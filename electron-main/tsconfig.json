@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022"],
+    "moduleResolution": "node",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "../dist-electron",
+    "rootDir": ".",
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "checkJs": false
+  },
+  "include": ["**/*.js", "**/*.ts"],
+  "exclude": ["node_modules"]
+}

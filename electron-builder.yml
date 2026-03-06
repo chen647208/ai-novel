@@ -1,0 +1,164 @@
+appId: com.novalocal.ainovelist
+productName: AI小说家
+directories:
+  output: dist
+  buildResources: build
+
+# 文件包含和排除配置 - 优化体积
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - package.json
+  - "!**/*.map"
+  - "!**/*.ts"
+  - "!**/*.js.map"
+  - "!**/*.css.map"
+  - "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples,docs,documentation,benchmark,benchmarks}/**"
+  - "!**/node_modules/.{cache,nyc_output,babel-cache,eslint-cache}/**"
+  - "!**/node_modules/*/.github/**"
+  - "!**/node_modules/*/.vscode/**"
+  - "!**/node_modules/*/CHANGELOG*"
+  - "!**/node_modules/*/README*"
+  - "!**/node_modules/*/LICENSE*"
+  - "!**/node_modules/*/package-lock.json"
+  - "!**/node_modules/*/yarn.lock"
+  - "!**/node_modules/*/pnpm-lock.yaml"
+  - "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}"
+  - "!._*"
+  - "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}"
+  - "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}"
+  - "!**/{appveyor.yml,.travis.yml,circle.yml,codecov.yml}"
+  - "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+  - "!**/coverage/**"
+  - "!**/.github/**"
+  - "!**/.vscode/**"
+  - "!**/test*/**"
+  - "!**/__test__*/**"
+  - "!**/spec*/**"
+  - "!**/demo*/**"
+  - "!**/example*/**"
+  - "!**/doc*/**"
+  - "!**/benchmark*/**"
+  - "!**/screenshot*/**"
+  - "!**/image*/**"
+  - "!**/asset*/**"  # 排除开发资源，保留构建后的资源
+  - "!**/src/**"    # 排除源代码，只保留构建产物
+
+# 排除不必要的文件和目录
+extraFiles: []
+
+# Windows 配置 - 优化体积
+win:
+  target: nsis
+  artifactName: ${productName}-${version}-setup.${ext}
+  # 排除不必要的 Electron 组件 - 优化体积
+  files:
+    - "!**/chrome-sandbox"
+    - "!**/libGLESv2.dll"
+    - "!**/vk_swiftshader.dll"
+    - "!**/vk_swiftshader_icd.json"
+    - "!**/d3dcompiler_47.dll"
+    - "!**/dxcompiler.dll"
+    - "!**/dxil.dll"
+    - "!**/vulkan-1.dll"
+    - "!**/ffmpeg.dll"
+    - "!**/libEGL.dll"
+    - "!**/resources/*.pak"
+    - "!**/resources/*.bin"
+    - "!**/locales/**"
+    - "!**/*.pak"
+    - "!**/snapshot_blob.bin"
+    - "!**/v8_context_snapshot.bin"
+    - "!**/resources/inspector/**"  # Chrome DevTools资源
+    - "!**/resources/pdf/**"        # PDF查看器资源
+    - "!**/resources/widevinecdm/**" # Widevine DRM组件
+    - "!**/resources/pepper-flash/**" # Flash插件
+    - "!**/swiftshader/**"          # SwiftShader软件渲染器
+    - "!**/resources/default_app/**" # Electron默认应用
+    - "!**/resources/electron.asar"  # Electron核心文件（已打包）
+
+# macOS 配置 - 优化体积
+mac:
+  target: dmg
+  icon: assets/icon.icns
+  category: public.app-category.productivity
+  # 排除不必要的文件
+  files:
+    - "!**/chrome-sandbox"
+    - "!**/libGLESv2.dylib"
+    - "!**/libEGL.dylib"
+    - "!**/resources/*.pak"
+    - "!**/resources/*.bin"
+    - "!**/locales/**"
+    - "!**/*.pak"
+    - "!**/resources/inspector/**"  # Chrome DevTools资源
+    - "!**/resources/pdf/**"        # PDF查看器资源
+    - "!**/resources/widevinecdm/**" # Widevine DRM组件
+    - "!**/resources/pepper-flash/**" # Flash插件
+    - "!**/swiftshader/**"          # SwiftShader软件渲染器
+    - "!**/resources/default_app/**" # Electron默认应用
+    - "!**/resources/electron.asar"  # Electron核心文件（已打包）
+
+# Linux 配置 - 优化体积
+linux:
+  target: AppImage
+  category: Utility
+  # 排除不必要的文件
+  files:
+    - "!**/chrome-sandbox"
+    - "!**/libGLESv2.so"
+    - "!**/libEGL.so"
+    - "!**/resources/*.pak"
+    - "!**/resources/*.bin"
+    - "!**/locales/**"
+    - "!**/*.pak"
+    - "!**/resources/inspector/**"  # Chrome DevTools资源
+    - "!**/resources/pdf/**"        # PDF查看器资源
+    - "!**/resources/widevinecdm/**" # Widevine DRM组件
+    - "!**/resources/pepper-flash/**" # Flash插件
+    - "!**/swiftshader/**"          # SwiftShader软件渲染器
+    - "!**/resources/default_app/**" # Electron默认应用
+    - "!**/resources/electron.asar"  # Electron核心文件（已打包）
+
+# NSIS 安装程序配置
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  perMachine: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  deleteAppDataOnUninstall: false
+  runAfterFinish: true
+  # 优化安装程序大小
+  differentialPackage: false
+
+# 压缩配置 - 使用最高压缩级别
+compression: maximum
+
+# ASAR 打包配置 - 优化体积
+asar: true
+asarUnpack:
+  - "**/*.node"
+
+# 其他优化 - 减少体积
+removePackageScripts: true
+npmRebuild: false
+# 启用更激进的树摇优化
+nodeGypRebuild: false
+# 启用文件去重
+detectUpdateChannel: false
+# 禁用自动更新
+publish: null
+# 减少调试信息
+extraResources: []
+
+# Electron 下载镜像
+electronDownload:
+  mirror: https://npmmirror.com/mirrors/electron/
+
+# 禁用代码签名（开发阶段）
+forceCodeSigning: false
+
+# 额外的元数据
+extraMetadata:
+  main: dist-electron/main.js

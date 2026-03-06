@@ -1,0 +1,5 @@
+{
+  "name": "NovaLocal AI Novelist",
+  "description": "A comprehensive local-first AI writing assistant for novelists, supporting model management (Ollama/APIs), inspiration generation, character building, outlining, and structured chapter writing with auto-save and reference sidebars.",
+  "requestFramePermissions": []
+}

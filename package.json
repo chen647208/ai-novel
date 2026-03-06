@@ -1,0 +1,134 @@
+{
+  "name": "novalocal-ai-novelist",
+  "private": true,
+  "version": "1.4.5",
+  "type": "module",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "electron:dev": "concurrently -k \"vite\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron:build": "npm run build && npm run build:electron",
+    "electron:build-win": "npm run electron:build && electron-builder --win",
+    "electron:build-mac": "npm run electron:build && electron-builder --mac",
+    "electron:build-linux": "npm run electron:build && electron-builder --linux",
+    "build:electron": "tsc -p electron-main/tsconfig.json && node scripts/copy-electron-files.js"
+  },
+  "dependencies": {
+    "@chroma-core/default-embed": "^0.1.9",
+    "@google/genai": "^1.34.0",
+    "@tailwindcss/vite": "^4.1.18",
+    "chromadb": "^3.2.2",
+    "font-awesome": "^4.7.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "tailwindcss": "^4.1.18",
+    "vectra": "^0.12.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^22.19.3",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.0.0",
+    "autoprefixer": "^10.4.23",
+    "concurrently": "^9.2.1",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12",
+    "typescript": "~5.8.3",
+    "vite": "^6.4.1",
+    "wait-on": "^9.0.3"
+  },
+  "build": {
+    "appId": "com.novalocal.ainovelist",
+    "productName": "AI小说家",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json",
+      "!**/*.map",
+      "!**/*.ts",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}/**",
+      "!**/node_modules/.{cache,nyc_output}/**",
+      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!._*",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
+      "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
+      "!**/{appveyor.yml,.travis.yml,circle.yml}",
+      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+    ],
+    "win": {
+      "target": "nsis",
+      "artifactName": "${productName}-${version}-setup.${ext}",
+      "files": [
+        "!**/chrome-sandbox",
+        "!**/libGLESv2.dll",
+        "!**/vk_swiftshader.dll",
+        "!**/d3dcompiler_47.dll",
+        "!**/ffmpeg.dll",
+        "!**/libEGL.dll",
+        "!**/resources/*.pak",
+        "!**/resources/*.bin",
+        "!**/locales/**",
+        "!**/*.pak"
+      ]
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.productivity",
+      "files": [
+        "!**/chrome-sandbox",
+        "!**/libGLESv2.dylib",
+        "!**/libEGL.dylib",
+        "!**/resources/*.pak",
+        "!**/resources/*.bin",
+        "!**/locales/**",
+        "!**/*.pak"
+      ]
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Utility",
+      "files": [
+        "!**/chrome-sandbox",
+        "!**/libGLESv2.so",
+        "!**/libEGL.so",
+        "!**/resources/*.pak",
+        "!**/resources/*.bin",
+        "!**/locales/**",
+        "!**/*.pak"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true,
+      "differentialPackage": false
+    },
+    "compression": "maximum",
+    "asar": true,
+    "asarUnpack": [
+      "**/*.node"
+    ],
+    "removePackageScripts": true,
+    "npmRebuild": false,
+    "electronDownload": {
+      "mirror": "https://npmmirror.com/mirrors/electron/"
+    },
+    "forceCodeSigning": false,
+    "publish": null,
+    "extraMetadata": {
+      "main": "dist-electron/main.js"
+    }
+  }
+}

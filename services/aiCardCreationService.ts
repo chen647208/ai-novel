@@ -1,0 +1,499 @@
+import { 
+  AICardCommand, 
+  AICardCommandResult, 
+  CardCreationResult, 
+  Project, 
+  Character, 
+  Location, 
+  Faction, 
+  TimelineEvent,
+  RuleSystem,
+  RuleLevel,
+  HistoryDate,
+  AIProjectContext,
+  ModelConfig,
+  CardPromptTemplate
+} from '../types';
+import { AICardCommandService } from './aiCardCommandService';
+import { AICardPromptService } from './aiCardPromptService';
+import { AIService } from './aiService';
+import { validateAndCompleteCardData, generateFieldReport } from './cardFieldValidator';
+
+/**
+ * AI卡片创建服务
+ * 整合命令解析、Prompt构建、AI调用和卡片创建的完整流程
+ */
+export class AICardCreationService {
+  
+  /**
+   * 处理用户输入，检测命令并创建卡片
+   * @param input 用户输入的文本
+   * @param project 当前项目
+   * @param modelConfig AI模型配置
+   * @returns 卡片创建结果，如果不是命令返回 null
+   */
+  static async processInput(
+    input: string, 
+    project: Project,
+    modelConfig?: ModelConfig,
+    customTemplate?: CardPromptTemplate
+  ): Promise<CardCreationResult | null> {
+    // 1. 解析命令
+    const command = AICardCommandService.parseCommand(input);
+    if (!command) return null;  // 不是卡片创建命令
+    
+    // 验证描述不为空
+    if (!command.description.trim()) {
+      return {
+        success: false,
+        command: command.command,
+        data: null,
+        message: `请在命令后提供具体描述，例如："/${AICardCommandService.getCommandDisplayName(command.command)} 一个神秘的古老寺庙"`,
+      };
+    }
+    
+    // 2. 构建Prompt（支持自定义模板）
+    const prompt = AICardPromptService.buildPrompt(
+      command.command, 
+      command.description,
+      AICardPromptService.extractContextFromProject(project),
+      customTemplate
+    );
+    
+    // 3. 调用AI
+    try {
+      // 检查模型配置
+      if (!modelConfig?.modelName) {
+        return {
+          success: false,
+          command: command.command,
+          data: null,
+          message: '未配置AI模型，请在AI助手中选择一个模型后重试',
+        };
+      }
+      
+      console.log('调用AI模型:', modelConfig.modelName, '提供商:', modelConfig.provider);
+      const aiResponse = await AIService.call(modelConfig, prompt);
+      
+      // 检查AI返回是否有错误
+      if (aiResponse.error) {
+        console.error('AI返回错误:', aiResponse.error);
+        return {
+          success: false,
+          command: command.command,
+          data: null,
+          message: `AI调用失败：${aiResponse.error}`,
+        };
+      }
+      
+      // 检查返回内容是否为空
+      if (!aiResponse.content || aiResponse.content.trim() === '') {
+        return {
+          success: false,
+          command: command.command,
+          data: null,
+          message: 'AI返回为空，请检查模型配置或重试',
+        };
+      }
+      
+      // 4. 解析AI返回的JSON
+      const cardData = this.parseAIResponse(aiResponse.content);
+      
+      // 5. 字段完整性校验和补全
+      const validationResult = validateAndCompleteCardData(command.command, cardData, project.id);
+      
+      if (!validationResult.isValid) {
+        console.warn('AI返回数据字段不完整，已自动填充:', validationResult.missingFields);
+      }
+      
+      if (validationResult.defaultedFields.length > 0) {
+        console.log('使用默认值的字段:', validationResult.defaultedFields);
+      }
+      
+      // 6. 创建卡片数据（使用补全后的数据）
+      const result = this.createCard(command.command, validationResult.completedData, project);
+      
+      // 7. 构建成功消息（包含字段完整性信息）
+      const fieldReport = generateFieldReport(validationResult);
+      const successMessage = this.buildSuccessMessage(command.command, validationResult.completedData);
+      
+      return {
+        success: true,
+        command: command.command,
+        data: result,
+        message: `${successMessage}\n\n${fieldReport}`,
+      };
+      
+    } catch (error: any) {
+      console.error('AI卡片创建失败:', error);
+      return {
+        success: false,
+        command: command.command,
+        data: null,
+        message: `创建失败：${error.message || '未知错误'}`,
+      };
+    }
+  }
+
+  /**
+   * 解析AI返回的内容，提取JSON
+   * @param content AI返回的原始内容
+   * @returns 解析后的JSON对象
+   */
+  private static parseAIResponse(content: string): any {
+    console.log('AI原始返回:', content);
+    
+    // 尝试多种方式提取JSON
+    let jsonStr = '';
+    
+    // 方式1: 提取 ```json 代码块
+    const jsonCodeBlockMatch = content.match(/```json\s*([\s\S]*?)```/);
+    if (jsonCodeBlockMatch) {
+      jsonStr = jsonCodeBlockMatch[1].trim();
+    }
+    // 方式2: 提取 ``` 代码块
+    else {
+      const codeBlockMatch = content.match(/```\s*([\s\S]*?)```/);
+      if (codeBlockMatch) {
+        jsonStr = codeBlockMatch[1].trim();
+      }
+      // 方式3: 查找第一个大括号到最后一个大括号的内容
+      else {
+        const braceMatch = content.match(/(\{[\s\S]*\})/);
+        if (braceMatch) {
+          jsonStr = braceMatch[1].trim();
+        }
+        // 方式4: 直接使用内容
+        else {
+          jsonStr = content.trim();
+        }
+      }
+    }
+    
+    // 清理可能的前后字符
+    jsonStr = jsonStr
+      .replace(/^\s*```\w*\s*/, '')  // 移除开头的代码块标记
+      .replace(/\s*```\s*$/, '')     // 移除结尾的代码块标记
+      .trim();
+    
+    console.log('提取的JSON字符串:', jsonStr);
+    
+    try {
+      return JSON.parse(jsonStr);
+    } catch (e) {
+      console.error('JSON解析失败:', jsonStr, e);
+      throw new Error('AI返回格式不正确，无法解析为JSON，请重试或修改描述');
+    }
+  }
+
+  /**
+   * 根据命令类型创建对应的卡片数据
+   * @param command 命令类型
+   * @param data AI返回的数据
+   * @param project 当前项目
+   * @returns 创建的卡片数据
+   */
+  private static createCard(
+    command: AICardCommand, 
+    data: any, 
+    project: Project
+  ): any {
+    const timestamp = Date.now();
+    
+    switch (command) {
+      case 'character':
+        return this.createCharacter(data, timestamp);
+      case 'location':
+        return this.createLocation(data, project, timestamp);
+      case 'faction':
+        return this.createFaction(data, project, timestamp);
+      case 'timeline':
+        return this.createTimelineEvent(data, timestamp);
+      case 'rule':
+        return this.createRuleSystem(data, project, timestamp);
+      case 'event':
+        return this.createEvent(data, timestamp);
+      case 'magic':
+        return this.createMagicSystem(data);
+      case 'tech':
+        return this.createTechLevel(data);
+      case 'history':
+        return this.createHistory(data);
+      default:
+        throw new Error(`不支持的命令类型: ${command}`);
+    }
+  }
+
+  /**
+   * 创建角色卡片
+   */
+  private static createCharacter(data: any, timestamp: number): Character {
+    const id = `char_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const character: Character = {
+      id,
+      name: data.name || '未命名角色',
+      role: this.normalizeRole(data.role),
+      gender: data.gender || '未知',
+      age: data.age || '未知',
+      personality: data.personality || '',
+      appearance: data.appearance || '',
+      background: data.background || '',
+      relationships: data.relationships || '',
+      distinctiveFeatures: data.distinctiveFeatures || '',
+      occupation: data.occupation || '',
+      motivation: data.motivation || data.goals || '',
+      strengths: data.strengths || data.abilities || '',
+      weaknesses: data.weaknesses || '',
+      characterArc: data.characterArc || '',
+    };
+    
+    return character;
+  }
+
+  /**
+   * 标准化角色类型
+   */
+  private static normalizeRole(role: string): string {
+    if (!role) return '配角';
+    const normalized = role.trim();
+    if (normalized.includes('主')) return '主角';
+    if (normalized.includes('反')) return '反派';
+    if (normalized.includes('配')) return '配角';
+    return normalized || '配角';
+  }
+
+  /**
+   * 创建地点卡片
+   */
+  private static createLocation(data: any, project: Project, timestamp: number): Location {
+    const id = `loc_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // 将AI返回的字段映射到实际的Location类型
+    const locationType = this.normalizeLocationType(data.type);
+    
+    const location: Location = {
+      id,
+      projectId: project.id,
+      name: data.name || '未命名地点',
+      type: locationType,
+      description: data.description || '',
+      tags: data.features ? [data.features] : undefined,
+      geography: data.atmosphere ? {
+        terrain: data.atmosphere,
+        climate: ''
+      } : undefined,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+    
+    return location;
+  }
+
+  /**
+   * 标准化地点类型
+   */
+  private static normalizeLocationType(type: string): Location['type'] {
+    if (!type) return 'other';
+    const normalized = type.toLowerCase();
+    if (normalized.includes('城市') || normalized.includes('city')) return 'city';
+    if (normalized.includes('区域') || normalized.includes('region')) return 'region';
+    if (normalized.includes('建筑') || normalized.includes('building')) return 'building';
+    if (normalized.includes('地标') || normalized.includes('landmark')) return 'landmark';
+    if (normalized.includes('地下') || normalized.includes('dungeon')) return 'dungeon';
+    if (normalized.includes('荒野') || normalized.includes('wilderness')) return 'wilderness';
+    return 'other';
+  }
+
+  /**
+   * 创建势力卡片
+   */
+  private static createFaction(data: any, project: Project, timestamp: number): Faction {
+    const id = `faction_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const faction: Faction = {
+      id,
+      projectId: project.id,
+      name: data.name || '未命名势力',
+      type: this.normalizeFactionType(data.type),
+      description: data.description || '',
+      ideology: data.values || data.goals || '',
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+    
+    return faction;
+  }
+  
+  /**
+   * 标准化势力类型
+   */
+  private static normalizeFactionType(type: string): Faction['type'] {
+    if (!type) return 'other';
+    const normalized = type.toLowerCase();
+    if (normalized.includes('王国') || normalized.includes('kingdom')) return 'kingdom';
+    if (normalized.includes('帝国') || normalized.includes('empire')) return 'empire';
+    if (normalized.includes('宗门') || normalized.includes('sect')) return 'sect';
+    if (normalized.includes('行会') || normalized.includes('商会') || normalized.includes('guild')) return 'guild';
+    if (normalized.includes('家族') || normalized.includes('family')) return 'family';
+    if (normalized.includes('部落') || normalized.includes('tribe')) return 'tribe';
+    if (normalized.includes('组织') || normalized.includes('organization')) return 'organization';
+    if (normalized.includes('联盟') || normalized.includes('alliance')) return 'alliance';
+    return 'other';
+  }
+
+  /**
+   * 创建时间线事件
+   */
+  private static createTimelineEvent(data: any, timestamp: number): TimelineEvent {
+    const id = `event_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const date: HistoryDate = {
+      year: data.date?.year || 0,
+      month: data.date?.month,
+      day: data.date?.day,
+      display: data.date?.display || `${data.date?.year || 0}`,
+    };
+    
+    const event: TimelineEvent = {
+      id,
+      title: data.title || '未命名事件',
+      description: data.description || '',
+      date,
+      type: this.normalizeEventType(data.type),
+      impact: data.impact || '',
+      relatedCharacterIds: data.relatedCharacters || [],
+      relatedLocationIds: data.relatedLocations || [],
+    };
+    
+    return event;
+  }
+
+  /**
+   * 标准化事件类型
+   */
+  private static normalizeEventType(type: string): 'plot' | 'character' | 'world' | 'faction' {
+    if (!type) return 'plot';
+    const normalized = type.toLowerCase();
+    if (normalized.includes('character') || normalized.includes('角色')) return 'character';
+    if (normalized.includes('world') || normalized.includes('世界')) return 'world';
+    if (normalized.includes('faction') || normalized.includes('势力')) return 'faction';
+    return 'plot';
+  }
+
+  /**
+   * 创建规则系统
+   */
+  private static createRuleSystem(data: any, project: Project, timestamp: number): RuleSystem {
+    const id = `rule_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const levels: RuleLevel[] = (data.levels || []).map((level: any, index: number) => ({
+      name: level.name || `等级${index + 1}`,
+      description: level.description || '',
+      requirements: level.requirements || '',
+      benefits: level.benefits || '',
+      order: level.order || index + 1,
+    }));
+    
+    const ruleSystem: RuleSystem = {
+      id,
+      projectId: project.id,
+      name: data.name || '未命名规则系统',
+      type: this.normalizeRuleType(data.type),
+      description: data.description || '',
+      levels,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+    
+    return ruleSystem;
+  }
+
+  /**
+   * 标准化规则类型
+   */
+  private static normalizeRuleType(type: string): RuleSystem['type'] {
+    if (!type) return 'cultivation';
+    const normalized = type.toLowerCase();
+    if (normalized.includes('cultivation') || normalized.includes('修炼')) return 'cultivation';
+    if (normalized.includes('magic') || normalized.includes('魔法')) return 'magic';
+    if (normalized.includes('tech') || normalized.includes('科技')) return 'tech';
+    if (normalized.includes('currency') || normalized.includes('货币')) return 'currency';
+    if (normalized.includes('organization') || normalized.includes('组织')) return 'organization';
+    return 'cultivation';
+  }
+
+  /**
+   * 创建剧情事件（结构与时间线事件类似）
+   */
+  private static createEvent(data: any, timestamp: number): TimelineEvent {
+    // 事件类型与时间线事件共用数据结构
+    const event = this.createTimelineEvent(data, timestamp);
+    event.type = 'plot';
+    return event;
+  }
+
+  /**
+   * 构建成功消息
+   */
+  private static buildSuccessMessage(command: AICardCommand, data: any): string {
+    const typeNames: Record<AICardCommand, string> = {
+      character: '角色',
+      location: '地点',
+      faction: '势力',
+      timeline: '时间线事件',
+      rule: '规则系统',
+      event: '剧情事件',
+      magic: '魔法体系',
+      tech: '科技水平',
+      history: '历史背景',
+    };
+    
+    const name = data.name || data.title || data.era || '未命名';
+    const typeName = typeNames[command];
+    
+    return `✅ 成功创建${typeName}：**「${name}」**
+
+已添加到项目中，您可以点击编辑进行细节调整。`;
+  }
+
+  /**
+   * 创建魔法体系
+   */
+  private static createMagicSystem(data: any): any {
+    return {
+      name: data.name || '未命名魔法体系',
+      description: data.description || '',
+      rules: data.rules || [],
+      limitations: data.limitations || '',
+      castingMethod: data.castingMethod || '',
+    };
+  }
+
+  /**
+   * 创建科技水平
+   */
+  private static createTechLevel(data: any): any {
+    return {
+      era: data.era || '未命名时代',
+      description: data.description || '',
+      keyTechnologies: data.keyTechnologies || [],
+      limitations: data.limitations || '',
+    };
+  }
+
+  /**
+   * 创建历史背景
+   */
+  private static createHistory(data: any): any {
+    return {
+      overview: data.overview || '',
+      keyEvents: (data.keyEvents || []).map((event: any) => ({
+        date: event.date || '',
+        title: event.title || '',
+        description: event.description || '',
+        impact: event.impact || '',
+      })),
+    };
+  }
+}
