@@ -1,8 +1,8 @@
-/**
+﻿/**
  * 一致性检查默认配置
  */
 
-import { ConsistencyCheckConfig, ConsistencyCheckPromptTemplate } from '../types';
+import { ConsistencyCheckConfig, ConsistencyCheckPromptTemplate } from '../../shared/types';
 
 /**
  * 默认一致性检查配置
@@ -220,3 +220,6 @@ export function getDefaultPromptsByCategory(
 ): ConsistencyCheckPromptTemplate[] {
   return getDefaultConsistencyPrompts().filter(p => p.category === category);
 }
+
+
+

@@ -1,5 +1,5 @@
-
-import { EmbeddingModelProvider } from '../types';
+﻿
+import { EmbeddingModelProvider } from '../../shared/types';
 
 export interface EmbeddingProviderInfo {
   id: EmbeddingModelProvider;
@@ -367,3 +367,6 @@ export const getDefaultEmbeddingParams = (provider: EmbeddingModelProvider) => {
       };
   }
 };
+
+
+
