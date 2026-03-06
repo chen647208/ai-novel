@@ -50,33 +50,33 @@ NovaLocal AI Novelist 是一个基于 Electron 的桌面应用程序，专门为
 
 ## 项目结构
 
-```
-d:/my-Electron开发环境/
-├── electron-main/           # Electron 主进程
-│   ├── main.js            # 主进程入口
-│   ├── preload.js         # 预加载脚本
-│   └── tsconfig.json      # TypeScript 配置
-├── components/            # React 组件
-│   ├── App.tsx           # 主应用组件
-│   ├── Sidebar.tsx       # 侧边栏导航
-│   ├── ModelSettings.tsx # AI 模型设置
-│   ├── WritingEditor.tsx # 写作编辑器
-│   └── ... (其他步骤组件)
-├── services/             # 业务服务
-│   ├── aiService.ts     # AI 服务
-│   └── storage.ts       # 数据存储服务
-├── scripts/             # 构建脚本
-│   └── copy-electron-files.js
-├── dist/               # 构建输出
-│   ├── win-unpacked/   # Windows 可执行文件
-│   └── *.exe          # Windows 安装程序
-├── dist-electron/      # Electron 构建文件
-├── assets/            # 静态资源
-├── types.ts           # TypeScript 类型定义
-├── package.json       # 项目配置
-├── vite.config.ts     # Vite 配置
-├── tailwind.config.js # Tailwind 配置
-└── postcss.config.js  # PostCSS 配置
+```text
+src/
+├── main/                 # Electron 主进程与 preload 源码
+│   ├── main.js
+│   ├── preload.js
+│   └── tsconfig.json
+├── renderer/             # React 渲染进程源码
+│   ├── App.tsx
+│   ├── index.tsx
+│   ├── index.html
+│   ├── index.css
+│   ├── components/
+│   ├── constants/
+│   └── services/
+├── shared/               # 共享类型与常量
+│   ├── types.ts
+│   └── constants.tsx
+└── assets/               # 图标与静态资源
+build/
+├── renderer/             # Vite 构建输出
+├── main/                 # Electron 主进程构建输出
+└── release/              # 安装包与发行产物
+scripts/                  # 构建与辅助脚本
+package.json              # 项目配置
+vite.config.ts            # Vite 配置
+tailwind.config.js        # Tailwind 配置
+postcss.config.js         # PostCSS 配置
 ```
 
 ## 安装和运行
@@ -135,8 +135,8 @@ npm run electron:dev
 ### 直接运行生产版本
 
 构建后，可以直接运行：
-- `dist/win-unpacked/NovaLocal AI Novelist.exe` (无需安装)
-- `dist/NovaLocal AI Novelist Setup 1.0.0.exe` (安装程序)
+- `build/release/win-unpacked/AI小说家.exe`（示例路径，具体名称以当前版本号为准）
+- `build/release/AI小说家-<version>-setup.exe`（安装程序）
 
 ## 使用指南
 
@@ -170,11 +170,11 @@ npm run electron:dev
 ### 项目架构
 
 #### 主进程 (Main Process)
-- 文件: `electron-main/main.js`
+- 文件: `src/main/main.js`
 - 职责: 窗口管理、系统集成、安全沙箱
 
 #### 预加载脚本 (Preload Script)
-- 文件: `electron-main/preload.js`
+- 文件: `src/main/preload.js`
 - 职责: 安全地暴露 API 给渲染进程
 
 #### 渲染进程 (Renderer Process)
@@ -202,7 +202,7 @@ npm run electron:dev
 
 3. **更新类型定义**
    ```typescript
-   // 在 types.ts 中添加新类型
+   // 在 `src/shared/types.ts` 中添加新类型
    ```
 
 ### 构建和部署
@@ -233,15 +233,15 @@ VITE_GEMINI_API_KEY=your_api_key_here
     "appId": "com.novalocal.ainovelist",
     "productName": "NovaLocal AI Novelist",
     "directories": {
-      "output": "dist"
+      "output": "build/release"
     },
     "files": [
-      "dist/**/*",
-      "dist-electron/**/*"
+      "build/renderer/**/*",
+      "build/main/**/*"
     ],
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.ico"
+      "icon": "src/assets/icon.icns"
     }
   }
 }
@@ -280,7 +280,7 @@ export default defineConfig({
    - 查看开发者工具控制台
 
 4. **构建失败**
-   - 清理 `dist/` 和 `dist-electron/` 目录
+   - 清理 `build/renderer`、`build/main` 和 `build/release` 目录
    - 重新运行 `npm install`
    - 检查 TypeScript 编译错误
 
@@ -384,3 +384,5 @@ export default defineConfig({
 
 *最后更新: 2025年12月26日*
 *文档版本: 1.0.0*
+
+

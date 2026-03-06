@@ -73,7 +73,7 @@ async function createWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
     },
-    icon: path.join(__dirname, '../assets/icon.png'),
+    icon: app.isPackaged ? path.join(process.resourcesPath, 'icon.png') : path.join(__dirname, '../../src/assets/icon.png'),
     titleBarStyle: 'default',
     autoHideMenuBar: true
   });
@@ -82,7 +82,7 @@ async function createWindow() {
   if (app.isPackaged) {
     // 生产环境：加载打包后的文件
     console.log('Production mode: loading built files');
-    const indexPath = path.join(__dirname, '../dist/index.html');
+    const indexPath = path.join(__dirname, '../renderer/index.html');
     mainWindow.loadFile(indexPath).catch(err => {
       console.error('Failed to load index.html:', err);
       // 如果加载失败，显示错误信息
@@ -90,7 +90,7 @@ async function createWindow() {
         <html>
           <body style="font-family: Arial; padding: 40px; text-align: center;">
             <h1>加载失败</h1>
-            <p>无法加载应用程序文件。请检查dist目录是否存在。</p>
+            <p>无法加载应用程序文件。请检查 build/renderer 目录是否存在。</p>
             <p>错误信息: ${err.message}</p>
           </body>
         </html>
@@ -500,3 +500,4 @@ ipcMain.handle('vector:check-consistency', async (event, projectId) => {
     return { success: false, error: error.message };
   }
 });
+

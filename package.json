@@ -3,17 +3,17 @@
   "private": true,
   "version": "1.4.5",
   "type": "module",
-  "main": "dist-electron/main.js",
+  "main": "build/main/main.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "electron:dev": "concurrently -k \"vite\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron:dev": "npm run build:electron && concurrently -k \"vite\" \"wait-on http://localhost:3000 && electron .\"",
     "electron:build": "npm run build && npm run build:electron",
     "electron:build-win": "npm run electron:build && electron-builder --win",
     "electron:build-mac": "npm run electron:build && electron-builder --mac",
     "electron:build-linux": "npm run electron:build && electron-builder --linux",
-    "build:electron": "tsc -p electron-main/tsconfig.json && node scripts/copy-electron-files.js"
+    "build:electron": "tsc -p src/main/tsconfig.json"
   },
   "dependencies": {
     "@chroma-core/default-embed": "^0.1.9",
@@ -44,12 +44,12 @@
     "appId": "com.novalocal.ainovelist",
     "productName": "AI小说家",
     "directories": {
-      "output": "dist",
-      "buildResources": "build"
+      "output": "build/release",
+      "buildResources": "src/assets"
     },
     "files": [
-      "dist/**/*",
-      "dist-electron/**/*",
+      "build/renderer/**/*",
+      "build/main/**/*",
       "package.json",
       "!**/*.map",
       "!**/*.ts",
@@ -80,7 +80,7 @@
     },
     "mac": {
       "target": "dmg",
-      "icon": "assets/icon.icns",
+      "icon": "src/assets/icon.icns",
       "category": "public.app-category.productivity",
       "files": [
         "!**/chrome-sandbox",
@@ -128,7 +128,13 @@
     "forceCodeSigning": false,
     "publish": null,
     "extraMetadata": {
-      "main": "dist-electron/main.js"
-    }
+      "main": "build/main/main.js"
+    },
+    "extraResources": [
+      {
+        "from": "src/assets/icon.png",
+        "to": "icon.png"
+      }
+    ]
   }
 }

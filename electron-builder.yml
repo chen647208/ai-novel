@@ -1,13 +1,13 @@
 appId: com.novalocal.ainovelist
 productName: AI小说家
 directories:
-  output: dist
-  buildResources: build
+  output: build/release
+  buildResources: src/assets
 
 # 文件包含和排除配置 - 优化体积
 files:
-  - dist/**/*
-  - dist-electron/**/*
+  - build/renderer/**/*
+  - build/main/**/*
   - package.json
   - "!**/*.map"
   - "!**/*.ts"
@@ -80,7 +80,7 @@ win:
 # macOS 配置 - 优化体积
 mac:
   target: dmg
-  icon: assets/icon.icns
+  icon: src/assets/icon.icns
   category: public.app-category.productivity
   # 排除不必要的文件
   files:
@@ -150,7 +150,9 @@ detectUpdateChannel: false
 # 禁用自动更新
 publish: null
 # 减少调试信息
-extraResources: []
+extraResources:
+  - from: src/assets/icon.png
+    to: icon.png
 
 # Electron 下载镜像
 electronDownload:
@@ -161,4 +163,5 @@ forceCodeSigning: false
 
 # 额外的元数据
 extraMetadata:
-  main: dist-electron/main.js
+  main: build/main/main.js
+

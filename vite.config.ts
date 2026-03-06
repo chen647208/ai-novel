@@ -4,7 +4,9 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  base: './', // 设置为相对路径，适用于Electron
+  root: path.resolve(__dirname, 'src/renderer'),
+  base: './',
+  publicDir: path.resolve(__dirname, 'src/assets'),
   server: {
     port: 3000,
     host: '0.0.0.0',
@@ -12,7 +14,13 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, '.'),
+      '@': path.resolve(__dirname, 'src/renderer'),
+      '@shared': path.resolve(__dirname, 'src/shared'),
+      '@assets': path.resolve(__dirname, 'src/assets'),
     }
+  },
+  build: {
+    outDir: path.resolve(__dirname, 'build/renderer'),
+    emptyOutDir: true,
   }
 });

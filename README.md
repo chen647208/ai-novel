@@ -1,132 +1,73 @@
-# Electron + React + TypeScript Template
+# AI Novel
 
-A clean, production-ready template for building cross-platform desktop applications with Electron, React 18, TypeScript, and Vite.
+A local-first Electron + React + TypeScript desktop app for AI-assisted novel writing.
 
-## Features
+## Stack
 
-- **Electron**: Build cross-platform desktop apps with JavaScript, HTML, and CSS
-- **React 18**: Modern React with hooks and concurrent features
-- **TypeScript**: Type-safe development with better tooling
-- **Vite**: Next-generation frontend tooling with instant HMR
-- **Tailwind CSS**: Utility-first CSS framework for rapid UI development
-- **Electron Builder**: Package and distribute your app for Windows, macOS, and Linux
+- Electron 39
+- React 19
+- TypeScript
+- Vite 6
+- Tailwind CSS 4
+- electron-builder
 
-## Project Structure
+## Structure
 
-```
-├── electron-main/     # Electron main process files
-│   ├── main.js       # Main process entry point
-│   ├── preload.js    # Preload script for secure IPC
-│   └── tsconfig.json # TypeScript config for main process
-├── scripts/          # Build scripts
-│   └── copy-electron-files.js
-├── public/           # Static assets
-├── src/              # React application source
-│   ├── App.tsx       # Main application component
-│   ├── index.html    # HTML entry point
-│   ├── index.tsx     # React entry point
-│   └── index.css     # Global styles
-├── package.json      # Project dependencies and scripts
-├── vite.config.ts    # Vite configuration
-├── tsconfig.json     # TypeScript configuration
-└── README.md         # This file
-```
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+ and npm
-
-### Installation
-
-1. Clone or download this template
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-### Development
-
-Start the development server with hot reload:
-
-```bash
-npm run dev
+```text
+src/
+  main/                 # Electron main/preload source
+    main.js
+    preload.js
+    tsconfig.json
+  renderer/             # Renderer source
+    App.tsx
+    index.tsx
+    index.html
+    index.css
+    components/
+    constants/
+    services/
+    types.ts            # Compatibility re-export to shared types
+    constants.tsx       # Compatibility re-export to shared constants
+  shared/               # Shared types/constants
+    types.ts
+    constants.tsx
+  assets/               # Source-controlled icons/assets
+build/
+  renderer/             # Vite output
+  main/                 # Electron main/preload build output
+  release/              # electron-builder packaging output
+scripts/                # Build/helper scripts
+docs/                   # Plans and project docs
 ```
 
-This will start:
-- Vite dev server on http://localhost:3000
-- Electron app with live reload
+## Commands
 
-### Building for Production
+- `npm run dev` — start the Vite renderer dev server
+- `npm run build` — build the renderer into `build/renderer`
+- `npm run build:electron` — compile Electron main/preload into `build/main`
+- `npm run electron:dev` — compile main first, then start Vite + Electron
+- `npm run electron:build` — build renderer and Electron main outputs
+- `npm run electron:build-win` — package Windows release into `build/release`
+- `npm run electron:build-mac` — package macOS release into `build/release`
+- `npm run electron:build-linux` — package Linux release into `build/release`
 
-Build the React app and Electron package:
+## Key Paths
 
-```bash
-npm run electron:build
-```
+- Electron main entry: `src/main/main.js`
+- Electron preload: `src/main/preload.js`
+- Renderer entry: `src/renderer/index.tsx`
+- Renderer HTML: `src/renderer/index.html`
+- Shared types: `src/shared/types.ts`
+- Shared prompt constants: `src/shared/constants.tsx`
 
-This creates production-ready files in the `dist/` and `dist-electron/` directories.
+## Build Outputs
 
-### Platform-Specific Builds
+- Renderer output: `build/renderer`
+- Electron output: `build/main`
+- Packaged app output: `build/release`
 
-Build for specific platforms:
+## Notes
 
-```bash
-# Windows
-npm run electron:build-win
-
-# macOS
-npm run electron:build-mac
-
-# Linux
-npm run electron:build-linux
-```
-
-## Available Scripts
-
-- `npm run dev` - Start Vite dev server only
-- `npm run build` - Build React app for production
-- `npm run preview` - Preview production build
-- `npm run electron:dev` - Start Electron with dev server
-- `npm run electron:build` - Build both React app and Electron
-- `npm run build:electron` - Build only Electron main process
-
-## Configuration
-
-### Electron Main Process
-
-Edit `electron-main/main.js` to customize the main process behavior.
-
-### Preload Script
-
-Edit `electron-main/preload.js` to expose secure APIs to the renderer process.
-
-### Build Configuration
-
-Edit `package.json` `build` section to customize:
-- App ID and product name
-- Platform-specific settings
-- Installer options
-
-## Adding Your Application
-
-1. Replace `App.tsx` with your own React components
-2. Update `index.html` with your app's metadata
-3. Add your application logic and styles
-4. Configure any necessary environment variables
-
-## Security Best Practices
-
-- Use preload scripts for secure IPC communication
-- Validate all user input
-- Keep dependencies updated
-- Follow Electron security guidelines
-
-## License
-
-This template is provided as-is. Feel free to modify and use for your projects.
-
-## Support
-
-For issues and questions, please check the Electron and React documentation.
+- Runtime data such as `chroma_data/` and `*.sqlite3` is not source code and is ignored.
+- Root-level files are intentionally limited to config, docs, scripts, and package metadata.

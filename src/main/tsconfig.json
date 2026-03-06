@@ -8,7 +8,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "../dist-electron",
+    "outDir": "../../build/main",
     "rootDir": ".",
     "allowSyntheticDefaultImports": true,
     "allowJs": true,

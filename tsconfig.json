@@ -18,12 +18,24 @@
     "moduleDetection": "force",
     "allowJs": true,
     "jsx": "react-jsx",
+    "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./*"
+        "src/renderer/*"
+      ],
+      "@shared/*": [
+        "src/shared/*"
+      ],
+      "@assets/*": [
+        "src/assets/*"
       ]
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  "include": [
+    "src/renderer/**/*",
+    "src/shared/**/*",
+    "vite.config.ts"
+  ]
 }
