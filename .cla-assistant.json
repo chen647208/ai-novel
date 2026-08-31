@@ -1,0 +1,9 @@
+{
+  "cla": "https://github.com/chen647208/ai-novel/blob/main/docs/CLA.md",
+  "develop": "main",
+  "lockBranch": false,
+  "labels": {
+    "signed": "cla: yes",
+    "pending": "cla: no"
+  }
+}
