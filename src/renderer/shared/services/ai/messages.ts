@@ -1,0 +1,95 @@
+/*
+ * 本文件属于 AI小说家 (ai-novel) 项目。
+ * Copyright (C) 2026 chen647208
+ * SPDX-License-Identifier: AGPL-3.0-only
+ *
+ * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
+ * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ */
+
+import type { ModelConfig } from '../../../../shared/types';
+import type { ChatMessage, TokenUsage } from './types.js';
+
+/** 构建消息数组（系统提示词 + 用户提示词）——全适配器共用 */
+export function buildMessages(model: ModelConfig, prompt: string): ChatMessage[] {
+  const messages: ChatMessage[] = [];
+  const systemPrompt = model.systemPrompt?.trim();
+  if (systemPrompt) {
+    messages.push({ role: 'system', content: systemPrompt });
+  }
+  messages.push({ role: 'user', content: prompt });
+  return messages;
+}
+
+/**
+ * 清理模型输出：去除部分中间件/模型错误包裹的 ``` 代码围栏。
+ * 仅当整体被围栏包裹时才剥离，避免误删正文中合法的代码块示例。
+ */
+export function cleanModelOutput(text: string): string {
+  const trimmed = text.trim();
+  const match = trimmed.match(/^```[a-zA-Z]*\s*\n?([\s\S]*?)\n?\s*```$/);
+  return match ? match[1]?.trim() ?? trimmed : trimmed;
+}
+
+/** 从 OpenAI 兼容响应体提取 token 用量 */
+export function extractOpenAITokenUsage(data: unknown): TokenUsage | undefined {
+  const usage = (data as { usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number } })?.usage;
+  if (!usage) return undefined;
+  return {
+    prompt: usage.prompt_tokens ?? 0,
+    completion: usage.completion_tokens ?? 0,
+    total: usage.total_tokens ?? 0,
+  };
+}
+
+/** 从 Gemini 原生 usageMetadata 提取 token 用量 */
+export function extractGeminiTokenUsage(data: unknown): TokenUsage | undefined {
+  const meta = (data as { usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number; totalTokenCount?: number } })
+    ?.usageMetadata;
+  if (!meta) return undefined;
+  return {
+    prompt: meta.promptTokenCount ?? 0,
+    completion: meta.candidatesTokenCount ?? 0,
+    total: meta.totalTokenCount ?? 0,
+  };
+}
+
+/** 从 Anthropic Messages 响应体提取 token 用量（input_tokens / output_tokens） */
+export function extractAnthropicTokenUsage(data: unknown): TokenUsage | undefined {
+  const usage = (data as { usage?: { input_tokens?: number; output_tokens?: number } })?.usage;
+  if (!usage) return undefined;
+  const prompt = usage.input_tokens ?? 0;
+  const completion = usage.output_tokens ?? 0;
+  return { prompt, completion, total: prompt + completion };
+}
+
+/** 从 OpenAI Responses API 响应体提取 token 用量（input_tokens / output_tokens / total_tokens） */
+export function extractResponsesTokenUsage(data: unknown): TokenUsage | undefined {
+  const usage = (data as { usage?: { input_tokens?: number; output_tokens?: number; total_tokens?: number } })?.usage;
+  if (!usage) return undefined;
+  const prompt = usage.input_tokens ?? 0;
+  const completion = usage.output_tokens ?? 0;
+  return { prompt, completion, total: usage.total_tokens ?? prompt + completion };
+}
+
+/** 规范化端点：去尾斜杠并拼接 chat/completions */
+export function openAIChatUrl(endpoint: string): string {
+  const base = endpoint.replace(/\/+$/, '');
+  return base.endsWith('/chat/completions') ? base : `${base}/chat/completions`;
+}
+
+/** 读取失败响应的可读错误信息（优先 JSON.error.message，回退文本/状态行） */
+export async function readErrorResponse(res: Response): Promise<string> {
+  const text = await res.text().catch(() => '');
+  try {
+    const json = JSON.parse(text) as { error?: { message?: string }; message?: string };
+    return json.error?.message || json.message || text.slice(0, 200) || res.statusText;
+  } catch {
+    return text.slice(0, 200) || res.statusText;
+  }
+}
+
+/** 判断是否被用户主动中止 */
+export function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === 'AbortError';
+}

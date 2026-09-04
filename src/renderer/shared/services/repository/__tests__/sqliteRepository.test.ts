@@ -1,0 +1,333 @@
+/*
+ * 本文件属于 AI小说家 (ai-novel) 项目。
+ * Copyright (C) 2026 chen647208
+ * SPDX-License-Identifier: AGPL-3.0-only
+ *
+ * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
+ * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ */
+
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { DatabaseSync } from 'node:sqlite';
+import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
+import type { AppState, Project, KnowledgeItem, Chapter } from '../../../../../shared/types';
+import type { SqlDriver, SqlRunResult, SqlValue } from '../types';
+import { SCHEMA_VERSION } from '../schema';
+import { SqliteRepository } from '../sqliteRepository';
+import { jsonRepository } from '../jsonRepository';
+import { runWasmRequest } from '../wasmSql';
+
+/**
+ * 同一套 SqliteRepository 逻辑，分别用两种真实 SQLite 引擎驱动：
+ *   - node:sqlite（桌面主进程所用）
+ *   - @sqlite.org/sqlite-wasm（网页 OPFS worker 所用）
+ * 两端共用 schema/迁移/增量写/FTS5(trigram) 检索，这里即其正确性来源。
+ */
+
+interface DriverFixture {
+  name: string;
+  create(): Promise<{
+    driver: SqlDriver;
+    rawGet<T>(sql: string, params?: SqlValue[]): T | undefined;
+    rawAll<T>(sql: string, params?: SqlValue[]): T[];
+    dispose(): void;
+  }>;
+}
+
+const nodeSqliteFixture: DriverFixture = {
+  name: 'node:sqlite',
+  async create() {
+    const db = new DatabaseSync(':memory:');
+    const driver: SqlDriver = {
+      exec: async (sql) => { db.exec(sql); },
+      run: async (sql, params = []) => {
+        const r = db.prepare(sql).run(...(params as unknown as never[]));
+        return { changes: Number(r.changes), lastInsertRowid: Number(r.lastInsertRowid) };
+      },
+      all: async <T>(sql: string, params: SqlValue[] = []) => db.prepare(sql).all(...(params as never[])) as T[],
+      get: async <T>(sql: string, params: SqlValue[] = []) => db.prepare(sql).get(...(params as never[])) as T | undefined,
+      transaction: async (fn) => {
+        db.exec('BEGIN');
+        try {
+          const result = await fn(driver);
+          db.exec('COMMIT');
+          return result;
+        } catch (e) {
+          try { db.exec('ROLLBACK'); } catch { /* noop */ }
+          throw e;
+        }
+      },
+      close: async () => { db.close(); },
+    };
+    return {
+      driver,
+      rawGet: <T>(sql: string, params: SqlValue[] = []) => db.prepare(sql).get(...(params as never[])) as T,
+      rawAll: <T>(sql: string, params: SqlValue[] = []) => db.prepare(sql).all(...(params as never[])) as T[],
+      dispose: () => { try { db.close(); } catch { /* noop */ } },
+    };
+  },
+};
+
+const wasmFixture: DriverFixture = {
+  name: '@sqlite.org/sqlite-wasm',
+  async create() {
+    const initModule = sqlite3InitModule as unknown as (
+      config?: Record<string, unknown>
+    ) => ReturnType<typeof sqlite3InitModule>;
+    const sqlite3 = await initModule({ print: () => {}, printErr: () => {} });
+    const db = new sqlite3.oo1.DB(':memory:');
+    const capi = sqlite3.capi;
+    const req = (method: 'exec' | 'run' | 'all' | 'get', sql: string, params: SqlValue[] = []) =>
+      runWasmRequest(db, capi, { method, sql, params });
+    const driver: SqlDriver = {
+      exec: async (sql) => { req('exec', sql); },
+      run: async (sql, params = []) => req('run', sql, params) as SqlRunResult,
+      all: async <T>(sql: string, params: SqlValue[] = []) => req('all', sql, params) as T[],
+      get: async <T>(sql: string, params: SqlValue[] = []) => req('get', sql, params) as T | undefined,
+      transaction: async (fn) => {
+        req('exec', 'BEGIN');
+        try {
+          const result = await fn(driver);
+          req('exec', 'COMMIT');
+          return result;
+        } catch (e) {
+          try { req('exec', 'ROLLBACK'); } catch { /* noop */ }
+          throw e;
+        }
+      },
+      close: async () => { db.close(); },
+    };
+    return {
+      driver,
+      rawGet: <T>(sql: string, params: SqlValue[] = []) => req('get', sql, params) as T,
+      rawAll: <T>(sql: string, params: SqlValue[] = []) => req('all', sql, params) as T[],
+      dispose: () => { try { db.close(); } catch { /* noop */ } },
+    };
+  },
+};
+
+const chapter = (id: string, title: string, content: string): Chapter =>
+  ({ id, title, content, order: 0, summary: '' } as unknown as Chapter);
+const knowledge = (id: string, content: string, name = ''): KnowledgeItem =>
+  ({ id, content, name, category: 'inspiration' } as unknown as KnowledgeItem);
+
+const project = (id: string, over: Partial<Project> = {}): Project =>
+  ({
+    id,
+    title: `书-${id}`,
+    inspiration: '',
+    intro: '',
+    characters: [],
+    outline: '',
+    chapters: [],
+    virtualChapters: [],
+    knowledge: [],
+    lastModified: 1000,
+    ...over,
+  } as unknown as Project);
+
+const baseState = (projects: Project[]): AppState => ({
+  projects,
+  activeProjectId: projects[0]?.id ?? null,
+  models: [{ id: 'm1', name: '模型1' } as never],
+  prompts: [],
+  activeModelId: 'm1',
+  embeddingModels: [],
+  activeEmbeddingModelId: null,
+});
+
+for (const fixture of [nodeSqliteFixture, wasmFixture]) {
+  describe(`SqliteRepository（真实 ${fixture.name} 内存库）`, () => {
+    let driver: SqlDriver;
+    let rawGet: <T>(sql: string, params?: SqlValue[]) => T | undefined;
+    let rawAll: <T>(sql: string, params?: SqlValue[]) => T[];
+    let dispose: () => void;
+    let repo: SqliteRepository;
+
+    beforeEach(async () => {
+      const ctx = await fixture.create();
+      driver = ctx.driver;
+      rawGet = ctx.rawGet;
+      rawAll = ctx.rawAll;
+      dispose = ctx.dispose;
+      repo = new SqliteRepository(driver);
+    });
+    afterEach(() => { vi.restoreAllMocks(); dispose(); });
+
+    it('迁移建立 schema 并写入 schema_version', async () => {
+      await repo.saveAll(baseState([]));
+      const row = rawGet<{ value: string }>(`SELECT value FROM meta WHERE key='schema_version'`);
+      expect(Number(row!.value)).toBe(SCHEMA_VERSION);
+      const tables = rawAll<{ name: string }>(`SELECT name FROM sqlite_master WHERE type IN ('table','view')`);
+      const names = tables.map(t => t.name);
+      expect(names).toEqual(expect.arrayContaining(['projects', 'settings', 'meta', 'chapters_fts', 'knowledge_fts']));
+    });
+
+    it('空库 loadAll 返回 null', async () => {
+      expect(await repo.loadAll()).toBeNull();
+    });
+
+    it('init 首启从旧 JSON 迁移一次并写入迁移哨兵', async () => {
+      const spy = vi.spyOn(jsonRepository, 'loadAll').mockResolvedValue(baseState([project('legacy1')]));
+      await repo.init();
+      expect(spy).toHaveBeenCalledTimes(1);
+      const loaded = await repo.loadAll();
+      expect(loaded!.projects.map(p => p.id)).toEqual(['legacy1']);
+      const row = rawGet<{ value: string }>(`SELECT value FROM meta WHERE key='migrated_from_json'`);
+      expect(row!.value).toBe('1');
+    });
+
+    it('恢复出厂清空后，重启 init 不会二次导入旧 JSON（哨兵存活）', async () => {
+      const spy = vi.spyOn(jsonRepository, 'loadAll').mockResolvedValue(baseState([project('legacy1')]));
+      await repo.init();                 // 首次迁移
+      await repo.clear();                // 恢复出厂：清空数据表，但保留哨兵
+      expect(await repo.loadAll()).toBeNull();
+      const repo2 = new SqliteRepository(driver); // 模拟重启（migrated 标志复位）
+      await repo2.init();
+      expect(spy).toHaveBeenCalledTimes(1);      // 第二次 init 命中哨兵，未再读旧 JSON
+      expect(await repo2.loadAll()).toBeNull();  // 旧数据未被复活
+    });
+
+    it('无旧数据时 init 也置哨兵，避免每次启动重复探测', async () => {
+      const spy = vi.spyOn(jsonRepository, 'loadAll').mockResolvedValue(null);
+      await repo.init();
+      const row = rawGet<{ value: string }>(`SELECT value FROM meta WHERE key='migrated_from_json'`);
+      expect(row!.value).toBe('1');
+      const repo2 = new SqliteRepository(driver);
+      await repo2.init();
+      expect(spy).toHaveBeenCalledTimes(1); // 哨兵已置，第二次不再探测旧数据
+    });
+
+    it('saveAll → loadAll 往返保留项目/配置/标量', async () => {
+      const state = baseState([project('a'), project('b')]);
+      state.cardPrompts = [{ id: 'cp' } as never];
+      state.consistencyCheckConfig = { mode: 'ai' } as never;
+      await repo.saveAll(state);
+
+      const loaded = await repo.loadAll();
+      expect(loaded).not.toBeNull();
+      expect(loaded!.projects.map(p => p.id).sort()).toEqual(['a', 'b']);
+      expect(loaded!.activeProjectId).toBe('a');
+      expect(loaded!.models).toHaveLength(1);
+      expect(loaded!.activeModelId).toBe('m1');
+      expect(loaded!.cardPrompts).toEqual([{ id: 'cp' }]);
+      expect(loaded!.consistencyCheckConfig).toEqual({ mode: 'ai' });
+    });
+
+    it('saveProject 只 upsert 目标行，不影响其它项目', async () => {
+      await repo.saveAll(baseState([project('a'), project('b')]));
+      await repo.saveProject(project('a', { title: '改名后的书', lastModified: 9999 }));
+
+      const loaded = await repo.loadAll();
+      const a = loaded!.projects.find(p => p.id === 'a')!;
+      const b = loaded!.projects.find(p => p.id === 'b')!;
+      expect(a.title).toBe('改名后的书');
+      expect(b.title).toBe('书-b'); // 未被触碰
+    });
+
+    it('saveProject 新增不存在的项会插入', async () => {
+      await repo.saveAll(baseState([project('a')]));
+      await repo.saveProject(project('c'));
+      const loaded = await repo.loadAll();
+      expect(loaded!.projects.map(p => p.id).sort()).toEqual(['a', 'c']);
+    });
+
+    it('deleteProject 删除项目及其 FTS 索引', async () => {
+      await repo.saveAll(baseState([
+        project('a', { chapters: [chapter('c1', '第一章', '龙骑士闯入了古城堡')] }),
+      ]));
+      expect((await repo.search('古城堡')).length).toBeGreaterThan(0);
+
+      await repo.deleteProject('a');
+      expect((await repo.loadAll())!.projects).toHaveLength(0);
+      expect(await repo.search('古城堡')).toHaveLength(0); // FTS 已随项目清除
+    });
+
+    it('saveSettings 只写给定切片，保留其它', async () => {
+      await repo.saveAll(baseState([project('a')]));
+      await repo.saveSettings({ activeModelId: 'm2', models: [{ id: 'm2', name: '新模型' } as never] });
+
+      const loaded = await repo.loadAll();
+      expect(loaded!.activeModelId).toBe('m2');
+      expect(loaded!.models[0]!.id).toBe('m2');
+      expect(loaded!.projects.map(p => p.id)).toEqual(['a']); // 项目未受影响
+    });
+
+    it('language 经 meta 往返持久化', async () => {
+      await repo.saveAll(baseState([project('a')]));
+      expect((await repo.loadAll())!.language).toBeUndefined(); // 默认跟随检测
+      await repo.saveSettings({ language: 'en' });
+      expect((await repo.loadAll())!.language).toBe('en');
+      await repo.saveSettings({ language: 'zh' });
+      expect((await repo.loadAll())!.language).toBe('zh');
+    });
+
+    it('FTS5 trigram 支持中文正文子串检索并返回片段', async () => {
+      await repo.saveAll(baseState([
+        project('a', {
+          chapters: [
+            chapter('c1', '第一章', '少年在雨夜中拔出了那把沉睡千年的剑'),
+            chapter('c2', '第二章', '城堡的大门缓缓打开'),
+          ],
+          knowledge: [knowledge('k1', '世界观设定：魔法源自星辰之力')],
+        }),
+      ]));
+
+      const hits = await repo.search('沉睡千年的剑');
+      expect(hits.length).toBe(1);
+      expect(hits[0]!.scope).toBe('chapter');
+      expect(hits[0]!.id).toBe('c1');
+      expect(hits[0]!.snippet).toContain('剑');
+
+      const kn = await repo.search('星辰之力');
+      expect(kn.length).toBe(1);
+      expect(kn[0]!.scope).toBe('knowledge');
+      expect(kn[0]!.id).toBe('k1');
+    });
+
+    it('FTS5 可按知识库条目的 name 命中（name 与 content 同索引）', async () => {
+      await repo.saveAll(baseState([
+        project('a', {
+          knowledge: [knowledge('k9', '这是一段与标题无关的正文描述内容', '魔法体系设定')],
+        }),
+      ]));
+      const hits = await repo.search('魔法体系');
+      expect(hits.length).toBe(1);
+      expect(hits[0]!.scope).toBe('knowledge');
+      expect(hits[0]!.id).toBe('k9');
+      expect(hits[0]!.title).toBe('魔法体系设定'); // name 回传
+    });
+
+    it('search 可按 projectId 限定范围', async () => {
+      await repo.saveAll(baseState([
+        project('a', { chapters: [chapter('c1', 't', '魔法学院的入学典礼')] }),
+        project('b', { chapters: [chapter('c2', 't', '魔法学院的毕业典礼')] }),
+      ]));
+      const all = await repo.search('魔法学院');
+      expect(all.length).toBe(2);
+      const onlyA = await repo.search('魔法学院', { projectId: 'a' });
+      expect(onlyA.length).toBe(1);
+      expect(onlyA[0]!.projectId).toBe('a');
+    });
+
+    it('短于 3 字符的查询返回空（trigram 约束）', async () => {
+      await repo.saveAll(baseState([project('a', { chapters: [chapter('c1', 't', '剑与魔法')] })]));
+      expect(await repo.search('剑')).toHaveLength(0);
+    });
+
+    it('clear 清空数据但保留 schema', async () => {
+      await repo.saveAll(baseState([project('a')]));
+      await repo.clear();
+      expect(await repo.loadAll()).toBeNull();
+      const row = rawGet<{ value: string }>(`SELECT value FROM meta WHERE key='schema_version'`);
+      expect(Number(row!.value)).toBe(SCHEMA_VERSION);
+    });
+
+    it('一致性配置从 settings 表读取', async () => {
+      await repo.saveAll(baseState([]));
+      expect(await repo.loadConsistencyCheckConfig()).toBeNull();
+      await repo.saveSettings({ consistencyCheckConfig: { mode: 'vector' } as never });
+      expect(await repo.loadConsistencyCheckConfig()).toEqual({ mode: 'vector' });
+    });
+  });
+}

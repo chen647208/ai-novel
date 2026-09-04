@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+/*
+ * 语义组件类：把全仓高频重复的工具类串（按钮/卡片/输入/标签/徽章）收敛为具名、
+ * 可复用的类，作为单一视觉来源。新代码优先使用这些类；旧代码渐进替换。
+ *
+ * 说明：本项目 @tailwindcss/vite 管道下，@theme/:root 自定义属性令牌若仅被
+ * @layer components 内的 var() 引用，会被 Lightning CSS 当作未使用而裁剪掉定义，
+ * 导致颜色悬空。故组件类直接引用内置工具类（始终生成），令牌语义由这些具名类承载。
+ */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-bold transition-all select-none
+      disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 active:scale-95;
+  }
+  .btn-sm { @apply px-3 py-1.5 text-xs; }
+  .btn-md { @apply px-4 py-2 text-sm; }
+  .btn-lg { @apply px-5 py-3 text-sm; }
+  .btn-block { @apply w-full; }
+
+  .btn-primary { @apply bg-blue-600 hover:bg-blue-700 text-white shadow-lg; }
+  .btn-secondary { @apply bg-gray-100 hover:bg-gray-200 text-gray-700; }
+  .btn-danger { @apply bg-red-600 hover:bg-red-700 text-white shadow-lg; }
+  .btn-ghost { @apply bg-transparent hover:bg-gray-100 text-gray-600; }
+
+  .card { @apply bg-white rounded-2xl border border-gray-100 shadow-sm; }
+
+  .input {
+    @apply w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 outline-none
+      transition-colors placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100;
+  }
+
+  .label { @apply block text-xs font-bold text-gray-500 mb-1.5; }
+
+  .badge { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider; }
+}

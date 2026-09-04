@@ -1,0 +1,120 @@
+﻿/*
+ * 本文件属于 AI小说家 (ai-novel) 项目。
+ * Copyright (C) 2026 chen647208
+ * SPDX-License-Identifier: AGPL-3.0-only
+ *
+ * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
+ * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ */
+
+import type { CardPromptTemplate, EmbeddingModelConfig, ModelConfig, PromptTemplate } from '../../../shared/types';
+import { i18n, dt, templateDisplayName } from '@/i18n';
+import { embeddingProviders, getDefaultEmbeddingParams } from '../../constants/embeddingProviders';
+import type { CardPromptImportResult, EmbeddingQuickAddTemplate } from './types';
+
+export const createNewModelConfig = (): ModelConfig => ({
+  id: Date.now().toString(),
+  name: i18n.t('settings:factories.newModel'),
+  provider: 'openai-chat',
+  endpoint: '',
+  modelName: '',
+});
+
+export const createNewPromptTemplate = (): PromptTemplate => ({
+  id: Date.now().toString(),
+  category: 'edit',
+  name: i18n.t('settings:factories.newPolishTemplate'),
+  content: '请润色：{content}',
+});
+
+export const createDefaultEmbeddingConfig = (): EmbeddingModelConfig => ({
+  id: Date.now().toString(),
+  name: i18n.t('settings:factories.newEmbeddingModel'),
+  provider: 'siliconflow',
+  endpoint: 'https://api.siliconflow.cn/v1',
+  modelName: 'BAAI/bge-m3',
+  dimensions: 1024,
+  maxSequenceLength: 8192,
+  batchSize: 16,
+  timeout: 30000,
+  normalizeEmbeddings: true,
+  poolingStrategy: 'mean',
+  truncate: 'end',
+  isActive: false,
+  testStatus: 'untested',
+});
+
+export const createQuickAddEmbeddingConfig = (template: EmbeddingQuickAddTemplate): EmbeddingModelConfig => {
+  const provider = embeddingProviders.find((item) => item.id === template.provider);
+  const defaultParams = getDefaultEmbeddingParams(template.provider);
+
+  return {
+    id: Date.now().toString(),
+    name: dt(template.nameKey),
+    provider: template.provider,
+    endpoint: provider?.endpoint || '',
+    modelName: template.modelName,
+    apiKey: '',
+    dimensions: defaultParams.dimensions,
+    maxSequenceLength: defaultParams.maxSequenceLength,
+    batchSize: defaultParams.batchSize,
+    timeout: defaultParams.timeout,
+    normalizeEmbeddings: defaultParams.normalizeEmbeddings,
+    poolingStrategy: defaultParams.poolingStrategy,
+    truncate: defaultParams.truncate,
+    isActive: false,
+    testStatus: 'untested',
+  };
+};
+
+export const createNewCardPromptTemplate = (): CardPromptTemplate => ({
+  id: Date.now().toString(),
+  category: 'card-character',
+  name: i18n.t('settings:factories.newCharacterTemplate'),
+  content: '请根据描述创建角色：\n\n{description}\n\n项目背景：\n{context}',
+  variables: ['description', 'context'],
+  isDefault: false,
+  requiredFields: ['name', 'gender', 'age', 'role', 'personality'],
+  fieldDescriptions: {
+    name: '角色姓名',
+    gender: '性别',
+    age: '年龄',
+    role: '角色类型',
+    personality: '性格特征',
+  },
+});
+
+export const duplicateCardPromptTemplate = (prompt: CardPromptTemplate): CardPromptTemplate => ({
+  ...prompt,
+  id: Date.now().toString(),
+  // 副本转为自定义模板：烘焙当前语言显示名，清除内置键
+  name: i18n.t('settings:factories.duplicateName', { name: templateDisplayName(prompt) }),
+  nameKey: undefined,
+  isDefault: false,
+});
+
+export const importCardPromptTemplates = (
+  jsonString: string,
+  validateCardPromptTemplate: (template: CardPromptTemplate) => { isValid: boolean; errors: string[] },
+): CardPromptImportResult => {
+  try {
+    const imported = JSON.parse(jsonString) as CardPromptTemplate[];
+    const validPrompts = imported.filter((prompt) => validateCardPromptTemplate(prompt).isValid);
+    const prompts = validPrompts.map((prompt) => ({
+      ...prompt,
+      id: Date.now().toString() + Math.random().toString(36).slice(2, 11),
+      isDefault: false,
+    }));
+
+    return {
+      success: true,
+      count: prompts.length,
+      prompts,
+    };
+  } catch {
+    return {
+      success: false,
+      error: i18n.t('settings:factories.importFailedJson'),
+    };
+  }
+};
