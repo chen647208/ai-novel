@@ -34,6 +34,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src/renderer'),
+      '@core': path.resolve(__dirname, 'src/core'),
       '@shared': path.resolve(__dirname, 'src/shared'),
       '@assets': path.resolve(__dirname, 'src/assets'),
     },
@@ -58,6 +59,9 @@ export default defineConfig({
           }
 
           const normalizedId = id.replace(/\\/g, '/');
+          if (normalizedId.includes('/src/core/')) {
+            return 'core';
+          }
           const matchedFeature = featureChunkMap.find((item) => normalizedId.includes(item.match));
           return matchedFeature?.chunk;
         },

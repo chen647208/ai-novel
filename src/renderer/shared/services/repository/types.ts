@@ -14,6 +14,15 @@ import type {
   ConsistencyCheckConfig,
   ConsistencyCheckPromptTemplate,
 } from '../../../../shared/types';
+import type { RevisionEntity } from '@core/entities';
+
+/** 提交选项：标注变更来源与触发原因（单一事务管线的 agentId 维度） */
+export interface CommitOptions {
+  /** 'user'（默认）或 'ai:<tool>'；写入 entity_changes.agent_id 与 revisions.author */
+  agentId?: string;
+  /** 触发正文变更的 toolCallId/commandId，写入 revisions.cause */
+  cause?: string;
+}
 
 /**
  * SQL 驱动抽象 —— repository 逻辑只依赖这一层，桌面(node:sqlite via IPC)
@@ -88,12 +97,22 @@ export interface StorageRepository {
   /** 清空全部数据 */
   clear(): Promise<void>;
 
-  /** 增量写入/更新单个项目（含其 FTS 索引刷新） */
-  saveProject(project: Project): Promise<void>;
+  /**
+   * 增量写入/更新单个项目（含其 FTS 索引刷新）。
+   * opts.agentId 标注变更来源（'user' 或 'ai:<tool>'），写入 entity_changes 与 Revision；
+   * opts.cause 记录触发本次正文变更的 toolCallId/commandId（AI 必留底）。
+   */
+  saveProject(project: Project, opts?: CommitOptions): Promise<void>;
   /** 删除单个项目（含其 FTS 索引） */
   deleteProject(id: string): Promise<void>;
   /** 仅写入给定的非项目配置切片 */
   saveSettings(patch: Partial<AppState>): Promise<void>;
+
+  /**
+   * 读取某节点的正文修订历史（按 seq 升序）。仅支持 Revision 的后端实现（SQLite）；
+   * JSON 后端无修订概念，返回空数组。
+   */
+  loadRevisions?(nodeId: string): Promise<RevisionEntity[]>;
 
   /** 全文检索（SQLite 走 FTS5；JSON 后端走内存过滤） */
   search(query: string, options?: SearchOptions): Promise<SearchHit[]>;

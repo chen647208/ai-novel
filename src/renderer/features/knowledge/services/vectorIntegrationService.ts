@@ -10,9 +10,7 @@
 import { logger } from '../../../shared/utils/logger';
 import { i18n } from '@/i18n';
 import { vectorService } from './vectorService';
-import { embeddingService as simpleEmbeddingService, type EmbeddingService } from './embeddingService';
-import { apiEmbeddingService } from './apiEmbeddingService';
-import { embeddingModelService } from '../../settings/services/embeddingModelService';
+import { embeddingProvider } from './embeddingProvider';
 import { 
   type VectorDocument, 
   type SearchResult, 
@@ -31,8 +29,6 @@ import {
  */
 export class VectorIntegrationService {
   private isInitialized: boolean = false;
-  private currentEmbeddingService: EmbeddingService = simpleEmbeddingService;
-  private useAPIEmbedding: boolean = false;
 
   constructor() {
     this.initialize();
@@ -45,26 +41,18 @@ export class VectorIntegrationService {
     try {
       // 初始化向量服务
       const vectorInitialized = await vectorService.initialize();
-      
-      // 尝试初始化 API Embedding 服务
-      const apiEmbeddingInitialized = await apiEmbeddingService.initialize();
-      
-      // 初始化本地简化版（作为后备）
-      const simpleEmbeddingInitialized = await simpleEmbeddingService.initialize();
-      
-      // 确定使用哪个嵌入服务
-      this.useAPIEmbedding = apiEmbeddingInitialized;
-      this.currentEmbeddingService = apiEmbeddingInitialized ? apiEmbeddingService : simpleEmbeddingService;
-      
-      this.isInitialized = vectorInitialized && (apiEmbeddingInitialized || simpleEmbeddingInitialized);
-      
+
+      // 初始化嵌入提供者（内部完成 API/本地选择与后备）
+      const embeddingInitialized = await embeddingProvider.initialize();
+
+      this.isInitialized = vectorInitialized && embeddingInitialized;
+
       if (this.isInitialized) {
         logger.debug('VectorIntegrationService initialized successfully');
-        logger.debug(`Using embedding service: ${this.useAPIEmbedding ? 'API' : 'Local TF-IDF'}`);
       } else {
         console.error('Failed to initialize VectorIntegrationService');
       }
-      
+
       return this.isInitialized;
     } catch (error) {
       console.error('Failed to initialize VectorIntegrationService:', error);
@@ -74,47 +62,11 @@ export class VectorIntegrationService {
   }
 
   /**
-   * 获取当前使用的 Embedding 服务
-   * 优先使用 API，失败时自动降级到本地服务
-   */
-  private async getEmbeddingService(): Promise<EmbeddingService> {
-    if (this.useAPIEmbedding) {
-      // 检查 API 服务是否仍然可用
-      const config = await embeddingModelService.getActiveConfig();
-      logger.debug('getEmbeddingService - API mode, active config:', config ? {
-        name: config.name,
-        testStatus: config.testStatus,
-        dimensions: config.dimensions
-      } : 'null');
-      
-      if (config && config.testStatus === 'success') {
-        logger.debug('Using API Embedding Service');
-        return apiEmbeddingService;
-      }
-      // API 不可用，降级到本地服务
-      console.warn('API Embedding not available (config missing or not tested), falling back to local TF-IDF');
-      this.useAPIEmbedding = false;
-      this.currentEmbeddingService = simpleEmbeddingService;
-    }
-    logger.debug('Using Local TF-IDF Embedding Service, dimensions:', this.currentEmbeddingService.getDimensions());
-    return this.currentEmbeddingService;
-  }
-
-  /**
    * 刷新 Embedding 服务配置
    * 在设置中更改配置后调用
    */
   async refreshEmbeddingConfig(): Promise<void> {
-    // 清除 API 服务的缓存
-    apiEmbeddingService.reloadConfig();
-    
-    // 重新初始化
-    const apiEmbeddingInitialized = await apiEmbeddingService.initialize();
-    
-    this.useAPIEmbedding = apiEmbeddingInitialized;
-    this.currentEmbeddingService = apiEmbeddingInitialized ? apiEmbeddingService : simpleEmbeddingService;
-    
-    logger.debug(`Embedding service refreshed: ${this.useAPIEmbedding ? 'API' : 'Local TF-IDF'}`);
+    await embeddingProvider.refresh();
   }
 
   /**
@@ -136,7 +88,7 @@ export class VectorIntegrationService {
       logger.debug(`indexKnowledgeBase started for project ${projectId}, items: ${knowledgeItems.length}`);
       
       // 获取当前使用的嵌入服务（支持自动降级）
-      const embeddingSvc = await this.getEmbeddingService();
+      const embeddingSvc = await embeddingProvider.get();
       logger.debug(`Using embedding service with dimensions: ${embeddingSvc.getDimensions()}`);
       
       // 将知识库项目转换为向量文档
@@ -196,7 +148,7 @@ export class VectorIntegrationService {
 
     try {
       // 获取当前使用的嵌入服务（支持自动降级）
-      const embeddingSvc = await this.getEmbeddingService();
+      const embeddingSvc = await embeddingProvider.get();
       
       // 生成查询的嵌入向量
       const queryEmbedding = await embeddingSvc.embedText(query);
@@ -223,7 +175,7 @@ export class VectorIntegrationService {
 
     try {
       // 获取当前使用的嵌入服务（支持自动降级）
-      const embeddingSvc = await this.getEmbeddingService();
+      const embeddingSvc = await embeddingProvider.get();
       
       // 生成查询的嵌入向量
       const queryEmbedding = await embeddingSvc.embedText(query);
@@ -246,7 +198,7 @@ export class VectorIntegrationService {
 
     try {
       // 获取当前使用的嵌入服务的维度
-      const embeddingSvc = await this.getEmbeddingService();
+      const embeddingSvc = await embeddingProvider.get();
       const dimensions = embeddingSvc.getDimensions();
       
       return await vectorService.getCollectionStats(projectId, dimensions);
@@ -254,7 +206,7 @@ export class VectorIntegrationService {
       console.error(`Failed to get vector stats for project ${projectId}:`, error);
       return {
         count: 0,
-        dimensions: this.currentEmbeddingService.getDimensions(),
+        dimensions: embeddingProvider.getActive().getDimensions(),
         categories: {},
         lastUpdated: Date.now()
       };
@@ -335,7 +287,7 @@ export class VectorIntegrationService {
         switch (update.action) {
           case 'add': {
             // 获取当前使用的嵌入服务
-            const embeddingSvc = await this.getEmbeddingService();
+            const embeddingSvc = await embeddingProvider.get();
             
             // 创建向量文档并添加
             const vectorDocuments = await embeddingSvc.createVectorDocuments(
@@ -359,7 +311,7 @@ export class VectorIntegrationService {
 
           case 'update': {
             // 获取当前使用的嵌入服务
-            const embeddingSvc2 = await this.getEmbeddingService();
+            const embeddingSvc2 = await embeddingProvider.get();
             
             // 先删除旧文档，再添加新文档
             const updatedDocuments = await embeddingSvc2.createVectorDocuments(
@@ -417,15 +369,15 @@ export class VectorIntegrationService {
     embeddingDimensions: number;
     vocabularySize: number;
   } {
-    const embeddingStatus = this.currentEmbeddingService.getStatus();
-    
+    const embeddingStatus = embeddingProvider.getActive().getStatus();
+
     return {
       vectorService: this.isInitialized,
       embeddingService: embeddingStatus.isReady,
-      embeddingServiceType: this.useAPIEmbedding ? 'api' : 'local',
+      embeddingServiceType: embeddingProvider.getMode(),
       embeddingModel: embeddingStatus.modelName,
       embeddingDimensions: embeddingStatus.dimensions,
-      vocabularySize: simpleEmbeddingService.getVocabularySize?.() ?? 0
+      vocabularySize: embeddingProvider.getVocabularySize()
     };
   }
 

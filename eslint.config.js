@@ -62,6 +62,23 @@ export default tseslint.config(
     },
   },
 
+  // 平台无关内核（src/core）：架构边界 —— 只依赖 shared 纯类型，禁止反向依赖渲染层/主进程
+  {
+    files: ['src/core/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            { group: ['@/*'], message: 'core 不得依赖渲染层（@/ 别名）' },
+            { group: ['@assets/*'], message: 'core 不得依赖资源层' },
+            { group: ['**/renderer/**', '**/main/**'], message: 'core 不得依赖渲染层/主进程实现' },
+          ],
+        },
+      ],
+    },
+  },
+
   // 测试文件：放宽部分规则（断言、console、any 在测试中是惯用写法）
   {
     files: ['src/**/__tests__/**/*.ts', 'src/**/*.test.ts'],

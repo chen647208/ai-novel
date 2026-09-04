@@ -13,6 +13,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(rootDir, 'src/renderer'),
+      '@core': path.resolve(rootDir, 'src/core'),
       '@shared': path.resolve(rootDir, 'src/shared'),
       '@assets': path.resolve(rootDir, 'src/assets'),
     },

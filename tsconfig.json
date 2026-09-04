@@ -30,6 +30,9 @@
       "@/*": [
         "src/renderer/*"
       ],
+      "@core/*": [
+        "src/core/*"
+      ],
       "@shared/*": [
         "src/shared/*"
       ],
@@ -42,6 +45,7 @@
   },
   "include": [
     "src/renderer/**/*",
+    "src/core/**/*",
     "src/shared/**/*",
     "vite.config.ts"
   ]

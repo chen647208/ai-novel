@@ -10,15 +10,17 @@
 import type { SqlDriver } from './types';
 
 /**
- * 数据库 schema 与迁移。桌面(node:sqlite)与网页(@sqlite.org/sqlite-wasm)共用同一份，
- * 因此这里只写标准 SQLite DDL，不含任何环境相关代码。
+ * 数据库 schema 与迁移（v2 六实体）。桌面(node:sqlite)与网页(@sqlite.org/sqlite-wasm)共用，
+ * 只写标准 SQLite DDL，不含环境相关代码。
  *
- * 采用“文档行 + FTS5”混合模型：
- *  - projects.data 存整棵 Project JSON（保留应用内存文档模型，增量写只动一行）
- *  - chapters_fts / knowledge_fts 用 trigram 分词，支持中文正文子串检索
+ * v1→v2 换代（用户确认无生产数据，直接替换）：
+ *  - 旧 projects.data 文档行模型 → nodes/edges/attrs 六实体表；
+ *  - 新增 revisions/attachments/blobs/entity_changes；
+ *  - chapters_fts/knowledge_fts 合并为 nodes_fts（投影自节点 title+body）。
+ * 每个实体表带 hash 列：变更检测缓存，saveProject 时与旧行比对，仅真实变化才写 entity_changes。
  */
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 /** settings 表里以 JSON 存储的非项目配置切片键 */
 export const SETTING_KEYS = [
@@ -38,35 +40,91 @@ export type MetaKey = (typeof META_KEYS)[number];
 /** 迁移脚本：version 为应用该脚本后达到的版本 */
 export const MIGRATIONS: ReadonlyArray<{ version: number; up: readonly string[] }> = [
   {
-    version: 1,
+    version: 2,
     up: [
-      `CREATE TABLE IF NOT EXISTS meta (
-         key   TEXT PRIMARY KEY,
-         value TEXT NOT NULL
+      // 丢弃 v1 文档行模型（无生产数据，直接换代）
+      `DROP TABLE IF EXISTS chapters_fts`,
+      `DROP TABLE IF EXISTS knowledge_fts`,
+      `DROP TABLE IF EXISTS projects`,
+      `CREATE TABLE IF NOT EXISTS nodes (
+         id         TEXT PRIMARY KEY,
+         book_id    TEXT NOT NULL,
+         type       TEXT NOT NULL,
+         title      TEXT NOT NULL,
+         body       TEXT NOT NULL,
+         path       TEXT,
+         created_at INTEGER NOT NULL,
+         updated_at INTEGER NOT NULL,
+         erased     INTEGER NOT NULL DEFAULT 0,
+         hash       TEXT NOT NULL
        )`,
-      `CREATE TABLE IF NOT EXISTS projects (
-         id            TEXT PRIMARY KEY,
-         title         TEXT NOT NULL,
-         last_modified INTEGER NOT NULL,
-         data          TEXT NOT NULL
+      `CREATE INDEX IF NOT EXISTS idx_nodes_book ON nodes(book_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_nodes_type ON nodes(type)`,
+      `CREATE TABLE IF NOT EXISTS edges (
+         id       TEXT PRIMARY KEY,
+         from_id  TEXT NOT NULL,
+         to_id    TEXT NOT NULL,
+         kind     TEXT NOT NULL,
+         role     TEXT,
+         position REAL NOT NULL,
+         book_id  TEXT NOT NULL,
+         erased   INTEGER NOT NULL DEFAULT 0,
+         hash     TEXT NOT NULL
        )`,
-      `CREATE INDEX IF NOT EXISTS idx_projects_modified ON projects(last_modified)`,
-      `CREATE TABLE IF NOT EXISTS settings (
-         key   TEXT PRIMARY KEY,
-         value TEXT NOT NULL
+      `CREATE INDEX IF NOT EXISTS idx_edges_book ON edges(book_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_edges_from ON edges(from_id)`,
+      `CREATE TABLE IF NOT EXISTS attrs (
+         id          TEXT PRIMARY KEY,
+         node_id     TEXT NOT NULL,
+         type        TEXT NOT NULL,
+         name        TEXT NOT NULL,
+         value       TEXT NOT NULL,
+         inheritable INTEGER NOT NULL DEFAULT 0,
+         position    INTEGER NOT NULL,
+         erased      INTEGER NOT NULL DEFAULT 0,
+         hash        TEXT NOT NULL
        )`,
-      `CREATE VIRTUAL TABLE IF NOT EXISTS chapters_fts USING fts5(
-         project_id UNINDEXED,
-         chapter_id UNINDEXED,
+      `CREATE INDEX IF NOT EXISTS idx_attrs_node ON attrs(node_id)`,
+      `CREATE TABLE IF NOT EXISTS revisions (
+         id         TEXT PRIMARY KEY,
+         node_id    TEXT NOT NULL,
+         seq        INTEGER NOT NULL,
+         body       TEXT NOT NULL,
+         author     TEXT NOT NULL,
+         cause      TEXT,
+         created_at INTEGER NOT NULL
+       )`,
+      `CREATE INDEX IF NOT EXISTS idx_revisions_node ON revisions(node_id, seq)`,
+      `CREATE TABLE IF NOT EXISTS attachments (
+         id      TEXT PRIMARY KEY,
+         node_id TEXT NOT NULL,
+         role    TEXT NOT NULL,
+         mime    TEXT NOT NULL,
+         blob_id TEXT NOT NULL,
+         erased  INTEGER NOT NULL DEFAULT 0
+       )`,
+      `CREATE TABLE IF NOT EXISTS blobs (
+         id    TEXT PRIMARY KEY,
+         bytes BLOB NOT NULL,
+         enc   TEXT
+       )`,
+      `CREATE TABLE IF NOT EXISTS entity_changes (
+         id               INTEGER PRIMARY KEY AUTOINCREMENT,
+         entity_name      TEXT NOT NULL,
+         entity_id        TEXT NOT NULL,
+         hash             TEXT NOT NULL,
+         is_erased        INTEGER NOT NULL,
+         instance_id      TEXT NOT NULL,
+         agent_id         TEXT NOT NULL,
+         utc_date_changed INTEGER NOT NULL
+       )`,
+      `CREATE INDEX IF NOT EXISTS idx_changes_entity ON entity_changes(entity_name, entity_id)`,
+      // 全文检索：投影自章节/知识节点（trigram 支持中文子串）
+      `CREATE VIRTUAL TABLE IF NOT EXISTS nodes_fts USING fts5(
+         book_id UNINDEXED,
+         node_id UNINDEXED,
+         type    UNINDEXED,
          title,
-         content,
-         tokenize = 'trigram'
-       )`,
-      `CREATE VIRTUAL TABLE IF NOT EXISTS knowledge_fts USING fts5(
-         project_id UNINDEXED,
-         item_id    UNINDEXED,
-         category   UNINDEXED,
-         name,
          content,
          tokenize = 'trigram'
        )`,
@@ -79,9 +137,11 @@ export const MIGRATIONS: ReadonlyArray<{ version: number; up: readonly string[] 
  * 每条迁移脚本在一个事务内执行，并写入 schema_version。
  */
 export async function migrate(driver: SqlDriver): Promise<void> {
-  // 引导 meta 表（首次运行时读取版本前必须存在）
   await driver.exec(
     `CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)`
+  );
+  await driver.exec(
+    `CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)`
   );
   const row = await driver.get<{ value: string }>(
     `SELECT value FROM meta WHERE key = 'schema_version'`

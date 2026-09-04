@@ -7,180 +7,34 @@
  * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
  */
 
-import { app, BrowserWindow, dialog, ipcMain } from 'electron';
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { IPC } from './channels.js';
+import { app } from 'electron';
 import { logger } from './logger.js';
-import { registerVectorIpc } from './vector-ipc.js';
-import { registerSqliteIpc, closeSqlite } from './sqlite-ipc.js';
+import { AppContainer, type ProviderContext } from './app/container.js';
+import { getMainWindow } from './app/window.js';
+import {
+  windowProvider,
+  fileProvider,
+  dialogProvider,
+  vectorProvider,
+  sqliteProvider,
+} from './app/providers.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+/**
+ * 应用入口：装配 Provider 容器并按序启动（docs/design/02）。
+ * 子系统实现见 src/main/app/providers.ts；此处只负责生命周期编排。
+ */
+const container = new AppContainer()
+  .register(sqliteProvider)
+  .register(vectorProvider)
+  .register(fileProvider)
+  .register(dialogProvider)
+  .register(windowProvider);
 
-/** 开发服务器候选端口（与 vite.config.ts 的 3000 及并发实例回退保持一致） */
-const DEV_SERVER_PORTS = [3000, 3001, 3002, 3003];
+const ctx: ProviderContext = { getMainWindow };
 
-const LOAD_ERROR_HTML = [
-  '<html><body style="font-family:Arial;padding:40px;text-align:center;">',
-  '<h1>加载失败</h1>',
-  '<p>无法加载应用程序文件。请检查 build/renderer 目录是否存在，或重新运行 npm run build。</p>',
-  '</body></html>',
-].join('');
-
-let mainWindow: BrowserWindow | null = null;
-
-function applyWindowSecurity(win: BrowserWindow): void {
-  // 拒绝一切弹出新窗口的行为（渲染层没有合法使用场景）
-  win.webContents.setWindowOpenHandler(({ url }) => {
-    logger.warn('window', `Blocked window.open: ${url}`);
-    return { action: 'deny' };
-  });
-
-  // 阻止偏离预期来源的导航（防止被诱导跳转到外部站点）
-  win.webContents.on('will-navigate', (event, url) => {
-    const allowed = app.isPackaged
-      ? url.startsWith('file:')
-      : /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/.test(url);
-    if (!allowed) {
-      event.preventDefault();
-      logger.warn('window', `Blocked navigation to: ${url}`);
-    }
-  });
-}
-
-function tryDevelopmentServer(win: BrowserWindow, portIndex = 0): void {
-  if (portIndex >= DEV_SERVER_PORTS.length) {
-    logger.error('window', 'All development server ports failed');
-    win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(LOAD_ERROR_HTML)}`).catch(() => undefined);
-    return;
-  }
-  const port = DEV_SERVER_PORTS[portIndex] as number;
-  const devServerURL = `http://localhost:${port}`;
-  logger.info('window', `Trying development server: ${devServerURL}`);
-  win.loadURL(devServerURL).catch((err: unknown) => {
-    logger.warn('window', `Dev server on port ${port} unavailable, trying next`, err);
-    setTimeout(() => tryDevelopmentServer(win, portIndex + 1), 100);
-  });
-}
-
-function createWindow(): void {
-  mainWindow = new BrowserWindow({
-    width: 1400,
-    height: 900,
-    minWidth: 1200,
-    minHeight: 800,
-    webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-      preload: path.join(__dirname, 'preload', 'preload.js'),
-    },
-    icon: app.isPackaged
-      ? path.join(process.resourcesPath, 'icon.png')
-      : path.join(__dirname, '../../src/assets/icon.png'),
-    titleBarStyle: 'default',
-    autoHideMenuBar: true,
-  });
-
-  applyWindowSecurity(mainWindow);
-
-  if (app.isPackaged) {
-    const indexPath = path.join(__dirname, '../renderer/index.html');
-    mainWindow.loadFile(indexPath).catch((err: unknown) => {
-      logger.error('window', 'Failed to load index.html', err);
-      mainWindow?.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(LOAD_ERROR_HTML)}`).catch(() => undefined);
-    });
-  } else {
-    tryDevelopmentServer(mainWindow);
-    mainWindow.webContents.openDevTools();
-  }
-
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-  });
-}
-
-// ========== IPC：文件系统 ==========
-// 说明：本应用为本地优先工具，导入/导出对话框允许用户选择任意路径，
-// 因此文件读写不做 userData 白名单限制，但会校验入参类型。
-
-function assertString(value: unknown, label: string): asserts value is string {
-  if (typeof value !== 'string' || value.length === 0) {
-    throw new TypeError(`Invalid ${label}: expected non-empty string`);
-  }
-}
-
-function registerFileIpc(): void {
-  ipcMain.handle(IPC.getAppDataPath, () => app.getPath('userData'));
-
-  ipcMain.handle(IPC.readFile, async (_event, filePath: string) => {
-    assertString(filePath, 'filePath');
-    return fs.readFile(filePath, 'utf-8');
-  });
-
-  ipcMain.handle(IPC.writeFile, async (_event, filePath: string, data: string) => {
-    assertString(filePath, 'filePath');
-    if (typeof data !== 'string') {
-      throw new TypeError('Invalid data: expected string');
-    }
-    await fs.mkdir(path.dirname(filePath), { recursive: true });
-    await fs.writeFile(filePath, data, 'utf-8');
-    return true;
-  });
-
-  ipcMain.handle(IPC.fileExists, async (_event, filePath: string) => {
-    assertString(filePath, 'filePath');
-    try {
-      await fs.access(filePath);
-      return true;
-    } catch {
-      return false;
-    }
-  });
-
-  ipcMain.handle(IPC.deleteFile, async (_event, filePath: string) => {
-    assertString(filePath, 'filePath');
-    await fs.unlink(filePath);
-    return true;
-  });
-}
-
-// ========== IPC：对话框 ==========
-
-function registerDialogIpc(): void {
-  ipcMain.handle(IPC.openFileDialog, async (_event, options: Electron.OpenDialogOptions) => {
-    const opts = options ?? {};
-    return mainWindow ? dialog.showOpenDialog(mainWindow, opts) : dialog.showOpenDialog(opts);
-  });
-
-  ipcMain.handle(IPC.saveFileDialog, async (_event, options: Electron.SaveDialogOptions) => {
-    const opts = options ?? {};
-    return mainWindow ? dialog.showSaveDialog(mainWindow, opts) : dialog.showSaveDialog(opts);
-  });
-
-  ipcMain.handle(IPC.openDirectoryDialog, async (_event, options: Electron.OpenDialogOptions) => {
-    const merged: Electron.OpenDialogOptions = {
-      title: '选择目录',
-      properties: ['openDirectory', 'createDirectory'],
-      ...options,
-    };
-    return mainWindow ? dialog.showOpenDialog(mainWindow, merged) : dialog.showOpenDialog(merged);
-  });
-}
-
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   logger.info('app', `User data path: ${app.getPath('userData')}`);
-  registerFileIpc();
-  registerDialogIpc();
-  registerVectorIpc();
-  registerSqliteIpc();
-  createWindow();
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
-  });
+  await container.boot(ctx);
 });
 
 app.on('window-all-closed', () => {
@@ -190,5 +44,5 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
-  closeSqlite();
+  void container.shutdown(ctx);
 });

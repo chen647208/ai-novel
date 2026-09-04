@@ -18,6 +18,6 @@
     "sourceMap": false,
     "declaration": false
   },
-  "include": ["channels.ts", "logger.ts", "vector-ipc.ts", "sqlite-ipc.ts", "main.ts"],
+  "include": ["channels.ts", "logger.ts", "vector-ipc.ts", "sqlite-ipc.ts", "main.ts", "app/**/*.ts"],
   "exclude": ["node_modules"]
 }

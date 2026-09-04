@@ -14,6 +14,7 @@ import type { AppState, Project, KnowledgeItem, Chapter } from '../../../../../s
 import type { SqlDriver, SqlRunResult, SqlValue } from '../types';
 import { SCHEMA_VERSION } from '../schema';
 import { SqliteRepository } from '../sqliteRepository';
+import { indexService } from '@core/index';
 import { jsonRepository } from '../jsonRepository';
 import { runWasmRequest } from '../wasmSql';
 
@@ -151,16 +152,22 @@ for (const fixture of [nodeSqliteFixture, wasmFixture]) {
       rawAll = ctx.rawAll;
       dispose = ctx.dispose;
       repo = new SqliteRepository(driver);
+      indexService.clear(); // 派生索引是进程级单例，逐用例清空避免污染
     });
     afterEach(() => { vi.restoreAllMocks(); dispose(); });
 
-    it('迁移建立 schema 并写入 schema_version', async () => {
+    it('迁移建立 v2 六实体 schema 并写入 schema_version', async () => {
       await repo.saveAll(baseState([]));
       const row = rawGet<{ value: string }>(`SELECT value FROM meta WHERE key='schema_version'`);
       expect(Number(row!.value)).toBe(SCHEMA_VERSION);
       const tables = rawAll<{ name: string }>(`SELECT name FROM sqlite_master WHERE type IN ('table','view')`);
       const names = tables.map(t => t.name);
-      expect(names).toEqual(expect.arrayContaining(['projects', 'settings', 'meta', 'chapters_fts', 'knowledge_fts']));
+      expect(names).toEqual(expect.arrayContaining([
+        'nodes', 'edges', 'attrs', 'revisions', 'attachments', 'blobs', 'entity_changes', 'nodes_fts', 'settings', 'meta',
+      ]));
+      // v1 文档行模型已彻底移除
+      expect(names).not.toContain('projects');
+      expect(names).not.toContain('chapters_fts');
     });
 
     it('空库 loadAll 返回 null', async () => {
@@ -328,6 +335,99 @@ for (const fixture of [nodeSqliteFixture, wasmFixture]) {
       expect(await repo.loadConsistencyCheckConfig()).toBeNull();
       await repo.saveSettings({ consistencyCheckConfig: { mode: 'vector' } as never });
       expect(await repo.loadConsistencyCheckConfig()).toEqual({ mode: 'vector' });
+    });
+
+    it('saveProject 为实体写 entity_changes（agentId=user，含 instanceId）', async () => {
+      await repo.saveProject(project('a', { chapters: [chapter('c1', '第一章', '正文')] }));
+      const changes = rawAll<{ entity_name: string; agent_id: string; instance_id: string; is_erased: number }>(
+        `SELECT entity_name, agent_id, instance_id, is_erased FROM entity_changes`
+      );
+      expect(changes.length).toBeGreaterThan(0);
+      expect(changes.every((c) => c.agent_id === 'user' && c.instance_id.length > 0 && c.is_erased === 0)).toBe(true);
+      expect(changes.some((c) => c.entity_name === 'nodes')).toBe(true);
+    });
+
+    it('内容未变时重复 saveProject 不产生新变更（哈希差分）', async () => {
+      const p = project('a', { chapters: [chapter('c1', '第一章', '正文')] });
+      await repo.saveProject(p);
+      const before = rawAll<{ n: number }>(`SELECT COUNT(*) AS n FROM entity_changes`)[0]!.n;
+      await repo.saveProject(p); // 同一内容再存
+      const after = rawAll<{ n: number }>(`SELECT COUNT(*) AS n FROM entity_changes`)[0]!.n;
+      expect(after).toBe(before);
+    });
+
+    it('改正文 → 仅变化实体写新变更；删项目 → 写擦除变更', async () => {
+      await repo.saveProject(project('a', { chapters: [chapter('c1', '第一章', '旧文'), chapter('c2', '第二章', '不变')] }));
+      const before = rawAll<{ n: number }>(`SELECT COUNT(*) AS n FROM entity_changes`)[0]!.n;
+      await repo.saveProject(project('a', { chapters: [chapter('c1', '第一章', '新文'), chapter('c2', '第二章', '不变')] }));
+      const after = rawAll<{ n: number }>(`SELECT COUNT(*) AS n FROM entity_changes`)[0]!.n;
+      expect(after).toBeGreaterThan(before);
+      // 擦除变更：删除整本书
+      await repo.deleteProject('a');
+      const erased = rawAll<{ n: number }>(`SELECT COUNT(*) AS n FROM entity_changes WHERE is_erased = 1`)[0]!.n;
+      expect(erased).toBeGreaterThan(0);
+    });
+
+    it('saveProject 提交后派生索引被填充（卡片隐式标签 + 伏笔）', async () => {
+      await repo.saveProject(project('idx1', {
+        characters: [{ id: 'card-lin', name: '林渊' } as never],
+        chapters: [chapter('c1', '第一章', '他走进了[[林渊]]的房间。')],
+        foreshadows: [{ id: 'fs1', title: '玉佩', status: 'planted', importance: 'critical' } as never],
+      }));
+      const snap = indexService.get('idx1');
+      expect(snap).toBeTruthy();
+      expect(snap!.tags.get('林渊')?.nodeId).toBe('card-lin');
+      expect(snap!.hardLinks.get('c1')).toContain('card-lin');
+      expect(snap!.foreshadowOpen.some((f) => f.nodeId === 'fs1')).toBe(true);
+    });
+
+    it('loadAll 冷启动从持久实体重建派生索引', async () => {
+      await repo.saveProject(project('idx2', { characters: [{ id: 'c1', name: '苏墨' } as never] }));
+      indexService.clear(); // 模拟进程重启：内存缓存丢失，实体仍在库
+      await repo.loadAll();
+      expect(indexService.get('idx2')?.tags.get('苏墨')?.nodeId).toBe('c1');
+    });
+
+    it('deleteProject 后派生索引失效', async () => {
+      await repo.saveProject(project('idx3', { characters: [{ id: 'c1', name: '甲' } as never] }));
+      expect(indexService.get('idx3')).toBeTruthy();
+      await repo.deleteProject('idx3');
+      expect(indexService.get('idx3')).toBeUndefined();
+    });
+
+    it('正文实质变化才追加修订；未变不追加；编辑续号', async () => {
+      await repo.saveProject(project('rev1', { chapters: [chapter('c1', '第一章', '初稿内容')] }));
+      let revs = (await repo.loadRevisions('c1'));
+      expect(revs).toHaveLength(1);
+      expect(revs[0]).toMatchObject({ seq: 1, body: '初稿内容', author: 'user' });
+
+      // 相同正文再存 → 不产生新修订
+      await repo.saveProject(project('rev1', { chapters: [chapter('c1', '第一章', '初稿内容')] }));
+      revs = (await repo.loadRevisions('c1'));
+      expect(revs).toHaveLength(1);
+
+      // 改正文 → seq 2
+      await repo.saveProject(project('rev1', { chapters: [chapter('c1', '第一章', '改后内容')] }));
+      revs = (await repo.loadRevisions('c1'));
+      expect(revs.map((r) => r.seq)).toEqual([1, 2]);
+      expect(revs[1]?.body).toBe('改后内容');
+    });
+
+    it('AI 提交记录 agentId 与 cause（单一事务管线留底）', async () => {
+      await repo.saveProject(
+        project('rev2', { chapters: [chapter('c1', '第一章', 'AI 续写')] }),
+        { agentId: 'ai:continue', cause: 'toolcall-42' }
+      );
+      const revs = (await repo.loadRevisions('c1'));
+      expect(revs[0]).toMatchObject({ author: 'ai:continue', cause: 'toolcall-42' });
+      // entity_changes 也带同一 agentId
+      const chg = rawAll<{ agent_id: string }>(`SELECT agent_id FROM entity_changes WHERE entity_id='c1'`);
+      expect(chg.some((c) => c.agent_id === 'ai:continue')).toBe(true);
+    });
+
+    it('空正文节点不产生修订噪声', async () => {
+      await repo.saveProject(project('rev3', { chapters: [chapter('c1', '第一章', '')] }));
+      expect((await repo.loadRevisions('c1'))).toHaveLength(0);
     });
   });
 }
