@@ -78,6 +78,9 @@
   },
   "models": {
     "namePlaceholder": "给模型起个名字...",
+    "activeBadge": "当前",
+    "deleteTitle": "删除该模型",
+    "connectionLog": "连接日志",
     "channelLabel": "选择渠道",
     "modelNameLabel": "模型具体名称",
     "selectModelPlaceholder": "请选择模型...",

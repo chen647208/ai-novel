@@ -10,6 +10,9 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from '@/i18n';
 import { roleLabel } from '../characters/displayLabels';
+import { Button } from '@/shared/ui/Button';
+import { Dialog, DialogContent } from '@/shared/ui/Dialog';
+import { cn } from '@/shared/utils/cn';
 import { Clock, Globe, ListTree, Map, Network, RefreshCw, Users, X } from 'lucide-react';
 import {
   type Character, type Location, type Faction, type Timeline, type TimelineEvent,
@@ -29,7 +32,7 @@ interface WorldViewGraphProps {
   onSelectNode?: (node: GraphNode) => void;
 }
 
-// 节点颜色映射
+// 节点颜色映射（数据可视化配色，独立于主题令牌）
 const NODE_COLORS = {
   character: '#3b82f6',    // Blue
   character_main: '#fbbf24', // Amber for main characters
@@ -48,6 +51,11 @@ const getCharacterColor = (role: string): string => {
   if (role.includes('配')) return NODE_COLORS.character;
   return '#94a3b8'; // Gray for others
 };
+
+/** 侧栏分组小标题 */
+const PanelLabel: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
+  <div className={cn('mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground', className)}>{children}</div>
+);
 
 const WorldViewGraph: React.FC<WorldViewGraphProps> = ({
   characters,
@@ -270,7 +278,7 @@ const WorldViewGraph: React.FC<WorldViewGraphProps> = ({
 
     const applyForces = () => {
       if (iteration >= maxIterations) return;
-      
+
       setNodePositions(prev => {
         const newPositions = { ...prev };
         const k = 0.05; // 引力常数
@@ -380,7 +388,7 @@ const WorldViewGraph: React.FC<WorldViewGraphProps> = ({
   // 相关节点和连线
   const relatedData = useMemo(() => {
     if (!selectedNodeId) return { nodes: new Set<string>(), links: new Set<string>() };
-    
+
     const relatedNodes = new Set<string>([selectedNodeId]);
     const relatedLinks = new Set<string>();
 
@@ -407,405 +415,404 @@ const WorldViewGraph: React.FC<WorldViewGraphProps> = ({
     mixed: t('graph.viewType.mixed')
   };
 
+  const nodeTypeLabel = (type: GraphNode['type']): string => {
+    switch (type) {
+      case 'character': return t('graph.nodeType.character');
+      case 'faction': return t('graph.nodeType.faction');
+      case 'location': return t('graph.nodeType.location');
+      case 'event': return t('graph.nodeType.event');
+      case 'rule': return t('graph.nodeType.rule');
+      default: return t('graph.nodeType.other');
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-[100] bg-gray-950 flex animate-in fade-in duration-500">
-      {/* 左侧导航面板 */}
-      <div className="w-72 bg-gray-900 border-r border-white/10 flex flex-col">
-        {/* 标题 */}
-        <div className="p-6 border-b border-white/10">
-          <h2 className="text-xl font-black text-white">{t('graph.title')}</h2>
-          <p className="text-gray-500 text-xs mt-1">World View Visualization</p>
-        </div>
-
-        {/* 视图类型选择 */}
-        <div className="p-4 border-b border-white/10">
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 block">{t('graph.viewTypeLabel')}</label>
-          <div className="space-y-2">
-            {(['mixed', 'character', 'faction', 'location', 'timeline', 'worldview'] as DiagramType[]).map(type => {
-              const TypeIcon = type === 'character' ? Users :
-                type === 'faction' ? ListTree :
-                type === 'location' ? Map :
-                type === 'timeline' ? Clock :
-                type === 'worldview' ? Globe : Network;
-              return (
-              <button
-                key={type}
-                onClick={() => { setActiveType(type); resetLayout(); }}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-                  activeType === type 
-                    ? 'bg-blue-600 text-white' 
-                    : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                }`}
-              >
-                <TypeIcon className="mr-2 inline size-4 align-text-bottom" />
-                {typeLabels[type]}
-              </button>
-              );
-            })}
+    <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent
+        hideClose
+        className="flex h-full w-full max-w-none flex-row gap-0 overflow-hidden rounded-none border-0 p-0"
+      >
+        {/* 左侧导航面板 */}
+        <div className="flex w-72 shrink-0 flex-col border-r border-border bg-card">
+          {/* 标题 */}
+          <div className="border-b border-border p-5">
+            <h2 className="font-serif text-lg font-medium text-foreground">{t('graph.title')}</h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">{t('graph.subtitle')}</p>
           </div>
-        </div>
 
-        {/* 布局选择 */}
-        <div className="p-4 border-b border-white/10">
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 block">{t('graph.layoutLabel')}</label>
-          <div className="flex flex-wrap gap-2">
-            {(['force', 'circular', 'hierarchical'] as const).map(layout => (
-              <button
-                key={layout}
-                onClick={() => { setActiveLayout(layout); resetLayout(); }}
-                className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
-                  activeLayout === layout
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-white/5 text-gray-400 hover:bg-white/10'
-                }`}
-              >
-                {t(`graph.layout.${layout}`)}
-              </button>
-            ))}
+          {/* 视图类型选择 */}
+          <div className="border-b border-border p-4">
+            <PanelLabel>{t('graph.viewTypeLabel')}</PanelLabel>
+            <div className="space-y-1">
+              {(['mixed', 'character', 'faction', 'location', 'timeline', 'worldview'] as DiagramType[]).map(type => {
+                const TypeIcon = type === 'character' ? Users :
+                  type === 'faction' ? ListTree :
+                  type === 'location' ? Map :
+                  type === 'timeline' ? Clock :
+                  type === 'worldview' ? Globe : Network;
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => { setActiveType(type); resetLayout(); }}
+                    className={cn(
+                      'flex w-full items-center gap-2 rounded-md border px-3 py-1.5 text-left text-sm transition-colors',
+                      activeType === type
+                        ? 'border-primary/40 bg-primary/5 text-primary'
+                        : 'border-transparent text-muted-foreground hover:bg-accent/40 hover:text-foreground'
+                    )}
+                  >
+                    <TypeIcon className="size-4 shrink-0" />
+                    {typeLabels[type]}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
-        {/* 筛选器 */}
-        <div className="p-4 border-b border-white/10 flex-1">
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 block">{t('graph.filterLabel')}</label>
-          <div className="space-y-2">
-            {(['showCharacters', 'showFactions', 'showLocations', 'showEvents', 'showRules'] as const).map(key => (
-              <label key={key} className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer hover:text-white">
+          {/* 布局选择 */}
+          <div className="border-b border-border p-4">
+            <PanelLabel>{t('graph.layoutLabel')}</PanelLabel>
+            <div className="flex flex-wrap gap-2">
+              {(['force', 'circular', 'hierarchical'] as const).map(layout => (
+                <button
+                  key={layout}
+                  type="button"
+                  onClick={() => { setActiveLayout(layout); resetLayout(); }}
+                  className={cn(
+                    'rounded-md border px-3 py-1 text-xs transition-colors',
+                    activeLayout === layout
+                      ? 'border-primary/40 bg-primary/5 text-primary'
+                      : 'border-border text-muted-foreground hover:bg-accent/40'
+                  )}
+                >
+                  {t(`graph.layout.${layout}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 筛选器 */}
+          <div className="flex-1 overflow-y-auto p-4">
+            <PanelLabel>{t('graph.filterLabel')}</PanelLabel>
+            <div className="space-y-2">
+              {(['showCharacters', 'showFactions', 'showLocations', 'showEvents', 'showRules'] as const).map(key => (
+                <label key={key} className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={filters[key]}
+                    onChange={(e) => setFilters(prev => ({ ...prev, [key]: e.target.checked }))}
+                    className="size-3.5 accent-primary"
+                  />
+                  <span>{t(`graph.filter.${key}`)}</span>
+                </label>
+              ))}
+            </div>
+
+            <PanelLabel className="mt-6">{t('graph.optionsLabel')}</PanelLabel>
+            <div className="space-y-2">
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
                 <input
                   type="checkbox"
-                  checked={filters[key]}
-                  onChange={(e) => setFilters(prev => ({ ...prev, [key]: e.target.checked }))}
-                  className="rounded bg-white/10 border-white/20 text-blue-600"
+                  checked={viewOptions.showLabels}
+                  onChange={(e) => setViewOptions(prev => ({ ...prev, showLabels: e.target.checked }))}
+                  className="size-3.5 accent-primary"
                 />
-                <span>{t(`graph.filter.${key}`)}</span>
+                <span>{t('graph.option.showLabels')}</span>
               </label>
-            ))}
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+                <input
+                  type="checkbox"
+                  checked={viewOptions.highlightMainCharacters}
+                  onChange={(e) => setViewOptions(prev => ({ ...prev, highlightMainCharacters: e.target.checked }))}
+                  className="size-3.5 accent-primary"
+                />
+                <span>{t('graph.option.highlightMainCharacters')}</span>
+              </label>
+            </div>
           </div>
 
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 block mt-6">{t('graph.optionsLabel')}</label>
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer hover:text-white">
-              <input
-                type="checkbox"
-                checked={viewOptions.showLabels}
-                onChange={(e) => setViewOptions(prev => ({ ...prev, showLabels: e.target.checked }))}
-                className="rounded bg-white/10 border-white/20 text-blue-600"
-              />
-              <span>{t('graph.option.showLabels')}</span>
-            </label>
-            <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer hover:text-white">
-              <input
-                type="checkbox"
-                checked={viewOptions.highlightMainCharacters}
-                onChange={(e) => setViewOptions(prev => ({ ...prev, highlightMainCharacters: e.target.checked }))}
-                className="rounded bg-white/10 border-white/20 text-blue-600"
-              />
-              <span>{t('graph.option.highlightMainCharacters')}</span>
-            </label>
+          {/* 操作按钮 */}
+          <div className="space-y-2 border-t border-border p-4">
+            <Button variant="secondary" size="sm" className="w-full" onClick={resetLayout}>
+              <RefreshCw className="size-3.5" />{t('graph.reset')}
+            </Button>
+            <Button variant="ghost" size="sm" className="w-full" onClick={onClose}>
+              <X className="size-3.5" />{t('graph.close')}
+            </Button>
           </div>
         </div>
 
-        {/* 操作按钮 */}
-        <div className="p-4 border-t border-white/10">
-          <button 
-            onClick={resetLayout}
-            className="w-full py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm transition-all mb-2"
+        {/* 主绘图区域 */}
+        <div ref={containerRef} className="relative min-w-0 flex-1 overflow-hidden bg-background">
+          {/* SVG 绘图区域 */}
+          <svg
+            ref={svgRef}
+            className="h-full w-full cursor-grab active:cursor-grabbing"
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
           >
-            <RefreshCw className="size-4 mr-2" />{t('graph.reset')}
-          </button>
-          <button
-            onClick={onClose}
-            className="w-full py-2 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 text-sm transition-all"
-          >
-            <X className="size-4 mr-2" />{t('graph.close')}
-          </button>
-        </div>
-      </div>
+            <defs>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
 
-      {/* 主绘图区域 */}
-      <div ref={containerRef} className="flex-1 relative overflow-hidden">
-        {/* 背景装饰 */}
-        <div className="absolute inset-0 opacity-20 pointer-events-none">
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500 rounded-full blur-[150px]"></div>
-          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500 rounded-full blur-[150px]"></div>
-        </div>
+            {/* 绘制连线 */}
+            {graphData.links.map(link => {
+              const source = getNodePosition(link.source);
+              const target = getNodePosition(link.target);
+              if (!source || !target) return null;
 
-        {/* SVG 绘图区域 */}
-        <svg 
-          ref={svgRef}
-          className="w-full h-full cursor-grab active:cursor-grabbing"
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-        >
-          <defs>
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
+              const isRelated = relatedData.links.has(link.id);
+              const isDimmed = selectedNodeId && !isRelated;
 
-          {/* 绘制连线 */}
-          {graphData.links.map(link => {
-            const source = getNodePosition(link.source);
-            const target = getNodePosition(link.target);
-            if (!source || !target) return null;
+              return (
+                <g key={link.id}>
+                  <line
+                    x1={source.x} y1={source.y}
+                    x2={target.x} y2={target.y}
+                    stroke={isRelated ? 'var(--color-primary)' : 'var(--color-border)'}
+                    strokeWidth={isRelated ? 2 : 1}
+                    strokeDasharray={link.dashed ? '5,5' : '0'}
+                    opacity={isDimmed ? 0.1 : isRelated ? 1 : 0.3}
+                    className="transition-all duration-300"
+                  />
+                  {viewOptions.showLabels && link.label && (
+                    <text
+                      x={((source.x ?? 0) + (target.x ?? 0)) / 2}
+                      y={((source.y ?? 0) + (target.y ?? 0)) / 2}
+                      fill="var(--color-muted-foreground)"
+                      fontSize="10"
+                      textAnchor="middle"
+                      opacity={isDimmed ? 0.1 : 0.7}
+                    >
+                      {link.label}
+                    </text>
+                  )}
+                </g>
+              );
+            })}
 
-            const isRelated = relatedData.links.has(link.id);
-            const isDimmed = selectedNodeId && !isRelated;
+            {/* 绘制节点 */}
+            {graphData.nodes.map(node => {
+              const pos = getNodePosition(node.id);
+              if (!pos) return null;
 
-            return (
-              <g key={link.id}>
-                <line
-                  x1={source.x} y1={source.y}
-                  x2={target.x} y2={target.y}
-                  stroke={isRelated ? '#60a5fa' : '#334155'}
-                  strokeWidth={isRelated ? 2 : 1}
-                  strokeDasharray={link.dashed ? '5,5' : '0'}
-                  opacity={isDimmed ? 0.1 : isRelated ? 1 : 0.3}
-                  className="transition-all duration-300"
-                />
-                {viewOptions.showLabels && link.label && (
-                  <text
-                    x={((source.x ?? 0) + (target.x ?? 0)) / 2}
-                    y={((source.y ?? 0) + (target.y ?? 0)) / 2}
-                    fill="#64748b"
-                    fontSize="10"
-                    textAnchor="middle"
-                    opacity={isDimmed ? 0.1 : 0.7}
-                  >
-                    {link.label}
-                  </text>
-                )}
-              </g>
-            );
-          })}
+              const isSelected = selectedNodeId === node.id;
+              const isRelated = relatedData.nodes.has(node.id);
+              const isDimmed = selectedNodeId && !isRelated;
 
-          {/* 绘制节点 */}
-          {graphData.nodes.map(node => {
-            const pos = getNodePosition(node.id);
-            if (!pos) return null;
+              // 根据节点类型调整大小
+              const size = node.size || 30;
+              const displaySize = isSelected ? size * 1.2 : size;
 
-            const isSelected = selectedNodeId === node.id;
-            const isRelated = relatedData.nodes.has(node.id);
-            const isDimmed = selectedNodeId && !isRelated;
-
-            // 根据节点类型调整大小
-            const size = node.size || 30;
-            const displaySize = isSelected ? size * 1.2 : size;
-
-            return (
-              <g 
-                key={node.id}
-                transform={`translate(${pos.x}, ${pos.y})`}
-                className={`cursor-pointer transition-all duration-300 ${draggingId === node.id ? 'cursor-grabbing' : ''}`}
-                onClick={() => {
-                  if (!draggingId) {
-                    setSelectedNodeId(node.id === selectedNodeId ? null : node.id);
-                    onSelectNode?.(node);
-                  }
-                }}
-                onMouseDown={(e) => handleMouseDown(e, node.id)}
-                style={{ 
-                  opacity: isDimmed ? 0.2 : 1,
-                  pointerEvents: draggingId && draggingId !== node.id ? 'none' : 'auto'
-                }}
-              >
-                {/* 外发光圈 */}
-                {isSelected && (
-                  <circle r={displaySize + 8} fill={node.color} opacity={0.3} filter="url(#glow)" />
-                )}
-                {/* 主圆 */}
-                <circle 
-                  r={displaySize} 
-                  fill={node.color}
-                  className="transition-all"
-                />
-                {/* 内圆 */}
-                <circle 
-                  r={displaySize * 0.75} 
-                  fill="#0f172a"
-                />
-                {/* 图标 */}
-                <text 
-                  dy=".1em"
-                  textAnchor="middle" 
-                  fill="white" 
-                  fontSize={displaySize * 0.5}
-                  className="select-none pointer-events-none"
-                  style={{ fontFamily: 'FontAwesome' }}
+              return (
+                <g
+                  key={node.id}
+                  transform={`translate(${pos.x}, ${pos.y})`}
+                  className={cn('cursor-pointer transition-all duration-300', draggingId === node.id && 'cursor-grabbing')}
+                  onClick={() => {
+                    if (!draggingId) {
+                      setSelectedNodeId(node.id === selectedNodeId ? null : node.id);
+                      onSelectNode?.(node);
+                    }
+                  }}
+                  onMouseDown={(e) => handleMouseDown(e, node.id)}
+                  style={{
+                    opacity: isDimmed ? 0.2 : 1,
+                    pointerEvents: draggingId && draggingId !== node.id ? 'none' : 'auto'
+                  }}
                 >
-                  <tspan>❤</tspan>
-                </text>
-                {/* 名称标签 */}
-                {viewOptions.showLabels && (
-                  <>
-                    <text 
-                      y={displaySize + 15}
-                      textAnchor="middle" 
-                      fill="white" 
-                      fontSize="11"
-                      fontWeight="bold"
-                      className="select-none pointer-events-none"
-                    >
-                      {node.name}
-                    </text>
-                    <text 
-                      y={displaySize + 28}
-                      textAnchor="middle" 
-                      fill="#94a3b8" 
-                      fontSize="9"
-                      className="select-none pointer-events-none"
-                    >
-                      {node.description}
-                    </text>
-                  </>
-                )}
-              </g>
-            );
-          })}
-        </svg>
+                  {/* 外发光圈 */}
+                  {isSelected && (
+                    <circle r={displaySize + 8} fill={node.color} opacity={0.3} filter="url(#glow)" />
+                  )}
+                  {/* 主圆 */}
+                  <circle
+                    r={displaySize}
+                    fill={node.color}
+                    className="transition-all"
+                  />
+                  {/* 内圆 */}
+                  <circle
+                    r={displaySize * 0.75}
+                    fill="var(--color-background)"
+                  />
+                  {/* 首字标识 */}
+                  <text
+                    dy=".1em"
+                    textAnchor="middle"
+                    fill={node.color}
+                    fontSize={displaySize * 0.6}
+                    fontWeight="500"
+                    className="select-none pointer-events-none"
+                  >
+                    {node.name.charAt(0)}
+                  </text>
+                  {/* 名称标签 */}
+                  {viewOptions.showLabels && (
+                    <>
+                      <text
+                        y={displaySize + 15}
+                        textAnchor="middle"
+                        fill="var(--color-foreground)"
+                        fontSize="11"
+                        fontWeight="500"
+                        className="select-none pointer-events-none"
+                      >
+                        {node.name}
+                      </text>
+                      <text
+                        y={displaySize + 28}
+                        textAnchor="middle"
+                        fill="var(--color-muted-foreground)"
+                        fontSize="9"
+                        className="select-none pointer-events-none"
+                      >
+                        {node.description}
+                      </text>
+                    </>
+                  )}
+                </g>
+              );
+            })}
+          </svg>
 
-        {/* 图例 */}
-        <div className="absolute bottom-4 left-4 bg-gray-900/80 backdrop-blur-md rounded-xl p-4 border border-white/10">
-          <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">{t('graph.legend')}</h4>
-          <div className="space-y-1.5 text-xs">
-            {(['character', 'faction', 'location', 'event', 'rule', 'worldview'] as const).map(type => (
-              <div key={type} className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: NODE_COLORS[type] }}></span>
-                <span className="text-gray-400">{t(`graph.nodeType.${type}`)}</span>
-              </div>
-            ))}
+          {/* 图例 */}
+          <div className="absolute bottom-4 left-4 rounded-lg border border-border bg-card/90 p-3 backdrop-blur">
+            <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('graph.legend')}</h4>
+            <div className="space-y-1.5 text-xs">
+              {(['character', 'faction', 'location', 'event', 'rule', 'worldview'] as const).map(type => (
+                <div key={type} className="flex items-center gap-2">
+                  <span className="size-3 rounded-full" style={{ backgroundColor: NODE_COLORS[type] }}></span>
+                  <span className="text-muted-foreground">{t(`graph.nodeType.${type}`)}</span>
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* 操作提示 */}
+          {!selectedNodeId && (
+            <div className="absolute bottom-4 right-4 rounded-md border border-border bg-card/90 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur">
+              {draggingId ? t('graph.hintDragging') : t('graph.hintIdle')}
+            </div>
+          )}
         </div>
 
-        {/* 操作提示 */}
-        {!selectedNodeId && (
-          <div className="absolute bottom-4 right-4 px-4 py-2 bg-white/5 backdrop-blur-md rounded-lg border border-white/10 text-white/50 text-xs">
-            {draggingId ? t('graph.hintDragging') : t('graph.hintIdle')}
+        {/* 右侧详情面板 */}
+        {selectedNode && (
+          <div className="flex w-80 shrink-0 flex-col border-l border-border bg-card">
+            <div className="border-b border-border p-5">
+              <div className="mb-3 flex items-center gap-2">
+                <span
+                  className="size-3 shrink-0 rounded-full"
+                  style={{ backgroundColor: selectedNode.color }}
+                ></span>
+                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{nodeTypeLabel(selectedNode.type)}</span>
+              </div>
+              <h3 className="font-serif text-xl font-medium text-foreground">{selectedNode.name}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{selectedNode.description}</p>
+            </div>
+
+            <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto p-5">
+              {/* 根据节点类型显示不同详情 */}
+              {selectedNode.type === 'character' && selectedNode.data && (
+                <>
+                  <div>
+                    <h4 className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('graph.personality')}</h4>
+                    <p className="text-sm text-foreground">{(selectedNode.data as Character).personality || t('graph.unset')}</p>
+                  </div>
+                  <div>
+                    <h4 className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('graph.background')}</h4>
+                    <p className="text-sm text-foreground">{(selectedNode.data as Character).background || t('graph.unset')}</p>
+                  </div>
+                  <div>
+                    <h4 className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('graph.relationships')}</h4>
+                    <p className="text-sm text-foreground">{(selectedNode.data as Character).relationships || t('graph.unset')}</p>
+                  </div>
+                </>
+              )}
+
+              {selectedNode.type === 'faction' && selectedNode.data && (
+                <>
+                  <div>
+                    <h4 className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('graph.description')}</h4>
+                    <p className="text-sm text-foreground">{(selectedNode.data as Faction).description || t('graph.unset')}</p>
+                  </div>
+                  <div>
+                    <h4 className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('graph.ideology')}</h4>
+                    <p className="text-sm text-foreground">{(selectedNode.data as Faction).ideology || t('graph.unset')}</p>
+                  </div>
+                </>
+              )}
+
+              {selectedNode.type === 'location' && selectedNode.data && (
+                <>
+                  <div>
+                    <h4 className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('graph.description')}</h4>
+                    <p className="text-sm text-foreground">{(selectedNode.data as Location).description || t('graph.unset')}</p>
+                  </div>
+                  <div>
+                    <h4 className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('graph.tags')}</h4>
+                    <p className="text-sm text-foreground">{(selectedNode.data as Location).tags?.join('、') || t('graph.unset')}</p>
+                  </div>
+                </>
+              )}
+
+              {selectedNode.type === 'event' && selectedNode.data && (
+                <>
+                  <div>
+                    <h4 className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('graph.time')}</h4>
+                    <p className="text-sm text-foreground">{(selectedNode.data as TimelineEvent).date.display || `${(selectedNode.data as TimelineEvent).date.year}`}</p>
+                  </div>
+                  <div>
+                    <h4 className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('graph.description')}</h4>
+                    <p className="text-sm text-foreground">{(selectedNode.data as TimelineEvent).description}</p>
+                  </div>
+                </>
+              )}
+
+              {/* 相关节点 */}
+              <div>
+                <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('graph.relatedCount', { count: relatedData.nodes.size - 1 })}</h4>
+                <div className="space-y-1">
+                  {Array.from(relatedData.nodes).filter(id => id !== selectedNode.id).map(nodeId => {
+                    const node = graphData.nodes.find(n => n.id === nodeId);
+                    if (!node) return null;
+                    return (
+                      <div
+                        key={nodeId}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setSelectedNodeId(nodeId)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedNodeId(nodeId); } }}
+                        className="flex cursor-pointer items-center gap-2 rounded-md border border-transparent px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:border-border hover:bg-accent/40 hover:text-foreground"
+                      >
+                        <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: node.color }}></span>
+                        <span>{node.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-border p-4">
+              <Button variant="secondary" size="sm" className="w-full" onClick={() => setSelectedNodeId(null)}>
+                {t('graph.closeDetails')}
+              </Button>
+            </div>
           </div>
         )}
-      </div>
-
-      {/* 右侧详情面板 */}
-      {selectedNode && (
-        <div className="w-80 bg-gray-900 border-l border-white/10 flex flex-col animate-in slide-in-from-right duration-300">
-          <div className="p-6 border-b border-white/10">
-            <div className="flex items-center gap-3 mb-4">
-              <span 
-                className="w-4 h-4 rounded-full"
-                style={{ backgroundColor: selectedNode.color }}
-              ></span>
-              <span className="text-xs font-bold text-gray-500 uppercase">{
-                selectedNode.type === 'character' ? t('graph.nodeType.character') :
-                selectedNode.type === 'faction' ? t('graph.nodeType.faction') :
-                selectedNode.type === 'location' ? t('graph.nodeType.location') :
-                selectedNode.type === 'event' ? t('graph.nodeType.event') :
-                selectedNode.type === 'rule' ? t('graph.nodeType.rule') : t('graph.nodeType.other')
-              }</span>
-            </div>
-            <h3 className="text-2xl font-black text-white">{selectedNode.name}</h3>
-            <p className="text-gray-400 text-sm mt-1">{selectedNode.description}</p>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
-            {/* 根据节点类型显示不同详情 */}
-            {selectedNode.type === 'character' && selectedNode.data && (
-              <>
-                <div>
-                  <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">{t('graph.personality')}</h4>
-                  <p className="text-sm text-gray-300">{(selectedNode.data as Character).personality || t('graph.unset')}</p>
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">{t('graph.background')}</h4>
-                  <p className="text-sm text-gray-300">{(selectedNode.data as Character).background || t('graph.unset')}</p>
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">{t('graph.relationships')}</h4>
-                  <p className="text-sm text-gray-300">{(selectedNode.data as Character).relationships || t('graph.unset')}</p>
-                </div>
-              </>
-            )}
-
-            {selectedNode.type === 'faction' && selectedNode.data && (
-              <>
-                <div>
-                  <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">{t('graph.description')}</h4>
-                  <p className="text-sm text-gray-300">{(selectedNode.data as Faction).description || t('graph.unset')}</p>
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">{t('graph.ideology')}</h4>
-                  <p className="text-sm text-gray-300">{(selectedNode.data as Faction).ideology || t('graph.unset')}</p>
-                </div>
-              </>
-            )}
-
-            {selectedNode.type === 'location' && selectedNode.data && (
-              <>
-                <div>
-                  <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">{t('graph.description')}</h4>
-                  <p className="text-sm text-gray-300">{(selectedNode.data as Location).description || t('graph.unset')}</p>
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">{t('graph.tags')}</h4>
-                  <p className="text-sm text-gray-300">{(selectedNode.data as Location).tags?.join('、') || t('graph.unset')}</p>
-                </div>
-              </>
-            )}
-
-            {selectedNode.type === 'event' && selectedNode.data && (
-              <>
-                <div>
-                  <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">{t('graph.time')}</h4>
-                  <p className="text-sm text-gray-300">{(selectedNode.data as TimelineEvent).date.display || `${(selectedNode.data as TimelineEvent).date.year}`}</p>
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">{t('graph.description')}</h4>
-                  <p className="text-sm text-gray-300">{(selectedNode.data as TimelineEvent).description}</p>
-                </div>
-              </>
-            )}
-
-            {/* 相关节点 */}
-            <div>
-              <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">{t('graph.relatedCount', { count: relatedData.nodes.size - 1 })}</h4>
-              <div className="space-y-2">
-                {Array.from(relatedData.nodes).filter(id => id !== selectedNode.id).map(nodeId => {
-                  const node = graphData.nodes.find(n => n.id === nodeId);
-                  if (!node) return null;
-                  return (
-                    <div 
-                      key={nodeId}
-                      onClick={() => setSelectedNodeId(nodeId)}
-                      className="flex items-center gap-2 p-2 rounded-lg bg-white/5 hover:bg-white/10 cursor-pointer transition-all"
-                    >
-                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: node.color }}></span>
-                      <span className="text-sm text-gray-300">{node.name}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 border-t border-white/10">
-            <button 
-              onClick={() => setSelectedNodeId(null)}
-              className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-bold text-gray-300 transition-all"
-            >
-              {t('graph.closeDetails')}
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
 export default WorldViewGraph;
-
-
-

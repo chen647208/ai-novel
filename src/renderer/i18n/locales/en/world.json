@@ -207,6 +207,7 @@
   },
   "graph": {
     "title": "Worldview Graph",
+    "subtitle": "Entity relationship visualization",
     "viewTypeLabel": "View Type",
     "layoutLabel": "Layout",
     "filterLabel": "Filters",

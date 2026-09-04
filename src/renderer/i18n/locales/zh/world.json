@@ -207,6 +207,7 @@
   },
   "graph": {
     "title": "世界观关系图谱",
+    "subtitle": "实体关系可视化",
     "viewTypeLabel": "视图类型",
     "layoutLabel": "布局方式",
     "filterLabel": "显示筛选",

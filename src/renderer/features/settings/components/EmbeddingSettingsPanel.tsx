@@ -12,8 +12,13 @@ import { useTranslation, dt } from '@/i18n';
 import { embeddingProviders, quickAddTemplates, getDefaultEmbeddingParams } from '../../../constants/embeddingProviders';
 import type { EmbeddingModelProvider } from '../../../../shared/types';
 import type { EmbeddingSettingsPanelProps } from '../types';
-import { AlertCircle, CheckCircle2, ChevronDown, Cloud, FlaskConical, Home, Key, List, Loader2, PlusCircle, SlidersHorizontal, Trash2 } from 'lucide-react';
+import { Button } from '@/shared/ui/Button';
+import { Input } from '@/shared/ui/Input';
+import { Select } from '@/shared/ui/Select';
+import { cn } from '@/shared/utils/cn';
+import { AlertCircle, CheckCircle2, Cloud, FlaskConical, Home, Key, List, Loader2, PlusCircle, SlidersHorizontal, Trash2 } from 'lucide-react';
 
+const fieldLabel = 'mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground';
 
 const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
   embeddingConfigs,
@@ -31,16 +36,16 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
 }) => {
   const { t, i18n } = useTranslation('settings');
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* 快速添加按钮 */}
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+      <div className="grid grid-cols-3 gap-3 md:grid-cols-6">
         {quickAddTemplates.map(template => (
           <button
             key={template.id}
             onClick={() => quickAddEmbeddingConfig(template)}
-            className="px-3 py-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1"
+            className="flex flex-col items-center gap-1 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-accent/40 hover:text-foreground"
           >
-            <span className="text-lg">{template.icon}</span>
+            <span className="text-lg leading-none">{template.icon}</span>
             <span className="text-center leading-tight">{dt(template.nameKey)}</span>
           </button>
         ))}
@@ -49,35 +54,58 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
       {/* Embedding配置列表 */}
       {embeddingConfigs.map(config => {
         const provider = embeddingProviders.find(p => p.id === config.provider);
+        const active = activeEmbeddingId === config.id;
         return (
-          <div key={config.id} className={`group border-2 rounded-[2rem] p-8 bg-white transition-all duration-500 ${activeEmbeddingId === config.id ? 'border-indigo-500 shadow-2xl shadow-indigo-50' : 'border-gray-100 hover:border-gray-200'}`}>
-            <div className="flex justify-between items-start mb-6">
-              <div className="flex items-center gap-4">
-                <div
+          <div key={config.id} className={cn('rounded-lg border bg-card p-6 transition-colors', active ? 'border-primary/40' : 'border-border')}>
+            <div className="mb-6 flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <span
+                  role="radio"
+                  aria-checked={active}
+                  tabIndex={0}
                   onClick={() => setActiveEmbeddingConfig(config.id)}
-                  className={`w-6 h-6 rounded-full border-4 flex items-center justify-center cursor-pointer transition-all ${activeEmbeddingId === config.id ? 'border-indigo-500 bg-indigo-500' : 'border-gray-200'}`}
+                  onKeyDown={(event) => {
+                    if (event.key === ' ' || event.key === 'Enter') {
+                      event.preventDefault();
+                      setActiveEmbeddingConfig(config.id);
+                    }
+                  }}
+                  className={cn(
+                    'flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 transition-colors',
+                    active ? 'border-primary' : 'border-input'
+                  )}
                 >
-                  {activeEmbeddingId === config.id && <div className="w-2 h-2 bg-white rounded-full"></div>}
-                </div>
+                  {active && <span className="size-2 rounded-full bg-primary" />}
+                </span>
                 <input
-                  className="font-black bg-transparent border-none focus:ring-0 p-0 text-2xl text-gray-800 placeholder-gray-200"
+                  className="w-64 border-none bg-transparent p-0 font-serif text-lg font-medium text-foreground outline-none placeholder:text-muted-foreground/40"
                   value={config.name}
                   onChange={(e) => updateEmbeddingConfig(config.id, { name: e.target.value })}
                   placeholder={t('models.namePlaceholder')}
                 />
+                {active && (
+                  <span className="rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-primary">
+                    {t('models.activeBadge')}
+                  </span>
+                )}
               </div>
-              <button onClick={() => removeEmbeddingConfig(config.id)} className="text-gray-200 hover:text-red-500 transition-colors p-2">
-                <Trash2 className="size-5" />
-              </button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                onClick={() => removeEmbeddingConfig(config.id)}
+                title={t('models.deleteTitle')}
+              >
+                <Trash2 className="size-4" />
+              </Button>
             </div>
 
             {/* 基本信息 */}
-            <div className="grid grid-cols-2 gap-6 mb-6">
+            <div className="mb-6 grid grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('embedding.providerLabel')}</label>
-                  <select
-                    className="w-full border-none rounded-2xl px-5 py-3.5 text-sm bg-gray-50 font-bold text-gray-700 outline-none focus:ring-2 focus:ring-indigo-100 transition-all"
+                  <label className={fieldLabel}>{t('embedding.providerLabel')}</label>
+                  <Select
                     value={config.provider}
                     onChange={(e) => {
                       const provider = embeddingProviders.find(p => p.id === e.target.value);
@@ -98,34 +126,29 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
                         {dt(p.nameKey)}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('embedding.modelNameLabel')}</label>
-                  <div className="relative">
-                    <select
-                      className="w-full border-none rounded-2xl px-5 py-3.5 text-sm bg-gray-50 font-mono text-gray-600 outline-none focus:ring-2 focus:ring-indigo-100 appearance-none pr-10"
-                      value={config.modelName}
-                      onChange={(e) => updateEmbeddingConfig(config.id, { modelName: e.target.value, testStatus: 'untested' })}
-                      disabled={embeddingModelListLoading[config.id]}
-                    >
-                      <option value="">{t('models.selectModelPlaceholder')}</option>
-                      {provider?.recommendedModels.map(m => (
-                        <option key={m.name} value={m.name}>
-                          {m.name}{m.descriptionKey ? ` (${dt(m.descriptionKey)})` : ''}
-                        </option>
-                      ))}
-                      {config.availableModels?.map(name => (
-                        <option key={name} value={name}>{name}</option>
-                      ))}
-                    </select>
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                      <ChevronDown className="size-4 text-gray-400" />
-                    </div>
-                  </div>
-                  <input
-                    className="w-full mt-2 border-none rounded-xl px-4 py-2.5 text-sm bg-gray-50/50 font-mono text-gray-600 outline-none focus:ring-2 focus:ring-indigo-100"
+                  <label className={fieldLabel}>{t('embedding.modelNameLabel')}</label>
+                  <Select
+                    value={config.modelName}
+                    onChange={(e) => updateEmbeddingConfig(config.id, { modelName: e.target.value, testStatus: 'untested' })}
+                    disabled={embeddingModelListLoading[config.id]}
+                    className="font-mono"
+                  >
+                    <option value="">{t('models.selectModelPlaceholder')}</option>
+                    {provider?.recommendedModels.map(m => (
+                      <option key={m.name} value={m.name}>
+                        {m.name}{m.descriptionKey ? ` (${dt(m.descriptionKey)})` : ''}
+                      </option>
+                    ))}
+                    {config.availableModels?.map(name => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
+                  </Select>
+                  <Input
+                    className="mt-2 font-mono text-xs"
                     value={config.modelName}
                     onChange={(e) => updateEmbeddingConfig(config.id, { modelName: e.target.value, testStatus: 'untested' })}
                     placeholder={t('models.manualInputPlaceholder')}
@@ -135,9 +158,9 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('models.endpointLabel')}</label>
-                  <input
-                    className="w-full border-none rounded-2xl px-5 py-3.5 text-sm font-mono bg-gray-50 text-gray-600 outline-none focus:ring-2 focus:ring-indigo-100"
+                  <label className={fieldLabel}>{t('models.endpointLabel')}</label>
+                  <Input
+                    className="font-mono"
                     value={config.endpoint}
                     onChange={(e) => updateEmbeddingConfig(config.id, { endpoint: e.target.value, testStatus: 'untested' })}
                     placeholder="https://api.example.com/v1"
@@ -145,18 +168,17 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('models.apiKeyLabel')}</label>
-                  <input
+                  <label className={fieldLabel}>{t('models.apiKeyLabel')}</label>
+                  <Input
                     type="password"
-                    className="w-full border-none rounded-2xl px-5 py-3.5 text-sm bg-gray-50 text-gray-600 outline-none focus:ring-2 focus:ring-indigo-100"
                     value={config.apiKey || ''}
                     onChange={(e) => updateEmbeddingConfig(config.id, { apiKey: e.target.value, testStatus: 'untested' })}
                     placeholder={provider?.apiKeyRequired ? "••••••••••••••••" : t('embedding.localCanLeaveBlank')}
                   />
                   {provider?.apiApplyUrl && (
-                    <p className="text-xs text-gray-400 mt-1">
-                      <a href={provider.apiApplyUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-500 hover:underline">
-                        <Key className="size-4 mr-1" />{t('guide.getApiKey')}
+                    <p className="mt-1.5 text-xs">
+                      <a href={provider.apiApplyUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium text-primary hover:underline">
+                        <Key className="size-3.5" />{t('guide.getApiKey')}
                       </a>
                     </p>
                   )}
@@ -165,21 +187,16 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
             </div>
 
             {/* Sentence-BERT参数设置 */}
-            <div className="border-t border-gray-100 pt-6 mb-6">
-              <div className="flex items-center gap-2 mb-4">
-                <SlidersHorizontal className="size-4 text-indigo-500" />
-                <h3 className="text-lg font-black text-gray-900">{t('embedding.paramsTitle')}</h3>
-                <span className="text-xs text-gray-400 font-bold uppercase tracking-widest ml-auto">Embedding Parameters</span>
+            <div className="mb-6 border-t border-border pt-5">
+              <div className="mb-4 flex items-center gap-2">
+                <SlidersHorizontal className="size-4 text-primary" />
+                <h3 className="text-sm font-medium text-foreground">{t('embedding.paramsTitle')}</h3>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('embedding.dimensionsLabel')}</label>
-                  <select
-                    className="w-full border-none rounded-xl px-4 py-3 text-sm bg-gray-50 font-bold text-gray-700 outline-none focus:ring-2 focus:ring-indigo-100"
-                    value={config.dimensions}
-                    onChange={(e) => updateEmbeddingConfig(config.id, { dimensions: parseInt(e.target.value) })}
-                  >
+                  <label className={fieldLabel}>{t('embedding.dimensionsLabel')}</label>
+                  <Select value={config.dimensions} onChange={(e) => updateEmbeddingConfig(config.id, { dimensions: parseInt(e.target.value, 10) })}>
                     <option value={384}>384</option>
                     <option value={512}>512</option>
                     <option value={768}>768</option>
@@ -188,16 +205,12 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
                     <option value={2048}>2048</option>
                     <option value={3072}>3072</option>
                     <option value={4096}>4096</option>
-                  </select>
+                  </Select>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('embedding.maxSeqLabel')}</label>
-                  <select
-                    className="w-full border-none rounded-xl px-4 py-3 text-sm bg-gray-50 font-bold text-gray-700 outline-none focus:ring-2 focus:ring-indigo-100"
-                    value={config.maxSequenceLength}
-                    onChange={(e) => updateEmbeddingConfig(config.id, { maxSequenceLength: parseInt(e.target.value) })}
-                  >
+                  <label className={fieldLabel}>{t('embedding.maxSeqLabel')}</label>
+                  <Select value={config.maxSequenceLength} onChange={(e) => updateEmbeddingConfig(config.id, { maxSequenceLength: parseInt(e.target.value, 10) })}>
                     <option value={256}>256</option>
                     <option value={512}>512</option>
                     <option value={1024}>1024</option>
@@ -205,75 +218,59 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
                     <option value={4096}>4096</option>
                     <option value={8192}>8192</option>
                     <option value={32768}>32768</option>
-                  </select>
+                  </Select>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('embedding.batchLabel')}</label>
-                  <select
-                    className="w-full border-none rounded-xl px-4 py-3 text-sm bg-gray-50 font-bold text-gray-700 outline-none focus:ring-2 focus:ring-indigo-100"
-                    value={config.batchSize}
-                    onChange={(e) => updateEmbeddingConfig(config.id, { batchSize: parseInt(e.target.value) })}
-                  >
+                  <label className={fieldLabel}>{t('embedding.batchLabel')}</label>
+                  <Select value={config.batchSize} onChange={(e) => updateEmbeddingConfig(config.id, { batchSize: parseInt(e.target.value, 10) })}>
                     <option value={1}>1</option>
                     <option value={4}>4</option>
                     <option value={8}>8</option>
                     <option value={16}>16</option>
                     <option value={32}>32</option>
                     <option value={64}>64</option>
-                  </select>
+                  </Select>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('embedding.timeoutLabel')}</label>
-                  <select
-                    className="w-full border-none rounded-xl px-4 py-3 text-sm bg-gray-50 font-bold text-gray-700 outline-none focus:ring-2 focus:ring-indigo-100"
-                    value={config.timeout}
-                    onChange={(e) => updateEmbeddingConfig(config.id, { timeout: parseInt(e.target.value) })}
-                  >
+                  <label className={fieldLabel}>{t('embedding.timeoutLabel')}</label>
+                  <Select value={config.timeout} onChange={(e) => updateEmbeddingConfig(config.id, { timeout: parseInt(e.target.value, 10) })}>
                     <option value={5000}>5s</option>
                     <option value={10000}>10s</option>
                     <option value={30000}>30s</option>
                     <option value={60000}>60s</option>
-                  </select>
+                  </Select>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('embedding.poolingLabel')}</label>
-                  <select
-                    className="w-full border-none rounded-xl px-4 py-3 text-sm bg-gray-50 font-bold text-gray-700 outline-none focus:ring-2 focus:ring-indigo-100"
-                    value={config.poolingStrategy}
-                    onChange={(e) => updateEmbeddingConfig(config.id, { poolingStrategy: e.target.value as 'mean' | 'cls' | 'max' })}
-                  >
+                  <label className={fieldLabel}>{t('embedding.poolingLabel')}</label>
+                  <Select value={config.poolingStrategy} onChange={(e) => updateEmbeddingConfig(config.id, { poolingStrategy: e.target.value as 'mean' | 'cls' | 'max' })}>
                     <option value="mean">{t('embedding.poolMean')}</option>
                     <option value="cls">{t('embedding.poolCls')}</option>
                     <option value="max">{t('embedding.poolMax')}</option>
-                  </select>
+                  </Select>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('embedding.truncateLabel')}</label>
-                  <select
-                    className="w-full border-none rounded-xl px-4 py-3 text-sm bg-gray-50 font-bold text-gray-700 outline-none focus:ring-2 focus:ring-indigo-100"
-                    value={config.truncate}
-                    onChange={(e) => updateEmbeddingConfig(config.id, { truncate: e.target.value as 'start' | 'end' | 'none' })}
-                  >
+                  <label className={fieldLabel}>{t('embedding.truncateLabel')}</label>
+                  <Select value={config.truncate} onChange={(e) => updateEmbeddingConfig(config.id, { truncate: e.target.value as 'start' | 'end' | 'none' })}>
                     <option value="end">{t('embedding.truncEnd')}</option>
                     <option value="start">{t('embedding.truncStart')}</option>
                     <option value="none">{t('embedding.truncNone')}</option>
-                  </select>
+                  </Select>
                 </div>
 
                 <div className="flex items-center">
-                  <label className="relative inline-flex items-center cursor-pointer">
+                  <label className="relative inline-flex cursor-pointer items-center">
                     <input
                       type="checkbox"
-                      className="sr-only peer"
+                      className="peer sr-only"
                       checked={config.normalizeEmbeddings}
                       onChange={(e) => updateEmbeddingConfig(config.id, { normalizeEmbeddings: e.target.checked })}
                     />
-                    <div className="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-500"></div>
-                    <span className="ml-3 text-sm font-medium text-gray-700">{t('embedding.normalizeLabel')}</span>
+                    <span className="h-6 w-11 rounded-full bg-muted transition-colors after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:bg-background after:shadow after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-5" />
+                    <span className="ml-3 text-sm text-foreground">{t('embedding.normalizeLabel')}</span>
                   </label>
                 </div>
               </div>
@@ -281,24 +278,23 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
 
             {/* 状态显示 */}
             {config.testStatus !== 'untested' && (
-              <div className={`mb-6 p-4 rounded-xl border-2 ${
-                config.testStatus === 'success'
-                  ? 'bg-emerald-50 border-emerald-100'
-                  : 'bg-red-50 border-red-100'
-              }`}>
-                <div className="flex items-center gap-2 mb-1">
-                  {config.testStatus === 'success' ? <CheckCircle2 className="size-4 text-emerald-500" /> : <AlertCircle className="size-4 text-red-500" />}
-                  <span className={`font-bold text-sm ${config.testStatus === 'success' ? 'text-emerald-700' : 'text-red-700'}`}>
+              <div className={cn(
+                'mb-6 rounded-lg border p-4',
+                config.testStatus === 'success' ? 'border-success/20 bg-success/5' : 'border-destructive/20 bg-destructive/5'
+              )}>
+                <div className="mb-1 flex items-center gap-2">
+                  {config.testStatus === 'success' ? <CheckCircle2 className="size-4 text-success" /> : <AlertCircle className="size-4 text-destructive" />}
+                  <span className={cn('text-sm font-medium', config.testStatus === 'success' ? 'text-success' : 'text-destructive')}>
                     {config.testStatus === 'success' ? t('embedding.statusOk') : t('embedding.statusFail')}
                   </span>
                   {config.lastTested && (
-                    <span className="text-xs text-gray-400 ml-auto">
+                    <span className="ml-auto text-xs text-muted-foreground">
                       {t('embedding.lastTested', { time: new Date(config.lastTested).toLocaleTimeString(i18n.language) })}
                     </span>
                   )}
                 </div>
                 {embeddingTestResults[config.id] && (
-                  <pre className={`text-xs font-mono whitespace-pre-wrap ${config.testStatus === 'success' ? 'text-emerald-600' : 'text-red-600'}`}>
+                  <pre className={cn('whitespace-pre-wrap font-mono text-xs', config.testStatus === 'success' ? 'text-success' : 'text-destructive')}>
                     {embeddingTestResults[config.id]}
                   </pre>
                 )}
@@ -306,37 +302,39 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
             )}
 
             {/* 操作按钮 */}
-            <div className="flex justify-between items-center">
-              <div className="text-xs text-gray-400">
+            <div className="flex items-center justify-between border-t border-border pt-4">
+              <div className="text-xs">
                 {provider?.type === 'local' ? (
-                  <span className="flex items-center gap-1 text-emerald-600">
-                    <Home className="size-4" /> {t('embedding.localDeploy')}
+                  <span className="flex items-center gap-1 text-success">
+                    <Home className="size-3.5" /> {t('embedding.localDeploy')}
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1 text-blue-600">
-                    <Cloud className="size-4" /> {t('embedding.cloudApi')}
+                  <span className="flex items-center gap-1 text-primary">
+                    <Cloud className="size-3.5" /> {t('embedding.cloudApi')}
                   </span>
                 )}
               </div>
 
               <div className="flex gap-2">
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => fetchEmbeddingModelList(config)}
                   disabled={embeddingModelListLoading[config.id]}
-                  className="px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl text-xs font-black transition-all flex items-center gap-2 disabled:opacity-50"
                 >
                   {embeddingModelListLoading[config.id] ? <Loader2 className="size-4 animate-spin" /> : <List className="size-4" />}
                   {t('models.refreshList')}
-                </button>
+                </Button>
 
-                <button
+                <Button
+                  variant="default"
+                  size="sm"
                   onClick={() => testEmbeddingConnection(config)}
                   disabled={embeddingTestingId === config.id}
-                  className="px-6 py-2.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl text-xs font-black transition-all flex items-center gap-2"
                 >
                   {embeddingTestingId === config.id ? <Loader2 className="size-4 animate-spin" /> : <FlaskConical className="size-4" />}
                   {embeddingTestingId === config.id ? t('embedding.testing') : t('embedding.testConn')}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -346,9 +344,9 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
       {/* 添加新配置按钮 */}
       <button
         onClick={addEmbeddingConfig}
-        className="w-full border-4 border-dashed border-gray-100 rounded-[2rem] py-8 text-gray-300 font-black hover:bg-white hover:text-indigo-500 hover:border-indigo-100 transition-all flex flex-col items-center gap-2 group"
+        className="group flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed border-border py-8 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-accent/30 hover:text-primary"
       >
-        <PlusCircle className="size-6 group-hover:scale-125 transition-transform" />
+        <PlusCircle className="size-5 transition-transform group-hover:scale-110" />
         <span>{t('embedding.addConfig')}</span>
       </button>
     </div>

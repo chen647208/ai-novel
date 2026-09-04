@@ -1,4 +1,4 @@
-﻿/*
+/*
  * 本文件属于 AI小说家 (ai-novel) 项目。
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -11,13 +11,21 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation, i18n } from '@/i18n';
 import { checkForUpdates, getCurrentVersionInfo, getVersionHistory, formatVersion, type UpdateCheckResult } from './services/versionService';
 import { dialogService } from '@/shared/services/dialogService';
-import { AlertCircle, AlertTriangle, CheckCircle2, Download, ExternalLink, Loader2, RefreshCw, Rocket, Tag, X } from 'lucide-react';
+import { Button, buttonVariants } from '@/shared/ui/Button';
+import { Dialog, DialogContent } from '@/shared/ui/Dialog';
+import { cn } from '@/shared/utils/cn';
+import { AlertCircle, AlertTriangle, CheckCircle2, Download, ExternalLink, Loader2, RefreshCw, Rocket, Tag } from 'lucide-react';
 
 
 interface VersionCheckModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+/** 区块小标题 */
+const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <h4 className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">{children}</h4>
+);
 
 const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }) => {
   const { t } = useTranslation('version');
@@ -73,10 +81,10 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
 
   const handleDownloadUpdate = async () => {
     if (!updateResult?.success || !updateResult.versionInfo.releaseUrl) return;
-    
+
     setIsDownloading(true);
     setDownloadProgress(0);
-    
+
     try {
       // 模拟下载进度
       const interval = setInterval(() => {
@@ -88,20 +96,20 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
           return prev + 5;
         });
       }, 200);
-      
+
       // 在实际应用中，这里会调用Electron的自动更新API
       // 暂时使用模拟下载
       await new Promise(resolve => setTimeout(resolve, 3000));
-      
+
       clearInterval(interval);
       setDownloadProgress(100);
-      
+
       // 显示安装提示
       setTimeout(() => {
         dialogService.alert(t('downloadComplete'));
         setIsDownloading(false);
       }, 1000);
-      
+
     } catch (error) {
       console.error('下载更新失败:', error);
       setIsDownloading(false);
@@ -113,169 +121,149 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-[9999] bg-gray-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="flex max-h-[85vh] w-[92vw] max-w-2xl flex-col gap-0 overflow-hidden p-0">
         {/* 标题栏 */}
-        <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-              <Rocket className="size-5 text-blue-600" />
-            </div>
-            <div>
-              <h3 className="text-xl font-black text-gray-900">{t('modal.title')}</h3>
-              <p className="text-gray-500 text-sm">{t('modal.subtitle')}</p>
-            </div>
+        <div className="flex items-center gap-3 border-b border-border bg-muted/30 px-6 py-4">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Rocket className="size-5" />
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X className="size-4" />
-          </button>
+          <div className="min-w-0">
+            <h3 className="font-serif text-lg font-medium text-foreground">{t('modal.title')}</h3>
+            <p className="text-xs text-muted-foreground">{t('modal.subtitle')}</p>
+          </div>
         </div>
 
         {/* 内容区域 */}
-        <div className="flex-1 overflow-y-auto p-8">
+        <div className="custom-scrollbar flex-1 space-y-6 overflow-y-auto p-6">
           {/* 当前版本信息 */}
-          <div className="mb-8">
-            <h4 className="text-lg font-bold text-gray-800 mb-4">{t('modal.currentVersion')}</h4>
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
-              <div className="flex items-center justify-between mb-4">
+          <div>
+            <SectionLabel>{t('modal.currentVersion')}</SectionLabel>
+            <div className="rounded-lg border border-border bg-muted/30 p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-2xl font-black text-gray-900">{formatVersion(currentVersionInfo.current)}</div>
-                  <div className="text-gray-500 text-sm mt-1">{t('modal.appName')}</div>
+                  <div className="font-serif text-2xl font-medium tabular-nums text-foreground">{formatVersion(currentVersionInfo.current)}</div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">{t('modal.appName')}</div>
                 </div>
-                <div className="px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-bold">
+                <span className="rounded border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs text-primary">
                   {t('modal.latestVersion')}
-                </div>
+                </span>
               </div>
-              <div className="text-gray-700 whitespace-pre-line">
+              <div className="whitespace-pre-line text-sm text-muted-foreground">
                 {currentVersionInfo.releaseNotes}
               </div>
             </div>
           </div>
 
           {/* 更新检查区域 */}
-          <div className="mb-8">
-            <h4 className="text-lg font-bold text-gray-800 mb-4">{t('modal.checkUpdate')}</h4>
-            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-              <div className="flex items-center justify-between mb-6">
+          <div>
+            <SectionLabel>{t('modal.checkUpdate')}</SectionLabel>
+            <div className="rounded-lg border border-border bg-card p-4">
+              <div className="flex items-center justify-between gap-4">
                 <div>
-                  <div className="font-medium text-gray-800">{t('modal.autoCheck')}</div>
-                  <div className="text-gray-500 text-sm mt-1">{t('modal.autoCheckDesc')}</div>
+                  <div className="text-sm text-foreground">{t('modal.autoCheck')}</div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">{t('modal.autoCheckDesc')}</div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => setAutoCheckEnabled(!autoCheckEnabled)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full ${autoCheckEnabled ? 'bg-green-600' : 'bg-gray-300'}`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${autoCheckEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
-                  </button>
-                  <button
-                    onClick={handleCheckForUpdates}
-                    disabled={isChecking}
-                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-                  >
-                    {isChecking ? (
-                      <>
-                        <Loader2 className="size-4 animate-spin mr-2" />
-                        {t('modal.checking')}
-                      </>
-                    ) : (
-                      <>
-                        <RefreshCw className="size-4 mr-2" />
-                        {t('modal.checkNow')}
-                      </>
-                    )}
-                  </button>
+                <div className="flex shrink-0 items-center gap-4">
+                  <label className="relative inline-flex cursor-pointer items-center">
+                    <input
+                      type="checkbox"
+                      className="peer sr-only"
+                      checked={autoCheckEnabled}
+                      onChange={(e) => setAutoCheckEnabled(e.target.checked)}
+                    />
+                    <span className="h-6 w-11 rounded-full bg-muted transition-colors after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:bg-background after:shadow after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-5" />
+                  </label>
+                  <Button size="sm" onClick={handleCheckForUpdates} disabled={isChecking}>
+                    {isChecking ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
+                    {isChecking ? t('modal.checking') : t('modal.checkNow')}
+                  </Button>
                 </div>
               </div>
 
               {updateResult && (
-                <div className={`mt-4 p-6 rounded-2xl border ${updateResult.success ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200'}`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      {updateResult.success ? <CheckCircle2 className="size-6 text-green-600" /> : <AlertTriangle className="size-6 text-amber-600" />}
+                <div className={cn(
+                  'mt-4 rounded-lg border p-4',
+                  updateResult.success ? 'border-success/20 bg-success/5' : 'border-warning/20 bg-warning/5'
+                )}>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      {updateResult.success
+                        ? <CheckCircle2 className="size-5 text-success" />
+                        : <AlertTriangle className="size-5 text-warning" />}
                       <div>
-                        <div className="font-bold text-gray-800 text-lg">
-                          {updateResult.success 
+                        <div className="text-sm font-medium text-foreground">
+                          {updateResult.success
                             ? (updateResult.versionInfo.hasUpdate ? t('modal.foundNew') : t('modal.upToDate'))
                             : t('modal.checkFailed')
                           }
                         </div>
                         {updateResult.success && updateResult.versionInfo.publishedAt && (
-                          <div className="text-gray-500 text-sm">
+                          <div className="text-xs text-muted-foreground">
                             {t('modal.publishedAt')} {new Date(updateResult.versionInfo.publishedAt).toLocaleDateString(i18n.language)}
                           </div>
                         )}
                       </div>
                     </div>
                     {updateResult.success && updateResult.versionInfo.hasUpdate && (
-                      <div className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-full text-sm font-bold animate-pulse">
+                      <span className="shrink-0 rounded border border-success/30 bg-success/10 px-2 py-0.5 text-xs text-success">
                         {t('modal.updateAvailable')}
-                      </div>
+                      </span>
                     )}
                   </div>
-                  
+
                   {updateResult.success && updateResult.versionInfo.latest && (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white p-4 rounded-xl border border-gray-200">
-                          <div className="text-gray-500 text-sm mb-1">{t('modal.currentVersion')}</div>
-                          <div className="text-2xl font-black text-gray-900">{formatVersion(updateResult.versionInfo.current)}</div>
+                    <div className="mt-4 space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="rounded-lg border border-border bg-background px-3 py-2">
+                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('modal.currentVersion')}</div>
+                          <div className="font-serif text-lg font-medium tabular-nums text-foreground">{formatVersion(updateResult.versionInfo.current)}</div>
                         </div>
-                        <div className="bg-white p-4 rounded-xl border border-gray-200">
-                          <div className="text-gray-500 text-sm mb-1">{t('modal.latestVersion')}</div>
-                          <div className="text-2xl font-black text-green-600">{formatVersion(updateResult.versionInfo.latest)}</div>
+                        <div className="rounded-lg border border-border bg-background px-3 py-2">
+                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('modal.latestVersion')}</div>
+                          <div className="font-serif text-lg font-medium tabular-nums text-success">{formatVersion(updateResult.versionInfo.latest)}</div>
                         </div>
                       </div>
-                      
+
                       {updateResult.versionInfo.releaseNotes && (
-                        <div className="bg-white p-4 rounded-xl border border-gray-200">
-                          <div className="text-gray-500 text-sm mb-2">{t('modal.releaseNotes')}</div>
-                          <div className="text-gray-700 whitespace-pre-line">
+                        <div className="rounded-lg border border-border bg-background px-3 py-2">
+                          <div className="mb-1 text-[10px] uppercase tracking-wider text-muted-foreground">{t('modal.releaseNotes')}</div>
+                          <div className="whitespace-pre-line text-sm text-foreground">
                             {updateResult.versionInfo.releaseNotes}
                           </div>
                         </div>
                       )}
-                      
+
                       {updateResult.versionInfo.hasUpdate && (
-                        <div className="space-y-4">
+                        <div>
                           {isDownloading ? (
-                            <div className="space-y-3">
-                              <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">{t('modal.downloading')}</span>
-                                <span className="font-bold text-blue-600">{downloadProgress}%</span>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-muted-foreground">{t('modal.downloading')}</span>
+                                <span className="font-medium tabular-nums text-primary">{downloadProgress}%</span>
                               </div>
-                              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                                <div 
-                                  className="bg-gradient-to-r from-blue-600 to-indigo-600 h-2.5 rounded-full transition-all duration-300"
+                              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                                <div
+                                  className="h-1.5 rounded-full bg-primary transition-all duration-300"
                                   style={{ width: `${downloadProgress}%` }}
                                 ></div>
                               </div>
-                              <div className="text-gray-500 text-sm">
-                                {t('modal.downloadHint')}
-                              </div>
+                              <div className="text-xs text-muted-foreground">{t('modal.downloadHint')}</div>
                             </div>
                           ) : (
-                            <div className="flex gap-3">
-                              <button
-                                onClick={handleDownloadUpdate}
-                                className="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-bold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                              >
-                                <Download className="size-4" />
+                            <div className="flex gap-2">
+                              <Button className="flex-1" size="sm" onClick={handleDownloadUpdate}>
+                                <Download className="size-3.5" />
                                 {t('modal.autoInstall')}
-                              </button>
-                              <a 
+                              </Button>
+                              <a
                                 href={updateResult.versionInfo.releaseUrl || '#'}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                                className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'flex-1')}
                               >
-                                <ExternalLink className="size-4" />
+                                <ExternalLink className="size-3.5" />
                                 {t('modal.manualDownload')}
                               </a>
                             </div>
@@ -284,17 +272,15 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
                       )}
                     </div>
                   )}
-                  
+
                   {updateResult.error && (
-                    <div className="mt-4 p-4 bg-white rounded-xl border border-red-200">
-                      <div className="flex items-center gap-2 text-red-600 mb-2">
-                        <AlertCircle className="size-4" />
-                        <div className="font-medium">{t('modal.errorInfo')}</div>
+                    <div className="mt-3 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2">
+                      <div className="mb-1 flex items-center gap-2 text-xs font-medium text-destructive">
+                        <AlertCircle className="size-3.5" />
+                        {t('modal.errorInfo')}
                       </div>
-                      <div className="text-sm text-gray-600">{updateResult.error}</div>
-                      <div className="mt-3 text-sm text-gray-500">
-                        {t('modal.errorHint')}
-                      </div>
+                      <div className="text-xs text-muted-foreground">{updateResult.error}</div>
+                      <div className="mt-2 text-xs text-muted-foreground">{t('modal.errorHint')}</div>
                     </div>
                   )}
                 </div>
@@ -304,30 +290,36 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
 
           {/* 版本历史 */}
           <div>
-            <h4 className="text-lg font-bold text-gray-800 mb-4">{t('modal.history')}</h4>
-            <div className="space-y-4">
+            <SectionLabel>{t('modal.history')}</SectionLabel>
+            <div className="space-y-3">
               {versionHistory.map((item, index) => (
-                <div 
-                  key={item.version} 
-                  className={`p-5 rounded-2xl border ${index === 0 ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}
+                <div
+                  key={item.version}
+                  className={cn(
+                    'rounded-lg border p-4',
+                    index === 0 ? 'border-primary/30 bg-primary/5' : 'border-border bg-card'
+                  )}
                 >
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="mb-2 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${index === 0 ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`}>
+                      <div className={cn(
+                        'flex size-8 shrink-0 items-center justify-center rounded-full',
+                        index === 0 ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+                      )}>
                         <Tag className="size-4" />
                       </div>
                       <div>
-                        <div className="font-black text-gray-900">{formatVersion(item.version)}</div>
-                        <div className="text-gray-500 text-sm">{item.date}</div>
+                        <div className="font-serif text-sm font-medium tabular-nums text-foreground">{formatVersion(item.version)}</div>
+                        <div className="text-xs text-muted-foreground">{item.date}</div>
                       </div>
                     </div>
                     {index === 0 && (
-                      <div className="px-3 py-1 bg-blue-600 text-white rounded-full text-xs font-bold">
+                      <span className="shrink-0 rounded border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs text-primary">
                         {t('modal.currentVersion')}
-                      </div>
+                      </span>
                     )}
                   </div>
-                  <div className="text-gray-700">{item.description}</div>
+                  <div className="text-sm text-muted-foreground">{item.description}</div>
                 </div>
               ))}
             </div>
@@ -335,21 +327,12 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
         </div>
 
         {/* 底部按钮 */}
-        <div className="px-8 py-6 border-t border-gray-100 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors"
-          >
-            {t('modal.close')}
-          </button>
+        <div className="flex justify-end border-t border-border bg-muted/30 px-6 py-4">
+          <Button variant="secondary" size="sm" onClick={onClose}>{t('modal.close')}</Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
 export default VersionCheckModal;
-
-
-
-

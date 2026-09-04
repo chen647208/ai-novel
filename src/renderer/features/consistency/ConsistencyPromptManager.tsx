@@ -1,4 +1,4 @@
-﻿/*
+/*
  * 本文件属于 AI小说家 (ai-novel) 项目。
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -17,7 +17,15 @@ import { type ConsistencyCheckPromptTemplate, type ConsistencyCheckPromptCategor
 import { ConsistencyCheckPromptService } from './services/consistencyCheckPromptService';
 import { getDefaultConsistencyPrompts } from '../../constants/consistencyCheck';
 import { dialogService } from '@/shared/services/dialogService';
-import { AlertCircle, CheckCircle2, ChevronDown, ChevronUp, Copy, Download, FileText, FlaskConical, Plus, Trash, Undo2, Upload, X } from 'lucide-react';
+import { Button } from '@/shared/ui/Button';
+import { Input } from '@/shared/ui/Input';
+import { Label } from '@/shared/ui/Label';
+import { Select } from '@/shared/ui/Select';
+import { Textarea } from '@/shared/ui/Textarea';
+import { Dialog, DialogContent } from '@/shared/ui/Dialog';
+import { EmptyState } from '@/shared/ui/EmptyState';
+import { cn } from '@/shared/utils/cn';
+import { AlertCircle, CheckCircle2, ChevronDown, ChevronUp, Copy, Download, FileText, FlaskConical, Plus, Trash2, Undo2, Upload } from 'lucide-react';
 
 
 interface ConsistencyPromptManagerProps {
@@ -80,7 +88,7 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
   const duplicateTemplate = (id: string) => {
     const template = templates.find(t => t.id === id);
     if (!template) return;
-    
+
     const newTemplate: ConsistencyCheckPromptTemplate = {
       ...template,
       id: Date.now().toString(),
@@ -137,57 +145,57 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
   };
 
   const categories: (ConsistencyCheckPromptCategory | 'all')[] = [
-    'all', 'semantic_character', 'semantic_faction', 'semantic_location', 
+    'all', 'semantic_character', 'semantic_faction', 'semantic_location',
     'semantic_timeline', 'semantic_cross', 'similarity_detection'
   ];
 
+  const closeImportExport = () => {
+    setImportExportOpen(false);
+    setImportText('');
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* 标题和操作栏 */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-xl font-black text-gray-900">{t('consistency:pm.title')}</h3>
-          <p className="text-xs text-gray-500 mt-1">{t('consistency:pm.subtitle')}</p>
+          <h3 className="font-serif text-lg font-medium text-foreground">{t('consistency:pm.title')}</h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">{t('consistency:pm.subtitle')}</p>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => { setImportExportMode('export'); setImportExportOpen(true); }}
-            className="px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl text-xs font-black transition-all flex items-center gap-2"
-          >
-            <Download className="size-4" />{t('common:export')}
-          </button>
-          <button
-            onClick={() => { setImportExportMode('import'); setImportExportOpen(true); }}
-            className="px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl text-xs font-black transition-all flex items-center gap-2"
-          >
-            <Upload className="size-4" />{t('common:import')}
-          </button>
-          <button
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" size="sm" onClick={() => { setImportExportMode('export'); setImportExportOpen(true); }}>
+            <Download className="size-3.5" />{t('common:export')}
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => { setImportExportMode('import'); setImportExportOpen(true); }}>
+            <Upload className="size-3.5" />{t('common:import')}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
             onClick={resetToDefault}
-            className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl text-xs font-black transition-all flex items-center gap-2"
           >
-            <Undo2 className="size-4" />{t('common:reset')}
-          </button>
-          <button
-            onClick={addTemplate}
-            className="px-4 py-2 bg-rose-600 text-white hover:bg-rose-700 rounded-xl text-xs font-black transition-all flex items-center gap-2"
-          >
-            <Plus className="size-4" />{t('consistency:pm.newTemplate')}
-          </button>
+            <Undo2 className="size-3.5" />{t('common:reset')}
+          </Button>
+          <Button size="sm" onClick={addTemplate}>
+            <Plus className="size-3.5" />{t('consistency:pm.newTemplate')}
+          </Button>
         </div>
       </div>
 
       {/* 分类筛选 */}
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex flex-wrap gap-2">
         {categories.map(cat => (
           <button
             key={cat}
+            type="button"
             onClick={() => setSelectedCategory(cat)}
-            className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
-              selectedCategory === cat 
-                ? 'bg-rose-100 text-rose-700' 
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
+            className={cn(
+              'rounded-md border px-3 py-1 text-xs transition-colors',
+              selectedCategory === cat
+                ? 'border-primary/40 bg-primary/5 text-primary'
+                : 'border-border text-muted-foreground hover:bg-accent/40'
+            )}
           >
             {getCategoryName(cat)}
           </button>
@@ -195,66 +203,56 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
       </div>
 
       {/* 模板列表 */}
-      <div className="space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar">
+      <div className="custom-scrollbar max-h-[500px] space-y-3 overflow-y-auto">
         {filteredTemplates.length === 0 ? (
-          <div className="text-center py-12 text-gray-400">
-            <FileText className="size-10 mb-3" />
-            <p>{t('consistency:pm.empty')}</p>
-          </div>
+          <EmptyState
+            icon={FileText}
+            title={t('consistency:pm.empty')}
+          />
         ) : (
           filteredTemplates.map(template => (
-            <div 
-              key={template.id} 
-              className={`border-2 rounded-[2rem] p-6 bg-white transition-all ${
-                editingId === template.id ? 'border-rose-300 shadow-xl shadow-rose-50' : 'border-gray-100 hover:border-rose-100'
-              } ${template.isDefault ? 'bg-rose-50/30' : ''}`}
+            <div
+              key={template.id}
+              className={cn(
+                'rounded-lg border bg-card p-5 transition-colors',
+                editingId === template.id ? 'border-primary/40' : 'border-border hover:border-primary/30'
+              )}
             >
               {/* 模板头部 */}
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-3">
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-2">
                   {template.isDefault && (
-                    <span className="px-2 py-1 bg-rose-100 text-rose-700 text-[10px] font-black rounded-lg">{t('consistency:pm.defaultBadge')}</span>
+                    <span className="shrink-0 rounded border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">{t('consistency:pm.defaultBadge')}</span>
                   )}
                   <input
-                    className="font-black bg-transparent border-none focus:ring-0 p-0 text-lg text-gray-800 w-48"
+                    className="w-48 border-none bg-transparent p-0 font-serif text-base font-medium text-foreground outline-none placeholder:text-muted-foreground disabled:cursor-default"
                     value={templateDisplayName(template)}
                     onChange={(e) => updateTemplate(template.id, { name: e.target.value, nameKey: undefined })}
                     placeholder={t('consistency:pm.namePlaceholder')}
                     disabled={template.isDefault}
                   />
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => duplicateTemplate(template.id)}
-                    className="text-gray-400 hover:text-blue-500 text-xs px-2 py-1"
-                    title={t('consistency:pm.duplicateTitle')}
-                  >
+                <div className="flex shrink-0 gap-1">
+                  <Button variant="ghost" size="icon" className="size-8" onClick={() => duplicateTemplate(template.id)} title={t('consistency:pm.duplicateTitle')}>
                     <Copy className="size-4" />
-                  </button>
+                  </Button>
                   {!template.isDefault && (
-                    <button
-                      onClick={() => removeTemplate(template.id)}
-                      className="text-gray-400 hover:text-red-500 text-xs px-2 py-1"
-                      title={t('consistency:pm.deleteTitle')}
-                    >
-                      <Trash className="size-4" />
-                    </button>
+                    <Button variant="ghost" size="icon" className="size-8 hover:bg-destructive/10 hover:text-destructive" onClick={() => removeTemplate(template.id)} title={t('consistency:pm.deleteTitle')}>
+                      <Trash2 className="size-4" />
+                    </Button>
                   )}
-                  <button
-                    onClick={() => setEditingId(editingId === template.id ? null : template.id)}
-                    className="text-gray-400 hover:text-rose-500 text-xs px-2 py-1"
-                  >
+                  <Button variant="ghost" size="icon" className="size-8" onClick={() => setEditingId(editingId === template.id ? null : template.id)}>
                     {editingId === template.id ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-                  </button>
+                  </Button>
                 </div>
               </div>
 
               {/* 模板基本信息 */}
-              <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('consistency:pm.categoryLabel')}</label>
-                  <select
-                    className="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white outline-none"
+                  <Label className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('consistency:pm.categoryLabel')}</Label>
+                  <Select
+                    className="h-8 w-full text-xs"
                     value={template.category}
                     onChange={(e) => updateTemplate(template.id, { category: e.target.value as ConsistencyCheckPromptCategory })}
                     disabled={template.isDefault}
@@ -262,29 +260,28 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
                     {(['semantic_character', 'semantic_faction', 'semantic_location', 'semantic_timeline', 'semantic_cross', 'similarity_detection'] as ConsistencyCheckPromptCategory[]).map(cat => (
                       <option key={cat} value={cat}>{t(`consistency:promptCategory.${cat}`)}</option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('consistency:pm.modesLabel')}</label>
-                  <div className="text-sm text-gray-600 py-2">
+                  <Label className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('consistency:pm.modesLabel')}</Label>
+                  <div className="py-1.5 text-sm text-foreground">
                     {template.applicableModes.includes('ai') && `${t('consistency:pm.modeAi')} `}
                     {template.applicableModes.includes('vector') && t('consistency:pm.modeVector')}
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('consistency:pm.variablesLabel')}</label>
-                  <div className="text-sm text-gray-600 py-2">{t('consistency:pm.variablesCount', { count: template.variables?.length || 0 })}</div>
+                  <Label className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('consistency:pm.variablesLabel')}</Label>
+                  <div className="py-1.5 text-sm tabular-nums text-foreground">{t('consistency:pm.variablesCount', { count: template.variables?.length || 0 })}</div>
                 </div>
               </div>
 
               {/* 展开编辑区域 */}
               {editingId === template.id && (
-                <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="mt-4 space-y-4 border-t border-border pt-4">
                   {/* 描述 */}
-                  <div className="mb-4">
-                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('consistency:pm.descLabel')}</label>
-                    <input
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-600 bg-white outline-none"
+                  <div>
+                    <Label className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('consistency:pm.descLabel')}</Label>
+                    <Input
                       value={template.descriptionKey ? dt(template.descriptionKey) : (template.description || '')}
                       onChange={(e) => updateTemplate(template.id, { description: e.target.value, descriptionKey: undefined })}
                       placeholder={t('consistency:pm.descPlaceholder')}
@@ -293,10 +290,10 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
                   </div>
 
                   {/* 提示词内容 */}
-                  <div className="mb-4">
-                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('consistency:pm.contentLabel')}</label>
-                    <textarea
-                      className="w-full h-48 border border-gray-200 rounded-2xl p-4 text-sm font-mono text-gray-600 bg-gray-50 outline-none resize-none"
+                  <div>
+                    <Label className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('consistency:pm.contentLabel')}</Label>
+                    <Textarea
+                      className="min-h-[192px] bg-muted/40 font-mono text-xs"
                       value={template.content}
                       onChange={(e) => updateTemplate(template.id, { content: e.target.value })}
                       placeholder={t('consistency:pm.contentPlaceholder')}
@@ -305,11 +302,11 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
                   </div>
 
                   {/* 可用变量提示 */}
-                  <div className="mb-4">
-                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('consistency:pm.definedVarsLabel')}</label>
-                    <div className="flex flex-wrap gap-2">
+                  <div>
+                    <Label className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('consistency:pm.definedVarsLabel')}</Label>
+                    <div className="flex flex-wrap gap-1.5">
                       {template.variables?.map(v => (
-                        <span key={v} className="px-2 py-1 bg-rose-50 border border-rose-100 rounded-lg text-xs text-rose-700">
+                        <span key={v} className="rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 font-mono text-xs text-primary">
                           {'{' + v + '}'}
                         </span>
                       ))}
@@ -318,19 +315,16 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
 
                   {/* 测试按钮和结果 */}
                   {!template.isDefault && (
-                    <div className="flex justify-between items-center">
-                      <button
-                        onClick={() => testTemplate(template)}
-                        className="px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-black transition-all flex items-center gap-2"
-                      >
-                        <FlaskConical className="size-4" />{t('consistency:pm.validateBtn')}
-                      </button>
+                    <div className="flex items-center justify-between gap-3">
+                      <Button variant="secondary" size="sm" onClick={() => testTemplate(template)}>
+                        <FlaskConical className="size-3.5" />{t('consistency:pm.validateBtn')}
+                      </Button>
                       {testResult?.templateId === template.id && (
-                        <div className={`text-xs ${testResult.isValid ? 'text-green-600' : 'text-red-600'}`}>
+                        <div className={cn('flex items-center gap-1 text-xs', testResult.isValid ? 'text-success' : 'text-destructive')}>
                           {testResult.isValid ? (
-                            <span><CheckCircle2 className="size-4 mr-1" />{t('consistency:pm.validResult')}</span>
+                            <><CheckCircle2 className="size-3.5" />{t('consistency:pm.validResult')}</>
                           ) : (
-                            <span><AlertCircle className="size-4 mr-1" />{testResult.errors.join(', ')}</span>
+                            <><AlertCircle className="size-3.5 shrink-0" />{testResult.errors.join(', ')}</>
                           )}
                         </div>
                       )}
@@ -344,77 +338,57 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
       </div>
 
       {/* 导入/导出模态框 */}
-      {importExportOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-[2rem] w-full max-w-2xl max-h-[80vh] overflow-hidden shadow-2xl">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h3 className="text-lg font-black text-gray-900">
-                {importExportMode === 'import' ? t('consistency:pm.importTitle') : t('consistency:pm.exportTitle')}
-              </h3>
-              <button
-                onClick={() => { setImportExportOpen(false); setImportText(''); }}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-            <div className="p-6">
-              {importExportMode === 'export' ? (
-                <div>
-                  <p className="text-sm text-gray-500 mb-4">{t('consistency:pm.exportHint')}</p>
-                  <textarea
-                    className="w-full h-64 border border-gray-200 rounded-2xl p-4 text-xs font-mono text-gray-600 bg-gray-50 resize-none"
-                    value={exportTemplates()}
-                    readOnly
-                  />
-                  <button
-                    onClick={() => { navigator.clipboard.writeText(exportTemplates()); dialogService.alert(t('consistency:pm.copied')); }}
-                    className="mt-4 w-full py-3 bg-blue-600 text-white rounded-xl text-sm font-black hover:bg-blue-700 transition-all"
-                  >
-                    <Copy className="size-4 mr-2" />{t('consistency:pm.copyBtn')}
-                  </button>
-                </div>
-              ) : (
-                <div>
-                  <p className="text-sm text-gray-500 mb-4">{t('consistency:pm.importHint')}</p>
-                  <textarea
-                    className="w-full h-64 border border-gray-200 rounded-2xl p-4 text-xs font-mono text-gray-600 bg-gray-50 resize-none"
-                    value={importText}
-                    onChange={(e) => setImportText(e.target.value)}
-                    placeholder={t('consistency:pm.importPlaceholder')}
-                  />
-                  <button
-                    onClick={() => {
-                      const result = importTemplates(importText);
-                      if (result.success) {
-                        dialogService.alert(t('consistency:pm.importSuccess', { count: result.count ?? 0 }));
-                        setImportExportOpen(false);
-                        setImportText('');
-                      } else {
-                        dialogService.alert(result.error ?? t('consistency:pm.importFailed'));
-                      }
-                    }}
-                    disabled={!importText.trim()}
-                    className="mt-4 w-full py-3 bg-green-600 text-white rounded-xl text-sm font-black hover:bg-green-700 transition-all disabled:bg-gray-300"
-                  >
-                    <Upload className="size-4 mr-2" />{t('consistency:pm.importBtn')}
-                  </button>
-                </div>
-              )}
-            </div>
+      <Dialog open={importExportOpen} onOpenChange={(open) => { if (!open) closeImportExport(); }}>
+        <DialogContent className="flex max-h-[85vh] w-[92vw] max-w-2xl flex-col gap-0 overflow-hidden p-0">
+          <div className="border-b border-border bg-muted/30 px-6 py-4">
+            <h3 className="font-serif text-lg font-medium text-foreground">
+              {importExportMode === 'import' ? t('consistency:pm.importTitle') : t('consistency:pm.exportTitle')}
+            </h3>
           </div>
-        </div>
-      )}
+          <div className="custom-scrollbar flex-1 overflow-y-auto p-6">
+            {importExportMode === 'export' ? (
+              <div>
+                <p className="mb-3 text-sm text-muted-foreground">{t('consistency:pm.exportHint')}</p>
+                <Textarea
+                  className="min-h-[256px] bg-muted/40 font-mono text-xs"
+                  value={exportTemplates()}
+                  readOnly
+                />
+                <Button className="mt-4 w-full" onClick={() => { navigator.clipboard.writeText(exportTemplates()); dialogService.alert(t('consistency:pm.copied')); }}>
+                  <Copy className="size-4" />{t('consistency:pm.copyBtn')}
+                </Button>
+              </div>
+            ) : (
+              <div>
+                <p className="mb-3 text-sm text-muted-foreground">{t('consistency:pm.importHint')}</p>
+                <Textarea
+                  className="min-h-[256px] font-mono text-xs"
+                  value={importText}
+                  onChange={(e) => setImportText(e.target.value)}
+                  placeholder={t('consistency:pm.importPlaceholder')}
+                />
+                <Button
+                  className="mt-4 w-full"
+                  onClick={() => {
+                    const result = importTemplates(importText);
+                    if (result.success) {
+                      dialogService.alert(t('consistency:pm.importSuccess', { count: result.count ?? 0 }));
+                      closeImportExport();
+                    } else {
+                      dialogService.alert(result.error ?? t('consistency:pm.importFailed'));
+                    }
+                  }}
+                  disabled={!importText.trim()}
+                >
+                  <Upload className="size-4" />{t('consistency:pm.importBtn')}
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
 export default ConsistencyPromptManager;
-
-
-
-
-
-
-
-

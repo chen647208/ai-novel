@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '@/i18n';
 import { dialogService, type ConfirmOptions, type AlertOptions, type PromptOptions } from '../../shared/services/dialogService';
 import { Button } from '../../shared/ui/Button';
+import { Input } from '../../shared/ui/Input';
 import { AlertTriangle, CircleAlert, CircleCheck, Info, SquarePen, type LucideIcon } from 'lucide-react';
 
 type Front =
@@ -20,10 +21,10 @@ type Front =
   | null;
 
 const TONE_ICON: Record<NonNullable<AlertOptions['tone']>, { icon: LucideIcon; cls: string }> = {
-  info: { icon: Info, cls: 'text-blue-500' },
-  success: { icon: CircleCheck, cls: 'text-green-500' },
-  error: { icon: CircleAlert, cls: 'text-red-500' },
-  warning: { icon: AlertTriangle, cls: 'text-amber-500' },
+  info: { icon: Info, cls: 'text-primary' },
+  success: { icon: CircleCheck, cls: 'text-success' },
+  error: { icon: CircleAlert, cls: 'text-destructive' },
+  warning: { icon: AlertTriangle, cls: 'text-warning' },
 };
 
 /**
@@ -69,7 +70,7 @@ const DialogHost: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[10000] bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       role="presentation"
       onKeyDown={onKeyDown}
     >
@@ -77,7 +78,7 @@ const DialogHost: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-label={front.options.title ?? t('dialog.untitled')}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-7 border border-gray-100 flex flex-col text-left animate-in zoom-in-95 duration-150"
+        className="flex w-full max-w-md flex-col rounded-xl border border-border bg-card p-7 text-left shadow-lg"
       >
         <div className="flex items-start gap-3">
           {front.kind === 'alert' && (() => {
@@ -85,21 +86,21 @@ const DialogHost: React.FC = () => {
             return <ToneIcon className={`mt-0.5 size-6 ${cls}`} />;
           })()}
           {front.kind === 'confirm' && front.options.danger && (
-            <AlertTriangle className="size-6 mt-0.5 text-red-500" />
+            <AlertTriangle className="mt-0.5 size-6 text-destructive" />
           )}
           {front.kind === 'prompt' && (
-            <SquarePen className="size-6 mt-0.5 text-blue-500" />
+            <SquarePen className="mt-0.5 size-6 text-primary" />
           )}
           <div className="flex-1">
             {front.options.title && (
-              <h3 className="text-lg font-bold text-gray-900 mb-1">{front.options.title}</h3>
+              <h3 className="mb-1 text-lg font-semibold text-foreground">{front.options.title}</h3>
             )}
-            <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{front.options.message}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground">{front.options.message}</p>
           </div>
         </div>
 
         {front.kind === 'prompt' && (
-          <input
+          <Input
             ref={inputRef}
             type="text"
             value={text}
@@ -111,7 +112,7 @@ const DialogHost: React.FC = () => {
                 settle(true);
               }
             }}
-            className="mt-5 w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm text-gray-900 transition-colors"
+            className="mt-5"
           />
         )}
 

@@ -11,7 +11,13 @@ import React, { useMemo, useState } from 'react';
 import { useTranslation } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
 import type { ForeshadowImportance, ModelConfig, Project } from '../../../../shared/types';
-import { Loader2, Plus, Sprout, WandSparkles, X } from 'lucide-react';
+import { Button } from '@/shared/ui/Button';
+import { Dialog, DialogContent } from '@/shared/ui/Dialog';
+import { Input } from '@/shared/ui/Input';
+import { Select } from '@/shared/ui/Select';
+import { Textarea } from '@/shared/ui/Textarea';
+import { cn } from '@/shared/utils/cn';
+import { Loader2, Plus, Sprout, WandSparkles } from 'lucide-react';
 import {
   addForeshadow,
   createForeshadow,
@@ -37,9 +43,9 @@ interface ForeshadowPanelProps {
 const IMPORTANCE_VALUES: ForeshadowImportance[] = ['minor', 'major', 'critical'];
 
 const IMPORTANCE_STYLE: Record<ForeshadowImportance, string> = {
-  minor: 'bg-gray-100 text-gray-600',
-  major: 'bg-blue-100 text-blue-700',
-  critical: 'bg-red-100 text-red-700',
+  minor: 'border-border bg-muted/40 text-muted-foreground',
+  major: 'border-primary/30 bg-primary/10 text-primary',
+  critical: 'border-destructive/30 bg-destructive/10 text-destructive',
 };
 
 const ForeshadowPanel: React.FC<ForeshadowPanelProps> = ({
@@ -62,8 +68,6 @@ const ForeshadowPanel: React.FC<ForeshadowPanelProps> = ({
     () => new Set(overdueForeshadows(project, activeChapter?.order ?? 0).map((f) => f.id)),
     [project, activeChapter?.order],
   );
-
-  if (!isOpen) return null;
 
   const visible = filter === 'open' ? openForeshadows(project) : [...(project.foreshadows ?? [])].sort((a, b) => b.updatedAt - a.updatedAt);
 
@@ -109,112 +113,108 @@ const ForeshadowPanel: React.FC<ForeshadowPanelProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[250] bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-3xl border border-gray-100 overflow-hidden flex flex-col max-h-[88vh]">
-        <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50 flex justify-between items-center shrink-0">
-          <div>
-            <h3 className="text-xl font-black text-gray-800 tracking-tight">{t('foreshadow:title')}</h3>
-            <p className="text-xs text-gray-500 mt-1">
-              {t('foreshadow:statOpen')} {counts.planted} · {t('foreshadow:statPaidOff')} {counts.paidOff} · {t('foreshadow:statAbandoned')} {counts.abandoned}
-              {overdueIds.size > 0 && <span className="text-red-500 font-bold"> · {t('foreshadow:statOverdue')} {overdueIds.size}</span>}
-            </p>
-          </div>
-          <button onClick={onClose} className="w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 flex items-center justify-center">
-            <X className="size-4" />
-          </button>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="flex max-h-[88vh] w-[94vw] max-w-3xl flex-col gap-0 overflow-hidden p-0">
+        <div className="shrink-0 border-b border-border bg-muted/30 px-6 py-4">
+          <h3 className="font-serif text-lg font-medium text-foreground">{t('foreshadow:title')}</h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {t('foreshadow:statOpen')} {counts.planted} · {t('foreshadow:statPaidOff')} {counts.paidOff} · {t('foreshadow:statAbandoned')} {counts.abandoned}
+            {overdueIds.size > 0 && <span className="font-medium text-destructive"> · {t('foreshadow:statOverdue')} {overdueIds.size}</span>}
+          </p>
         </div>
 
         {/* 新增区 */}
-        <div className="p-5 border-b border-gray-100 bg-gray-50/50 space-y-3 shrink-0">
-          <input
-            className="w-full text-sm font-bold border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-100"
+        <div className="shrink-0 space-y-2 border-b border-border p-5">
+          <Input
             placeholder={t('foreshadow:formTitlePlaceholder')}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-          <textarea
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-100 resize-none"
+          <Textarea
             rows={2}
             placeholder={t('foreshadow:formDetailPlaceholder')}
             value={detail}
             onChange={(e) => setDetail(e.target.value)}
           />
           <div className="flex items-center gap-3">
-            <select
-              className="text-xs font-bold border border-gray-200 rounded-lg px-2 py-1.5 outline-none"
+            <Select
+              className="h-8 w-auto text-xs"
               value={importance}
               onChange={(e) => setImportance(e.target.value as ForeshadowImportance)}
             >
               {IMPORTANCE_VALUES.map((v) => <option key={v} value={v}>{t(`foreshadow:importance.${v}`)}</option>)}
-            </select>
+            </Select>
             {activeChapter && (
-              <span className="text-xs text-gray-400">{t('foreshadow:willPlantAt', { num: activeChapter.order + 1 })}</span>
+              <span className="text-xs text-muted-foreground">{t('foreshadow:willPlantAt', { num: activeChapter.order + 1 })}</span>
             )}
-            <button onClick={handleAdd} className="ml-auto px-4 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 transition-colors">
-              <Plus className="size-4 mr-1" />{t('foreshadow:add')}
-            </button>
+            <Button size="sm" className="ml-auto" onClick={handleAdd}>
+              <Plus className="size-3.5" />{t('foreshadow:add')}
+            </Button>
           </div>
         </div>
 
         {/* 过滤 + AI 检测 */}
-        <div className="px-5 py-3 flex items-center justify-between shrink-0 border-b border-gray-100">
-          <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
-            <button onClick={() => setFilter('open')} className={`px-3 py-1 rounded-md text-xs font-bold ${filter === 'open' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500'}`}>{t('foreshadow:filterOpen')}</button>
-            <button onClick={() => setFilter('all')} className={`px-3 py-1 rounded-md text-xs font-bold ${filter === 'all' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500'}`}>{t('foreshadow:filterAll')}</button>
+        <div className="flex shrink-0 items-center justify-between border-b border-border px-5 py-3">
+          <div className="flex gap-1 rounded-lg bg-muted p-1">
+            <button
+              type="button"
+              onClick={() => setFilter('open')}
+              className={cn('rounded-md px-3 py-1 text-xs transition-colors', filter === 'open' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
+            >{t('foreshadow:filterOpen')}</button>
+            <button
+              type="button"
+              onClick={() => setFilter('all')}
+              className={cn('rounded-md px-3 py-1 text-xs transition-colors', filter === 'all' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
+            >{t('foreshadow:filterAll')}</button>
           </div>
-          <button
-            onClick={handleDetect}
-            disabled={detecting}
-            className="px-3 py-1.5 bg-purple-100 text-purple-700 text-xs font-bold rounded-lg hover:bg-purple-200 disabled:opacity-50 transition-colors flex items-center gap-1.5"
-            title={t('foreshadow:detectTitle')}
-          >
-            {detecting ? <Loader2 className="size-4 animate-spin" /> : <WandSparkles className="size-4" />}
+          <Button variant="secondary" size="sm" onClick={handleDetect} disabled={detecting} title={t('foreshadow:detectTitle')}>
+            {detecting ? <Loader2 className="size-3.5 animate-spin" /> : <WandSparkles className="size-3.5" />}
             {detecting ? t('foreshadow:detecting') : t('foreshadow:detectBtn')}
-          </button>
+          </Button>
         </div>
 
         {/* 列表 */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-3 bg-gray-50/30">
+        <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto bg-muted/20 p-5">
           {visible.length === 0 ? (
-            <div className="text-center py-14 text-gray-400 text-sm">
-              <Sprout className="size-8 mb-3 block text-gray-300" />
+            <div className="py-12 text-center text-sm text-muted-foreground">
+              <Sprout className="mx-auto mb-3 size-8" />
               {filter === 'open' ? t('foreshadow:emptyOpen') : t('foreshadow:emptyAll')}
             </div>
           ) : (
             visible.map((f) => (
-              <div key={f.id} className={`bg-white rounded-xl border p-4 ${overdueIds.has(f.id) ? 'border-red-200 ring-1 ring-red-100' : 'border-gray-200'}`}>
+              <div key={f.id} className={cn('rounded-lg border bg-card p-4', overdueIds.has(f.id) ? 'border-destructive/30' : 'border-border')}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${IMPORTANCE_STYLE[f.importance]}`}>{t(`foreshadow:importance.${f.importance}`)}</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded font-bold bg-gray-100 text-gray-500">{t(`foreshadow:status.${f.status}`)}</span>
-                      {overdueIds.has(f.id) && <span className="text-[10px] px-1.5 py-0.5 rounded font-bold bg-red-500 text-white">{t('foreshadow:overdueBadge')}</span>}
-                      <span className="text-sm font-bold text-gray-800 truncate">{f.title}</span>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className={cn('rounded border px-1.5 py-0.5 text-[10px]', IMPORTANCE_STYLE[f.importance])}>{t(`foreshadow:importance.${f.importance}`)}</span>
+                      <span className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] text-muted-foreground">{t(`foreshadow:status.${f.status}`)}</span>
+                      {overdueIds.has(f.id) && <span className="rounded border border-destructive/30 bg-destructive/10 px-1.5 py-0.5 text-[10px] text-destructive">{t('foreshadow:overdueBadge')}</span>}
+                      <span className="truncate font-serif text-sm font-medium text-foreground">{f.title}</span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">{f.detail}</p>
-                    <div className="text-[10px] text-gray-400 mt-1.5">
+                    <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{f.detail}</p>
+                    <div className="mt-1.5 text-[10px] text-muted-foreground">
                       {f.plantedChapterOrder !== undefined && t('foreshadow:plantedAt', { num: f.plantedChapterOrder + 1 })}
                       {f.payoffChapterOrder !== undefined && t('foreshadow:payoffAt', { num: f.payoffChapterOrder + 1 })}
                     </div>
                   </div>
-                  <div className="flex flex-col gap-1.5 shrink-0">
+                  <div className="flex shrink-0 flex-col gap-1">
                     {f.status !== 'paid-off' && activeChapter && (
-                      <button onClick={() => emit(payOffForeshadow(project, f.id, { id: activeChapter.id, order: activeChapter.order }))} className="text-[10px] font-bold px-2 py-1 rounded bg-emerald-50 text-emerald-600 hover:bg-emerald-100" title={t('foreshadow:markPayoffTitle')}>{t('foreshadow:markPayoff')}</button>
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-success hover:bg-success/10 hover:text-success" onClick={() => emit(payOffForeshadow(project, f.id, { id: activeChapter.id, order: activeChapter.order }))} title={t('foreshadow:markPayoffTitle')}>{t('foreshadow:markPayoff')}</Button>
                     )}
                     {f.status !== 'abandoned' ? (
-                      <button onClick={() => emit(setStatus(project, f.id, 'abandoned'))} className="text-[10px] font-bold px-2 py-1 rounded bg-gray-100 text-gray-500 hover:bg-gray-200">{t('foreshadow:abandon')}</button>
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground" onClick={() => emit(setStatus(project, f.id, 'abandoned'))}>{t('foreshadow:abandon')}</Button>
                     ) : (
-                      <button onClick={() => emit(setStatus(project, f.id, 'planted'))} className="text-[10px] font-bold px-2 py-1 rounded bg-gray-100 text-gray-500 hover:bg-gray-200">{t('foreshadow:restore')}</button>
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground" onClick={() => emit(setStatus(project, f.id, 'planted'))}>{t('foreshadow:restore')}</Button>
                     )}
-                    <button onClick={() => emit(removeForeshadow(project, f.id))} className="text-[10px] font-bold px-2 py-1 rounded text-gray-300 hover:text-red-500 hover:bg-red-50">{t('common:delete')}</button>
+                    <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground hover:bg-destructive/10 hover:text-destructive" onClick={() => emit(removeForeshadow(project, f.id))}>{t('common:delete')}</Button>
                   </div>
                 </div>
               </div>
             ))
           )}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

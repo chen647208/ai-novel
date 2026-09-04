@@ -47,6 +47,7 @@
     "resetTemplateTitle": "重置为默认模板",
     "inputPlaceholder": "输入问题，或使用 /角色 /地点 /势力 等命令快速创建... (Shift+Enter 换行)",
     "stopTitle": "停止生成",
+    "sendTitle": "发送",
     "resizeLockedTitle": "窗口已锁定，无法调整大小",
     "resizeTitle": "拖动调整窗口大小"
   },
@@ -115,6 +116,7 @@
     "analyzingFull": "正在分析上下文...",
     "noRecommendations": "暂无推荐",
     "emptyHint": "选择角色、地点或输入内容以获取推荐",
+    "refresh": "刷新推荐",
     "type": {
       "character": "角色",
       "faction": "势力",

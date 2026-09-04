@@ -47,6 +47,7 @@
     "resetTemplateTitle": "Reset to default template",
     "inputPlaceholder": "Type a question, or use /character /location /faction commands to create quickly... (Shift+Enter for a new line)",
     "stopTitle": "Stop generating",
+    "sendTitle": "Send",
     "resizeLockedTitle": "Window is locked and cannot be resized",
     "resizeTitle": "Drag to resize the window"
   },
@@ -115,6 +116,7 @@
     "analyzingFull": "Analyzing context...",
     "noRecommendations": "No recommendations",
     "emptyHint": "Select a character or location, or type content to get recommendations",
+    "refresh": "Refresh recommendations",
     "type": {
       "character": "Character",
       "faction": "Faction",

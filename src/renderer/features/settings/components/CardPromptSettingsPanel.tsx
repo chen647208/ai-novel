@@ -13,8 +13,14 @@ import type { CardPromptCategory } from '../../../../shared/types';
 import { getTemplateVariableDescriptions } from '../../cards/services/cardPromptService';
 import type { CardPromptSettingsPanelProps } from '../types';
 import { dialogService } from '@/shared/services/dialogService';
-import { AlertCircle, CheckCircle2, ChevronDown, ChevronUp, Copy, Download, FlaskConical, Plus, Trash, Undo2, Upload, X } from 'lucide-react';
+import { Button } from '@/shared/ui/Button';
+import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
+import { Select } from '@/shared/ui/Select';
+import { Textarea } from '@/shared/ui/Textarea';
+import { cn } from '@/shared/utils/cn';
+import { AlertCircle, CheckCircle2, ChevronDown, ChevronUp, Copy, Download, FlaskConical, Plus, Trash2, Undo2, Upload } from 'lucide-react';
 
+const fieldLabel = 'mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground';
 
 const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
   localCardPrompts,
@@ -37,110 +43,117 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
   resetCardPromptsToDefault,
 }) => {
   const { t } = useTranslation(['settings', 'common']);
+  const closeImportExport = () => {
+    setImportExportModalOpen(false);
+    setImportText('');
+  };
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* 标题和操作栏 */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-black text-gray-900">{t('cardPrompts.title')}</h3>
-          <p className="text-xs text-gray-500 mt-1">{t('cardPrompts.subtitle')}</p>
+          <h3 className="font-serif text-lg font-medium text-foreground">{t('cardPrompts.title')}</h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">{t('cardPrompts.subtitle')}</p>
         </div>
         <div className="flex gap-2">
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => {
               setImportExportMode('export');
               setImportExportModalOpen(true);
             }}
-            className="px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl text-xs font-black transition-all flex items-center gap-2"
           >
             <Download className="size-4" />
             {t('common:export')}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => {
               setImportExportMode('import');
               setImportExportModalOpen(true);
             }}
-            className="px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl text-xs font-black transition-all flex items-center gap-2"
           >
             <Upload className="size-4" />
             {t('common:import')}
-          </button>
-          <button
-            onClick={resetCardPromptsToDefault}
-            className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl text-xs font-black transition-all flex items-center gap-2"
-          >
+          </Button>
+          <Button variant="outline" size="sm" className="text-destructive hover:text-destructive" onClick={resetCardPromptsToDefault}>
             <Undo2 className="size-4" />
             {t('common:reset')}
-          </button>
-          <button
-            onClick={addCardPrompt}
-            className="px-4 py-2 bg-amber-600 text-white hover:bg-amber-700 rounded-xl text-xs font-black transition-all flex items-center gap-2"
-          >
+          </Button>
+          <Button variant="default" size="sm" onClick={addCardPrompt}>
             <Plus className="size-4" />
             {t('cardPrompts.newTemplate')}
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* 模板列表 */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {localCardPrompts.map(template => (
           <div
             key={template.id}
-            className={`border-2 rounded-[2rem] p-6 bg-white transition-all ${
-              editingCardPromptId === template.id ? 'border-amber-300 shadow-xl shadow-amber-50' : 'border-gray-100 hover:border-amber-100'
-            } ${template.isDefault ? 'bg-amber-50/30' : ''}`}
+            className={cn(
+              'rounded-lg border bg-card p-5 transition-colors',
+              editingCardPromptId === template.id ? 'border-primary/40' : 'border-border hover:border-primary/20'
+            )}
           >
             {/* 模板头部 */}
-            <div className="flex justify-between items-start mb-4">
+            <div className="mb-4 flex items-start justify-between">
               <div className="flex items-center gap-3">
                 {template.isDefault && (
-                  <span className="px-2 py-1 bg-amber-100 text-amber-700 text-[10px] font-black rounded-lg">
+                  <span className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                     {t('cardPrompts.defaultBadge')}
                   </span>
                 )}
                 <input
-                  className="font-black bg-transparent border-none focus:ring-0 p-0 text-lg text-gray-800 w-48"
+                  className="w-48 border-none bg-transparent p-0 font-serif text-base font-medium text-foreground outline-none placeholder:text-muted-foreground/40 disabled:text-muted-foreground"
                   value={templateDisplayName(template)}
                   onChange={(e) => updateCardPrompt(template.id, { name: e.target.value, nameKey: undefined })}
                   placeholder={t('cardPrompts.namePlaceholder')}
                   disabled={template.isDefault}
                 />
               </div>
-              <div className="flex gap-2">
-                <button
+              <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8 text-muted-foreground hover:text-foreground"
                   onClick={() => duplicateCardPrompt(template.id)}
-                  className="text-gray-400 hover:text-blue-500 text-xs px-2 py-1"
                   title={t('cardPrompts.duplicateTip')}
                 >
                   <Copy className="size-4" />
-                </button>
+                </Button>
                 {!template.isDefault && (
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                     onClick={() => removeCardPrompt(template.id)}
-                    className="text-gray-400 hover:text-red-500 text-xs px-2 py-1"
                     title={t('cardPrompts.deleteTip')}
                   >
-                    <Trash className="size-4" />
-                  </button>
+                    <Trash2 className="size-4" />
+                  </Button>
                 )}
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8 text-muted-foreground hover:text-foreground"
                   onClick={() => setEditingCardPromptId(editingCardPromptId === template.id ? null : template.id)}
-                  className="text-gray-400 hover:text-amber-500 text-xs px-2 py-1"
                   title={editingCardPromptId === template.id ? t('cardPrompts.collapse') : t('cardPrompts.edit')}
                 >
                   {editingCardPromptId === template.id ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-                </button>
+                </Button>
               </div>
             </div>
 
             {/* 模板基本信息 */}
-            <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-3 gap-4">
               <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('cardPrompts.categoryLabel')}</label>
-                <select
-                  className="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white outline-none focus:ring-2 focus:ring-amber-100"
+                <label className={fieldLabel}>{t('cardPrompts.categoryLabel')}</label>
+                <Select
+                  className="h-8 text-xs"
                   value={template.category}
                   onChange={(e) => updateCardPrompt(template.id, { category: e.target.value as CardPromptCategory })}
                   disabled={template.isDefault}
@@ -153,29 +166,29 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
                   <option value="card-magic">{t('cardPrompts.category.magic')}</option>
                   <option value="card-tech">{t('cardPrompts.category.tech')}</option>
                   <option value="card-history">{t('cardPrompts.category.history')}</option>
-                </select>
+                </Select>
               </div>
               <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('cardPrompts.requiredCountLabel')}</label>
-                <div className="text-sm text-gray-600 py-2">{t('cardPrompts.fieldsCount', { count: template.requiredFields?.length || 0 })}</div>
+                <label className={fieldLabel}>{t('cardPrompts.requiredCountLabel')}</label>
+                <div className="py-1.5 text-sm text-foreground/80">{t('cardPrompts.fieldsCount', { count: template.requiredFields?.length || 0 })}</div>
               </div>
               <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('cardPrompts.variablesLabel')}</label>
-                <div className="text-sm text-gray-600 py-2">{t('cardPrompts.variablesCount', { count: template.variables?.length || 0 })}</div>
+                <label className={fieldLabel}>{t('cardPrompts.variablesLabel')}</label>
+                <div className="py-1.5 text-sm text-foreground/80">{t('cardPrompts.variablesCount', { count: template.variables?.length || 0 })}</div>
               </div>
             </div>
 
             {/* 展开编辑区域 */}
             {editingCardPromptId === template.id && (
-              <div className="mt-4 pt-4 border-t border-gray-100 animate-in fade-in">
+              <div className="mt-4 border-t border-border pt-4">
                 {/* 提示词内容 */}
                 <div className="mb-4">
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">
+                  <label className={fieldLabel}>
                     {t('cardPrompts.contentLabel')}
-                    <span className="text-gray-300 font-normal ml-2">{t('cardPrompts.mustIncludeVar')}</span>
+                    <span className="ml-2 font-normal normal-case tracking-normal text-muted-foreground/70">{t('cardPrompts.mustIncludeVar')}</span>
                   </label>
-                  <textarea
-                    className="w-full h-48 border border-gray-200 rounded-2xl p-4 text-sm font-mono text-gray-600 bg-gray-50 outline-none focus:ring-2 focus:ring-amber-100 resize-none custom-scrollbar"
+                  <Textarea
+                    className="custom-scrollbar h-48 resize-none bg-muted/40 font-mono text-sm"
                     value={template.content}
                     onChange={(e) => updateCardPrompt(template.id, { content: e.target.value })}
                     placeholder={t('cardPrompts.contentPlaceholder')}
@@ -185,14 +198,14 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
 
                 {/* 必填字段配置 */}
                 <div className="mb-4">
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('cardPrompts.requiredFieldsLabel')}</label>
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <div className="text-xs text-gray-500 mb-2">
+                  <label className={fieldLabel}>{t('cardPrompts.requiredFieldsLabel')}</label>
+                  <div className="rounded-lg border border-border bg-muted/30 p-3">
+                    <div className="mb-2 text-xs text-muted-foreground">
                       {t('cardPrompts.requiredFieldsHint')}
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5">
                       {template.requiredFields?.map((field, idx) => (
-                        <span key={idx} className="px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs text-gray-600">
+                        <span key={idx} className="rounded border border-border bg-background px-1.5 py-0.5 text-xs text-muted-foreground">
                           {field}
                         </span>
                       ))}
@@ -202,12 +215,12 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
 
                 {/* 可用变量提示 */}
                 <div className="mb-4">
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('cardPrompts.variablesLabel')}</label>
-                  <div className="flex flex-wrap gap-2">
+                  <label className={fieldLabel}>{t('cardPrompts.variablesLabel')}</label>
+                  <div className="flex flex-wrap gap-1.5">
                     {getTemplateVariableDescriptions().map(v => (
-                      <span key={v.variable} className="px-2 py-1 bg-amber-50 border border-amber-100 rounded-lg text-xs text-amber-700" title={v.description}>
+                      <span key={v.variable} className="rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 font-mono text-xs text-primary" title={v.description}>
                         {v.variable}
-                        {v.required && <span className="text-red-500 ml-1">*</span>}
+                        {v.required && <span className="ml-1 text-destructive">*</span>}
                       </span>
                     ))}
                   </div>
@@ -215,20 +228,17 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
 
                 {/* 测试按钮和结果 */}
                 {!template.isDefault && (
-                  <div className="flex justify-between items-center">
-                    <button
-                      onClick={() => testCardPrompt(template)}
-                      className="px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-black transition-all flex items-center gap-2"
-                    >
+                  <div className="flex items-center justify-between">
+                    <Button variant="secondary" size="sm" onClick={() => testCardPrompt(template)}>
                       <FlaskConical className="size-4" />
                       {t('cardPrompts.validate')}
-                    </button>
+                    </Button>
                     {cardPromptTestResult?.templateId === template.id && (
-                      <div className={`text-xs ${cardPromptTestResult.isValid ? 'text-green-600' : 'text-red-600'}`}>
+                      <div className={cn('text-xs', cardPromptTestResult.isValid ? 'text-success' : 'text-destructive')}>
                         {cardPromptTestResult.isValid ? (
-                          <span><CheckCircle2 className="size-4 mr-1" />{t('cardPrompts.valid')}</span>
+                          <span className="inline-flex items-center gap-1"><CheckCircle2 className="size-4" />{t('cardPrompts.valid')}</span>
                         ) : (
-                          <span><AlertCircle className="size-4 mr-1" />{cardPromptTestResult.errors.join(', ')}</span>
+                          <span className="inline-flex items-center gap-1"><AlertCircle className="size-4" />{cardPromptTestResult.errors.join(', ')}</span>
                         )}
                       </div>
                     )}
@@ -241,73 +251,61 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
       </div>
 
       {/* 导入/导出模态框 */}
-      {importExportModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-[2rem] w-full max-w-2xl max-h-[80vh] overflow-hidden shadow-2xl">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h3 className="text-lg font-black text-gray-900">
-                {importExportMode === 'import' ? t('cardPrompts.importTitle') : t('cardPrompts.exportTitle')}
-              </h3>
-              <button
-                onClick={() => {
-                  setImportExportModalOpen(false);
-                  setImportText('');
-                }}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-            <div className="p-6">
-              {importExportMode === 'export' ? (
-                <div>
-                  <p className="text-sm text-gray-500 mb-4">{t('cardPrompts.exportHint')}</p>
-                  <textarea
-                    className="w-full h-64 border border-gray-200 rounded-2xl p-4 text-xs font-mono text-gray-600 bg-gray-50 resize-none"
-                    value={exportCardPrompts()}
-                    readOnly
-                  />
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(exportCardPrompts());
-                      dialogService.alert(t('cardPrompts.copied'));
-                    }}
-                    className="mt-4 w-full py-3 bg-blue-600 text-white rounded-xl text-sm font-black hover:bg-blue-700 transition-all"
-                  >
-                    <Copy className="size-4 mr-2" />{t('cardPrompts.copyToClipboard')}
-                  </button>
-                </div>
-              ) : (
-                <div>
-                  <p className="text-sm text-gray-500 mb-4">{t('cardPrompts.importHint')}</p>
-                  <textarea
-                    className="w-full h-64 border border-gray-200 rounded-2xl p-4 text-xs font-mono text-gray-600 bg-gray-50 resize-none"
-                    value={importText}
-                    onChange={(e) => setImportText(e.target.value)}
-                    placeholder={t('cardPrompts.pastePlaceholder')}
-                  />
-                  <button
-                    onClick={() => {
-                      const result = importCardPrompts(importText);
-                      if (result.success) {
-                        dialogService.alert(t('cardPrompts.importSuccess', { count: result.count ?? 0 }));
-                        setImportExportModalOpen(false);
-                        setImportText('');
-                      } else {
-                        dialogService.alert(result.error ?? t('cardPrompts.importFailed'));
-                      }
-                    }}
-                    disabled={!importText.trim()}
-                    className="mt-4 w-full py-3 bg-green-600 text-white rounded-xl text-sm font-black hover:bg-green-700 transition-all disabled:bg-gray-300"
-                  >
-                    <Upload className="size-4 mr-2" />{t('cardPrompts.importTitle')}
-                  </button>
-                </div>
-              )}
-            </div>
+      <Dialog open={importExportModalOpen} onOpenChange={(open) => { if (!open) closeImportExport(); }}>
+        <DialogContent className="flex max-h-[80vh] w-full max-w-2xl flex-col gap-0 overflow-hidden p-0">
+          <div className="border-b border-border bg-muted/30 px-6 py-4">
+            <DialogTitle className="font-serif text-lg">
+              {importExportMode === 'import' ? t('cardPrompts.importTitle') : t('cardPrompts.exportTitle')}
+            </DialogTitle>
           </div>
-        </div>
-      )}
+          <div className="custom-scrollbar flex-1 overflow-y-auto px-6 py-5">
+            {importExportMode === 'export' ? (
+              <div>
+                <p className="mb-3 text-sm text-muted-foreground">{t('cardPrompts.exportHint')}</p>
+                <Textarea
+                  className="h-64 resize-none bg-muted/40 font-mono text-xs"
+                  value={exportCardPrompts()}
+                  readOnly
+                />
+                <Button
+                  className="mt-4 w-full"
+                  onClick={() => {
+                    navigator.clipboard.writeText(exportCardPrompts());
+                    dialogService.alert(t('cardPrompts.copied'));
+                  }}
+                >
+                  <Copy className="size-4" />{t('cardPrompts.copyToClipboard')}
+                </Button>
+              </div>
+            ) : (
+              <div>
+                <p className="mb-3 text-sm text-muted-foreground">{t('cardPrompts.importHint')}</p>
+                <Textarea
+                  className="h-64 resize-none bg-muted/40 font-mono text-xs"
+                  value={importText}
+                  onChange={(e) => setImportText(e.target.value)}
+                  placeholder={t('cardPrompts.pastePlaceholder')}
+                />
+                <Button
+                  className="mt-4 w-full"
+                  onClick={() => {
+                    const result = importCardPrompts(importText);
+                    if (result.success) {
+                      dialogService.alert(t('cardPrompts.importSuccess', { count: result.count ?? 0 }));
+                      closeImportExport();
+                    } else {
+                      dialogService.alert(result.error ?? t('cardPrompts.importFailed'));
+                    }
+                  }}
+                  disabled={!importText.trim()}
+                >
+                  <Upload className="size-4" />{t('cardPrompts.importTitle')}
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

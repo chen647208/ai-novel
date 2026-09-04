@@ -15,17 +15,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation, i18n } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
+import { Button } from '@/shared/ui/Button';
+import { Select } from '@/shared/ui/Select';
 import { AlertTriangle, BookOpen, CheckCircle2, ChevronDown, ChevronUp, Circle, Clock, ExternalLink, Gavel, Info, Loader2, MapPin, RefreshCw, Stethoscope, User, Users, WandSparkles, XCircle, type LucideIcon } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
-import { 
-  type Project, 
-  type ModelConfig, 
-  type ConsistencyCheckMode, 
+import {
+  type Project,
+  type ModelConfig,
+  type ConsistencyCheckMode,
   type ConsistencyCheckPromptTemplate,
   type ConsistencyCheckConfig,
-  type EmbeddingModelConfig 
+  type EmbeddingModelConfig
 } from '../../../shared/types';
-import { 
+import {
   type ConsistencyCheckResult,
   quickCheck,
   fixDanglingReferences,
@@ -77,10 +79,10 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
       setCheckMode('rule');
       return;
     }
-    
+
     setIsChecking(true);
     setCheckProgress(null);
-    
+
     try {
       if (checkMode === 'rule') {
         // 规则检查
@@ -101,7 +103,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
             setCheckProgress({ completed: current, total, currentItem: stage });
           }
         );
-        
+
         // 转换为标准格式
         const standardResult: ConsistencyCheckResult = {
           issues: vectorResult.issues.map(issue => ({
@@ -122,7 +124,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
           },
           checkedAt: vectorResult.checkedAt
         };
-        
+
         setCheckResult(standardResult);
       } else if ((checkMode === 'ai' || checkMode === 'hybrid') && model) {
         // AI 或混合检查
@@ -130,7 +132,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
         consistencyPrompts.forEach(p => {
           templates[p.category] = p;
         });
-        
+
         const result = await performAdvancedConsistencyCheck(project, {
           mode: checkMode,
           model,
@@ -139,7 +141,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
             setCheckProgress({ completed, total, currentItem });
           }
         });
-        
+
         setCheckResult(result);
       } else {
         // 默认规则检查
@@ -193,13 +195,13 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
     return true;
   }) || [];
 
-  // 获取类型图标（lucide 组件 + 颜色类）
+  // 获取类型图标（lucide 组件 + 语义色）
   const getTypeIcon = (type: string): { icon: LucideIcon; cls: string } => {
     switch (type) {
-      case 'error': return { icon: XCircle, cls: 'text-red-500' };
-      case 'warning': return { icon: AlertTriangle, cls: 'text-amber-500' };
-      case 'info': return { icon: Info, cls: 'text-blue-500' };
-      default: return { icon: Circle, cls: 'text-gray-400' };
+      case 'error': return { icon: XCircle, cls: 'text-destructive' };
+      case 'warning': return { icon: AlertTriangle, cls: 'text-warning' };
+      case 'info': return { icon: Info, cls: 'text-primary' };
+      default: return { icon: Circle, cls: 'text-muted-foreground' };
     }
   };
 
@@ -207,6 +209,18 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
     const { icon: Icon, cls } = getTypeIcon(type);
     return <Icon className={cn(cls, className)} />;
   };
+
+  // 类型徽章样式
+  const typeBadgeCls = (type: string) =>
+    type === 'error' ? 'border-destructive/30 bg-destructive/10 text-destructive' :
+    type === 'warning' ? 'border-warning/30 bg-warning/10 text-warning' :
+    'border-primary/30 bg-primary/10 text-primary';
+
+  // 问题行容器样式
+  const issueRowCls = (type: string) =>
+    type === 'error' ? 'border-destructive/20 bg-destructive/5' :
+    type === 'warning' ? 'border-warning/20 bg-warning/5' :
+    'border-primary/20 bg-primary/5';
 
   // 获取类型标签
   const getTypeLabel = (type: string) => {
@@ -245,38 +259,34 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-[2rem] p-6 shadow-lg">
+    <div className="rounded-lg border border-border bg-card p-5">
       {/* 头部 */}
-      <div className="flex justify-between items-start mb-6">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
-            <Stethoscope className="size-4 text-purple-500" />
+          <h3 className="flex items-center gap-2 font-serif text-lg font-medium text-foreground">
+            <Stethoscope className="size-4 text-muted-foreground" />
             {t('consistency:title')}
           </h3>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="mt-0.5 text-xs text-muted-foreground">
             {t('consistency:subtitle')}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {/* 检查模式选择 */}
-          <select
+          <Select
+            className="h-8 w-auto text-xs"
             value={checkMode}
             onChange={(e) => setCheckMode(e.target.value as ConsistencyCheckMode)}
-            className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white outline-none focus:ring-2 focus:ring-purple-100"
           >
             <option value="rule">{t('consistency:mode.rule')}</option>
             <option value="vector">{t('consistency:mode.vector')}</option>
             <option value="ai">{t('consistency:mode.ai')}</option>
             <option value="hybrid">{t('consistency:mode.hybrid')}</option>
-          </select>
-          <button
-            onClick={performCheck}
-            disabled={isChecking}
-            className="px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-black hover:bg-purple-700 transition-all disabled:opacity-50 flex items-center gap-2"
-          >
-            {isChecking ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+          </Select>
+          <Button size="sm" onClick={performCheck} disabled={isChecking}>
+            {isChecking ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
             {isChecking ? t('consistency:checking') : t('consistency:recheck')}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -284,26 +294,26 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
       {(checkMode === 'vector' || checkMode === 'ai' || checkMode === 'hybrid') && (
         <div className="mb-4 flex gap-2">
           {checkMode === 'vector' && !embeddingConfig && (
-            <div className="flex-1 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-3">
-              <AlertTriangle className="size-4 text-amber-500" />
-              <span className="text-sm text-amber-700">
+            <div className="flex flex-1 items-center gap-2 rounded-lg border border-warning/20 bg-warning/10 px-3 py-2">
+              <AlertTriangle className="size-4 shrink-0 text-warning" />
+              <span className="text-sm text-warning">
                 {t('consistency:noEmbedding')}
               </span>
             </div>
           )}
           {(checkMode === 'ai' || checkMode === 'hybrid') && !model && (
-            <div className="flex-1 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-3">
-              <AlertTriangle className="size-4 text-amber-500" />
-              <span className="text-sm text-amber-700">
+            <div className="flex flex-1 items-center gap-2 rounded-lg border border-warning/20 bg-warning/10 px-3 py-2">
+              <AlertTriangle className="size-4 shrink-0 text-warning" />
+              <span className="text-sm text-warning">
                 {t('consistency:noModel')}
               </span>
             </div>
           )}
           {((checkMode === 'vector' && embeddingConfig) ||
             ((checkMode === 'ai' || checkMode === 'hybrid') && model)) && (
-            <div className="flex-1 bg-green-50 border border-green-200 rounded-xl p-3 flex items-center gap-3">
-              <CheckCircle2 className="size-4 text-green-500" />
-              <span className="text-sm text-green-700">
+            <div className="flex flex-1 items-center gap-2 rounded-lg border border-success/20 bg-success/10 px-3 py-2">
+              <CheckCircle2 className="size-4 shrink-0 text-success" />
+              <span className="text-sm text-success">
                 {checkMode === 'vector' && embeddingConfig && t('consistency:configured', { name: embeddingConfig.name })}
                 {(checkMode === 'ai' || checkMode === 'hybrid') && model && t('consistency:configured', { name: model.name })}
               </span>
@@ -314,16 +324,16 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
 
       {/* 检查进度 */}
       {isChecking && checkProgress && (
-        <div className="mb-6 bg-purple-50 rounded-2xl p-4">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-bold text-purple-700">{checkProgress.currentItem}</span>
-            <span className="text-xs text-purple-500">
+        <div className="mb-5 rounded-lg border border-primary/20 bg-primary/5 p-4">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-sm text-primary">{checkProgress.currentItem}</span>
+            <span className="text-xs tabular-nums text-muted-foreground">
               {checkProgress.completed} / {checkProgress.total}
             </span>
           </div>
-          <div className="w-full bg-purple-200 rounded-full h-2">
-            <div 
-              className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-1.5 rounded-full bg-primary transition-all duration-300"
               style={{ width: `${(checkProgress.completed / checkProgress.total) * 100}%` }}
             ></div>
           </div>
@@ -332,34 +342,34 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
 
       {/* 统计概览 */}
       {checkResult && (
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="bg-gray-50 rounded-2xl p-4 text-center">
-            <div className="text-2xl font-black text-gray-800">{checkResult.summary.total}</div>
-            <div className="text-xs text-gray-500 font-bold uppercase">{t('consistency:summary.found')}</div>
+        <div className="mb-5 grid grid-cols-4 gap-3">
+          <div className="rounded-lg border border-border bg-muted/30 p-3 text-center">
+            <div className="font-serif text-2xl font-medium tabular-nums text-foreground">{checkResult.summary.total}</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('consistency:summary.found')}</div>
           </div>
-          <div className="bg-red-50 rounded-2xl p-4 text-center">
-            <div className="text-2xl font-black text-red-600">{checkResult.summary.errors}</div>
-            <div className="text-xs text-red-500 font-bold uppercase">{t('consistency:summary.errors')}</div>
+          <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-center">
+            <div className="font-serif text-2xl font-medium tabular-nums text-destructive">{checkResult.summary.errors}</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('consistency:summary.errors')}</div>
           </div>
-          <div className="bg-amber-50 rounded-2xl p-4 text-center">
-            <div className="text-2xl font-black text-amber-600">{checkResult.summary.warnings}</div>
-            <div className="text-xs text-amber-500 font-bold uppercase">{t('consistency:summary.warnings')}</div>
+          <div className="rounded-lg border border-warning/20 bg-warning/5 p-3 text-center">
+            <div className="font-serif text-2xl font-medium tabular-nums text-warning">{checkResult.summary.warnings}</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('consistency:summary.warnings')}</div>
           </div>
-          <div className="bg-blue-50 rounded-2xl p-4 text-center">
-            <div className="text-2xl font-black text-blue-600">{checkResult.summary.infos}</div>
-            <div className="text-xs text-blue-500 font-bold uppercase">{t('consistency:summary.infos')}</div>
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-center">
+            <div className="font-serif text-2xl font-medium tabular-nums text-primary">{checkResult.summary.infos}</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('consistency:summary.infos')}</div>
           </div>
         </div>
       )}
 
       {/* 过滤器 */}
-      <div className="flex gap-4 mb-4">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-black text-gray-400 uppercase">{t('consistency:filter.categoryLabel')}</span>
-          <select
+          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('consistency:filter.categoryLabel')}</span>
+          <Select
+            className="h-8 w-auto text-xs"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white outline-none"
           >
             <option value="all">{t('consistency:filter.all')}</option>
             <option value="character">{t('consistency:category.character')}</option>
@@ -368,99 +378,92 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
             <option value="chapter">{t('consistency:category.chapter')}</option>
             <option value="timeline">{t('consistency:category.timeline')}</option>
             <option value="rule">{t('consistency:category.rule')}</option>
-          </select>
+          </Select>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-black text-gray-400 uppercase">{t('consistency:filter.typeLabel')}</span>
-          <select
+          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('consistency:filter.typeLabel')}</span>
+          <Select
+            className="h-8 w-auto text-xs"
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white outline-none"
           >
             <option value="all">{t('consistency:filter.all')}</option>
             <option value="error">{t('consistency:type.error')}</option>
             <option value="warning">{t('consistency:type.warning')}</option>
             <option value="info">{t('consistency:type.info')}</option>
-          </select>
+          </Select>
         </div>
         {checkResult && checkResult.summary.errors > 0 && (
-          <button
-            onClick={handleAutoFix}
-            className="ml-auto px-4 py-1.5 bg-green-600 text-white rounded-lg text-xs font-black hover:bg-green-700 transition-all flex items-center gap-2"
-          >
-            <WandSparkles className="size-4" />
+          <Button size="sm" className="ml-auto" onClick={handleAutoFix}>
+            <WandSparkles className="size-3.5" />
             {t('consistency:autoFix')}
-          </button>
+          </Button>
         )}
       </div>
 
       {/* 问题列表 */}
-      <div className="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar">
+      <div className="custom-scrollbar max-h-[400px] space-y-2 overflow-y-auto">
         {filteredIssues.length === 0 ? (
-          <div className="text-center py-12 text-gray-400">
-            <CheckCircle2 className="size-10 mb-3 text-green-400" />
-            <p className="text-sm">{t('consistency:noIssues')}</p>
+          <div className="py-10 text-center">
+            <CheckCircle2 className="mx-auto mb-2 size-8 text-success" />
+            <p className="text-sm text-muted-foreground">{t('consistency:noIssues')}</p>
           </div>
         ) : (
           filteredIssues.map((issue) => (
             <div
               key={issue.id}
-              className={`border-2 rounded-2xl p-4 transition-all cursor-pointer ${
-                issue.type === 'error' ? 'border-red-100 bg-red-50/30' :
-                issue.type === 'warning' ? 'border-amber-100 bg-amber-50/30' :
-                'border-blue-100 bg-blue-50/30'
-              }`}
+              role="button"
+              tabIndex={0}
               onClick={() => toggleExpand(issue.id)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleExpand(issue.id); } }}
+              className={cn('cursor-pointer rounded-lg border p-3 transition-colors', issueRowCls(issue.type))}
             >
               <div className="flex items-start gap-3">
-                <TypeIcon type={issue.type} className="mt-0.5 size-4" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
-                      issue.type === 'error' ? 'bg-red-100 text-red-700' :
-                      issue.type === 'warning' ? 'bg-amber-100 text-amber-700' :
-                      'bg-blue-100 text-blue-700'
-                    }`}>
+                <TypeIcon type={issue.type} className="mt-0.5 size-4 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex flex-wrap items-center gap-2">
+                    <span className={cn('rounded border px-1.5 py-0.5 text-[10px]', typeBadgeCls(issue.type))}>
                       {getTypeLabel(issue.type)}
                     </span>
-                    <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                    <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
                       {(() => { const CatIcon = getCategoryIcon(issue.category); return <CatIcon className="size-3.5" />; })()}
                       {getCategoryLabel(issue.category)}
                     </span>
-                    <span className="text-xs font-bold text-gray-700 truncate">
+                    <span className="truncate text-xs font-medium text-foreground">
                       {issue.targetName}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-600">{issue.message}</p>
-                  
+                  <p className="text-sm text-muted-foreground">{issue.message}</p>
+
                   {expandedIssues.has(issue.id) && (
-                    <div className="mt-3 pt-3 border-t border-gray-200/50 animate-in fade-in">
+                    <div className="mt-3 space-y-2 border-t border-border/60 pt-3">
                       {issue.suggestion && (
-                        <div className="mb-2">
-                          <span className="text-[10px] font-black text-gray-400 uppercase">{t('consistency:suggestionLabel')}</span>
-                          <p className="text-sm text-gray-600 mt-0.5">{issue.suggestion}</p>
+                        <div>
+                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('consistency:suggestionLabel')}</span>
+                          <p className="mt-0.5 text-sm text-foreground">{issue.suggestion}</p>
                         </div>
                       )}
                       {issue.details && (
-                        <div className="mb-2">
-                          <span className="text-[10px] font-black text-gray-400 uppercase">{t('consistency:detailsLabel')}</span>
-                          <p className="text-xs text-gray-500 mt-0.5 font-mono">{issue.details}</p>
+                        <div>
+                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('consistency:detailsLabel')}</span>
+                          <p className="mt-0.5 font-mono text-xs text-muted-foreground">{issue.details}</p>
                         </div>
                       )}
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           onNavigateToItem?.(issue.category, issue.targetId);
                         }}
-                        className="mt-2 text-xs text-purple-600 hover:text-purple-700 font-bold flex items-center gap-1"
+                        className="mt-1 flex items-center gap-1 text-xs text-primary hover:underline"
                       >
-                        <ExternalLink className="size-4" />
+                        <ExternalLink className="size-3.5" />
                         {t('consistency:goToEdit')}
                       </button>
                     </div>
                   )}
                 </div>
-                {expandedIssues.has(issue.id) ? <ChevronUp className="size-3.5 text-gray-400" /> : <ChevronDown className="size-3.5 text-gray-400" />}
+                {expandedIssues.has(issue.id) ? <ChevronUp className="size-3.5 shrink-0 text-muted-foreground" /> : <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" />}
               </div>
             </div>
           ))
@@ -469,7 +472,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
 
       {/* 底部信息 */}
       {checkResult && (
-        <div className="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-400 text-center">
+        <div className="mt-4 border-t border-border pt-3 text-center text-xs text-muted-foreground">
           {t('consistency:lastCheck', { time: new Date(checkResult.checkedAt).toLocaleString(i18n.language) })}
         </div>
       )}
@@ -478,14 +481,3 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
 };
 
 export default ConsistencyChecker;
-
-
-
-
-
-
-
-
-
-
-

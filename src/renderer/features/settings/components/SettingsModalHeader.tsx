@@ -1,4 +1,4 @@
-﻿/*
+/*
  * 本文件属于 AI小说家 (ai-novel) 项目。
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -10,21 +10,22 @@
 import React from 'react';
 import { useTranslation } from '@/i18n';
 import SettingsTabNav from './SettingsTabNav';
+import { Button } from '@/shared/ui/Button';
 import type { SettingsModalHeaderProps } from '../types';
 import { X } from 'lucide-react';
 
 const SettingsModalHeader: React.FC<SettingsModalHeaderProps> = ({ activeTab, onChange, onClose }) => {
-  const { t } = useTranslation('settings');
+  const { t } = useTranslation(['settings', 'common']);
   return (
-    <div className="border-b border-gray-100 px-10 pt-8 pb-4 flex flex-col gap-6">
-      <div className="flex justify-between items-center">
+    <div className="flex flex-col gap-5 border-b border-border bg-muted/30 px-6 pt-5 pb-4">
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-black text-gray-900 tracking-tighter">{t('title')}</h2>
-          <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">{t('subtitle')}</p>
+          <h2 className="font-serif text-xl font-medium text-foreground">{t('title')}</h2>
+          <p className="mt-0.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('subtitle')}</p>
         </div>
-        <button onClick={onClose} className="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors">
-          <X className="size-4 text-gray-400" />
-        </button>
+        <Button variant="ghost" size="icon" onClick={onClose} title={t('common:close')}>
+          <X className="size-4" />
+        </Button>
       </div>
 
       <SettingsTabNav activeTab={activeTab} onChange={onChange} />

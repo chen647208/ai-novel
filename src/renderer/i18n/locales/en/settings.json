@@ -78,6 +78,9 @@
   },
   "models": {
     "namePlaceholder": "Name this model...",
+    "activeBadge": "Active",
+    "deleteTitle": "Delete this model",
+    "connectionLog": "Connection log",
     "channelLabel": "Select Channel",
     "modelNameLabel": "Model Name",
     "selectModelPlaceholder": "Select a model...",

@@ -11,6 +11,10 @@ import React from 'react';
 import { useTranslation, templateDisplayName } from '@/i18n';
 import type { PromptTemplate } from '../../../../shared/types';
 import type { PromptTemplatesPanelProps } from '../types';
+import { Button } from '@/shared/ui/Button';
+import { Input } from '@/shared/ui/Input';
+import { Select } from '@/shared/ui/Select';
+import { Textarea } from '@/shared/ui/Textarea';
 import { WandSparkles } from 'lucide-react';
 
 const PromptTemplatesPanel: React.FC<PromptTemplatesPanelProps> = ({
@@ -21,49 +25,57 @@ const PromptTemplatesPanel: React.FC<PromptTemplatesPanelProps> = ({
 }) => {
   const { t } = useTranslation('settings');
   return (
-    <div className="grid grid-cols-1 gap-6">
-              {localPrompts.map(prompt => (
-                <div key={prompt.id} className="border-2 border-gray-100 rounded-[2rem] p-8 bg-white hover:border-blue-100 transition-all">
-                  <div className="flex justify-between items-center mb-6">
-                    <div className="flex-1 mr-6">
-                      <input 
-                        className="font-black bg-transparent border-none focus:ring-0 p-0 text-xl text-gray-800 w-full"
-                        value={templateDisplayName(prompt)}
-                        onChange={(e) => updatePrompt(prompt.id, { name: e.target.value, nameKey: undefined })}
-                        placeholder={t('prompts.namePlaceholder')}
-                      />
-                    </div>
-                    <select 
-                      className="text-[10px] font-black border-none rounded-lg px-3 py-1 bg-gray-100 text-gray-500 uppercase tracking-widest outline-none focus:ring-2 focus:ring-blue-100"
-                      value={prompt.category}
-                      onChange={(e) => updatePrompt(prompt.id, { category: e.target.value as PromptTemplate['category'] })}
-                    >
-                      <option value="inspiration">{t('prompts.category.inspiration')}</option>
-                      <option value="character">{t('prompts.category.character')}</option>
-                      <option value="outline">{t('prompts.category.outline')}</option>
-                      <option value="chapter">{t('prompts.category.chapter')}</option>
-                      <option value="writing">{t('prompts.category.writing')}</option>
-                      <option value="edit">{t('prompts.category.edit')}</option>
-                      <option value="summary">{t('prompts.category.summary')}</option>
-                    </select>
-                  </div>
+    <div className="grid grid-cols-1 gap-4">
+      {localPrompts.map(prompt => (
+        <div key={prompt.id} className="rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/30">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <Input
+              className="border-none bg-transparent p-0 font-serif text-lg font-medium shadow-none focus-visible:ring-0"
+              value={templateDisplayName(prompt)}
+              onChange={(e) => updatePrompt(prompt.id, { name: e.target.value, nameKey: undefined })}
+              placeholder={t('prompts.namePlaceholder')}
+            />
+            <Select
+              className="h-8 w-auto shrink-0 text-xs"
+              value={prompt.category}
+              onChange={(e) => updatePrompt(prompt.id, { category: e.target.value as PromptTemplate['category'] })}
+            >
+              <option value="inspiration">{t('prompts.category.inspiration')}</option>
+              <option value="character">{t('prompts.category.character')}</option>
+              <option value="outline">{t('prompts.category.outline')}</option>
+              <option value="chapter">{t('prompts.category.chapter')}</option>
+              <option value="writing">{t('prompts.category.writing')}</option>
+              <option value="edit">{t('prompts.category.edit')}</option>
+              <option value="summary">{t('prompts.category.summary')}</option>
+            </Select>
+          </div>
 
-                  <textarea 
-                    className="w-full h-40 border-none rounded-2xl p-6 text-sm font-medium text-gray-600 bg-gray-50 outline-none focus:ring-2 focus:ring-blue-100 resize-none custom-scrollbar"
-                    value={prompt.content}
-                    onChange={(e) => updatePrompt(prompt.id, { content: e.target.value })}
-                    placeholder={t('prompts.contentPlaceholder')}
-                  />
-                  <div className="mt-3 flex justify-between items-center">
-                    <span className="text-[9px] text-gray-300 font-bold uppercase">{t('prompts.availablePlaceholders')}</span>
-                    <button onClick={() => setLocalPrompts(localPrompts.filter(p => p.id !== prompt.id))} className="text-gray-300 hover:text-red-500 text-xs font-bold">{t('prompts.deleteTemplate')}</button>
-                  </div>
-                </div>
-              ))}
-              <button onClick={addPrompt} className="w-full border-4 border-dashed border-gray-100 rounded-[2rem] py-8 text-gray-300 font-black hover:bg-white hover:text-emerald-500 hover:border-emerald-100 transition-all group flex flex-col items-center gap-2">
-                <WandSparkles className="size-6 group-hover:rotate-12 transition-transform" />
-                <span>{t('prompts.addTemplate')}</span>
-              </button>
+          <Textarea
+            className="min-h-[160px] bg-muted/40 font-mono text-sm"
+            value={prompt.content}
+            onChange={(e) => updatePrompt(prompt.id, { content: e.target.value })}
+            placeholder={t('prompts.contentPlaceholder')}
+          />
+          <div className="mt-2 flex items-center justify-between">
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">{t('prompts.availablePlaceholders')}</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-auto p-0 text-xs text-muted-foreground hover:bg-transparent hover:text-destructive"
+              onClick={() => setLocalPrompts(localPrompts.filter(p => p.id !== prompt.id))}
+            >
+              {t('prompts.deleteTemplate')}
+            </Button>
+          </div>
+        </div>
+      ))}
+      <button
+        onClick={addPrompt}
+        className="group flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed border-border py-8 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-accent/30 hover:text-primary"
+      >
+        <WandSparkles className="size-5 transition-transform group-hover:rotate-12" />
+        <span>{t('prompts.addTemplate')}</span>
+      </button>
     </div>
   );
 };

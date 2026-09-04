@@ -1,4 +1,4 @@
-﻿/*
+/*
  * 本文件属于 AI小说家 (ai-novel) 项目。
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -12,6 +12,10 @@ import { useTranslation } from 'react-i18next';
 import { templateDisplayName } from '@/i18n';
 import type { Project, PromptTemplate } from '../../../../shared/types';
 import type { AssistantCategory } from '../types';
+import { Button } from '@/shared/ui/Button';
+import { Select } from '@/shared/ui/Select';
+import { Textarea } from '@/shared/ui/Textarea';
+import { cn } from '@/shared/utils/cn';
 import { BookOpenText, Lightbulb, ListOrdered, ListTree, Users, WandSparkles, type LucideIcon } from 'lucide-react';
 
 interface AssistantContextPanelProps {
@@ -51,18 +55,22 @@ const AssistantContextPanel: React.FC<AssistantContextPanelProps> = ({
 }) => {
   const { t } = useTranslation('assistant');
   return (
-    <div className="flex-1 flex flex-col bg-gray-50 z-10 overflow-hidden animate-in slide-in-from-right duration-200 absolute inset-0 top-[88px]">
-      <div className="flex bg-white border-b overflow-x-auto no-scrollbar shrink-0">
+    <div className="absolute inset-0 top-[88px] z-10 flex flex-1 flex-col overflow-hidden bg-background">
+      <div className="flex shrink-0 overflow-x-auto border-b border-border bg-card no-scrollbar">
         {categoryItems.map((category) => (
           <button
             key={category.id}
+            type="button"
             onClick={() => {
               onCategoryChange(category.id);
               onSubSelectionChange('all');
             }}
-            className={`flex-1 min-w-[60px] py-3 flex flex-col items-center gap-1 text-[10px] border-b-2 transition-colors ${
-              activeCategory === category.id ? 'border-blue-500 text-blue-600 bg-blue-50/50' : 'border-transparent text-gray-400 hover:text-gray-600'
-            }`}
+            className={cn(
+              'flex min-w-[60px] flex-1 flex-col items-center gap-1 border-b-2 py-3 text-[10px] transition-colors',
+              activeCategory === category.id
+                ? 'border-primary text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            )}
           >
             <category.icon className="size-4" />
             <span>{t(category.labelKey)}</span>
@@ -71,55 +79,48 @@ const AssistantContextPanel: React.FC<AssistantContextPanelProps> = ({
       </div>
 
       {(activeCategory === 'knowledge' || activeCategory === 'chapters') && project && (
-        <div className="px-4 py-2 bg-white border-b shrink-0">
-          <select
+        <div className="shrink-0 border-b border-border bg-card px-4 py-2">
+          <Select
+            className="h-7 w-full text-xs"
             value={subSelectionId}
             onChange={(e) => onSubSelectionChange(e.target.value)}
-            className="w-full text-xs bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 outline-none"
           >
             <option value="all">{t('context.viewAllOption')}</option>
             {activeCategory === 'knowledge' && project.knowledge?.map((item) => (
               <option key={item.id} value={item.id}>{item.name}</option>
             ))}
-            {activeCategory === 'chapters' && project.chapters?.sort((a, b) => a.order - b.order).map((chapter) => (
+            {activeCategory === 'chapters' && [...(project.chapters ?? [])].sort((a, b) => a.order - b.order).map((chapter) => (
               <option key={chapter.id} value={chapter.id}>{t('context.chapterEntry', { num: chapter.order + 1, title: chapter.title })}</option>
             ))}
-          </select>
+          </Select>
         </div>
       )}
 
-      <div className="flex-1 p-4 overflow-y-auto custom-scrollbar">
-        <textarea
+      <div className="custom-scrollbar flex-1 overflow-y-auto p-4">
+        <Textarea
           readOnly
-          className="w-full h-full bg-white border border-gray-200 rounded-xl p-3 text-xs text-gray-600 leading-relaxed resize-none outline-none focus:ring-1 focus:ring-blue-100"
+          className="h-full min-h-full bg-card text-xs leading-relaxed"
           value={contextContent}
         />
       </div>
 
-      <div className="p-3 bg-white border-t border-gray-200 shrink-0 space-y-2">
-        <div className="flex gap-2">
-          <select
-            value={analysisPromptId}
-            onChange={(e) => onPromptChange(e.target.value)}
-            className="flex-1 text-xs bg-gray-50 border border-gray-200 rounded-lg px-2 py-2 outline-none"
-          >
-            <option value="">{t('context.selectPromptOption')}</option>
-            {prompts.map((prompt) => (
-              <option key={prompt.id} value={prompt.id}>[{prompt.category}] {templateDisplayName(prompt)}</option>
-            ))}
-          </select>
-        </div>
-        <button
-          onClick={onAnalyze}
-          disabled={isLoading || !project}
-          className="w-full py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all flex items-center justify-center gap-2"
+      <div className="shrink-0 space-y-2 border-t border-border bg-card p-3">
+        <Select
+          className="h-8 w-full text-xs"
+          value={analysisPromptId}
+          onChange={(e) => onPromptChange(e.target.value)}
         >
+          <option value="">{t('context.selectPromptOption')}</option>
+          {prompts.map((prompt) => (
+            <option key={prompt.id} value={prompt.id}>[{prompt.category}] {templateDisplayName(prompt)}</option>
+          ))}
+        </Select>
+        <Button className="w-full" size="sm" onClick={onAnalyze} disabled={isLoading || !project}>
           <WandSparkles className="size-4" /> {t('context.analyzeBtn')}
-        </button>
+        </Button>
       </div>
     </div>
   );
 };
 
 export default AssistantContextPanel;
-

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * 本文件属于 AI小说家 (ai-novel) 项目。
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -11,147 +11,138 @@ import React from 'react';
 import { useTranslation, dt, dtList } from '@/i18n';
 import { modelProviders } from '../../../constants/modelProviders';
 import type { SystemGuidePanelProps } from '../types';
+import { Button } from '@/shared/ui/Button';
 import { CheckCircle2, ExternalLink, GraduationCap, Key, Lightbulb, PlusCircle } from 'lucide-react';
+
+const fieldLabel = 'mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground';
 
 const SystemGuidePanel: React.FC<SystemGuidePanelProps> = ({ onQuickAddProviderModel }) => {
   const { t } = useTranslation('settings');
   return (
-    <div className="space-y-8 animate-in zoom-in duration-300">
-      <div className="text-center mb-8">
-        <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4 mx-auto shadow-2xl shadow-blue-200">
-          <GraduationCap className="size-8 text-white" />
+    <div className="space-y-6">
+      <div className="mb-6 text-center">
+        <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <GraduationCap className="size-7" />
         </div>
-        <h3 className="text-2xl font-black text-gray-900 mb-2">{t('guide.title')}</h3>
-        <p className="text-gray-500 text-sm max-w-2xl mx-auto leading-relaxed">
+        <h3 className="font-serif text-xl font-medium text-foreground">{t('guide.title')}</h3>
+        <p className="mx-auto mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
           {t('guide.subtitle')}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {modelProviders.filter((provider) => provider.official).map((provider) => (
           <div
             key={provider.id}
-            className={`border-2 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl ${
-              provider.isChinese
-                ? 'border-blue-100 bg-gradient-to-br from-blue-50 to-white hover:border-blue-300'
-                : 'border-gray-100 bg-gradient-to-br from-gray-50 to-white hover:border-gray-300'
-            }`}
+            className="rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/30"
           >
-            <div className="flex justify-between items-start mb-4">
+            <div className="mb-4 flex items-start justify-between gap-3">
               <div>
-                <h4 className="text-lg font-black text-gray-900 flex items-center gap-2">
+                <h4 className="flex items-center gap-2 font-serif text-base font-medium text-foreground">
                   {dt(provider.nameKey)}
                   {provider.isChinese && (
-                    <span className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold uppercase">
+                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-primary">
                       {t('guide.domestic')}
                     </span>
                   )}
                 </h4>
-                <p className="text-sm text-gray-500 mt-1">{dt(provider.descriptionKey)}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{dt(provider.descriptionKey)}</p>
               </div>
               <div className="text-right">
-                <div className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">{t('guide.recommendedModel')}</div>
-                <div className="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-1 rounded-lg">
+                <div className={fieldLabel}>{t('guide.recommendedModel')}</div>
+                <div className="rounded border border-border bg-muted/40 px-2 py-1 font-mono text-xs text-muted-foreground">
                   {provider.recommendedModels[0] ?? t('guide.custom')}
                 </div>
               </div>
             </div>
 
-            <div className="space-y-3 mb-4">
+            <div className="mb-4 space-y-3">
               <div>
-                <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('guide.website')}</div>
+                <div className={fieldLabel}>{t('guide.website')}</div>
                 <a
                   href={provider.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+                  className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
                 >
                   <ExternalLink className="size-3.5" />
                   {provider.website.replace('https://', '')}
                 </a>
               </div>
               <div>
-                <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('guide.apiApplyUrl')}</div>
+                <div className={fieldLabel}>{t('guide.apiApplyUrl')}</div>
                 <a
                   href={provider.apiApplyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-purple-600 hover:text-purple-800 font-medium flex items-center gap-1"
+                  className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
                 >
                   <Key className="size-3.5" />
                   {t('guide.getApiKey')}
                 </a>
               </div>
               <div>
-                <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('guide.endpoint')}</div>
-                <div className="text-xs font-mono bg-gray-50 text-gray-700 p-2 rounded-lg border border-gray-100">
+                <div className={fieldLabel}>{t('guide.endpoint')}</div>
+                <div className="rounded border border-border bg-muted/40 p-2 font-mono text-xs text-muted-foreground">
                   {provider.endpoint || t('guide.endpointDefault')}
                 </div>
               </div>
             </div>
 
-            <div className="border-t border-gray-100 pt-4">
-              <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('guide.tips')}</div>
+            <div className="border-t border-border pt-3">
+              <div className={fieldLabel}>{t('guide.tips')}</div>
               <ul className="space-y-1">
                 {dtList(provider.tipsKey).map((tip, index) => (
-                  <li key={index} className="text-xs text-gray-600 flex items-start gap-2">
-                    <CheckCircle2 className="size-3.5 text-green-500 mt-0.5" />
+                  <li key={index} className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-success" />
                     <span>{tip}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <div className="flex gap-2">
-                <button
-                  onClick={() => onQuickAddProviderModel(provider)}
-                  className="flex-1 px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2"
-                >
-                  <PlusCircle className="size-4" />
-                  {t('guide.quickAdd')}
-                </button>
-                <a
-                  href={provider.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2"
-                >
+            <div className="mt-4 flex gap-2 border-t border-border pt-4">
+              <Button variant="secondary" size="sm" className="flex-1" onClick={() => onQuickAddProviderModel(provider)}>
+                <PlusCircle className="size-4" />
+                {t('guide.quickAdd')}
+              </Button>
+              <a href={provider.website} target="_blank" rel="noopener noreferrer">
+                <Button variant="ghost" size="sm">
                   <ExternalLink className="size-4" />
                   {t('guide.visitSite')}
-                </a>
-              </div>
+                </Button>
+              </a>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-100 rounded-2xl p-6 mt-8">
-        <h4 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
-          <Lightbulb className="size-4 text-yellow-500" />
+      <div className="rounded-lg border border-border bg-muted/30 p-5">
+        <h4 className="mb-4 flex items-center gap-2 font-serif text-base font-medium text-foreground">
+          <Lightbulb className="size-4 text-warning" />
           {t('guide.stepsTitle')}
         </h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white p-4 rounded-xl border border-blue-100">
-            <div className="text-blue-600 font-black text-sm mb-2 flex items-center gap-2">
-              <span className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">1</span>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="rounded-lg border border-border bg-card p-4">
+            <div className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
+              <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium tabular-nums text-primary">1</span>
               {t('guide.step1Title')}
             </div>
-            <p className="text-xs text-gray-600">{t('guide.step1Desc')}</p>
+            <p className="text-xs text-muted-foreground">{t('guide.step1Desc')}</p>
           </div>
-          <div className="bg-white p-4 rounded-xl border border-blue-100">
-            <div className="text-blue-600 font-black text-sm mb-2 flex items-center gap-2">
-              <span className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">2</span>
+          <div className="rounded-lg border border-border bg-card p-4">
+            <div className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
+              <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium tabular-nums text-primary">2</span>
               {t('guide.step2Title')}
             </div>
-            <p className="text-xs text-gray-600">{t('guide.step2Desc')}</p>
+            <p className="text-xs text-muted-foreground">{t('guide.step2Desc')}</p>
           </div>
-          <div className="bg-white p-4 rounded-xl border border-blue-100">
-            <div className="text-blue-600 font-black text-sm mb-2 flex items-center gap-2">
-              <span className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">3</span>
+          <div className="rounded-lg border border-border bg-card p-4">
+            <div className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
+              <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium tabular-nums text-primary">3</span>
               {t('guide.step3Title')}
             </div>
-            <p className="text-xs text-gray-600">{t('guide.step3Desc')}</p>
+            <p className="text-xs text-muted-foreground">{t('guide.step3Desc')}</p>
           </div>
         </div>
       </div>

@@ -19,6 +19,8 @@ import { getDefaultCardPrompts } from '../cards/services/cardPromptService';
 import AssistantContextPanel from './components/AssistantContextPanel';
 import AssistantEditPanel from './components/AssistantEditPanel';
 import AssistantChatWorkspace from './components/AssistantChatWorkspace';
+import { Select } from '@/shared/ui/Select';
+import { cn } from '@/shared/utils/cn';
 import { dialogService } from '@/shared/services/dialogService';
 import { BookOpenText, Bot, CircleStop, Lock, LockOpen, Maximize2, Minus, PenLine, Pin, Trash2, X } from 'lucide-react';
 
@@ -111,7 +113,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       
       case 'chapters': {
         if (subSelectionId === 'all') {
-           return (project.chapters || []).sort((a, b) => a.order - b.order)
+           return [...(project.chapters || [])].sort((a, b) => a.order - b.order)
              .map(c => `第${c.order + 1}章：${c.title}`).join('\n') || "暂无章节";
         }
         const chap = project.chapters?.find(c => c.id === subSelectionId);
@@ -830,17 +832,17 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-8 right-8 z-[9999] w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform cursor-pointer group"
+        className="fixed bottom-8 right-8 z-[9999] flex size-12 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-opacity hover:opacity-90"
         title={t('window.fabTitle')}
       >
-        <Bot className="size-6 group-hover:animate-bounce" />
+        <Bot className="size-6" />
       </button>
     );
   }
 
   return (
-    <div 
-      className="fixed bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+    <div
+      className="fixed flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xl"
       style={{
         left: position.x,
         top: position.y,
@@ -851,40 +853,36 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
         zIndex: alwaysOnTop ? 10000 : 9999
       }}
     >
-      <div 
+      <div
         ref={dragRef}
         onMouseDown={handleMouseDown}
-        className={`flex items-center justify-between px-4 py-3 bg-gray-900 text-white cursor-move select-none shrink-0 ${isMinimized ? 'h-full' : ''}`}
+        className={cn('flex shrink-0 items-center justify-between border-b border-border bg-muted/40 px-4 py-2.5 select-none', isMinimized && 'h-full border-b-0')}
       >
         <div className="flex items-center gap-2">
-          <Bot className="size-4 text-blue-400" />
-          <span className="font-bold text-sm">{t('window.title')}</span>
+          <Bot className="size-4 text-primary" />
+          <span className="text-sm font-medium text-foreground">{t('window.title')}</span>
         </div>
-        <div className="flex items-center gap-2" onMouseDown={e => e.stopPropagation()}>
-          <button 
-            onClick={() => setAlwaysOnTop(!alwaysOnTop)} 
-            className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
-              alwaysOnTop ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-white/20 text-white'
-            }`}
+        <div className="flex items-center gap-1" onMouseDown={e => e.stopPropagation()}>
+          <button
+            onClick={() => setAlwaysOnTop(!alwaysOnTop)}
+            className={cn('flex size-6 items-center justify-center rounded transition-colors', alwaysOnTop ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground')}
             title={alwaysOnTop ? t('window.unpinTitle') : t('window.pinTitle')}
           >
             {alwaysOnTop ? <Pin className="size-3.5" /> : <Pin className="size-3.5 rotate-90" />}
           </button>
-          
-          <button 
-            onClick={() => setIsLocked(!isLocked)} 
-            className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
-              isLocked ? 'bg-yellow-500/20 text-yellow-400' : 'hover:bg-white/20 text-white'
-            }`}
+
+          <button
+            onClick={() => setIsLocked(!isLocked)}
+            className={cn('flex size-6 items-center justify-center rounded transition-colors', isLocked ? 'bg-warning/10 text-warning' : 'text-muted-foreground hover:bg-accent hover:text-foreground')}
             title={isLocked ? t('window.unlockTitle') : t('window.lockTitle')}
           >
             {isLocked ? <Lock className="size-3.5" /> : <LockOpen className="size-3.5" />}
           </button>
-          
-          <button onClick={() => setIsMinimized(!isMinimized)} className="w-6 h-6 rounded hover:bg-white/20 flex items-center justify-center transition-colors">
+
+          <button onClick={() => setIsMinimized(!isMinimized)} className="flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
             {isMinimized ? <Maximize2 className="size-3.5" /> : <Minus className="size-3.5" />}
           </button>
-          <button onClick={() => setIsOpen(false)} className="w-6 h-6 rounded hover:bg-red-500/80 flex items-center justify-center transition-colors">
+          <button onClick={() => setIsOpen(false)} className="flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive">
             <X className="size-3.5" />
           </button>
         </div>
@@ -892,51 +890,51 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
 
       {!isMinimized && (
         <>
-          <div className="px-4 py-2 border-b bg-gray-50 flex justify-between items-center text-xs shrink-0">
+          <div className="flex shrink-0 items-center justify-between border-b border-border bg-muted/20 px-4 py-2 text-xs">
              <div className="flex items-center gap-2">
-                <select 
-                  value={currentModelId} 
+                <Select
+                  className="h-7 w-auto max-w-[140px] text-xs"
+                  value={currentModelId}
                   onChange={(e) => setCurrentModelId(e.target.value)}
-                  className="bg-white border border-gray-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 max-w-[140px]"
                 >
                   {models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                </select>
-                <select 
+                </Select>
+                <Select
+                  className="h-7 w-auto max-w-[120px] text-xs"
                   value={outputMode}
                   onChange={(e) => setOutputMode(e.target.value as OutputMode)}
-                  className="bg-white border border-gray-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500 max-w-[120px]"
                 >
                   <option value="streaming">{t('output.streaming')}</option>
                   <option value="traditional">{t('output.traditional')}</option>
-                </select>
+                </Select>
              </div>
              <div className="flex items-center gap-1">
-                <button 
-                  onClick={() => setEditPanelOpen(!editPanelOpen)} 
-                  className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${editPanelOpen ? 'bg-green-100 text-green-600' : 'text-gray-400 hover:bg-gray-200'}`}
+                <button
+                  onClick={() => setEditPanelOpen(!editPanelOpen)}
+                  className={cn('flex size-7 items-center justify-center rounded transition-colors', editPanelOpen ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground')}
                   title={t('window.editDataTitle')}
                 >
                   <PenLine className="size-4" />
                 </button>
-                <button 
-                  onClick={() => setContextPanelOpen(!contextPanelOpen)} 
-                  className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${contextPanelOpen ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:bg-gray-200'}`}
+                <button
+                  onClick={() => setContextPanelOpen(!contextPanelOpen)}
+                  className={cn('flex size-7 items-center justify-center rounded transition-colors', contextPanelOpen ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground')}
                   title={t('window.contextTitle')}
                 >
                   <BookOpenText className="size-4" />
                 </button>
                 {streamingMessageId && (
-                  <button 
+                  <button
                     onClick={handleStopStreaming}
-                    className="w-7 h-7 rounded text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors"
+                    className="flex size-7 items-center justify-center rounded text-destructive transition-colors hover:bg-destructive/10"
                     title={t('window.stopStreamTitle')}
                   >
                     <CircleStop className="size-4" />
                   </button>
                 )}
-                <button 
-                  onClick={() => setMessages([])} 
-                  className="w-7 h-7 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors"
+                <button
+                  onClick={() => setMessages([])}
+                  className="flex size-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                   title={t('window.clearChatTitle')}
                 >
                   <Trash2 className="size-4" />

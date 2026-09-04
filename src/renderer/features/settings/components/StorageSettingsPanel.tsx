@@ -11,7 +11,31 @@ import React from 'react';
 import { useTranslation } from '@/i18n';
 import type { StorageSettingsPanelProps } from '../types';
 import { dialogService } from '@/shared/services/dialogService';
+import { Button } from '@/shared/ui/Button';
+import { Input } from '@/shared/ui/Input';
 import { AlertTriangle, ArrowLeftRight, Clock, Database, FolderOpen, History, Info, Loader2, Save, Settings, Trash2 } from 'lucide-react';
+
+/** 存储设置区块的小标题 */
+const FieldLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+    {children}
+  </div>
+);
+
+/** 状态徽章 */
+const StatusBadge: React.FC<{ tone: 'primary' | 'success' | 'muted'; children: React.ReactNode }> = ({ tone, children }) => (
+  <span
+    className={
+      tone === 'primary'
+        ? 'rounded border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs text-primary'
+        : tone === 'success'
+          ? 'rounded border border-success/30 bg-success/10 px-2 py-0.5 text-xs text-success'
+          : 'rounded border border-border bg-muted/40 px-2 py-0.5 text-xs text-muted-foreground'
+    }
+  >
+    {children}
+  </span>
+);
 
 const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
   storageConfig,
@@ -24,42 +48,43 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
 }) => {
   const { t, i18n } = useTranslation('settings');
   return (
-    <div className="space-y-8 animate-in zoom-in duration-300">
-      <div className="text-center mb-8">
-        <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-4 mx-auto shadow-2xl shadow-green-200">
-          <Database className="size-8 text-white" />
+    <div className="space-y-6">
+      {/* 页头 */}
+      <div className="flex items-center gap-4">
+        <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Database className="size-6" />
         </div>
-        <h3 className="text-2xl font-black text-gray-900 mb-2">{t('storage.title')}</h3>
-        <p className="text-gray-500 text-sm max-w-2xl mx-auto leading-relaxed">
-          {t('storage.subtitle')}
-        </p>
+        <div>
+          <h3 className="font-serif text-xl font-medium text-foreground">{t('storage.title')}</h3>
+          <p className="mt-0.5 text-sm text-muted-foreground">{t('storage.subtitle')}</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* 当前存储信息 */}
-        <div className="border-2 border-green-100 rounded-2xl p-6 bg-gradient-to-br from-green-50 to-white">
-          <h4 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
-            <Info className="size-4 text-green-500" />
+        <div className="rounded-lg border border-border bg-card p-5">
+          <h4 className="mb-4 flex items-center gap-2 text-sm font-medium text-foreground">
+            <Info className="size-4 text-muted-foreground" />
             {t('storage.currentStatus')}
           </h4>
 
           <div className="space-y-4">
             <div>
-              <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('storage.pathLabel')}</div>
-              <div className="text-sm font-mono bg-gray-50 text-gray-700 p-3 rounded-lg border border-gray-100 truncate">
+              <FieldLabel>{t('storage.pathLabel')}</FieldLabel>
+              <div className="truncate rounded-md border border-border bg-muted/30 px-3 py-2 font-mono text-xs text-foreground">
                 {storageConfig.dataPath || t('storage.defaultPath')}
               </div>
             </div>
 
             <div>
-              <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('storage.modeLabel')}</div>
+              <FieldLabel>{t('storage.modeLabel')}</FieldLabel>
               <div className="flex items-center gap-2">
-                <div className={`px-3 py-1 rounded-lg text-xs font-black ${storageConfig.useCustomPath ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
+                <StatusBadge tone={storageConfig.useCustomPath ? 'primary' : 'muted'}>
                   {storageConfig.useCustomPath ? t('storage.customPathTag') : t('storage.defaultPathTag')}
-                </div>
+                </StatusBadge>
                 {storageConfig.lastMigration && (
-                  <div className="text-xs text-gray-400">
-                    <Clock className="size-4 mr-1" />
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Clock className="size-3.5" />
                     {t('storage.lastMigration', { date: new Date(storageConfig.lastMigration).toLocaleDateString(i18n.language) })}
                   </div>
                 )}
@@ -67,22 +92,20 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
             </div>
 
             <div>
-              <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('storage.dataFileLabel')}</div>
-              <div className="text-sm text-gray-600">
-                novalist-data.json
-              </div>
+              <FieldLabel>{t('storage.dataFileLabel')}</FieldLabel>
+              <div className="font-mono text-xs text-foreground">novalist-data.json</div>
             </div>
 
             {/* 自动备份状态 */}
             <div>
-              <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('storage.autoBackupStatus')}</div>
+              <FieldLabel>{t('storage.autoBackupStatus')}</FieldLabel>
               <div className="flex items-center gap-2">
-                <div className={`px-3 py-1 rounded-lg text-xs font-black ${storageConfig.autoBackupEnabled ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}`}>
+                <StatusBadge tone={storageConfig.autoBackupEnabled ? 'success' : 'muted'}>
                   {storageConfig.autoBackupEnabled ? t('storage.enabled') : t('storage.disabled')}
-                </div>
+                </StatusBadge>
                 {storageConfig.lastAutoBackup && (
-                  <div className="text-xs text-gray-400">
-                    <History className="size-4 mr-1" />
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <History className="size-3.5" />
                     {t('storage.lastBackup', { time: new Date(storageConfig.lastAutoBackup).toLocaleTimeString(i18n.language) })}
                   </div>
                 )}
@@ -92,81 +115,79 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
         </div>
 
         {/* 存储配置 */}
-        <div className="border-2 border-blue-100 rounded-2xl p-6 bg-gradient-to-br from-blue-50 to-white">
-          <h4 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
-            <Settings className="size-4 text-blue-500" />
+        <div className="rounded-lg border border-border bg-card p-5">
+          <h4 className="mb-4 flex items-center gap-2 text-sm font-medium text-foreground">
+            <Settings className="size-4 text-muted-foreground" />
             {t('storage.configTitle')}
           </h4>
 
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
+          <div className="space-y-5">
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <div className="text-sm font-black text-gray-700 mb-1">{t('storage.useCustomLabel')}</div>
-                <p className="text-xs text-gray-500">{t('storage.useCustomHint')}</p>
+                <div className="mb-0.5 text-sm text-foreground">{t('storage.useCustomLabel')}</div>
+                <p className="text-xs text-muted-foreground">{t('storage.useCustomHint')}</p>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
+              <label className="relative inline-flex shrink-0 cursor-pointer items-center">
                 <input
                   type="checkbox"
-                  className="sr-only peer"
+                  className="peer sr-only"
                   checked={storageConfig.useCustomPath}
                   onChange={(e) => setStorageConfig({ ...storageConfig, useCustomPath: e.target.checked })}
                 />
-                <div className="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                <span className="h-6 w-11 rounded-full bg-muted transition-colors after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:bg-background after:shadow after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-5" />
               </label>
             </div>
 
             {storageConfig.useCustomPath && (
-              <div className="space-y-4">
-                <div>
-                  <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('storage.customPathLabel')}</div>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      className="flex-1 border-none rounded-xl px-4 py-3 text-sm bg-gray-50 text-gray-700 outline-none focus:ring-2 focus:ring-blue-100"
-                      value={storageConfig.dataPath}
-                      onChange={(e) => setStorageConfig({ ...storageConfig, dataPath: e.target.value })}
-                      placeholder={t('storage.pathPlaceholder')}
-                    />
-                    <button
-                      onClick={async () => {
-                        // 使用Electron API选择目录
-                        if (window.electronAPI) {
-                          try {
-                            const result = await window.electronAPI.openDirectoryDialog({
-                              title: t('storage.dialogTitle'),
-                              defaultPath: storageConfig.dataPath || ''
-                            });
-                            if (!result.canceled && result.filePaths.length > 0) {
-                              setStorageConfig({ ...storageConfig, dataPath: result.filePaths[0] ?? '' });
-                            }
-                          } catch (error) {
-                            console.error('选择目录失败:', error);
+              <div>
+                <FieldLabel>{t('storage.customPathLabel')}</FieldLabel>
+                <div className="flex gap-2">
+                  <Input
+                    className="flex-1 font-mono text-xs"
+                    value={storageConfig.dataPath}
+                    onChange={(e) => setStorageConfig({ ...storageConfig, dataPath: e.target.value })}
+                    placeholder={t('storage.pathPlaceholder')}
+                  />
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={async () => {
+                      // 使用Electron API选择目录
+                      if (window.electronAPI) {
+                        try {
+                          const result = await window.electronAPI.openDirectoryDialog({
+                            title: t('storage.dialogTitle'),
+                            defaultPath: storageConfig.dataPath || ''
+                          });
+                          if (!result.canceled && result.filePaths.length > 0) {
+                            setStorageConfig({ ...storageConfig, dataPath: result.filePaths[0] ?? '' });
                           }
-                        } else {
-                          dialogService.alert(t('storage.electronUnavailable'));
+                        } catch (error) {
+                          console.error('选择目录失败:', error);
                         }
-                      }}
-                      className="px-4 py-3 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-black transition-all"
-                    >
-                      <FolderOpen className="size-4 mr-2" />
-                      {t('storage.selectDir')}
-                    </button>
-                  </div>
+                      } else {
+                        dialogService.alert(t('storage.electronUnavailable'));
+                      }
+                    }}
+                  >
+                    <FolderOpen className="size-3.5" />
+                    {t('storage.selectDir')}
+                  </Button>
                 </div>
               </div>
             )}
 
             {/* 自动备份配置 */}
-            <div className="space-y-6 pt-6 border-t border-gray-100">
-              <div className="flex items-center justify-between">
+            <div className="space-y-5 border-t border-border pt-5">
+              <div className="flex items-center justify-between gap-4">
                 <div>
-                  <div className="text-sm font-black text-gray-700 mb-1">{t('storage.autoBackupLabel')}</div>
-                  <p className="text-xs text-gray-500">{t('storage.autoBackupHint')}</p>
+                  <div className="mb-0.5 text-sm text-foreground">{t('storage.autoBackupLabel')}</div>
+                  <p className="text-xs text-muted-foreground">{t('storage.autoBackupHint')}</p>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
+                <label className="relative inline-flex shrink-0 cursor-pointer items-center">
                   <input
                     type="checkbox"
-                    className="sr-only peer"
+                    className="peer sr-only"
                     checked={storageConfig.autoBackupEnabled || false}
                     onChange={(e) => setStorageConfig({
                       ...storageConfig,
@@ -174,48 +195,45 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                       autoBackupInterval: e.target.checked ? (storageConfig.autoBackupInterval || 10) : undefined
                     })}
                   />
-                  <div className="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                  <span className="h-6 w-11 rounded-full bg-muted transition-colors after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:bg-background after:shadow after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-5" />
                 </label>
               </div>
 
               {storageConfig.autoBackupEnabled && (
-                <div className="space-y-4 pl-4 border-l-2 border-green-100">
+                <div className="space-y-4 border-l-2 border-primary/20 pl-4">
                   <div>
-                    <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('storage.intervalLabel')}</div>
+                    <FieldLabel>{t('storage.intervalLabel')}</FieldLabel>
                     <div className="flex gap-2">
                       {[5, 10, 30].map((interval) => (
                         <button
                           key={interval}
+                          type="button"
                           onClick={() => setStorageConfig({ ...storageConfig, autoBackupInterval: interval })}
-                          className={`px-4 py-2 rounded-lg text-xs font-black transition-all ${
+                          className={`rounded-md border px-3 py-1.5 text-xs transition-colors ${
                             storageConfig.autoBackupInterval === interval
-                              ? 'bg-green-100 text-green-600 border-2 border-green-200'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                              ? 'border-primary/40 bg-primary/5 text-primary'
+                              : 'border-border text-muted-foreground hover:bg-accent/40'
                           }`}
                         >
                           {t('storage.intervalSeconds', { interval })}
                         </button>
                       ))}
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">
-                      {t('storage.intervalHint')}
-                    </p>
+                    <p className="mt-2 text-xs text-muted-foreground">{t('storage.intervalHint')}</p>
                   </div>
 
                   <div>
-                    <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('storage.backupStateLabel')}</div>
+                    <FieldLabel>{t('storage.backupStateLabel')}</FieldLabel>
                     <div className="flex items-center gap-2">
-                      <div className={`px-3 py-1 rounded-lg text-xs font-black ${
-                        storageConfig.lastAutoBackup
-                          ? 'bg-green-100 text-green-600'
-                          : 'bg-gray-100 text-gray-600'
-                      }`}>
+                      <StatusBadge tone={storageConfig.lastAutoBackup ? 'success' : 'muted'}>
                         {storageConfig.lastAutoBackup
                           ? t('storage.lastBackup', { time: new Date(storageConfig.lastAutoBackup).toLocaleTimeString(i18n.language) })
                           : t('storage.notBackedUp')
                         }
-                      </div>
-                      <button
+                      </StatusBadge>
+                      <Button
+                        variant="secondary"
+                        size="sm"
                         onClick={async () => {
                           // 手动触发备份
                           try {
@@ -227,17 +245,16 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                             console.error('手动备份失败:', error);
                           }
                         }}
-                        className="px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-black transition-all"
                       >
-                        <Save className="size-4 mr-1" />
+                        <Save className="size-3.5" />
                         {t('storage.backupNow')}
-                      </button>
+                      </Button>
                     </div>
                   </div>
 
                   <div>
-                    <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('storage.policyLabel')}</div>
-                    <p className="text-xs text-gray-600">
+                    <FieldLabel>{t('storage.policyLabel')}</FieldLabel>
+                    <p className="text-xs leading-relaxed text-muted-foreground">
                       {t('storage.policyLine1')}<br />
                       {t('storage.policyLine2')}<br />
                       {t('storage.policyLine3')}<br />
@@ -252,17 +269,19 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
       </div>
 
       {/* 数据操作 */}
-      <div className="border-2 border-red-100 rounded-2xl p-6 bg-gradient-to-br from-red-50 to-white mt-8">
-        <h4 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
-          <AlertTriangle className="size-4 text-red-500" />
+      <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-5">
+        <h4 className="mb-4 flex items-center gap-2 text-sm font-medium text-foreground">
+          <AlertTriangle className="size-4 text-destructive" />
           {t('storage.dangerTitle')}
         </h4>
 
         <div className="space-y-4">
           <div>
-            <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('storage.migrationLabel')}</div>
-            <div className="flex items-center gap-2">
-              <button
+            <FieldLabel>{t('storage.migrationLabel')}</FieldLabel>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={async () => {
                   setIsLoadingStorage(true);
                   setMigrationStatus(t('storage.migrationChecking'));
@@ -278,33 +297,32 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                   }
                 }}
                 disabled={isLoadingStorage}
-                className="px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl text-xs font-black transition-all flex items-center gap-2 disabled:opacity-50"
               >
-                {isLoadingStorage ? <Loader2 className="size-4 animate-spin" /> : <ArrowLeftRight className="size-4" />}
+                {isLoadingStorage ? <Loader2 className="size-3.5 animate-spin" /> : <ArrowLeftRight className="size-3.5" />}
                 {t('storage.checkMigration')}
-              </button>
+              </Button>
               {migrationStatus && (
-                <span className="text-xs text-gray-600">{migrationStatus}</span>
+                <span className="text-xs text-muted-foreground">{migrationStatus}</span>
               )}
             </div>
           </div>
 
           <div>
-            <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('storage.clearLabel')}</div>
-            <p className="text-xs text-gray-600 mb-3">
-              {t('storage.clearHint')}
-            </p>
-            <button
+            <FieldLabel>{t('storage.clearLabel')}</FieldLabel>
+            <p className="mb-2 text-xs text-muted-foreground">{t('storage.clearHint')}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
               onClick={async () => {
                 if (await dialogService.confirm({ message: t('storage.clearConfirm'), danger: true })) {
                   onClearData();
                 }
               }}
-              className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl text-xs font-black transition-all flex items-center gap-2"
             >
-              <Trash2 className="size-4" />
+              <Trash2 className="size-3.5" />
               {t('storage.clearLabel')}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

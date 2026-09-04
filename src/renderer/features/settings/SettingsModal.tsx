@@ -30,6 +30,7 @@ import { DEFAULT_IMPORT_EXPORT_MODE, DEFAULT_SETTINGS_TAB, DEFAULT_STORAGE_CONFI
 import SettingsModalHeader from './components/SettingsModalHeader';
 import SettingsModalFooter from './components/SettingsModalFooter';
 import SettingsTabContent from './components/SettingsTabContent';
+import { Dialog, DialogContent } from '@/shared/ui/Dialog';
 import {
   createDefaultEmbeddingConfig,
   createNewCardPromptTemplate,
@@ -431,14 +432,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-md">
-      <div className="bg-white rounded-[2.5rem] w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-white/20">
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <DialogContent hideClose className="flex h-[90vh] w-[94vw] max-w-6xl flex-col gap-0 overflow-hidden p-0">
         <SettingsModalHeader
           activeTab={activeTab}
           onChange={setActiveTab}
           onClose={onClose}
         />
-        <div className="p-10 overflow-y-auto flex-1 bg-gray-50/50 custom-scrollbar">
+        <div className="custom-scrollbar flex-1 overflow-y-auto bg-background p-6">
           <SettingsTabContent
             activeTab={activeTab}
             localModels={localModels}
@@ -507,8 +513,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           onClose={onClose}
           onSave={handleGlobalSave}
         />
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

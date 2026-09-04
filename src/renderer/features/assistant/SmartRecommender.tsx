@@ -15,9 +15,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type Project, type ModelConfig } from '../../../shared/types';
+import { Button } from '@/shared/ui/Button';
 import { cn } from '@/shared/utils/cn';
 import { CalendarDays, Circle, Eye, Gavel, Info, Lightbulb, Loader2, MapPin, Plus, RefreshCw, Search, User, Users, type LucideIcon } from 'lucide-react';
-import { 
+import {
   type SmartRecommendationResult,
   type RecommendationItem,
   getSmartRecommendations,
@@ -52,7 +53,7 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
 
   // 获取推荐
   const fetchRecommendations = useCallback(async () => {
-    if (!context.currentContent && !context.selectedCharacters?.length && 
+    if (!context.currentContent && !context.selectedCharacters?.length &&
         !context.selectedLocation && !context.selectedFaction) {
       setRecommendations(null);
       return;
@@ -79,22 +80,21 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
     fetchRecommendations();
   }, [fetchRecommendations]);
 
-  // 获取类型图标（lucide 组件 + 颜色类）
-  const getTypeIcon = (type: string): { icon: LucideIcon; cls: string } => {
+  // 获取类型图标（lucide 组件，形状区分类型）
+  const getTypeIcon = (type: string): LucideIcon => {
     switch (type) {
-      case 'character': return { icon: User, cls: 'text-blue-500' };
-      case 'faction': return { icon: Users, cls: 'text-purple-500' };
-      case 'location': return { icon: MapPin, cls: 'text-green-500' };
-      case 'event': return { icon: CalendarDays, cls: 'text-orange-500' };
-      case 'rule': return { icon: Gavel, cls: 'text-red-500' };
-      default: return { icon: Circle, cls: 'text-gray-400' };
+      case 'character': return User;
+      case 'faction': return Users;
+      case 'location': return MapPin;
+      case 'event': return CalendarDays;
+      case 'rule': return Gavel;
+      default: return Circle;
     }
   };
 
-  // 类型图标渲染辅助：getTypeIcon 返回组件+颜色类
   const TypeIcon = ({ type, className }: { type: string; className?: string }) => {
-    const { icon: Icon, cls } = getTypeIcon(type);
-    return <Icon className={cn(cls, className)} />;
+    const Icon = getTypeIcon(type);
+    return <Icon className={cn('text-muted-foreground', className)} />;
   };
 
   // 获取类型标签
@@ -121,46 +121,54 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
 
   // 获取相关性颜色
   const getRelevanceColor = (score: number) => {
-    if (score >= 20) return 'text-green-600';
-    if (score >= 10) return 'text-amber-600';
-    return 'text-gray-500';
+    if (score >= 20) return 'text-success';
+    if (score >= 10) return 'text-warning';
+    return 'text-muted-foreground';
+  };
+
+  const handleSelect = (rec: RecommendationItem) => {
+    setSelectedItemId(rec.id);
+    onSelectItem?.(rec);
   };
 
   // 紧凑模式
   if (compact) {
     return (
-      <div className="bg-white/80 backdrop-blur rounded-2xl p-4 shadow-sm border border-gray-100">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-black text-gray-700 flex items-center gap-2">
-            <Lightbulb className="size-4 text-amber-500" />
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h4 className="flex items-center gap-2 text-sm font-medium text-foreground">
+            <Lightbulb className="size-4 text-primary" />
             {t('rec.title')}
           </h4>
-          {isLoading && <Loader2 className="size-3.5 animate-spin text-gray-400" />}
+          {isLoading && <Loader2 className="size-3.5 animate-spin text-muted-foreground" />}
         </div>
-        
+
         {recommendations?.recommendations && recommendations.recommendations.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-1">
             {recommendations.recommendations.slice(0, 3).map((rec) => (
               <div
                 key={rec.id}
-                onClick={() => {
-                  setSelectedItemId(rec.id);
-                  onSelectItem?.(rec);
-                }}
-                className={`flex items-center gap-2 p-2 rounded-xl cursor-pointer transition-all ${
-                  selectedItemId === rec.id ? 'bg-amber-50 border-amber-200' : 'hover:bg-gray-50'
-                } border border-transparent`}
+                role="button"
+                tabIndex={0}
+                onClick={() => handleSelect(rec)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSelect(rec); } }}
+                className={cn(
+                  'flex cursor-pointer items-center gap-2 rounded-md border px-2 py-1.5 transition-colors',
+                  selectedItemId === rec.id
+                    ? 'border-primary/40 bg-primary/5'
+                    : 'border-transparent hover:bg-accent/40'
+                )}
               >
                 <TypeIcon type={rec.type} className="size-4" />
-                <span className="text-sm text-gray-700 truncate flex-1">{getDisplayName(rec.item)}</span>
-                <span className={`text-[10px] font-bold ${getRelevanceColor(rec.relevanceScore)}`}>
+                <span className="flex-1 truncate text-sm text-foreground">{getDisplayName(rec.item)}</span>
+                <span className={cn('text-[10px] tabular-nums', getRelevanceColor(rec.relevanceScore))}>
                   {Math.round(rec.relevanceScore)}
                 </span>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-xs text-gray-400 text-center py-2">
+          <p className="py-2 text-center text-xs text-muted-foreground">
             {isLoading ? t('rec.analyzingShort') : t('rec.noRecommendations')}
           </p>
         )}
@@ -170,38 +178,34 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
 
   // 完整模式
   return (
-    <div className="bg-white rounded-[2rem] p-6 shadow-lg">
+    <div className="rounded-lg border border-border bg-card p-5">
       {/* 头部 */}
-      <div className="flex justify-between items-start mb-6">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
-            <Lightbulb className="size-4 text-amber-500" />
+          <h3 className="flex items-center gap-2 font-serif text-lg font-medium text-foreground">
+            <Lightbulb className="size-4 text-primary" />
             {t('rec.title')}
           </h3>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="mt-0.5 text-xs text-muted-foreground">
             {recommendations?.context || t('rec.defaultContext')}
           </p>
         </div>
-        <div className="flex gap-2">
-          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+        <div className="flex items-center gap-3">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
             <input
               type="checkbox"
               checked={useAI}
               onChange={(e) => setUseAI(e.target.checked)}
-              className="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+              className="size-3.5 accent-primary"
               disabled={!model}
             />
-            <span className={model ? '' : 'text-gray-400'}>
+            <span className={model ? '' : 'opacity-50'}>
               {t('rec.aiEnhanced')} {model ? '' : t('rec.aiEnhancedOff')}
             </span>
           </label>
-          <button
-            onClick={fetchRecommendations}
-            disabled={isLoading}
-            className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition-all disabled:opacity-50 flex items-center justify-center"
-          >
+          <Button variant="secondary" size="icon" className="size-8" onClick={fetchRecommendations} disabled={isLoading} title={t('rec.refresh')}>
             {isLoading ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -211,78 +215,82 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
           recommendations.recommendations.map((rec) => (
             <div
               key={rec.id}
-              className={`border-2 rounded-2xl p-4 transition-all cursor-pointer ${
-                selectedItemId === rec.id 
-                  ? 'border-amber-300 bg-amber-50/50' 
-                  : 'border-gray-100 hover:border-amber-100 bg-white'
-              }`}
-              onClick={() => {
-                setSelectedItemId(rec.id);
-                onSelectItem?.(rec);
-              }}
+              role="button"
+              tabIndex={0}
+              onClick={() => handleSelect(rec)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSelect(rec); } }}
+              className={cn(
+                'cursor-pointer rounded-lg border p-4 transition-colors',
+                selectedItemId === rec.id
+                  ? 'border-primary/40 bg-primary/5'
+                  : 'border-border bg-card hover:border-primary/30'
+              )}
             >
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
-                  <TypeIcon type={rec.type} className="size-5" />
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
+                  <TypeIcon type={rec.type} className="size-4" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex flex-wrap items-center gap-1.5">
+                    <span className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] text-muted-foreground">
                       {getTypeLabel(rec.type)}
                     </span>
                     {rec.suggestedAction && (
-                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                      <span className="rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] text-primary">
                         {t('rec.suggested', { action: getActionLabel(rec.suggestedAction) })}
                       </span>
                     )}
-                    <span className={`text-[10px] font-bold ml-auto ${getRelevanceColor(rec.relevanceScore)}`}>
+                    <span className={cn('ml-auto text-[10px] tabular-nums', getRelevanceColor(rec.relevanceScore))}>
                       {t('rec.relevance', { score: Math.round(rec.relevanceScore) })}
                     </span>
                   </div>
-                  <h4 className="font-bold text-gray-800 mb-1">{getDisplayName(rec.item)}</h4>
-                  <p className="text-xs text-gray-500 line-clamp-2">
+                  <h4 className="mb-0.5 font-serif text-sm font-medium text-foreground">{getDisplayName(rec.item)}</h4>
+                  <p className="line-clamp-2 text-xs text-muted-foreground">
                     {'description' in rec.item && rec.item.description
                       ? rec.item.description
                       : t('rec.noDescription')}
                   </p>
                   {rec.reason && (
-                    <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
-                      <Info className="size-4" />
+                    <p className="mt-2 flex items-center gap-1 text-xs text-primary">
+                      <Info className="size-3.5 shrink-0" />
                       {rec.reason}
                     </p>
                   )}
                 </div>
               </div>
-              
+
               {/* 操作按钮 */}
-              <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
-                <button
+              <div className="mt-3 flex gap-2 border-t border-border pt-3">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="flex-1"
                   onClick={(e) => {
                     e.stopPropagation();
                     onViewItem?.(rec.type, rec.id);
                   }}
-                  className="flex-1 py-2 bg-gray-50 text-gray-600 rounded-xl text-xs font-bold hover:bg-gray-100 transition-all flex items-center justify-center gap-1"
                 >
-                  <Eye className="size-4" />
+                  <Eye className="size-3.5" />
                   {t('rec.viewDetails')}
-                </button>
-                <button
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onSelectItem?.(rec);
+                    handleSelect(rec);
                   }}
-                  className="flex-1 py-2 bg-amber-50 text-amber-600 rounded-xl text-xs font-bold hover:bg-amber-100 transition-all flex items-center justify-center gap-1"
                 >
-                  <Plus className="size-4" />
+                  <Plus className="size-3.5" />
                   {getActionLabel(rec.suggestedAction)}
-                </button>
+                </Button>
               </div>
             </div>
           ))
         ) : (
-          <div className="text-center py-12 text-gray-400">
-            <Search className="size-10 mb-3 text-gray-300" />
-            <p className="text-sm">
+          <div className="py-10 text-center">
+            <Search className="mx-auto mb-2 size-8 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
               {isLoading ? t('rec.analyzingFull') : t('rec.emptyHint')}
             </p>
           </div>
@@ -290,8 +298,8 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
       </div>
 
       {/* 场景推荐快捷入口 */}
-      <div className="mt-6 pt-6 border-t border-gray-100">
-        <h4 className="text-xs font-black text-gray-400 uppercase mb-3">{t('rec.sceneTitle')}</h4>
+      <div className="mt-5 border-t border-border pt-4">
+        <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('rec.sceneTitle')}</h4>
         <div className="flex flex-wrap gap-2">
           {([
             { type: 'dialogue', scene: t('rec.scene.dialogue') },
@@ -301,11 +309,12 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
           ] as const).map(({ type, scene }) => (
             <button
               key={type}
+              type="button"
               onClick={() => {
                 const result = getSceneRecommendations(project, type, context.selectedLocation, context.selectedCharacters);
                 setRecommendations(result);
               }}
-              className="px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold hover:bg-gray-100 transition-all"
+              className="rounded-md border border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground"
             >
               {t('rec.sceneLabel', { scene })}
             </button>
@@ -317,11 +326,3 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
 };
 
 export default SmartRecommender;
-
-
-
-
-
-
-
-
