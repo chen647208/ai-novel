@@ -6,7 +6,7 @@
 ## 阅读顺序建议
 
 - 想了解整体方向 → 直接读 **10 总纲**，遇到引用再回查单篇。
-- 想动手改造 → 读 **11 迁移计划**（工作包分解 + 现状诊断 + 风险登记）。
+- 想动手改造 → 读 **[design/08 路线图](../design/08-roadmap.md)**（正式方案，已取代 11 篇粗排）。
 - 想了解某个项目 → 按下表。
 - 每篇结构固定：为什么值得看 → 核心机制拆解 → 我们要抄什么（映射到 ai-novel）→ 不要学的 → 参考。
 
@@ -24,7 +24,7 @@
 | 08 | [deepseek-harness](08-deepseek-harness.md) | 一切皆插件 agent（205k★，MIT） | Bundle/Profile/Patch 组合发行值得抄；社区补的设计债（无隔离/无规范）是我们的 day-1 清单 |
 | 09 | [编辑器内核与插件规范](09-editor-kernels-and-plugin-specs.md) | TipTap/CM6/BlockNote/Plate + VS Code/Zed/Figma/MCP | 双内核选型（TipTap+CM6，钩子清单源码实测）、三条编辑器架构不变量、插件规范 v0 合成方案（含 manifest 样例） |
 | 10 | [架构蓝图](10-architecture-blueprint.md) | —— 总纲 | 五条设计公理、分层架构、P0–P4 迁移路线、七条红线 |
-| 11 | [迁移计划](11-migration-plan.md) | 本仓库现状 | P0–P4 拆成 16 个工作包，逐条落到真实文件路径（含现状诊断与风险登记） |
+| 11 | [迁移计划](11-migration-plan.md) | 本仓库现状 | ~~P0–P4 工作包分解~~ **已被 [design/08](../design/08-roadmap.md) 取代**（实测发现已有 repository 抽象，重排为 M0–M5），保留作输入 |
 
 ## 调研对象速览（含未成篇的）
 

@@ -1,0 +1,94 @@
+# 08 实施路线图：M0–M5 完整方案
+
+> 本篇是**可执行总方案**，取代 research/11 的粗排（11 保留作调研输入）。每个里程碑结束都发可发布版本（公理 4）。工作量标注 S/M/L（相对值，非承诺工期）。
+> 版本策略：v1.5→v1.9 小步快跑（内部架构换代，功能不减），v2.0 = 插件化公开。
+
+## M0 数据地基（→ v1.5）｜ 设计依据：03 篇 ｜ ✅ 已完成（verify 全绿，386 测试）
+
+| WP | 内容 | 尺寸 | 落点 | 状态 |
+|---|---|---|---|---|
+| 0.1 | 六实体 + Attribute + EntityChange 类型与校验 | M | `src/core/entities/` | ✅ 类型/校验/SHA-256 哈希/uuidv7，单测覆盖 |
+| 0.2 | 类型注册表 + 首批内置模板（03 篇 §2 表） | M | `src/core/types-registry/` | ✅ 19 内置模板 + 注册表，模板驱动字段 |
+| 0.3 | DSL 解析/序列化器 + 往返测试 | M | `src/core/dsl/` | ✅ frontmatter(YAML 子集)+关键字行+[[wiki]]，往返保真测试 |
+| 0.4 | schema v2（nodes/edges/attrs/revisions/entity_changes/blobs）+ 投影 | L | `repository/schema.ts` | ✅ v2 直接替换 v1（未投产，无迁移框架）；实体化仓库 + FTS 镜像 |
+| 0.5 | 索引器（全量+增量+持久化）；consistency/foreshadow 改消费索引 | L | `src/core/index/` | ✅ 纯 buildIndex + IndexService 指纹增量短路 + 序列化编解码；已作为实时派生缓存接入仓库 loadAll/sync/erase（双引擎端到端测试）。prose 级消费方（编辑器波浪线/图谱）随 M1 DSL 落地 |
+| 0.6 | 一次性迁移器（v1/JSON→v2） | M | `migrations/v2-import.ts` | ⏭️ 按「本版本未投产」决策降级：schema v2 直接替换，仅保留 JSON→SQLite 首启一次性导入哨兵 |
+| 0.7 | 减脂：7 向量服务 → EmbeddingProvider+VectorIndex | M | `knowledge/services/` | ✅ 抽 `EmbeddingProvider`（api/local 选择+自动降级+刷新），删死代码 `simpleVectorStore`，integration 收敛；8 特征测试 |
+| 0.8 | 主进程 Provider 骨架 + IPCAPI 类型化 | M | `src/main/app/` | ✅ AppContainer（正序 boot/逆序 shutdown）+ window/file/dialog/vector/sqlite provider |
+
+**退出标准**：verify 全绿 ✅；删 index 缓存可全量重建 ✅（loadAll 冷启动重建测试）；UI 行为不变（纯换底）✅（StorageRepository/SqlDriver 接口未变，消费方零改动）。迁移往返测试按未投产决策不适用。
+**风险**：迁移丢数据 → 未投产，无历史数据，风险消除。
+
+## M1 编辑器与状态（→ v1.6）｜ 设计依据：06 篇 ｜ 🟡 进行中（地基已验证）
+
+| WP | 内容 | 尺寸 | 状态 |
+|---|---|---|---|
+| 1.1 | TipTap 接入：novel schema + TipTapCanvas 替换 textarea（编排层保留） | L | 🟡 **schema 先行已完成并测试**：`src/renderer/editor/schema.ts`（StarterKit + sceneBreak/keywordLine/chapterRef/placeholder/darlingSlot/ghostNote/dialogueBlock + quoteStyle/tagRef 标记，`getSchema` 无头验证）；`serialization.ts`（DSL↔PM-JSON 纯函数往返，9 测）。**TipTapCanvas 替换待做**：编排层 `textRef` 依赖 textarea 选区快照/光标像素定位（`getTextSelectionSnapshot`/`getKeyboardSelectionMenuPosition`），须在 ProseMirror view 上重实现，属需交互冒烟验证的核心写作 UX，未盲改 |
+| 1.2 | CM6 novelDsl language（大纲/卡片/prompt 区）+ @tag 校验波浪线 | M | ⬜ 待做（依赖 CM6 依赖安装 + 索引 tags 作补全源） |
+| 1.3 | 单一变更管线：transaction → Store.apply → entity_changes + Revision | M | 🟡 **Revision 落底后端已完成并测试**：`saveProject(project, {agentId, cause})` → 正文实质变化才追加 `revisions`（seq 续号、author=agentId、cause 留底），`loadRevisions(nodeId)` 读取；entity_changes 贯穿 agentId（双引擎 6 测）。**Store.apply/UI 接线待做**（随 1.1b/1.5） |
+| 1.4 | 8 个写作原语扩展（enterFlow/placeholder/darlings/ghostOutline/…） | L | ⬜ 待做（依赖 1.1b 画布落地） |
+| 1.5 | Zustand 双 store；App.tsx 收编（<150 行）；persistDiff 做一致性哨兵 | M | ⬜ 待做（App.tsx 现为单一 `useState<AppState>`+persistDiff 差分写；逐 feature 切走需交互回归） |
+| 1.6 | UI 宪法落地：NewBookModal 先建后改；引导模式与自由工作区并存 | S | ⬜ 待做 |
+
+**退出标准**：06 篇 §6 全部 5 条；textarea 出依赖树；编辑延迟基准达标。
+**本轮边界说明**：M1 的 schema/序列化/修订管线为纯逻辑，已无头单测 + `npm run verify` 全绿（406 测试）。画布替换、状态收编、写作原语、CM6 均触及运行中 App 的中心状态与 1174 行编排层，须配交互冒烟验证，未在无验证条件下盲改。
+
+## M2 AI 换代（→ v1.7）｜ 设计依据：05 篇
+
+| WP | 内容 | 尺寸 |
+|---|---|---|
+| 2.1 | AiGatewayProvider：适配器上移主进程 + 类型化事件流 IPC | M |
+| 2.2 | ToolRegistry + 首批 10 内置工具（4 个 prompt 服务工具化转写） | L |
+| 2.3 | PromptAssembler（section 装配器，拆 aiContextBuilder） | M |
+| 2.4 | 技能引擎：SKILL.md 加载 + 渐进注入 + 首批 5 内置写法技能 | M |
+| 2.5 | 审批三档 + diff 预览 + 待审箱 + 超时降级；三级审计链闭合 | L |
+| 2.6 | 会话事件流（jsonl）+ AIHistoryViewer 升级事件浏览器 | M |
+| 2.7 | MCP server 出口 + GlobalAssistant 自举吃 MCP | M |
+
+**退出标准**：05 篇 §8 全部 5 条；旧 prompt service 删除（无双轨）。
+
+## M3 插件化（→ v2.0 公开）｜ 设计依据：04 篇
+
+| WP | 内容 | 尺寸 |
+|---|---|---|
+| 3.1 | manifest schema 校验器 + 加载器（逐插件隔离 + 状态面板 + 一键禁用） | L |
+| 3.2 | 生命周期/unwind/命名空间/错误契约/权限代理 | L |
+| 3.3 | 贡献点 v0 三类：类型模板/技能/Build 渲染器 | M |
+| 3.4 | Dogfooding：15 个 feature → 内置 bundle（先 cards/world/timeline，再 outline/foreshadowing，最后 AI bundle） | XL |
+| 3.5 | profile/bundle/patch 装配 + 装配树查看器；minimal/webnovel/literary 三预设 | M |
+| 3.6 | 导出 Build Profile 全管线（07 篇，含预览与字数统一） | L |
+| 3.7 | 插件 SDK 包（MIT）+ 示例插件（"魔法体系"模板 + "rtf 渲染器"） | M |
+
+**退出标准**：04 篇 §10 全部 5 条 + 07 篇 §5；示例插件不改内核通过；`/core:*` 命令全部走命名空间。
+
+## M4 表面扩展（→ v2.1+）
+
+- 辅助窗口（一致性报告/导出预览，Zettlr win-* 模式）｜ S
+- 贡献点 v1：命令/UI 槽位/编辑器扩展沙箱（worker+iframe）｜ L
+- 同步地基启用：entity_changes pull/push 协议 + 冲突副本 UI（03 篇协议，LWW 禁用）｜ L
+- 逐条目加密（protected session）｜ M
+
+## M5 生态（→ v2.x）
+
+- 插件文档站（规范放仓库内版本化——Twine 教训）｜ M
+- VS Code 形态支线：core npm 包 + 最小扩展（书架只读 + 卡片编辑）｜ L
+- 贡献点 v2：hooks 接缝/主题 ｜ M
+- 兼容性 CI（宿主版本区间矩阵）+ 插件状态上报 ｜ M
+
+## 横切策略
+
+**测试**：28 → M0 末 ≥60（实体/DSL 往返/索引增量/迁移）→ M3 末 ≥120（隔离/unwind/权限/管线 E2E）。CI 新增：core 边界 lint、DSL 往返、插件隔离冒烟三 job。
+**回归门**：每 WP 合入跑 `npm run verify`；每里程碑加手工冒烟清单（建书→写作→AI→导出→重启恢复）。
+**不做清单**：多用户/协作（M5 后议）；移动端；云同步服务；WASM 插件（观察 Zed 后再议）；保留 v1 双写兼容（用户规则：直接替换）。
+**依赖顺序**：M0→M1→M2→M3 严格串行（数据层→管线→AI→插件）；M3.4 dogfooding 可与 3.5/3.6 并行。
+
+## 风险登记（更新自 research/11）
+
+| 风险 | 等级 | 缓解 |
+|---|---|---|
+| M0 迁移丢数据 | 高 | 快照+双读校验期+样本往返测试 |
+| TipTap 替换 textarea 引发写作体验倒退（光标/输入法/性能） | 高 | M1 期间双内核灰度开关；中文 IME composition 专项测试 |
+| 15 feature 插件化（M3.4 XL）周期失控 | 中 | 按依赖序分批，每批可发布；先易后难 |
+| AI 上移主进程破坏现有流式体验 | 中 | 2.1 先做双跑对比（渲染层旧路径 vs 网关新路径）再切 |
+| 插件规范过度设计 | 中 | v0 只开 3 类贡献点；接缝按需求出现再开 |
+| AGPL 与插件生态 | 低 | SDK 单独 MIT（04 篇 §9），FAQ 说明边界 |
