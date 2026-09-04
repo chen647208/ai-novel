@@ -8,13 +8,13 @@
  */
 
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import WritingEditorStatusOverlay from './WritingEditorStatusOverlay';
+import TipTapCanvas from './TipTapCanvas';
 import type { WritingEditorCanvasProps } from '../types';
 import { cn } from '@/shared/utils/cn';
 
 const WritingEditorCanvas: React.FC<WritingEditorCanvasProps> = ({
-  textRef,
+  editorRef,
   activeChapterId,
   content,
   isFocusMode,
@@ -32,24 +32,19 @@ const WritingEditorCanvas: React.FC<WritingEditorCanvasProps> = ({
   onStopStreaming,
   onStopBatchGeneration,
 }) => {
-  const { t } = useTranslation('writing');
   return (
     <div className={cn('custom-scrollbar flex flex-1 justify-center overflow-y-auto p-10 transition-colors', isFocusMode ? 'bg-background' : 'bg-muted/30')}>
-      <textarea
-        ref={textRef}
-        disabled={!activeChapterId || (isGenerating && !isStreaming)}
-        value={content}
+      <TipTapCanvas
+        ref={editorRef}
+        activeChapterId={activeChapterId}
+        content={content}
+        isFocusMode={isFocusMode}
+        isGenerating={isGenerating}
+        isStreaming={isStreaming}
+        onContentChange={onContentChange}
         onMouseUp={onMouseUp}
         onKeyUp={onKeyUp}
         onMouseMove={onMouseMove}
-        onChange={(event) => onContentChange(event.target.value)}
-        placeholder={activeChapterId ? t('canvas.placeholderReady') : t('canvas.placeholderEmpty')}
-        className={cn(
-          'h-full w-full min-h-[1200px] cursor-text resize-none rounded-lg border border-border bg-card p-16 font-serif text-lg leading-relaxed text-foreground shadow-sm outline-none',
-          'selection:bg-primary/15 placeholder:text-muted-foreground/50 disabled:cursor-not-allowed disabled:opacity-60',
-          isFocusMode ? 'max-w-3xl text-xl leading-loose' : 'max-w-4xl'
-        )}
-        style={{ whiteSpace: 'pre-wrap' }}
       />
       <WritingEditorStatusOverlay
         isGenerating={isGenerating}

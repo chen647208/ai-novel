@@ -45,6 +45,24 @@ export interface TextSelectionRange {
   end: number;
 }
 
+/**
+ * TipTap 富文本画布对外暴露的命令式句柄。
+ * 编排层（WritingEditor）通过它读取选区并定位菜单，
+ * 不再依赖原生 textarea 的 selectionStart/End。
+ */
+export interface NovelEditorHandle {
+  /**
+   * 当前非空选区。range.start/end 为 ProseMirror 文档位置，
+   * 与 applySelectionReplacement 的 from/to 语义一致（同一份 DSL 解析出的 doc）。
+   * 无选区或仅空白时返回 null。
+   */
+  getSelection(): { text: string; range: TextSelectionRange } | null;
+  /** 键盘选区时弹出菜单的视口坐标（已 clamp），无选区返回 null。 */
+  getKeyboardSelectionMenuPosition(): { x: number; y: number } | null;
+  /** 聚焦编辑器。 */
+  focus(): void;
+}
+
 export interface GenerationModalState {
   isOpen: boolean;
   chapter: Chapter | null;
@@ -180,7 +198,7 @@ export interface WritingSidebarProps {
 }
 
 export interface WritingEditorCanvasProps {
-  textRef: React.RefObject<HTMLTextAreaElement | null>;
+  editorRef: React.RefObject<NovelEditorHandle | null>;
   activeChapterId: string | null;
   content: string;
   isFocusMode: boolean;
@@ -191,9 +209,9 @@ export interface WritingEditorCanvasProps {
   selectedKnowledgeCount: number;
   streamingContentLength: number;
   batchProgress: BatchProgress;
-  onMouseUp: (event: React.MouseEvent<HTMLTextAreaElement>) => void;
+  onMouseUp: (event: React.MouseEvent<HTMLDivElement>) => void;
   onKeyUp: () => void;
-  onMouseMove: (event: React.MouseEvent<HTMLTextAreaElement>) => void;
+  onMouseMove: (event: React.MouseEvent<HTMLDivElement>) => void;
   onContentChange: (content: string) => void;
   onStopStreaming: () => void;
   onStopBatchGeneration: () => void;

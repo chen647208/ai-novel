@@ -239,26 +239,4 @@ export const getGenerationType = (record: AIHistoryRecord) => {
   }
   return i18n.t('writing:utils.genTypeContent');
 };
-export const getTextSelectionSnapshot = (textarea: HTMLTextAreaElement) => {
-  const start = textarea.selectionStart;
-  const end = textarea.selectionEnd;
-  const text = textarea.value.substring(start, end);
-
-  if (!text.trim() || start === end) {
-    return null;
-  }
-
-  return {
-    text,
-    range: { start, end },
-  };
-};
-
-export const getKeyboardSelectionMenuPosition = (textarea: HTMLTextAreaElement) => {
-  const textareaRect = textarea.getBoundingClientRect();
-  const xPos = textareaRect.left + textareaRect.width / 2 - 100;
-  const yPos = textareaRect.top + textareaRect.height / 2 - 30;
-
-  return getFloatingMenuPosition(xPos, yPos);
-};
 

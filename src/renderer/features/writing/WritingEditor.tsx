@@ -36,6 +36,7 @@ import type {
   BatchProgress,
   GenerationModalState,
   MenuPosition,
+  NovelEditorHandle,
   TextSelectionRange,
   TokenUsage,
   WritingEditorProps,
@@ -45,14 +46,13 @@ import {
   buildExportFilename,
   debounce,
   getChapterContext,
-  getKeyboardSelectionMenuPosition,
   getPreviousChapterSummaryIds,
-  getTextSelectionSnapshot,
   getFloatingMenuPosition,
   saveExportFile,
   toggleSetValue,
   type ExportFormat,
 } from './utils';
+import { applySelectionReplacement } from '../../editor/commands';
 
 const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeModel, onUpdate, initialChapterId, onBack }) => {
   const { t } = useTranslation('writing');
@@ -116,7 +116,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
     () => overdueForeshadows(project, activeChapter?.order ?? 0).length,
     [project, activeChapter?.order],
   );
-  const textRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<NovelEditorHandle>(null);
 
   useEffect(() => {
     if (writingPrompts.length > 0 && !selectedGenPromptId) {
@@ -344,8 +344,9 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
   };
 
   const handleMouseSelect = (e: React.MouseEvent) => {
-    if (!textRef.current || selectionBlocked) return;
-    const snapshot = getTextSelectionSnapshot(textRef.current);
+    const handle = editorRef.current;
+    if (!handle || selectionBlocked) return;
+    const snapshot = handle.getSelection();
     if (!snapshot) {
       clearSelectionMenu();
       return;
@@ -354,21 +355,23 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
   };
 
   const handleKeySelect = () => {
-    if (!textRef.current || selectionBlocked) return;
-    const snapshot = getTextSelectionSnapshot(textRef.current);
+    const handle = editorRef.current;
+    if (!handle || selectionBlocked) return;
+    const snapshot = handle.getSelection();
     if (!snapshot) {
       clearSelectionMenu();
       return;
     }
-    const position = getKeyboardSelectionMenuPosition(textRef.current);
-    setMenuPos(position);
+    const anchor = handle.getKeyboardSelectionMenuPosition();
+    if (anchor) setMenuPos(getFloatingMenuPosition(anchor.x, anchor.y));
     setSelectedText(snapshot.text);
     setSelectionRange(snapshot.range);
   };
 
   const handleMouseMove = useMemo(() => debounce((e: React.MouseEvent) => {
-    if (selectionBlocked || !textRef.current) return;
-    const snapshot = getTextSelectionSnapshot(textRef.current);
+    const handle = editorRef.current;
+    if (selectionBlocked || !handle) return;
+    const snapshot = handle.getSelection();
     if (!snapshot) {
       if (menuPos) setMenuPos(null);
       return;
@@ -522,7 +525,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
             const result = response.content;
             if (selectedText && selectionRange && !genModal.isOpen) {
               const currentContent = activeChapter?.content || "";
-              const newContent = currentContent.substring(0, selectionRange.start) + result + currentContent.substring(selectionRange.end);
+              const newContent = applySelectionReplacement(currentContent, selectionRange.start, selectionRange.end, result);
               
               const historyRecord = AIService.buildHistoryRecordData(
                 targetChapter.id,
@@ -601,7 +604,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
         
         if (selectedText && selectionRange && !genModal.isOpen) {
           const currentContent = activeChapter?.content || "";
-          const newContent = currentContent.substring(0, selectionRange.start) + result.content + currentContent.substring(selectionRange.end);
+          const newContent = applySelectionReplacement(currentContent, selectionRange.start, selectionRange.end, result.content);
           
           const historyRecord = AIService.buildHistoryRecordData(
             targetChapter.id,
@@ -1137,7 +1140,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
         />
 
         <WritingEditorCanvas
-          textRef={textRef}
+          editorRef={editorRef}
           activeChapterId={activeChapterId}
           content={isStreaming ? streamingContent : (activeChapter?.content || "")}
           isFocusMode={isFocusMode}

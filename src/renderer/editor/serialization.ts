@@ -40,6 +40,11 @@ const SCENE_BREAK = /^\s*\*\*\*\s*$/;
 const WIKI_INLINE = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g;
 const PLACEHOLDER_INLINE = /\{([^{}|]+)(?:\|([^{}]+))?\}/g;
 
+/** 该行若原样落入 DSL 会被重新解析为块级语法（标题/关键字/场景分隔）。 */
+function isBlockCollision(line: string): boolean {
+  return HEADING.test(line) || KEYWORD_LINE.test(line) || SCENE_BREAK.test(line);
+}
+
 function textNode(t: string): PmNode {
   return { type: 'text', text: t };
 }
@@ -104,6 +109,11 @@ export function dslToPmDoc(body: string): PmNode {
   };
 
   for (const line of lines) {
+    // 反斜杠转义：仅当去掉前导 \ 后本会被解析为块级语法时，视为字面段落文本
+    if (line.startsWith('\\') && isBlockCollision(line.slice(1))) {
+      paraBuf.push(line.slice(1));
+      continue;
+    }
     if (line.trim() === '') {
       flushPara();
       continue;
@@ -152,6 +162,14 @@ function renderInline(nodes: PmNode[] | undefined): string {
   return s;
 }
 
+/** 段落文本逐行转义：任何会被误解析为块级语法的行前置反斜杠，保证往返保真。 */
+function escapeParagraphText(text: string): string {
+  return text
+    .split('\n')
+    .map((ln) => (isBlockCollision(ln) ? '\\' + ln : ln))
+    .join('\n');
+}
+
 /** PM doc JSON → DSL 正文文本（块间以空行分隔，与 dslToPmDoc 往返稳定） */
 export function pmDocToDsl(doc: PmNode): string {
   const blocks = doc.content ?? [];
@@ -159,7 +177,7 @@ export function pmDocToDsl(doc: PmNode): string {
   for (const b of blocks) {
     switch (b.type) {
       case 'paragraph':
-        lines.push(renderInline(b.content));
+        lines.push(escapeParagraphText(renderInline(b.content)));
         lines.push('');
         break;
       case 'heading': {
@@ -184,6 +202,6 @@ export function pmDocToDsl(doc: PmNode): string {
         }
     }
   }
-  // 去掉尾部多余空行，保留单个结尾换行
-  return lines.join('\n').replace(/\n+$/, '') + '\n';
+  // 去掉尾部多余空行；不追加尾随换行（编辑器受控内容与源正文对齐，避免尾差抖动）
+  return lines.join('\n').replace(/\n+$/, '');
 }

@@ -67,7 +67,6 @@ describe('pmDocToDsl', () => {
       '***',
       '',
       '新场景开始。',
-      '',
     ].join('\n');
     expect(pmDocToDsl(dslToPmDoc(canonical))).toBe(canonical);
   });
@@ -82,5 +81,58 @@ describe('pmDocToDsl', () => {
   it('标题级别还原为对应 # 数', () => {
     const dsl = pmDocToDsl(dslToPmDoc('### 三级'));
     expect(dsl.startsWith('### 三级')).toBe(true);
+  });
+});
+
+describe('块前缀转义（往返保真，段落不被误解析为块级语法）', () => {
+  const paraDoc = (text: string): PmNode => ({
+    type: 'doc',
+    content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
+  });
+
+  it('以 # 开头的段落序列化为 \\\\# 并在重载后仍是段落', () => {
+    const dsl = pmDocToDsl(paraDoc('# 这不是标题'));
+    expect(dsl).toBe('\\# 这不是标题');
+    const reloaded = dslToPmDoc(dsl);
+    expect(topTypes(reloaded)).toEqual(['paragraph']);
+    expect(reloaded.content?.[0]?.content?.[0]?.text).toBe('# 这不是标题');
+  });
+
+  it('*** 与 # @ 前缀段落同样转义保真', () => {
+    for (const text of ['***', '# @pov: 伪关键字', '## 伪二级']) {
+      const dsl = pmDocToDsl(paraDoc(text));
+      const reloaded = dslToPmDoc(dsl);
+      expect(topTypes(reloaded)).toEqual(['paragraph']);
+      expect(reloaded.content?.[0]?.content?.[0]?.text).toBe(text);
+    }
+  });
+
+  it('转义后二次往返幂等（不会重复加反斜杠）', () => {
+    const once = pmDocToDsl(paraDoc('# 标题样文本'));
+    const twice = pmDocToDsl(dslToPmDoc(once));
+    expect(twice).toBe(once);
+  });
+
+  it('普通段落不加反斜杠；非冲突的前导反斜杠原样保留', () => {
+    expect(pmDocToDsl(paraDoc('正常段落。'))).toBe('正常段落。');
+    const dsl = pmDocToDsl(paraDoc('\\不是块语法'));
+    expect(dsl).toBe('\\不是块语法');
+    expect(dslToPmDoc(dsl).content?.[0]?.content?.[0]?.text).toBe('\\不是块语法');
+  });
+
+  it('段内软换行的冲突行逐行转义', () => {
+    const doc: PmNode = {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [
+        { type: 'text', text: '上行' },
+        { type: 'hardBreak' },
+        { type: 'text', text: '# 下行伪标题' },
+      ] }],
+    };
+    const dsl = pmDocToDsl(doc);
+    expect(dsl).toBe('上行\n\\# 下行伪标题');
+    const reloaded = dslToPmDoc(dsl);
+    expect(topTypes(reloaded)).toEqual(['paragraph']);
+    expect(reloaded.content?.[0]?.content?.map((n) => n.text ?? n.type)).toEqual(['上行', 'hardBreak', '# 下行伪标题']);
   });
 });

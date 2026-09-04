@@ -23,7 +23,7 @@
 
 | WP | 内容 | 尺寸 | 状态 |
 |---|---|---|---|
-| 1.1 | TipTap 接入：novel schema + TipTapCanvas 替换 textarea（编排层保留） | L | 🟡 **schema 先行已完成并测试**：`src/renderer/editor/schema.ts`（StarterKit + sceneBreak/keywordLine/chapterRef/placeholder/darlingSlot/ghostNote/dialogueBlock + quoteStyle/tagRef 标记，`getSchema` 无头验证）；`serialization.ts`（DSL↔PM-JSON 纯函数往返，9 测）。**TipTapCanvas 替换待做**：编排层 `textRef` 依赖 textarea 选区快照/光标像素定位（`getTextSelectionSnapshot`/`getKeyboardSelectionMenuPosition`），须在 ProseMirror view 上重实现，属需交互冒烟验证的核心写作 UX，未盲改 |
+| 1.1 | TipTap 接入：novel schema + TipTapCanvas 替换 textarea（编排层保留） | L | ✅ **已完成并交互冒烟**：`schema.ts`（StarterKit + sceneBreak/keywordLine/chapterRef/placeholder/darlingSlot/ghostNote/dialogueBlock + quoteStyle/tagRef，`getSchema` 无头验证）；`serialization.ts`（DSL↔PM-JSON 纯函数往返 + 块前缀反斜杠转义保真，14 测）；`commands.ts`（parseBody/serializeBody/applySelectionReplacement，5 测）；`TipTapCanvas.tsx`（受控 content 同步 + `NovelEditorHandle`：PM 语义 `getSelection`/`getKeyboardSelectionMenuPosition`/`focus`）；编排层 `textRef`→`editorRef`，两处 AI 回写改走 `applySelectionReplacement`。浏览器冒烟：渲染/输入/多段/选区唤出 AI 菜单/重载持久化均通过 |
 | 1.2 | CM6 novelDsl language（大纲/卡片/prompt 区）+ @tag 校验波浪线 | M | ⬜ 待做（依赖 CM6 依赖安装 + 索引 tags 作补全源） |
 | 1.3 | 单一变更管线：transaction → Store.apply → entity_changes + Revision | M | 🟡 **Revision 落底后端已完成并测试**：`saveProject(project, {agentId, cause})` → 正文实质变化才追加 `revisions`（seq 续号、author=agentId、cause 留底），`loadRevisions(nodeId)` 读取；entity_changes 贯穿 agentId（双引擎 6 测）。**Store.apply/UI 接线待做**（随 1.1b/1.5） |
 | 1.4 | 8 个写作原语扩展（enterFlow/placeholder/darlings/ghostOutline/…） | L | ⬜ 待做（依赖 1.1b 画布落地） |
@@ -31,7 +31,7 @@
 | 1.6 | UI 宪法落地：NewBookModal 先建后改；引导模式与自由工作区并存 | S | ⬜ 待做 |
 
 **退出标准**：06 篇 §6 全部 5 条；textarea 出依赖树；编辑延迟基准达标。
-**本轮边界说明**：M1 的 schema/序列化/修订管线为纯逻辑，已无头单测 + `npm run verify` 全绿（406 测试）。画布替换、状态收编、写作原语、CM6 均触及运行中 App 的中心状态与 1174 行编排层，须配交互冒烟验证，未在无验证条件下盲改。
+**本轮边界说明**：M1 的 schema/序列化/修订管线/画布替换为纯逻辑或已完成交互冒烟，`npm run verify` 全绿（416 测试）。状态收编、写作原语、CM6 触及运行中 App 的中心状态，须配交互回归验证，未在无验证条件下盲改。
 
 ## M2 AI 换代（→ v1.7）｜ 设计依据：05 篇
 
