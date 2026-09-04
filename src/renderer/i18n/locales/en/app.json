@@ -65,10 +65,20 @@
     "importFailed": "Import failed: {{message}}",
     "clearConfirm": "⚠️ Are you sure you want to clear all content of \"{{title}}\"?\nThe project is kept, but inspiration, outline and chapters will be removed.",
     "deleteProjectTitle": "Delete Project Warning",
-    "deleteProjectConfirm": "Are you sure you want to delete \"{{title}}\"?"
+    "deleteProjectConfirm": "Are you sure you want to delete \"{{title}}\"?",
+    "exportTitle": "Export Current Book",
+    "exportSuccess": "Book \"{{title}}\" exported successfully!",
+    "invalidFile": "The imported file is not valid book data"
   },
   "importAll": {
     "success": "All data imported successfully!",
     "failed": "Import failed or was cancelled."
+  },
+  "storage": {
+    "exportAllTitle": "Export Project Data",
+    "importAllTitle": "Import Project Data",
+    "exportAllSuccess": "Data exported successfully!",
+    "jsonFilter": "JSON Files",
+    "allFilesFilter": "All Files"
   }
 }

@@ -12,6 +12,7 @@ import { logger } from '../utils/logger';
 import { type AppState, type Project, type StorageConfig, type Chapter, type ConsistencyCheckConfig, type ConsistencyCheckPromptTemplate } from "../../../shared/types";
 import { AutoBackupService } from "./autoBackupService";
 import { dialogService } from '@/shared/services/dialogService';
+import { i18n } from '@/i18n';
 
 // 使用Electron API进行文件系统存储
 const STORAGE_FILE_NAME = 'novalist-data.json';
@@ -310,17 +311,17 @@ export const storage = {
     if (window.electronAPI) {
       try {
         const result = await window.electronAPI.saveFileDialog({
-          title: '导出项目数据',
+          title: i18n.t('app:storage.exportAllTitle'),
           defaultPath: `novalist-backup-${new Date().toISOString().split('T')[0]}.json`,
           filters: [
-            { name: 'JSON文件', extensions: ['json'] },
-            { name: '所有文件', extensions: ['*'] }
+            { name: i18n.t('app:storage.jsonFilter'), extensions: ['json'] },
+            { name: i18n.t('app:storage.allFilesFilter'), extensions: ['*'] }
           ]
         });
         
         if (!result.canceled && result.filePath) {
           await window.electronAPI.writeFile(result.filePath, JSON.stringify(state, null, 2));
-          dialogService.alert('数据导出成功！');
+          dialogService.alert(i18n.t('app:storage.exportAllSuccess'));
         }
       } catch (error) {
         console.error('Failed to export data:', error);
@@ -351,10 +352,10 @@ export const storage = {
     if (window.electronAPI) {
       try {
         const result = await window.electronAPI.openFileDialog({
-          title: '导入项目数据',
+          title: i18n.t('app:storage.importAllTitle'),
           filters: [
-            { name: 'JSON文件', extensions: ['json'] },
-            { name: '所有文件', extensions: ['*'] }
+            { name: i18n.t('app:storage.jsonFilter'), extensions: ['json'] },
+            { name: i18n.t('app:storage.allFilesFilter'), extensions: ['*'] }
           ],
           properties: ['openFile']
         });
@@ -546,17 +547,17 @@ export const storage = {
     if (window.electronAPI) {
       try {
         const result = await window.electronAPI.saveFileDialog({
-          title: '导出当前书籍',
+          title: i18n.t('app:book.exportTitle'),
           defaultPath: `${project.title.replace(/[<>:"/\\|?*]/g, '_')}-${new Date().toISOString().split('T')[0]}.json`,
           filters: [
-            { name: 'JSON文件', extensions: ['json'] },
-            { name: '所有文件', extensions: ['*'] }
+            { name: i18n.t('app:storage.jsonFilter'), extensions: ['json'] },
+            { name: i18n.t('app:storage.allFilesFilter'), extensions: ['*'] }
           ]
         });
         
         if (!result.canceled && result.filePath) {
           await window.electronAPI.writeFile(result.filePath, JSON.stringify(project, null, 2));
-          dialogService.alert(`书籍《${project.title}》导出成功！`);
+          dialogService.alert(i18n.t('app:book.exportSuccess', { title: project.title }));
         }
       } catch (error) {
         console.error('Failed to export current book:', error);
@@ -588,10 +589,10 @@ export const storage = {
     if (window.electronAPI) {
       try {
         const result = await window.electronAPI.openFileDialog({
-          title: '导入书籍',
+          title: i18n.t('app:bookshelf.importBook'),
           filters: [
-            { name: 'JSON文件', extensions: ['json'] },
-            { name: '所有文件', extensions: ['*'] }
+            { name: i18n.t('app:storage.jsonFilter'), extensions: ['json'] },
+            { name: i18n.t('app:storage.allFilesFilter'), extensions: ['*'] }
           ],
           properties: ['openFile']
         });
@@ -603,7 +604,7 @@ export const storage = {
           
           // 验证导入的数据是否为有效的Project对象
           if (!project.id || !project.title) {
-            throw new Error('导入的文件不是有效的书籍数据');
+            throw new Error(i18n.t('app:book.invalidFile'));
           }
           
           // 确保导入的书籍有唯一的ID（避免与现有书籍冲突）
@@ -638,7 +639,7 @@ export const storage = {
               
               // 验证导入的数据是否为有效的Project对象
               if (!project.id || !project.title) {
-                reject(new Error('导入的文件不是有效的书籍数据'));
+                reject(new Error(i18n.t('app:book.invalidFile')));
                 return;
               }
               

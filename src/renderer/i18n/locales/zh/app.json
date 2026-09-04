@@ -65,10 +65,20 @@
     "importFailed": "导入失败：{{message}}",
     "clearConfirm": "⚠️ 确定要清空小说《{{title}}》的所有内容吗？\n保留项目，但清除灵感、大纲和章节。",
     "deleteProjectTitle": "删除项目警告",
-    "deleteProjectConfirm": "确定要删除《{{title}}》吗？"
+    "deleteProjectConfirm": "确定要删除《{{title}}》吗？",
+    "exportTitle": "导出当前书籍",
+    "exportSuccess": "书籍《{{title}}》导出成功！",
+    "invalidFile": "导入的文件不是有效的书籍数据"
   },
   "importAll": {
     "success": "全部数据导入成功！",
     "failed": "导入失败或已取消。"
+  },
+  "storage": {
+    "exportAllTitle": "导出项目数据",
+    "importAllTitle": "导入项目数据",
+    "exportAllSuccess": "数据导出成功！",
+    "jsonFilter": "JSON文件",
+    "allFilesFilter": "所有文件"
   }
 }
