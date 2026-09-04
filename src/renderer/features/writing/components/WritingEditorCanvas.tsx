@@ -1,4 +1,4 @@
-﻿/*
+/*
  * 本文件属于 AI小说家 (ai-novel) 项目。
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -11,6 +11,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import WritingEditorStatusOverlay from './WritingEditorStatusOverlay';
 import type { WritingEditorCanvasProps } from '../types';
+import { cn } from '@/shared/utils/cn';
 
 const WritingEditorCanvas: React.FC<WritingEditorCanvasProps> = ({
   textRef,
@@ -33,7 +34,7 @@ const WritingEditorCanvas: React.FC<WritingEditorCanvasProps> = ({
 }) => {
   const { t } = useTranslation('writing');
   return (
-    <div className={`flex-1 overflow-y-auto p-10 flex justify-center custom-scrollbar transition-colors duration-500 ${isFocusMode ? 'bg-neutral-100' : ''}`}>
+    <div className={cn('custom-scrollbar flex flex-1 justify-center overflow-y-auto p-10 transition-colors', isFocusMode ? 'bg-background' : 'bg-muted/30')}>
       <textarea
         ref={textRef}
         disabled={!activeChapterId || (isGenerating && !isStreaming)}
@@ -43,8 +44,12 @@ const WritingEditorCanvas: React.FC<WritingEditorCanvasProps> = ({
         onMouseMove={onMouseMove}
         onChange={(event) => onContentChange(event.target.value)}
         placeholder={activeChapterId ? t('canvas.placeholderReady') : t('canvas.placeholderEmpty')}
-        className={`w-full h-full p-16 bg-white shadow-2xl rounded-3xl border border-gray-100 outline-none text-lg text-gray-700 leading-relaxed font-serif resize-none min-h-[1200px] transition-all duration-500 selection:bg-blue-100 disabled:bg-gray-50 disabled:cursor-not-allowed cursor-text ${isFocusMode ? 'max-w-3xl text-xl leading-loose shadow-xl' : 'max-w-4xl'}`}
-        style={{ whiteSpace: 'pre-wrap', opacity: (isGenerating && !isStreaming) ? 0.6 : 1 }}
+        className={cn(
+          'h-full w-full min-h-[1200px] cursor-text resize-none rounded-lg border border-border bg-card p-16 font-serif text-lg leading-relaxed text-foreground shadow-sm outline-none',
+          'selection:bg-primary/15 placeholder:text-muted-foreground/50 disabled:cursor-not-allowed disabled:opacity-60',
+          isFocusMode ? 'max-w-3xl text-xl leading-loose' : 'max-w-4xl'
+        )}
+        style={{ whiteSpace: 'pre-wrap' }}
       />
       <WritingEditorStatusOverlay
         isGenerating={isGenerating}

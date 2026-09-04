@@ -189,6 +189,7 @@
   },
   "toolbar": {
     "back": "返回",
+    "openSidebar": "展开侧栏",
     "writingLabel": "正在撰写",
     "titlePlaceholder": "输入章节标题...",
     "selectChapter": "请选择章节",

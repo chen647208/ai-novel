@@ -189,6 +189,7 @@
   },
   "toolbar": {
     "back": "Back",
+    "openSidebar": "Open sidebar",
     "writingLabel": "Now writing",
     "titlePlaceholder": "Enter chapter title...",
     "selectChapter": "Select a chapter",

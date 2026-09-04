@@ -1011,7 +1011,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
   const modalContextInfo = genModal.chapter ? getChapterContext(project.chapters, genModal.chapter) : { prevChapter: null, prevContextText: "", nextChapter: null, nextSummary: "" };
 
   return (
-    <div className="flex h-full bg-white overflow-hidden relative animate-in fade-in duration-300">
+    <div className="relative flex h-full overflow-hidden bg-background">
       
       <WritingEditorOverlayLayer
         genModal={genModal}
@@ -1104,7 +1104,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
         />
       )}
 
-      <div className="flex-1 flex flex-col h-full bg-gray-50/30">
+      <div className="flex h-full flex-1 flex-col bg-muted/30">
         <WritingEditorToolbar
           activeChapterId={activeChapterId}
           activeChapterTitle={activeChapter?.title || ""}

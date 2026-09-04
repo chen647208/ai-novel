@@ -1,4 +1,4 @@
-﻿/*
+/*
  * 本文件属于 AI小说家 (ai-novel) 项目。
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -10,6 +10,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { WritingSelectionMenuProps } from '../types';
+import { Button } from '@/shared/ui/Button';
 import { WandSparkles, X } from 'lucide-react';
 
 const WritingSelectionMenu: React.FC<WritingSelectionMenuProps> = ({
@@ -25,16 +26,22 @@ const WritingSelectionMenu: React.FC<WritingSelectionMenuProps> = ({
 
   return (
     <div
-      className="fixed z-[100] bg-white border border-gray-200 shadow-2xl rounded-2xl p-1.5 flex gap-1 animate-in zoom-in-95 duration-200"
+      className="fixed z-[100] flex items-center gap-1 rounded-lg border border-border bg-popover p-1 shadow-md"
       style={{ left: menuPos.x, top: menuPos.y }}
     >
-      <button onClick={onOpenEditModal} className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs font-black rounded-xl hover:shadow-lg hover:shadow-blue-200 transition-all flex items-center gap-2 active:scale-95">
-        <WandSparkles className="size-4" /> {t('selectionMenu.polishExpand')}
-      </button>
-      <div className="w-px h-6 bg-gray-200 self-center mx-1"></div>
-      <button onClick={onClearSelection} className="w-8 h-8 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 flex items-center justify-center transition-all" title={t('selectionMenu.clearTitle')}>
+      <Button size="sm" onClick={onOpenEditModal}>
+        <WandSparkles className="size-3.5" /> {t('selectionMenu.polishExpand')}
+      </Button>
+      <div className="mx-0.5 h-5 w-px bg-border" />
+      <Button
+        variant="ghost"
+        size="icon"
+        className="size-7 text-muted-foreground"
+        onClick={onClearSelection}
+        title={t('selectionMenu.clearTitle')}
+      >
         <X className="size-4" />
-      </button>
+      </Button>
     </div>
   );
 };

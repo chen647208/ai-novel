@@ -1,4 +1,4 @@
-﻿/*
+/*
  * 本文件属于 AI小说家 (ai-novel) 项目。
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -11,7 +11,10 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { templateDisplayName } from '@/i18n';
 import type { ChapterSummarySectionProps } from '../types';
-import { Bot, Settings } from 'lucide-react';
+import { Button } from '@/shared/ui/Button';
+import { Select } from '@/shared/ui/Select';
+import { Textarea } from '@/shared/ui/Textarea';
+import { Bot, Loader2, Settings } from 'lucide-react';
 
 const ChapterSummarySection: React.FC<ChapterSummarySectionProps> = ({
   activeChapter,
@@ -26,63 +29,58 @@ const ChapterSummarySection: React.FC<ChapterSummarySectionProps> = ({
   const { t } = useTranslation('writing');
   return (
     <section>
-      <div className="flex justify-between items-center mb-3">
-        <h4 className="text-[10px] font-black text-purple-600 uppercase tracking-widest">{t('summarySection.title')}</h4>
-        <div className="flex gap-1">
-          <button
-            onClick={onOpenSummaryPromptManager}
-            className="text-[8px] text-gray-400 hover:text-purple-500 transition-colors"
-            title={t('summarySection.manageTitle')}
-          >
-            <Settings className="size-4" />
-          </button>
-        </div>
+      <div className="mb-2 flex items-center justify-between">
+        <h4 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('summarySection.title')}</h4>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-7 text-muted-foreground"
+          onClick={onOpenSummaryPromptManager}
+          title={t('summarySection.manageTitle')}
+        >
+          <Settings className="size-4" />
+        </Button>
       </div>
 
-      <textarea
+      <Textarea
         value={activeChapter?.contentSummary || ''}
         onChange={(event) => onContentSummaryChange(event.target.value)}
         placeholder={t('summarySection.placeholder')}
-        className="w-full p-4 bg-purple-50 rounded-2xl border border-purple-100 text-xs text-gray-700 whitespace-pre-wrap leading-relaxed shadow-inner mb-4 min-h-[120px] resize-y focus:outline-none focus:ring-2 focus:ring-purple-200 focus:border-purple-300"
+        className="mb-3 min-h-[120px] bg-muted/40 text-xs leading-relaxed whitespace-pre-wrap"
       />
 
-      <div className="space-y-3">
-        <div className="flex gap-2">
-          <select
-            value={selectedSummaryPromptId}
-            onChange={(event) => onSummaryPromptChange(event.target.value)}
-            className="flex-1 bg-white border border-purple-200 text-black text-xs rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-purple-200 cursor-pointer appearance-none"
-          >
-            <option value="" className="text-black">{t('summarySection.selectTemplate')}</option>
-            {summaryPrompts.map((prompt) => (
-              <option key={prompt.id} value={prompt.id} className="text-black">{templateDisplayName(prompt)}</option>
-            ))}
-          </select>
-        </div>
+      <div className="space-y-2">
+        <Select
+          value={selectedSummaryPromptId}
+          onChange={(event) => onSummaryPromptChange(event.target.value)}
+          className="h-8 text-xs"
+        >
+          <option value="">{t('summarySection.selectTemplate')}</option>
+          {summaryPrompts.map((prompt) => (
+            <option key={prompt.id} value={prompt.id}>{templateDisplayName(prompt)}</option>
+          ))}
+        </Select>
 
-        <button
+        <Button
+          className="w-full"
+          size="sm"
           onClick={onExtractSummary}
           disabled={isExtractingSummary || !activeChapter?.content || activeChapter.content.trim().length === 0}
-          className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-            isExtractingSummary
-              ? 'bg-purple-100 text-purple-400 cursor-not-allowed'
-              : 'bg-purple-600 text-white hover:bg-purple-700 active:scale-95'
-          }`}
         >
           {isExtractingSummary ? (
             <>
-              <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <Loader2 className="size-3.5 animate-spin" />
               {t('summarySection.extracting')}
             </>
           ) : (
             <>
-              <Bot className="size-4" />
+              <Bot className="size-3.5" />
               {t('summarySection.extractBtn')}
             </>
           )}
-        </button>
+        </Button>
 
-        <p className="text-[9px] text-gray-400 text-center">
+        <p className="text-center text-[10px] text-muted-foreground">
           {t('summarySection.hint')}
         </p>
       </div>

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * 本文件属于 AI小说家 (ai-novel) 项目。
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -12,7 +12,55 @@ import { useTranslation } from 'react-i18next';
 import { templateDisplayName } from '@/i18n';
 import { type OutputMode } from '../../../../shared/types';
 import type { ChapterGenerationModalProps } from '../types';
-import { Ban, BookOpen, Check, WandSparkles, X } from 'lucide-react';
+import { Button } from '@/shared/ui/Button';
+import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
+import { Input } from '@/shared/ui/Input';
+import { Select } from '@/shared/ui/Select';
+import { Textarea } from '@/shared/ui/Textarea';
+import { cn } from '@/shared/utils/cn';
+import { ArrowDown, ArrowUp, Ban, BookOpen, Check, WandSparkles } from 'lucide-react';
+
+/** 生成弹窗的「左标签 / 右内容」分区卡片 */
+const GenSection: React.FC<{ label: string; alignStart?: boolean; children: React.ReactNode }> = ({ label, alignStart, children }) => (
+  <div className="grid grid-cols-12 overflow-hidden rounded-lg border border-border bg-card">
+    <div
+      className={cn(
+        'col-span-3 border-r border-border bg-muted/30 p-4 text-xs font-medium uppercase tracking-wider text-muted-foreground',
+        !alignStart && 'flex items-center'
+      )}
+    >
+      {label}
+    </div>
+    <div className="col-span-9 p-4">{children}</div>
+  </div>
+);
+
+/** 上下文连贯性检测的单行指示器 */
+const ContextIndicator: React.FC<{
+  direction: 'up' | 'down';
+  present: boolean;
+  title: string;
+  titleCls: string;
+  hint: string;
+}> = ({ direction, present, title, titleCls, hint }) => {
+  const Icon = direction === 'up' ? ArrowUp : ArrowDown;
+  return (
+    <div className="flex items-start gap-3">
+      <span
+        className={cn(
+          'flex size-6 shrink-0 items-center justify-center rounded-full',
+          present ? (direction === 'up' ? 'bg-primary/10 text-primary' : 'bg-success/10 text-success') : 'bg-muted text-muted-foreground'
+        )}
+      >
+        <Icon className="size-3.5" />
+      </span>
+      <div>
+        <p className={cn('text-xs font-medium', present ? titleCls : 'text-muted-foreground')}>{title}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>
+      </div>
+    </div>
+  );
+};
 
 const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
   genModal,
@@ -55,486 +103,395 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
   const { t } = useTranslation('writing');
   const prevTitlePart = modalContextInfo.prevChapter ? `《${modalContextInfo.prevChapter.title}》` : '';
   const nextTitlePart = modalContextInfo.nextChapter ? `《${modalContextInfo.nextChapter.title}》` : '';
+  const streamingSupported = activeModel.supportsStreaming !== false;
+  const summaryChapters = [...project.chapters]
+    .sort((a, b) => a.order - b.order)
+    .filter((chapter) => chapter.contentSummary && chapter.contentSummary.trim().length > 0);
+  const writingKnowledge = (project.knowledge || []).filter((k) => k.category === 'writing');
+  const batchOptions: Array<{ value: typeof batchMode; label: string }> = [
+    { value: 'single', label: t('genModal.batchSingle') },
+    { value: 'batch5', label: t('genModal.batchFive') },
+    { value: 'batch10', label: t('genModal.batchTen') },
+  ];
+
   return (
-      genModal.isOpen && genModal.chapter && (
-        <div className="fixed inset-0 z-[200] bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in zoom-in-95 duration-200">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-5xl border border-gray-100 overflow-hidden flex flex-col max-h-[95vh]">
-            <div className="p-8 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center shrink-0">
-              <div>
-                <h3 className="text-2xl font-black text-gray-800 tracking-tight">{t('genModal.title')}</h3>
-                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Context-Aware Generation</p>
+    genModal.isOpen && genModal.chapter && (
+      <Dialog
+        open
+        onOpenChange={(open) => {
+          if (!open) setGenModal({ isOpen: false, chapter: null });
+        }}
+      >
+        <DialogContent className="flex h-[92vh] w-[94vw] max-w-5xl flex-col gap-0 overflow-hidden p-0">
+          <div className="shrink-0 border-b border-border bg-muted/30 px-6 py-4">
+            <DialogTitle className="font-serif text-lg">{t('genModal.title')}</DialogTitle>
+          </div>
+
+          <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto px-6 py-5">
+            {/* 信息概览卡片 */}
+            <div className="overflow-hidden rounded-lg border border-border bg-card">
+              <div className="grid grid-cols-12 border-b border-border">
+                <div className="col-span-3 flex items-center border-r border-border bg-muted/30 p-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('genModal.targetChapter')}</div>
+                <div className="col-span-9 flex items-center justify-between p-4 text-sm font-medium text-foreground">
+                  <span>{t('genModal.chapterEntry', { num: genModal.chapter.order + 1, title: genModal.chapter.title })}</span>
+                  <span
+                    className={cn(
+                      'shrink-0 rounded border px-1.5 py-0.5 text-xs',
+                      genModal.chapter.content.length > 50
+                        ? 'border-warning/30 bg-warning/10 text-warning'
+                        : 'border-border bg-muted/40 text-muted-foreground'
+                    )}
+                  >
+                    {genModal.chapter.content.length > 50 ? t('genModal.hasContent') : t('genModal.blankChapter')}
+                  </span>
+                </div>
               </div>
-              <button onClick={() => setGenModal({ isOpen: false, chapter: null })} className="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 flex items-center justify-center transition-all"><X className="size-4" /></button>
+
+              {/* 上下文连贯性检测面板 */}
+              <div className="grid grid-cols-12">
+                <div className="col-span-3 border-r border-border bg-muted/30 p-4 pt-5 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('genModal.contextTitle')}</div>
+                <div className="col-span-9 space-y-2.5 p-4">
+                  <ContextIndicator
+                    direction="up"
+                    present={!!(modalContextInfo.prevContextText && modalContextInfo.prevContextText.length > 0)}
+                    title={modalContextInfo.prevContextText && modalContextInfo.prevContextText.length > 0 ? t('genModal.prevTitle') : t('genModal.noPrevTitle')}
+                    titleCls="text-foreground"
+                    hint={modalContextInfo.prevContextText && modalContextInfo.prevContextText.length > 0 ? t('genModal.prevHint', { chapter: prevTitlePart }) : t('genModal.noPrevHint')}
+                  />
+                  <ContextIndicator
+                    direction="down"
+                    present={!!(modalContextInfo.nextSummary && modalContextInfo.nextSummary.length > 0)}
+                    title={modalContextInfo.nextSummary && modalContextInfo.nextSummary.length > 0 ? t('genModal.nextTitle') : t('genModal.noNextTitle')}
+                    titleCls="text-foreground"
+                    hint={modalContextInfo.nextSummary && modalContextInfo.nextSummary.length > 0 ? t('genModal.nextHint', { chapter: nextTitlePart }) : t('genModal.noNextHint')}
+                  />
+                </div>
+              </div>
             </div>
-            
-            <div className="p-8 overflow-y-auto custom-scrollbar space-y-6 flex-1">
-              
-              {/* 信息概览卡片 */}
-              <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-                <div className="grid grid-cols-12 border-b border-gray-200">
-                  <div className="col-span-3 bg-gray-50 p-4 text-xs font-black text-gray-500 uppercase flex items-center">{t('genModal.targetChapter')}</div>
-                  <div className="col-span-9 p-4 text-sm font-bold text-gray-800 flex items-center bg-white justify-between">
-                     <span>{t('genModal.chapterEntry', { num: genModal.chapter.order + 1, title: genModal.chapter.title })}</span>
-                     <span className={`text-[10px] px-2 py-0.5 rounded border ${genModal.chapter.content.length > 50 ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-gray-50 text-gray-400 border-gray-100'}`}>
-                        {genModal.chapter.content.length > 50 ? t('genModal.hasContent') : t('genModal.blankChapter')}
-                     </span>
-                  </div>
-                </div>
 
-                {/* 上下文连贯性检测面板 */}
-                <div className="grid grid-cols-12 border-b border-gray-200">
-                   <div className="col-span-3 bg-gray-50 p-4 text-xs font-black text-blue-500 uppercase flex items-start pt-5">{t('genModal.contextTitle')}</div>
-                   <div className="col-span-9 p-4 bg-white">
-                      <div className="space-y-2">
-                         {modalContextInfo.prevContextText && modalContextInfo.prevContextText.length > 0 ? (
-                            <div className="flex items-start gap-3">
-                               <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-black shrink-0">↑</div>
-                               <div>
-                                  <p className="text-xs font-bold text-blue-700">{t('genModal.prevTitle')}</p>
-                                  <p className="text-[10px] text-gray-500 mt-0.5">{t('genModal.prevHint', { chapter: prevTitlePart })}</p>
-                               </div>
-                            </div>
-                         ) : (
-                            <div className="flex items-start gap-3">
-                               <div className="w-6 h-6 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xs font-black shrink-0">↑</div>
-                               <div>
-                                  <p className="text-xs font-bold text-gray-400">{t('genModal.noPrevTitle')}</p>
-                                  <p className="text-[10px] text-gray-400 mt-0.5">{t('genModal.noPrevHint')}</p>
-                               </div>
-                            </div>
-                         )}
-                         {modalContextInfo.nextSummary && modalContextInfo.nextSummary.length > 0 ? (
-                            <div className="flex items-start gap-3">
-                               <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs font-black shrink-0">↓</div>
-                               <div>
-                                  <p className="text-xs font-bold text-green-700">{t('genModal.nextTitle')}</p>
-                                  <p className="text-[10px] text-gray-500 mt-0.5">{t('genModal.nextHint', { chapter: nextTitlePart })}</p>
-                               </div>
-                            </div>
-                         ) : (
-                            <div className="flex items-start gap-3">
-                               <div className="w-6 h-6 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xs font-black shrink-0">↓</div>
-                               <div>
-                                  <p className="text-xs font-bold text-gray-400">{t('genModal.noNextTitle')}</p>
-                                  <p className="text-[10px] text-gray-400 mt-0.5">{t('genModal.noNextHint')}</p>
-                               </div>
-                            </div>
-                         )}
-                      </div>
-                   </div>
-                </div>
+            {/* 区域A：小说大纲关联 */}
+            <GenSection label={t('genModal.sectionOutline')}>
+              <Button variant={useOutline ? 'default' : 'secondary'} size="sm" onClick={() => setUseOutline(!useOutline)}>
+                <BookOpen className="size-4" />
+                {useOutline ? t('genModal.outlineLinked') : t('genModal.outlineLink')}
+              </Button>
+              <p className="mt-2 text-xs text-muted-foreground">{t('genModal.outlineHint')}</p>
+            </GenSection>
+
+            {/* 区域B：角色选择器 */}
+            <GenSection label={t('genModal.sectionCharacters')}>
+              <div className="mb-2 flex gap-2">
+                <Button variant="secondary" size="sm" onClick={selectAllCharacters}>{t('genModal.selectAllCharacters')}</Button>
+                <Button variant="ghost" size="sm" onClick={clearAllCharacters}>{t('genModal.clearSelection')}</Button>
               </div>
-              
-              {/* AI提示词注入增强功能区域 */}
-              <div className="space-y-6">
-                {/* 区域A：小说大纲关联 */}
-                <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-                  <div className="grid grid-cols-12 border-b border-gray-200">
-                    <div className="col-span-3 bg-gray-50 p-4 text-xs font-black text-gray-500 uppercase flex items-center">{t('genModal.sectionOutline')}</div>
-                    <div className="col-span-9 p-4 bg-white">
-                      <button 
-                        onClick={() => setUseOutline(!useOutline)}
-                        className={`px-6 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
-                          useOutline 
-                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 hover:bg-blue-700' 
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        <BookOpen className="size-4" />
-                        {useOutline ? t('genModal.outlineLinked') : t('genModal.outlineLink')}
-                      </button>
-                      <p className="text-[10px] text-gray-400 mt-2">
-                        {t('genModal.outlineHint')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
 
-                {/* 区域B：角色选择器 */}
-                <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-                  <div className="grid grid-cols-12 border-b border-gray-200">
-                    <div className="col-span-3 bg-gray-50 p-4 text-xs font-black text-gray-500 uppercase flex items-center">{t('genModal.sectionCharacters')}</div>
-                    <div className="col-span-9 p-4 bg-white">
-                      <div className="flex gap-3 mb-3">
-                        <button
-                          onClick={selectAllCharacters}
-                          className="px-4 py-2 bg-blue-100 text-blue-700 text-xs font-bold rounded-lg hover:bg-blue-200 transition-colors"
-                        >
-                          {t('genModal.selectAllCharacters')}
-                        </button>
-                        <button
-                          onClick={clearAllCharacters}
-                          className="px-4 py-2 bg-gray-100 text-gray-600 text-xs font-bold rounded-lg hover:bg-gray-200 transition-colors"
-                        >
-                          {t('genModal.clearSelection')}
-                        </button>
-                      </div>
-                      
-                      <div className="max-h-48 overflow-y-auto custom-scrollbar border border-gray-100 rounded-lg p-3 bg-gray-50/50">
-                        {project.characters.map(character => {
-                          const isSelected = selectedCharacterIds.has(character.id);
-                          return (
-                            <div 
-                              key={character.id}
-                              onClick={() => toggleCharacter(character.id)}
-                              className={`flex items-start gap-3 p-3 rounded-lg mb-2 cursor-pointer transition-colors ${
-                                isSelected 
-                                  ? 'bg-blue-50 border border-blue-100' 
-                                  : 'hover:bg-gray-50'
-                              }`}
-                            >
-                              <div className={`w-5 h-5 rounded-md border flex items-center justify-center mt-0.5 ${
-                                isSelected 
-                                  ? 'bg-blue-500 border-blue-500 text-white' 
-                                  : 'bg-white border-gray-300'
-                              }`}>
-                                {isSelected && <Check className="size-3" />}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex justify-between items-start">
-                                  <div className="text-sm font-bold text-gray-800">
-                                    {character.name}
-                                  </div>
-                                  <span className={`text-[10px] px-2 py-0.5 rounded ${
-                                    isSelected ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'
-                                  }`}>
-                                    {character.role || t('genModal.roleUnspecified')}
-                                  </span>
-                                </div>
-                                <div className="text-[10px] text-gray-500 mt-1 line-clamp-2">
-                                  {character.personality || character.background || t('genModal.noCharacterDesc')}
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-
-                        {project.characters.length === 0 && (
-                          <div className="text-center py-4 text-gray-400 text-sm">
-                            {t('genModal.noCharacters')}
-                          </div>
-                        )}
-                      </div>
-
-                      <p className="text-[10px] text-gray-400 mt-2">
-                        {t('genModal.charactersHint')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 区域C：章节正文摘要选择器 */}
-                <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-                  <div className="grid grid-cols-12 border-b border-gray-200">
-                    <div className="col-span-3 bg-gray-50 p-4 text-xs font-black text-gray-500 uppercase flex items-center">{t('genModal.sectionSummaries')}</div>
-                    <div className="col-span-9 p-4 bg-white">
-                      <div className="flex gap-3 mb-3">
-                        <button
-                          onClick={selectAllChapterSummaries}
-                          className="px-4 py-2 bg-blue-100 text-blue-700 text-xs font-bold rounded-lg hover:bg-blue-200 transition-colors"
-                        >
-                          {t('genModal.smartSelectFive')}
-                        </button>
-                        <button
-                          onClick={clearAllChapterSummaries}
-                          className="px-4 py-2 bg-gray-100 text-gray-600 text-xs font-bold rounded-lg hover:bg-gray-200 transition-colors"
-                        >
-                          {t('genModal.clearSelection')}
-                        </button>
-                      </div>
-                      
-                      <div className="max-h-48 overflow-y-auto custom-scrollbar border border-gray-100 rounded-lg p-3 bg-gray-50/50">
-                        {project.chapters
-                          .sort((a, b) => a.order - b.order)
-                          .filter(chapter => chapter.contentSummary && chapter.contentSummary.trim().length > 0)
-                          .map(chapter => {
-                            const isSelected = selectedChapterSummaryIds.has(chapter.id);
-                            const isCurrentChapter = genModal.chapter?.id === chapter.id;
-                            return (
-                              <div 
-                                key={chapter.id}
-                                onClick={() => !isCurrentChapter && toggleChapterSummary(chapter.id)}
-                                className={`flex items-start gap-3 p-3 rounded-lg mb-2 cursor-pointer transition-colors ${
-                                  isCurrentChapter 
-                                    ? 'bg-gray-100 cursor-not-allowed' 
-                                    : isSelected 
-                                      ? 'bg-green-50 border border-green-100' 
-                                      : 'hover:bg-gray-50'
-                                }`}
-                              >
-                                <div className={`w-5 h-5 rounded-md border flex items-center justify-center mt-0.5 ${
-                                  isCurrentChapter 
-                                    ? 'bg-gray-300 border-gray-300 text-gray-400' 
-                                    : isSelected 
-                                      ? 'bg-green-500 border-green-500 text-white' 
-                                      : 'bg-white border-gray-300'
-                                }`}>
-                                  {isCurrentChapter && <Ban className="size-2" />}
-                                  {!isCurrentChapter && isSelected && <Check className="size-3" />}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex justify-between items-start">
-                                    <div className="text-sm font-bold text-gray-800">
-                                      {t('genModal.chapterEntry', { num: chapter.order + 1, title: chapter.title })}
-                                      {isCurrentChapter && <span className="ml-2 text-xs text-gray-500">{t('genModal.currentChapter')}</span>}
-                                    </div>
-                                    {!isCurrentChapter && (
-                                      <span className={`text-[10px] px-2 py-0.5 rounded ${
-                                        isSelected ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
-                                      }`}>
-                                        {isSelected ? t('genModal.selectedState') : t('genModal.unselectedState')}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="text-[10px] text-gray-500 mt-1 line-clamp-2">
-                                    {chapter.contentSummary}
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })
+              <div className="custom-scrollbar max-h-48 space-y-1.5 overflow-y-auto rounded-lg border border-border bg-muted/20 p-2">
+                {project.characters.map((character) => {
+                  const isSelected = selectedCharacterIds.has(character.id);
+                  return (
+                    <div
+                      key={character.id}
+                      role="checkbox"
+                      aria-checked={isSelected}
+                      tabIndex={0}
+                      onClick={() => toggleCharacter(character.id)}
+                      onKeyDown={(event) => {
+                        if (event.key === ' ' || event.key === 'Enter') {
+                          event.preventDefault();
+                          toggleCharacter(character.id);
                         }
-                        
-                        {project.chapters.filter(c => c.contentSummary && c.contentSummary.trim().length > 0).length === 0 && (
-                          <div className="text-center py-4 text-gray-400 text-sm">
-                            {t('genModal.noSummaries')}
-                          </div>
-                        )}
-                      </div>
-
-                      <p className="text-[10px] text-gray-400 mt-2">
-                        {t('genModal.summariesHint')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 区域D：细纲自由编辑 */}
-                <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-                  <div className="grid grid-cols-12 border-b border-gray-200">
-                    <div className="col-span-3 bg-gray-50 p-4 text-xs font-black text-gray-500 uppercase flex items-start pt-5">{t('genModal.sectionDetail')}</div>
-                    <div className="col-span-9 p-4 bg-white">
-                      <textarea
-                        value={editableSummary}
-                        onChange={(e) => setEditableSummary(e.target.value)}
-                        placeholder={t('genModal.detailPlaceholder')}
-                        className="w-full bg-amber-50/50 border border-amber-100 text-gray-700 text-sm rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-amber-200 resize-none h-32 custom-scrollbar"
-                      />
-                      <p className="text-[10px] text-gray-400 mt-2">
-                        {t('genModal.detailHint')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* 知识库选择区域 */}
-              <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-                <div className="grid grid-cols-12 border-b border-gray-200">
-                  <div className="col-span-3 bg-gray-50 p-4 text-xs font-black text-gray-500 uppercase flex items-center">{t('genModal.sectionKnowledge')}</div>
-                  <div className="col-span-9 p-4 bg-white">
-                    <div className="flex gap-3 mb-3">
-                      <button onClick={selectAllKnowledge} className="px-4 py-2 bg-blue-100 text-blue-700 text-xs font-bold rounded-lg hover:bg-blue-200 transition-colors">{t('genModal.selectAll')}</button>
-                      <button onClick={clearAllKnowledge} className="px-4 py-2 bg-gray-100 text-gray-600 text-xs font-bold rounded-lg hover:bg-gray-200 transition-colors">{t('genModal.clear')}</button>
-                    </div>
-                    <div className="max-h-48 overflow-y-auto custom-scrollbar border border-gray-100 rounded-lg p-3 bg-gray-50/50">
-                      {project.knowledge && project.knowledge.filter(k => k.category === 'writing').length > 0 ? (
-                        project.knowledge.filter(k => k.category === 'writing').map(k => {
-                          const isSelected = selectedKnowledgeIds.has(k.id);
-                          return (
-                            <div key={k.id} onClick={() => toggleKnowledge(k.id)} className={`flex items-center gap-3 p-3 rounded-lg mb-2 cursor-pointer transition-colors ${isSelected ? 'bg-blue-50 border border-blue-100' : 'hover:bg-gray-50'}`}>
-                              <div className={`w-5 h-5 rounded-md border flex items-center justify-center ${isSelected ? 'bg-blue-500 border-blue-500 text-white' : 'bg-white border-gray-300'}`}>
-                                {isSelected && <Check className="size-3" />}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="text-sm font-bold text-gray-800 truncate">{k.name}</div>
-                                <div className="text-[10px] text-gray-500 truncate">{k.category}</div>
-                              </div>
-                            </div>
-                          );
-                        })
-                      ) : (
-                        <div className="text-center py-4 text-gray-400 text-sm">
-                          {t('genModal.noKnowledge')}
-                        </div>
+                      }}
+                      className={cn(
+                        'flex cursor-pointer items-start gap-3 rounded-md p-2.5 transition-colors',
+                        isSelected ? 'border border-primary/40 bg-primary/5' : 'border border-transparent hover:bg-accent/40'
                       )}
-                    </div>
-                    <p className="text-[10px] text-gray-400 mt-2">
-                      {t('genModal.knowledgeHint')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* 生成模板选择区域 */}
-              <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-                <div className="grid grid-cols-12 border-b border-gray-200">
-                  <div className="col-span-3 bg-gray-50 p-4 text-xs font-black text-gray-500 uppercase flex items-center">{t('genModal.sectionTemplate')}</div>
-                  <div className="col-span-9 p-4 bg-white">
-                    <select 
-                      value={selectedGenPromptId} 
-                      onChange={(e) => setSelectedGenPromptId(e.target.value)}
-                      className="w-full bg-blue-50/50 border border-blue-100 text-blue-900 text-sm font-bold rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer hover:bg-blue-50 transition-colors"
                     >
-                      {writingPrompts.map(p => (
-                        <option key={p.id} value={p.id}>📝 {templateDisplayName(p)}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-              
-{/* 字数目标选择区域 */}
-<div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-  <div className="grid grid-cols-12 border-b border-gray-200">
-    <div className="col-span-3 bg-gray-50 p-4 text-xs font-black text-gray-500 uppercase flex items-center">{t('genModal.sectionWordTarget')}</div>
-    <div className="col-span-9 p-4 bg-white">
-      <div className="flex items-center gap-4">
-        <input 
-          type="number" 
-          min="1"
-          value={targetWordCount}
-          onChange={(e) => setTargetWordCount(parseInt(e.target.value) || 1)}
-          className="flex-1 bg-blue-50/50 border border-blue-100 text-blue-900 text-sm font-bold rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-200"
-          placeholder={t('genModal.wordTargetPlaceholder')}
-        />
-        <div className="text-sm font-bold text-blue-600 min-w-[80px] text-right">
-          {t('genModal.wordUnit')}
-        </div>
-      </div>
-      <p className="text-[10px] text-gray-400 mt-2">
-        {t('genModal.wordTargetHint')}
-      </p>
-    </div>
-  </div>
-</div>
-              
-              {/* 批量生成模式选择区域 */}
-              <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-                <div className="grid grid-cols-12 border-b border-gray-200">
-    <div className="col-span-3 bg-gray-50 p-4 text-xs font-black text-gray-500 uppercase flex items-center">{t('genModal.sectionBatch')}</div>
-    <div className="col-span-9 p-4 bg-white">
-      <div className="flex gap-3">
-        <button
-          onClick={() => setBatchMode('single')}
-          className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors ${
-            batchMode === 'single'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
-        >
-          {t('genModal.batchSingle')}
-        </button>
-        <button
-          onClick={() => setBatchMode('batch5')}
-          className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors ${
-            batchMode === 'batch5'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
-        >
-          {t('genModal.batchFive')}
-        </button>
-        <button
-          onClick={() => setBatchMode('batch10')}
-          className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors ${
-            batchMode === 'batch10'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
-        >
-          {t('genModal.batchTen')}
-        </button>
-      </div>
-      <p className="text-[10px] text-gray-400 mt-2">
-        {t('genModal.batchHint')}
-      </p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* 输出模式选择区域 */}
-              <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-                <div className="grid grid-cols-12 border-b border-gray-200">
-                  <div className="col-span-3 bg-gray-50 p-4 text-xs font-black text-gray-500 uppercase flex items-center">{t('genModal.sectionOutputMode')}</div>
-                  <div className="col-span-9 p-4 bg-white">
-                    <select
-                      value={outputMode}
-                      onChange={(e) => setOutputMode(e.target.value as OutputMode)}
-                      className="w-full bg-purple-50/50 border border-purple-100 text-purple-900 text-sm font-bold rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-purple-200 cursor-pointer hover:bg-purple-50 transition-colors"
-                    >
-                      <option value="streaming">{t('output.streaming')}</option>
-                      <option value="traditional">{t('output.traditional')}</option>
-                    </select>
-
-                    {/* 流式输出状态提示 */}
-                    <div className="mt-3 p-3 bg-white/80 border border-purple-100 rounded-xl">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${activeModel.supportsStreaming !== false ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
-                          <span className="text-xs font-bold text-gray-700">
-                            {t('output.supportLabel')}
+                      <span
+                        className={cn(
+                          'mt-0.5 flex size-4 shrink-0 items-center justify-center rounded border transition-colors',
+                          isSelected ? 'border-primary bg-primary text-primary-foreground' : 'border-input bg-background'
+                        )}
+                      >
+                        {isSelected && <Check className="size-3" />}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="font-serif text-sm font-medium text-foreground">{character.name}</span>
+                          <span
+                            className={cn(
+                              'shrink-0 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide',
+                              isSelected ? 'border-primary/30 bg-primary/10 text-primary' : 'border-border bg-muted/40 text-muted-foreground'
+                            )}
+                          >
+                            {character.role || t('genModal.roleUnspecified')}
                           </span>
                         </div>
-                        <span className={`text-xs font-black px-2 py-1 rounded ${activeModel.supportsStreaming !== false ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500 border border-gray-200'}`}>
-                          {activeModel.supportsStreaming !== false ? t('output.on') : t('output.off')}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-gray-500 mt-2">
-                        {activeModel.supportsStreaming !== false
-                          ? t('output.onHint', { name: activeModel.name })
-                          : t('output.offHint', { name: activeModel.name })
-                        }
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-between items-center shrink-0">
-              <div className="flex items-center gap-4">
-                {/* Token消耗显示 */}
-                {(isStreaming || isGenerating || streamingTokens.total >= 0 || traditionalTokens.total >= 0) && (
-                  <div className="flex items-center gap-4 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-xl p-3 shadow-sm">
-                    <div className="text-center">
-                      <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('output.inputToken')}</div>
-                      <div className="text-sm font-bold text-blue-600">
-                        {isStreaming ? streamingTokens.prompt : traditionalTokens.prompt}
+                        <div className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                          {character.personality || character.background || t('genModal.noCharacterDesc')}
+                        </div>
                       </div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('output.outputToken')}</div>
-                      <div className="text-sm font-bold text-green-600">
-                        {isStreaming ? streamingTokens.completion : traditionalTokens.completion}
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('output.total')}</div>
-                      <div className="text-sm font-bold text-purple-600">
-                        {isStreaming ? streamingTokens.total : traditionalTokens.total}
-                      </div>
-                    </div>
-                    {isStreaming && (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                        <span className="text-xs text-gray-500">{t('output.generating')}</span>
-                      </div>
-                    )}
-                  </div>
+                  );
+                })}
+
+                {project.characters.length === 0 && (
+                  <div className="py-4 text-center text-sm text-muted-foreground">{t('genModal.noCharacters')}</div>
                 )}
               </div>
-              <div className="flex gap-4">
-                <button onClick={handleEnterEditor} className="px-6 py-3 rounded-xl text-gray-500 font-bold text-sm hover:bg-gray-200 hover:text-gray-800 transition-all">{t('genModal.editorOnly')}</button>
-                <button onClick={handleModalGenerate} className="px-8 py-3 bg-blue-600 text-white font-black text-sm rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2"><WandSparkles className="size-4" /> {t('genModal.confirmGenerate')}</button>
+
+              <p className="mt-2 text-xs text-muted-foreground">{t('genModal.charactersHint')}</p>
+            </GenSection>
+
+            {/* 区域C：章节正文摘要选择器 */}
+            <GenSection label={t('genModal.sectionSummaries')}>
+              <div className="mb-2 flex gap-2">
+                <Button variant="secondary" size="sm" onClick={selectAllChapterSummaries}>{t('genModal.smartSelectFive')}</Button>
+                <Button variant="ghost" size="sm" onClick={clearAllChapterSummaries}>{t('genModal.clearSelection')}</Button>
               </div>
+
+              <div className="custom-scrollbar max-h-48 space-y-1.5 overflow-y-auto rounded-lg border border-border bg-muted/20 p-2">
+                {summaryChapters.map((chapter) => {
+                  const isSelected = selectedChapterSummaryIds.has(chapter.id);
+                  const isCurrentChapter = genModal.chapter?.id === chapter.id;
+                  return (
+                    <div
+                      key={chapter.id}
+                      role={isCurrentChapter ? undefined : 'checkbox'}
+                      aria-checked={isCurrentChapter ? undefined : isSelected}
+                      tabIndex={isCurrentChapter ? -1 : 0}
+                      onClick={() => !isCurrentChapter && toggleChapterSummary(chapter.id)}
+                      onKeyDown={(event) => {
+                        if (!isCurrentChapter && (event.key === ' ' || event.key === 'Enter')) {
+                          event.preventDefault();
+                          toggleChapterSummary(chapter.id);
+                        }
+                      }}
+                      className={cn(
+                        'flex items-start gap-3 rounded-md p-2.5 transition-colors',
+                        isCurrentChapter
+                          ? 'cursor-not-allowed border border-transparent bg-muted/40 opacity-60'
+                          : isSelected
+                            ? 'cursor-pointer border border-primary/40 bg-primary/5'
+                            : 'cursor-pointer border border-transparent hover:bg-accent/40'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'mt-0.5 flex size-4 shrink-0 items-center justify-center rounded border transition-colors',
+                          isCurrentChapter
+                            ? 'border-border bg-muted text-muted-foreground'
+                            : isSelected
+                              ? 'border-primary bg-primary text-primary-foreground'
+                              : 'border-input bg-background'
+                        )}
+                      >
+                        {isCurrentChapter && <Ban className="size-2.5" />}
+                        {!isCurrentChapter && isSelected && <Check className="size-3" />}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="truncate text-sm font-medium text-foreground">
+                            {t('genModal.chapterEntry', { num: chapter.order + 1, title: chapter.title })}
+                            {isCurrentChapter && <span className="ml-2 text-xs font-normal text-muted-foreground">{t('genModal.currentChapter')}</span>}
+                          </span>
+                          {!isCurrentChapter && (
+                            <span
+                              className={cn(
+                                'shrink-0 rounded border px-1.5 py-0.5 text-[10px]',
+                                isSelected ? 'border-primary/30 bg-primary/10 text-primary' : 'border-border bg-muted/40 text-muted-foreground'
+                              )}
+                            >
+                              {isSelected ? t('genModal.selectedState') : t('genModal.unselectedState')}
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-1 line-clamp-2 text-xs text-muted-foreground">{chapter.contentSummary}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {summaryChapters.length === 0 && (
+                  <div className="py-4 text-center text-sm text-muted-foreground">{t('genModal.noSummaries')}</div>
+                )}
+              </div>
+
+              <p className="mt-2 text-xs text-muted-foreground">{t('genModal.summariesHint')}</p>
+            </GenSection>
+
+            {/* 区域D：细纲自由编辑 */}
+            <GenSection label={t('genModal.sectionDetail')} alignStart>
+              <Textarea
+                className="min-h-[120px]"
+                value={editableSummary}
+                onChange={(e) => setEditableSummary(e.target.value)}
+                placeholder={t('genModal.detailPlaceholder')}
+              />
+              <p className="mt-2 text-xs text-muted-foreground">{t('genModal.detailHint')}</p>
+            </GenSection>
+
+            {/* 知识库选择区域 */}
+            <GenSection label={t('genModal.sectionKnowledge')}>
+              <div className="mb-2 flex gap-2">
+                <Button variant="secondary" size="sm" onClick={selectAllKnowledge}>{t('genModal.selectAll')}</Button>
+                <Button variant="ghost" size="sm" onClick={clearAllKnowledge}>{t('genModal.clear')}</Button>
+              </div>
+              <div className="custom-scrollbar max-h-48 space-y-1.5 overflow-y-auto rounded-lg border border-border bg-muted/20 p-2">
+                {writingKnowledge.length > 0 ? (
+                  writingKnowledge.map((k) => {
+                    const isSelected = selectedKnowledgeIds.has(k.id);
+                    return (
+                      <div
+                        key={k.id}
+                        role="checkbox"
+                        aria-checked={isSelected}
+                        tabIndex={0}
+                        onClick={() => toggleKnowledge(k.id)}
+                        onKeyDown={(event) => {
+                          if (event.key === ' ' || event.key === 'Enter') {
+                            event.preventDefault();
+                            toggleKnowledge(k.id);
+                          }
+                        }}
+                        className={cn(
+                          'flex cursor-pointer items-center gap-3 rounded-md p-2.5 transition-colors',
+                          isSelected ? 'border border-primary/40 bg-primary/5' : 'border border-transparent hover:bg-accent/40'
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            'flex size-4 shrink-0 items-center justify-center rounded border transition-colors',
+                            isSelected ? 'border-primary bg-primary text-primary-foreground' : 'border-input bg-background'
+                          )}
+                        >
+                          {isSelected && <Check className="size-3" />}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-medium text-foreground">{k.name}</div>
+                          <div className="truncate text-xs text-muted-foreground">{k.category}</div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="py-4 text-center text-sm text-muted-foreground">{t('genModal.noKnowledge')}</div>
+                )}
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">{t('genModal.knowledgeHint')}</p>
+            </GenSection>
+
+            {/* 生成模板选择区域 */}
+            <GenSection label={t('genModal.sectionTemplate')}>
+              <Select value={selectedGenPromptId} onChange={(e) => setSelectedGenPromptId(e.target.value)}>
+                {writingPrompts.map((p) => (
+                  <option key={p.id} value={p.id}>{templateDisplayName(p)}</option>
+                ))}
+              </Select>
+            </GenSection>
+
+            {/* 字数目标选择区域 */}
+            <GenSection label={t('genModal.sectionWordTarget')}>
+              <div className="flex items-center gap-3">
+                <Input
+                  className="flex-1"
+                  type="number"
+                  min="1"
+                  value={targetWordCount}
+                  onChange={(e) => setTargetWordCount(parseInt(e.target.value, 10) || 1)}
+                  placeholder={t('genModal.wordTargetPlaceholder')}
+                />
+                <span className="min-w-[80px] text-right text-sm text-muted-foreground">{t('genModal.wordUnit')}</span>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">{t('genModal.wordTargetHint')}</p>
+            </GenSection>
+
+            {/* 批量生成模式选择区域 */}
+            <GenSection label={t('genModal.sectionBatch')}>
+              <div className="inline-flex gap-1 rounded-lg bg-muted p-1">
+                {batchOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setBatchMode(opt.value)}
+                    className={cn(
+                      'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                      batchMode === opt.value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">{t('genModal.batchHint')}</p>
+            </GenSection>
+
+            {/* 输出模式选择区域 */}
+            <GenSection label={t('genModal.sectionOutputMode')} alignStart>
+              <Select value={outputMode} onChange={(e) => setOutputMode(e.target.value as OutputMode)}>
+                <option value="streaming">{t('output.streaming')}</option>
+                <option value="traditional">{t('output.traditional')}</option>
+              </Select>
+
+              <div className="mt-2 rounded-lg border border-border bg-muted/30 p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className={cn('size-2 rounded-full', streamingSupported ? 'animate-pulse bg-success' : 'bg-muted-foreground/40')} />
+                    <span className="text-sm text-foreground">{t('output.supportLabel')}</span>
+                  </div>
+                  <span
+                    className={cn(
+                      'rounded px-2 py-0.5 text-xs font-medium',
+                      streamingSupported ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'
+                    )}
+                  >
+                    {streamingSupported ? t('output.on') : t('output.off')}
+                  </span>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {streamingSupported
+                    ? t('output.onHint', { name: activeModel.name })
+                    : t('output.offHint', { name: activeModel.name })}
+                </p>
+              </div>
+            </GenSection>
+          </div>
+
+          <div className="flex shrink-0 items-center justify-between gap-4 border-t border-border bg-muted/30 px-6 py-4">
+            <div className="flex items-center gap-4">
+              {/* Token消耗显示 */}
+              {(isStreaming || isGenerating || streamingTokens.total >= 0 || traditionalTokens.total >= 0) && (
+                <div className="flex items-center gap-4 rounded-lg border border-border bg-background px-3 py-2">
+                  <div className="text-center">
+                    <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t('output.inputToken')}</div>
+                    <div className="text-sm tabular-nums text-foreground">{isStreaming ? streamingTokens.prompt : traditionalTokens.prompt}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t('output.outputToken')}</div>
+                    <div className="text-sm tabular-nums text-foreground">{isStreaming ? streamingTokens.completion : traditionalTokens.completion}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t('output.total')}</div>
+                    <div className="text-sm font-medium tabular-nums text-foreground">{isStreaming ? streamingTokens.total : traditionalTokens.total}</div>
+                  </div>
+                  {isStreaming && (
+                    <div className="flex items-center gap-2">
+                      <span className="size-2 animate-pulse rounded-full bg-primary" />
+                      <span className="text-xs text-muted-foreground">{t('output.generating')}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <Button variant="ghost" onClick={handleEnterEditor}>{t('genModal.editorOnly')}</Button>
+              <Button onClick={handleModalGenerate}>
+                <WandSparkles className="size-4" /> {t('genModal.confirmGenerate')}
+              </Button>
             </div>
           </div>
-        </div>
-      )
-
+        </DialogContent>
+      </Dialog>
+    )
   );
 };
 
 export default ChapterGenerationModal;
-

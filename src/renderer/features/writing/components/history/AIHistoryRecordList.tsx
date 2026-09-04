@@ -1,4 +1,4 @@
-﻿/*
+/*
  * 本文件属于 AI小说家 (ai-novel) 项目。
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -13,7 +13,12 @@ import type { TFunction } from 'i18next';
 import { formatHistoryTimestamp, formatTokenUsage, getGenerationType, getProviderIcon } from '../../utils';
 import type { AIHistoryRecordListProps, AIHistoryRecordWithChapter } from '../../types';
 import { dialogService } from '@/shared/services/dialogService';
+import { Button } from '@/shared/ui/Button';
+import { EmptyState } from '@/shared/ui/EmptyState';
+import { cn } from '@/shared/utils/cn';
 import { Check, ChevronRight, Copy, Eye, History } from 'lucide-react';
+
+const sectionLabel = 'mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground';
 
 const renderTemplateBlock = (item: AIHistoryRecordWithChapter, compact: boolean, t: TFunction<'writing'>) => {
   if (!item.record.metadata?.templateName) {
@@ -21,68 +26,66 @@ const renderTemplateBlock = (item: AIHistoryRecordWithChapter, compact: boolean,
   }
 
   return (
-    <div className={`${compact ? 'rounded-xl p-4' : 'rounded-2xl p-5'} bg-blue-50/70 border border-blue-100`}>
-      <div className={`${compact ? 'text-xs mb-2' : 'text-sm mb-3'} font-bold text-blue-600 uppercase tracking-widest`}>
-        {t('record.useTemplate')}
-      </div>
-      <div className={`${compact ? 'text-sm' : 'text-base'} font-bold text-blue-800`}>
+    <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+      <div className={sectionLabel}>{t('record.useTemplate')}</div>
+      <div className={cn('font-medium text-foreground', compact ? 'text-sm' : 'text-base')}>
         {item.record.metadata.templateName}
       </div>
     </div>
   );
 };
 
-const renderTokenBlock = (item: AIHistoryRecordWithChapter, compact: boolean, t: TFunction<'writing'>) => (
-  <div className={`${compact ? 'rounded-xl p-4' : 'rounded-2xl p-5'} bg-gray-50`}>
-    <div className={`${compact ? 'text-xs mb-2' : 'text-sm mb-3'} font-bold text-gray-500 uppercase tracking-widest`}>
-      {t('record.tokenUsage')}
-    </div>
+const renderTokenBlock = (item: AIHistoryRecordWithChapter, t: TFunction<'writing'>) => (
+  <div className="rounded-lg border border-border bg-muted/30 p-4">
+    <div className={sectionLabel}>{t('record.tokenUsage')}</div>
     {item.record.tokens ? (
-      <div className={`${compact ? 'space-y-2 text-sm' : 'space-y-3 text-base'}`}>
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600">{t('record.input')}</span>
-          <span className="font-bold text-blue-600">{item.record.tokens.prompt}</span>
+      <div className="space-y-1.5 text-sm">
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground">{t('record.input')}</span>
+          <span className="font-medium tabular-nums text-foreground">{item.record.tokens.prompt}</span>
         </div>
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600">{t('record.output')}</span>
-          <span className="font-bold text-green-600">{item.record.tokens.completion}</span>
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground">{t('record.output')}</span>
+          <span className="font-medium tabular-nums text-foreground">{item.record.tokens.completion}</span>
         </div>
-        <div className="flex justify-between items-center border-t border-gray-200 pt-2">
-          <span className="font-bold text-gray-700">{t('record.total')}</span>
-          <span className="font-bold text-purple-600">{item.record.tokens.total}</span>
+        <div className="flex items-center justify-between border-t border-border pt-1.5">
+          <span className="font-medium text-foreground">{t('record.total')}</span>
+          <span className="font-medium tabular-nums text-foreground">{item.record.tokens.total}</span>
         </div>
       </div>
     ) : (
-      <div className={`${compact ? 'text-sm' : 'text-base'} text-gray-400 italic`}>{t('record.noTokenData')}</div>
+      <div className="text-sm italic text-muted-foreground">{t('record.noTokenData')}</div>
     )}
   </div>
 );
 
 const renderActionBlock = (item: AIHistoryRecordWithChapter, compact: boolean, t: TFunction<'writing'>) => (
-  <div className={`${compact ? 'rounded-xl p-4' : 'rounded-2xl p-5'} bg-gray-50`}>
-    <div className={`${compact ? 'text-xs mb-2' : 'text-sm mb-3'} font-bold text-gray-500 uppercase tracking-widest`}>
-      {t('record.actions')}
-    </div>
-    <div className="space-y-3">
-      <button
+  <div className="rounded-lg border border-border bg-muted/30 p-4">
+    <div className={sectionLabel}>{t('record.actions')}</div>
+    <div className="space-y-2">
+      <Button
+        variant="secondary"
+        size={compact ? 'sm' : 'md'}
+        className="w-full"
         onClick={() => {
           navigator.clipboard.writeText(item.record.generatedContent);
           dialogService.alert(t('record.copied'));
         }}
-        className={`${compact ? 'px-3 py-2 text-xs' : 'px-4 py-3 text-sm'} w-full bg-blue-100 text-blue-600 hover:bg-blue-200 rounded-xl font-bold transition-colors flex items-center justify-center gap-2`}
       >
         <Copy className="size-4" />
         {t('record.copyContent')}
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="ghost"
+        size={compact ? 'sm' : 'md'}
+        className="w-full"
         onClick={() => {
           dialogService.alert(t('record.fullPromptDialog', { prompt: item.record.prompt }));
         }}
-        className={`${compact ? 'px-3 py-2 text-xs' : 'px-4 py-3 text-sm'} w-full bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl font-bold transition-colors flex items-center justify-center gap-2`}
       >
         <Eye className="size-4" />
         {t('record.viewPrompt')}
-      </button>
+      </Button>
     </div>
   </div>
 );
@@ -99,71 +102,84 @@ const AIHistoryRecordCard: React.FC<{
 
   return (
     <div
-      className={`bg-white ${compact ? 'rounded-2xl' : 'rounded-3xl'} border overflow-hidden transition-all hover:shadow-lg ${
-        isSelected ? 'border-blue-300 shadow-lg shadow-blue-100' : 'border-gray-200 hover:border-gray-300'
-      }`}
+      className={cn(
+        'overflow-hidden rounded-lg border bg-card transition-colors',
+        isSelected ? 'border-primary/40' : 'border-border hover:border-primary/20'
+      )}
     >
       <div
-        className={`${compact ? 'p-4' : 'p-6'} border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex justify-between items-center cursor-pointer`}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isSelected}
+        className={cn(
+          'flex cursor-pointer items-center justify-between border-b border-border bg-muted/30',
+          compact ? 'p-4' : 'p-5',
+          !isSelected && 'border-b-transparent'
+        )}
         onClick={() => onToggle(item.record.id)}
+        onKeyDown={(event) => {
+          if (event.key === ' ' || event.key === 'Enter') {
+            event.preventDefault();
+            onToggle(item.record.id);
+          }
+        }}
       >
-        <div className={`flex items-center ${compact ? 'gap-4' : 'gap-5'}`}>
-          <div className={`${compact ? 'w-5 h-5' : 'w-6 h-6'} rounded border flex items-center justify-center ${
-            isSelected ? 'bg-blue-500 border-blue-500 text-white' : 'bg-white border-gray-300'
-          }`}>
-            {isSelected && <Check className={`size-4 ${compact ? 'text-xs' : 'text-sm'}`} />}
-          </div>
+        <div className={cn('flex min-w-0 items-center', compact ? 'gap-3' : 'gap-4')}>
+          <span
+            className={cn(
+              'flex size-4 shrink-0 items-center justify-center rounded border transition-colors',
+              isSelected ? 'border-primary bg-primary text-primary-foreground' : 'border-input bg-background'
+            )}
+          >
+            {isSelected && <Check className="size-3" />}
+          </span>
 
-          <div className={`flex items-center ${compact ? 'gap-3' : 'gap-4'}`}>
-            {(() => { const { icon: PIcon, cls } = getProviderIcon(item.record.modelConfig.provider); return <PIcon className={`${compact ? 'size-4' : 'size-5'} ${cls}`} />; })()}
-            <div>
-              <div className={`flex items-center ${compact ? 'gap-2' : 'gap-3'}`}>
-                <span className={`${compact ? 'text-sm' : 'text-base'} font-bold text-gray-800`}>
+          <div className={cn('flex min-w-0 items-center', compact ? 'gap-2.5' : 'gap-3')}>
+            {(() => { const { icon: PIcon, cls } = getProviderIcon(item.record.modelConfig.provider); return <PIcon className={cn('size-4 shrink-0', cls)} />; })()}
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className={cn('truncate font-medium text-foreground', compact ? 'text-sm' : 'text-base')}>
                   {item.record.modelConfig.modelName}
                 </span>
-                <span className={`${compact ? 'text-xs px-2 py-0.5' : 'text-xs px-3 py-1'} rounded bg-gray-100 text-gray-600 font-bold`}>
+                <span className="shrink-0 rounded border border-border bg-background px-1.5 py-0.5 text-xs text-muted-foreground">
                   {generationType}
                 </span>
               </div>
-              <div className={`${compact ? 'text-xs mt-0.5' : 'text-sm mt-1'} text-gray-500`}>
+              <div className={cn('truncate text-xs text-muted-foreground', !compact && 'mt-0.5')}>
                 {getChapterDisplayTitle(item.chapter)}
               </div>
             </div>
           </div>
         </div>
 
-        <div className={`flex items-center ${compact ? 'gap-4' : 'gap-5'}`}>
+        <div className={cn('flex shrink-0 items-center', compact ? 'gap-3' : 'gap-4')}>
           <div className="text-right">
-            <div className={`${compact ? 'text-xs' : 'text-sm'} font-bold text-gray-700`}>
+            <div className={cn('text-xs font-medium text-foreground', !compact && 'text-sm')}>
               {formatHistoryTimestamp(item.record.timestamp)}
             </div>
-            <div className={`${compact ? 'text-[10px] mt-0.5' : 'text-xs mt-1'} text-gray-400`}>
+            <div className="mt-0.5 text-[10px] tabular-nums text-muted-foreground">
               {item.record.tokens ? `${item.record.tokens.total} tokens` : 'N/A tokens'}
             </div>
           </div>
-          <ChevronRight className={`size-4 text-gray-300 transition-transform ${isSelected ? 'rotate-90' : ''}`} />
+          <ChevronRight className={cn('size-4 text-muted-foreground transition-transform', isSelected && 'rotate-90')} />
         </div>
       </div>
 
       {isSelected && (
-        <div className={`${compact ? 'p-5 space-y-5' : 'p-6 space-y-6'} animate-in fade-in duration-200`}>
+        <div className={cn('space-y-4', compact ? 'p-4' : 'p-5')}>
           {renderTemplateBlock(item, compact, t)}
 
-          <div className={compact ? 'space-y-5' : 'grid grid-cols-2 gap-6'}>
-            <div className={`${compact ? 'rounded-xl p-4' : 'rounded-2xl p-5'} bg-gray-50`}>
-              <div className={`${compact ? 'text-xs mb-2' : 'text-sm mb-3'} font-bold text-gray-500 uppercase tracking-widest`}>
-                {t('record.fullPromptLabel')}
-              </div>
-              <div className={`${compact ? 'max-h-40 text-xs' : 'max-h-64 text-sm'} overflow-y-auto whitespace-pre-wrap text-gray-700 leading-relaxed custom-scrollbar`}>
+          <div className={compact ? 'space-y-4' : 'grid grid-cols-2 gap-4'}>
+            <div className="rounded-lg border border-border bg-muted/30 p-4">
+              <div className={sectionLabel}>{t('record.fullPromptLabel')}</div>
+              <div className={cn('custom-scrollbar overflow-y-auto whitespace-pre-wrap leading-relaxed text-foreground/80', compact ? 'max-h-40 text-xs' : 'max-h-64 text-sm')}>
                 {item.record.prompt}
               </div>
             </div>
 
-            <div className={`${compact ? 'rounded-xl p-4' : 'rounded-2xl p-5'} bg-gray-50`}>
-              <div className={`${compact ? 'text-xs mb-2' : 'text-sm mb-3'} font-bold text-gray-500 uppercase tracking-widest`}>
-                {t('record.generatedContentLabel')}
-              </div>
-              <div className={`${compact ? 'max-h-40 text-xs' : 'max-h-64 text-sm'} overflow-y-auto whitespace-pre-wrap text-gray-700 leading-relaxed custom-scrollbar`}>
+            <div className="rounded-lg border border-border bg-muted/30 p-4">
+              <div className={sectionLabel}>{t('record.generatedContentLabel')}</div>
+              <div className={cn('custom-scrollbar overflow-y-auto whitespace-pre-wrap leading-relaxed text-foreground/80', compact ? 'max-h-40 text-xs' : 'max-h-64 text-sm')}>
                 {item.record.generatedContent}
               </div>
             </div>
@@ -171,26 +187,24 @@ const AIHistoryRecordCard: React.FC<{
 
           {compact ? (
             <div className="grid grid-cols-1 gap-4">
-              {renderTokenBlock(item, compact, t)}
+              {renderTokenBlock(item, t)}
               {renderActionBlock(item, compact, t)}
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-6">
-                <div className="rounded-2xl p-5 bg-gray-50">
-                  <div className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-3">
-                    {t('record.summaryInfo')}
-                  </div>
-                  <div className="space-y-2 text-sm text-gray-700">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div className="rounded-lg border border-border bg-muted/30 p-4">
+                  <div className={sectionLabel}>{t('record.summaryInfo')}</div>
+                  <div className="space-y-1 text-sm text-foreground/80">
                     <div>{t('record.summaryChapter')}{getChapterDisplayTitle(item.chapter)}</div>
                     <div>{t('record.summaryType')}{generationType}</div>
                     <div>{t('record.summaryTime')}{formatHistoryTimestamp(item.record.timestamp)}</div>
                     <div>{t('record.summaryToken')}{formatTokenUsage(item.record.tokens)}</div>
                   </div>
                 </div>
-                {renderTokenBlock(item, compact, t)}
+                {renderTokenBlock(item, t)}
               </div>
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {renderActionBlock(item, compact, t)}
               </div>
             </div>
@@ -219,38 +233,51 @@ const AIHistoryRecordList: React.FC<AIHistoryRecordListProps> = ({
   return (
     <>
       {compact && onToggleSelectAll && (
-        <div className="px-4 pb-1 bg-white border-b border-gray-100 shrink-0">
-          <div className="flex justify-between items-center pt-1">
-            <div className="flex items-center gap-2">
-              <div onClick={onToggleSelectAll} className="flex items-center gap-1 cursor-pointer select-none">
-                <div className={`w-4 h-4 rounded border flex items-center justify-center ${allSelected ? 'bg-blue-500 border-blue-500 text-white' : 'bg-white border-gray-300'}`}>
-                  {allSelected && <Check className="size-3" />}
-                </div>
-                <span className="text-xs font-bold text-gray-700">{allSelected ? t('record.deselectAll') : t('record.selectAll')}</span>
-              </div>
+        <div className="shrink-0 border-b border-border bg-card px-4 py-2">
+          <div className="flex items-center justify-between">
+            <div
+              role="checkbox"
+              aria-checked={allSelected}
+              tabIndex={0}
+              onClick={onToggleSelectAll}
+              onKeyDown={(event) => {
+                if (event.key === ' ' || event.key === 'Enter') {
+                  event.preventDefault();
+                  onToggleSelectAll();
+                }
+              }}
+              className="flex cursor-pointer items-center gap-2 select-none"
+            >
+              <span
+                className={cn(
+                  'flex size-4 items-center justify-center rounded border transition-colors',
+                  allSelected ? 'border-primary bg-primary text-primary-foreground' : 'border-input bg-background'
+                )}
+              >
+                {allSelected && <Check className="size-3" />}
+              </span>
+              <span className="text-xs font-medium text-foreground">{allSelected ? t('record.deselectAll') : t('record.selectAll')}</span>
             </div>
-            <div className="text-xs text-gray-500">{t('record.countUnit', { count: records.length })}</div>
+            <div className="text-xs tabular-nums text-muted-foreground">{t('record.countUnit', { count: records.length })}</div>
           </div>
         </div>
       )}
 
-      <div className={`flex-1 overflow-y-auto ${compact ? 'p-6' : 'p-8'} bg-gray-50/30 custom-scrollbar`}>
+      <div className={cn('custom-scrollbar flex-1 overflow-y-auto bg-muted/20', compact ? 'p-4' : 'p-6')}>
         {records.length === 0 ? (
-          <div className={`text-center ${compact ? 'py-16' : 'py-20'}`}>
-            <div className={`${compact ? 'w-20 h-20 mb-6' : 'w-24 h-24 mb-8'} bg-gray-100 rounded-full flex items-center justify-center mx-auto`}>
-              <History className={`size-4 text-gray-300 ${compact ? 'text-3xl' : 'text-4xl'}`} />
-            </div>
-            <h4 className={`${compact ? 'text-lg mb-2' : 'text-xl mb-3'} font-bold text-gray-400`}>{t('record.emptyTitle')}</h4>
-            <p className={`${compact ? 'text-sm max-w-md' : 'text-base max-w-lg'} text-gray-400 mx-auto`}>
-              {searchQuery.trim()
+          <EmptyState
+            icon={History}
+            title={t('record.emptyTitle')}
+            description={
+              searchQuery.trim()
                 ? t('record.emptyNoMatch')
                 : viewMode === 'chapter' && !selectedChapterId
                   ? t('record.emptyPickChapter')
-                  : t('record.emptyDefault')}
-            </p>
-          </div>
+                  : t('record.emptyDefault')
+            }
+          />
         ) : (
-          <div className={compact ? 'space-y-4' : 'space-y-6'}>
+          <div className={compact ? 'space-y-3' : 'space-y-4'}>
             {records.map((item) => (
               <AIHistoryRecordCard
                 key={item.record.id}
@@ -269,4 +296,3 @@ const AIHistoryRecordList: React.FC<AIHistoryRecordListProps> = ({
 };
 
 export default AIHistoryRecordList;
-

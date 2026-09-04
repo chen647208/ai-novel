@@ -1,4 +1,4 @@
-﻿/*
+/*
  * 本文件属于 AI小说家 (ai-novel) 项目。
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -12,6 +12,12 @@ import { useTranslation } from 'react-i18next';
 import { dialogService } from '@/shared/services/dialogService';
 import AIHistoryRecordList from './components/history/AIHistoryRecordList';
 import { toggleSetValue } from './utils';
+import { Button } from '@/shared/ui/Button';
+import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
+import { Input } from '@/shared/ui/Input';
+import { Label } from '@/shared/ui/Label';
+import { Select } from '@/shared/ui/Select';
+import { cn } from '@/shared/utils/cn';
 import { Search, Trash, Trash2, X } from 'lucide-react';
 import type {
   AIHistoryRecordWithChapter,
@@ -182,75 +188,80 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
     setSelectedHistoryIds(new Set());
   };
 
+  const filterLabel = 'mb-1 block text-xs font-medium uppercase tracking-wider text-muted-foreground';
+  const segmented = (active: boolean, disabled = false) =>
+    cn(
+      'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+      active ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+      disabled && 'cursor-not-allowed opacity-50 hover:text-muted-foreground'
+    );
+
   if (mode === 'sidebar') {
     return (
-      <div className="h-full flex flex-col bg-white border-l border-gray-200 shadow-lg animate-in slide-in-from-right duration-300">
-        <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-purple-50 flex justify-between items-center shrink-0">
-          <div>
-            <h3 className="text-xl font-black text-gray-800 tracking-tight">{t('history.sidebarTitle')}</h3>
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Global History Viewer</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 flex items-center justify-center transition-all"
-            title={t('history.closeSidebar')}
-          >
+      <div className="flex h-full flex-col border-l border-border bg-card">
+        <div className="flex shrink-0 items-center justify-between border-b border-border bg-muted/30 px-4 py-3">
+          <h3 className="font-serif text-base font-medium text-foreground">{t('history.sidebarTitle')}</h3>
+          <Button variant="ghost" size="icon" className="size-8" onClick={onClose} title={t('history.closeSidebar')}>
             <X className="size-4" />
-          </button>
+          </Button>
         </div>
 
-        <div className="px-6 py-3 bg-gray-50/50 border-b border-gray-100 flex justify-between items-center shrink-0">
+        <div className="flex shrink-0 items-center justify-between border-b border-border bg-muted/20 px-4 py-2">
           <div className="flex items-center gap-4">
-            <div className="text-center">
-              <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{t('history.statTotal')}</div>
-              <div className="text-base font-bold text-blue-600">{allHistoryRecords.length}</div>
+            <div>
+              <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t('history.statTotal')}</div>
+              <div className="text-sm font-medium tabular-nums text-foreground">{allHistoryRecords.length}</div>
             </div>
-            <div className="text-center">
-              <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{t('history.statChapters')}</div>
-              <div className="text-base font-bold text-green-600">{chapterOptions.length}</div>
+            <div>
+              <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t('history.statChapters')}</div>
+              <div className="text-sm font-medium tabular-nums text-foreground">{chapterOptions.length}</div>
             </div>
-            <div className="text-center">
-              <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{t('history.statSelected')}</div>
-              <div className="text-base font-bold text-purple-600">{selectedHistoryIds.size}</div>
+            <div>
+              <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t('history.statSelected')}</div>
+              <div className="text-sm font-medium tabular-nums text-foreground">{selectedHistoryIds.size}</div>
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <button
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
               onClick={clearAllHistory}
-              className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-bold transition-all flex items-center gap-1"
               disabled={allHistoryRecords.length === 0}
               title={t('history.clearAllTitle')}
             >
-              <Trash2 className="size-3.5" />
-            </button>
-            <button
+              <Trash2 className="size-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
               onClick={deleteSelectedHistory}
-              className="px-3 py-1.5 bg-red-600 text-white hover:bg-red-700 rounded-lg text-xs font-bold transition-all flex items-center gap-1"
               disabled={selectedHistoryIds.size === 0}
               title={t('history.deleteSelectedTitle')}
             >
-              <Trash className="size-3.5" />
-            </button>
+              <Trash className="size-4" />
+            </Button>
           </div>
         </div>
 
-        <div className="p-4 border-b border-gray-100 bg-white space-y-3 shrink-0">
+        <div className="shrink-0 space-y-3 border-b border-border p-4">
           <div>
-            <label className="block text-xs font-bold text-gray-500 mb-1">{t('history.viewModeLabel')}</label>
-            <div className="flex gap-1">
+            <Label className={filterLabel}>{t('history.viewModeLabel')}</Label>
+            <div className="flex gap-1 rounded-lg bg-muted p-1">
               <button
                 onClick={() => {
                   setViewMode('all');
                   setSelectedChapterId(null);
                 }}
-                className={`flex-1 px-2 py-1.5 rounded text-xs font-bold transition-all ${viewMode === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                className={cn('flex-1', segmented(viewMode === 'all'))}
               >
                 {t('history.viewAll')}
               </button>
               <button
                 onClick={() => setViewMode('chapter')}
-                className={`flex-1 px-2 py-1.5 rounded text-xs font-bold transition-all ${viewMode === 'chapter' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                className={cn('flex-1', segmented(viewMode === 'chapter', chapterOptions.length === 0))}
                 disabled={chapterOptions.length === 0}
               >
                 {t('history.viewChapter')}
@@ -260,11 +271,11 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
 
           {viewMode === 'chapter' && (
             <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1">{t('history.selectChapterLabel')}</label>
-              <select
+              <Label className={filterLabel}>{t('history.selectChapterLabel')}</Label>
+              <Select
+                className="h-8 text-xs"
                 value={selectedChapterId || ''}
                 onChange={(event) => setSelectedChapterId(event.target.value || null)}
-                className="w-full bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-lg px-3 py-1.5 outline-none focus:ring-1 focus:ring-blue-200 cursor-pointer"
               >
                 <option value="">{t('history.selectChapterPlaceholder')}</option>
                 {chapterOptions.map((chapter) => (
@@ -272,50 +283,44 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
                     {getChapterDisplayTitle(chapter)}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-bold text-gray-500 mb-1">{t('history.searchLabel')}</label>
+            <Label className={filterLabel}>{t('history.searchLabel')}</Label>
             <div className="relative">
-              <input
+              <Input
+                className="h-8 pl-8 text-xs"
                 type="text"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder={t('history.searchPlaceholder')}
-                className="w-full bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-lg px-3 py-1.5 pl-8 outline-none focus:ring-1 focus:ring-blue-200"
               />
-              <Search className="size-3.5 absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1">{t('history.sortLabel')}</label>
-              <select
+              <Label className={filterLabel}>{t('history.sortLabel')}</Label>
+              <Select
+                className="h-8 text-xs"
                 value={sortBy}
                 onChange={(event) => setSortBy(event.target.value as AIHistorySortBy)}
-                className="w-full bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-lg px-2 py-1.5 outline-none focus:ring-1 focus:ring-blue-200 cursor-pointer"
               >
                 <option value="timestamp">{t('history.sortTime')}</option>
                 <option value="model">{t('history.sortModel')}</option>
                 <option value="tokens">{t('history.sortTokens')}</option>
-              </select>
+              </Select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1">{t('history.orderLabel')}</label>
-              <div className="flex gap-1">
-                <button
-                  onClick={() => setSortOrder('desc')}
-                  className={`flex-1 px-2 py-1.5 rounded text-xs font-bold transition-all ${sortOrder === 'desc' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-                >
+              <Label className={filterLabel}>{t('history.orderLabel')}</Label>
+              <div className="flex gap-1 rounded-lg bg-muted p-1">
+                <button onClick={() => setSortOrder('desc')} className={cn('flex-1', segmented(sortOrder === 'desc'))}>
                   {t('history.desc')}
                 </button>
-                <button
-                  onClick={() => setSortOrder('asc')}
-                  className={`flex-1 px-2 py-1.5 rounded text-xs font-bold transition-all ${sortOrder === 'asc' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-                >
+                <button onClick={() => setSortOrder('asc')} className={cn('flex-1', segmented(sortOrder === 'asc'))}>
                   {t('history.asc')}
                 </button>
               </div>
@@ -339,80 +344,78 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-8 animate-in fade-in duration-300">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden animate-in zoom-in duration-300">
-        <div className="p-8 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-purple-50 flex justify-between items-center shrink-0">
-          <div>
-            <h2 className="text-2xl font-black text-gray-800 tracking-tight">{t('history.modalTitle')}</h2>
-            <p className="text-sm text-gray-400 font-bold uppercase tracking-widest mt-2">Global AI History Viewer</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 flex items-center justify-center transition-all shadow-lg"
-            title={t('history.closeViewer')}
-          >
-            <X className="size-5" />
-          </button>
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <DialogContent className="flex h-[90vh] w-[94vw] max-w-6xl flex-col gap-0 overflow-hidden p-0">
+        <div className="flex shrink-0 items-center justify-between border-b border-border bg-muted/30 px-6 py-4">
+          <DialogTitle className="font-serif text-lg">{t('history.modalTitle')}</DialogTitle>
         </div>
 
-        <div className="px-8 py-4 bg-gray-50/50 border-b border-gray-100 flex justify-between items-center shrink-0">
+        <div className="flex shrink-0 items-center justify-between border-b border-border bg-muted/20 px-6 py-3">
           <div className="flex items-center gap-8">
-            <div className="text-center">
-              <div className="text-xs font-black text-gray-400 uppercase tracking-widest">{t('history.statTotal')}</div>
-              <div className="text-2xl font-bold text-blue-600">{allHistoryRecords.length}</div>
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('history.statTotal')}</div>
+              <div className="text-lg font-medium tabular-nums text-foreground">{allHistoryRecords.length}</div>
             </div>
-            <div className="text-center">
-              <div className="text-xs font-black text-gray-400 uppercase tracking-widest">{t('history.statChapters')}</div>
-              <div className="text-2xl font-bold text-green-600">{chapterOptions.length}</div>
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('history.statChapters')}</div>
+              <div className="text-lg font-medium tabular-nums text-foreground">{chapterOptions.length}</div>
             </div>
-            <div className="text-center">
-              <div className="text-xs font-black text-gray-400 uppercase tracking-widest">{t('history.statSelected')}</div>
-              <div className="text-2xl font-bold text-purple-600">{selectedHistoryIds.size}</div>
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('history.statSelected')}</div>
+              <div className="text-lg font-medium tabular-nums text-foreground">{selectedHistoryIds.size}</div>
             </div>
-            <div className="text-center">
-              <div className="text-xs font-black text-gray-400 uppercase tracking-widest">{t('history.statStorage')}</div>
-              <div className="text-lg font-bold text-gray-600">{totalStorageSizeKb} KB</div>
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('history.statStorage')}</div>
+              <div className="text-lg font-medium tabular-nums text-foreground">{totalStorageSizeKb} KB</div>
             </div>
           </div>
 
-          <div className="flex gap-3">
-            <button
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-destructive hover:text-destructive"
               onClick={clearAllHistory}
-              className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl text-sm font-bold transition-all flex items-center gap-2 shadow-sm"
               disabled={allHistoryRecords.length === 0}
               title={t('history.clearAllTitle')}
             >
               <Trash2 className="size-4" />
               {t('history.clearAll')}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
               onClick={deleteSelectedHistory}
-              className="px-6 py-2 bg-red-600 text-white hover:bg-red-700 rounded-xl text-sm font-bold transition-all flex items-center gap-2 shadow-lg shadow-red-200"
               disabled={selectedHistoryIds.size === 0}
               title={t('history.deleteSelectedTitle')}
             >
               <Trash className="size-4" />
               {t('history.deleteSelected', { count: selectedHistoryIds.size })}
-            </button>
+            </Button>
           </div>
         </div>
 
-        <div className="p-6 border-b border-gray-100 bg-white grid grid-cols-4 gap-6 shrink-0">
+        <div className="grid shrink-0 grid-cols-4 gap-4 border-b border-border bg-card p-4">
           <div>
-            <label className="block text-sm font-bold text-gray-500 mb-2">{t('history.viewModeLabel')}</label>
-            <div className="flex gap-2">
+            <Label className={filterLabel}>{t('history.viewModeLabel')}</Label>
+            <div className="flex gap-1 rounded-lg bg-muted p-1">
               <button
                 onClick={() => {
                   setViewMode('all');
                   setSelectedChapterId(null);
                 }}
-                className={`flex-1 px-4 py-2 rounded-lg text-sm font-bold transition-all ${viewMode === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                className={cn('flex-1', segmented(viewMode === 'all'))}
               >
                 {t('history.viewAllFull')}
               </button>
               <button
                 onClick={() => setViewMode('chapter')}
-                className={`flex-1 px-4 py-2 rounded-lg text-sm font-bold transition-all ${viewMode === 'chapter' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                className={cn('flex-1', segmented(viewMode === 'chapter', chapterOptions.length === 0))}
                 disabled={chapterOptions.length === 0}
               >
                 {t('history.viewChapterFull')}
@@ -422,11 +425,10 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
 
           {viewMode === 'chapter' && (
             <div>
-              <label className="block text-sm font-bold text-gray-500 mb-2">{t('history.selectChapterLabel')}</label>
-              <select
+              <Label className={filterLabel}>{t('history.selectChapterLabel')}</Label>
+              <Select
                 value={selectedChapterId || ''}
                 onChange={(event) => setSelectedChapterId(event.target.value || null)}
-                className="w-full bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer"
               >
                 <option value="">{t('history.selectChapterPlaceholder')}</option>
                 {chapterOptions.map((chapter) => (
@@ -434,50 +436,43 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
                     {getChapterDisplayTitle(chapter)}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           )}
 
           <div className={viewMode === 'chapter' ? 'col-span-2' : 'col-span-3'}>
-            <label className="block text-sm font-bold text-gray-500 mb-2">{t('history.searchContentLabel')}</label>
+            <Label className={filterLabel}>{t('history.searchContentLabel')}</Label>
             <div className="relative">
-              <input
+              <Input
+                className="pl-9"
                 type="text"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder={t('history.searchPlaceholderFull')}
-                className="w-full bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-lg px-4 py-2 pl-10 outline-none focus:ring-2 focus:ring-blue-200"
               />
-              <Search className="size-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-bold text-gray-500 mb-2">{t('history.sortLabelFull')}</label>
-              <select
+              <Label className={filterLabel}>{t('history.sortLabelFull')}</Label>
+              <Select
                 value={sortBy}
                 onChange={(event) => setSortBy(event.target.value as AIHistorySortBy)}
-                className="w-full bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer"
               >
                 <option value="timestamp">{t('history.sortTimeFull')}</option>
                 <option value="model">{t('history.sortModelFull')}</option>
                 <option value="tokens">{t('history.sortTokensFull')}</option>
-              </select>
+              </Select>
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-500 mb-2">{t('history.orderLabelFull')}</label>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setSortOrder('desc')}
-                  className={`flex-1 px-4 py-2 rounded-lg text-sm font-bold transition-all ${sortOrder === 'desc' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-                >
+              <Label className={filterLabel}>{t('history.orderLabelFull')}</Label>
+              <div className="flex gap-1 rounded-lg bg-muted p-1">
+                <button onClick={() => setSortOrder('desc')} className={cn('flex-1', segmented(sortOrder === 'desc'))}>
                   {t('history.desc')}
                 </button>
-                <button
-                  onClick={() => setSortOrder('asc')}
-                  className={`flex-1 px-4 py-2 rounded-lg text-sm font-bold transition-all ${sortOrder === 'asc' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-                >
+                <button onClick={() => setSortOrder('asc')} className={cn('flex-1', segmented(sortOrder === 'asc'))}>
                   {t('history.asc')}
                 </button>
               </div>
@@ -496,27 +491,24 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
           getChapterDisplayTitle={getChapterDisplayTitle}
         />
 
-        <div className="p-8 bg-gray-50 border-t border-gray-100 flex justify-between items-center shrink-0">
-          <div className="text-sm text-gray-500">{t('history.footerTotal', { count: allHistoryRecords.length, size: totalStorageSizeKb })}</div>
-          <div className="flex gap-4">
-            <button
-              onClick={onClose}
-              className="px-8 py-4 rounded-xl text-gray-500 font-bold text-base hover:bg-gray-200 hover:text-gray-800 transition-all"
-            >
+        <div className="flex shrink-0 items-center justify-between border-t border-border bg-muted/30 px-6 py-4">
+          <div className="text-sm text-muted-foreground">{t('history.footerTotal', { count: allHistoryRecords.length, size: totalStorageSizeKb })}</div>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" onClick={onClose}>
               {t('history.close')}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="destructive"
               onClick={deleteSelectedHistory}
-              className="px-10 py-4 bg-red-600 text-white font-black text-base rounded-xl shadow-lg shadow-red-200 hover:bg-red-700 active:scale-95 transition-all flex items-center gap-2"
               disabled={selectedHistoryIds.size === 0}
             >
               <Trash className="size-4" />
               {t('history.deleteSelectedRecords', { count: selectedHistoryIds.size })}
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -11,8 +11,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { WritingEditorToolbarProps } from '../types';
 import { formatCharCount } from '../services/writingStatsService';
+import { Button } from '@/shared/ui/Button';
+import { cn } from '@/shared/utils/cn';
 import { ArrowLeft, Camera, ChevronsRight, Eraser, FileOutput, FileText, History, Maximize2, Minimize2, Sprout } from 'lucide-react';
-
 
 const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
   activeChapterId,
@@ -40,38 +41,56 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
   onManualSnapshot,
 }) => {
   const { t, i18n } = useTranslation('writing');
+  const actionButton = 'text-muted-foreground';
   return (
-    <div className={`border-b px-10 py-5 flex justify-between items-center sticky top-0 z-10 transition-colors ${isFocusMode ? 'bg-gray-50/80 border-gray-200/50' : 'bg-white'}`}>
-      <div className="flex items-center gap-6">
+    <div
+      className={cn(
+        'sticky top-0 z-10 flex items-center justify-between border-b border-border px-10 py-4 transition-colors',
+        isFocusMode ? 'bg-background/80 backdrop-blur-sm' : 'bg-card'
+      )}
+    >
+      <div className="flex items-center gap-5">
         {!isFocusMode && (
-          <button onClick={onBack} className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-all" title={t('toolbar.back')}>
+          <Button variant="ghost" size="icon" className="size-9 shrink-0" onClick={onBack} title={t('toolbar.back')}>
             <ArrowLeft className="size-4" />
-          </button>
+          </Button>
         )}
         <div className="flex flex-col">
-          <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{t('toolbar.writingLabel')}</span>
+          <span className="text-xs font-medium uppercase tracking-wider text-primary">{t('toolbar.writingLabel')}</span>
           {activeChapterId ? (
             <input
-              className={`text-2xl font-black border-none focus:ring-0 p-0 placeholder-gray-200 bg-transparent ${isFocusMode ? 'w-[60ch] text-gray-700' : 'w-96 text-gray-800'}`}
+              className={cn(
+                'border-none bg-transparent p-0 font-serif text-2xl font-medium text-foreground outline-none placeholder:text-muted-foreground/40',
+                isFocusMode ? 'w-[60ch]' : 'w-96'
+              )}
               value={activeChapterTitle}
               onChange={(event) => onTitleChange(event.target.value)}
               placeholder={t('toolbar.titlePlaceholder')}
             />
           ) : (
-            <span className="text-2xl font-black text-gray-300">{t('toolbar.selectChapter')}</span>
+            <span className="font-serif text-2xl font-medium text-muted-foreground/50">{t('toolbar.selectChapter')}</span>
           )}
         </div>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {/* 统计信息：本章 + 全书 + 今日 */}
-        <div className="hidden lg:flex items-center gap-3 text-[10px] font-bold text-gray-400 mr-1" title={t('toolbar.statsTitle', { paragraphs: chapterStats.paragraphs, sentences: chapterStats.sentences, minutes: chapterStats.readingMinutes })}>
-          <span>{t('toolbar.thisChapter')}<span className="text-gray-900 text-xs">{formatCharCount(chapterStats.charCount)}</span></span>
-          <span className="text-gray-200">|</span>
-          <span>{t('toolbar.wholeBook')}<span className="text-gray-900 text-xs">{formatCharCount(bookStats.totalCharCount)}</span></span>
+        <div
+          className="mr-1 hidden items-center gap-3 text-xs text-muted-foreground lg:flex"
+          title={t('toolbar.statsTitle', { paragraphs: chapterStats.paragraphs, sentences: chapterStats.sentences, minutes: chapterStats.readingMinutes })}
+        >
+          <span>
+            {t('toolbar.thisChapter')}
+            <span className="font-medium tabular-nums text-foreground">{formatCharCount(chapterStats.charCount)}</span>
+          </span>
+          <span className="text-border">|</span>
+          <span>
+            {t('toolbar.wholeBook')}
+            <span className="font-medium tabular-nums text-foreground">{formatCharCount(bookStats.totalCharCount)}</span>
+          </span>
           {bookStats.todayCharCount > 0 && (
             <>
-              <span className="text-gray-200">|</span>
-              <span className="text-emerald-600">{t('toolbar.todayAdded', { count: formatCharCount(bookStats.todayCharCount) })}</span>
+              <span className="text-border">|</span>
+              <span className="text-success">{t('toolbar.todayAdded', { count: formatCharCount(bookStats.todayCharCount) })}</span>
             </>
           )}
         </div>
@@ -79,63 +98,75 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
         {!isFocusMode && (
           <>
             {activeChapterId && (
-              <button onClick={onManualSnapshot} className="text-gray-300 hover:text-amber-500 transition-colors flex items-center gap-2 text-xs font-bold" title={t('toolbar.snapshotTitle', { count: snapshotCount })}>
+              <Button variant="ghost" size="sm" className={cn(actionButton, 'hover:text-foreground')} onClick={onManualSnapshot} title={t('toolbar.snapshotTitle', { count: snapshotCount })}>
                 <Camera className="size-4" /> {t('toolbar.snapshot')}
-              </button>
+              </Button>
             )}
             {hasProjectChapters && (
-              <button onClick={onOpenExport} className="text-gray-300 hover:text-emerald-500 transition-colors flex items-center gap-2 text-xs font-bold" title={t('toolbar.exportTitle')}>
+              <Button variant="ghost" size="sm" className={cn(actionButton, 'hover:text-foreground')} onClick={onOpenExport} title={t('toolbar.exportTitle')}>
                 <FileOutput className="size-4" /> {t('toolbar.export')}
-              </button>
+              </Button>
             )}
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(actionButton, 'gap-1.5', overdueForeshadowCount > 0 ? 'text-destructive hover:text-destructive' : 'hover:text-foreground')}
               onClick={onOpenForeshadow}
-              className={`transition-colors flex items-center gap-1.5 text-xs font-bold ${overdueForeshadowCount > 0 ? 'text-red-500 hover:text-red-600' : 'text-gray-300 hover:text-indigo-500'}`}
               title={overdueForeshadowCount > 0 ? t('toolbar.foreshadowTitleOverdue', { open: openForeshadowCount, overdue: overdueForeshadowCount }) : t('toolbar.foreshadowTitle', { open: openForeshadowCount })}
             >
               <Sprout className="size-4" /> {t('toolbar.foreshadow')}
               {openForeshadowCount > 0 && (
-                <span className={`text-[9px] px-1.5 rounded-full ${overdueForeshadowCount > 0 ? 'bg-red-500 text-white' : 'bg-indigo-100 text-indigo-600'}`}>{openForeshadowCount}</span>
+                <span
+                  className={cn(
+                    'rounded-full px-1.5 py-0.5 text-[10px] font-medium tabular-nums',
+                    overdueForeshadowCount > 0 ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'
+                  )}
+                >
+                  {openForeshadowCount}
+                </span>
               )}
-            </button>
+            </Button>
             {activeChapterId && (
-              <button onClick={onClearContent} className="text-gray-300 hover:text-red-500 transition-colors flex items-center gap-2 text-xs font-bold" title={t('toolbar.clearTitle')}>
+              <Button variant="ghost" size="sm" className={cn(actionButton, 'hover:text-destructive')} onClick={onClearContent} title={t('toolbar.clearTitle')}>
                 <Eraser className="size-4" /> {t('toolbar.clear')}
-              </button>
+              </Button>
             )}
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(actionButton, isGlobalHistorySidebarOpen && 'bg-accent text-foreground')}
               onClick={onToggleGlobalHistory}
-              className={`text-gray-300 hover:text-blue-500 transition-colors flex items-center gap-2 text-xs font-bold ${isGlobalHistorySidebarOpen ? 'text-blue-500' : ''}`}
               title={t('toolbar.globalHistoryTitle')}
             >
               <History className="size-4" /> {t('toolbar.globalHistory')}
-            </button>
+            </Button>
             {activeChapterId && hasActiveChapterHistory && (
-              <button
-                onClick={onOpenChapterHistory}
-                className="text-gray-300 hover:text-purple-500 transition-colors flex items-center gap-2 text-xs font-bold"
-                title={t('toolbar.chapterHistoryTitle')}
-              >
+              <Button variant="ghost" size="sm" className={cn(actionButton, 'hover:text-foreground')} onClick={onOpenChapterHistory} title={t('toolbar.chapterHistoryTitle')}>
                 <FileText className="size-4" /> {t('toolbar.chapterHistory')}
-              </button>
+              </Button>
             )}
           </>
         )}
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
+          className={cn(actionButton, isFocusMode && 'text-primary hover:text-primary')}
           onClick={onToggleFocusMode}
-          className={`flex items-center gap-2 text-xs font-bold transition-colors ${isFocusMode ? 'text-blue-600' : 'text-gray-300 hover:text-blue-500'}`}
           title={isFocusMode ? t('toolbar.exitFocusTitle') : t('toolbar.enterFocusTitle')}
         >
           {isFocusMode ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />} {isFocusMode ? t('toolbar.exitFocus') : t('toolbar.focus')}
-        </button>
+        </Button>
         {!isSidebarOpen && !isFocusMode && (
-          <button onClick={onOpenSidebar} className="w-10 h-10 rounded-2xl bg-white shadow-lg border border-gray-100 text-gray-400 hover:text-blue-600 flex items-center justify-center transition-all">
+          <Button variant="outline" size="icon" className="size-9 shrink-0" onClick={onOpenSidebar} title={t('toolbar.openSidebar')}>
             <ChevronsRight className="size-4" />
-          </button>
+          </Button>
         )}
-        <div className="flex flex-col items-end">
-          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('toolbar.charCountLabel')}<span className="text-gray-900">{chapterStats.charCount}</span></span>
-          <span className="text-[9px] text-gray-300 font-medium mt-0.5 italic">{t('toolbar.autoSave', { time: new Date(lastSaved).toLocaleTimeString(i18n.language) })}</span>
+        <div className="ml-1 flex flex-col items-end">
+          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            {t('toolbar.charCountLabel')}
+            <span className="tabular-nums text-foreground">{chapterStats.charCount}</span>
+          </span>
+          <span className="mt-0.5 text-[10px] italic text-muted-foreground/70">{t('toolbar.autoSave', { time: new Date(lastSaved).toLocaleTimeString(i18n.language) })}</span>
         </div>
       </div>
     </div>

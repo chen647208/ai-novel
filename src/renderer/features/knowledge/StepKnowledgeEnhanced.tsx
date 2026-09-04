@@ -634,56 +634,50 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
       )}
 
       {showEnhancedTimeline && (
-        <div className="animate-in fade-in">
-          <EnhancedTimeline
-            project={project}
-            onEventClick={(event) => {
-              logger.debug('点击事件:', event);
-            }}
-            onChapterClick={(chapter) => {
-              logger.debug('点击章节:', chapter);
-            }}
-            showChapters={true}
-          />
-        </div>
+        <EnhancedTimeline
+          project={project}
+          onEventClick={(event) => {
+            logger.debug('点击事件:', event);
+          }}
+          onChapterClick={(chapter) => {
+            logger.debug('点击章节:', chapter);
+          }}
+          showChapters={true}
+        />
       )}
 
       {showConsistencyChecker && (
-        <div className="animate-in fade-in">
-          <ConsistencyChecker
-            project={project}
-            model={activeModel}
-            embeddingConfig={activeEmbeddingConfig || undefined}
-            consistencyPrompts={consistencyPrompts}
-            consistencyConfig={consistencyConfig || undefined}
-            onFixIssues={(fixedProject) => {
-              onUpdate(fixedProject);
-              dialogService.alert(t('center.autoFixed'));
-            }}
-            onNavigateToItem={(type, id) => {
-              logger.debug('导航到:', type, id);
-            }}
-          />
-        </div>
+        <ConsistencyChecker
+          project={project}
+          model={activeModel}
+          embeddingConfig={activeEmbeddingConfig || undefined}
+          consistencyPrompts={consistencyPrompts}
+          consistencyConfig={consistencyConfig || undefined}
+          onFixIssues={(fixedProject) => {
+            onUpdate(fixedProject);
+            dialogService.alert(t('center.autoFixed'));
+          }}
+          onNavigateToItem={(type, id) => {
+            logger.debug('导航到:', type, id);
+          }}
+        />
       )}
 
       {showSmartRecommender && (
-        <div className="animate-in fade-in">
-          <SmartRecommender
-            project={project}
-            context={{
-              selectedCharacters: project.characters?.slice(0, 2).map(c => c.id),
-              selectedLocation: project.locations?.[0]?.id,
-              currentContent: ''
-            }}
-            onSelectItem={(item) => {
-              logger.debug('选择推荐项:', item);
-            }}
-            onViewItem={(type, id) => {
-              logger.debug('查看:', type, id);
-            }}
-          />
-        </div>
+        <SmartRecommender
+          project={project}
+          context={{
+            selectedCharacters: project.characters?.slice(0, 2).map(c => c.id),
+            selectedLocation: project.locations?.[0]?.id,
+            currentContent: ''
+          }}
+          onSelectItem={(item) => {
+            logger.debug('选择推荐项:', item);
+          }}
+          onViewItem={(type, id) => {
+            logger.debug('查看:', type, id);
+          }}
+        />
       )}
 
       {showFactionEditor && (

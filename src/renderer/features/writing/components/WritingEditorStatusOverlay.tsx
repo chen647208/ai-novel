@@ -1,4 +1,4 @@
-﻿/*
+/*
  * 本文件属于 AI小说家 (ai-novel) 项目。
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -10,7 +10,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { WritingEditorStatusOverlayProps } from '../types';
-import { Square } from 'lucide-react';
+import { Button } from '@/shared/ui/Button';
+import { Loader2, Square } from 'lucide-react';
 
 const WritingEditorStatusOverlay: React.FC<WritingEditorStatusOverlayProps> = ({
   isGenerating,
@@ -27,67 +28,70 @@ const WritingEditorStatusOverlay: React.FC<WritingEditorStatusOverlayProps> = ({
   return (
     <>
       {isGenerating && !isStreaming && (
-        <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px] flex items-center justify-center z-20">
-          <div className="bg-white p-8 rounded-[2rem] shadow-2xl border border-gray-100 flex flex-col items-center animate-in zoom-in duration-300">
-            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-blue-600 font-black text-xs tracking-widest uppercase">{t('statusOverlay.generating')}</p>
-            <p className="text-gray-400 text-[10px] mt-2">{t('statusOverlay.targetWords', { count: targetWordCount })}</p>
-            <p className="text-gray-300 text-[9px] mt-1">{t('statusOverlay.contextInjected', { count: selectedKnowledgeCount })}</p>
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+          <div className="flex flex-col items-center rounded-xl border border-border bg-card p-8 shadow-lg">
+            <Loader2 className="mb-4 size-10 animate-spin text-primary" strokeWidth={2} />
+            <p className="text-xs font-medium uppercase tracking-widest text-foreground">{t('statusOverlay.generating')}</p>
+            <p className="mt-2 text-xs text-muted-foreground">{t('statusOverlay.targetWords', { count: targetWordCount })}</p>
+            <p className="mt-1 text-[10px] text-muted-foreground/70">{t('statusOverlay.contextInjected', { count: selectedKnowledgeCount })}</p>
           </div>
         </div>
       )}
 
       {isStreaming && (
-        <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px] flex items-center justify-center z-20">
-          <div className="bg-white p-8 rounded-[2rem] shadow-2xl border border-gray-100 flex flex-col items-center animate-in zoom-in duration-300">
-            <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-green-600 font-black text-xs tracking-widest uppercase">{t('statusOverlay.streaming')}</p>
-            <p className="text-gray-400 text-[10px] mt-2">{t('statusOverlay.generatedSoFar', { count: streamingContentLength })}</p>
-            <p className="text-gray-300 text-[9px] mt-1">{t('statusOverlay.streamingHint')}</p>
-            <button
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+          <div className="flex flex-col items-center rounded-xl border border-border bg-card p-8 shadow-lg">
+            <Loader2 className="mb-4 size-10 animate-spin text-success" strokeWidth={2} />
+            <p className="text-xs font-medium uppercase tracking-widest text-foreground">{t('statusOverlay.streaming')}</p>
+            <p className="mt-2 text-xs tabular-nums text-muted-foreground">{t('statusOverlay.generatedSoFar', { count: streamingContentLength })}</p>
+            <p className="mt-1 text-[10px] text-muted-foreground/70">{t('statusOverlay.streamingHint')}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4 text-destructive hover:text-destructive"
               onClick={onStopStreaming}
-              className="mt-4 px-4 py-2 bg-red-100 text-red-600 text-xs font-bold rounded-lg hover:bg-red-200 transition-colors flex items-center gap-2"
             >
-              <Square className="size-4" /> {t('statusOverlay.stop')}
-            </button>
+              <Square className="size-3.5" /> {t('statusOverlay.stop')}
+            </Button>
           </div>
         </div>
       )}
 
       {isBatchGenerating && (
-        <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px] flex items-center justify-center z-20">
-          <div className="bg-white p-8 rounded-[2rem] shadow-2xl border border-gray-100 flex flex-col items-center animate-in zoom-in duration-300 max-w-md">
-            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-blue-600 font-black text-xs tracking-widest uppercase">{t('statusOverlay.batchInProgress')}</p>
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+          <div className="flex max-w-md flex-col items-center rounded-xl border border-border bg-card p-8 shadow-lg">
+            <Loader2 className="mb-4 size-10 animate-spin text-primary" strokeWidth={2} />
+            <p className="text-xs font-medium uppercase tracking-widest text-foreground">{t('statusOverlay.batchInProgress')}</p>
 
-            <div className="w-full mt-4 mb-2">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-bold text-gray-700">
+            <div className="mb-2 mt-4 w-full">
+              <div className="mb-1.5 flex items-center justify-between">
+                <span className="text-sm font-medium">
                   {t('statusOverlay.batchProgress', { current: batchProgress.current, total: batchProgress.total })}
                 </span>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs tabular-nums text-muted-foreground">
                   {Math.round((batchProgress.current / batchProgress.total) * 100)}%
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                 <div
-                  className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                  className="h-full rounded-full bg-primary transition-all duration-300"
                   style={{ width: `${(batchProgress.current / batchProgress.total) * 100}%` }}
-                ></div>
+                />
               </div>
             </div>
 
-            <p className="text-gray-600 text-sm font-bold mt-3 mb-1">
+            <p className="mt-3 mb-1 truncate text-sm font-medium">
               {batchProgress.currentChapterTitle}
             </p>
-            <p className="text-gray-400 text-[10px]">{t('statusOverlay.currentChapter')}</p>
+            <p className="text-[10px] text-muted-foreground">{t('statusOverlay.currentChapter')}</p>
 
-            <button
+            <Button
+              variant="outline"
+              className="mt-6 text-destructive hover:text-destructive"
               onClick={onStopBatchGeneration}
-              className="mt-6 px-6 py-3 bg-red-100 text-red-600 text-sm font-bold rounded-xl hover:bg-red-200 transition-colors flex items-center gap-2"
             >
               <Square className="size-4" /> {t('statusOverlay.stopBatch')}
-            </button>
+            </Button>
           </div>
         </div>
       )}
