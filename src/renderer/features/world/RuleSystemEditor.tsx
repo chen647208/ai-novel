@@ -24,6 +24,8 @@ interface RuleSystemEditorProps {
   ruleSystems: RuleSystem[];
   characters: Character[];
   onSave: (ruleSystems: RuleSystem[]) => void;
+  /** 外部导航（一致性检查/智能推荐「跳转到编辑」）时预选中的规则系统 id */
+  initialSelectedId?: string | null;
 }
 
 /**
@@ -39,7 +41,8 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
   projectId,
   ruleSystems,
   characters,
-  onSave
+  onSave,
+  initialSelectedId
 }) => {
   const { t } = useTranslation('world');
   const [localRuleSystems, setLocalRuleSystems] = useState<RuleSystem[]>([]);
@@ -50,6 +53,14 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
   useEffect(() => {
     setLocalRuleSystems(ruleSystems || []);
   }, [ruleSystems]);
+
+  // 外部导航：id 变化时选中对应规则系统
+  useEffect(() => {
+    if (initialSelectedId && (ruleSystems || []).some(r => r.id === initialSelectedId)) {
+      setSelectedSystemId(initialSelectedId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSelectedId]);
 
   // 获取规则类型显示名称
   const getRuleTypeLabel = (type: RuleSystemType): string => t(`rule.type.${type}`);

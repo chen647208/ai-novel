@@ -25,6 +25,8 @@ interface FactionEditorProps {
   locations: Location[];
   characters: Character[];
   onSave: (factions: Faction[]) => void;
+  /** 外部导航（一致性检查/智能推荐「跳转到编辑」）时预选中的势力 id */
+  initialSelectedId?: string | null;
 }
 
 /**
@@ -42,7 +44,8 @@ export const FactionEditor: React.FC<FactionEditorProps> = ({
   factions,
   locations,
   characters,
-  onSave
+  onSave,
+  initialSelectedId
 }) => {
   const { t } = useTranslation('world');
   const [localFactions, setLocalFactions] = useState<Faction[]>([]);
@@ -54,6 +57,14 @@ export const FactionEditor: React.FC<FactionEditorProps> = ({
   useEffect(() => {
     setLocalFactions(factions || []);
   }, [factions]);
+
+  // 外部导航：id 变化时选中对应势力
+  useEffect(() => {
+    if (initialSelectedId && (factions || []).some(f => f.id === initialSelectedId)) {
+      setSelectedFactionId(initialSelectedId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSelectedId]);
 
   // 获取选中的势力
   const selectedFaction = localFactions.find(f => f.id === selectedFactionId);

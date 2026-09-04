@@ -63,6 +63,8 @@ const App: React.FC = () => {
   const [section, setSection] = useState<SectionId>('inspiration');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
+  // 跨分区导航：世界构建中心「跳转到编辑」角色时，切到角色区并聚焦该角色
+  const [focusCharacterId, setFocusCharacterId] = useState<string | null>(null);
   const [resetKey, setResetKey] = useState(0);
   const [isHistoryViewerOpen, setIsHistoryViewerOpen] = useState(false);
   const [isVersionCheckOpen, setIsVersionCheckOpen] = useState(false);
@@ -459,6 +461,14 @@ const App: React.FC = () => {
             project={activeProject}
             onUpdate={updateProject}
             activeModel={activeModel}
+            onNavigateToCharacter={(id) => {
+              setFocusCharacterId(id);
+              setSection('characters');
+            }}
+            onNavigateToChapter={(id) => {
+              setEditingChapterId(id);
+              setSection('writing');
+            }}
           />
         );
       case 'characters':
@@ -469,6 +479,8 @@ const App: React.FC = () => {
             activeModel={activeModel}
             onUpdate={updateProject}
             onOpenSettings={() => setIsSettingsOpen(true)}
+            focusCharacterId={focusCharacterId}
+            onFocusHandled={() => setFocusCharacterId(null)}
           />
         );
       case 'outline':

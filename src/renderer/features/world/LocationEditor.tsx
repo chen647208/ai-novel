@@ -24,6 +24,8 @@ interface LocationEditorProps {
   locations: Location[];
   factions: Faction[];
   onSave: (locations: Location[]) => void;
+  /** 外部导航（一致性检查/智能推荐「跳转到编辑」）时预选中的地点 id */
+  initialSelectedId?: string | null;
 }
 
 /**
@@ -40,7 +42,8 @@ export const LocationEditor: React.FC<LocationEditorProps> = ({
   projectId,
   locations,
   factions,
-  onSave
+  onSave,
+  initialSelectedId
 }) => {
   const { t } = useTranslation('world');
   const [localLocations, setLocalLocations] = useState<Location[]>([]);
@@ -52,6 +55,14 @@ export const LocationEditor: React.FC<LocationEditorProps> = ({
   useEffect(() => {
     setLocalLocations(locations || []);
   }, [locations]);
+
+  // 外部导航：id 变化时选中对应地点（挂载即生效，重复点击同一目标也生效）
+  useEffect(() => {
+    if (initialSelectedId && (locations || []).some(l => l.id === initialSelectedId)) {
+      setSelectedLocationId(initialSelectedId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSelectedId]);
 
   // 获取选中的地点
   const selectedLocation = localLocations.find(l => l.id === selectedLocationId);

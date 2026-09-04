@@ -28,13 +28,34 @@ interface StepCharactersProps {
   activeModel: ModelConfig;
   onUpdate: (updates: Partial<Project>) => void;
   onOpenSettings?: () => void;
+  /** 外部导航（一致性检查「跳转到编辑」等）：自动打开该角色的详情弹窗 */
+  focusCharacterId?: string | null;
+  /** 聚焦已消费的通知，父组件据此清除 focusCharacterId，避免重复弹出 */
+  onFocusHandled?: () => void;
 }
 
-const StepCharacters: React.FC<StepCharactersProps> = ({ project, prompts, activeModel, onUpdate, onOpenSettings }) => {
+const StepCharacters: React.FC<StepCharactersProps> = ({
+  project,
+  prompts,
+  activeModel,
+  onUpdate,
+  onOpenSettings,
+  focusCharacterId,
+  onFocusHandled,
+}) => {
   const { t } = useTranslation('characters');
   const [loading, setLoading] = useState(false);
   const [showDiagram, setShowDiagram] = useState(false);
   const [modalCharacterId, setModalCharacterId] = useState<string | null>(null);
+
+  // 外部导航：打开目标角色的详情弹窗后立即通知父组件消费
+  useEffect(() => {
+    if (focusCharacterId && (project.characters || []).some(c => c.id === focusCharacterId)) {
+      setModalCharacterId(focusCharacterId);
+      onFocusHandled?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusCharacterId]);
   
   // 传统输出模式的token信息
   const [traditionalTokens, setTraditionalTokens] = useState({ prompt: 0, completion: 0, total: 0 });

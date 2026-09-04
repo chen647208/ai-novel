@@ -37,9 +37,19 @@ interface StepKnowledgeEnhancedProps {
   project: Project;
   onUpdate: (updates: Partial<Project>) => void;
   activeModel?: ModelConfig | null;
+  /** 跳转到角色区并聚焦指定角色（跨分区导航由 App 提供） */
+  onNavigateToCharacter?: (id: string) => void;
+  /** 跳转到写作区并打开指定章节（跨分区导航由 App 提供） */
+  onNavigateToChapter?: (id: string) => void;
 }
 
-const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, onUpdate, activeModel: propActiveModel }) => {
+const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
+  project,
+  onUpdate,
+  activeModel: propActiveModel,
+  onNavigateToCharacter,
+  onNavigateToChapter,
+}) => {
   const { t, i18n } = useTranslation('knowledge');
   const [dragActive, setDragActive] = useState(false);
   const [viewingItem, setViewingItem] = useState<KnowledgeItem | null>(null);
@@ -78,6 +88,59 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
   
   const [activeModel, setActiveModel] = useState<ModelConfig | null>(propActiveModel || null);
   const [activeEmbeddingConfig, setActiveEmbeddingConfig] = useState<EmbeddingModelConfig | null>(null);
+
+  // 外部导航目标（一致性检查/智能推荐「跳转到编辑」）：type 决定打开哪个面板，id 为实体 id。
+  // 面板关闭时清空，避免下次手动打开仍残留上次跳转的选中项。
+  const [navTarget, setNavTarget] = useState<{ type: string; id: string } | null>(null);
+
+  // 处理来自一致性检查器 / 智能推荐 / 增强时间线的实体导航
+  const handleNavigateToItem = (type: string, id: string) => {
+    if (!id) return;
+    switch (type) {
+      case 'location':
+        setShowFactionEditor(false);
+        setShowRuleSystemEditor(false);
+        setShowEnhancedTimeline(false);
+        setNavTarget({ type: 'location', id });
+        setShowLocationEditor(true);
+        break;
+      case 'faction':
+        setShowLocationEditor(false);
+        setShowRuleSystemEditor(false);
+        setShowEnhancedTimeline(false);
+        setNavTarget({ type: 'faction', id });
+        setShowFactionEditor(true);
+        break;
+      case 'rule':
+        setShowLocationEditor(false);
+        setShowFactionEditor(false);
+        setShowEnhancedTimeline(false);
+        setNavTarget({ type: 'rule', id });
+        setShowRuleSystemEditor(true);
+        break;
+      case 'timeline':
+      case 'event':
+        setShowLocationEditor(false);
+        setShowFactionEditor(false);
+        setShowRuleSystemEditor(false);
+        setNavTarget({ type: 'timeline', id });
+        setShowEnhancedTimeline(true);
+        break;
+      case 'character':
+        onNavigateToCharacter?.(id);
+        break;
+      case 'chapter':
+        onNavigateToChapter?.(id);
+        break;
+      default:
+        logger.debug('未知导航类型:', type, id);
+    }
+  };
+
+  // 面板关闭时清除对应导航目标（仅当当前 navTarget 属于该面板）
+  const clearNavTargetFor = (type: string) => {
+    setNavTarget(prev => (prev && prev.type === type ? null : prev));
+  };
 
   useEffect(() => {
     if (propActiveModel) {
@@ -574,15 +637,15 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
       <KnowledgeFeaturePanels
         project={project}
         showLocationEditor={showLocationEditor}
-        setShowLocationEditor={setShowLocationEditor}
+        setShowLocationEditor={(v) => { setShowLocationEditor(v); if (v === false) clearNavTargetFor('location'); }}
         showFactionEditor={showFactionEditor}
-        setShowFactionEditor={setShowFactionEditor}
+        setShowFactionEditor={(v) => { setShowFactionEditor(v); if (v === false) clearNavTargetFor('faction'); }}
         showTimelineEditor={showTimelineEditor}
         setShowTimelineEditor={setShowTimelineEditor}
         showRuleSystemEditor={showRuleSystemEditor}
-        setShowRuleSystemEditor={setShowRuleSystemEditor}
+        setShowRuleSystemEditor={(v) => { setShowRuleSystemEditor(v); if (v === false) clearNavTargetFor('rule'); }}
         showEnhancedTimeline={showEnhancedTimeline}
-        setShowEnhancedTimeline={setShowEnhancedTimeline}
+        setShowEnhancedTimeline={(v) => { setShowEnhancedTimeline(v); if (v === false) clearNavTargetFor('timeline'); }}
         showConsistencyChecker={showConsistencyChecker}
         setShowConsistencyChecker={setShowConsistencyChecker}
         showSmartRecommender={showSmartRecommender}
@@ -597,6 +660,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
             projectId={project.id}
             locations={project.locations || []}
             factions={project.factions || []}
+            initialSelectedId={navTarget?.type === 'location' ? navTarget.id : null}
             onSave={(locations) => {
               onUpdate({ locations });
             }}
@@ -626,6 +690,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
             projectId={project.id}
             ruleSystems={project.ruleSystems || []}
             characters={project.characters || []}
+            initialSelectedId={navTarget?.type === 'rule' ? navTarget.id : null}
             onSave={(ruleSystems) => {
               onUpdate({ ruleSystems });
             }}
@@ -636,11 +701,12 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
       {showEnhancedTimeline && (
         <EnhancedTimeline
           project={project}
+          selectedEventId={navTarget?.type === 'timeline' ? navTarget.id : undefined}
           onEventClick={(event) => {
-            logger.debug('点击事件:', event);
+            setNavTarget({ type: 'timeline', id: event.id });
           }}
           onChapterClick={(chapter) => {
-            logger.debug('点击章节:', chapter);
+            onNavigateToChapter?.(chapter.id);
           }}
           showChapters={true}
         />
@@ -657,9 +723,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
             onUpdate(fixedProject);
             dialogService.alert(t('center.autoFixed'));
           }}
-          onNavigateToItem={(type, id) => {
-            logger.debug('导航到:', type, id);
-          }}
+          onNavigateToItem={handleNavigateToItem}
         />
       )}
 
@@ -672,11 +736,9 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
             currentContent: ''
           }}
           onSelectItem={(item) => {
-            logger.debug('选择推荐项:', item);
+            handleNavigateToItem(item.type, item.id);
           }}
-          onViewItem={(type, id) => {
-            logger.debug('查看:', type, id);
-          }}
+          onViewItem={handleNavigateToItem}
         />
       )}
 
@@ -687,6 +749,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
             factions={project.factions || []}
             locations={project.locations || []}
             characters={project.characters || []}
+            initialSelectedId={navTarget?.type === 'faction' ? navTarget.id : null}
             onSave={(factions) => {
               onUpdate({ factions });
             }}
