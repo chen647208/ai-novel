@@ -1,0 +1,97 @@
+appId: com.novalocal.ainovelist
+productName: AI小说家
+copyright: Copyright © 2025 NovaLocal
+
+directories:
+  output: build/release
+  buildResources: src/assets
+
+# 打包进应用的文件：只含构建产物与 package.json。
+# 注意：Electron 运行时文件（.pak / locales / *.dll / snapshot_blob / electron.asar 等）
+# 由 electron-builder 自动随 Electron 发行版打包，绝不能在 files 里排除，否则应用无法启动。
+files:
+  - build/renderer/**/*
+  - build/main/**/*
+  - package.json
+  - "!**/*.map"
+  - "!**/*.ts"
+  - "!**/node_modules/**/{test,__tests__,tests,powered-test,example,examples,docs,documentation,benchmark,benchmarks}/**"
+  - "!**/node_modules/**/.{cache,nyc_output,babel-cache,eslint-cache}/**"
+  - "!**/node_modules/**/{.github,.vscode}/**"
+  - "!**/node_modules/**/{CHANGELOG*,readme*,README*,license*,LICENSE*}"
+  - "!**/node_modules/**/{package-lock.json,yarn.lock,pnpm-lock.yaml}"
+
+# 跨平台目标：Windows NSIS 安装包、macOS DMG、Linux AppImage + deb
+# 架构：x64 + arm64（放弃 32 位：Linux 无 ia32 预编译包，Windows ia32 已属老旧小众且新版 Electron 将移除）
+win:
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+  artifactName: ${productName}-${version}-${arch}-setup.${ext}
+  icon: src/assets/icon.ico
+
+mac:
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+  artifactName: ${productName}-${version}-${arch}.${ext}
+  icon: src/assets/icon.icns
+  category: public.app-category.productivity
+  # 开源默认不做签名/公证；如需分发设置 CSC_IDENTITY_AUTO_DISCOVERY=false 跳过
+  hardenedRuntime: false
+  gatekeeperAssess: false
+
+linux:
+  target:
+    - target: AppImage
+      arch: [x64, arm64]
+    - target: deb
+      arch: [x64, arm64]
+  artifactName: ${productName}-${version}-${arch}.${ext}
+  icon: src/assets/icon.png
+  category: Utility
+  maintainer: NovaLocal
+  synopsis: 本地优先的 AI 小说创作助手
+  description: 支持书籍管理、灵感生成、人物构建、大纲设计、章节规划、知识库与正文写作的本地优先桌面应用。
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  perMachine: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  deleteAppDataOnUninstall: false
+  runAfterFinish: true
+  artifactName: ${productName}-${version}-${arch}-setup.${ext}
+
+# 产物元数据（供后续自动更新/发布使用）
+generateUpdatesFilesForAllChannels: false
+
+compression: normal
+asar: true
+asarUnpack:
+  - "**/*.node"
+
+removePackageScripts: true
+npmRebuild: false
+
+# 发布：由 CI 的 tag 触发工作流通过 GitHub Release 上传产物，
+# 这里保留 github provider 以便需要时 electron-builder 直接发布。
+publish:
+  provider: github
+  owner: chen647208
+  repo: ai-novel
+  releaseType: release
+
+extraResources:
+  - from: src/assets/icon.png
+    to: icon.png
+
+# Electron 下载镜像（中国大陆网络友好；CI 与本地均可访问）
+electronDownload:
+  mirror: https://npmmirror.com/mirrors/electron/
+
+forceCodeSigning: false
+
+extraMetadata:
+  main: build/main/main.js
