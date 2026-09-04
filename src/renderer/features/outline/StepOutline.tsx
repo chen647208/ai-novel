@@ -18,7 +18,8 @@ import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { Select } from '@/shared/ui/Select';
-import { Check, CheckCheck, ListTree, Loader2, Pause, PenLine, Play, Square, Users, XCircle } from 'lucide-react';
+import { Check, CheckCheck, Eye, ListTree, Loader2, Pause, PenLine, Pencil, Play, Square, Users, XCircle } from 'lucide-react';
+import { MarkdownView } from '@/shared/ui/Markdown';
 
 interface StepOutlineProps {
   project: Project;
@@ -53,6 +54,8 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
   
   // 直接读取结果或使用流式内容
   const outlineContent = isStreaming ? streamingContent : (project.outline || '');
+  // 预览（Markdown 渲染）⇄ 编辑（textarea）切换；有内容时默认预览
+  const [outlineEditing, setOutlineEditing] = useState(false);
 
   // 流式回调处理函数
   const handleStreamingChunk = (response: StreamingAIResponse, finalPrompt?: string) => {
@@ -143,6 +146,8 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
     // 重置状态 - 先重置传统模式token，但保留流式状态直到流式开始
     setTraditionalTokens({ prompt: 0, completion: 0, total: 0 });
     setIsPaused(false);
+    // 生成时切回预览，流式内容以 Markdown 格式化实时呈现
+    setOutlineEditing(false);
     
     setLoading(true);
     const template = prompts.find(p => p.id === selectedPromptId)?.content || '';
@@ -415,6 +420,17 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
                 <Button
                   variant="ghost"
                   size="sm"
+                  className="h-6 gap-1 px-2 text-xs text-muted-foreground"
+                  onClick={() => setOutlineEditing(v => !v)}
+                  disabled={!outlineContent}
+                  title={outlineEditing ? t('steps:common.preview') : t('steps:common.edit')}
+                >
+                  {outlineEditing ? <Eye className="size-3.5" /> : <Pencil className="size-3.5" />}
+                  {outlineEditing ? t('steps:common.preview') : t('steps:common.edit')}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
                   className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
                   onClick={() => onUpdate({ outline: '' })}
                 >
@@ -422,12 +438,18 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
                 </Button>
               </div>
             </div>
-            <textarea
-              className="flex-1 resize-none border-0 bg-transparent p-8 font-serif text-base leading-loose outline-none placeholder:text-muted-foreground/50"
-              value={outlineContent}
-              onChange={(e) => onUpdate({ outline: e.target.value })}
-              placeholder={t('steps:outline.editorPlaceholder')}
-            />
+            {outlineEditing || !outlineContent ? (
+              <textarea
+                className="flex-1 resize-none border-0 bg-transparent p-8 font-serif text-base leading-loose outline-none placeholder:text-muted-foreground/50"
+                value={outlineContent}
+                onChange={(e) => onUpdate({ outline: e.target.value })}
+                placeholder={t('steps:outline.editorPlaceholder')}
+              />
+            ) : (
+              <div className="custom-scrollbar flex-1 overflow-y-auto p-8">
+                <MarkdownView content={outlineContent} className="font-serif text-base" />
+              </div>
+            )}
           </Card>
         </div>
       </div>

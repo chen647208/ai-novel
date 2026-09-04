@@ -23,7 +23,8 @@ import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
-import { BookOpenText, Bot, Check, CheckCheck, ChevronDown, ChevronUp, CloudUpload, Globe, Lightbulb, Loader2, Pause, PenLine, Play, Square, Trash2, WandSparkles, XCircle } from 'lucide-react';
+import { BookOpenText, Bot, Check, CheckCheck, ChevronDown, ChevronUp, CloudUpload, Eye, Globe, Lightbulb, Loader2, Pause, PenLine, Pencil, Play, Square, Trash2, WandSparkles, XCircle } from 'lucide-react';
+import { MarkdownView } from '@/shared/ui/Markdown';
 
 interface StepInspirationProps {
   project: Project | null;
@@ -71,6 +72,8 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
   
   // 直接读取结果或使用流式内容
   const results = isStreaming ? streamingContent : (project?.intro || '');
+  // 预览（Markdown 渲染）⇄ 编辑（textarea）切换；有内容时默认预览
+  const [resultEditing, setResultEditing] = useState(false);
   
   // 安全获取知识库数据
   const safeKnowledge = Array.isArray(project?.knowledge) ? project.knowledge : [];
@@ -176,6 +179,8 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
     setStreamingTokens({ prompt: 0, completion: 0, total: 0 });
     setIsComplete(false);
     setIsPaused(false);
+    // 生成时切回预览，流式内容以 Markdown 格式化实时呈现
+    setResultEditing(false);
     
     setLoading(true);
     setIsStreaming(true);
@@ -577,23 +582,41 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
                 <h3 className="text-sm font-semibold">{t('steps:inspiration.aiPlan')}</h3>
                 <Badge variant="secondary">{t('steps:common.editable')}</Badge>
              </div>
-             <div className="flex items-center gap-1.5 rounded-md border border-border bg-muted/50 px-2.5 py-1">
-                <span className="text-xs text-muted-foreground">{t('steps:inspiration.bookName')}</span>
-                <Input
-                  placeholder={t('steps:inspiration.bookNamePlaceholder')}
-                  className="h-6 w-40 border-none bg-transparent px-1 text-sm font-medium shadow-none focus-visible:ring-0"
-                  value={project?.title || ''}
-                  onChange={(e) => onUpdate({ title: e.target.value })}
-                />
+             <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 gap-1 px-2 text-xs text-muted-foreground"
+                  onClick={() => setResultEditing(v => !v)}
+                  disabled={!results}
+                >
+                  {resultEditing ? <Eye className="size-3.5" /> : <Pencil className="size-3.5" />}
+                  {resultEditing ? t('steps:common.preview') : t('steps:common.edit')}
+                </Button>
+                <div className="flex items-center gap-1.5 rounded-md border border-border bg-muted/50 px-2.5 py-1">
+                  <span className="text-xs text-muted-foreground">{t('steps:inspiration.bookName')}</span>
+                  <Input
+                    placeholder={t('steps:inspiration.bookNamePlaceholder')}
+                    className="h-6 w-40 border-none bg-transparent px-1 text-sm font-medium shadow-none focus-visible:ring-0"
+                    value={project?.title || ''}
+                    onChange={(e) => onUpdate({ title: e.target.value })}
+                  />
+                </div>
              </div>
           </div>
-          <Textarea
-            className="min-h-[500px] rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 resize-y leading-loose whitespace-pre-wrap font-serif text-base"
-            value={results}
-            onChange={(e) => onUpdate({ intro: e.target.value })}
-            placeholder={t('steps:inspiration.resultPlaceholder')}
-            spellCheck={false}
-          />
+          {resultEditing || !results ? (
+            <Textarea
+              className="min-h-[500px] rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 resize-y leading-loose whitespace-pre-wrap font-serif text-base"
+              value={results}
+              onChange={(e) => onUpdate({ intro: e.target.value })}
+              placeholder={t('steps:inspiration.resultPlaceholder')}
+              spellCheck={false}
+            />
+          ) : (
+            <div className="custom-scrollbar min-h-[500px] overflow-y-auto p-6">
+              <MarkdownView content={results} className="font-serif text-base" />
+            </div>
+          )}
         </Card>
       ) : (
         <EmptyState

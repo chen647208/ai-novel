@@ -18,6 +18,7 @@ import { Card } from '@/shared/ui/Card';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
+import { MarkdownView } from '@/shared/ui/Markdown';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
 import { BookOpen, BookOpenText, Check, CheckCheck, ChevronDown, ChevronRight, Clock, FastForward, FileOutput, Flag, Globe2, Layers, LayoutList, ListOrdered, Loader2, MapPin, PenTool, Trash2, WandSparkles, XCircle } from 'lucide-react';
@@ -361,8 +362,8 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
           <h4 className="mb-3 flex shrink-0 items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             <BookOpen className="size-3.5" /> {t('steps:chapters.outlineRefTitle')}
           </h4>
-          <div className="flex-1 overflow-y-auto pr-1 text-xs italic leading-relaxed text-muted-foreground whitespace-pre-wrap">
-            {project.outline || t('steps:chapters.outlineEmpty')}
+          <div className="custom-scrollbar flex-1 overflow-y-auto pr-1 text-xs text-muted-foreground">
+            {project.outline ? <MarkdownView content={project.outline} className="text-xs [&_*]:text-current" /> : t('steps:chapters.outlineEmpty')}
           </div>
         </Card>
 

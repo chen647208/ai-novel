@@ -1,6 +1,8 @@
 {
   "common": {
     "outputMode": "Output mode:",
+    "preview": "Preview",
+    "edit": "Edit",
     "streaming": "Streaming",
     "traditional": "Traditional",
     "promptTemplate": "Prompt template:",

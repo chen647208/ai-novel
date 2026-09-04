@@ -30,21 +30,21 @@ export const DEFAULT_PROMPTS: PromptTemplate[] = [
     category: 'outline',
     name: '深度角色驱动大纲',
     nameKey: 'prompts:p3',
-    content: '根据小说《{title}》，简介：{intro}。人物设定如下：{characters}。请编写一个逻辑自洽、冲突强烈的小说大纲。'
+    content: '根据小说《{title}》，简介：{intro}。人物设定如下：{characters}。请编写一个逻辑自洽、冲突强烈的小说大纲。请使用 Markdown 结构化输出：用 # 一级标题标注全书主线，## 二级标题划分卷/幕，卷内用加粗标注关键冲突，情节要点用有序列表逐条展开，卷与卷之间用 --- 分隔线区隔。'
   },
   {
     id: 'p4',
     category: 'chapter',
     name: '全量章节细纲生成',
     nameKey: 'prompts:p4',
-    content: '根据大纲：{outline}。请直接从“第一章”开始输出详细章节列表（至少20章）。格式：\n第1章：[标题]\n剧情细纲：[描述]\n---'
+    content: '根据大纲：{outline}。请直接从“第一章”开始输出详细章节列表（至少20章）。格式：\n第1章：[标题]\n剧情细纲：[描述]\n---\n注意：严格使用纯文本，不要使用任何 Markdown 符号（如 # 标题、* 加粗、- 列表），每章之间用单独一行 --- 分隔。'
   },
   {
     id: 'p4-continue',
     category: 'chapter',
     name: '续写后续章节细纲',
     nameKey: 'prompts:p4-continue',
-    content: '根据全书大纲：{outline}。\n\n目前已经完成了前 {count} 章的细纲，已知章节如下：\n{existing_chapters}\n\n请紧接上述内容，从“第 {next_count} 章”开始，继续输出后续的章节细纲（约20章）。请确保剧情逻辑连贯，符合大纲走向。格式保持一致：\n第N章：[标题]\n剧情细纲：[描述]\n---'
+    content: '根据全书大纲：{outline}。\n\n目前已经完成了前 {count} 章的细纲，已知章节如下：\n{existing_chapters}\n\n请紧接上述内容，从“第 {next_count} 章”开始，继续输出后续的章节细纲（约20章）。请确保剧情逻辑连贯，符合大纲走向。格式保持一致：\n第N章：[标题]\n剧情细纲：[描述]\n---\n注意：严格使用纯文本，不要使用任何 Markdown 符号（如 # 标题、* 加粗、- 列表），每章之间用单独一行 --- 分隔。'
   },
   {
     id: 'p5',

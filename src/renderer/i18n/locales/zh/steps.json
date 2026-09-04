@@ -1,6 +1,8 @@
 {
   "common": {
     "outputMode": "输出模式:",
+    "preview": "预览",
+    "edit": "编辑",
     "streaming": "流式输出",
     "traditional": "传统输出",
     "promptTemplate": "提示词模板:",

@@ -15,6 +15,7 @@ import type { AssistantWindowSize, ChatMessage } from '../types';
 import { Button } from '@/shared/ui/Button';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
+import { MarkdownView } from '@/shared/ui/Markdown';
 import { cn } from '@/shared/utils/cn';
 import { AlertCircle, BookOpen, Calculator, Clock, Cpu, FileText, Flag, Keyboard, Landmark, LoaderCircle, MapPin, MessagesSquare, Paperclip, Reply, Send, Settings2, Square, User, X, Zap } from 'lucide-react';
 
@@ -106,7 +107,8 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
         {messages.map((msg) => (
           <div key={msg.id} className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
             <div className={cn(
-              'max-w-[85%] whitespace-pre-wrap rounded-xl p-3 text-sm leading-relaxed',
+              'max-w-[85%] rounded-xl p-3 text-sm leading-relaxed',
+              msg.role === 'user' && 'whitespace-pre-wrap',
               msg.role === 'user'
                 ? 'rounded-br-sm bg-primary text-primary-foreground'
                 : 'rounded-bl-sm border border-border bg-card text-foreground shadow-sm'
@@ -123,7 +125,9 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
                 </div>
               )}
               <div className="relative">
-                {msg.content}
+                {msg.role === 'user'
+                  ? msg.content
+                  : <MarkdownView content={msg.content} className="text-sm [&_p]:my-1 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0" />}
                 {msg.isStreaming && <span className="ml-1 inline-block h-4 w-2 animate-pulse bg-primary align-middle"></span>}
               </div>
               {(msg.tokens || msg.model || msg.finishReason) && (
