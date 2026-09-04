@@ -1,0 +1,45 @@
+﻿# 文档总览
+
+本目录用于记录当前项目的真实结构、功能模块与构建发布方式。
+所有文档均以当前代码为准，目标是帮助后续维护时快速定位入口、职责和边界。
+
+## 阅读顺序
+
+### 1. 先看整体
+
+- `guides/project-structure.md`：项目分层、主线结构与目录约定
+- `guides/build-and-release.md`：构建命令、产物位置与打包说明
+- `guides/ci-and-release.md`：CI 持续集成与基于标签的自动发布流程
+- `guides/licensing.md`：AGPL-3.0 社区版与商业授权的双重许可说明
+- `CLA.md`：贡献者许可协议正文
+
+### 2. 再看核心功能
+
+- `features/workflow.md`：从书籍创建到灵感、人物、大纲、章节的主创作流程
+- `features/ai-layer.md`：AI 调用层架构（适配器、流式、取消、重试、结构化输出）
+- `features/writing.md`：正文写作、AI 历史、编辑快照、统计、导出与专注模式
+- `features/foreshadowing.md`：伏笔追踪（埋设/回收/超期、AI 检测、提示词注入）
+- `features/knowledge.md`：知识库、向量检索与世界构建中心
+- `features/assistant.md`：全局助手、智能推荐与上下文分析
+- `features/world.md`：世界观、时间线与一致性检查相关能力
+- `features/settings.md`：模型、Embedding、提示词和存储设置
+- `features/version.md`：版本信息、更新检查与版本历史
+
+### 3. 外部调研与设计输入（research/）
+
+- `research/README.md`：调研索引——9 个同类开源写作项目 + codex/deepseek-harness 的机制拆解与可提取清单
+- `research/10-architecture-blueprint.md`：架构蓝图总纲（五条设计公理、分层架构、P0–P4 迁移路线、红线清单）
+- `research/11-migration-plan.md`：迁移计划（P0–P4 工作包分解、现状诊断、依赖排序、风险登记）
+
+## 当前文档范围
+
+- 文档只覆盖当前仓库里已经存在并在主线中使用的结构
+- 已移除的兼容层不会再单独保留说明文档
+- 如代码继续调整，优先更新本目录和 `README.md`
+
+## 文档维护约定
+
+- 文档默认使用中文
+- 文档内容以“真实代码路径 + 职责说明 + 维护建议”为主
+- 不写与当前仓库不符的计划性描述
+- 不把整理日志放回 `docs/plans`

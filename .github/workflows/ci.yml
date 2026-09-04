@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# 同一分支的新提交取消旧的进行中任务
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: 类型检查 · 测试 · 构建
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装系统依赖（Electron 运行库，供构建校验）
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgbm-dev libnss3 libatk-bridge2.0-0 libgtk-3-0 libasound2 || true
+
+      - name: 配置 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 代码规范检查（ESLint 严格模式）
+        run: npm run lint
+
+      - name: 类型检查（渲染层 + 主进程，strict）
+        run: npm run typecheck:all
+
+      - name: 单元测试
+        run: npm run test
+
+      - name: 校验许可证声明头（AGPL-3.0 / SPDX）
+        run: npm run headers:check
+
+      - name: 构建渲染层与主进程产物
+        run: npm run electron:build
+
+      - name: 校验图标资源
+        run: npm run check:icons
