@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { templateDisplayName } from '@/i18n';
 import { type OutputMode } from '../../../../shared/types';
 import type { ChapterGenerationModalProps } from '../types';
+import { Ban, BookOpen, Check, WandSparkles, X } from 'lucide-react';
 
 const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
   genModal,
@@ -63,7 +64,7 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
                 <h3 className="text-2xl font-black text-gray-800 tracking-tight">{t('genModal.title')}</h3>
                 <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Context-Aware Generation</p>
               </div>
-              <button onClick={() => setGenModal({ isOpen: false, chapter: null })} className="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 flex items-center justify-center transition-all"><i className="fas fa-times"></i></button>
+              <button onClick={() => setGenModal({ isOpen: false, chapter: null })} className="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 flex items-center justify-center transition-all"><X className="size-4" /></button>
             </div>
             
             <div className="p-8 overflow-y-auto custom-scrollbar space-y-6 flex-1">
@@ -139,7 +140,7 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                       >
-                        <i className="fas fa-book"></i>
+                        <BookOpen className="size-4" />
                         {useOutline ? t('genModal.outlineLinked') : t('genModal.outlineLink')}
                       </button>
                       <p className="text-[10px] text-gray-400 mt-2">
@@ -187,7 +188,7 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
                                   ? 'bg-blue-500 border-blue-500 text-white' 
                                   : 'bg-white border-gray-300'
                               }`}>
-                                {isSelected && <i className="fas fa-check text-[10px]"></i>}
+                                {isSelected && <Check className="size-3" />}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex justify-between items-start">
@@ -268,8 +269,8 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
                                       ? 'bg-green-500 border-green-500 text-white' 
                                       : 'bg-white border-gray-300'
                                 }`}>
-                                  {isCurrentChapter && <i className="fas fa-ban text-[8px]"></i>}
-                                  {!isCurrentChapter && isSelected && <i className="fas fa-check text-[10px]"></i>}
+                                  {isCurrentChapter && <Ban className="size-2" />}
+                                  {!isCurrentChapter && isSelected && <Check className="size-3" />}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="flex justify-between items-start">
@@ -343,7 +344,7 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
                           return (
                             <div key={k.id} onClick={() => toggleKnowledge(k.id)} className={`flex items-center gap-3 p-3 rounded-lg mb-2 cursor-pointer transition-colors ${isSelected ? 'bg-blue-50 border border-blue-100' : 'hover:bg-gray-50'}`}>
                               <div className={`w-5 h-5 rounded-md border flex items-center justify-center ${isSelected ? 'bg-blue-500 border-blue-500 text-white' : 'bg-white border-gray-300'}`}>
-                                {isSelected && <i className="fas fa-check text-[10px]"></i>}
+                                {isSelected && <Check className="size-3" />}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="text-sm font-bold text-gray-800 truncate">{k.name}</div>
@@ -525,7 +526,7 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
               </div>
               <div className="flex gap-4">
                 <button onClick={handleEnterEditor} className="px-6 py-3 rounded-xl text-gray-500 font-bold text-sm hover:bg-gray-200 hover:text-gray-800 transition-all">{t('genModal.editorOnly')}</button>
-                <button onClick={handleModalGenerate} className="px-8 py-3 bg-blue-600 text-white font-black text-sm rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2"><i className="fas fa-wand-magic-sparkles"></i> {t('genModal.confirmGenerate')}</button>
+                <button onClick={handleModalGenerate} className="px-8 py-3 bg-blue-600 text-white font-black text-sm rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2"><WandSparkles className="size-4" /> {t('genModal.confirmGenerate')}</button>
               </div>
             </div>
           </div>

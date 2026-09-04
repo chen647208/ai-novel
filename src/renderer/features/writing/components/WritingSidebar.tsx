@@ -13,6 +13,7 @@ import { roleLabel } from '../../characters/displayLabels';
 import ChapterNavigationSection from './ChapterNavigationSection';
 import ChapterSummarySection from './ChapterSummarySection';
 import type { WritingSidebarProps } from '../types';
+import { ChevronsLeft } from 'lucide-react';
 
 const WritingSidebar: React.FC<WritingSidebarProps> = ({
   characters,
@@ -36,7 +37,7 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
       <div className="p-4 border-b bg-gray-100 flex justify-between items-center">
         <h3 className="font-black text-gray-700 text-sm tracking-tight">{t('sidebar.title')}</h3>
         <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-          <i className="fas fa-angle-double-left"></i>
+          <ChevronsLeft className="size-4" />
         </button>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">

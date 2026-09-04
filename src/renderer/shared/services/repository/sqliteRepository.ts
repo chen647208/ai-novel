@@ -116,6 +116,8 @@ export class SqliteRepository implements StorageRepository {
     if (consistencyCheckConfig) state.consistencyCheckConfig = consistencyCheckConfig;
     const lang = meta.get('language');
     if (lang === 'zh' || lang === 'en') state.language = lang;
+    const theme = meta.get('theme');
+    if (theme === 'light' || theme === 'dark' || theme === 'system') state.theme = theme;
     return state;
   }
 
@@ -200,7 +202,7 @@ export class SqliteRepository implements StorageRepository {
       await tx.run(`DELETE FROM chapters_fts`, []);
       await tx.run(`DELETE FROM knowledge_fts`, []);
       await tx.run(
-        `DELETE FROM meta WHERE key IN ('activeProjectId','activeModelId','activeEmbeddingModelId','language')`,
+        `DELETE FROM meta WHERE key IN ('activeProjectId','activeModelId','activeEmbeddingModelId','language','theme')`,
         []
       );
     });

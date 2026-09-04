@@ -17,6 +17,8 @@ import { type ConsistencyCheckPromptTemplate, type ConsistencyCheckPromptCategor
 import { ConsistencyCheckPromptService } from './services/consistencyCheckPromptService';
 import { getDefaultConsistencyPrompts } from '../../constants/consistencyCheck';
 import { dialogService } from '@/shared/services/dialogService';
+import { AlertCircle, CheckCircle2, ChevronDown, ChevronUp, Copy, Download, FileText, FlaskConical, Plus, Trash, Undo2, Upload, X } from 'lucide-react';
+
 
 interface ConsistencyPromptManagerProps {
   templates: ConsistencyCheckPromptTemplate[];
@@ -152,25 +154,25 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
             onClick={() => { setImportExportMode('export'); setImportExportOpen(true); }}
             className="px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl text-xs font-black transition-all flex items-center gap-2"
           >
-            <i className="fas fa-download"></i>{t('common:export')}
+            <Download className="size-4" />{t('common:export')}
           </button>
           <button
             onClick={() => { setImportExportMode('import'); setImportExportOpen(true); }}
             className="px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl text-xs font-black transition-all flex items-center gap-2"
           >
-            <i className="fas fa-upload"></i>{t('common:import')}
+            <Upload className="size-4" />{t('common:import')}
           </button>
           <button
             onClick={resetToDefault}
             className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl text-xs font-black transition-all flex items-center gap-2"
           >
-            <i className="fas fa-undo"></i>{t('common:reset')}
+            <Undo2 className="size-4" />{t('common:reset')}
           </button>
           <button
             onClick={addTemplate}
             className="px-4 py-2 bg-rose-600 text-white hover:bg-rose-700 rounded-xl text-xs font-black transition-all flex items-center gap-2"
           >
-            <i className="fas fa-plus"></i>{t('consistency:pm.newTemplate')}
+            <Plus className="size-4" />{t('consistency:pm.newTemplate')}
           </button>
         </div>
       </div>
@@ -196,7 +198,7 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
       <div className="space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar">
         {filteredTemplates.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
-            <i className="fas fa-file-alt text-4xl mb-3"></i>
+            <FileText className="size-10 mb-3" />
             <p>{t('consistency:pm.empty')}</p>
           </div>
         ) : (
@@ -227,7 +229,7 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
                     className="text-gray-400 hover:text-blue-500 text-xs px-2 py-1"
                     title={t('consistency:pm.duplicateTitle')}
                   >
-                    <i className="fas fa-copy"></i>
+                    <Copy className="size-4" />
                   </button>
                   {!template.isDefault && (
                     <button
@@ -235,14 +237,14 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
                       className="text-gray-400 hover:text-red-500 text-xs px-2 py-1"
                       title={t('consistency:pm.deleteTitle')}
                     >
-                      <i className="fas fa-trash"></i>
+                      <Trash className="size-4" />
                     </button>
                   )}
                   <button
                     onClick={() => setEditingId(editingId === template.id ? null : template.id)}
                     className="text-gray-400 hover:text-rose-500 text-xs px-2 py-1"
                   >
-                    <i className={`fas fa-chevron-${editingId === template.id ? 'up' : 'down'}`}></i>
+                    {editingId === template.id ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
                   </button>
                 </div>
               </div>
@@ -321,14 +323,14 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
                         onClick={() => testTemplate(template)}
                         className="px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-black transition-all flex items-center gap-2"
                       >
-                        <i className="fas fa-vial"></i>{t('consistency:pm.validateBtn')}
+                        <FlaskConical className="size-4" />{t('consistency:pm.validateBtn')}
                       </button>
                       {testResult?.templateId === template.id && (
                         <div className={`text-xs ${testResult.isValid ? 'text-green-600' : 'text-red-600'}`}>
                           {testResult.isValid ? (
-                            <span><i className="fas fa-check-circle mr-1"></i>{t('consistency:pm.validResult')}</span>
+                            <span><CheckCircle2 className="size-4 mr-1" />{t('consistency:pm.validResult')}</span>
                           ) : (
-                            <span><i className="fas fa-exclamation-circle mr-1"></i>{testResult.errors.join(', ')}</span>
+                            <span><AlertCircle className="size-4 mr-1" />{testResult.errors.join(', ')}</span>
                           )}
                         </div>
                       )}
@@ -353,7 +355,7 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
                 onClick={() => { setImportExportOpen(false); setImportText(''); }}
                 className="text-gray-400 hover:text-gray-600"
               >
-                <i className="fas fa-times"></i>
+                <X className="size-4" />
               </button>
             </div>
             <div className="p-6">
@@ -369,7 +371,7 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
                     onClick={() => { navigator.clipboard.writeText(exportTemplates()); dialogService.alert(t('consistency:pm.copied')); }}
                     className="mt-4 w-full py-3 bg-blue-600 text-white rounded-xl text-sm font-black hover:bg-blue-700 transition-all"
                   >
-                    <i className="fas fa-copy mr-2"></i>{t('consistency:pm.copyBtn')}
+                    <Copy className="size-4 mr-2" />{t('consistency:pm.copyBtn')}
                   </button>
                 </div>
               ) : (
@@ -395,7 +397,7 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
                     disabled={!importText.trim()}
                     className="mt-4 w-full py-3 bg-green-600 text-white rounded-xl text-sm font-black hover:bg-green-700 transition-all disabled:bg-gray-300"
                   >
-                    <i className="fas fa-upload mr-2"></i>{t('consistency:pm.importBtn')}
+                    <Upload className="size-4 mr-2" />{t('consistency:pm.importBtn')}
                   </button>
                 </div>
               )}

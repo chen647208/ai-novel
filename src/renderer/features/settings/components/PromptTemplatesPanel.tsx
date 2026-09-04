@@ -11,6 +11,7 @@ import React from 'react';
 import { useTranslation, templateDisplayName } from '@/i18n';
 import type { PromptTemplate } from '../../../../shared/types';
 import type { PromptTemplatesPanelProps } from '../types';
+import { WandSparkles } from 'lucide-react';
 
 const PromptTemplatesPanel: React.FC<PromptTemplatesPanelProps> = ({
   localPrompts,
@@ -60,7 +61,7 @@ const PromptTemplatesPanel: React.FC<PromptTemplatesPanelProps> = ({
                 </div>
               ))}
               <button onClick={addPrompt} className="w-full border-4 border-dashed border-gray-100 rounded-[2rem] py-8 text-gray-300 font-black hover:bg-white hover:text-emerald-500 hover:border-emerald-100 transition-all group flex flex-col items-center gap-2">
-                <i className="fas fa-magic text-2xl group-hover:rotate-12 transition-transform"></i>
+                <WandSparkles className="size-6 group-hover:rotate-12 transition-transform" />
                 <span>{t('prompts.addTemplate')}</span>
               </button>
     </div>

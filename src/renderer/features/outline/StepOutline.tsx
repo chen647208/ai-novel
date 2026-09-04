@@ -7,13 +7,13 @@
  * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
  */
 
-
 import React, { useState, useMemo, useRef } from 'react';
 import { useTranslation, templateDisplayName } from '@/i18n';
 import { type Project, type PromptTemplate, type ModelConfig, type StreamingAIResponse, type OutputMode } from '../../../shared/types';
 import { AIService } from '../assistant/services/aiService';
 import { roleLabel } from '../characters/displayLabels';
 import { dialogService } from '@/shared/services/dialogService';
+import { Check, CheckCheck, ListTree, Loader2, Pause, PenLine, Play, Square, Users, XCircle } from 'lucide-react';
 
 interface StepOutlineProps {
   project: Project;
@@ -273,14 +273,14 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
                 onClick={togglePauseStreaming}
                 className="px-4 py-3 bg-yellow-500 text-white font-black rounded-xl hover:bg-yellow-600 transition-all shadow-lg shadow-yellow-100 active:scale-95 flex items-center gap-2"
               >
-                <i className={`fas ${isPaused ? 'fa-play' : 'fa-pause'}`}></i>
+                {isPaused ? <Play className="size-4" /> : <Pause className="size-4" />}
                 {isPaused ? t('steps:outline.resumeGen') : t('steps:outline.pauseGen')}
               </button>
               <button 
                 onClick={stopStreaming}
                 className="px-4 py-3 bg-red-500 text-white font-black rounded-xl hover:bg-red-600 transition-all shadow-lg shadow-red-100 active:scale-95 flex items-center gap-2"
               >
-                <i className="fas fa-stop"></i>
+                <Square className="size-4" />
                 {t('steps:outline.stopGen')}
               </button>
             </div>
@@ -290,7 +290,7 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
               disabled={loading}
               className="px-8 py-3 bg-blue-600 text-white font-black rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 active:scale-95 disabled:bg-gray-400 flex items-center gap-2"
             >
-              {loading ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-sitemap"></i>}
+              {loading ? <Loader2 className="size-4 animate-spin" /> : <ListTree className="size-4" />}
               {loading ? t('steps:outline.generating') : t('steps:outline.generateBtn')}
             </button>
           )}
@@ -330,14 +330,14 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
                          className="px-2 py-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded text-[9px] font-bold transition-all flex items-center gap-1"
                          title={t('steps:common.selectAllTitle')}
                       >
-                         <i className="fas fa-check-double text-[8px]"></i> {t('steps:common.selectAll')}
+                         <CheckCheck className="size-2" /> {t('steps:common.selectAll')}
                       </button>
                       <button 
                          onClick={() => setSelectedKnowledgeIds(new Set())}
                          className="px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded text-[9px] font-bold transition-all flex items-center gap-1"
                          title={t('steps:common.clearTitle')}
                       >
-                         <i className="fas fa-times-circle text-[8px]"></i> {t('steps:common.clear')}
+                         <XCircle className="size-2" /> {t('steps:common.clear')}
                       </button>
                    </div>
                 )}
@@ -357,7 +357,7 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
                         }`}
                      >
                         <div className={`w-4 h-4 rounded border flex items-center justify-center ${selectedKnowledgeIds.has(k.id) ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-white border-gray-300'}`}>
-                           {selectedKnowledgeIds.has(k.id) && <i className="fas fa-check text-[8px]"></i>}
+                           {selectedKnowledgeIds.has(k.id) && <Check className="size-2" />}
                         </div>
                         <span className={`text-xs font-bold truncate ${selectedKnowledgeIds.has(k.id) ? 'text-emerald-800' : 'text-gray-600'}`}>{k.name}</span>
                      </div>
@@ -369,7 +369,7 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
             <div className="flex justify-between items-center mb-4">
               <h4 className="text-[10px] font-black text-purple-500 uppercase tracking-widest">{t('steps:outline.charactersTitle', { count: project.characters.length })}</h4>
-              <i className="fas fa-users text-purple-200"></i>
+              <Users className="size-4 text-purple-200" />
             </div>
             <div className="space-y-3">
               {project.characters.length === 0 ? (
@@ -394,7 +394,7 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
           <div className="bg-white rounded-3xl border border-gray-200 shadow-sm flex flex-col h-full overflow-hidden">
             <div className="p-5 border-b bg-gray-50/50 flex justify-between items-center px-8">
               <div className="flex items-center gap-2">
-                <i className="fas fa-edit text-gray-400 text-xs"></i>
+                <PenLine className="size-3.5 text-gray-400" />
                 <span className="text-xs font-black text-gray-400 tracking-widest uppercase">{t('steps:outline.editorTitle')}</span>
               </div>
               <div className="flex items-center gap-4">
@@ -444,10 +444,4 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
 };
 
 export default StepOutline;
-
-
-
-
-
-
 

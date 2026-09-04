@@ -11,6 +11,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { WritingEditorToolbarProps } from '../types';
 import { formatCharCount } from '../services/writingStatsService';
+import { ArrowLeft, Camera, ChevronsRight, Eraser, FileOutput, FileText, History, Maximize2, Minimize2, Sprout } from 'lucide-react';
+
 
 const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
   activeChapterId,
@@ -43,7 +45,7 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
       <div className="flex items-center gap-6">
         {!isFocusMode && (
           <button onClick={onBack} className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-all" title={t('toolbar.back')}>
-            <i className="fas fa-arrow-left"></i>
+            <ArrowLeft className="size-4" />
           </button>
         )}
         <div className="flex flex-col">
@@ -78,12 +80,12 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
           <>
             {activeChapterId && (
               <button onClick={onManualSnapshot} className="text-gray-300 hover:text-amber-500 transition-colors flex items-center gap-2 text-xs font-bold" title={t('toolbar.snapshotTitle', { count: snapshotCount })}>
-                <i className="fas fa-camera"></i> {t('toolbar.snapshot')}
+                <Camera className="size-4" /> {t('toolbar.snapshot')}
               </button>
             )}
             {hasProjectChapters && (
               <button onClick={onOpenExport} className="text-gray-300 hover:text-emerald-500 transition-colors flex items-center gap-2 text-xs font-bold" title={t('toolbar.exportTitle')}>
-                <i className="fas fa-file-export"></i> {t('toolbar.export')}
+                <FileOutput className="size-4" /> {t('toolbar.export')}
               </button>
             )}
             <button
@@ -91,14 +93,14 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
               className={`transition-colors flex items-center gap-1.5 text-xs font-bold ${overdueForeshadowCount > 0 ? 'text-red-500 hover:text-red-600' : 'text-gray-300 hover:text-indigo-500'}`}
               title={overdueForeshadowCount > 0 ? t('toolbar.foreshadowTitleOverdue', { open: openForeshadowCount, overdue: overdueForeshadowCount }) : t('toolbar.foreshadowTitle', { open: openForeshadowCount })}
             >
-              <i className="fas fa-seedling"></i> {t('toolbar.foreshadow')}
+              <Sprout className="size-4" /> {t('toolbar.foreshadow')}
               {openForeshadowCount > 0 && (
                 <span className={`text-[9px] px-1.5 rounded-full ${overdueForeshadowCount > 0 ? 'bg-red-500 text-white' : 'bg-indigo-100 text-indigo-600'}`}>{openForeshadowCount}</span>
               )}
             </button>
             {activeChapterId && (
               <button onClick={onClearContent} className="text-gray-300 hover:text-red-500 transition-colors flex items-center gap-2 text-xs font-bold" title={t('toolbar.clearTitle')}>
-                <i className="fas fa-eraser"></i> {t('toolbar.clear')}
+                <Eraser className="size-4" /> {t('toolbar.clear')}
               </button>
             )}
             <button
@@ -106,7 +108,7 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
               className={`text-gray-300 hover:text-blue-500 transition-colors flex items-center gap-2 text-xs font-bold ${isGlobalHistorySidebarOpen ? 'text-blue-500' : ''}`}
               title={t('toolbar.globalHistoryTitle')}
             >
-              <i className="fas fa-history"></i> {t('toolbar.globalHistory')}
+              <History className="size-4" /> {t('toolbar.globalHistory')}
             </button>
             {activeChapterId && hasActiveChapterHistory && (
               <button
@@ -114,7 +116,7 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
                 className="text-gray-300 hover:text-purple-500 transition-colors flex items-center gap-2 text-xs font-bold"
                 title={t('toolbar.chapterHistoryTitle')}
               >
-                <i className="fas fa-file-alt"></i> {t('toolbar.chapterHistory')}
+                <FileText className="size-4" /> {t('toolbar.chapterHistory')}
               </button>
             )}
           </>
@@ -124,11 +126,11 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
           className={`flex items-center gap-2 text-xs font-bold transition-colors ${isFocusMode ? 'text-blue-600' : 'text-gray-300 hover:text-blue-500'}`}
           title={isFocusMode ? t('toolbar.exitFocusTitle') : t('toolbar.enterFocusTitle')}
         >
-          <i className={`fas ${isFocusMode ? 'fa-compress' : 'fa-expand'}`}></i> {isFocusMode ? t('toolbar.exitFocus') : t('toolbar.focus')}
+          {isFocusMode ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />} {isFocusMode ? t('toolbar.exitFocus') : t('toolbar.focus')}
         </button>
         {!isSidebarOpen && !isFocusMode && (
           <button onClick={onOpenSidebar} className="w-10 h-10 rounded-2xl bg-white shadow-lg border border-gray-100 text-gray-400 hover:text-blue-600 flex items-center justify-center transition-all">
-            <i className="fas fa-angle-double-right"></i>
+            <ChevronsRight className="size-4" />
           </button>
         )}
         <div className="flex flex-col items-end">

@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { templateDisplayName } from '@/i18n';
 import type { Project, PromptTemplate } from '../../../../shared/types';
 import type { AssistantCategory } from '../types';
+import { BookOpenText, Lightbulb, ListOrdered, ListTree, Users, WandSparkles, type LucideIcon } from 'lucide-react';
 
 interface AssistantContextPanelProps {
   project: Project | null;
@@ -27,12 +28,12 @@ interface AssistantContextPanelProps {
   onAnalyze: () => void;
 }
 
-const categoryItems: Array<{ id: AssistantCategory; icon: string; labelKey: 'category.inspiration' | 'category.knowledge' | 'category.characters' | 'category.outline' | 'category.chapters' }> = [
-  { id: 'inspiration', icon: 'fa-lightbulb', labelKey: 'category.inspiration' },
-  { id: 'knowledge', icon: 'fa-book-atlas', labelKey: 'category.knowledge' },
-  { id: 'characters', icon: 'fa-users', labelKey: 'category.characters' },
-  { id: 'outline', icon: 'fa-sitemap', labelKey: 'category.outline' },
-  { id: 'chapters', icon: 'fa-list-ol', labelKey: 'category.chapters' },
+const categoryItems: Array<{ id: AssistantCategory; icon: LucideIcon; labelKey: 'category.inspiration' | 'category.knowledge' | 'category.characters' | 'category.outline' | 'category.chapters' }> = [
+  { id: 'inspiration', icon: Lightbulb, labelKey: 'category.inspiration' },
+  { id: 'knowledge', icon: BookOpenText, labelKey: 'category.knowledge' },
+  { id: 'characters', icon: Users, labelKey: 'category.characters' },
+  { id: 'outline', icon: ListTree, labelKey: 'category.outline' },
+  { id: 'chapters', icon: ListOrdered, labelKey: 'category.chapters' },
 ];
 
 const AssistantContextPanel: React.FC<AssistantContextPanelProps> = ({
@@ -63,7 +64,7 @@ const AssistantContextPanel: React.FC<AssistantContextPanelProps> = ({
               activeCategory === category.id ? 'border-blue-500 text-blue-600 bg-blue-50/50' : 'border-transparent text-gray-400 hover:text-gray-600'
             }`}
           >
-            <i className={`fas ${category.icon}`}></i>
+            <category.icon className="size-4" />
             <span>{t(category.labelKey)}</span>
           </button>
         ))}
@@ -113,7 +114,7 @@ const AssistantContextPanel: React.FC<AssistantContextPanelProps> = ({
           disabled={isLoading || !project}
           className="w-full py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all flex items-center justify-center gap-2"
         >
-          <i className="fas fa-wand-magic-sparkles"></i> {t('context.analyzeBtn')}
+          <WandSparkles className="size-4" /> {t('context.analyzeBtn')}
         </button>
       </div>
     </div>

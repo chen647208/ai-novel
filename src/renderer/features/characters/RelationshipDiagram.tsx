@@ -11,6 +11,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from '@/i18n';
 import { type Character } from '../../../shared/types';
 import { roleLabel } from './displayLabels';
+import { Heart, RefreshCw, X } from 'lucide-react';
 
 interface RelationshipDiagramProps {
   characters: Character[];
@@ -153,14 +154,14 @@ const RelationshipDiagram: React.FC<RelationshipDiagramProps> = ({ characters, o
             className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-all border border-white/10 flex items-center gap-2"
             title={t('diagram.resetTitle')}
           >
-            <i className="fas fa-sync-alt"></i>
+            <RefreshCw className="size-4" />
             {t('diagram.reset')}
           </button>
           <button 
             onClick={onClose}
             className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all border border-white/10"
           >
-            <i className="fas fa-times"></i>
+            <X className="size-4" />
           </button>
         </div>
       </header>
@@ -270,7 +271,7 @@ const RelationshipDiagram: React.FC<RelationshipDiagramProps> = ({ characters, o
           <div className="space-y-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
             <div>
               <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-                <i className="fas fa-heart text-red-400"></i> {t('diagram.relationsTitle')}
+                <Heart className="size-4 text-red-400" /> {t('diagram.relationsTitle')}
               </h4>
               <p className="text-sm leading-relaxed text-gray-300 italic">
                 {selectedChar.relationships || t('diagram.noRelations')}

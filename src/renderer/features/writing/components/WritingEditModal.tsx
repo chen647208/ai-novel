@@ -11,6 +11,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { templateDisplayName } from '@/i18n';
 import type { WritingEditModalProps } from '../types';
+import { WandSparkles, X } from 'lucide-react';
 
 const WritingEditModal: React.FC<WritingEditModalProps> = ({
   isOpen,
@@ -44,7 +45,7 @@ const WritingEditModal: React.FC<WritingEditModalProps> = ({
             <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Text Polish & Expansion</p>
           </div>
           <button onClick={onClose} className="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 flex items-center justify-center transition-all">
-            <i className="fas fa-times"></i>
+            <X className="size-4" />
           </button>
         </div>
 
@@ -145,7 +146,7 @@ const WritingEditModal: React.FC<WritingEditModalProps> = ({
           <div className="flex gap-4">
             <button onClick={onClose} className="px-6 py-3 rounded-xl text-gray-500 font-bold text-sm hover:bg-gray-200 hover:text-gray-800 transition-all">{t('editModal.cancel')}</button>
             <button onClick={onSubmit} className="px-8 py-3 bg-purple-600 text-white font-black text-sm rounded-xl shadow-lg shadow-purple-200 hover:bg-purple-700 active:scale-95 transition-all flex items-center gap-2">
-              <i className="fas fa-magic"></i> {t('editModal.runNow')}
+              <WandSparkles className="size-4" /> {t('editModal.runNow')}
             </button>
           </div>
         </div>

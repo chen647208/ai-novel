@@ -11,6 +11,8 @@ import React from 'react';
 import { useTranslation } from '@/i18n';
 import { type Project } from '../../../shared/types';
 import { dialogService } from '@/shared/services/dialogService';
+import { BookOpen, Copy, MoreHorizontal, PenLine, Trash2 } from 'lucide-react';
+
 
 interface BookItemProps {
   book: Project;
@@ -92,7 +94,7 @@ const BookItem: React.FC<BookItemProps> = ({
         onContextMenu={handleContextMenu}
       >
         <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center">
-          <i className={`fas fa-book ${isActive ? 'text-blue-400' : 'text-gray-500'}`}></i>
+          <BookOpen className={`size-4 ${isActive ? 'text-blue-400' : 'text-gray-500'}`} />
         </div>
         
         <div className="ml-3 flex-1 min-w-0">
@@ -134,7 +136,7 @@ const BookItem: React.FC<BookItemProps> = ({
               }}
               title={t('books:item.moreActions')}
             >
-              <i className="fas fa-ellipsis-h text-xs"></i>
+              <MoreHorizontal className="size-3.5" />
             </button>
           </div>
         )}
@@ -161,7 +163,7 @@ const BookItem: React.FC<BookItemProps> = ({
                 setShowContextMenu(false);
               }}
             >
-              <i className="fas fa-edit mr-2 text-gray-400"></i>
+              <PenLine className="size-4 mr-2 text-gray-400" />
               {t('books:item.rename')}
             </button>
             <button
@@ -171,7 +173,7 @@ const BookItem: React.FC<BookItemProps> = ({
                 handleDuplicate();
               }}
             >
-              <i className="fas fa-copy mr-2 text-gray-400"></i>
+              <Copy className="size-4 mr-2 text-gray-400" />
               {t('books:item.duplicate')}
             </button>
             <div className="border-t border-gray-800 my-1"></div>
@@ -182,7 +184,7 @@ const BookItem: React.FC<BookItemProps> = ({
                 handleDelete();
               }}
             >
-              <i className="fas fa-trash-alt mr-2"></i>
+              <Trash2 className="size-4 mr-2" />
               {t('common:delete')}
             </button>
           </div>

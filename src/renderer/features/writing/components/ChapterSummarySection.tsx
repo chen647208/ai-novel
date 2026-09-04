@@ -11,6 +11,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { templateDisplayName } from '@/i18n';
 import type { ChapterSummarySectionProps } from '../types';
+import { Bot, Settings } from 'lucide-react';
 
 const ChapterSummarySection: React.FC<ChapterSummarySectionProps> = ({
   activeChapter,
@@ -33,7 +34,7 @@ const ChapterSummarySection: React.FC<ChapterSummarySectionProps> = ({
             className="text-[8px] text-gray-400 hover:text-purple-500 transition-colors"
             title={t('summarySection.manageTitle')}
           >
-            <i className="fas fa-cog"></i>
+            <Settings className="size-4" />
           </button>
         </div>
       </div>
@@ -75,7 +76,7 @@ const ChapterSummarySection: React.FC<ChapterSummarySectionProps> = ({
             </>
           ) : (
             <>
-              <i className="fas fa-robot"></i>
+              <Bot className="size-4" />
               {t('summarySection.extractBtn')}
             </>
           )}

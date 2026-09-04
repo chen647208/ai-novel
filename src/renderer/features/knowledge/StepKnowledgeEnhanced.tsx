@@ -24,6 +24,7 @@ import SmartRecommender from '../assistant/SmartRecommender';
 import EnhancedTimeline from '../timeline/EnhancedTimeline';
 import KnowledgeFeaturePanels from './components/KnowledgeFeaturePanels';
 import { dialogService } from '@/shared/services/dialogService';
+import { BookOpen, Bot, Brain, Calendar, Clock, CloudUpload, FileText, Flag, Globe, Loader2, MapPinned, PenLine, Search, Settings2, Tag, X } from 'lucide-react';
 
 interface StepKnowledgeEnhancedProps {
   project: Project;
@@ -421,12 +422,12 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
             >
               {isSearching ? (
                 <>
-                  <i className="fas fa-spinner fa-spin mr-2"></i>
+                  <Loader2 className="size-4 animate-spin mr-2" />
                   {t('center.searching')}
                 </>
               ) : (
                 <>
-                  <i className="fas fa-search mr-2"></i>
+                  <Search className="size-4 mr-2" />
                   {t('center.search')}
                 </>
               )}
@@ -443,7 +444,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
               }`}
               title={t('center.hybridTitle')}
             >
-              <i className="fas fa-robot"></i>
+              <Bot className="size-4" />
               <span className="hidden sm:inline">{t('center.modeHybrid')}</span>
             </button>
             <button
@@ -455,7 +456,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
               }`}
               title={t('center.semanticTitle')}
             >
-              <i className="fas fa-brain"></i>
+              <Brain className="size-4" />
               <span className="hidden sm:inline">{t('center.modeSemantic')}</span>
             </button>
             <button
@@ -467,7 +468,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
               }`}
               title={t('center.keywordTitle')}
             >
-              <i className="fas fa-search"></i>
+              <Search className="size-4" />
               <span className="hidden sm:inline">{t('center.modeKeyword')}</span>
             </button>
           </div>
@@ -500,7 +501,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
               project.worldView ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-400'
             }`}>
-              <i className="fas fa-globe text-lg"></i>
+              <Globe className="size-5" />
             </div>
             <div>
               <h4 className="font-bold text-gray-800 text-sm">{t('center.statsWorldview')}</h4>
@@ -518,7 +519,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
               project.locations?.length ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-400'
             }`}>
-              <i className="fas fa-map-marked-alt text-lg"></i>
+              <MapPinned className="size-5" />
             </div>
             <div>
               <h4 className="font-bold text-gray-800 text-sm">{t('center.statsLocation')}</h4>
@@ -536,7 +537,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
               project.factions?.length ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-400'
             }`}>
-              <i className="fas fa-flag text-lg"></i>
+              <Flag className="size-5" />
             </div>
             <div>
               <h4 className="font-bold text-gray-800 text-sm">{t('center.statsFaction')}</h4>
@@ -554,7 +555,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
               project.timeline?.events?.length ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-400'
             }`}>
-              <i className="fas fa-clock text-lg"></i>
+              <Clock className="size-5" />
             </div>
             <div>
               <h4 className="font-bold text-gray-800 text-sm">{t('center.statsTimeline')}</h4>
@@ -572,7 +573,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
               project.ruleSystems?.length ? 'bg-rose-100 text-rose-600' : 'bg-gray-100 text-gray-400'
             }`}>
-              <i className="fas fa-cogs text-lg"></i>
+              <Settings2 className="size-5" />
             </div>
             <div>
               <h4 className="font-bold text-gray-800 text-sm">{t('center.statsRule')}</h4>
@@ -597,7 +598,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
               onClick={() => setShowSearchResults(false)}
               className="text-gray-400 hover:text-gray-600"
             >
-              <i className="fas fa-times"></i>
+              <X className="size-4" />
             </button>
           </div>
           <div className="max-h-64 overflow-y-auto">
@@ -799,7 +800,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
           <div className="flex-1 overflow-y-auto p-4">
             {getFilteredKnowledge().length === 0 ? (
               <div className="text-center py-8 text-gray-400">
-                <i className="fas fa-book text-3xl mb-2"></i>
+                <BookOpen className="size-8 mb-2" />
                 <p>{t('center.emptyContent')}</p>
                 <p className="text-sm mt-1">{t('center.emptyContentHint')}</p>
               </div>
@@ -873,7 +874,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
                 }
               }}
             >
-              <i className="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+              <CloudUpload className="size-8 text-gray-400 mb-2" />
               <p className="text-gray-600">{t('center.dropTitle')}</p>
               <p className="text-sm text-gray-400 mt-1">{t('center.dropHint')}</p>
               <input
@@ -963,15 +964,15 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
                   />
                   <div className="mt-3 flex items-center gap-4 text-sm text-gray-500">
                     <div className="flex items-center gap-1">
-                      <i className="fas fa-file-alt"></i>
+                      <FileText className="size-4" />
                       <span>{formatSize(viewingItem.size)}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <i className="fas fa-calendar"></i>
+                      <Calendar className="size-4" />
                       <span>{new Date(viewingItem.addedAt).toLocaleString(i18n.language)}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <i className="fas fa-tag"></i>
+                      <Tag className="size-4" />
                       <span>{viewingItem.type.toUpperCase()}</span>
                     </div>
                   </div>
@@ -993,7 +994,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
             ) : (
               <div className="h-full flex items-center justify-center text-gray-400">
                 <div className="text-center">
-                  <i className="fas fa-edit text-4xl mb-3"></i>
+                  <PenLine className="size-10 mb-3" />
                   <p>{t('center.emptyEditor')}</p>
                   <p className="text-sm mt-1">{t('center.emptyEditorHint')}</p>
                 </div>

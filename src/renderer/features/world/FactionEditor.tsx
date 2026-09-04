@@ -11,6 +11,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/i18n';
 import { type Faction, type Location, type Character } from '../../../shared/types';
 import { dialogService } from '@/shared/services/dialogService';
+import { BarChart3, Crown, Flag, MapPin, Plus, Save, Search, Trash, Users, X } from 'lucide-react';
 
 interface FactionEditorProps {
   projectId: string;
@@ -200,7 +201,7 @@ export const FactionEditor: React.FC<FactionEditorProps> = ({
       {/* 工具栏 */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1 relative">
-          <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             value={searchQuery}
@@ -213,7 +214,7 @@ export const FactionEditor: React.FC<FactionEditorProps> = ({
           onClick={addFaction}
           className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-bold hover:bg-amber-700 transition-colors flex items-center gap-2"
         >
-          <i className="fas fa-plus"></i>
+          <Plus className="size-4" />
           {t('faction.add')}
         </button>
       </div>
@@ -253,7 +254,7 @@ export const FactionEditor: React.FC<FactionEditorProps> = ({
                     </span>
                     {faction.leaderId && (
                       <span className="text-xs text-amber-600">
-                        <i className="fas fa-crown mr-1"></i>
+                        <Crown className="size-4 mr-1" />
                         {characters.find(c => c.id === faction.leaderId)?.name || t('faction.unknownLeader')}
                       </span>
                     )}
@@ -261,10 +262,10 @@ export const FactionEditor: React.FC<FactionEditorProps> = ({
                   {((faction.controlledLocationIds?.length ?? 0) > 0 || (faction.memberCharacterIds?.length ?? 0) > 0) && (
                     <div className="mt-1 flex gap-2 text-xs text-gray-500">
                       {(faction.controlledLocationIds?.length ?? 0) > 0 && (
-                        <span><i className="fas fa-map-marker-alt mr-1"></i>{t('faction.territoriesCount', { count: faction.controlledLocationIds?.length ?? 0 })}</span>
+                        <span><MapPin className="size-4 mr-1" />{t('faction.territoriesCount', { count: faction.controlledLocationIds?.length ?? 0 })}</span>
                       )}
                       {(faction.memberCharacterIds?.length ?? 0) > 0 && (
-                        <span><i className="fas fa-users mr-1"></i>{t('faction.membersCount', { count: faction.memberCharacterIds?.length ?? 0 })}</span>
+                        <span><Users className="size-4 mr-1" />{t('faction.membersCount', { count: faction.memberCharacterIds?.length ?? 0 })}</span>
                       )}
                     </div>
                   )}
@@ -285,7 +286,7 @@ export const FactionEditor: React.FC<FactionEditorProps> = ({
                   onClick={() => deleteFaction(selectedFaction.id)}
                   className="text-red-500 hover:text-red-600 text-sm flex items-center gap-1"
                 >
-                  <i className="fas fa-trash"></i>
+                  <Trash className="size-4" />
                   {t('faction.delete')}
                 </button>
               </div>
@@ -366,7 +367,7 @@ export const FactionEditor: React.FC<FactionEditorProps> = ({
               {/* 实力评估 */}
               <div className="bg-amber-50/50 p-3 rounded-lg border border-amber-100">
                 <h5 className="text-xs font-bold text-amber-800 mb-2 flex items-center gap-1">
-                  <i className="fas fa-chart-bar"></i>
+                  <BarChart3 className="size-4" />
                   {t('faction.strengthTitle')}
                 </h5>
                 <div className="grid grid-cols-2 gap-3">
@@ -444,7 +445,7 @@ export const FactionEditor: React.FC<FactionEditorProps> = ({
                     onClick={() => addRelation(selectedFaction.id)}
                     className="text-xs text-amber-600 hover:text-amber-700 font-bold flex items-center gap-1"
                   >
-                    <i className="fas fa-plus"></i> {t('faction.addRelation')}
+                    <Plus className="size-4" /> {t('faction.addRelation')}
                   </button>
                 </div>
 
@@ -486,7 +487,7 @@ export const FactionEditor: React.FC<FactionEditorProps> = ({
                           onClick={() => removeRelation(selectedFaction.id, index)}
                           className="text-red-500 hover:text-red-600 px-1"
                         >
-                          <i className="fas fa-times"></i>
+                          <X className="size-4" />
                         </button>
                       </div>
                     ))}
@@ -555,7 +556,7 @@ export const FactionEditor: React.FC<FactionEditorProps> = ({
           ) : (
             <div className="h-full flex items-center justify-center text-gray-400">
               <div className="text-center">
-                <i className="fas fa-flag text-4xl mb-2 opacity-30"></i>
+                <Flag className="size-10 mb-2 opacity-30" />
                 <p className="text-sm">{t('faction.selectHint')}</p>
               </div>
             </div>
@@ -570,7 +571,7 @@ export const FactionEditor: React.FC<FactionEditorProps> = ({
             onClick={handleSave}
             className="px-6 py-2 bg-amber-600 text-white rounded-lg font-bold hover:bg-amber-700 transition-colors flex items-center gap-2"
           >
-            <i className="fas fa-save"></i>
+            <Save className="size-4" />
             {t('faction.save')}
           </button>
         </div>

@@ -204,21 +204,6 @@ export class ConsistencyCheckPromptService {
   static getCategoryDisplayName(category: ConsistencyCheckPromptCategory): string {
     return i18n.t(`consistency:promptCategory.${category}`);
   }
-
-  /**
-   * 获取分类图标
-   */
-  static getCategoryIcon(category: ConsistencyCheckPromptCategory): string {
-    const icons: Record<ConsistencyCheckPromptCategory, string> = {
-      'semantic_character': 'fa-user',
-      'semantic_faction': 'fa-users',
-      'semantic_location': 'fa-map-marker-alt',
-      'semantic_timeline': 'fa-clock',
-      'semantic_cross': 'fa-exchange-alt',
-      'similarity_detection': 'fa-clone'
-    };
-    return icons[category] || 'fa-file-alt';
-  }
 }
 
 

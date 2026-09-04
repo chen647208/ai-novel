@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
+import { BookHeart, X } from 'lucide-react';
 
 interface NewBookModalProps {
   isOpen: boolean;
@@ -62,7 +63,7 @@ const NewBookModal: React.FC<NewBookModalProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-blue-600/20 flex items-center justify-center">
-                <i className="fas fa-book-medical text-blue-400 text-lg"></i>
+                <BookHeart className="size-5 text-blue-400" />
               </div>
               <div>
                 <h3 className="text-xl font-black text-white">{t('books:newBook.title')}</h3>
@@ -73,7 +74,7 @@ const NewBookModal: React.FC<NewBookModalProps> = ({
               onClick={handleClose}
               className="w-8 h-8 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white flex items-center justify-center transition-colors"
             >
-              <i className="fas fa-times"></i>
+              <X className="size-4" />
             </button>
           </div>
         </div>

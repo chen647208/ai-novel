@@ -10,6 +10,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from '@/i18n';
 import { type Character, type Project,} from '../../../shared/types';
+import { Brain, Calculator, CalendarDays, Check, ChevronDown, ChevronRight, ChevronUp, Eye, Flag, Globe2, Home, IdCard, Layers, LineChart, MapPin, ScrollText, Share2, Shield, UserRound, X } from 'lucide-react';
+
 
 interface CharacterModalProps {
   character: Character;
@@ -48,7 +50,7 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ character, project, isO
         <div className="px-10 py-6 border-b border-gray-100 bg-gray-50/30 flex justify-between items-start flex-shrink-0">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-              <i className="fas fa-user-tag text-blue-500 text-xl"></i>
+              <UserRound className="size-6 text-blue-500" />
             </div>
             <div className="flex-1">
               <div className="mb-2">
@@ -107,7 +109,7 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ character, project, isO
             onClick={onClose}
             className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-500 flex items-center justify-center transition-colors"
           >
-            <i className="fas fa-times"></i>
+            <X className="size-4" />
           </button>
         </div>
 
@@ -120,7 +122,7 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ character, project, isO
               {/* 基本信息卡片 */}
               <div className="bg-blue-50/20 p-6 rounded-3xl border border-blue-50/50">
                 <div className="flex items-center gap-3 mb-4">
-                  <i className="fas fa-id-card text-blue-400"></i>
+                  <IdCard className="size-4 text-blue-400" />
                   <h3 className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{t('modal.basic.title')}</h3>
                 </div>
                 <div className="space-y-4">
@@ -148,7 +150,7 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ character, project, isO
               {/* 外观特征卡片 */}
               <div className="bg-purple-50/20 p-6 rounded-3xl border border-purple-50/50">
                 <div className="flex items-center gap-3 mb-4">
-                  <i className="fas fa-eye text-purple-400"></i>
+                  <Eye className="size-4 text-purple-400" />
                   <h3 className="text-[10px] font-black text-purple-600 uppercase tracking-widest">{t('modal.appearance.title')}</h3>
                 </div>
                 <div className="space-y-4">
@@ -176,7 +178,7 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ character, project, isO
               {/* 性格特征卡片 */}
               <div className="bg-amber-50/20 p-6 rounded-3xl border border-amber-50/50">
                 <div className="flex items-center gap-3 mb-4">
-                  <i className="fas fa-brain text-amber-400"></i>
+                  <Brain className="size-4 text-amber-400" />
                   <h3 className="text-[10px] font-black text-amber-600 uppercase tracking-widest">{t('modal.personality.title')}</h3>
                 </div>
                 <textarea
@@ -193,7 +195,7 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ character, project, isO
               {/* 背景设定卡片 */}
               <div className="bg-emerald-50/20 p-6 rounded-3xl border border-emerald-50/50">
                 <div className="flex items-center gap-3 mb-4">
-                  <i className="fas fa-scroll text-emerald-400"></i>
+                  <ScrollText className="size-4 text-emerald-400" />
                   <h3 className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">{t('modal.background.title')}</h3>
                 </div>
                 <textarea
@@ -207,7 +209,7 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ character, project, isO
               {/* 能力与弱点卡片 */}
               <div className="bg-red-50/20 p-6 rounded-3xl border border-red-50/50">
                 <div className="flex items-center gap-3 mb-4">
-                  <i className="fas fa-shield-alt text-red-400"></i>
+                  <Shield className="size-4 text-red-400" />
                   <h3 className="text-[10px] font-black text-red-600 uppercase tracking-widest">{t('modal.abilities.title')}</h3>
                 </div>
                 <div className="space-y-4">
@@ -237,7 +239,7 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ character, project, isO
                 {/* 关系网卡片 */}
                 <div className="bg-indigo-50/20 p-6 rounded-3xl border border-indigo-50/50">
                   <div className="flex items-center gap-3 mb-4">
-                    <i className="fas fa-share-nodes text-indigo-400"></i>
+                    <Share2 className="size-4 text-indigo-400" />
                     <h3 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{t('modal.relations.title')}</h3>
                   </div>
                   <textarea
@@ -251,7 +253,7 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ character, project, isO
                 {/* 成长弧线卡片 */}
                 <div className="bg-cyan-50/20 p-6 rounded-3xl border border-cyan-50/50">
                   <div className="flex items-center gap-3 mb-4">
-                    <i className="fas fa-chart-line text-cyan-400"></i>
+                    <LineChart className="size-4 text-cyan-400" />
                     <h3 className="text-[10px] font-black text-cyan-600 uppercase tracking-widest">{t('modal.arc.title')}</h3>
                   </div>
                   <textarea
@@ -279,7 +281,7 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ character, project, isO
             onClick={onClose}
             className="px-8 py-3 bg-gray-900 text-white rounded-xl text-sm font-black hover:bg-gray-800 transition-all flex items-center gap-2 shadow-lg"
           >
-            <i className="fas fa-check text-xs"></i>
+            <Check className="size-3.5" />
             {t('modal.saveAndClose')}
           </button>
         </div>
@@ -316,7 +318,7 @@ const BirthInfoEditor: React.FC<BirthInfoEditorProps> = ({ character, onUpdate }
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center gap-2 text-xs text-gray-500 hover:text-indigo-600 transition-colors"
       >
-        <i className={`fas fa-chevron-${isExpanded ? 'down' : 'right'}`}></i>
+        {isExpanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
         <span>{t('birth.title')}</span>
         {birthInfo.date && <span className="text-indigo-500">{t('birth.set')}</span>}
       </button>
@@ -415,7 +417,7 @@ const BirthInfoEditor: React.FC<BirthInfoEditorProps> = ({ character, onUpdate }
             {/* 年龄预览（自动计算模式下） */}
             {birthInfo.calculationType === 'auto' && birthInfo.date?.year !== undefined && birthInfo.storyCurrentDate?.year !== undefined && (
               <div className="mt-2 text-xs text-indigo-600">
-                <i className="fas fa-calculator mr-1"></i>
+                <Calculator className="size-4 mr-1" />
                 {t('birth.calculatedAge', { age: birthInfo.storyCurrentDate.year - birthInfo.date.year })}
               </div>
             )}
@@ -469,7 +471,7 @@ const WorldRelationEditor: React.FC<WorldRelationEditorProps> = ({ character, pr
         className="w-full flex items-center justify-between"
       >
         <div className="flex items-center gap-3">
-          <i className="fas fa-globe-asia text-amber-500 text-lg"></i>
+          <Globe2 className="size-5 text-amber-500" />
           <div>
             <h3 className="text-sm font-black text-gray-800">{t('world.title')}</h3>
             <p className="text-xs text-gray-500">
@@ -479,7 +481,7 @@ const WorldRelationEditor: React.FC<WorldRelationEditorProps> = ({ character, pr
             </p>
           </div>
         </div>
-        <i className={`fas fa-chevron-${isExpanded ? 'up' : 'down'} text-gray-400 transition-transform`}></i>
+        {isExpanded ? <ChevronUp className="size-4 text-gray-400 transition-transform" /> : <ChevronDown className="size-4 text-gray-400 transition-transform" />}
       </button>
 
       {isExpanded && (
@@ -487,7 +489,7 @@ const WorldRelationEditor: React.FC<WorldRelationEditorProps> = ({ character, pr
           {/* 所属势力 */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-gray-600 flex items-center gap-2">
-              <i className="fas fa-flag text-amber-500"></i>
+              <Flag className="size-4 text-amber-500" />
               {t('world.faction')}
             </label>
             <select
@@ -513,7 +515,7 @@ const WorldRelationEditor: React.FC<WorldRelationEditorProps> = ({ character, pr
           {/* 出身地点 */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-gray-600 flex items-center gap-2">
-              <i className="fas fa-home text-emerald-500"></i>
+              <Home className="size-4 text-emerald-500" />
               {t('world.homeLocation')}
             </label>
             <select
@@ -539,7 +541,7 @@ const WorldRelationEditor: React.FC<WorldRelationEditorProps> = ({ character, pr
           {/* 当前地点 */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-gray-600 flex items-center gap-2">
-              <i className="fas fa-map-marker-alt text-blue-500"></i>
+              <MapPin className="size-4 text-blue-500" />
               {t('world.currentLocation')}
             </label>
             <select
@@ -565,7 +567,7 @@ const WorldRelationEditor: React.FC<WorldRelationEditorProps> = ({ character, pr
           {/* 等级体系 */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-gray-600 flex items-center gap-2">
-              <i className="fas fa-layer-group text-purple-500"></i>
+              <Layers className="size-4 text-purple-500" />
               {t('world.ruleSystem')}
             </label>
             <div className="space-y-2">
@@ -622,7 +624,7 @@ const WorldRelationEditor: React.FC<WorldRelationEditorProps> = ({ character, pr
           {timeline && (
             <div className="col-span-1 md:col-span-2 lg:col-span-4 mt-2 pt-4 border-t border-amber-200/30">
               <label className="text-xs font-bold text-gray-600 flex items-center gap-2 mb-3">
-                <i className="fas fa-calendar-alt text-indigo-500"></i>
+                <CalendarDays className="size-4 text-indigo-500" />
                 {t('birth.dateWithCalendar', { calendar: timeline.config.calendarSystem })}
               </label>
               <div className="grid grid-cols-4 gap-3">

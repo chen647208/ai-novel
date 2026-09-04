@@ -12,6 +12,8 @@ import { useTranslation } from '@/i18n';
 import { type Project } from '../../../shared/types';
 import BookItem from './BookItem';
 import NewBookModal from './NewBookModal';
+import { BookOpen, ChevronDown, ChevronUp, Plus } from 'lucide-react';
+
 
 interface BookManagerProps {
   books: Project[];
@@ -54,7 +56,7 @@ const BookManager: React.FC<BookManagerProps> = ({
       >
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-blue-600/20 flex items-center justify-center">
-            <i className="fas fa-book text-blue-400"></i>
+            <BookOpen className="size-4 text-blue-400" />
           </div>
           <div className="text-left">
             <div className="font-bold text-white text-sm">{t('manager.current')}</div>
@@ -67,7 +69,7 @@ const BookManager: React.FC<BookManagerProps> = ({
           <div className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">
             {t('manager.count', { count: books.length })}
           </div>
-          <i className={`fas fa-chevron-${isExpanded ? 'up' : 'down'} text-gray-500 text-xs transition-transform`}></i>
+          {isExpanded ? <ChevronUp className="size-3.5 text-gray-500 transition-transform" /> : <ChevronDown className="size-3.5 text-gray-500 transition-transform" />}
         </div>
       </div>
 
@@ -97,7 +99,7 @@ const BookManager: React.FC<BookManagerProps> = ({
           onClick={() => setIsNewBookModalOpen(true)}
           className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 hover:text-blue-300 rounded-lg border border-blue-600/30 hover:border-blue-600/50 transition-all group cursor-pointer"
         >
-          <i className="fas fa-plus text-xs"></i>
+          <Plus className="size-3.5" />
           <span className="text-sm font-bold">{t('manager.new')}</span>
         </button>
       </div>

@@ -19,6 +19,13 @@
     "language": {
       "zh": "简体中文",
       "en": "English"
+    },
+    "themeLabel": "界面主题",
+    "themeHint": "选择界面配色，切换后立即生效并自动保存。",
+    "theme": {
+      "light": "浅色",
+      "dark": "深色",
+      "system": "跟随系统"
     }
   },
   "footer": {

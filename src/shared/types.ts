@@ -19,6 +19,9 @@ export type OutputMode = 'streaming' | 'traditional';
 /** 界面语言。新增语言时在此扩展联合，并补一份对应字典。 */
 export type AppLanguage = 'zh' | 'en';
 
+/** 界面主题：浅色 / 深色 / 跟随系统。 */
+export type AppTheme = 'light' | 'dark' | 'system';
+
 export interface ModelConfig {
   id: string;
   name: string;
@@ -691,6 +694,8 @@ export interface AppState {
   consistencyCheckConfig?: ConsistencyCheckConfig;
   /** 界面语言；undefined 表示跟随系统检测（首启按 navigator 决定，之后持久化用户选择） */
   language?: AppLanguage;
+  /** 界面主题；undefined 表示默认浅色（首启），之后持久化用户选择 */
+  theme?: AppTheme;
 }
 
 // 向量数据库相关类型

@@ -10,6 +10,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/i18n';
 import { type WorldView, type MagicSystem, type TechnologyLevel, type WorldHistory, type HistoryEvent, type MagicLevel } from '../../../shared/types';
+import { Cpu, Landmark, Plus, Save, Trash, WandSparkles, X } from 'lucide-react';
 
 interface WorldViewEditorProps {
   projectId: string;
@@ -172,7 +173,7 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
     <div className="space-y-4">
       <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
         <h4 className="text-sm font-bold text-blue-800 mb-3 flex items-center gap-2">
-          <i className="fas fa-wand-magic-sparkles"></i>
+          <WandSparkles className="size-4" />
           {t('worldview.magic.title')}
         </h4>
 
@@ -245,7 +246,7 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
                     }}
                     className="px-2 py-1 text-red-500 hover:bg-red-50 rounded transition-colors"
                   >
-                    <i className="fas fa-times"></i>
+                    <X className="size-4" />
                   </button>
                 </div>
               ))}
@@ -256,7 +257,7 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
                 }}
                 className="text-xs text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1"
               >
-                <i className="fas fa-plus"></i> {t('worldview.magic.addRule')}
+                <Plus className="size-4" /> {t('worldview.magic.addRule')}
               </button>
             </div>
           </div>
@@ -273,7 +274,7 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
                       onClick={() => removeMagicLevel(index)}
                       className="text-xs text-red-500 hover:text-red-600"
                     >
-                      <i className="fas fa-trash"></i>
+                      <Trash className="size-4" />
                     </button>
                   </div>
                   <input
@@ -296,7 +297,7 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
                 onClick={addMagicLevel}
                 className="w-full py-2 border-2 border-dashed border-blue-200 text-blue-600 rounded-lg text-sm font-bold hover:bg-blue-50 transition-colors"
               >
-                <i className="fas fa-plus mr-1"></i> {t('worldview.magic.addLevel')}
+                <Plus className="size-4 mr-1" /> {t('worldview.magic.addLevel')}
               </button>
             </div>
           </div>
@@ -309,7 +310,7 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
     <div className="space-y-4">
       <div className="bg-green-50/50 p-4 rounded-xl border border-green-100">
         <h4 className="text-sm font-bold text-green-800 mb-3 flex items-center gap-2">
-          <i className="fas fa-microchip"></i>
+          <Cpu className="size-4" />
           {t('worldview.tech.title')}
         </h4>
 
@@ -405,7 +406,7 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
                     }}
                     className="px-2 py-1 text-red-500 hover:bg-red-50 rounded transition-colors"
                   >
-                    <i className="fas fa-times"></i>
+                    <X className="size-4" />
                   </button>
                 </div>
               ))}
@@ -416,7 +417,7 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
                 }}
                 className="text-xs text-green-600 hover:text-green-700 font-bold flex items-center gap-1"
               >
-                <i className="fas fa-plus"></i> {t('worldview.tech.addTech')}
+                <Plus className="size-4" /> {t('worldview.tech.addTech')}
               </button>
             </div>
           </div>
@@ -429,7 +430,7 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
     <div className="space-y-4">
       <div className="bg-amber-50/50 p-4 rounded-xl border border-amber-100">
         <h4 className="text-sm font-bold text-amber-800 mb-3 flex items-center gap-2">
-          <i className="fas fa-landmark"></i>
+          <Landmark className="size-4" />
           {t('worldview.history.title')}
         </h4>
 
@@ -468,7 +469,7 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
                       onClick={() => removeHistoryEvent(index)}
                       className="text-xs text-red-500 hover:text-red-600"
                     >
-                      <i className="fas fa-trash"></i>
+                      <Trash className="size-4" />
                     </button>
                   </div>
 
@@ -512,7 +513,7 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
                 onClick={addHistoryEvent}
                 className="w-full py-2 border-2 border-dashed border-amber-200 text-amber-600 rounded-lg text-sm font-bold hover:bg-amber-50 transition-colors"
               >
-                <i className="fas fa-plus mr-1"></i> {t('worldview.history.addEvent')}
+                <Plus className="size-4 mr-1" /> {t('worldview.history.addEvent')}
               </button>
             </div>
           </div>
@@ -533,7 +534,7 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
               : 'text-gray-600 hover:bg-gray-100'
           }`}
         >
-          <i className="fas fa-wand-magic-sparkles"></i>
+          <WandSparkles className="size-4" />
           {t('worldview.tabMagic')}
         </button>
         <button
@@ -544,7 +545,7 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
               : 'text-gray-600 hover:bg-gray-100'
           }`}
         >
-          <i className="fas fa-microchip"></i>
+          <Cpu className="size-4" />
           {t('worldview.tabTech')}
         </button>
         <button
@@ -555,7 +556,7 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
               : 'text-gray-600 hover:bg-gray-100'
           }`}
         >
-          <i className="fas fa-landmark"></i>
+          <Landmark className="size-4" />
           {t('worldview.tabHistory')}
         </button>
       </div>
@@ -574,7 +575,7 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
             onClick={handleSave}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors flex items-center gap-2"
           >
-            <i className="fas fa-save"></i>
+            <Save className="size-4" />
             {t('worldview.save')}
           </button>
         </div>

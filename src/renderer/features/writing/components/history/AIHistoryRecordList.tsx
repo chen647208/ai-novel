@@ -13,6 +13,7 @@ import type { TFunction } from 'i18next';
 import { formatHistoryTimestamp, formatTokenUsage, getGenerationType, getProviderIcon } from '../../utils';
 import type { AIHistoryRecordListProps, AIHistoryRecordWithChapter } from '../../types';
 import { dialogService } from '@/shared/services/dialogService';
+import { Check, ChevronRight, Copy, Eye, History } from 'lucide-react';
 
 const renderTemplateBlock = (item: AIHistoryRecordWithChapter, compact: boolean, t: TFunction<'writing'>) => {
   if (!item.record.metadata?.templateName) {
@@ -70,7 +71,7 @@ const renderActionBlock = (item: AIHistoryRecordWithChapter, compact: boolean, t
         }}
         className={`${compact ? 'px-3 py-2 text-xs' : 'px-4 py-3 text-sm'} w-full bg-blue-100 text-blue-600 hover:bg-blue-200 rounded-xl font-bold transition-colors flex items-center justify-center gap-2`}
       >
-        <i className="fas fa-copy"></i>
+        <Copy className="size-4" />
         {t('record.copyContent')}
       </button>
       <button
@@ -79,7 +80,7 @@ const renderActionBlock = (item: AIHistoryRecordWithChapter, compact: boolean, t
         }}
         className={`${compact ? 'px-3 py-2 text-xs' : 'px-4 py-3 text-sm'} w-full bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl font-bold transition-colors flex items-center justify-center gap-2`}
       >
-        <i className="fas fa-eye"></i>
+        <Eye className="size-4" />
         {t('record.viewPrompt')}
       </button>
     </div>
@@ -110,11 +111,11 @@ const AIHistoryRecordCard: React.FC<{
           <div className={`${compact ? 'w-5 h-5' : 'w-6 h-6'} rounded border flex items-center justify-center ${
             isSelected ? 'bg-blue-500 border-blue-500 text-white' : 'bg-white border-gray-300'
           }`}>
-            {isSelected && <i className={`fas fa-check ${compact ? 'text-xs' : 'text-sm'}`}></i>}
+            {isSelected && <Check className={`size-4 ${compact ? 'text-xs' : 'text-sm'}`} />}
           </div>
 
           <div className={`flex items-center ${compact ? 'gap-3' : 'gap-4'}`}>
-            <i className={`${getProviderIcon(item.record.modelConfig.provider)} ${compact ? '' : 'text-lg'}`}></i>
+            {(() => { const { icon: PIcon, cls } = getProviderIcon(item.record.modelConfig.provider); return <PIcon className={`${compact ? 'size-4' : 'size-5'} ${cls}`} />; })()}
             <div>
               <div className={`flex items-center ${compact ? 'gap-2' : 'gap-3'}`}>
                 <span className={`${compact ? 'text-sm' : 'text-base'} font-bold text-gray-800`}>
@@ -140,7 +141,7 @@ const AIHistoryRecordCard: React.FC<{
               {item.record.tokens ? `${item.record.tokens.total} tokens` : 'N/A tokens'}
             </div>
           </div>
-          <i className={`fas fa-chevron-right text-gray-300 transition-transform ${isSelected ? 'rotate-90' : ''}`}></i>
+          <ChevronRight className={`size-4 text-gray-300 transition-transform ${isSelected ? 'rotate-90' : ''}`} />
         </div>
       </div>
 
@@ -223,7 +224,7 @@ const AIHistoryRecordList: React.FC<AIHistoryRecordListProps> = ({
             <div className="flex items-center gap-2">
               <div onClick={onToggleSelectAll} className="flex items-center gap-1 cursor-pointer select-none">
                 <div className={`w-4 h-4 rounded border flex items-center justify-center ${allSelected ? 'bg-blue-500 border-blue-500 text-white' : 'bg-white border-gray-300'}`}>
-                  {allSelected && <i className="fas fa-check text-[10px]"></i>}
+                  {allSelected && <Check className="size-3" />}
                 </div>
                 <span className="text-xs font-bold text-gray-700">{allSelected ? t('record.deselectAll') : t('record.selectAll')}</span>
               </div>
@@ -237,7 +238,7 @@ const AIHistoryRecordList: React.FC<AIHistoryRecordListProps> = ({
         {records.length === 0 ? (
           <div className={`text-center ${compact ? 'py-16' : 'py-20'}`}>
             <div className={`${compact ? 'w-20 h-20 mb-6' : 'w-24 h-24 mb-8'} bg-gray-100 rounded-full flex items-center justify-center mx-auto`}>
-              <i className={`fas fa-history ${compact ? 'text-3xl' : 'text-4xl'} text-gray-300`}></i>
+              <History className={`size-4 text-gray-300 ${compact ? 'text-3xl' : 'text-4xl'}`} />
             </div>
             <h4 className={`${compact ? 'text-lg mb-2' : 'text-xl mb-3'} font-bold text-gray-400`}>{t('record.emptyTitle')}</h4>
             <p className={`${compact ? 'text-sm max-w-md' : 'text-base max-w-lg'} text-gray-400 mx-auto`}>
@@ -268,6 +269,4 @@ const AIHistoryRecordList: React.FC<AIHistoryRecordListProps> = ({
 };
 
 export default AIHistoryRecordList;
-
-
 

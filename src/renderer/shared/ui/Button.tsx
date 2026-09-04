@@ -7,23 +7,56 @@
  * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
  */
 
-import React from 'react';
-import { buttonClass, type ButtonVariant, type ButtonSize } from './buttonClass';
+import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '../utils/cn';
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
+/**
+ * 全局按钮：cva 变体映射设计令牌。
+ * variant: default(墨黑主操作) / secondary / outline / ghost / destructive / link
+ * size: sm / md / lg / icon
+ */
+export const buttonVariants = cva(
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors ' +
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 ' +
+    'disabled:pointer-events-none disabled:opacity-50 ' +
+    '[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-accent',
+        outline: 'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        destructive: 'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',
+        link: 'text-link underline-offset-4 hover:underline',
+      },
+      size: {
+        sm: 'h-8 rounded-md px-3 text-xs',
+        md: 'h-9 px-4 py-2',
+        lg: 'h-10 rounded-md px-6',
+        icon: 'h-9 w-9',
+      },
+    },
+    defaultVariants: { variant: 'default', size: 'md' },
+  }
+);
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
   /** 占满父容器宽度 */
   block?: boolean;
 }
 
-/**
- * 全局语义按钮：变体/尺寸映射到 index.css 的 .btn-* 组件类。
- * 默认 type="button"，避免在表单里误触发提交；透传其余原生属性。
- */
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant, size, block, className, type = 'button', ...rest }, ref) => (
-    <button ref={ref} type={type} className={buttonClass({ variant, size, block, className })} {...rest} />
+    <button
+      ref={ref}
+      type={type}
+      className={cn(buttonVariants({ variant, size }), block && 'w-full', className)}
+      {...rest}
+    />
   )
 );
 Button.displayName = 'Button';

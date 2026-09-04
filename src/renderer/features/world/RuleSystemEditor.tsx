@@ -11,6 +11,8 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/i18n';
 import { type RuleSystem, type RuleSystemType, type RuleLevel, type Character } from '../../../shared/types';
 import { dialogService } from '@/shared/services/dialogService';
+import { ArrowDown, ArrowUp, Briefcase, ChevronDown, ChevronUp, Coins, Crown, Cpu, Dumbbell, ListTree, Plus, Save, Settings2, Sparkles, Trash, X, type LucideIcon } from 'lucide-react';
+
 
 interface RuleSystemEditorProps {
   projectId: string;
@@ -48,16 +50,16 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
   const getRuleTypeLabel = (type: RuleSystemType): string => t(`rule.type.${type}`);
 
   // 获取规则类型图标
-  const getRuleTypeIcon = (type: RuleSystemType): string => {
-    const icons: Record<RuleSystemType, string> = {
-      cultivation: 'fa-dumbbell',
-      magic: 'fa-hat-wizard',
-      tech: 'fa-microchip',
-      currency: 'fa-coins',
-      organization: 'fa-sitemap',
-      profession: 'fa-briefcase',
-      title: 'fa-crown',
-      custom: 'fa-cog'
+  const getRuleTypeIcon = (type: RuleSystemType): LucideIcon => {
+    const icons: Record<RuleSystemType, LucideIcon> = {
+      cultivation: Dumbbell,
+      magic: Sparkles,
+      tech: Cpu,
+      currency: Coins,
+      organization: ListTree,
+      profession: Briefcase,
+      title: Crown,
+      custom: Settings2
     };
     return icons[type];
   };
@@ -196,23 +198,26 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
       <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
         <h4 className="text-sm font-bold text-gray-700 mb-3">{t('rule.addTitle')}</h4>
         <div className="grid grid-cols-4 gap-2">
-          {(['cultivation', 'magic', 'tech', 'currency', 'organization', 'profession', 'title', 'custom'] as RuleSystemType[]).map(type => (
+          {(['cultivation', 'magic', 'tech', 'currency', 'organization', 'profession', 'title', 'custom'] as RuleSystemType[]).map(type => {
+            const TypeIcon = getRuleTypeIcon(type);
+            return (
             <button
               key={type}
               onClick={() => addRuleSystem(type)}
               className={`p-3 rounded-lg border transition-all text-center hover:shadow-md ${getRuleTypeColor(type)}`}
             >
-              <i className={`fas ${getRuleTypeIcon(type)} text-lg mb-1 block`}></i>
+              <TypeIcon className="mb-1 block size-5" />
               <span className="text-xs font-bold">{getRuleTypeLabel(type)}</span>
             </button>
-          ))}
+            );
+          })}
         </div>
       </div>
 
       {/* 规则系统列表 */}
       {localRuleSystems.length === 0 ? (
         <div className="text-center py-8 text-gray-400">
-          <i className="fas fa-cogs text-4xl mb-2 opacity-30"></i>
+          <Settings2 className="size-10 mb-2 opacity-30" />
           <p className="text-sm">{t('rule.empty')}</p>
         </div>
       ) : (
@@ -232,7 +237,7 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
                 className={`p-4 cursor-pointer flex items-center justify-between ${getRuleTypeColor(system.type)}`}
               >
                 <div className="flex items-center gap-3">
-                  <i className={`fas ${getRuleTypeIcon(system.type)} text-xl`}></i>
+                  {(() => { const TypeIcon = getRuleTypeIcon(system.type); return <TypeIcon className="size-6" />; })()}
                   <div>
                     <h4 className="font-bold text-gray-800">{system.name}</h4>
                     <p className="text-xs text-gray-500">
@@ -249,9 +254,9 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
                     }}
                     className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                   >
-                    <i className="fas fa-trash"></i>
+                    <Trash className="size-4" />
                   </button>
-                  <i className={`fas fa-chevron-${selectedSystemId === system.id ? 'up' : 'down'} text-gray-400`}></i>
+                  {selectedSystemId === system.id ? <ChevronUp className="size-4 text-gray-400" /> : <ChevronDown className="size-4 text-gray-400" />}
                 </div>
               </div>
 
@@ -289,7 +294,7 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
                         onClick={() => addLevel(system.id)}
                         className="text-xs text-rose-600 hover:text-rose-700 font-bold flex items-center gap-1"
                       >
-                        <i className="fas fa-plus"></i> {t('rule.addLevel')}
+                        <Plus className="size-4" /> {t('rule.addLevel')}
                       </button>
                     </div>
 
@@ -314,20 +319,20 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
                                   disabled={index === 0}
                                   className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
                                 >
-                                  <i className="fas fa-arrow-up"></i>
+                                  <ArrowUp className="size-4" />
                                 </button>
                                 <button
                                   onClick={() => moveLevel(system.id, index, 'down')}
                                   disabled={index === system.levels.length - 1}
                                   className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
                                 >
-                                  <i className="fas fa-arrow-down"></i>
+                                  <ArrowDown className="size-4" />
                                 </button>
                                 <button
                                   onClick={() => removeLevel(system.id, index)}
                                   className="p-1 text-red-400 hover:text-red-600"
                                 >
-                                  <i className="fas fa-times"></i>
+                                  <X className="size-4" />
                                 </button>
                               </div>
                             </div>
@@ -404,7 +409,7 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
             onClick={handleSave}
             className="px-6 py-2 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 transition-colors flex items-center gap-2"
           >
-            <i className="fas fa-save"></i>
+            <Save className="size-4" />
             {t('rule.save')}
           </button>
         </div>

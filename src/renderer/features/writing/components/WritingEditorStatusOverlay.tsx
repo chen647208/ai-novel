@@ -10,6 +10,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { WritingEditorStatusOverlayProps } from '../types';
+import { Square } from 'lucide-react';
 
 const WritingEditorStatusOverlay: React.FC<WritingEditorStatusOverlayProps> = ({
   isGenerating,
@@ -47,7 +48,7 @@ const WritingEditorStatusOverlay: React.FC<WritingEditorStatusOverlayProps> = ({
               onClick={onStopStreaming}
               className="mt-4 px-4 py-2 bg-red-100 text-red-600 text-xs font-bold rounded-lg hover:bg-red-200 transition-colors flex items-center gap-2"
             >
-              <i className="fas fa-stop"></i> {t('statusOverlay.stop')}
+              <Square className="size-4" /> {t('statusOverlay.stop')}
             </button>
           </div>
         </div>
@@ -85,7 +86,7 @@ const WritingEditorStatusOverlay: React.FC<WritingEditorStatusOverlayProps> = ({
               onClick={onStopBatchGeneration}
               className="mt-6 px-6 py-3 bg-red-100 text-red-600 text-sm font-bold rounded-xl hover:bg-red-200 transition-colors flex items-center gap-2"
             >
-              <i className="fas fa-stop"></i> {t('statusOverlay.stopBatch')}
+              <Square className="size-4" /> {t('statusOverlay.stopBatch')}
             </button>
           </div>
         </div>

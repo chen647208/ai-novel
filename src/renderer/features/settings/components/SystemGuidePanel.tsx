@@ -11,6 +11,7 @@ import React from 'react';
 import { useTranslation, dt, dtList } from '@/i18n';
 import { modelProviders } from '../../../constants/modelProviders';
 import type { SystemGuidePanelProps } from '../types';
+import { CheckCircle2, ExternalLink, GraduationCap, Key, Lightbulb, PlusCircle } from 'lucide-react';
 
 const SystemGuidePanel: React.FC<SystemGuidePanelProps> = ({ onQuickAddProviderModel }) => {
   const { t } = useTranslation('settings');
@@ -18,7 +19,7 @@ const SystemGuidePanel: React.FC<SystemGuidePanelProps> = ({ onQuickAddProviderM
     <div className="space-y-8 animate-in zoom-in duration-300">
       <div className="text-center mb-8">
         <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4 mx-auto shadow-2xl shadow-blue-200">
-          <i className="fas fa-graduation-cap text-3xl text-white"></i>
+          <GraduationCap className="size-8 text-white" />
         </div>
         <h3 className="text-2xl font-black text-gray-900 mb-2">{t('guide.title')}</h3>
         <p className="text-gray-500 text-sm max-w-2xl mx-auto leading-relaxed">
@@ -65,7 +66,7 @@ const SystemGuidePanel: React.FC<SystemGuidePanelProps> = ({ onQuickAddProviderM
                   rel="noopener noreferrer"
                   className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
                 >
-                  <i className="fas fa-external-link-alt text-xs"></i>
+                  <ExternalLink className="size-3.5" />
                   {provider.website.replace('https://', '')}
                 </a>
               </div>
@@ -77,7 +78,7 @@ const SystemGuidePanel: React.FC<SystemGuidePanelProps> = ({ onQuickAddProviderM
                   rel="noopener noreferrer"
                   className="text-sm text-purple-600 hover:text-purple-800 font-medium flex items-center gap-1"
                 >
-                  <i className="fas fa-key text-xs"></i>
+                  <Key className="size-3.5" />
                   {t('guide.getApiKey')}
                 </a>
               </div>
@@ -94,7 +95,7 @@ const SystemGuidePanel: React.FC<SystemGuidePanelProps> = ({ onQuickAddProviderM
               <ul className="space-y-1">
                 {dtList(provider.tipsKey).map((tip, index) => (
                   <li key={index} className="text-xs text-gray-600 flex items-start gap-2">
-                    <i className="fas fa-check-circle text-green-500 mt-0.5 text-xs"></i>
+                    <CheckCircle2 className="size-3.5 text-green-500 mt-0.5" />
                     <span>{tip}</span>
                   </li>
                 ))}
@@ -107,7 +108,7 @@ const SystemGuidePanel: React.FC<SystemGuidePanelProps> = ({ onQuickAddProviderM
                   onClick={() => onQuickAddProviderModel(provider)}
                   className="flex-1 px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2"
                 >
-                  <i className="fas fa-plus-circle"></i>
+                  <PlusCircle className="size-4" />
                   {t('guide.quickAdd')}
                 </button>
                 <a
@@ -116,7 +117,7 @@ const SystemGuidePanel: React.FC<SystemGuidePanelProps> = ({ onQuickAddProviderM
                   rel="noopener noreferrer"
                   className="px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2"
                 >
-                  <i className="fas fa-external-link-alt"></i>
+                  <ExternalLink className="size-4" />
                   {t('guide.visitSite')}
                 </a>
               </div>
@@ -127,7 +128,7 @@ const SystemGuidePanel: React.FC<SystemGuidePanelProps> = ({ onQuickAddProviderM
 
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-100 rounded-2xl p-6 mt-8">
         <h4 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
-          <i className="fas fa-lightbulb text-yellow-500"></i>
+          <Lightbulb className="size-4 text-yellow-500" />
           {t('guide.stepsTitle')}
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

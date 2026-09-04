@@ -25,7 +25,9 @@
     "deleteProjectTip": "Delete the current project",
     "checkUpdateTip": "Check for updates",
     "viewHistoryTip": "View AI generation history",
-    "history": "History"
+    "history": "History",
+    "themeToLight": "Switch to light theme",
+    "themeToDark": "Switch to dark theme"
   },
   "reset": {
     "factoryTitle": "Factory Reset",

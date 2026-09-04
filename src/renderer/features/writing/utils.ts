@@ -9,6 +9,7 @@
 
 import type { AIHistoryRecord, Chapter, Project } from '../../../shared/types';
 import { i18n } from '@/i18n';
+import { Bot, Brain, Cpu, Feather, Server, type LucideIcon } from 'lucide-react';
 import {
   FLOATING_MENU_HEIGHT,
   FLOATING_MENU_OFFSET_X,
@@ -211,20 +212,20 @@ export const formatTokenUsage = (tokens?: TokenUsage) => {
   return i18n.t('writing:utils.tokenUsage', { input: tokens.prompt, output: tokens.completion, total: tokens.total });
 };
 
-export const getProviderIcon = (provider: string) => {
+export const getProviderIcon = (provider: string): { icon: LucideIcon; cls: string } => {
   switch (provider) {
     case 'gemini':
-      return 'fas fa-robot text-blue-500';
+      return { icon: Bot, cls: 'text-blue-500' };
     case 'ollama':
-      return 'fas fa-server text-green-500';
+      return { icon: Server, cls: 'text-green-500' };
     case 'anthropic':
-      return 'fas fa-feather text-orange-500';
+      return { icon: Feather, cls: 'text-orange-500' };
     case 'openai-responses':
-      return 'fas fa-brain text-indigo-500';
+      return { icon: Brain, cls: 'text-indigo-500' };
     case 'openai-chat':
-      return 'fas fa-brain text-purple-500';
+      return { icon: Brain, cls: 'text-purple-500' };
     default:
-      return 'fas fa-microchip text-gray-500';
+      return { icon: Cpu, cls: 'text-gray-500' };
   }
 };
 

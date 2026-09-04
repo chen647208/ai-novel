@@ -7,12 +7,12 @@
  * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
  */
 
-
 import React, { useState, useMemo } from 'react';
 import { useTranslation, i18n, templateDisplayName } from '@/i18n';
 import { type Project, type PromptTemplate, type ModelConfig, type Chapter } from '../../../shared/types';
 import { AIService } from '../assistant/services/aiService';
 import { dialogService } from '@/shared/services/dialogService';
+import { BookOpen, BookOpenText, Check, CheckCheck, ChevronDown, ChevronRight, Clock, FastForward, FileOutput, Flag, Globe2, Layers, LayoutList, ListOrdered, Loader2, MapPin, PenTool, Trash2, WandSparkles, XCircle } from 'lucide-react';
 
 interface StepChapterOutlineProps {
   project: Project;
@@ -69,7 +69,6 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
       };
     });
   };
-
 
   const exportChaptersToTxt = async () => {
     if (project.chapters.length === 0) {
@@ -241,7 +240,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
       <div className="flex justify-between items-center bg-white p-6 px-10 rounded-[2rem] border border-gray-100 shadow-sm z-20">
         <div className="flex items-center gap-5">
           <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
-            <i className="fas fa-list-ol text-xl"></i>
+            <ListOrdered className="size-6" />
           </div>
           <div>
             <h2 className="text-2xl font-black text-gray-800 tracking-tight">{t('steps:chapters.title')}</h2>
@@ -256,7 +255,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
                  className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${selectedKnowledgeIds.size > 0 ? 'bg-emerald-100 text-emerald-600 border-emerald-200' : 'bg-white border-gray-200 text-gray-400 hover:text-gray-600'}`}
                  title={t('steps:chapters.knowledgeToggleTitle')}
               >
-                 <i className="fas fa-book-atlas"></i>
+                 <BookOpenText className="size-4" />
                  {selectedKnowledgeIds.size > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 text-white text-[9px] flex items-center justify-center rounded-full font-bold">{selectedKnowledgeIds.size}</span>}
               </button>
               
@@ -275,14 +274,14 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
                              className="px-2 py-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded text-[9px] font-bold transition-all flex items-center gap-1"
                              title={t('steps:common.selectAllTitle')}
                           >
-                             <i className="fas fa-check-double text-[8px]"></i> {t('steps:common.selectAll')}
+                             <CheckCheck className="size-2" /> {t('steps:common.selectAll')}
                           </button>
                           <button 
                              onClick={() => setSelectedKnowledgeIds(new Set())}
                              className="px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded text-[9px] font-bold transition-all flex items-center gap-1"
                              title={t('steps:common.clearTitle')}
                           >
-                             <i className="fas fa-times-circle text-[8px]"></i> {t('steps:common.clear')}
+                             <XCircle className="size-2" /> {t('steps:common.clear')}
                           </button>
                        </div>
                     </div>
@@ -301,7 +300,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
                                 }`}
                              >
                                 <div className={`w-3 h-3 rounded border flex items-center justify-center ${selectedKnowledgeIds.has(k.id) ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-white border-gray-300'}`}>
-                                   {selectedKnowledgeIds.has(k.id) && <i className="fas fa-check text-[6px]"></i>}
+                                   {selectedKnowledgeIds.has(k.id) && <Check className="size-4 text-[6px]" />}
                                 </div>
                                 <span className={`text-[10px] font-bold truncate flex-1 text-left ${selectedKnowledgeIds.has(k.id) ? 'text-emerald-800' : 'text-gray-600'}`}>{k.name}</span>
                              </div>
@@ -328,7 +327,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
                 loading ? 'bg-gray-200 text-gray-400' : 'bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200 active:scale-95'
               }`}
             >
-              {loading ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-magic"></i>}
+              {loading ? <Loader2 className="size-4 animate-spin" /> : <WandSparkles className="size-4" />}
               {loading ? t('steps:chapters.generating') : t('steps:chapters.regenerate')}
             </button>
             
@@ -340,7 +339,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
                   continueLoading ? 'bg-gray-200 text-gray-400' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-100 active:scale-95'
                 }`}
               >
-                {continueLoading ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-forward-step"></i>}
+                {continueLoading ? <Loader2 className="size-4 animate-spin" /> : <FastForward className="size-4" />}
                 {continueLoading ? t('steps:chapters.continuing') : t('steps:chapters.continueBtn')}
               </button>
             )}
@@ -352,7 +351,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-8 overflow-hidden z-10">
         <div className="lg:col-span-1 bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col overflow-hidden">
           <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-            <i className="fas fa-book-open"></i> {t('steps:chapters.outlineRefTitle')}
+            <BookOpen className="size-4" /> {t('steps:chapters.outlineRefTitle')}
           </h4>
           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar text-xs text-gray-500 leading-relaxed italic opacity-80 whitespace-pre-wrap text-left">
             {project.outline || t('steps:chapters.outlineEmpty')}
@@ -362,7 +361,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
         <div className="lg:col-span-3 bg-gray-50/30 rounded-[2.5rem] border border-gray-200/50 overflow-hidden flex flex-col">
           <div className="p-6 border-b bg-white flex justify-between items-center px-10">
             <span className="text-xs font-black text-gray-400 uppercase flex items-center gap-2">
-              <i className="fas fa-stream"></i> {t('steps:chapters.chapterListPreview', { count: project.chapters.length })}
+              <LayoutList className="size-4" /> {t('steps:chapters.chapterListPreview', { count: project.chapters.length })}
             </span>
             <div className="flex items-center gap-4">
               {/* Token消耗显示 */}
@@ -405,7 +404,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
                     : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
                 }`}
               >
-                <i className="fas fa-file-export"></i>
+                <FileOutput className="size-4" />
                 {t('steps:chapters.exportTxt')}
               </button>
             </div>
@@ -420,7 +419,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
               if (sortedChapters.length === 0) {
                 return (
                   <div className="h-full flex flex-col items-center justify-center text-gray-300 py-20">
-                    <i className="fas fa-layer-group text-6xl mb-6 opacity-10"></i>
+                    <Layers className="size-4 text-6xl mb-6 opacity-10" />
                     <p className="font-black text-gray-400">{t('steps:chapters.emptyTitle')}</p>
                     <p className="text-xs mt-2 text-center max-w-xs">{t('steps:chapters.emptyHint')}</p>
                   </div>
@@ -449,13 +448,13 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
                         onClick={() => onEnterWriting(chap.id)}
                         className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-black shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2"
                       >
-                        <i className="fas fa-pen-nib"></i> {t('steps:chapters.writeThis')}
+                        <PenTool className="size-4" /> {t('steps:chapters.writeThis')}
                       </button>
                       <button 
                         onClick={() => onUpdate({ chapters: project.chapters.filter(c => c.id !== chap.id) })}
                         className="text-gray-200 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-2"
                       >
-                        <i className="fas fa-trash-alt"></i>
+                        <Trash2 className="size-4" />
                       </button>
                     </div>
                   </div>
@@ -537,9 +536,9 @@ const ChapterWorldRelationEditor: React.FC<ChapterWorldRelationEditorProps> = ({
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center gap-2 text-xs text-gray-500 hover:text-amber-600 transition-colors"
       >
-        <i className={`fas fa-chevron-${isExpanded ? 'down' : 'right'}`}></i>
+        {isExpanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
         <span className="flex items-center gap-2">
-          <i className="fas fa-globe-asia text-amber-500"></i>
+          <Globe2 className="size-4 text-amber-500" />
           {t('steps:chapters.worldRelation')}
           {(mainLocation || involvedFactions.length > 0) && (
             <span className="text-amber-600 font-medium">
@@ -554,7 +553,7 @@ const ChapterWorldRelationEditor: React.FC<ChapterWorldRelationEditorProps> = ({
           {/* 主要发生地点 */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-gray-600 flex items-center gap-2">
-              <i className="fas fa-map-marker-alt text-emerald-500"></i>
+              <MapPin className="size-4 text-emerald-500" />
               {t('steps:chapters.mainLocation')}
             </label>
             <select
@@ -580,7 +579,7 @@ const ChapterWorldRelationEditor: React.FC<ChapterWorldRelationEditorProps> = ({
           {/* 涉及势力 */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-gray-600 flex items-center gap-2">
-              <i className="fas fa-flag text-amber-500"></i>
+              <Flag className="size-4 text-amber-500" />
               {t('steps:chapters.involvedFactions')}
             </label>
             <div className="max-h-32 overflow-y-auto space-y-1 bg-gray-50 rounded-xl p-2">
@@ -608,7 +607,7 @@ const ChapterWorldRelationEditor: React.FC<ChapterWorldRelationEditorProps> = ({
           {/* 故事时间点 */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-gray-600 flex items-center gap-2">
-              <i className="fas fa-clock text-indigo-500"></i>
+              <Clock className="size-4 text-indigo-500" />
               {t('steps:chapters.storyTime')}
               {timeline && <span className="text-gray-400 font-normal">({timeline.config.calendarSystem})</span>}
             </label>
@@ -681,11 +680,4 @@ const ChapterWorldRelationEditor: React.FC<ChapterWorldRelationEditorProps> = ({
 };
 
 export default StepChapterOutline;
-
-
-
-
-
-
-
 

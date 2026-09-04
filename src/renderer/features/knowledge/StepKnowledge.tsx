@@ -7,11 +7,11 @@
  * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
  */
 
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/i18n';
 import { type Project, type KnowledgeItem, type KnowledgeCategory } from '../../../shared/types';
 import { dialogService } from '@/shared/services/dialogService';
+import { BookOpen, CloudUpload, Code, FileText, Save, X } from 'lucide-react';
 
 interface StepKnowledgeProps {
   project: Project;
@@ -213,7 +213,7 @@ const StepKnowledge: React.FC<StepKnowledgeProps> = ({ project, onUpdate }) => {
             onDrop={handleDrop}
           >
             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm text-blue-500 text-2xl">
-              <i className="fas fa-cloud-upload-alt"></i>
+              <CloudUpload className="size-4" />
             </div>
             <div>
               <p className="font-black text-gray-700">{t('dropTitle')}</p>
@@ -247,7 +247,7 @@ const StepKnowledge: React.FC<StepKnowledgeProps> = ({ project, onUpdate }) => {
                 >
                   <div className="flex items-center justify-between mb-1">
                      <div className="flex items-center gap-3 overflow-hidden">
-                        <i className={`fas ${item.type === 'json' ? 'fa-code' : 'fa-file-alt'} ${viewingItem?.id === item.id ? 'text-blue-200' : 'text-gray-300'}`}></i>
+                        {item.type === 'json' ? <Code className="size-4 ${viewingItem?.id === item.id ? 'text-blue-200' : 'text-gray-300'}" /> : <FileText className="size-4 ${viewingItem?.id === item.id ? 'text-blue-200' : 'text-gray-300'}" />}
                         <div className="flex flex-col">
                           <h4 className="font-bold text-sm truncate">{item.name}</h4>
                           <span className="text-[9px] text-gray-400 mt-0.5">
@@ -269,7 +269,7 @@ const StepKnowledge: React.FC<StepKnowledgeProps> = ({ project, onUpdate }) => {
                        {deleteConfirmId === item.id ? (
                          <span className="text-[10px] font-bold whitespace-nowrap px-1">{t('confirmDelete')}</span>
                        ) : (
-                         <i className="fas fa-times"></i>
+                         <X className="size-4" />
                        )}
                      </button>
                   </div>
@@ -290,7 +290,7 @@ const StepKnowledge: React.FC<StepKnowledgeProps> = ({ project, onUpdate }) => {
               <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
                 <div className="flex items-center gap-4 flex-1">
                   <div className="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 shrink-0">
-                    <i className={`fas ${viewingItem.type === 'json' ? 'fa-code' : 'fa-file-alt'}`}></i>
+                    {viewingItem.type === 'json' ? <Code className="size-4" /> : <FileText className="size-4" />}
                   </div>
                   <div className="flex-1 mr-4">
                      <input 
@@ -328,7 +328,7 @@ const StepKnowledge: React.FC<StepKnowledgeProps> = ({ project, onUpdate }) => {
                           : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                      }`}
                    >
-                     <i className="fas fa-save"></i> {t('saveChanges')}
+                     <Save className="size-4" /> {t('saveChanges')}
                    </button>
                 </div>
               </div>
@@ -344,7 +344,7 @@ const StepKnowledge: React.FC<StepKnowledgeProps> = ({ project, onUpdate }) => {
             </>
           ) : (
              <div className="h-full flex flex-col items-center justify-center text-gray-300">
-               <i className="fas fa-book-open text-6xl mb-6 opacity-20"></i>
+               <BookOpen className="size-4 text-6xl mb-6 opacity-20" />
                <p className="font-bold text-gray-400">{t('emptyHint')}</p>
              </div>
           )}
@@ -355,8 +355,4 @@ const StepKnowledge: React.FC<StepKnowledgeProps> = ({ project, onUpdate }) => {
 };
 
 export default StepKnowledge;
-
-
-
-
 

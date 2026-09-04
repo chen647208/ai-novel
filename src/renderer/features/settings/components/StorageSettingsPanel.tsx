@@ -11,6 +11,7 @@ import React from 'react';
 import { useTranslation } from '@/i18n';
 import type { StorageSettingsPanelProps } from '../types';
 import { dialogService } from '@/shared/services/dialogService';
+import { AlertTriangle, ArrowLeftRight, Clock, Database, FolderOpen, History, Info, Loader2, Save, Settings, Trash2 } from 'lucide-react';
 
 const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
   storageConfig,
@@ -26,7 +27,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
     <div className="space-y-8 animate-in zoom-in duration-300">
       <div className="text-center mb-8">
         <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-4 mx-auto shadow-2xl shadow-green-200">
-          <i className="fas fa-database text-3xl text-white"></i>
+          <Database className="size-8 text-white" />
         </div>
         <h3 className="text-2xl font-black text-gray-900 mb-2">{t('storage.title')}</h3>
         <p className="text-gray-500 text-sm max-w-2xl mx-auto leading-relaxed">
@@ -38,7 +39,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
         {/* 当前存储信息 */}
         <div className="border-2 border-green-100 rounded-2xl p-6 bg-gradient-to-br from-green-50 to-white">
           <h4 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
-            <i className="fas fa-info-circle text-green-500"></i>
+            <Info className="size-4 text-green-500" />
             {t('storage.currentStatus')}
           </h4>
 
@@ -58,7 +59,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                 </div>
                 {storageConfig.lastMigration && (
                   <div className="text-xs text-gray-400">
-                    <i className="fas fa-clock mr-1"></i>
+                    <Clock className="size-4 mr-1" />
                     {t('storage.lastMigration', { date: new Date(storageConfig.lastMigration).toLocaleDateString(i18n.language) })}
                   </div>
                 )}
@@ -81,7 +82,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                 </div>
                 {storageConfig.lastAutoBackup && (
                   <div className="text-xs text-gray-400">
-                    <i className="fas fa-history mr-1"></i>
+                    <History className="size-4 mr-1" />
                     {t('storage.lastBackup', { time: new Date(storageConfig.lastAutoBackup).toLocaleTimeString(i18n.language) })}
                   </div>
                 )}
@@ -93,7 +94,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
         {/* 存储配置 */}
         <div className="border-2 border-blue-100 rounded-2xl p-6 bg-gradient-to-br from-blue-50 to-white">
           <h4 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
-            <i className="fas fa-cog text-blue-500"></i>
+            <Settings className="size-4 text-blue-500" />
             {t('storage.configTitle')}
           </h4>
 
@@ -147,7 +148,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                       }}
                       className="px-4 py-3 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-black transition-all"
                     >
-                      <i className="fas fa-folder-open mr-2"></i>
+                      <FolderOpen className="size-4 mr-2" />
                       {t('storage.selectDir')}
                     </button>
                   </div>
@@ -228,7 +229,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                         }}
                         className="px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-black transition-all"
                       >
-                        <i className="fas fa-save mr-1"></i>
+                        <Save className="size-4 mr-1" />
                         {t('storage.backupNow')}
                       </button>
                     </div>
@@ -253,7 +254,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
       {/* 数据操作 */}
       <div className="border-2 border-red-100 rounded-2xl p-6 bg-gradient-to-br from-red-50 to-white mt-8">
         <h4 className="text-lg font-black text-gray-900 mb-4 flex items-center gap-2">
-          <i className="fas fa-exclamation-triangle text-red-500"></i>
+          <AlertTriangle className="size-4 text-red-500" />
           {t('storage.dangerTitle')}
         </h4>
 
@@ -279,7 +280,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                 disabled={isLoadingStorage}
                 className="px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl text-xs font-black transition-all flex items-center gap-2 disabled:opacity-50"
               >
-                {isLoadingStorage ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-exchange-alt"></i>}
+                {isLoadingStorage ? <Loader2 className="size-4 animate-spin" /> : <ArrowLeftRight className="size-4" />}
                 {t('storage.checkMigration')}
               </button>
               {migrationStatus && (
@@ -301,7 +302,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
               }}
               className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl text-xs font-black transition-all flex items-center gap-2"
             >
-              <i className="fas fa-trash-alt"></i>
+              <Trash2 className="size-4" />
               {t('storage.clearLabel')}
             </button>
           </div>

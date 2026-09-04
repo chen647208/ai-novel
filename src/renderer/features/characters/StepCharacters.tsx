@@ -7,7 +7,6 @@
  * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
  */
 
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation, templateDisplayName } from '@/i18n';
 import { type Project, type PromptTemplate, type ModelConfig, type Character } from '../../../shared/types';
@@ -16,6 +15,7 @@ import RelationshipDiagram from './RelationshipDiagram';
 import CompactCharacterCard from './CompactCharacterCard';
 import CharacterModal from './CharacterModal';
 import { dialogService } from '@/shared/services/dialogService';
+import { AlertCircle, Check, CheckCheck, Loader2, Network, Plus, Settings, Trash2, UserRound, Wand2, XCircle } from 'lucide-react';
 
 interface StepCharactersProps {
   project: Project;
@@ -349,7 +349,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({ project, prompts, activ
                 <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">{t('strategy.title')}</h4>
                 <p className="text-[10px] text-gray-400">{t('strategy.subtitle')}</p>
               </div>
-              <button onClick={onOpenSettings} className="text-gray-500 hover:text-white transition-colors"><i className="fas fa-cog"></i></button>
+              <button onClick={onOpenSettings} className="text-gray-500 hover:text-white transition-colors"><Settings className="size-4" /></button>
             </header>
             
             <div className="space-y-4">
@@ -367,7 +367,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({ project, prompts, activ
                   disabled={loading}
                   className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-xs transition-all flex items-center justify-center gap-2 shadow-xl shadow-blue-500/20 active:scale-95"
                 >
-                  {loading ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-wand-sparkles text-[10px]"></i>}
+                  {loading ? <Loader2 className="size-4 animate-spin" /> : <Wand2 className="size-3" />}
                   <span>{loading ? t('generating') : t('generateBtn')}</span>
                 </button>
                 
@@ -427,14 +427,14 @@ const StepCharacters: React.FC<StepCharactersProps> = ({ project, prompts, activ
                          className="px-2 py-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded text-[9px] font-bold transition-all flex items-center gap-1"
                          title={t('knowledge.selectAllTitle')}
                       >
-                         <i className="fas fa-check-double text-[8px]"></i> {t('knowledge.selectAll')}
+                         <CheckCheck className="size-2" /> {t('knowledge.selectAll')}
                       </button>
                       <button
                          onClick={clearAllKnowledge}
                          className="px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded text-[9px] font-bold transition-all flex items-center gap-1"
                          title={t('knowledge.clearTitle')}
                       >
-                         <i className="fas fa-times-circle text-[8px]"></i> {t('knowledge.clear')}
+                         <XCircle className="size-2" /> {t('knowledge.clear')}
                       </button>
                    </div>
                 )}
@@ -450,7 +450,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({ project, prompts, activ
                         }`}
                      >
                         <div className={`w-3 h-3 rounded border flex items-center justify-center ${selectedKnowledgeIds.has(k.id) ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-white border-gray-300'}`}>
-                           {selectedKnowledgeIds.has(k.id) && <i className="fas fa-check text-[6px]"></i>}
+                           {selectedKnowledgeIds.has(k.id) && <Check className="size-4 text-[6px]" />}
                         </div>
                         <span className={`text-[10px] font-bold truncate ${selectedKnowledgeIds.has(k.id) ? 'text-emerald-800' : 'text-gray-600'}`}>{k.name}</span>
                      </div>
@@ -460,7 +460,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({ project, prompts, activ
           </div>
           
           <button onClick={() => setShowDiagram(true)} className="w-full py-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-2xl text-[11px] font-black transition-all flex items-center justify-center gap-2 border border-emerald-100">
-            <i className="fas fa-project-diagram"></i> {t('openDiagram')}
+            <Network className="size-4" /> {t('openDiagram')}
           </button>
         </div>
 
@@ -484,7 +484,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({ project, prompts, activ
                       : 'text-red-500 border-red-100 bg-red-50 hover:bg-red-100'
                 }`}
               >
-                <i className={`fas ${clearConfirm ? 'fa-exclamation-circle' : 'fa-trash-can'} text-[9px]`}></i>
+                {clearConfirm ? <AlertCircle className="size-2.5" /> : <Trash2 className="size-2.5" />}
                 {clearConfirm ? t('archive.clearConfirm') : t('archive.clear')}
               </button>
               <button 
@@ -510,7 +510,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({ project, prompts, activ
                 })}
                 className="px-6 py-2.5 bg-gray-900 text-white rounded-xl text-[10px] font-black hover:bg-gray-800 transition-all flex items-center gap-2 shadow-lg active:scale-95"
               >
-                <i className="fas fa-plus text-[9px]"></i> {t('archive.addManually')}
+                <Plus className="size-4 text-[9px]" /> {t('archive.addManually')}
               </button>
             </div>
           </div>
@@ -518,7 +518,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({ project, prompts, activ
           <div className="flex-1 overflow-y-auto p-10 bg-gray-50/20 custom-scrollbar">
             {(project.characters || []).length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center py-20 text-gray-300">
-                <i className="fas fa-user-tag text-5xl mb-6 opacity-20"></i>
+                <UserRound className="size-12 mb-6 opacity-20" />
                 <h3 className="text-base font-black text-gray-400">{t('archive.emptyTitle')}</h3>
                 <p className="text-[10px] mt-2 opacity-60">{t('archive.emptyHint')}</p>
               </div>
@@ -546,7 +546,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({ project, prompts, activ
                       {deleteConfirmId === char.id ? (
                         <span className="text-xs font-bold animate-pulse">{t('archive.deleteConfirm')}</span>
                       ) : (
-                        <i className="fas fa-trash-alt text-sm"></i>
+                        <Trash2 className="size-4" />
                       )}
                     </button>
                   </div>
@@ -573,11 +573,4 @@ const StepCharacters: React.FC<StepCharactersProps> = ({ project, prompts, activ
 };
 
 export default StepCharacters;
-
-
-
-
-
-
-
 

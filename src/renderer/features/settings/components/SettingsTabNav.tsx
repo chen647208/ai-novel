@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { Brain, Cpu, Database, GraduationCap, SlidersHorizontal, Stethoscope, Terminal, WandSparkles, type LucideIcon } from 'lucide-react';
 import { useTranslation } from '@/i18n';
 import type { SettingsTab } from '../types';
 
@@ -16,15 +17,15 @@ interface SettingsTabNavProps {
   onChange: (tab: SettingsTab) => void;
 }
 
-const tabItems: Array<{ id: SettingsTab; icon: string; labelKey: 'tab.general' | 'tab.models' | 'tab.prompts' | 'tab.cardPrompts' | 'tab.consistencyPrompts' | 'tab.system' | 'tab.storage' | 'tab.embedding'; activeClassName: string }> = [
-  { id: 'general', icon: 'fa-sliders-h', labelKey: 'tab.general', activeClassName: 'bg-gray-900 text-white shadow-xl shadow-gray-200' },
-  { id: 'models', icon: 'fa-microchip', labelKey: 'tab.models', activeClassName: 'bg-gray-900 text-white shadow-xl shadow-gray-200' },
-  { id: 'prompts', icon: 'fa-terminal', labelKey: 'tab.prompts', activeClassName: 'bg-gray-900 text-white shadow-xl shadow-gray-200' },
-  { id: 'card-prompts', icon: 'fa-magic', labelKey: 'tab.cardPrompts', activeClassName: 'bg-amber-600 text-white shadow-xl shadow-amber-200' },
-  { id: 'consistency-prompts', icon: 'fa-stethoscope', labelKey: 'tab.consistencyPrompts', activeClassName: 'bg-rose-600 text-white shadow-xl shadow-rose-200' },
-  { id: 'system', icon: 'fa-graduation-cap', labelKey: 'tab.system', activeClassName: 'bg-purple-50 text-purple-600 shadow-xl shadow-purple-100' },
-  { id: 'storage', icon: 'fa-database', labelKey: 'tab.storage', activeClassName: 'bg-green-50 text-green-600 shadow-xl shadow-green-100' },
-  { id: 'embedding', icon: 'fa-brain', labelKey: 'tab.embedding', activeClassName: 'bg-indigo-50 text-indigo-600 shadow-xl shadow-indigo-100' },
+const tabItems: Array<{ id: SettingsTab; icon: LucideIcon; labelKey: 'tab.general' | 'tab.models' | 'tab.prompts' | 'tab.cardPrompts' | 'tab.consistencyPrompts' | 'tab.system' | 'tab.storage' | 'tab.embedding'; activeClassName: string }> = [
+  { id: 'general', icon: SlidersHorizontal, labelKey: 'tab.general', activeClassName: 'bg-gray-900 text-white shadow-xl shadow-gray-200' },
+  { id: 'models', icon: Cpu, labelKey: 'tab.models', activeClassName: 'bg-gray-900 text-white shadow-xl shadow-gray-200' },
+  { id: 'prompts', icon: Terminal, labelKey: 'tab.prompts', activeClassName: 'bg-gray-900 text-white shadow-xl shadow-gray-200' },
+  { id: 'card-prompts', icon: WandSparkles, labelKey: 'tab.cardPrompts', activeClassName: 'bg-amber-600 text-white shadow-xl shadow-amber-200' },
+  { id: 'consistency-prompts', icon: Stethoscope, labelKey: 'tab.consistencyPrompts', activeClassName: 'bg-rose-600 text-white shadow-xl shadow-rose-200' },
+  { id: 'system', icon: GraduationCap, labelKey: 'tab.system', activeClassName: 'bg-purple-50 text-purple-600 shadow-xl shadow-purple-100' },
+  { id: 'storage', icon: Database, labelKey: 'tab.storage', activeClassName: 'bg-green-50 text-green-600 shadow-xl shadow-green-100' },
+  { id: 'embedding', icon: Brain, labelKey: 'tab.embedding', activeClassName: 'bg-indigo-50 text-indigo-600 shadow-xl shadow-indigo-100' },
 ];
 
 const SettingsTabNav: React.FC<SettingsTabNavProps> = ({ activeTab, onChange }) => {
@@ -39,7 +40,7 @@ const SettingsTabNav: React.FC<SettingsTabNavProps> = ({ activeTab, onChange }) 
             activeTab === item.id ? item.activeClassName : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
           }`}
         >
-          <i className={`fas ${item.icon} mr-2`}></i> {t(item.labelKey)}
+          <item.icon className="mr-2 size-4" /> {t(item.labelKey)}
         </button>
       ))}
     </div>

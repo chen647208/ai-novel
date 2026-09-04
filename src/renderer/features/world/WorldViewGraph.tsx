@@ -10,6 +10,7 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from '@/i18n';
 import { roleLabel } from '../characters/displayLabels';
+import { Clock, Globe, ListTree, Map, Network, RefreshCw, Users, X } from 'lucide-react';
 import {
   type Character, type Location, type Faction, type Timeline, type TimelineEvent,
   type RuleSystem, type WorldView, type DiagramType, type GraphLayout,
@@ -420,7 +421,13 @@ const WorldViewGraph: React.FC<WorldViewGraphProps> = ({
         <div className="p-4 border-b border-white/10">
           <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 block">{t('graph.viewTypeLabel')}</label>
           <div className="space-y-2">
-            {(['mixed', 'character', 'faction', 'location', 'timeline', 'worldview'] as DiagramType[]).map(type => (
+            {(['mixed', 'character', 'faction', 'location', 'timeline', 'worldview'] as DiagramType[]).map(type => {
+              const TypeIcon = type === 'character' ? Users :
+                type === 'faction' ? ListTree :
+                type === 'location' ? Map :
+                type === 'timeline' ? Clock :
+                type === 'worldview' ? Globe : Network;
+              return (
               <button
                 key={type}
                 onClick={() => { setActiveType(type); resetLayout(); }}
@@ -430,16 +437,11 @@ const WorldViewGraph: React.FC<WorldViewGraphProps> = ({
                     : 'text-gray-400 hover:bg-white/5 hover:text-white'
                 }`}
               >
-                <i className={`fas fa-${
-                  type === 'character' ? 'users' :
-                  type === 'faction' ? 'sitemap' :
-                  type === 'location' ? 'map' :
-                  type === 'timeline' ? 'clock' :
-                  type === 'worldview' ? 'globe' : 'project-diagram'
-                } mr-2`}></i>
+                <TypeIcon className="mr-2 inline size-4 align-text-bottom" />
                 {typeLabels[type]}
               </button>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -509,13 +511,13 @@ const WorldViewGraph: React.FC<WorldViewGraphProps> = ({
             onClick={resetLayout}
             className="w-full py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm transition-all mb-2"
           >
-            <i className="fas fa-sync-alt mr-2"></i>{t('graph.reset')}
+            <RefreshCw className="size-4 mr-2" />{t('graph.reset')}
           </button>
           <button
             onClick={onClose}
             className="w-full py-2 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 text-sm transition-all"
           >
-            <i className="fas fa-times mr-2"></i>{t('graph.close')}
+            <X className="size-4 mr-2" />{t('graph.close')}
           </button>
         </div>
       </div>

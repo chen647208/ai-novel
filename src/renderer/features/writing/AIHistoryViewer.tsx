@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { dialogService } from '@/shared/services/dialogService';
 import AIHistoryRecordList from './components/history/AIHistoryRecordList';
 import { toggleSetValue } from './utils';
+import { Search, Trash, Trash2, X } from 'lucide-react';
 import type {
   AIHistoryRecordWithChapter,
   AIHistorySortBy,
@@ -194,7 +195,7 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
             className="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 flex items-center justify-center transition-all"
             title={t('history.closeSidebar')}
           >
-            <i className="fas fa-times"></i>
+            <X className="size-4" />
           </button>
         </div>
 
@@ -221,7 +222,7 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
               disabled={allHistoryRecords.length === 0}
               title={t('history.clearAllTitle')}
             >
-              <i className="fas fa-trash-can text-xs"></i>
+              <Trash2 className="size-3.5" />
             </button>
             <button
               onClick={deleteSelectedHistory}
@@ -229,7 +230,7 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
               disabled={selectedHistoryIds.size === 0}
               title={t('history.deleteSelectedTitle')}
             >
-              <i className="fas fa-trash text-xs"></i>
+              <Trash className="size-3.5" />
             </button>
           </div>
         </div>
@@ -285,7 +286,7 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
                 placeholder={t('history.searchPlaceholder')}
                 className="w-full bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-lg px-3 py-1.5 pl-8 outline-none focus:ring-1 focus:ring-blue-200"
               />
-              <i className="fas fa-search absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
+              <Search className="size-3.5 absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
           </div>
 
@@ -350,7 +351,7 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
             className="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 flex items-center justify-center transition-all shadow-lg"
             title={t('history.closeViewer')}
           >
-            <i className="fas fa-times text-lg"></i>
+            <X className="size-5" />
           </button>
         </div>
 
@@ -381,7 +382,7 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
               disabled={allHistoryRecords.length === 0}
               title={t('history.clearAllTitle')}
             >
-              <i className="fas fa-trash-can"></i>
+              <Trash2 className="size-4" />
               {t('history.clearAll')}
             </button>
             <button
@@ -390,7 +391,7 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
               disabled={selectedHistoryIds.size === 0}
               title={t('history.deleteSelectedTitle')}
             >
-              <i className="fas fa-trash"></i>
+              <Trash className="size-4" />
               {t('history.deleteSelected', { count: selectedHistoryIds.size })}
             </button>
           </div>
@@ -447,7 +448,7 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
                 placeholder={t('history.searchPlaceholderFull')}
                 className="w-full bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-lg px-4 py-2 pl-10 outline-none focus:ring-2 focus:ring-blue-200"
               />
-              <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <Search className="size-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
           </div>
 
@@ -509,7 +510,7 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
               className="px-10 py-4 bg-red-600 text-white font-black text-base rounded-xl shadow-lg shadow-red-200 hover:bg-red-700 active:scale-95 transition-all flex items-center gap-2"
               disabled={selectedHistoryIds.size === 0}
             >
-              <i className="fas fa-trash"></i>
+              <Trash className="size-4" />
               {t('history.deleteSelectedRecords', { count: selectedHistoryIds.size })}
             </button>
           </div>

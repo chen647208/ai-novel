@@ -10,6 +10,8 @@
 import React from 'react';
 import { useTranslation } from '@/i18n';
 import type { DiagramType, Project } from '../../../../shared/types';
+import { ChevronDown, ChevronUp, Clock, Flag, LayoutList, MapPinned, Network, ScrollText, Shield, WandSparkles } from 'lucide-react';
+
 
 interface KnowledgeFeaturePanelsProps {
   project: Project;
@@ -65,14 +67,14 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${project.locations?.length ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-500'}`}>
-                <i className="fas fa-map-marked-alt text-lg"></i>
+                <MapPinned className="size-5" />
               </div>
               <div>
                 <h4 className="font-bold text-gray-800">{t('panel.locationTitle')}</h4>
                 <p className="text-xs text-gray-500">{project.locations?.length ? t('panel.locationDefined', { count: project.locations.length }) : t('panel.locationHint')}</p>
               </div>
             </div>
-            <i className={`fas fa-chevron-${showLocationEditor ? 'up' : 'down'} text-gray-400`}></i>
+            {showLocationEditor ? <ChevronUp className="size-4 text-gray-400" /> : <ChevronDown className="size-4 text-gray-400" />}
           </div>
         </button>
 
@@ -87,14 +89,14 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${project.factions?.length ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-500'}`}>
-                <i className="fas fa-flag text-lg"></i>
+                <Flag className="size-5" />
               </div>
               <div>
                 <h4 className="font-bold text-gray-800">{t('panel.factionTitle')}</h4>
                 <p className="text-xs text-gray-500">{project.factions?.length ? t('panel.factionDefined', { count: project.factions.length }) : t('panel.factionHint')}</p>
               </div>
             </div>
-            <i className={`fas fa-chevron-${showFactionEditor ? 'up' : 'down'} text-gray-400`}></i>
+            {showFactionEditor ? <ChevronUp className="size-4 text-gray-400" /> : <ChevronDown className="size-4 text-gray-400" />}
           </div>
         </button>
 
@@ -110,14 +112,14 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${project.timeline?.events?.length ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-500'}`}>
-                <i className="fas fa-clock text-lg"></i>
+                <Clock className="size-5" />
               </div>
               <div>
                 <h4 className="font-bold text-gray-800">{t('panel.timelineTitle')}</h4>
                 <p className="text-xs text-gray-500">{project.timeline?.events?.length ? t('panel.timelineDefined', { count: project.timeline.events.length }) : t('panel.timelineHint')}</p>
               </div>
             </div>
-            <i className={`fas fa-chevron-${showTimelineEditor ? 'up' : 'down'} text-gray-400`}></i>
+            {showTimelineEditor ? <ChevronUp className="size-4 text-gray-400" /> : <ChevronDown className="size-4 text-gray-400" />}
           </div>
         </button>
 
@@ -133,14 +135,14 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${project.ruleSystems?.length ? 'bg-rose-100 text-rose-600' : 'bg-gray-100 text-gray-500'}`}>
-                <i className="fas fa-scroll text-lg"></i>
+                <ScrollText className="size-5" />
               </div>
               <div>
                 <h4 className="font-bold text-gray-800">{t('panel.ruleTitle')}</h4>
                 <p className="text-xs text-gray-500">{project.ruleSystems?.length ? t('panel.ruleDefined', { count: project.ruleSystems.length }) : t('panel.ruleHint')}</p>
               </div>
             </div>
-            <i className={`fas fa-chevron-${showRuleSystemEditor ? 'up' : 'down'} text-gray-400`}></i>
+            {showRuleSystemEditor ? <ChevronUp className="size-4 text-gray-400" /> : <ChevronDown className="size-4 text-gray-400" />}
           </div>
         </button>
       </div>
@@ -155,7 +157,7 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
         >
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${(project.characters?.length || project.factions?.length || project.locations?.length) ? 'bg-cyan-100 text-cyan-600' : 'bg-gray-100 text-gray-500'}`}>
-              <i className="fas fa-project-diagram text-lg"></i>
+              <Network className="size-5" />
             </div>
             <div>
               <h4 className="font-bold text-gray-800">{t('panel.graphTitle')}</h4>
@@ -171,14 +173,14 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-violet-100 text-violet-600">
-                <i className="fas fa-stream text-lg"></i>
+                <LayoutList className="size-5" />
               </div>
               <div>
               <h4 className="font-bold text-gray-800">{t('panel.enhancedTimelineTitle')}</h4>
               <p className="text-xs text-gray-500">{t('panel.enhancedTimelineHint')}</p>
               </div>
             </div>
-            <i className={`fas fa-chevron-${showEnhancedTimeline ? 'up' : 'down'} text-gray-400`}></i>
+            {showEnhancedTimeline ? <ChevronUp className="size-4 text-gray-400" /> : <ChevronDown className="size-4 text-gray-400" />}
           </div>
         </button>
 
@@ -189,14 +191,14 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-red-100 text-red-600">
-                <i className="fas fa-shield-alt text-lg"></i>
+                <Shield className="size-5" />
               </div>
               <div>
               <h4 className="font-bold text-gray-800">{t('panel.consistencyTitle')}</h4>
               <p className="text-xs text-gray-500">{t('panel.consistencyHint')}</p>
               </div>
             </div>
-            <i className={`fas fa-chevron-${showConsistencyChecker ? 'up' : 'down'} text-gray-400`}></i>
+            {showConsistencyChecker ? <ChevronUp className="size-4 text-gray-400" /> : <ChevronDown className="size-4 text-gray-400" />}
           </div>
         </button>
       </div>
@@ -209,14 +211,14 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-100 text-purple-600">
-                <i className="fas fa-magic text-lg"></i>
+                <WandSparkles className="size-5" />
               </div>
               <div>
               <h4 className="font-bold text-gray-800">{t('panel.recommenderTitle')}</h4>
               <p className="text-xs text-gray-500">{t('panel.recommenderHint')}</p>
               </div>
             </div>
-            <i className={`fas fa-chevron-${showSmartRecommender ? 'up' : 'down'} text-gray-400`}></i>
+            {showSmartRecommender ? <ChevronUp className="size-4 text-gray-400" /> : <ChevronDown className="size-4 text-gray-400" />}
           </div>
         </button>
       </div>

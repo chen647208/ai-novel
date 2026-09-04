@@ -11,6 +11,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation, i18n } from '@/i18n';
 import { checkForUpdates, getCurrentVersionInfo, getVersionHistory, formatVersion, type UpdateCheckResult } from './services/versionService';
 import { dialogService } from '@/shared/services/dialogService';
+import { AlertCircle, AlertTriangle, CheckCircle2, Download, ExternalLink, Loader2, RefreshCw, Rocket, Tag, X } from 'lucide-react';
+
 
 interface VersionCheckModalProps {
   isOpen: boolean;
@@ -120,7 +122,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
         <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-              <i className="fas fa-rocket text-blue-600 text-lg"></i>
+              <Rocket className="size-5 text-blue-600" />
             </div>
             <div>
               <h3 className="text-xl font-black text-gray-900">{t('modal.title')}</h3>
@@ -131,7 +133,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
             onClick={onClose}
             className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
           >
-            <i className="fas fa-times"></i>
+            <X className="size-4" />
           </button>
         </div>
 
@@ -179,12 +181,12 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
                   >
                     {isChecking ? (
                       <>
-                        <i className="fas fa-spinner fa-spin mr-2"></i>
+                        <Loader2 className="size-4 animate-spin mr-2" />
                         {t('modal.checking')}
                       </>
                     ) : (
                       <>
-                        <i className="fas fa-sync-alt mr-2"></i>
+                        <RefreshCw className="size-4 mr-2" />
                         {t('modal.checkNow')}
                       </>
                     )}
@@ -196,7 +198,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
                 <div className={`mt-4 p-6 rounded-2xl border ${updateResult.success ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200'}`}>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <i className={`fas text-2xl ${updateResult.success ? 'fa-check-circle text-green-600' : 'fa-exclamation-triangle text-amber-600'}`}></i>
+                      {updateResult.success ? <CheckCircle2 className="size-6 text-green-600" /> : <AlertTriangle className="size-6 text-amber-600" />}
                       <div>
                         <div className="font-bold text-gray-800 text-lg">
                           {updateResult.success 
@@ -264,7 +266,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
                                 onClick={handleDownloadUpdate}
                                 className="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-bold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                               >
-                                <i className="fas fa-download"></i>
+                                <Download className="size-4" />
                                 {t('modal.autoInstall')}
                               </button>
                               <a 
@@ -273,7 +275,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
                                 rel="noopener noreferrer"
                                 className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                               >
-                                <i className="fas fa-external-link-alt"></i>
+                                <ExternalLink className="size-4" />
                                 {t('modal.manualDownload')}
                               </a>
                             </div>
@@ -286,7 +288,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
                   {updateResult.error && (
                     <div className="mt-4 p-4 bg-white rounded-xl border border-red-200">
                       <div className="flex items-center gap-2 text-red-600 mb-2">
-                        <i className="fas fa-exclamation-circle"></i>
+                        <AlertCircle className="size-4" />
                         <div className="font-medium">{t('modal.errorInfo')}</div>
                       </div>
                       <div className="text-sm text-gray-600">{updateResult.error}</div>
@@ -312,7 +314,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${index === 0 ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`}>
-                        <i className="fas fa-tag"></i>
+                        <Tag className="size-4" />
                       </div>
                       <div>
                         <div className="font-black text-gray-900">{formatVersion(item.version)}</div>

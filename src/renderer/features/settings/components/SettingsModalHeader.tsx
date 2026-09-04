@@ -11,6 +11,7 @@ import React from 'react';
 import { useTranslation } from '@/i18n';
 import SettingsTabNav from './SettingsTabNav';
 import type { SettingsModalHeaderProps } from '../types';
+import { X } from 'lucide-react';
 
 const SettingsModalHeader: React.FC<SettingsModalHeaderProps> = ({ activeTab, onChange, onClose }) => {
   const { t } = useTranslation('settings');
@@ -22,7 +23,7 @@ const SettingsModalHeader: React.FC<SettingsModalHeaderProps> = ({ activeTab, on
           <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">{t('subtitle')}</p>
         </div>
         <button onClick={onClose} className="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors">
-          <i className="fas fa-times text-gray-400"></i>
+          <X className="size-4 text-gray-400" />
         </button>
       </div>
 

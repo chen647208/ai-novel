@@ -12,6 +12,7 @@ import React from 'react';
 import { useTranslation } from '@/i18n';
 import { type Project } from '../../../shared/types';
 import BookManager from '../../features/books/BookManager';
+import { Brain, Feather, Globe, ListOrdered, ListTree, Skull, SlidersHorizontal, Users } from 'lucide-react';
 
 interface SidebarProps {
   currentStep: number;
@@ -47,11 +48,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   const { t } = useTranslation('nav');
   // 调整步骤 ID，世界构建中心整合了知识库与世界观管理
   const steps = [
-    { id: 0, icon: 'fa-brain', labelKey: 'steps.inspiration' },
-    { id: 1, icon: 'fa-globe', labelKey: 'steps.world' }, // 整合知识库与世界观
-    { id: 2, icon: 'fa-users', labelKey: 'steps.characters' },
-    { id: 3, icon: 'fa-sitemap', labelKey: 'steps.outline' },
-    { id: 4, icon: 'fa-list-ol', labelKey: 'steps.chapterOutline' }
+    { id: 0, icon: Brain, labelKey: 'steps.inspiration' },
+    { id: 1, icon: Globe, labelKey: 'steps.world' }, // 整合知识库与世界观
+    { id: 2, icon: Users, labelKey: 'steps.characters' },
+    { id: 3, icon: ListTree, labelKey: 'steps.outline' },
+    { id: 4, icon: ListOrdered, labelKey: 'steps.chapterOutline' }
   ] as const;
 
   return (
@@ -59,7 +60,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className="p-6 border-b border-gray-800 flex items-center justify-between">
         <div className="flex items-center gap-2">
            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-              <i className="fas fa-feather-alt text-white"></i>
+              <Feather className="size-4 text-white" />
            </div>
            <h1 className="text-xl font-black tracking-tight text-white">NovaLocal</h1>
         </div>
@@ -97,7 +98,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 : 'text-gray-400 border-transparent hover:bg-gray-800 hover:text-gray-200'
             } ${(!activeProject && step.id !== 0) ? 'opacity-20 cursor-not-allowed' : ''}`}
           >
-            <i className={`fas ${step.icon} w-6 text-lg`}></i>
+            <step.icon className="w-6 shrink-0" size={20} />
             <span className="ml-4 font-bold tracking-wide">{t(step.labelKey)}</span>
           </button>
         ))}
@@ -109,7 +110,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           onClick={onOpenSettings}
           className="w-full flex items-center px-6 py-4 text-gray-400 hover:bg-gray-800 hover:text-white transition-all group border-b border-gray-800 cursor-pointer"
         >
-          <i className="fas fa-sliders-h w-5 group-hover:rotate-180 transition-transform duration-500"></i>
+          <SlidersHorizontal className="size-4 w-5 group-hover:rotate-180 transition-transform duration-500" />
           <span className="ml-4 text-sm font-bold">{t('settings')}</span>
         </button>
         
@@ -122,7 +123,7 @@ const Sidebar: React.FC<SidebarProps> = ({
              className="w-full flex items-center px-3 py-2 text-gray-500 hover:bg-red-900/20 hover:text-red-500 rounded-lg transition-all group cursor-pointer"
              title={t('factoryResetTip')}
           >
-             <div className="w-6 flex justify-center"><i className="fas fa-skull-crossbones"></i></div>
+             <div className="w-6 flex justify-center"><Skull className="size-4" /></div>
              <span className="ml-2 text-xs font-bold">{t('factoryReset')}</span>
           </button>
         </div>

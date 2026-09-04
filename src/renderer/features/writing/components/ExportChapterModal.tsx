@@ -11,6 +11,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Chapter } from '../../../../shared/types';
 import type { ExportFormat } from '../utils';
+import { AlignLeft, Check, Code, FileOutput, Globe, X, type LucideIcon } from 'lucide-react';
 
 interface ExportChapterModalProps {
   isOpen: boolean;
@@ -24,10 +25,10 @@ interface ExportChapterModalProps {
   onConfirm: () => void;
 }
 
-const FORMAT_OPTIONS: Array<{ value: ExportFormat; label: string; icon: string }> = [
-  { value: 'txt', label: 'TXT', icon: 'fa-align-left' },
-  { value: 'md', label: 'Markdown', icon: 'fa-code' },
-  { value: 'html', label: 'HTML', icon: 'fa-globe' },
+const FORMAT_OPTIONS: Array<{ value: ExportFormat; label: string; icon: LucideIcon }> = [
+  { value: 'txt', label: 'TXT', icon: AlignLeft },
+  { value: 'md', label: 'Markdown', icon: Code },
+  { value: 'html', label: 'HTML', icon: Globe },
 ];
 
 const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
@@ -57,7 +58,7 @@ const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
             <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Export Novel Content</p>
           </div>
           <button onClick={onClose} className="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 flex items-center justify-center transition-all">
-            <i className="fas fa-times"></i>
+            <X className="size-4" />
           </button>
         </div>
 
@@ -75,7 +76,7 @@ const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
                 }`}
                 title={t('export.exportAsTitle', { format: opt.label })}
               >
-                <i className={`fas ${opt.icon}`}></i> {opt.label}
+                <opt.icon className="size-4" /> {opt.label}
               </button>
             ))}
           </div>
@@ -101,7 +102,7 @@ const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
                   }`}
                 >
                   <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${isSelected ? 'bg-blue-500 border-blue-500 text-white' : 'bg-white border-gray-300'}`}>
-                    {isSelected && <i className="fas fa-check text-[10px]"></i>}
+                    {isSelected && <Check className="size-3" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className={`text-sm font-bold truncate ${isSelected ? 'text-blue-900' : 'text-gray-700'}`}>
@@ -118,7 +119,7 @@ const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
         <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-4 shrink-0">
           <button onClick={onClose} className="px-6 py-3 rounded-xl text-gray-500 font-bold text-sm hover:bg-gray-200 hover:text-gray-800 transition-all">{t('export.cancel')}</button>
           <button onClick={onConfirm} className="px-8 py-3 bg-emerald-600 text-white font-black text-sm rounded-xl shadow-lg shadow-emerald-200 hover:bg-emerald-700 active:scale-95 transition-all flex items-center gap-2">
-            <i className="fas fa-file-export"></i> {t('export.confirmExport', { format: format.toUpperCase() })}
+            <FileOutput className="size-4" /> {t('export.confirmExport', { format: format.toUpperCase() })}
           </button>
         </div>
       </div>

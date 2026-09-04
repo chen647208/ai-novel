@@ -8,44 +8,87 @@
  */
 
 import React from 'react';
+import { Languages, Monitor, Moon, Sun } from 'lucide-react';
 import { useTranslation, SUPPORTED_LANGUAGES } from '@/i18n';
-import type { AppLanguage } from '@shared/types';
+import type { AppLanguage, AppTheme } from '@shared/types';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/Card';
+import { Label } from '@/shared/ui/Label';
+import { Select } from '@/shared/ui/Select';
+import { cn } from '@/shared/utils/cn';
 import type { GeneralSettingsPanelProps } from '../types';
 
-const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({ language, onLanguageChange }) => {
+const THEME_OPTIONS: {
+  value: AppTheme;
+  icon: typeof Sun;
+  labelKey: 'general.theme.light' | 'general.theme.dark' | 'general.theme.system';
+}[] = [
+  { value: 'light', icon: Sun, labelKey: 'general.theme.light' },
+  { value: 'dark', icon: Moon, labelKey: 'general.theme.dark' },
+  { value: 'system', icon: Monitor, labelKey: 'general.theme.system' },
+];
+
+const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({
+  language,
+  onLanguageChange,
+  theme,
+  onThemeChange,
+}) => {
   const { t } = useTranslation('settings');
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-        <div className="flex items-center gap-2 mb-1">
-          <i className="fas fa-language text-blue-500"></i>
-          <h3 className="text-lg font-black text-gray-900">{t('general.title')}</h3>
-        </div>
-        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-6">{t('general.subtitle')}</p>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Languages className="size-4 text-muted-foreground" />
+            {t('general.title')}
+          </CardTitle>
+          <CardDescription>{t('general.subtitle')}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="max-w-xs space-y-2">
+            <Label htmlFor="app-language">{t('general.languageLabel')}</Label>
+            <Select
+              id="app-language"
+              value={language}
+              onChange={(e) => onLanguageChange(e.target.value as AppLanguage)}
+            >
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <option key={lang} value={lang}>
+                  {t(`general.language.${lang}`)}
+                </option>
+              ))}
+            </Select>
+            <p className="text-xs text-muted-foreground">{t('general.languageHint')}</p>
+          </div>
 
-        <div className="space-y-3 max-w-sm">
-          <label
-            htmlFor="app-language"
-            className="block text-[10px] font-black text-gray-400 uppercase tracking-widest"
-          >
-            {t('general.languageLabel')}
-          </label>
-          <select
-            id="app-language"
-            value={language}
-            onChange={(e) => onLanguageChange(e.target.value as AppLanguage)}
-            className="w-full border-none rounded-2xl px-5 py-3.5 text-sm bg-gray-50 font-medium text-gray-700 outline-none focus:ring-2 focus:ring-blue-100 cursor-pointer"
-          >
-            {SUPPORTED_LANGUAGES.map((lang) => (
-              <option key={lang} value={lang}>
-                {t(`general.language.${lang}`)}
-              </option>
-            ))}
-          </select>
-          <p className="text-xs text-gray-500">{t('general.languageHint')}</p>
-        </div>
-      </div>
+          <div className="max-w-xs space-y-2">
+            <Label>{t('general.themeLabel')}</Label>
+            <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label={t('general.themeLabel')}>
+              {THEME_OPTIONS.map(({ value, icon: Icon, labelKey }) => (
+                <button
+                  key={value}
+                  type="button"
+                  role="radio"
+                  aria-checked={theme === value}
+                  onClick={() => onThemeChange(value)}
+                  className={cn(
+                    'flex flex-col items-center gap-1.5 rounded-lg border px-3 py-2.5 text-xs font-medium transition-colors',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60',
+                    theme === value
+                      ? 'border-primary bg-accent text-foreground'
+                      : 'border-input text-muted-foreground hover:bg-accent/60 hover:text-foreground'
+                  )}
+                >
+                  <Icon className="size-4" />
+                  {t(labelKey)}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">{t('general.themeHint')}</p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

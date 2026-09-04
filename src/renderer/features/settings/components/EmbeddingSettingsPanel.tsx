@@ -12,6 +12,8 @@ import { useTranslation, dt } from '@/i18n';
 import { embeddingProviders, quickAddTemplates, getDefaultEmbeddingParams } from '../../../constants/embeddingProviders';
 import type { EmbeddingModelProvider } from '../../../../shared/types';
 import type { EmbeddingSettingsPanelProps } from '../types';
+import { AlertCircle, CheckCircle2, ChevronDown, Cloud, FlaskConical, Home, Key, List, Loader2, PlusCircle, SlidersHorizontal, Trash2 } from 'lucide-react';
+
 
 const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
   embeddingConfigs,
@@ -65,7 +67,7 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
                 />
               </div>
               <button onClick={() => removeEmbeddingConfig(config.id)} className="text-gray-200 hover:text-red-500 transition-colors p-2">
-                <i className="fas fa-trash-alt text-lg"></i>
+                <Trash2 className="size-5" />
               </button>
             </div>
 
@@ -119,7 +121,7 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
                       ))}
                     </select>
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                      <i className="fas fa-chevron-down text-gray-400"></i>
+                      <ChevronDown className="size-4 text-gray-400" />
                     </div>
                   </div>
                   <input
@@ -154,7 +156,7 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
                   {provider?.apiApplyUrl && (
                     <p className="text-xs text-gray-400 mt-1">
                       <a href={provider.apiApplyUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-500 hover:underline">
-                        <i className="fas fa-key mr-1"></i>{t('guide.getApiKey')}
+                        <Key className="size-4 mr-1" />{t('guide.getApiKey')}
                       </a>
                     </p>
                   )}
@@ -165,7 +167,7 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
             {/* Sentence-BERT参数设置 */}
             <div className="border-t border-gray-100 pt-6 mb-6">
               <div className="flex items-center gap-2 mb-4">
-                <i className="fas fa-sliders-h text-indigo-500"></i>
+                <SlidersHorizontal className="size-4 text-indigo-500" />
                 <h3 className="text-lg font-black text-gray-900">{t('embedding.paramsTitle')}</h3>
                 <span className="text-xs text-gray-400 font-bold uppercase tracking-widest ml-auto">Embedding Parameters</span>
               </div>
@@ -285,7 +287,7 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
                   : 'bg-red-50 border-red-100'
               }`}>
                 <div className="flex items-center gap-2 mb-1">
-                  <i className={`fas ${config.testStatus === 'success' ? 'fa-check-circle text-emerald-500' : 'fa-exclamation-circle text-red-500'}`}></i>
+                  {config.testStatus === 'success' ? <CheckCircle2 className="size-4 text-emerald-500" /> : <AlertCircle className="size-4 text-red-500" />}
                   <span className={`font-bold text-sm ${config.testStatus === 'success' ? 'text-emerald-700' : 'text-red-700'}`}>
                     {config.testStatus === 'success' ? t('embedding.statusOk') : t('embedding.statusFail')}
                   </span>
@@ -308,11 +310,11 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
               <div className="text-xs text-gray-400">
                 {provider?.type === 'local' ? (
                   <span className="flex items-center gap-1 text-emerald-600">
-                    <i className="fas fa-home"></i> {t('embedding.localDeploy')}
+                    <Home className="size-4" /> {t('embedding.localDeploy')}
                   </span>
                 ) : (
                   <span className="flex items-center gap-1 text-blue-600">
-                    <i className="fas fa-cloud"></i> {t('embedding.cloudApi')}
+                    <Cloud className="size-4" /> {t('embedding.cloudApi')}
                   </span>
                 )}
               </div>
@@ -323,7 +325,7 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
                   disabled={embeddingModelListLoading[config.id]}
                   className="px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl text-xs font-black transition-all flex items-center gap-2 disabled:opacity-50"
                 >
-                  {embeddingModelListLoading[config.id] ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-list"></i>}
+                  {embeddingModelListLoading[config.id] ? <Loader2 className="size-4 animate-spin" /> : <List className="size-4" />}
                   {t('models.refreshList')}
                 </button>
 
@@ -332,7 +334,7 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
                   disabled={embeddingTestingId === config.id}
                   className="px-6 py-2.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl text-xs font-black transition-all flex items-center gap-2"
                 >
-                  {embeddingTestingId === config.id ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-vial"></i>}
+                  {embeddingTestingId === config.id ? <Loader2 className="size-4 animate-spin" /> : <FlaskConical className="size-4" />}
                   {embeddingTestingId === config.id ? t('embedding.testing') : t('embedding.testConn')}
                 </button>
               </div>
@@ -346,7 +348,7 @@ const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({
         onClick={addEmbeddingConfig}
         className="w-full border-4 border-dashed border-gray-100 rounded-[2rem] py-8 text-gray-300 font-black hover:bg-white hover:text-indigo-500 hover:border-indigo-100 transition-all flex flex-col items-center gap-2 group"
       >
-        <i className="fas fa-plus-circle text-2xl group-hover:scale-125 transition-transform"></i>
+        <PlusCircle className="size-6 group-hover:scale-125 transition-transform" />
         <span>{t('embedding.addConfig')}</span>
       </button>
     </div>

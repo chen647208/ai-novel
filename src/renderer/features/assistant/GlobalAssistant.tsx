@@ -7,7 +7,6 @@
  * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
  */
 
-
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type KnowledgeItem, type OutputMode, type Character, type Location, type Faction, type RuleSystem, type TimelineEvent, type AICardCommand, type CreatedCard, type Timeline, type WorldView, type MagicSystem, type TechnologyLevel, type WorldHistory, type CardPromptTemplate } from '../../../shared/types';
@@ -21,6 +20,7 @@ import AssistantContextPanel from './components/AssistantContextPanel';
 import AssistantEditPanel from './components/AssistantEditPanel';
 import AssistantChatWorkspace from './components/AssistantChatWorkspace';
 import { dialogService } from '@/shared/services/dialogService';
+import { BookOpenText, Bot, CircleStop, Lock, LockOpen, Maximize2, Minus, PenLine, Pin, Trash2, X } from 'lucide-react';
 
 const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId, project, prompts, onUpdate }) => {
   const { t } = useTranslation('assistant');
@@ -833,7 +833,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
         className="fixed bottom-8 right-8 z-[9999] w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform cursor-pointer group"
         title={t('window.fabTitle')}
       >
-        <i className="fas fa-robot text-xl group-hover:animate-bounce"></i>
+        <Bot className="size-6 group-hover:animate-bounce" />
       </button>
     );
   }
@@ -857,7 +857,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
         className={`flex items-center justify-between px-4 py-3 bg-gray-900 text-white cursor-move select-none shrink-0 ${isMinimized ? 'h-full' : ''}`}
       >
         <div className="flex items-center gap-2">
-          <i className="fas fa-robot text-blue-400"></i>
+          <Bot className="size-4 text-blue-400" />
           <span className="font-bold text-sm">{t('window.title')}</span>
         </div>
         <div className="flex items-center gap-2" onMouseDown={e => e.stopPropagation()}>
@@ -868,7 +868,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
             }`}
             title={alwaysOnTop ? t('window.unpinTitle') : t('window.pinTitle')}
           >
-            <i className={`fas ${alwaysOnTop ? 'fa-thumbtack' : 'fa-thumbtack fa-rotate-90'} text-xs`}></i>
+            {alwaysOnTop ? <Pin className="size-3.5" /> : <Pin className="size-3.5 rotate-90" />}
           </button>
           
           <button 
@@ -878,14 +878,14 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
             }`}
             title={isLocked ? t('window.unlockTitle') : t('window.lockTitle')}
           >
-            <i className={`fas ${isLocked ? 'fa-lock' : 'fa-lock-open'} text-xs`}></i>
+            {isLocked ? <Lock className="size-3.5" /> : <LockOpen className="size-3.5" />}
           </button>
           
           <button onClick={() => setIsMinimized(!isMinimized)} className="w-6 h-6 rounded hover:bg-white/20 flex items-center justify-center transition-colors">
-            <i className={`fas ${isMinimized ? 'fa-expand-alt' : 'fa-minus'} text-xs`}></i>
+            {isMinimized ? <Maximize2 className="size-3.5" /> : <Minus className="size-3.5" />}
           </button>
           <button onClick={() => setIsOpen(false)} className="w-6 h-6 rounded hover:bg-red-500/80 flex items-center justify-center transition-colors">
-            <i className="fas fa-times text-xs"></i>
+            <X className="size-3.5" />
           </button>
         </div>
       </div>
@@ -916,14 +916,14 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
                   className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${editPanelOpen ? 'bg-green-100 text-green-600' : 'text-gray-400 hover:bg-gray-200'}`}
                   title={t('window.editDataTitle')}
                 >
-                  <i className="fas fa-edit"></i>
+                  <PenLine className="size-4" />
                 </button>
                 <button 
                   onClick={() => setContextPanelOpen(!contextPanelOpen)} 
                   className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${contextPanelOpen ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:bg-gray-200'}`}
                   title={t('window.contextTitle')}
                 >
-                  <i className="fas fa-book-open-reader"></i>
+                  <BookOpenText className="size-4" />
                 </button>
                 {streamingMessageId && (
                   <button 
@@ -931,7 +931,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
                     className="w-7 h-7 rounded text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors"
                     title={t('window.stopStreamTitle')}
                   >
-                    <i className="fas fa-stop-circle"></i>
+                    <CircleStop className="size-4" />
                   </button>
                 )}
                 <button 
@@ -939,7 +939,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
                   className="w-7 h-7 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors"
                   title={t('window.clearChatTitle')}
                 >
-                  <i className="fas fa-trash-can"></i>
+                  <Trash2 className="size-4" />
                 </button>
              </div>
           </div>
@@ -1008,5 +1008,4 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
 };
 
 export default GlobalAssistant;
-
 

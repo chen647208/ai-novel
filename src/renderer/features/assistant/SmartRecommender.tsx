@@ -15,6 +15,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type Project, type ModelConfig } from '../../../shared/types';
+import { cn } from '@/shared/utils/cn';
+import { CalendarDays, Circle, Eye, Gavel, Info, Lightbulb, Loader2, MapPin, Plus, RefreshCw, Search, User, Users, type LucideIcon } from 'lucide-react';
 import { 
   type SmartRecommendationResult,
   type RecommendationItem,
@@ -77,16 +79,22 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
     fetchRecommendations();
   }, [fetchRecommendations]);
 
-  // 获取类型图标
-  const getTypeIcon = (type: string) => {
+  // 获取类型图标（lucide 组件 + 颜色类）
+  const getTypeIcon = (type: string): { icon: LucideIcon; cls: string } => {
     switch (type) {
-      case 'character': return 'fa-user text-blue-500';
-      case 'faction': return 'fa-users text-purple-500';
-      case 'location': return 'fa-map-marker-alt text-green-500';
-      case 'event': return 'fa-calendar-alt text-orange-500';
-      case 'rule': return 'fa-gavel text-red-500';
-      default: return 'fa-circle text-gray-400';
+      case 'character': return { icon: User, cls: 'text-blue-500' };
+      case 'faction': return { icon: Users, cls: 'text-purple-500' };
+      case 'location': return { icon: MapPin, cls: 'text-green-500' };
+      case 'event': return { icon: CalendarDays, cls: 'text-orange-500' };
+      case 'rule': return { icon: Gavel, cls: 'text-red-500' };
+      default: return { icon: Circle, cls: 'text-gray-400' };
     }
+  };
+
+  // 类型图标渲染辅助：getTypeIcon 返回组件+颜色类
+  const TypeIcon = ({ type, className }: { type: string; className?: string }) => {
+    const { icon: Icon, cls } = getTypeIcon(type);
+    return <Icon className={cn(cls, className)} />;
   };
 
   // 获取类型标签
@@ -124,10 +132,10 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
       <div className="bg-white/80 backdrop-blur rounded-2xl p-4 shadow-sm border border-gray-100">
         <div className="flex items-center justify-between mb-3">
           <h4 className="text-sm font-black text-gray-700 flex items-center gap-2">
-            <i className="fas fa-lightbulb text-amber-500"></i>
+            <Lightbulb className="size-4 text-amber-500" />
             {t('rec.title')}
           </h4>
-          {isLoading && <i className="fas fa-spinner fa-spin text-xs text-gray-400"></i>}
+          {isLoading && <Loader2 className="size-3.5 animate-spin text-gray-400" />}
         </div>
         
         {recommendations?.recommendations && recommendations.recommendations.length > 0 ? (
@@ -143,7 +151,7 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
                   selectedItemId === rec.id ? 'bg-amber-50 border-amber-200' : 'hover:bg-gray-50'
                 } border border-transparent`}
               >
-                <i className={`fas ${getTypeIcon(rec.type)} w-4`}></i>
+                <TypeIcon type={rec.type} className="size-4" />
                 <span className="text-sm text-gray-700 truncate flex-1">{getDisplayName(rec.item)}</span>
                 <span className={`text-[10px] font-bold ${getRelevanceColor(rec.relevanceScore)}`}>
                   {Math.round(rec.relevanceScore)}
@@ -167,7 +175,7 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
       <div className="flex justify-between items-start mb-6">
         <div>
           <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
-            <i className="fas fa-lightbulb text-amber-500"></i>
+            <Lightbulb className="size-4 text-amber-500" />
             {t('rec.title')}
           </h3>
           <p className="text-xs text-gray-500 mt-1">
@@ -192,7 +200,7 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
             disabled={isLoading}
             className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition-all disabled:opacity-50 flex items-center justify-center"
           >
-            <i className={`fas ${isLoading ? 'fa-spinner fa-spin' : 'fa-sync-alt'}`}></i>
+            {isLoading ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
           </button>
         </div>
       </div>
@@ -215,7 +223,7 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
             >
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
-                  <i className={`fas ${getTypeIcon(rec.type)} text-lg`}></i>
+                  <TypeIcon type={rec.type} className="size-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -239,7 +247,7 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
                   </p>
                   {rec.reason && (
                     <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
-                      <i className="fas fa-info-circle"></i>
+                      <Info className="size-4" />
                       {rec.reason}
                     </p>
                   )}
@@ -255,7 +263,7 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
                   }}
                   className="flex-1 py-2 bg-gray-50 text-gray-600 rounded-xl text-xs font-bold hover:bg-gray-100 transition-all flex items-center justify-center gap-1"
                 >
-                  <i className="fas fa-eye"></i>
+                  <Eye className="size-4" />
                   {t('rec.viewDetails')}
                 </button>
                 <button
@@ -265,7 +273,7 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
                   }}
                   className="flex-1 py-2 bg-amber-50 text-amber-600 rounded-xl text-xs font-bold hover:bg-amber-100 transition-all flex items-center justify-center gap-1"
                 >
-                  <i className="fas fa-plus"></i>
+                  <Plus className="size-4" />
                   {getActionLabel(rec.suggestedAction)}
                 </button>
               </div>
@@ -273,7 +281,7 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
           ))
         ) : (
           <div className="text-center py-12 text-gray-400">
-            <i className="fas fa-search text-4xl mb-3 text-gray-300"></i>
+            <Search className="size-10 mb-3 text-gray-300" />
             <p className="text-sm">
               {isLoading ? t('rec.analyzingFull') : t('rec.emptyHint')}
             </p>

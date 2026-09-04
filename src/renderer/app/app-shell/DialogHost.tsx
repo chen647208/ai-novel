@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '@/i18n';
 import { dialogService, type ConfirmOptions, type AlertOptions, type PromptOptions } from '../../shared/services/dialogService';
 import { Button } from '../../shared/ui/Button';
+import { AlertTriangle, CircleAlert, CircleCheck, Info, SquarePen, type LucideIcon } from 'lucide-react';
 
 type Front =
   | { kind: 'confirm'; options: ConfirmOptions }
@@ -18,11 +19,11 @@ type Front =
   | { kind: 'prompt'; options: PromptOptions }
   | null;
 
-const TONE_ICON: Record<NonNullable<AlertOptions['tone']>, string> = {
-  info: 'fa-circle-info text-blue-500',
-  success: 'fa-circle-check text-green-500',
-  error: 'fa-circle-exclamation text-red-500',
-  warning: 'fa-triangle-exclamation text-amber-500',
+const TONE_ICON: Record<NonNullable<AlertOptions['tone']>, { icon: LucideIcon; cls: string }> = {
+  info: { icon: Info, cls: 'text-blue-500' },
+  success: { icon: CircleCheck, cls: 'text-green-500' },
+  error: { icon: CircleAlert, cls: 'text-red-500' },
+  warning: { icon: AlertTriangle, cls: 'text-amber-500' },
 };
 
 /**
@@ -79,14 +80,15 @@ const DialogHost: React.FC = () => {
         className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-7 border border-gray-100 flex flex-col text-left animate-in zoom-in-95 duration-150"
       >
         <div className="flex items-start gap-3">
-          {front.kind === 'alert' && (
-            <i className={`fas ${TONE_ICON[front.options.tone ?? 'info']} text-2xl mt-0.5`}></i>
-          )}
+          {front.kind === 'alert' && (() => {
+            const { icon: ToneIcon, cls } = TONE_ICON[front.options.tone ?? 'info'];
+            return <ToneIcon className={`mt-0.5 size-6 ${cls}`} />;
+          })()}
           {front.kind === 'confirm' && front.options.danger && (
-            <i className="fas fa-triangle-exclamation text-2xl mt-0.5 text-red-500"></i>
+            <AlertTriangle className="size-6 mt-0.5 text-red-500" />
           )}
           {front.kind === 'prompt' && (
-            <i className="fas fa-pen-to-square text-2xl mt-0.5 text-blue-500"></i>
+            <SquarePen className="size-6 mt-0.5 text-blue-500" />
           )}
           <div className="flex-1">
             {front.options.title && (
@@ -121,7 +123,7 @@ const DialogHost: React.FC = () => {
           )}
           <Button
             ref={primaryRef}
-            variant={front.kind === 'confirm' && front.options.danger ? 'danger' : 'primary'}
+            variant={front.kind === 'confirm' && front.options.danger ? 'destructive' : 'default'}
             className="flex-1"
             onClick={() => settle(true)}
           >

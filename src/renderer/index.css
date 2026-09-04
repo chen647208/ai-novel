@@ -1,36 +1,173 @@
 @import "tailwindcss";
 
 /*
- * 语义组件类：把全仓高频重复的工具类串（按钮/卡片/输入/标签/徽章）收敛为具名、
- * 可复用的类，作为单一视觉来源。新代码优先使用这些类；旧代码渐进替换。
+ * 设计令牌体系（shadcn-on-Tailwind-v4 模式）。
  *
- * 说明：本项目 @tailwindcss/vite 管道下，@theme/:root 自定义属性令牌若仅被
- * @layer components 内的 var() 引用，会被 Lightning CSS 当作未使用而裁剪掉定义，
- * 导致颜色悬空。故组件类直接引用内置工具类（始终生成），令牌语义由这些具名类承载。
+ * 结构：:root/.dark 定义原始 CSS 变量 → @theme inline 映射为 --color-*/--radius-*/--font-*，
+ * 由 Tailwind 生成 bg-background、text-muted-foreground、rounded-lg 等工具类。
+ * 工具类直接出现在 JSX 中，Lightning CSS 按用量生成，不存在仅经 var() 引用被摇树裁掉的问题。
+ *
+ * 风格：现代极简（暖中性 stone 基底 + 墨黑主操作 + 靛蓝单一强调色），
+ * 文学点缀由衬线字体栈（标题/正文编辑器）承载。深色主题为浅色令牌的同色相暖炭镜像。
  */
-@layer components {
-  .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl font-bold transition-all select-none
-      disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 active:scale-95;
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  color-scheme: light;
+
+  --background: #fafaf9;
+  --foreground: #1c1917;
+  --card: #ffffff;
+  --card-foreground: #1c1917;
+  --popover: #ffffff;
+  --popover-foreground: #1c1917;
+  --primary: #1c1917;
+  --primary-foreground: #fafaf9;
+  --secondary: #f5f5f4;
+  --secondary-foreground: #292524;
+  --muted: #f5f5f4;
+  --muted-foreground: #78716c;
+  --accent: #f0efed;
+  --accent-foreground: #1c1917;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --success: #059669;
+  --warning: #d97706;
+  --border: #e7e5e4;
+  --input: #e7e5e4;
+  --ring: #4f46e5;
+  --link: #4338ca;
+
+  --radius: 0.5rem;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --background: #171513;
+  --foreground: #e8e6e3;
+  --card: #211f1c;
+  --card-foreground: #e8e6e3;
+  --popover: #211f1c;
+  --popover-foreground: #e8e6e3;
+  --primary: #e8e6e3;
+  --primary-foreground: #1c1917;
+  --secondary: #2c2925;
+  --secondary-foreground: #e8e6e3;
+  --muted: #2c2925;
+  --muted-foreground: #a39e97;
+  --accent: #33302b;
+  --accent-foreground: #e8e6e3;
+  --destructive: #ef4444;
+  --destructive-foreground: #171513;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --border: #38342f;
+  --input: #38342f;
+  --ring: #818cf8;
+  --link: #a5b4fc;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-link: var(--link);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", Georgia,
+    "Times New Roman", serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --animate-fade-in: fade-in 0.15s ease-out;
+  --animate-fade-out: fade-out 0.12s ease-in;
+  --animate-zoom-in: zoom-in 0.15s ease-out;
+  --animate-zoom-out: zoom-out 0.12s ease-in;
+  --animate-slide-down: slide-down 0.18s ease-out;
+  --animate-slide-up: slide-up 0.18s ease-out;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
-  .btn-sm { @apply px-3 py-1.5 text-xs; }
-  .btn-md { @apply px-4 py-2 text-sm; }
-  .btn-lg { @apply px-5 py-3 text-sm; }
-  .btn-block { @apply w-full; }
+  @keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  @keyframes zoom-in {
+    from { opacity: 0; transform: scale(0.96) translateY(4px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes zoom-out {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.97); }
+  }
+  @keyframes slide-down {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
 
-  .btn-primary { @apply bg-blue-600 hover:bg-blue-700 text-white shadow-lg; }
-  .btn-secondary { @apply bg-gray-100 hover:bg-gray-200 text-gray-700; }
-  .btn-danger { @apply bg-red-600 hover:bg-red-700 text-white shadow-lg; }
-  .btn-ghost { @apply bg-transparent hover:bg-gray-100 text-gray-600; }
-
-  .card { @apply bg-white rounded-2xl border border-gray-100 shadow-sm; }
-
-  .input {
-    @apply w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 outline-none
-      transition-colors placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body,
+  #root {
+    @apply h-full;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  ::selection {
+    background-color: color-mix(in oklab, var(--ring) 22%, transparent);
   }
 
-  .label { @apply block text-xs font-bold text-gray-500 mb-1.5; }
-
-  .badge { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider; }
+  /* 桌面应用细滚动条，跟随主题 */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--muted-foreground) 30%, transparent);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--muted-foreground) 55%, transparent);
+    background-clip: content-box;
+  }
 }

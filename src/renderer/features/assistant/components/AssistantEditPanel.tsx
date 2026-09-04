@@ -10,14 +10,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AssistantEditPanelProps, AssistantEditCategory } from '../types';
+import { AlertCircle, BookOpenText, CheckCircle2, FileText, Info, Lightbulb, ListOrdered, ListTree, LoaderCircle, Save, Users, WandSparkles, type LucideIcon } from 'lucide-react';
 
-const EDIT_CATEGORIES: Array<{ id: AssistantEditCategory; icon: string }> = [
-  { id: 'inspiration', icon: 'fa-lightbulb' },
-  { id: 'knowledge', icon: 'fa-book-atlas' },
-  { id: 'characters', icon: 'fa-users' },
-  { id: 'outline', icon: 'fa-sitemap' },
-  { id: 'chapters', icon: 'fa-list-ol' },
-  { id: 'content', icon: 'fa-file-lines' },
+const EDIT_CATEGORIES: Array<{ id: AssistantEditCategory; icon: LucideIcon }> = [
+  { id: 'inspiration', icon: Lightbulb },
+  { id: 'knowledge', icon: BookOpenText },
+  { id: 'characters', icon: Users },
+  { id: 'outline', icon: ListTree },
+  { id: 'chapters', icon: ListOrdered },
+  { id: 'content', icon: FileText },
 ];
 
 /** 类别 id 与字典键一一对应，渲染时按当前语言取标签。 */
@@ -62,7 +63,7 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
                 editCategory === cat.id ? 'border-blue-500 text-blue-600 bg-blue-50/50' : 'border-transparent text-gray-400 hover:text-gray-600'
               }`}
             >
-              <i className={`fas ${cat.icon}`}></i>
+              <cat.icon className="size-4" />
               <span>{t(CATEGORY_LABEL_KEYS[cat.id])}</span>
             </button>
           ))}
@@ -174,12 +175,12 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
                   >
                     {isGeneratingCharacter ? (
                       <>
-                        <i className="fas fa-circle-notch fa-spin"></i>
+                        <LoaderCircle className="size-4 animate-spin" />
                         {t('edit.generating')}
                       </>
                     ) : (
                       <>
-                        <i className="fas fa-wand-magic-sparkles"></i>
+                        <WandSparkles className="size-4" />
                         {t('edit.generateCharacter')}
                       </>
                     )}
@@ -426,7 +427,7 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
                   />
                   </div>
                   <div className="text-xs text-gray-500 flex items-center gap-2">
-                    <i className="fas fa-info-circle"></i>
+                    <Info className="size-4" />
                     <span>{t('edit.unsavedHint')}</span>
                     {syncStatus === 'idle' && editingData.chapters && editingData.chapters.length > 0 && (
                       <span className="text-amber-600 font-medium">{t('edit.unsavedBadge')}</span>
@@ -443,19 +444,19 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
           <div className="flex items-center gap-2">
             {syncStatus === 'saving' && (
               <div className="flex items-center gap-1 text-blue-600 text-xs">
-                <i className="fas fa-circle-notch fa-spin"></i>
+                <LoaderCircle className="size-4 animate-spin" />
                 {t('edit.saving')}
               </div>
             )}
             {syncStatus === 'saved' && (
               <div className="flex items-center gap-1 text-green-600 text-xs">
-                <i className="fas fa-check-circle"></i>
+                <CheckCircle2 className="size-4" />
                 {t('edit.saved')}
               </div>
             )}
             {syncStatus === 'error' && (
               <div className="flex items-center gap-1 text-red-600 text-xs">
-                <i className="fas fa-exclamation-circle"></i>
+                <AlertCircle className="size-4" />
                 {t('edit.saveFailed')}
               </div>
             )}
@@ -482,12 +483,12 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
             >
               {syncStatus === 'saving' ? (
                 <>
-                  <i className="fas fa-circle-notch fa-spin"></i>
+                  <LoaderCircle className="size-4 animate-spin" />
                   {t('edit.saving')}
                 </>
               ) : (
                 <>
-                  <i className="fas fa-save"></i>
+                  <Save className="size-4" />
                   {t('edit.saveChanges')}
                 </>
               )}

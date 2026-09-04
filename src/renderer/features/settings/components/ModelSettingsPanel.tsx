@@ -13,6 +13,8 @@ import type { ModelSettingsPanelProps } from '../types';
 import { modelProviders, findProviderPreset } from '../../../constants/modelProviders';
 import { channelValueFor, channelPatch, channelGroups } from '../utils/channelPreset';
 import { isModelConfigured } from '../../../shared/utils/modelReadiness';
+import { AlertCircle, AlertTriangle, CheckCircle2, ChevronDown, Clock, FlaskConical, List, Loader2, PlusCircle, RefreshCw, SlidersHorizontal, Trash2 } from 'lucide-react';
+
 
 const CHANNEL_GROUPS = channelGroups(modelProviders);
 
@@ -50,7 +52,7 @@ const ModelSettingsPanel: React.FC<ModelSettingsPanelProps> = ({
               />
             </div>
             <button onClick={() => removeModel(model.id)} className="text-gray-200 hover:text-red-500 transition-colors p-2">
-              <i className="fas fa-trash-alt text-lg"></i>
+              <Trash2 className="size-5" />
             </button>
           </div>
 
@@ -99,7 +101,7 @@ const ModelSettingsPanel: React.FC<ModelSettingsPanelProps> = ({
                     )}
                   </select>
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                    <i className="fas fa-chevron-down text-gray-400"></i>
+                    <ChevronDown className="size-4 text-gray-400" />
                   </div>
                 </div>
 
@@ -108,19 +110,19 @@ const ModelSettingsPanel: React.FC<ModelSettingsPanelProps> = ({
                   <div className="flex items-center gap-2">
                     {modelListLoading[model.id] && (
                       <div className="flex items-center gap-1 text-xs text-blue-600">
-                        <i className="fas fa-spinner fa-spin"></i>
+                        <Loader2 className="size-4 animate-spin" />
                         <span>{t('models.fetchingList')}</span>
                       </div>
                     )}
                     {model.modelsFetchError && !modelListLoading[model.id] && (
                       <div className="flex items-center gap-1 text-xs text-red-600">
-                        <i className="fas fa-exclamation-circle"></i>
+                        <AlertCircle className="size-4" />
                         <span>{model.modelsFetchError}</span>
                       </div>
                     )}
                     {model.availableModels && model.availableModels.length > 0 && !modelListLoading[model.id] && (
                       <div className="flex items-center gap-1 text-xs text-green-600">
-                        <i className="fas fa-check-circle"></i>
+                        <CheckCircle2 className="size-4" />
                         <span>{t('models.loadedCount', { count: model.availableModels.length })}</span>
                       </div>
                     )}
@@ -132,7 +134,7 @@ const ModelSettingsPanel: React.FC<ModelSettingsPanelProps> = ({
                     disabled={modelListLoading[model.id] || !isModelConfigured(model)}
                     className="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-bold transition-all flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <i className={`fas ${modelListLoading[model.id] ? 'fa-spinner fa-spin' : 'fa-sync-alt'}`}></i>
+                    {modelListLoading[model.id] ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
                     {t('models.refreshList')}
                   </button>
                 </div>
@@ -186,7 +188,7 @@ const ModelSettingsPanel: React.FC<ModelSettingsPanelProps> = ({
           {/* 高级参数设置 */}
           <div className="mt-8 pt-8 border-t border-gray-100">
             <div className="flex items-center gap-2 mb-6">
-              <i className="fas fa-sliders-h text-blue-500"></i>
+              <SlidersHorizontal className="size-4 text-blue-500" />
               <h3 className="text-lg font-black text-gray-900">{t('models.advancedTitle')}</h3>
               <span className="text-xs text-gray-400 font-bold uppercase tracking-widest ml-auto">AI Model Parameters</span>
             </div>
@@ -290,7 +292,7 @@ const ModelSettingsPanel: React.FC<ModelSettingsPanelProps> = ({
               : 'bg-emerald-50 text-emerald-700 border-emerald-100'
             }`}>
               <div className="flex items-center gap-2 mb-2">
-                <i className={`fas ${testResults[model.id]?.startsWith('[ERROR]') ? 'fa-exclamation-triangle' : 'fa-check-circle'}`}></i>
+                {testResults[model.id]?.startsWith('[ERROR]') ? <AlertTriangle className="size-4" /> : <CheckCircle2 className="size-4" />}
                 <span className="font-black uppercase tracking-widest">Connection Log</span>
               </div>
               {testResults[model.id]}
@@ -301,7 +303,7 @@ const ModelSettingsPanel: React.FC<ModelSettingsPanelProps> = ({
             <div className="text-xs text-gray-400">
               {model.modelsLastFetched && (
                 <div className="flex items-center gap-1">
-                  <i className="fas fa-clock"></i>
+                  <Clock className="size-4" />
                   <span>{t('models.lastUpdated', { time: new Date(model.modelsLastFetched).toLocaleTimeString(i18n.language) })}</span>
                 </div>
               )}
@@ -313,7 +315,7 @@ const ModelSettingsPanel: React.FC<ModelSettingsPanelProps> = ({
                 disabled={modelListLoading[model.id] || !isModelConfigured(model)}
                 className="px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl text-xs font-black transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {modelListLoading[model.id] ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-list"></i>}
+                {modelListLoading[model.id] ? <Loader2 className="size-4 animate-spin" /> : <List className="size-4" />}
                 {t('models.fetchList')}
               </button>
 
@@ -322,7 +324,7 @@ const ModelSettingsPanel: React.FC<ModelSettingsPanelProps> = ({
                 disabled={testingId === model.id}
                 className="px-6 py-2.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-black transition-all flex items-center gap-2"
               >
-                {testingId === model.id ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-vial"></i>}
+                {testingId === model.id ? <Loader2 className="size-4 animate-spin" /> : <FlaskConical className="size-4" />}
                 {testingId === model.id ? t('models.testing') : t('models.testNow')}
               </button>
             </div>
@@ -330,7 +332,7 @@ const ModelSettingsPanel: React.FC<ModelSettingsPanelProps> = ({
         </div>
       ))}
       <button onClick={addModel} className="w-full border-4 border-dashed border-gray-100 rounded-[2rem] py-8 text-gray-300 font-black hover:bg-white hover:text-blue-500 hover:border-blue-100 transition-all flex flex-col items-center gap-2 group">
-        <i className="fas fa-plus-circle text-2xl group-hover:scale-125 transition-transform"></i>
+        <PlusCircle className="size-6 group-hover:scale-125 transition-transform" />
         <span>{t('models.addProvider')}</span>
       </button>
     </div>

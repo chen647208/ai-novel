@@ -12,6 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { templateDisplayName } from '@/i18n';
 import type { CardPromptTemplate, KnowledgeItem } from '../../../../shared/types';
 import type { AssistantWindowSize, ChatMessage } from '../types';
+import { AlertCircle, BookOpen, Calculator, Clock, Cpu, FileText, Flag, Keyboard, Landmark, LoaderCircle, MapPin, MessagesSquare, Paperclip, Reply, Send, Settings2, Square, User, X, Zap } from 'lucide-react';
+
 
 interface AssistantChatWorkspaceProps {
   chatContainerRef: React.RefObject<HTMLDivElement | null>;
@@ -38,14 +40,14 @@ interface AssistantChatWorkspaceProps {
 // cmd 前缀是数据（aiCardCommandService 对中英别名都接受），故按语言在渲染期取用；
 // filterTemplatesByInput 同时匹配两语言前缀。
 const quickCommands = [
-  { zh: '/角色', en: '/character', icon: 'fa-user', color: 'bg-blue-100 text-blue-700 hover:bg-blue-200', category: 'card-character' },
-  { zh: '/地点', en: '/location', icon: 'fa-map-marker-alt', color: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200', category: 'card-location' },
-  { zh: '/势力', en: '/faction', icon: 'fa-flag', color: 'bg-amber-100 text-amber-700 hover:bg-amber-200', category: 'card-faction' },
-  { zh: '/时间线', en: '/timeline', icon: 'fa-clock', color: 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200', category: 'card-timeline' },
-  { zh: '/规则', en: '/rule', icon: 'fa-cogs', color: 'bg-rose-100 text-rose-700 hover:bg-rose-200', category: 'card-rule' },
-  { zh: '/魔法体系', en: '/magic', icon: 'fa-bolt', color: 'bg-purple-100 text-purple-700 hover:bg-purple-200', category: 'card-magic' },
-  { zh: '/科技水平', en: '/technology', icon: 'fa-microchip', color: 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200', category: 'card-tech' },
-  { zh: '/历史背景', en: '/history', icon: 'fa-landmark', color: 'bg-stone-100 text-stone-700 hover:bg-stone-200', category: 'card-history' },
+  { zh: '/角色', en: '/character', icon: User, color: 'bg-blue-100 text-blue-700 hover:bg-blue-200', category: 'card-character' },
+  { zh: '/地点', en: '/location', icon: MapPin, color: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200', category: 'card-location' },
+  { zh: '/势力', en: '/faction', icon: Flag, color: 'bg-amber-100 text-amber-700 hover:bg-amber-200', category: 'card-faction' },
+  { zh: '/时间线', en: '/timeline', icon: Clock, color: 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200', category: 'card-timeline' },
+  { zh: '/规则', en: '/rule', icon: Settings2, color: 'bg-rose-100 text-rose-700 hover:bg-rose-200', category: 'card-rule' },
+  { zh: '/魔法体系', en: '/magic', icon: Zap, color: 'bg-purple-100 text-purple-700 hover:bg-purple-200', category: 'card-magic' },
+  { zh: '/科技水平', en: '/technology', icon: Cpu, color: 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200', category: 'card-tech' },
+  { zh: '/历史背景', en: '/history', icon: Landmark, color: 'bg-stone-100 text-stone-700 hover:bg-stone-200', category: 'card-history' },
 ] as const;
 
 const filterTemplatesByInput = (templates: CardPromptTemplate[], input: string) => {
@@ -93,7 +95,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
       >
         {messages.length === 0 && (
           <div className="text-center mt-20 text-gray-300">
-            <i className="fas fa-comments text-4xl mb-3 opacity-20"></i>
+            <MessagesSquare className="size-10 mb-3 opacity-20" />
             <p className="text-xs">{t('chat.empty')}</p>
           </div>
         )}
@@ -104,7 +106,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
                 <div className="mb-2 space-y-1">
                   {msg.attachments.map((file, index) => (
                     <div key={index} className="flex items-center gap-2 text-xs bg-black/10 px-2 py-1 rounded">
-                      <i className={`fas ${file.type === 'context' ? 'fa-book-open' : 'fa-paperclip'}`}></i>
+                      {file.type === 'context' ? <BookOpen className="size-4" /> : <Paperclip className="size-4" />}
                       <span className="truncate max-w-[150px]">{file.name}</span>
                     </div>
                   ))}
@@ -119,22 +121,22 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
                 <div className="mt-2 pt-2 border-t border-gray-100 text-xs text-gray-500 space-y-1">
                   {msg.model && (
                     <div className="flex items-center gap-1">
-                      <i className="fas fa-microchip"></i>
+                      <Cpu className="size-4" />
                       <span>{t('chat.modelPrefix')}{msg.model}</span>
                     </div>
                   )}
                   {msg.tokens && (
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1"><i className="fas fa-keyboard"></i><span>{t('chat.inputPrefix')}{msg.tokens.prompt}</span></div>
-                      <div className="flex items-center gap-1"><i className="fas fa-reply"></i><span>{t('chat.outputPrefix')}{msg.tokens.completion}</span></div>
-                      <div className="flex items-center gap-1"><i className="fas fa-calculator"></i><span>{t('chat.totalPrefix')}{msg.tokens.total}</span></div>
+                      <div className="flex items-center gap-1"><Keyboard className="size-4" /><span>{t('chat.inputPrefix')}{msg.tokens.prompt}</span></div>
+                      <div className="flex items-center gap-1"><Reply className="size-4" /><span>{t('chat.outputPrefix')}{msg.tokens.completion}</span></div>
+                      <div className="flex items-center gap-1"><Calculator className="size-4" /><span>{t('chat.totalPrefix')}{msg.tokens.total}</span></div>
                     </div>
                   )}
                   {msg.finishReason && (
-                      <div className="flex items-center gap-1"><i className="fas fa-flag-checkered"></i><span>{t('chat.finishReasonPrefix')}{msg.finishReason}</span></div>
+                      <div className="flex items-center gap-1"><Flag className="size-4" /><span>{t('chat.finishReasonPrefix')}{msg.finishReason}</span></div>
                   )}
                   {msg.error && (
-                      <div className="flex items-center gap-1 text-red-500"><i className="fas fa-exclamation-circle"></i><span>{t('chat.errorPrefix')}{msg.error}</span></div>
+                      <div className="flex items-center gap-1 text-red-500"><AlertCircle className="size-4" /><span>{t('chat.errorPrefix')}{msg.error}</span></div>
                   )}
                 </div>
               )}
@@ -144,7 +146,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
         {isLoading && !streamingMessageId && (
           <div className="flex justify-start">
             <div className="bg-white border border-gray-100 rounded-2xl rounded-bl-none p-3 shadow-sm">
-              <i className="fas fa-circle-notch fa-spin text-blue-500 text-xs"></i>
+              <LoaderCircle className="size-3.5 animate-spin text-blue-500" />
             </div>
           </div>
         )}
@@ -154,9 +156,9 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
         <div className="px-4 py-2 bg-blue-50 border-t border-blue-100 flex gap-2 overflow-x-auto custom-scrollbar shrink-0">
           {pendingFiles.map((file, index) => (
             <div key={index} className="flex items-center gap-1 bg-white border border-blue-200 px-2 py-1 rounded-lg text-[10px] text-blue-700 whitespace-nowrap">
-              <i className="fas fa-file-alt"></i>
+              <FileText className="size-4" />
               <span className="max-w-[80px] truncate">{file.name}</span>
-              <button onClick={() => setPendingFiles((prev) => prev.filter((_, i) => i !== index))} className="hover:text-red-500 ml-1"><i className="fas fa-times"></i></button>
+              <button onClick={() => setPendingFiles((prev) => prev.filter((_, i) => i !== index))} className="hover:text-red-500 ml-1"><X className="size-4" /></button>
             </div>
           ))}
         </div>
@@ -181,7 +183,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
                   className={`px-2 py-1 rounded-md text-[10px] font-medium transition-colors ${item.color}`}
                   title={t('chat.commandTitle', { cmd: cmd.trim() })}
                 >
-                  <i className={`fas ${item.icon} mr-1`}></i>
+                  <item.icon className="mr-1 inline size-3 align-text-bottom" />
                   {cmd.trim()}
                 </button>
               );
@@ -203,7 +205,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
               </select>
               {selectedCardTemplateId && (
                 <button onClick={() => setSelectedCardTemplateId(null)} className="text-[10px] text-gray-400 hover:text-red-500" title={t('chat.resetTemplateTitle')}>
-                  <i className="fas fa-times"></i>
+                  <X className="size-4" />
                 </button>
               )}
             </div>
@@ -211,7 +213,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
 
           <div className="flex gap-2 items-end">
             <label className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl cursor-pointer transition-colors">
-              <i className="fas fa-paperclip text-lg"></i>
+              <Paperclip className="size-5" />
               <input type="file" multiple className="hidden" onChange={handleFileUpload} accept=".txt,.md,.json,.js,.ts,.csv" />
             </label>
             <textarea
@@ -232,7 +234,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
                 title={t('chat.stopTitle')}
                 className="p-2.5 rounded-xl text-white transition-all shadow-lg bg-red-500 hover:bg-red-600 active:scale-95 shadow-red-200"
               >
-                <i className="fas fa-stop"></i>
+                <Square className="size-4" />
               </button>
             ) : (
               <button
@@ -240,7 +242,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
                 disabled={isLoading || (!input.trim() && pendingFiles.length === 0)}
                 className={`p-2.5 rounded-xl text-white transition-all shadow-lg ${isLoading || (!input.trim() && pendingFiles.length === 0) ? 'bg-gray-300 cursor-not-allowed shadow-none' : 'bg-blue-600 hover:bg-blue-700 active:scale-95 shadow-blue-200'}`}
               >
-                <i className="fas fa-paper-plane"></i>
+                <Send className="size-4" />
               </button>
             )}
           </div>

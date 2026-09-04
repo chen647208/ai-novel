@@ -15,6 +15,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation, i18n } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
+import { AlertTriangle, BookOpen, CheckCircle2, ChevronDown, ChevronUp, Circle, Clock, ExternalLink, Gavel, Info, Loader2, MapPin, RefreshCw, Stethoscope, User, Users, WandSparkles, XCircle, type LucideIcon } from 'lucide-react';
+import { cn } from '@/shared/utils/cn';
 import { 
   type Project, 
   type ModelConfig, 
@@ -191,14 +193,19 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
     return true;
   }) || [];
 
-  // 获取类型图标
-  const getTypeIcon = (type: string) => {
+  // 获取类型图标（lucide 组件 + 颜色类）
+  const getTypeIcon = (type: string): { icon: LucideIcon; cls: string } => {
     switch (type) {
-      case 'error': return 'fa-times-circle text-red-500';
-      case 'warning': return 'fa-exclamation-triangle text-amber-500';
-      case 'info': return 'fa-info-circle text-blue-500';
-      default: return 'fa-circle text-gray-400';
+      case 'error': return { icon: XCircle, cls: 'text-red-500' };
+      case 'warning': return { icon: AlertTriangle, cls: 'text-amber-500' };
+      case 'info': return { icon: Info, cls: 'text-blue-500' };
+      default: return { icon: Circle, cls: 'text-gray-400' };
     }
+  };
+
+  const TypeIcon = ({ type, className }: { type: string; className?: string }) => {
+    const { icon: Icon, cls } = getTypeIcon(type);
+    return <Icon className={cn(cls, className)} />;
   };
 
   // 获取类型标签
@@ -211,16 +218,16 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
     }
   };
 
-  // 获取分类图标
-  const getCategoryIcon = (category: string) => {
+  // 获取分类图标（lucide 组件）
+  const getCategoryIcon = (category: string): LucideIcon => {
     switch (category) {
-      case 'character': return 'fa-user';
-      case 'faction': return 'fa-users';
-      case 'location': return 'fa-map-marker-alt';
-      case 'chapter': return 'fa-book';
-      case 'timeline': return 'fa-clock';
-      case 'rule': return 'fa-gavel';
-      default: return 'fa-circle';
+      case 'character': return User;
+      case 'faction': return Users;
+      case 'location': return MapPin;
+      case 'chapter': return BookOpen;
+      case 'timeline': return Clock;
+      case 'rule': return Gavel;
+      default: return Circle;
     }
   };
 
@@ -243,7 +250,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
       <div className="flex justify-between items-start mb-6">
         <div>
           <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
-            <i className="fas fa-stethoscope text-purple-500"></i>
+            <Stethoscope className="size-4 text-purple-500" />
             {t('consistency:title')}
           </h3>
           <p className="text-xs text-gray-500 mt-1">
@@ -267,7 +274,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
             disabled={isChecking}
             className="px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-black hover:bg-purple-700 transition-all disabled:opacity-50 flex items-center gap-2"
           >
-            <i className={`fas ${isChecking ? 'fa-spinner fa-spin' : 'fa-sync-alt'}`}></i>
+            {isChecking ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
             {isChecking ? t('consistency:checking') : t('consistency:recheck')}
           </button>
         </div>
@@ -278,7 +285,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
         <div className="mb-4 flex gap-2">
           {checkMode === 'vector' && !embeddingConfig && (
             <div className="flex-1 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-3">
-              <i className="fas fa-exclamation-triangle text-amber-500"></i>
+              <AlertTriangle className="size-4 text-amber-500" />
               <span className="text-sm text-amber-700">
                 {t('consistency:noEmbedding')}
               </span>
@@ -286,7 +293,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
           )}
           {(checkMode === 'ai' || checkMode === 'hybrid') && !model && (
             <div className="flex-1 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-3">
-              <i className="fas fa-exclamation-triangle text-amber-500"></i>
+              <AlertTriangle className="size-4 text-amber-500" />
               <span className="text-sm text-amber-700">
                 {t('consistency:noModel')}
               </span>
@@ -295,7 +302,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
           {((checkMode === 'vector' && embeddingConfig) ||
             ((checkMode === 'ai' || checkMode === 'hybrid') && model)) && (
             <div className="flex-1 bg-green-50 border border-green-200 rounded-xl p-3 flex items-center gap-3">
-              <i className="fas fa-check-circle text-green-500"></i>
+              <CheckCircle2 className="size-4 text-green-500" />
               <span className="text-sm text-green-700">
                 {checkMode === 'vector' && embeddingConfig && t('consistency:configured', { name: embeddingConfig.name })}
                 {(checkMode === 'ai' || checkMode === 'hybrid') && model && t('consistency:configured', { name: model.name })}
@@ -381,7 +388,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
             onClick={handleAutoFix}
             className="ml-auto px-4 py-1.5 bg-green-600 text-white rounded-lg text-xs font-black hover:bg-green-700 transition-all flex items-center gap-2"
           >
-            <i className="fas fa-magic"></i>
+            <WandSparkles className="size-4" />
             {t('consistency:autoFix')}
           </button>
         )}
@@ -391,7 +398,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
       <div className="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar">
         {filteredIssues.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
-            <i className="fas fa-check-circle text-4xl mb-3 text-green-400"></i>
+            <CheckCircle2 className="size-10 mb-3 text-green-400" />
             <p className="text-sm">{t('consistency:noIssues')}</p>
           </div>
         ) : (
@@ -406,7 +413,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
               onClick={() => toggleExpand(issue.id)}
             >
               <div className="flex items-start gap-3">
-                <i className={`fas ${getTypeIcon(issue.type)} mt-0.5`}></i>
+                <TypeIcon type={issue.type} className="mt-0.5 size-4" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
@@ -417,7 +424,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
                       {getTypeLabel(issue.type)}
                     </span>
                     <span className="text-[10px] text-gray-400 flex items-center gap-1">
-                      <i className={`fas ${getCategoryIcon(issue.category)}`}></i>
+                      {(() => { const CatIcon = getCategoryIcon(issue.category); return <CatIcon className="size-3.5" />; })()}
                       {getCategoryLabel(issue.category)}
                     </span>
                     <span className="text-xs font-bold text-gray-700 truncate">
@@ -447,13 +454,13 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
                         }}
                         className="mt-2 text-xs text-purple-600 hover:text-purple-700 font-bold flex items-center gap-1"
                       >
-                        <i className="fas fa-external-link-alt"></i>
+                        <ExternalLink className="size-4" />
                         {t('consistency:goToEdit')}
                       </button>
                     </div>
                   )}
                 </div>
-                <i className={`fas fa-chevron-${expandedIssues.has(issue.id) ? 'up' : 'down'} text-gray-400 text-xs`}></i>
+                {expandedIssues.has(issue.id) ? <ChevronUp className="size-3.5 text-gray-400" /> : <ChevronDown className="size-3.5 text-gray-400" />}
               </div>
             </div>
           ))

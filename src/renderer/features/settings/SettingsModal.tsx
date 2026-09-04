@@ -60,7 +60,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
   onClearData,
   language,
-  onLanguageChange
+  onLanguageChange,
+  theme,
+  onThemeChange
 }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab>(DEFAULT_SETTINGS_TAB);
   const [localModels, setLocalModels] = useState<ModelConfig[]>(models);
@@ -496,6 +498,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             quickAddEmbeddingConfig={quickAddEmbeddingConfig}
             language={language}
             onLanguageChange={onLanguageChange}
+            theme={theme}
+            onThemeChange={onThemeChange}
           />
         </div>
 

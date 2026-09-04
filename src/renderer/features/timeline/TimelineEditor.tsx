@@ -11,6 +11,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation, i18n } from '@/i18n';
 import { type Timeline, type TimelineEvent, type HistoryDate, type Character, type Location, type Faction, type Chapter } from '../../../shared/types';
 import { dialogService } from '@/shared/services/dialogService';
+import { Clock, Flag, MapPin, Plus, Save, Settings, Trash, User } from 'lucide-react';
 
 interface TimelineEditorProps {
   projectId: string;
@@ -189,7 +190,7 @@ export const TimelineEditor: React.FC<TimelineEditorProps> = ({
       {/* 时间线配置 */}
       <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
         <h4 className="text-sm font-bold text-indigo-800 mb-3 flex items-center gap-2">
-          <i className="fas fa-cog"></i>
+          <Settings className="size-4" />
           {t('editor.configTitle')}
         </h4>
         <div className="grid grid-cols-2 gap-3">
@@ -239,7 +240,7 @@ export const TimelineEditor: React.FC<TimelineEditorProps> = ({
           onClick={addEvent}
           className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 transition-colors flex items-center gap-2"
         >
-          <i className="fas fa-plus"></i>
+          <Plus className="size-4" />
           {t('editor.addEvent')}
         </button>
       </div>
@@ -302,13 +303,13 @@ export const TimelineEditor: React.FC<TimelineEditorProps> = ({
                       {((event.relatedCharacterIds?.length ?? 0) > 0 || (event.relatedLocationIds?.length ?? 0) > 0 || (event.relatedFactionIds?.length ?? 0) > 0) && (
                         <div className="flex gap-2 mt-1 text-xs text-gray-400">
                           {(event.relatedCharacterIds?.length ?? 0) > 0 && (
-                            <span><i className="fas fa-user mr-1"></i>{event.relatedCharacterIds?.length ?? 0}</span>
+                            <span><User className="size-4 mr-1" />{event.relatedCharacterIds?.length ?? 0}</span>
                           )}
                           {(event.relatedLocationIds?.length ?? 0) > 0 && (
-                            <span><i className="fas fa-map-marker-alt mr-1"></i>{event.relatedLocationIds?.length ?? 0}</span>
+                            <span><MapPin className="size-4 mr-1" />{event.relatedLocationIds?.length ?? 0}</span>
                           )}
                           {(event.relatedFactionIds?.length ?? 0) > 0 && (
-                            <span><i className="fas fa-flag mr-1"></i>{event.relatedFactionIds?.length ?? 0}</span>
+                            <span><Flag className="size-4 mr-1" />{event.relatedFactionIds?.length ?? 0}</span>
                           )}
                         </div>
                       )}
@@ -331,7 +332,7 @@ export const TimelineEditor: React.FC<TimelineEditorProps> = ({
                   onClick={() => deleteEvent(selectedEvent.id)}
                   className="text-red-500 hover:text-red-600 text-sm flex items-center gap-1"
                 >
-                  <i className="fas fa-trash"></i>
+                  <Trash className="size-4" />
                   {t('editor.delete')}
                 </button>
               </div>
@@ -566,7 +567,7 @@ export const TimelineEditor: React.FC<TimelineEditorProps> = ({
           ) : (
             <div className="h-full flex items-center justify-center text-gray-400">
               <div className="text-center">
-                <i className="fas fa-clock text-4xl mb-2 opacity-30"></i>
+                <Clock className="size-10 mb-2 opacity-30" />
                 <p className="text-sm">{t('editor.selectToEdit')}</p>
               </div>
             </div>
@@ -581,7 +582,7 @@ export const TimelineEditor: React.FC<TimelineEditorProps> = ({
             onClick={handleSave}
             className="px-6 py-2 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-colors flex items-center gap-2"
           >
-            <i className="fas fa-save"></i>
+            <Save className="size-4" />
             {t('editor.save')}
           </button>
         </div>

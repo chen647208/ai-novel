@@ -15,6 +15,7 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from '@/i18n';
 import { type Project, type TimelineEvent, type Chapter, type HistoryDate } from '../../../shared/types';
+import { BookOpen, Calendar, CalendarX2, LayoutList, MapPin, User, Users } from 'lucide-react';
 
 interface EnhancedTimelineProps {
   project: Project;
@@ -169,7 +170,7 @@ const EnhancedTimeline: React.FC<EnhancedTimelineProps> = ({
       <div className="flex justify-between items-start mb-6">
         <div>
           <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
-            <i className="fas fa-stream text-purple-500"></i>
+            <LayoutList className="size-4 text-purple-500" />
             {t('enhanced.title')}
           </h3>
           <p className="text-xs text-gray-500 mt-1">
@@ -218,7 +219,7 @@ const EnhancedTimeline: React.FC<EnhancedTimelineProps> = ({
         <div className="space-y-6">
           {groupedItems.length === 0 ? (
             <div className="text-center py-12 text-gray-400">
-              <i className="fas fa-calendar-times text-4xl mb-3"></i>
+              <CalendarX2 className="size-10 mb-3" />
               <p className="text-sm">{t('enhanced.empty')}</p>
             </div>
           ) : (
@@ -263,7 +264,7 @@ const EnhancedTimeline: React.FC<EnhancedTimelineProps> = ({
                             ? getEventImportanceStyle(item.data as TimelineEvent)
                             : 'bg-amber-100 text-amber-600'
                         }`}>
-                          <i className={`fas ${item.type === 'event' ? 'fa-calendar' : 'fa-book'}`}></i>
+                          {item.type === 'event' ? <Calendar className="size-4" /> : <BookOpen className="size-4" />}
                         </div>
                         
                         <div className="flex-1 min-w-0">
@@ -301,19 +302,19 @@ const EnhancedTimeline: React.FC<EnhancedTimelineProps> = ({
                             <div className="flex flex-wrap gap-2 mt-2">
                               {(item.data as TimelineEvent).relatedCharacterIds?.length && (
                                 <span className="text-[10px] text-gray-400 flex items-center gap-1">
-                                  <i className="fas fa-user"></i>
+                                  <User className="size-4" />
                                   {t('enhanced.relatedCharacters', { count: (item.data as TimelineEvent).relatedCharacterIds?.length })}
                                 </span>
                               )}
                               {(item.data as TimelineEvent).relatedLocationIds?.length && (
                                 <span className="text-[10px] text-gray-400 flex items-center gap-1">
-                                  <i className="fas fa-map-marker-alt"></i>
+                                  <MapPin className="size-4" />
                                   {t('enhanced.hasLocation')}
                                 </span>
                               )}
                               {(item.data as TimelineEvent).relatedChapterId && (
                                 <span className="text-[10px] text-amber-600 flex items-center gap-1">
-                                  <i className="fas fa-book"></i>
+                                  <BookOpen className="size-4" />
                                   {t('enhanced.linkedChapter')}
                                 </span>
                               )}
@@ -324,19 +325,19 @@ const EnhancedTimeline: React.FC<EnhancedTimelineProps> = ({
                             <div className="flex flex-wrap gap-2 mt-2">
                               {(item.data as Chapter).mainLocationId && (
                                 <span className="text-[10px] text-gray-400 flex items-center gap-1">
-                                  <i className="fas fa-map-marker-alt"></i>
+                                  <MapPin className="size-4" />
                                   {t('enhanced.hasMainScene')}
                                 </span>
                               )}
                               {(item.data as Chapter).involvedFactionIds?.length && (
                                 <span className="text-[10px] text-gray-400 flex items-center gap-1">
-                                  <i className="fas fa-users"></i>
+                                  <Users className="size-4" />
                                   {t('enhanced.relatedFactions', { count: (item.data as Chapter).involvedFactionIds?.length })}
                                 </span>
                               )}
                               {(item.data as Chapter).timelineEventId && (
                                 <span className="text-[10px] text-purple-600 flex items-center gap-1">
-                                  <i className="fas fa-calendar"></i>
+                                  <Calendar className="size-4" />
                                   {t('enhanced.linkedEvent')}
                                 </span>
                               )}
@@ -387,6 +388,4 @@ const EnhancedTimeline: React.FC<EnhancedTimelineProps> = ({
 };
 
 export default EnhancedTimeline;
-
-
 

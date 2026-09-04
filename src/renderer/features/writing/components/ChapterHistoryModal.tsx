@@ -13,6 +13,7 @@ import type { Chapter } from '../../../../shared/types';
 import { formatHistoryTimestamp, getGenerationType, getProviderIcon } from '../utils';
 import { listSnapshots, removeSnapshot } from '../services/chapterSnapshotService';
 import { dialogService } from '@/shared/services/dialogService';
+import { Bot, Camera, Copy, History, Redo2, RotateCcw, Trash, X } from 'lucide-react';
 
 interface ChapterHistoryModalProps {
   isOpen: boolean;
@@ -65,7 +66,7 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
             <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">{t('chapterHistory.chapterHeader', { num: chapter.order + 1, title: chapter.title })}</p>
           </div>
           <button onClick={onClose} className="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 flex items-center justify-center transition-all">
-            <i className="fas fa-times"></i>
+            <X className="size-4" />
           </button>
         </div>
 
@@ -74,13 +75,13 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
             onClick={() => setTab('ai')}
             className={`px-4 py-2 text-xs font-bold rounded-t-lg transition-colors ${tab === 'ai' ? 'bg-gray-50 text-blue-600 border border-b-0 border-gray-200' : 'text-gray-400 hover:text-gray-600'}`}
           >
-            <i className="fas fa-robot mr-1"></i> {t('chapterHistory.tabAI', { count: sortedHistory.length })}
+            <Bot className="size-4 mr-1" /> {t('chapterHistory.tabAI', { count: sortedHistory.length })}
           </button>
           <button
             onClick={() => setTab('snapshot')}
             className={`px-4 py-2 text-xs font-bold rounded-t-lg transition-colors ${tab === 'snapshot' ? 'bg-gray-50 text-amber-600 border border-b-0 border-gray-200' : 'text-gray-400 hover:text-gray-600'}`}
           >
-            <i className="fas fa-camera mr-1"></i> {t('chapterHistory.tabSnapshot', { count: snapshots.length })}
+            <Camera className="size-4 mr-1" /> {t('chapterHistory.tabSnapshot', { count: snapshots.length })}
           </button>
         </div>
 
@@ -107,7 +108,7 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
                           className="px-3 py-1.5 bg-amber-100 text-amber-700 text-xs font-bold rounded-lg hover:bg-amber-200 transition-colors flex items-center gap-1.5"
                           title={t('chapterHistory.restoreTitle')}
                         >
-                          <i className="fas fa-rotate-left"></i> {t('chapterHistory.restore')}
+                          <RotateCcw className="size-4" /> {t('chapterHistory.restore')}
                         </button>
                         {onUpdateChapter && (
                           <button
@@ -115,7 +116,7 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
                             className="w-8 h-8 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors"
                             title={t('chapterHistory.deleteSnapshotTitle')}
                           >
-                            <i className="fas fa-trash"></i>
+                            <Trash className="size-4" />
                           </button>
                         )}
                       </div>
@@ -125,7 +126,7 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
               </div>
             ) : (
               <div className="text-center py-16">
-                <i className="fas fa-camera text-4xl text-gray-300 mb-4"></i>
+                <Camera className="size-10 text-gray-300 mb-4" />
                 <p className="text-gray-500 font-medium">{t('chapterHistory.noSnapshots')}</p>
                 <p className="text-gray-400 text-sm mt-2">{t('chapterHistory.noSnapshotsHint')}</p>
               </div>
@@ -136,7 +137,7 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
                 <div key={record.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden transition-all hover:shadow-lg">
                   <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex justify-between items-center">
                     <div className="flex items-center gap-4">
-                      <i className={getProviderIcon(record.modelConfig.provider)}></i>
+                      {(() => { const { icon: PIcon, cls } = getProviderIcon(record.modelConfig.provider); return <PIcon className={`size-5 ${cls}`} />; })()}
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-bold text-gray-800">{record.modelConfig.modelName}</span>
@@ -214,7 +215,7 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
                         }}
                         className="px-4 py-2 bg-gray-100 text-gray-700 text-xs font-bold rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
                       >
-                        <i className="fas fa-copy"></i> {t('record.copyContent')}
+                        <Copy className="size-4" /> {t('record.copyContent')}
                       </button>
                       <button
                         onClick={() => {
@@ -223,7 +224,7 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
                         }}
                         className="px-4 py-2 bg-blue-100 text-blue-700 text-xs font-bold rounded-lg hover:bg-blue-200 transition-colors flex items-center gap-2"
                       >
-                        <i className="fas fa-redo"></i> {t('chapterHistory.reapply')}
+                        <Redo2 className="size-4" /> {t('chapterHistory.reapply')}
                       </button>
                     </div>
                   </div>
@@ -232,7 +233,7 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
             </div>
           ) : (
             <div className="text-center py-16">
-              <i className="fas fa-history text-4xl text-gray-300 mb-4"></i>
+              <History className="size-10 text-gray-300 mb-4" />
               <p className="text-gray-500 font-medium">{t('chapterHistory.noHistory')}</p>
               <p className="text-gray-400 text-sm mt-2">{t('chapterHistory.noHistoryHint')}</p>
             </div>
@@ -243,7 +244,7 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
           <div className="text-xs text-gray-500">{t('chapterHistory.footerCount', { count: chapter.history?.length || 0 })}</div>
           <div className="flex gap-3">
             <button onClick={onClearHistory} className="px-4 py-2 bg-red-50 text-red-600 text-xs font-bold rounded-lg hover:bg-red-100 transition-colors flex items-center gap-2">
-              <i className="fas fa-trash"></i> {t('chapterHistory.clearHistory')}
+              <Trash className="size-4" /> {t('chapterHistory.clearHistory')}
             </button>
             <button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-700 text-xs font-bold rounded-lg hover:bg-gray-300 transition-colors">
               {t('chapterHistory.close')}

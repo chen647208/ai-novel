@@ -11,6 +11,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/i18n';
 import { type Location, type Faction } from '../../../shared/types';
 import { dialogService } from '@/shared/services/dialogService';
+import { Flag, MapPinned, Mountain, Plus, Save, Search, Trash, X } from 'lucide-react';
 
 interface LocationEditorProps {
   projectId: string;
@@ -162,7 +163,7 @@ export const LocationEditor: React.FC<LocationEditorProps> = ({
       {/* 工具栏 */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1 relative">
-          <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             value={searchQuery}
@@ -175,7 +176,7 @@ export const LocationEditor: React.FC<LocationEditorProps> = ({
           onClick={addLocation}
           className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-bold hover:bg-emerald-700 transition-colors flex items-center gap-2"
         >
-          <i className="fas fa-plus"></i>
+          <Plus className="size-4" />
           {t('location.add')}
         </button>
       </div>
@@ -214,7 +215,7 @@ export const LocationEditor: React.FC<LocationEditorProps> = ({
                   </div>
                   {location.controlledBy && (
                     <div className="mt-1 text-xs text-emerald-600">
-                      <i className="fas fa-flag mr-1"></i>
+                      <Flag className="size-4 mr-1" />
                       {factions.find(f => f.id === location.controlledBy)?.name || t('location.unknownFaction')}
                     </div>
                   )}
@@ -235,7 +236,7 @@ export const LocationEditor: React.FC<LocationEditorProps> = ({
                   onClick={() => deleteLocation(selectedLocation.id)}
                   className="text-red-500 hover:text-red-600 text-sm flex items-center gap-1"
                 >
-                  <i className="fas fa-trash"></i>
+                  <Trash className="size-4" />
                   {t('location.delete')}
                 </button>
               </div>
@@ -280,7 +281,7 @@ export const LocationEditor: React.FC<LocationEditorProps> = ({
               {/* 地理属性 */}
               <div className="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100">
                 <h5 className="text-xs font-bold text-emerald-800 mb-2 flex items-center gap-1">
-                  <i className="fas fa-mountain"></i>
+                  <Mountain className="size-4" />
                   {t('location.geoTitle')}
                 </h5>
                 <div className="grid grid-cols-2 gap-3">
@@ -364,7 +365,7 @@ export const LocationEditor: React.FC<LocationEditorProps> = ({
                     onClick={() => addConnection(selectedLocation.id)}
                     className="text-xs text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-1"
                   >
-                    <i className="fas fa-plus"></i> {t('location.addConnection')}
+                    <Plus className="size-4" /> {t('location.addConnection')}
                   </button>
                 </div>
 
@@ -398,7 +399,7 @@ export const LocationEditor: React.FC<LocationEditorProps> = ({
                           onClick={() => removeConnection(selectedLocation.id, index)}
                           className="text-red-500 hover:text-red-600 px-1"
                         >
-                          <i className="fas fa-times"></i>
+                          <X className="size-4" />
                         </button>
                       </div>
                     ))}
@@ -409,7 +410,7 @@ export const LocationEditor: React.FC<LocationEditorProps> = ({
           ) : (
             <div className="h-full flex items-center justify-center text-gray-400">
               <div className="text-center">
-                <i className="fas fa-map-marked-alt text-4xl mb-2 opacity-30"></i>
+                <MapPinned className="size-10 mb-2 opacity-30" />
                 <p className="text-sm">{t('location.selectHint')}</p>
               </div>
             </div>
@@ -424,7 +425,7 @@ export const LocationEditor: React.FC<LocationEditorProps> = ({
             onClick={handleSave}
             className="px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 transition-colors flex items-center gap-2"
           >
-            <i className="fas fa-save"></i>
+            <Save className="size-4" />
             {t('location.save')}
           </button>
         </div>

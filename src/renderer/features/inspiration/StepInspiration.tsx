@@ -7,7 +7,6 @@
  * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
  */
 
-
 import { logger } from '../../shared/utils/logger';
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation, i18n, templateDisplayName } from '@/i18n';
@@ -15,6 +14,7 @@ import { type Project, type PromptTemplate, type ModelConfig, type KnowledgeItem
 import { AIService } from '../assistant/services/aiService';
 import WorldViewEditor from '../world/WorldViewEditor';
 import { dialogService } from '@/shared/services/dialogService';
+import { BookOpenText, Bot, Check, CheckCheck, ChevronDown, ChevronUp, CloudUpload, Globe, Lightbulb, Loader2, Pause, Pen, Play, Square, Trash2, WandSparkles, XCircle } from 'lucide-react';
 
 interface StepInspirationProps {
   project: Project | null;
@@ -356,7 +356,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
           </h3>
           {(input || results) && (
             <button onClick={handleClear} className="text-xs text-gray-400 hover:text-red-500 font-bold transition-colors">
-              <i className="fas fa-trash-alt mr-1"></i>{t('steps:inspiration.clearContent')}
+              <Trash2 className="size-4 mr-1" />{t('steps:inspiration.clearContent')}
             </button>
           )}
         </div>
@@ -376,7 +376,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
         <div className="mt-4 border-t border-gray-100 pt-4">
              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                    <i className="fas fa-book-atlas text-blue-500"></i>
+                    <BookOpenText className="size-4 text-blue-500" />
                     <span className="text-xs font-bold text-gray-500">{t('steps:inspiration.knowledgeRef')}</span>
                 </div>
                 {(project?.knowledge || []).filter(k => k.category === 'inspiration').length > 0 && (
@@ -386,19 +386,19 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
                          className="px-2 py-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded text-[9px] font-bold transition-all flex items-center gap-1"
                          title={t('steps:common.selectAllTitle')}
                       >
-                         <i className="fas fa-check-double text-[8px]"></i> {t('steps:common.selectAll')}
+                         <CheckCheck className="size-2" /> {t('steps:common.selectAll')}
                       </button>
                       <button 
                          onClick={clearAllKnowledge}
                          className="px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded text-[9px] font-bold transition-all flex items-center gap-1"
                          title={t('steps:common.clearTitle')}
                       >
-                         <i className="fas fa-times-circle text-[8px]"></i> {t('steps:common.clear')}
+                         <XCircle className="size-2" /> {t('steps:common.clear')}
                       </button>
                    </div>
                 )}
                 <label className="cursor-pointer px-3 py-1.5 bg-gray-100 hover:bg-blue-50 hover:text-blue-600 text-gray-500 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1.5 border border-transparent hover:border-blue-100">
-                    <i className="fas fa-cloud-upload-alt"></i> {t('steps:inspiration.uploadNew')}
+                    <CloudUpload className="size-4" /> {t('steps:inspiration.uploadNew')}
                     <input type="file" multiple className="hidden" onChange={handleFileUpload} accept=".txt,.md,.json,.csv" />
                 </label>
              </div>
@@ -422,7 +422,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
                            }`}
                          >
                             <div className={`w-3 h-3 rounded-full border flex items-center justify-center ${selectedKnowledgeIds.has(k.id) ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-300'}`}>
-                               {selectedKnowledgeIds.has(k.id) && <i className="fas fa-check text-[6px] text-white"></i>}
+                               {selectedKnowledgeIds.has(k.id) && <Check className="size-4 text-[6px] text-white" />}
                             </div>
                             {k.name || t('steps:common.unnamedFile')}
                          </button>
@@ -498,14 +498,14 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
                       : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
                   }`}
                 >
-                  <i className={`fas ${isPaused ? 'fa-play' : 'fa-pause'} text-xs`}></i>
+                  {isPaused ? <Play className="size-3.5" /> : <Pause className="size-3.5" />}
                   {isPaused ? t('steps:common.resume') : t('steps:common.pause')}
                 </button>
                 <button
                   onClick={handleStopStreaming}
                   className="px-3 py-1.5 rounded-lg text-xs font-bold border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-all flex items-center gap-1.5"
                 >
-                  <i className="fas fa-stop text-xs"></i>
+                  <Square className="size-3.5" />
                   {t('steps:common.stop')}
                 </button>
               </div>
@@ -519,7 +519,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
                 loading || (!input && selectedKnowledgeIds.size === 0) ? 'bg-gray-300 cursor-not-allowed shadow-none' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200 active:scale-95'
               }`}
             >
-              {loading ? <i className="fas fa-spinner fa-spin mr-2"></i> : <i className="fas fa-wand-magic-sparkles mr-2"></i>}
+              {loading ? <Loader2 className="size-4 animate-spin mr-2" /> : <WandSparkles className="size-4 mr-2" />}
               {loading ? t('steps:inspiration.generating') : t('steps:inspiration.generateBtn')}
             </button>
           </div>
@@ -536,7 +536,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
               project?.worldView ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-500'
             }`}>
-              <i className="fas fa-globe text-lg"></i>
+              <Globe className="size-5" />
             </div>
             <div>
               <h4 className="font-bold text-gray-800">{t('steps:inspiration.worldTitle')}</h4>
@@ -553,7 +553,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
                 {t('steps:inspiration.enabled')}
               </span>
             )}
-            <i className={`fas fa-chevron-${showWorldView ? 'up' : 'down'} text-gray-400 transition-transform`}></i>
+            {showWorldView ? <ChevronUp className="size-4 text-gray-400 transition-transform" /> : <ChevronDown className="size-4 text-gray-400 transition-transform" />}
           </div>
         </button>
         
@@ -574,7 +574,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
         <section className="bg-white p-8 rounded-[2rem] shadow-lg border border-gray-100 border-l-8 border-l-blue-500 animate-in zoom-in duration-300">
           <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-50">
              <div className="flex items-center gap-2">
-                <i className="fas fa-robot text-blue-500"></i>
+                <Bot className="size-4 text-blue-500" />
                 <h3 className="text-lg font-black text-gray-800">{t('steps:inspiration.aiPlan')}</h3>
                 <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded ml-2 font-bold">{t('steps:common.editable')}</span>
              </div>
@@ -586,7 +586,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
                   value={project?.title || ''}
                   onChange={(e) => onUpdate({ title: e.target.value })}
                 />
-                <i className="fas fa-pen text-gray-300 text-xs"></i>
+                <Pen className="size-3.5 text-gray-300" />
              </div>
           </div>
           <textarea
@@ -599,7 +599,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
         </section>
       ) : (
         <div className="text-center py-10 opacity-50">
-          <i className="fas fa-lightbulb text-4xl text-gray-200 mb-4"></i>
+          <Lightbulb className="size-10 text-gray-200 mb-4" />
           <p className="text-gray-400 text-sm">{t('steps:inspiration.emptyHint')}</p>
         </div>
       )}
@@ -608,12 +608,4 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
 };
 
 export default StepInspiration;
-
-
-
-
-
-
-
-
 

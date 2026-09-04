@@ -65,6 +65,7 @@ export const normalizeImportedState = (imported: Partial<AppState> | null | unde
     consistencyPrompts: Array.isArray(src.consistencyPrompts) ? src.consistencyPrompts : INITIAL_APP_STATE.consistencyPrompts,
     consistencyCheckConfig: src.consistencyCheckConfig ?? INITIAL_APP_STATE.consistencyCheckConfig,
     language: src.language === 'zh' || src.language === 'en' ? src.language : INITIAL_APP_STATE.language,
+    theme: src.theme === 'light' || src.theme === 'dark' || src.theme === 'system' ? src.theme : INITIAL_APP_STATE.theme,
   };
 };
 

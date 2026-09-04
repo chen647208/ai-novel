@@ -19,6 +19,13 @@
     "language": {
       "zh": "简体中文",
       "en": "English"
+    },
+    "themeLabel": "Interface Theme",
+    "themeHint": "Choose the color scheme. It applies immediately and is saved automatically.",
+    "theme": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
     }
   },
   "footer": {

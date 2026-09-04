@@ -11,6 +11,7 @@ import React from 'react';
 import { useTranslation } from '@/i18n';
 import { type Character } from '../../../shared/types';
 import { roleLabel, genderLabel } from './displayLabels';
+import { ChevronRight, Crown, Eye, Info, Skull, Star, User, Users, type LucideIcon } from 'lucide-react';
 
 interface CompactCharacterCardProps {
   character: Character;
@@ -20,18 +21,18 @@ interface CompactCharacterCardProps {
 const CompactCharacterCard: React.FC<CompactCharacterCardProps> = ({ character, onClick }) => {
   const { t } = useTranslation('characters');
   // 根据角色类型获取颜色和图标（数据值匹配，显示名走 displayLabels 助手）
-  const getRoleConfig = (role: string) => {
+  const getRoleConfig = (role: string): { color: string; icon: LucideIcon } => {
     const roleLower = role.toLowerCase();
     if (roleLower.includes('主')) {
-      return { color: 'bg-amber-100 text-amber-700 border-amber-200', icon: 'fas fa-crown' };
+      return { color: 'bg-amber-100 text-amber-700 border-amber-200', icon: Crown };
     }
     if (roleLower.includes('反')) {
-      return { color: 'bg-red-100 text-red-700 border-red-200', icon: 'fas fa-skull' };
+      return { color: 'bg-red-100 text-red-700 border-red-200', icon: Skull };
     }
     if (roleLower.includes('配')) {
-      return { color: 'bg-blue-100 text-blue-700 border-blue-200', icon: 'fas fa-user-friends' };
+      return { color: 'bg-blue-100 text-blue-700 border-blue-200', icon: Users };
     }
-    return { color: 'bg-gray-100 text-gray-600 border-gray-200', icon: 'fas fa-user' };
+    return { color: 'bg-gray-100 text-gray-600 border-gray-200', icon: User };
   };
 
   const roleConfig = getRoleConfig(character.role);
@@ -49,7 +50,7 @@ const CompactCharacterCard: React.FC<CompactCharacterCardProps> = ({ character, 
           <h3 className="text-xl font-black text-gray-900 truncate">{character.name}</h3>
           <div className="flex items-center gap-2 mt-1">
             <span className={`text-[10px] font-black px-3 py-1 rounded-full border ${roleConfig.color} flex items-center gap-1.5`}>
-              <i className={`${roleConfig.icon} text-[8px]`}></i>
+              <roleConfig.icon className="size-2" />
               {roleText}
             </span>
             <span className="text-[10px] text-gray-400 font-medium">
@@ -61,14 +62,14 @@ const CompactCharacterCard: React.FC<CompactCharacterCardProps> = ({ character, 
           </div>
         </div>
         <div className="text-gray-300 hover:text-gray-600 transition-colors">
-          <i className="fas fa-chevron-right text-sm"></i>
+          <ChevronRight className="size-4" />
         </div>
       </div>
 
       {/* 外观描述 */}
       <div className="mb-4 flex-1">
         <div className="flex items-center gap-2 mb-2">
-          <i className="fas fa-eye text-blue-400 text-xs"></i>
+          <Eye className="size-3.5 text-blue-400" />
           <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{t('card.appearanceTitle')}</span>
         </div>
         <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
@@ -79,7 +80,7 @@ const CompactCharacterCard: React.FC<CompactCharacterCardProps> = ({ character, 
       {/* 标志性特征 */}
       <div className="pt-4 border-t border-gray-50">
         <div className="flex items-center gap-2 mb-2">
-          <i className="fas fa-star text-amber-400 text-xs"></i>
+          <Star className="size-3.5 text-amber-400" />
           <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">{t('card.featuresTitle')}</span>
         </div>
         <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
@@ -91,7 +92,7 @@ const CompactCharacterCard: React.FC<CompactCharacterCardProps> = ({ character, 
       <div className="mt-4 pt-3 border-t border-gray-50 flex justify-between items-center">
         <span className="text-[9px] text-gray-400 font-medium">{t('card.clickHint')}</span>
         <span className="text-[9px] text-gray-300">
-          <i className="fas fa-info-circle mr-1"></i>
+          <Info className="size-4 mr-1" />
           {t('card.detail')}
         </span>
       </div>

@@ -7,11 +7,10 @@
  * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
  */
 
-
 import { logger } from '../shared/utils/logger';
 import { isModelConfigured } from '../shared/utils/modelReadiness';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { type AppState, type AppLanguage, type Project } from '../../shared/types';
+import { type AppState, type AppLanguage, type AppTheme, type Project } from '../../shared/types';
 import { INITIAL_APP_STATE, normalizeImportedState, type ResetModalState } from './initialState';
 import { repository } from '../shared/services/repository';
 import { changeLanguage, getEffectiveLanguage, i18n, useTranslation } from '../i18n';
@@ -31,7 +30,9 @@ import AIHistoryViewer from '../features/writing/AIHistoryViewer'; // 新增导�
 import VersionCheckModal from '../features/version/VersionCheckModal'; // 新增导入：版本检查模态框
 import { persistDiff } from './persistDiff';
 import { dialogService } from '@/shared/services/dialogService';
+import { applyTheme, resolveTheme, watchSystemTheme } from '@/shared/services/themeService';
 import { Button } from '@/shared/ui/Button';
+import { BookDown, BookHeart, BookOpen, BookUp, Cpu, Download, Eraser, History, List, Moon, Plug, RefreshCw, Skull, Sun, Trash2, Upload, Users } from 'lucide-react';
 
 const App: React.FC = () => {
   const { t } = useTranslation(['app', 'common']);
@@ -123,6 +124,19 @@ const App: React.FC = () => {
     setState(prev => (prev.language === language ? prev : { ...prev, language }));
     changeLanguage(language);
   }, []);
+
+  // 界面主题切换：更新 AppState（经差分持久化落盘）并即时应用到 <html>。
+  const handleThemeChange = useCallback((theme: AppTheme) => {
+    setState(prev => (prev.theme === theme ? prev : { ...prev, theme }));
+    applyTheme(theme);
+  }, []);
+
+  // 启动/偏好变化时应用主题；偏好为 system 时跟随系统深浅变化。
+  useEffect(() => {
+    applyTheme(state.theme);
+    if ((state.theme ?? 'light') !== 'system') return;
+    return watchSystemTheme(() => applyTheme('system'));
+  }, [state.theme]);
 
   // 书籍管理相关函数
   const handleBookSelect = useCallback((bookId: string) => {
@@ -384,7 +398,7 @@ const App: React.FC = () => {
     if (!activeProject && currentStep !== 0) {
       return (
         <div className="flex flex-col items-center justify-center h-full text-gray-400">
-           <i className="fas fa-book-medical text-4xl mb-4 text-gray-300"></i>
+           <BookHeart className="size-10 mb-4 text-gray-300" />
            <p className="font-bold">{t('empty.noProject')}</p>
            <Button onClick={() => setCurrentStep(0)} className="mt-4">{t('empty.goCreate')}</Button>
         </div>
@@ -394,7 +408,7 @@ const App: React.FC = () => {
     if (!activeModel || !isModelConfigured(activeModel)) {
       return (
         <div className="flex flex-col items-center justify-center h-full text-gray-400">
-          <i className="fas fa-plug text-4xl mb-4 text-gray-300"></i>
+          <Plug className="size-10 mb-4 text-gray-300" />
           <p className="font-bold">{activeModel ? t('model.notConfiguredKey') : t('model.noneConfigured')}</p>
           <Button onClick={() => setIsSettingsOpen(true)} className="mt-4">{t('model.goSettings')}</Button>
         </div>
@@ -412,7 +426,7 @@ const App: React.FC = () => {
               <div className="flex gap-3">
                  {/* 全数据备份/导入按钮 */}
                  <button onClick={() => repository.exportAll(state)} className="px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm font-medium transition-colors">
-                    <i className="fas fa-download mr-2"></i>{t('home.backup')}
+                    <Download className="size-4 mr-2" />{t('home.backup')}
                  </button>
                  <button 
                    onClick={async () => {
@@ -441,7 +455,7 @@ const App: React.FC = () => {
                    }}
                    className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm font-medium cursor-pointer transition-colors shadow-lg"
                  >
-                    <i className="fas fa-upload mr-2"></i>{t('home.importAll')}
+                    <Upload className="size-4 mr-2" />{t('home.importAll')}
                  </button>
                  
                  {/* 当前书籍导出/导入按钮 */}
@@ -453,14 +467,14 @@ const App: React.FC = () => {
                        className="px-4 py-2 border border-blue-200 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 text-sm font-medium transition-colors"
                        title={t('home.exportCurrentBook')}
                      >
-                       <i className="fas fa-book-download mr-2"></i>{t('home.exportCurrentBook')}
+                       <BookDown className="size-4 mr-2" />{t('home.exportCurrentBook')}
                      </button>
                      <button 
                        onClick={handleImportBook}
                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium cursor-pointer transition-colors shadow-lg"
                        title={t('home.importSingleBookTip')}
                      >
-                       <i className="fas fa-book-upload mr-2"></i>{t('home.importBook')}
+                       <BookUp className="size-4 mr-2" />{t('home.importBook')}
                      </button>
                    </>
                  )}
@@ -568,7 +582,7 @@ const App: React.FC = () => {
         <div className="fixed inset-0 z-[9999] bg-gray-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 border border-gray-100 flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
               <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 ${resetModal.type === 'factory_reset' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
-                 <i className={`fas ${resetModal.type === 'factory_reset' ? 'fa-skull-crossbones' : 'fa-trash-can'} text-3xl`}></i>
+                 {resetModal.type === 'factory_reset' ? <Skull className="size-8" /> : <Trash2 className="size-8" />}
               </div>
               
               <h3 className="text-2xl font-black text-gray-900 mb-2">
@@ -636,14 +650,14 @@ const App: React.FC = () => {
                           title={t('topbar.clearProjectTip')}
                           className="w-6 h-6 rounded hover:bg-red-50 text-gray-300 hover:text-red-500 transition-colors flex items-center justify-center"
                         >
-                           <i className="fas fa-eraser text-xs"></i>
+                           <Eraser className="size-3.5" />
                         </button>
                         <button 
                           onClick={handleDeleteCurrentProject}
                           title={t('topbar.deleteProjectTip')}
                           className="w-6 h-6 rounded hover:bg-red-50 text-gray-300 hover:text-red-600 transition-colors flex items-center justify-center"
                         >
-                           <i className="fas fa-trash-can text-xs"></i>
+                           <Trash2 className="size-3.5" />
                         </button>
                       </div>
                    )}
@@ -653,11 +667,19 @@ const App: React.FC = () => {
              <div className="flex items-center gap-4">
                 {activeProject && (
                   <div className="text-xs text-gray-400 font-medium">
-                     <span className="mr-3"><i className="fas fa-book mr-1"></i>{activeProject.knowledge?.length || 0}</span>
-                     <span className="mr-3"><i className="fas fa-user-group mr-1"></i>{activeProject.characters.length}</span>
-                     <span className="mr-3"><i className="fas fa-list mr-1"></i>{activeProject.chapters.length}</span>
+                     <span className="mr-3"><BookOpen className="size-4 mr-1" />{activeProject.knowledge?.length || 0}</span>
+                     <span className="mr-3"><Users className="size-4 mr-1" />{activeProject.characters.length}</span>
+                     <span className="mr-3"><List className="size-4 mr-1" />{activeProject.chapters.length}</span>
                   </div>
                 )}
+                {/* 主题快速切换：在当前生效的浅/深之间翻转（显式落盘，覆盖 system 偏好） */}
+                <button
+                  onClick={() => handleThemeChange(resolveTheme(state.theme) === 'dark' ? 'light' : 'dark')}
+                  className="flex size-8 items-center justify-center rounded-md text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                  title={resolveTheme(state.theme) === 'dark' ? t('topbar.themeToLight') : t('topbar.themeToDark')}
+                >
+                  {resolveTheme(state.theme) === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
+                </button>
                 {/* 版本号显示和检查按钮 */}
                 <div className="flex items-center gap-2">
                   <div className="text-xs text-gray-400 font-medium bg-gray-50 px-2 py-1 rounded border border-gray-200">
@@ -668,7 +690,7 @@ const App: React.FC = () => {
                     className="w-6 h-6 rounded-full hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors flex items-center justify-center"
                     title={t('topbar.checkUpdateTip')}
                   >
-                    <i className="fas fa-sync-alt text-xs"></i>
+                    <RefreshCw className="size-3.5" />
                   </button>
                 </div>
                 {/* 历史记录按钮 */}
@@ -681,7 +703,7 @@ const App: React.FC = () => {
                       className="flex items-center text-sm text-gray-500 bg-purple-50 px-3 py-1.5 rounded-full border border-purple-100 cursor-pointer hover:bg-purple-100 transition-colors"
                       title={t('topbar.viewHistoryTip')}
                     >
-                      <i className="fas fa-history mr-2 text-purple-500"></i>
+                      <History className="size-4 mr-2 text-purple-500" />
                       <span className="font-medium text-purple-700">{t('topbar.history')}</span>
                     </button>
                   )
@@ -690,7 +712,7 @@ const App: React.FC = () => {
                   className="flex items-center text-sm text-gray-500 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 cursor-pointer hover:bg-blue-100 transition-colors"
                   onClick={() => setIsSettingsOpen(true)}
                 >
-                  <i className="fas fa-microchip mr-2 text-blue-500"></i>
+                  <Cpu className="size-4 mr-2 text-blue-500" />
                   <span className="font-medium text-blue-700">{activeModel?.name || t('model.noneSelected')}</span>
                 </div>
              </div>
@@ -712,6 +734,8 @@ const App: React.FC = () => {
           consistencyCheckConfig={state.consistencyCheckConfig}
           language={state.language ?? getEffectiveLanguage()}
           onLanguageChange={handleLanguageChange}
+          theme={state.theme ?? 'light'}
+          onThemeChange={handleThemeChange}
           onClose={async () => {
             setIsSettingsOpen(false);
             // 刷新 Embedding 服务配置
@@ -759,10 +783,4 @@ const App: React.FC = () => {
 };
 
 export default App;
-
-
-
-
-
-
 

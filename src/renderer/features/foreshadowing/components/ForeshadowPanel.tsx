@@ -11,6 +11,7 @@ import React, { useMemo, useState } from 'react';
 import { useTranslation } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
 import type { ForeshadowImportance, ModelConfig, Project } from '../../../../shared/types';
+import { Loader2, Plus, Sprout, WandSparkles, X } from 'lucide-react';
 import {
   addForeshadow,
   createForeshadow,
@@ -119,7 +120,7 @@ const ForeshadowPanel: React.FC<ForeshadowPanelProps> = ({
             </p>
           </div>
           <button onClick={onClose} className="w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 flex items-center justify-center">
-            <i className="fas fa-times"></i>
+            <X className="size-4" />
           </button>
         </div>
 
@@ -150,7 +151,7 @@ const ForeshadowPanel: React.FC<ForeshadowPanelProps> = ({
               <span className="text-xs text-gray-400">{t('foreshadow:willPlantAt', { num: activeChapter.order + 1 })}</span>
             )}
             <button onClick={handleAdd} className="ml-auto px-4 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 transition-colors">
-              <i className="fas fa-plus mr-1"></i>{t('foreshadow:add')}
+              <Plus className="size-4 mr-1" />{t('foreshadow:add')}
             </button>
           </div>
         </div>
@@ -167,7 +168,7 @@ const ForeshadowPanel: React.FC<ForeshadowPanelProps> = ({
             className="px-3 py-1.5 bg-purple-100 text-purple-700 text-xs font-bold rounded-lg hover:bg-purple-200 disabled:opacity-50 transition-colors flex items-center gap-1.5"
             title={t('foreshadow:detectTitle')}
           >
-            <i className={`fas ${detecting ? 'fa-spinner fa-spin' : 'fa-wand-magic-sparkles'}`}></i>
+            {detecting ? <Loader2 className="size-4 animate-spin" /> : <WandSparkles className="size-4" />}
             {detecting ? t('foreshadow:detecting') : t('foreshadow:detectBtn')}
           </button>
         </div>
@@ -176,7 +177,7 @@ const ForeshadowPanel: React.FC<ForeshadowPanelProps> = ({
         <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-3 bg-gray-50/30">
           {visible.length === 0 ? (
             <div className="text-center py-14 text-gray-400 text-sm">
-              <i className="fas fa-seedling text-3xl mb-3 block text-gray-300"></i>
+              <Sprout className="size-8 mb-3 block text-gray-300" />
               {filter === 'open' ? t('foreshadow:emptyOpen') : t('foreshadow:emptyAll')}
             </div>
           ) : (

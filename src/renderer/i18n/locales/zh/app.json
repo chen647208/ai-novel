@@ -25,7 +25,9 @@
     "deleteProjectTip": "删除当前项目",
     "checkUpdateTip": "检查更新",
     "viewHistoryTip": "查看AI生成历史记录",
-    "history": "历史记录"
+    "history": "历史记录",
+    "themeToLight": "切换到浅色主题",
+    "themeToDark": "切换到深色主题"
   },
   "reset": {
     "factoryTitle": "恢复出厂设置",

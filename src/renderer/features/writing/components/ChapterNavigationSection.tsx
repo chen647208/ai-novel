@@ -10,6 +10,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ChapterNavigationSectionProps } from '../types';
+import { ChevronRight } from 'lucide-react';
 
 const ChapterNavigationSection: React.FC<ChapterNavigationSectionProps> = ({
   chapters,
@@ -33,7 +34,7 @@ const ChapterNavigationSection: React.FC<ChapterNavigationSectionProps> = ({
               }`}
             >
               <span className="truncate flex-1">{t('navigation.chapterEntry', { num: chapter.order + 1, title: chapter.title })}</span>
-              {activeChapterId !== chapter.id && <i className="fas fa-chevron-right opacity-0 group-hover:opacity-50 text-[10px]"></i>}
+              {activeChapterId !== chapter.id && <ChevronRight className="size-3 opacity-0 group-hover:opacity-50" />}
             </div>
           ))}
       </div>

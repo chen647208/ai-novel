@@ -77,11 +77,18 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
   quickAddEmbeddingConfig,
   language,
   onLanguageChange,
+  theme,
+  onThemeChange,
 }) => {
   return (
     <>
       {activeTab === 'general' && (
-        <GeneralSettingsPanel language={language} onLanguageChange={onLanguageChange} />
+        <GeneralSettingsPanel
+          language={language}
+          onLanguageChange={onLanguageChange}
+          theme={theme}
+          onThemeChange={onThemeChange}
+        />
       )}
 
       {activeTab === 'models' && (

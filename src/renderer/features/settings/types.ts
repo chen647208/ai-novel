@@ -11,6 +11,7 @@ import type React from 'react';
 import type { ModelProviderInfo } from '../../constants/modelProviders';
 import type {
   AppLanguage,
+  AppTheme,
   CardPromptTemplate,
   ConsistencyCheckConfig,
   ConsistencyCheckPromptTemplate,
@@ -38,6 +39,10 @@ export interface SettingsModalProps {
   language: AppLanguage;
   /** 切换界面语言（立即生效并持久化） */
   onLanguageChange: (language: AppLanguage) => void;
+  /** 当前界面主题偏好 */
+  theme: AppTheme;
+  /** 切换界面主题（立即生效并持久化） */
+  onThemeChange: (theme: AppTheme) => void;
 }
 
 export type SettingsTab = 'models' | 'prompts' | 'card-prompts' | 'consistency-prompts' | 'system' | 'storage' | 'embedding' | 'general';
@@ -135,6 +140,8 @@ export interface SystemGuidePanelProps {
 export interface GeneralSettingsPanelProps {
   language: AppLanguage;
   onLanguageChange: (language: AppLanguage) => void;
+  theme: AppTheme;
+  onThemeChange: (theme: AppTheme) => void;
 }
 
 export interface ConsistencyPromptSettingsPanelProps {
@@ -212,5 +219,7 @@ export interface SettingsTabContentProps {
   quickAddEmbeddingConfig: (template: EmbeddingQuickAddTemplate) => void;
   language: AppLanguage;
   onLanguageChange: (language: AppLanguage) => void;
+  theme: AppTheme;
+  onThemeChange: (theme: AppTheme) => void;
 }
 

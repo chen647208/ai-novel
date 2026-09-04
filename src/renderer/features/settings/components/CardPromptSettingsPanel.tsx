@@ -13,6 +13,8 @@ import type { CardPromptCategory } from '../../../../shared/types';
 import { getTemplateVariableDescriptions } from '../../cards/services/cardPromptService';
 import type { CardPromptSettingsPanelProps } from '../types';
 import { dialogService } from '@/shared/services/dialogService';
+import { AlertCircle, CheckCircle2, ChevronDown, ChevronUp, Copy, Download, FlaskConical, Plus, Trash, Undo2, Upload, X } from 'lucide-react';
+
 
 const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
   localCardPrompts,
@@ -51,7 +53,7 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
             }}
             className="px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl text-xs font-black transition-all flex items-center gap-2"
           >
-            <i className="fas fa-download"></i>
+            <Download className="size-4" />
             {t('common:export')}
           </button>
           <button
@@ -61,21 +63,21 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
             }}
             className="px-4 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl text-xs font-black transition-all flex items-center gap-2"
           >
-            <i className="fas fa-upload"></i>
+            <Upload className="size-4" />
             {t('common:import')}
           </button>
           <button
             onClick={resetCardPromptsToDefault}
             className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl text-xs font-black transition-all flex items-center gap-2"
           >
-            <i className="fas fa-undo"></i>
+            <Undo2 className="size-4" />
             {t('common:reset')}
           </button>
           <button
             onClick={addCardPrompt}
             className="px-4 py-2 bg-amber-600 text-white hover:bg-amber-700 rounded-xl text-xs font-black transition-all flex items-center gap-2"
           >
-            <i className="fas fa-plus"></i>
+            <Plus className="size-4" />
             {t('cardPrompts.newTemplate')}
           </button>
         </div>
@@ -112,7 +114,7 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
                   className="text-gray-400 hover:text-blue-500 text-xs px-2 py-1"
                   title={t('cardPrompts.duplicateTip')}
                 >
-                  <i className="fas fa-copy"></i>
+                  <Copy className="size-4" />
                 </button>
                 {!template.isDefault && (
                   <button
@@ -120,7 +122,7 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
                     className="text-gray-400 hover:text-red-500 text-xs px-2 py-1"
                     title={t('cardPrompts.deleteTip')}
                   >
-                    <i className="fas fa-trash"></i>
+                    <Trash className="size-4" />
                   </button>
                 )}
                 <button
@@ -128,7 +130,7 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
                   className="text-gray-400 hover:text-amber-500 text-xs px-2 py-1"
                   title={editingCardPromptId === template.id ? t('cardPrompts.collapse') : t('cardPrompts.edit')}
                 >
-                  <i className={`fas fa-chevron-${editingCardPromptId === template.id ? 'up' : 'down'}`}></i>
+                  {editingCardPromptId === template.id ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
                 </button>
               </div>
             </div>
@@ -218,15 +220,15 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
                       onClick={() => testCardPrompt(template)}
                       className="px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-black transition-all flex items-center gap-2"
                     >
-                      <i className="fas fa-vial"></i>
+                      <FlaskConical className="size-4" />
                       {t('cardPrompts.validate')}
                     </button>
                     {cardPromptTestResult?.templateId === template.id && (
                       <div className={`text-xs ${cardPromptTestResult.isValid ? 'text-green-600' : 'text-red-600'}`}>
                         {cardPromptTestResult.isValid ? (
-                          <span><i className="fas fa-check-circle mr-1"></i>{t('cardPrompts.valid')}</span>
+                          <span><CheckCircle2 className="size-4 mr-1" />{t('cardPrompts.valid')}</span>
                         ) : (
-                          <span><i className="fas fa-exclamation-circle mr-1"></i>{cardPromptTestResult.errors.join(', ')}</span>
+                          <span><AlertCircle className="size-4 mr-1" />{cardPromptTestResult.errors.join(', ')}</span>
                         )}
                       </div>
                     )}
@@ -253,7 +255,7 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
                 }}
                 className="text-gray-400 hover:text-gray-600"
               >
-                <i className="fas fa-times"></i>
+                <X className="size-4" />
               </button>
             </div>
             <div className="p-6">
@@ -272,7 +274,7 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
                     }}
                     className="mt-4 w-full py-3 bg-blue-600 text-white rounded-xl text-sm font-black hover:bg-blue-700 transition-all"
                   >
-                    <i className="fas fa-copy mr-2"></i>{t('cardPrompts.copyToClipboard')}
+                    <Copy className="size-4 mr-2" />{t('cardPrompts.copyToClipboard')}
                   </button>
                 </div>
               ) : (
@@ -298,7 +300,7 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
                     disabled={!importText.trim()}
                     className="mt-4 w-full py-3 bg-green-600 text-white rounded-xl text-sm font-black hover:bg-green-700 transition-all disabled:bg-gray-300"
                   >
-                    <i className="fas fa-upload mr-2"></i>{t('cardPrompts.importTitle')}
+                    <Upload className="size-4 mr-2" />{t('cardPrompts.importTitle')}
                   </button>
                 </div>
               )}
