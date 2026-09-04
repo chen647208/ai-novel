@@ -11,7 +11,13 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/i18n';
 import { type Location, type Faction } from '../../../shared/types';
 import { dialogService } from '@/shared/services/dialogService';
-import { Flag, MapPinned, Mountain, Plus, Save, Search, Trash, X } from 'lucide-react';
+import { cn } from '@/shared/utils/cn';
+import { Button } from '@/shared/ui/Button';
+import { Input } from '@/shared/ui/Input';
+import { Label } from '@/shared/ui/Label';
+import { Select } from '@/shared/ui/Select';
+import { Textarea } from '@/shared/ui/Textarea';
+import { Flag, MapPinned, Mountain, Plus, Save, Search, Trash2, X } from 'lucide-react';
 
 interface LocationEditorProps {
   projectId: string;
@@ -161,37 +167,34 @@ export const LocationEditor: React.FC<LocationEditorProps> = ({
   return (
     <div className="space-y-4">
       {/* 工具栏 */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex-1 relative">
-          <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('location.searchPlaceholder')}
-            className="w-full pl-10 pr-4 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-200 outline-none"
+            className="pl-9"
           />
         </div>
-        <button
-          onClick={addLocation}
-          className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-bold hover:bg-emerald-700 transition-colors flex items-center gap-2"
-        >
+        <Button onClick={addLocation}>
           <Plus className="size-4" />
           {t('location.add')}
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
         {/* 地点列表 */}
-        <div className="col-span-1 bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-          <div className="p-3 border-b border-gray-200 bg-gray-100">
-            <h4 className="text-sm font-bold text-gray-700">
+        <div className="col-span-1 overflow-hidden rounded-lg border border-border bg-card">
+          <div className="border-b border-border bg-muted/30 p-3">
+            <h4 className="text-sm font-medium">
               {t('location.listTitle', { count: filteredLocations.length })}
             </h4>
           </div>
           <div className="max-h-[400px] overflow-y-auto">
             {filteredLocations.length === 0 ? (
-              <div className="p-4 text-center text-gray-400 text-sm">
+              <div className="p-4 text-center text-sm text-muted-foreground">
                 {searchQuery ? t('location.noMatch') : t('location.empty')}
               </div>
             ) : (
@@ -199,23 +202,24 @@ export const LocationEditor: React.FC<LocationEditorProps> = ({
                 <div
                   key={location.id}
                   onClick={() => setSelectedLocationId(location.id)}
-                  className={`p-3 border-b border-gray-100 cursor-pointer transition-colors ${
+                  className={cn(
+                    'cursor-pointer border-b border-border p-3 transition-colors last:border-0',
                     selectedLocationId === location.id
-                      ? 'bg-emerald-50 border-l-4 border-l-emerald-500'
-                      : 'hover:bg-gray-100 border-l-4 border-l-transparent'
-                  }`}
+                      ? 'border-l-4 border-l-primary bg-primary/5'
+                      : 'border-l-4 border-l-transparent hover:bg-accent/40'
+                  )}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm text-gray-800 truncate">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate font-serif text-sm font-medium">
                       {location.name}
                     </span>
-                    <span className="text-xs px-2 py-0.5 bg-gray-200 text-gray-600 rounded">
+                    <span className="shrink-0 rounded border border-border bg-muted/40 px-1.5 py-0.5 text-xs text-muted-foreground">
                       {getLocationTypeLabel(location.type)}
                     </span>
                   </div>
                   {location.controlledBy && (
-                    <div className="mt-1 text-xs text-emerald-600">
-                      <Flag className="size-4 mr-1" />
+                    <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                      <Flag className="size-3.5" />
                       {factions.find(f => f.id === location.controlledBy)?.name || t('location.unknownFaction')}
                     </div>
                   )}
@@ -228,91 +232,90 @@ export const LocationEditor: React.FC<LocationEditorProps> = ({
         {/* 地点详情编辑 */}
         <div className="col-span-2 max-h-[400px] overflow-y-auto">
           {selectedLocation ? (
-            <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-4 animate-in fade-in">
+            <div className="space-y-4 rounded-lg border border-border bg-card p-4">
               {/* 头部 */}
-              <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                <h4 className="font-bold text-gray-800">{t('location.detailsTitle')}</h4>
-                <button
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <h4 className="text-sm font-medium">{t('location.detailsTitle')}</h4>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-destructive"
                   onClick={() => deleteLocation(selectedLocation.id)}
-                  className="text-red-500 hover:text-red-600 text-sm flex items-center gap-1"
                 >
-                  <Trash className="size-4" />
+                  <Trash2 className="size-4" />
                   {t('location.delete')}
-                </button>
+                </Button>
               </div>
 
               {/* 基本信息 */}
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-gray-600 mb-1">{t('location.nameLabel')}</label>
-                  <input
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">{t('location.nameLabel')}</Label>
+                  <Input
                     type="text"
                     value={selectedLocation.name}
                     onChange={(e) => updateLocation(selectedLocation.id, { name: e.target.value })}
-                    className="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-200 outline-none"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-600 mb-1">{t('location.typeLabel')}</label>
-                  <select
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">{t('location.typeLabel')}</Label>
+                  <Select
                     value={selectedLocation.type}
                     onChange={(e) => updateLocation(selectedLocation.id, { type: e.target.value as Location['type'] })}
-                    className="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-200 outline-none"
                   >
                     {(['city', 'region', 'building', 'landmark', 'dungeon', 'wilderness', 'other'] as Location['type'][]).map(ty => (
                       <option key={ty} value={ty}>{t(`location.type.${ty}`)}</option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
               </div>
 
               {/* 描述 */}
-              <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1">{t('location.descLabel')}</label>
-                <textarea
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">{t('location.descLabel')}</Label>
+                <Textarea
                   value={selectedLocation.description}
                   onChange={(e) => updateLocation(selectedLocation.id, { description: e.target.value })}
                   placeholder={t('location.descPlaceholder')}
                   rows={3}
-                  className="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-200 outline-none resize-none"
                 />
               </div>
 
               {/* 地理属性 */}
-              <div className="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100">
-                <h5 className="text-xs font-bold text-emerald-800 mb-2 flex items-center gap-1">
-                  <Mountain className="size-4" />
+              <div className="rounded-lg border border-border bg-muted/30 p-3">
+                <h5 className="mb-2 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <Mountain className="size-3.5" />
                   {t('location.geoTitle')}
                 </h5>
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">{t('location.terrainLabel')}</label>
-                    <input
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">{t('location.terrainLabel')}</Label>
+                    <Input
                       type="text"
                       value={selectedLocation.geography?.terrain || ''}
                       onChange={(e) => updateLocation(selectedLocation.id, {
                         geography: { terrain: e.target.value, climate: selectedLocation.geography?.climate || '' }
                       })}
                       placeholder={t('location.terrainPlaceholder')}
-                      className="w-full px-3 py-1.5 text-sm border rounded focus:ring-2 focus:ring-emerald-200 outline-none"
+                      className="h-8 text-sm"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">{t('location.climateLabel')}</label>
-                    <input
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">{t('location.climateLabel')}</Label>
+                    <Input
                       type="text"
                       value={selectedLocation.geography?.climate || ''}
                       onChange={(e) => updateLocation(selectedLocation.id, {
                         geography: { terrain: selectedLocation.geography?.terrain || '', climate: e.target.value }
                       })}
                       placeholder={t('location.climatePlaceholder')}
-                      className="w-full px-3 py-1.5 text-sm border rounded focus:ring-2 focus:ring-emerald-200 outline-none"
+                      className="h-8 text-sm"
                     />
                   </div>
                 </div>
-                <div className="mt-2">
-                  <label className="block text-xs text-gray-600 mb-1">{t('location.resourcesLabel')}</label>
-                  <input
+                <div className="mt-2 space-y-1">
+                  <Label className="text-xs text-muted-foreground">{t('location.resourcesLabel')}</Label>
+                  <Input
                     type="text"
                     value={selectedLocation.geography?.resources?.join(', ') || ''}
                     onChange={(e) => updateLocation(selectedLocation.id, {
@@ -323,84 +326,86 @@ export const LocationEditor: React.FC<LocationEditorProps> = ({
                       }
                     })}
                     placeholder={t('location.resourcesPlaceholder')}
-                    className="w-full px-3 py-1.5 text-sm border rounded focus:ring-2 focus:ring-emerald-200 outline-none"
+                    className="h-8 text-sm"
                   />
                 </div>
               </div>
 
               {/* 标签 */}
-              <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1">{t('location.tagsLabel')}</label>
-                <input
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">{t('location.tagsLabel')}</Label>
+                <Input
                   type="text"
                   value={selectedLocation.tags?.join(', ') || ''}
                   onChange={(e) => updateLocation(selectedLocation.id, {
                     tags: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
                   })}
                   placeholder={t('location.tagsPlaceholder')}
-                  className="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-200 outline-none"
                 />
               </div>
 
               {/* 势力控制 */}
-              <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1">{t('location.controlledByLabel')}</label>
-                <select
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">{t('location.controlledByLabel')}</Label>
+                <Select
                   value={selectedLocation.controlledBy || ''}
                   onChange={(e) => updateLocation(selectedLocation.id, { controlledBy: e.target.value || undefined })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-emerald-200 outline-none"
                 >
                   <option value="">{t('location.noFactionOption')}</option>
                   {factions.map(faction => (
                     <option key={faction.id} value={faction.id}>{faction.name}</option>
                   ))}
-                </select>
+                </Select>
               </div>
 
               {/* 地点关联 */}
-              <div className="border-t border-gray-100 pt-3">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-bold text-gray-600">{t('location.connectionsLabel')}</label>
-                  <button
+              <div className="border-t border-border pt-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <Label className="text-xs text-muted-foreground">{t('location.connectionsLabel')}</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-primary hover:text-primary"
                     onClick={() => addConnection(selectedLocation.id)}
-                    className="text-xs text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-1"
                   >
                     <Plus className="size-4" /> {t('location.addConnection')}
-                  </button>
+                  </Button>
                 </div>
 
                 {selectedLocation.connectedLocations?.length === 0 ? (
-                  <p className="text-xs text-gray-400 italic">{t('location.noConnections')}</p>
+                  <p className="text-xs italic text-muted-foreground">{t('location.noConnections')}</p>
                 ) : (
                   <div className="space-y-2">
                     {selectedLocation.connectedLocations?.map((conn, index) => (
-                      <div key={index} className="flex gap-2 items-center bg-gray-50 p-2 rounded">
-                        <select
+                      <div key={index} className="flex items-center gap-2 rounded-md border border-border bg-muted/30 p-2">
+                        <Select
                           value={conn.locationId}
                           onChange={(e) => updateConnection(selectedLocation.id, index, { locationId: e.target.value })}
-                          className="flex-1 px-2 py-1 text-sm border rounded focus:ring-2 focus:ring-emerald-200 outline-none"
+                          className="h-8 flex-1 text-sm"
                         >
                           {localLocations
                             .filter(l => l.id !== selectedLocation.id)
                             .map(loc => (
                               <option key={loc.id} value={loc.id}>{loc.name}</option>
                             ))}
-                        </select>
-                        <select
+                        </Select>
+                        <Select
                           value={conn.relation}
                           onChange={(e) => updateConnection(selectedLocation.id, index, { relation: e.target.value as NonNullable<Location['connectedLocations']>[0]['relation'] })}
-                          className="px-2 py-1 text-sm border rounded focus:ring-2 focus:ring-emerald-200 outline-none"
+                          className="h-8 w-32 text-sm"
                         >
                           {(['adjacent', 'trade', 'conflict', 'ally', 'subordinate'] as NonNullable<Location['connectedLocations']>[0]['relation'][]).map(rt => (
                             <option key={rt} value={rt}>{t(`location.connectionType.${rt}`)}</option>
                           ))}
-                        </select>
-                        <button
+                        </Select>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
                           onClick={() => removeConnection(selectedLocation.id, index)}
-                          className="text-red-500 hover:text-red-600 px-1"
                         >
                           <X className="size-4" />
-                        </button>
+                        </Button>
                       </div>
                     ))}
                   </div>
@@ -408,9 +413,9 @@ export const LocationEditor: React.FC<LocationEditorProps> = ({
               </div>
             </div>
           ) : (
-            <div className="h-full flex items-center justify-center text-gray-400">
-              <div className="text-center">
-                <MapPinned className="size-10 mb-2 opacity-30" />
+            <div className="flex h-full items-center justify-center">
+              <div className="text-center text-muted-foreground">
+                <MapPinned className="mx-auto mb-2 size-10 opacity-30" strokeWidth={1.5} />
                 <p className="text-sm">{t('location.selectHint')}</p>
               </div>
             </div>
@@ -420,14 +425,11 @@ export const LocationEditor: React.FC<LocationEditorProps> = ({
 
       {/* 保存按钮 */}
       {hasChanges && (
-        <div className="flex justify-end pt-4 border-t border-gray-100 animate-in fade-in">
-          <button
-            onClick={handleSave}
-            className="px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 transition-colors flex items-center gap-2"
-          >
+        <div className="flex justify-end border-t border-border pt-4">
+          <Button onClick={handleSave}>
             <Save className="size-4" />
             {t('location.save')}
-          </button>
+          </Button>
         </div>
       )}
     </div>

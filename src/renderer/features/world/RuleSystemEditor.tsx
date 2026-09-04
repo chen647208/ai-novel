@@ -11,7 +11,12 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/i18n';
 import { type RuleSystem, type RuleSystemType, type RuleLevel, type Character } from '../../../shared/types';
 import { dialogService } from '@/shared/services/dialogService';
-import { ArrowDown, ArrowUp, Briefcase, ChevronDown, ChevronUp, Coins, Crown, Cpu, Dumbbell, ListTree, Plus, Save, Settings2, Sparkles, Trash, X, type LucideIcon } from 'lucide-react';
+import { cn } from '@/shared/utils/cn';
+import { Button } from '@/shared/ui/Button';
+import { Input } from '@/shared/ui/Input';
+import { Label } from '@/shared/ui/Label';
+import { Textarea } from '@/shared/ui/Textarea';
+import { ArrowDown, ArrowUp, Briefcase, ChevronDown, ChevronUp, Coins, Crown, Cpu, Dumbbell, ListTree, Plus, Save, Settings2, Sparkles, Trash2, X, type LucideIcon } from 'lucide-react';
 
 
 interface RuleSystemEditorProps {
@@ -64,17 +69,17 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
     return icons[type];
   };
 
-  // 获取规则类型颜色
+  // 获取规则类型颜色（语义色，双主题安全）
   const getRuleTypeColor = (type: RuleSystemType): string => {
     const colors: Record<RuleSystemType, string> = {
-      cultivation: 'text-rose-600 bg-rose-50 border-rose-200',
-      magic: 'text-purple-600 bg-purple-50 border-purple-200',
-      tech: 'text-cyan-600 bg-cyan-50 border-cyan-200',
-      currency: 'text-amber-600 bg-amber-50 border-amber-200',
-      organization: 'text-blue-600 bg-blue-50 border-blue-200',
-      profession: 'text-emerald-600 bg-emerald-50 border-emerald-200',
-      title: 'text-yellow-600 bg-yellow-50 border-yellow-200',
-      custom: 'text-gray-600 bg-gray-50 border-gray-200'
+      cultivation: 'bg-rose-500/10 text-rose-600 dark:text-rose-400',
+      magic: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+      tech: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
+      currency: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+      organization: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+      profession: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+      title: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400',
+      custom: 'bg-muted text-muted-foreground'
     };
     return colors[type];
   };
@@ -195,8 +200,8 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
   return (
     <div className="space-y-4">
       {/* 添加新规则系统 */}
-      <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-        <h4 className="text-sm font-bold text-gray-700 mb-3">{t('rule.addTitle')}</h4>
+      <div className="rounded-lg border border-border bg-muted/30 p-4">
+        <h4 className="mb-3 text-sm font-medium">{t('rule.addTitle')}</h4>
         <div className="grid grid-cols-4 gap-2">
           {(['cultivation', 'magic', 'tech', 'currency', 'organization', 'profession', 'title', 'custom'] as RuleSystemType[]).map(type => {
             const TypeIcon = getRuleTypeIcon(type);
@@ -204,10 +209,10 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
             <button
               key={type}
               onClick={() => addRuleSystem(type)}
-              className={`p-3 rounded-lg border transition-all text-center hover:shadow-md ${getRuleTypeColor(type)}`}
+              className={cn('rounded-lg border border-transparent p-3 text-center transition-colors hover:border-border', getRuleTypeColor(type))}
             >
-              <TypeIcon className="mb-1 block size-5" />
-              <span className="text-xs font-bold">{getRuleTypeLabel(type)}</span>
+              <TypeIcon className="mx-auto mb-1 block size-5" />
+              <span className="text-xs font-medium">{getRuleTypeLabel(type)}</span>
             </button>
             );
           })}
@@ -216,8 +221,8 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
 
       {/* 规则系统列表 */}
       {localRuleSystems.length === 0 ? (
-        <div className="text-center py-8 text-gray-400">
-          <Settings2 className="size-10 mb-2 opacity-30" />
+        <div className="py-8 text-center text-muted-foreground">
+          <Settings2 className="mx-auto mb-2 size-10 opacity-30" strokeWidth={1.5} />
           <p className="text-sm">{t('rule.empty')}</p>
         </div>
       ) : (
@@ -225,139 +230,148 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
           {localRuleSystems.map(system => (
             <div
               key={system.id}
-              className={`border rounded-xl overflow-hidden transition-all ${
-                selectedSystemId === system.id
-                  ? 'border-rose-300 shadow-md'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
+              className={cn(
+                'overflow-hidden rounded-lg border bg-card transition-colors',
+                selectedSystemId === system.id ? 'border-primary/40' : 'border-border hover:border-muted-foreground/40'
+              )}
             >
               {/* 系统头部 */}
               <div
                 onClick={() => setSelectedSystemId(selectedSystemId === system.id ? null : system.id)}
-                className={`p-4 cursor-pointer flex items-center justify-between ${getRuleTypeColor(system.type)}`}
+                className="flex cursor-pointer items-center justify-between p-4"
               >
                 <div className="flex items-center gap-3">
-                  {(() => { const TypeIcon = getRuleTypeIcon(system.type); return <TypeIcon className="size-6" />; })()}
+                  <div className={cn('flex size-10 shrink-0 items-center justify-center rounded-lg', getRuleTypeColor(system.type))}>
+                    {(() => { const TypeIcon = getRuleTypeIcon(system.type); return <TypeIcon className="size-5" />; })()}
+                  </div>
                   <div>
-                    <h4 className="font-bold text-gray-800">{system.name}</h4>
-                    <p className="text-xs text-gray-500">
+                    <h4 className="font-serif text-sm font-medium">{system.name}</h4>
+                    <p className="text-xs text-muted-foreground">
                       {t('rule.levelsCount', { count: system.levels.length })}
                       {(system.appliedToCharacterIds?.length ?? 0) > 0 && ` · ${t('rule.charactersCount', { count: system.appliedToCharacterIds?.length ?? 0 })}`}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 text-muted-foreground hover:text-destructive"
                     onClick={(e) => {
                       e.stopPropagation();
                       deleteSystem(system.id);
                     }}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                   >
-                    <Trash className="size-4" />
-                  </button>
-                  {selectedSystemId === system.id ? <ChevronUp className="size-4 text-gray-400" /> : <ChevronDown className="size-4 text-gray-400" />}
+                    <Trash2 className="size-4" />
+                  </Button>
+                  {selectedSystemId === system.id ? <ChevronUp className="size-4 text-muted-foreground" /> : <ChevronDown className="size-4 text-muted-foreground" />}
                 </div>
               </div>
 
               {/* 系统详情编辑 */}
               {selectedSystemId === system.id && (
-                <div className="p-4 bg-white animate-in fade-in">
+                <div className="border-t border-border p-4">
                   {/* 基本信息 */}
-                  <div className="space-y-3 mb-4">
-                    <div>
-                      <label className="block text-xs font-bold text-gray-600 mb-1">{t('rule.nameLabel')}</label>
-                      <input
+                  <div className="mb-4 space-y-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">{t('rule.nameLabel')}</Label>
+                      <Input
                         type="text"
                         value={system.name}
                         onChange={(e) => updateSystem(system.id, { name: e.target.value })}
-                        className="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-rose-200 outline-none"
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-600 mb-1">{t('rule.descLabel')}</label>
-                      <textarea
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">{t('rule.descLabel')}</Label>
+                      <Textarea
                         value={system.description}
                         onChange={(e) => updateSystem(system.id, { description: e.target.value })}
                         placeholder={t('rule.descPlaceholder')}
                         rows={2}
-                        className="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-rose-200 outline-none resize-none"
                       />
                     </div>
                   </div>
 
                   {/* 等级管理 */}
-                  <div className="border-t border-gray-100 pt-3">
-                    <div className="flex items-center justify-between mb-3">
-                      <h5 className="text-sm font-bold text-gray-700">{t('rule.levelsTitle')}</h5>
-                      <button
+                  <div className="border-t border-border pt-3">
+                    <div className="mb-3 flex items-center justify-between">
+                      <h5 className="text-sm font-medium">{t('rule.levelsTitle')}</h5>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary hover:text-primary"
                         onClick={() => addLevel(system.id)}
-                        className="text-xs text-rose-600 hover:text-rose-700 font-bold flex items-center gap-1"
                       >
                         <Plus className="size-4" /> {t('rule.addLevel')}
-                      </button>
+                      </Button>
                     </div>
 
                     {system.levels.length === 0 ? (
-                      <p className="text-xs text-gray-400 italic">{t('rule.noLevels')}</p>
+                      <p className="text-xs italic text-muted-foreground">{t('rule.noLevels')}</p>
                     ) : (
-                      <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                      <div className="max-h-[300px] space-y-2 overflow-y-auto">
                         {system.levels.map((level, index) => (
-                          <div key={index} className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-xs font-bold text-gray-400 w-8">#{index + 1}</span>
-                              <input
+                          <div key={index} className="rounded-lg border border-border bg-muted/30 p-3">
+                            <div className="mb-2 flex items-center gap-2">
+                              <span className="w-8 text-xs font-medium tabular-nums text-muted-foreground">#{index + 1}</span>
+                              <Input
                                 type="text"
                                 value={level.name}
                                 onChange={(e) => updateLevel(system.id, index, { name: e.target.value })}
                                 placeholder={t('rule.levelNamePlaceholder')}
-                                className="flex-1 px-2 py-1 text-sm border rounded focus:ring-2 focus:ring-rose-200 outline-none"
+                                className="h-8 flex-1 text-sm"
                               />
-                              <div className="flex items-center gap-1">
-                                <button
+                              <div className="flex items-center gap-0.5">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-7 text-muted-foreground"
                                   onClick={() => moveLevel(system.id, index, 'up')}
                                   disabled={index === 0}
-                                  className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
                                 >
                                   <ArrowUp className="size-4" />
-                                </button>
-                                <button
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-7 text-muted-foreground"
                                   onClick={() => moveLevel(system.id, index, 'down')}
                                   disabled={index === system.levels.length - 1}
-                                  className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
                                 >
                                   <ArrowDown className="size-4" />
-                                </button>
-                                <button
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-7 text-muted-foreground hover:text-destructive"
                                   onClick={() => removeLevel(system.id, index)}
-                                  className="p-1 text-red-400 hover:text-red-600"
                                 >
                                   <X className="size-4" />
-                                </button>
+                                </Button>
                               </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-2 ml-8">
-                              <textarea
+                            <div className="ml-8 grid grid-cols-2 gap-2">
+                              <Textarea
                                 value={level.description}
                                 onChange={(e) => updateLevel(system.id, index, { description: e.target.value })}
                                 placeholder={t('rule.levelDescPlaceholder')}
                                 rows={2}
-                                className="px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-rose-200 outline-none resize-none"
+                                className="text-xs"
                               />
                               <div className="space-y-1">
-                                <input
+                                <Input
                                   type="text"
                                   value={level.requirements || ''}
                                   onChange={(e) => updateLevel(system.id, index, { requirements: e.target.value })}
                                   placeholder={t('rule.levelReqPlaceholder')}
-                                  className="w-full px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-rose-200 outline-none"
+                                  className="h-7 text-xs"
                                 />
-                                <input
+                                <Input
                                   type="text"
                                   value={level.abilities || ''}
                                   onChange={(e) => updateLevel(system.id, index, { abilities: e.target.value })}
                                   placeholder={t('rule.levelAbilitiesPlaceholder')}
-                                  className="w-full px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-rose-200 outline-none"
+                                  className="h-7 text-xs"
                                 />
                               </div>
                             </div>
@@ -368,28 +382,29 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
                   </div>
 
                   {/* 角色关联 */}
-                  <div className="border-t border-gray-100 pt-3 mt-3">
-                    <h5 className="text-sm font-bold text-gray-700 mb-2">{t('rule.charactersTitle')}</h5>
+                  <div className="mt-3 border-t border-border pt-3">
+                    <h5 className="mb-2 text-sm font-medium">{t('rule.charactersTitle')}</h5>
                     {characters.length === 0 ? (
-                      <p className="text-xs text-gray-400 italic">{t('rule.noCharacters')}</p>
+                      <p className="text-xs italic text-muted-foreground">{t('rule.noCharacters')}</p>
                     ) : (
-                      <div className="grid grid-cols-3 gap-2 max-h-32 overflow-y-auto">
+                      <div className="grid max-h-32 grid-cols-3 gap-2 overflow-y-auto">
                         {characters.map(character => (
                           <label
                             key={character.id}
-                            className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-colors ${
+                            className={cn(
+                              'flex cursor-pointer items-center gap-2 rounded-md border p-2 transition-colors',
                               system.appliedToCharacterIds?.includes(character.id)
-                                ? 'bg-rose-50 border border-rose-200'
-                                : 'bg-gray-50 border border-transparent hover:bg-gray-100'
-                            }`}
+                                ? 'border-primary/40 bg-primary/5'
+                                : 'border-transparent bg-muted/30 hover:bg-muted'
+                            )}
                           >
                             <input
                               type="checkbox"
                               checked={system.appliedToCharacterIds?.includes(character.id) || false}
                               onChange={() => toggleCharacter(system.id, character.id)}
-                              className="rounded text-rose-600 focus:ring-rose-500"
+                              className="size-3.5 accent-primary"
                             />
-                            <span className="text-xs truncate">{character.name}</span>
+                            <span className="truncate text-xs">{character.name}</span>
                           </label>
                         ))}
                       </div>
@@ -404,14 +419,11 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
 
       {/* 保存按钮 */}
       {hasChanges && (
-        <div className="flex justify-end pt-4 border-t border-gray-100 animate-in fade-in">
-          <button
-            onClick={handleSave}
-            className="px-6 py-2 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 transition-colors flex items-center gap-2"
-          >
+        <div className="flex justify-end border-t border-border pt-4">
+          <Button onClick={handleSave}>
             <Save className="size-4" />
             {t('rule.save')}
-          </button>
+          </Button>
         </div>
       )}
     </div>

@@ -28,7 +28,8 @@
   },
   "openDiagram": "开启命运关系图谱",
   "archive": {
-    "title": "世界与角色档案库",
+    "title": "角色档案",
+    "total": "共 {{n}} 个角色",
     "clearConfirm": "确定清空？",
     "clear": "清空库",
     "addManually": "手动添加",
@@ -143,6 +144,7 @@
   },
   "diagram": {
     "title": "人物命运图谱",
+    "subtitle": "关系交织的命运之网",
     "resetTitle": "重置为圆形布局",
     "reset": "重置布局",
     "ageLabel": "年龄：{{age}}",

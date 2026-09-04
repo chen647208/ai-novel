@@ -13,6 +13,11 @@ import { type Project, type PromptTemplate, type ModelConfig, type StreamingAIRe
 import { AIService } from '../assistant/services/aiService';
 import { roleLabel } from '../characters/displayLabels';
 import { dialogService } from '@/shared/services/dialogService';
+import { cn } from '@/shared/utils/cn';
+import { Badge } from '@/shared/ui/Badge';
+import { Button } from '@/shared/ui/Button';
+import { Card } from '@/shared/ui/Card';
+import { Select } from '@/shared/ui/Select';
 import { Check, CheckCheck, ListTree, Loader2, Pause, PenLine, Play, Square, Users, XCircle } from 'lucide-react';
 
 interface StepOutlineProps {
@@ -241,202 +246,189 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
   };
 
   return (
-    <div className="max-w-7xl mx-auto h-full p-8 flex flex-col gap-6 overflow-hidden">
-      <div className="flex justify-between items-end border-b pb-6 border-gray-100">
+    <div className="mx-auto flex h-full w-full max-w-7xl flex-col gap-6 overflow-hidden p-8">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5">
         <div>
-          <h2 className="text-3xl font-black text-gray-800 tracking-tight">{t('steps:outline.title')}</h2>
-          <p className="text-gray-500 mt-1 italic font-medium">{t('steps:outline.subtitle')}</p>
+          <h2 className="font-serif text-2xl font-semibold tracking-tight">{t('steps:outline.title')}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t('steps:outline.subtitle')}</p>
         </div>
-        <div className="flex gap-4">
-          <select 
+        <div className="flex flex-wrap items-center gap-2">
+          <Select
             value={selectedPromptId}
             onChange={(e) => setSelectedPromptId(e.target.value)}
-            className="text-sm border-2 border-gray-100 rounded-xl px-4 py-2 bg-white outline-none focus:border-blue-500 transition-all"
+            className="h-9 w-auto"
           >
             {outlinePrompts.map(p => <option key={p.id} value={p.id}>{templateDisplayName(p)}</option>)}
-          </select>
-          
+          </Select>
+
           {/* 输出模式选择器 */}
-          <select 
+          <Select
             value={outputMode}
             onChange={(e) => setOutputMode(e.target.value as OutputMode)}
-            className="text-sm border-2 border-gray-100 rounded-xl px-4 py-2 bg-white outline-none focus:border-blue-500 transition-all"
+            className="h-9 w-auto"
           >
             <option value="streaming">{t('steps:common.streaming')}</option>
             <option value="traditional">{t('steps:common.traditional')}</option>
-          </select>
-          
+          </Select>
+
           {/* 流式控制按钮组 */}
           {isStreaming ? (
-            <div className="flex gap-2">
-              <button 
-                onClick={togglePauseStreaming}
-                className="px-4 py-3 bg-yellow-500 text-white font-black rounded-xl hover:bg-yellow-600 transition-all shadow-lg shadow-yellow-100 active:scale-95 flex items-center gap-2"
-              >
+            <>
+              <Button variant="outline" onClick={togglePauseStreaming}>
                 {isPaused ? <Play className="size-4" /> : <Pause className="size-4" />}
                 {isPaused ? t('steps:outline.resumeGen') : t('steps:outline.pauseGen')}
-              </button>
-              <button 
-                onClick={stopStreaming}
-                className="px-4 py-3 bg-red-500 text-white font-black rounded-xl hover:bg-red-600 transition-all shadow-lg shadow-red-100 active:scale-95 flex items-center gap-2"
-              >
+              </Button>
+              <Button variant="destructive" onClick={stopStreaming}>
                 <Square className="size-4" />
                 {t('steps:outline.stopGen')}
-              </button>
-            </div>
+              </Button>
+            </>
           ) : (
-            <button 
-              onClick={generateOutline}
-              disabled={loading}
-              className="px-8 py-3 bg-blue-600 text-white font-black rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 active:scale-95 disabled:bg-gray-400 flex items-center gap-2"
-            >
+            <Button onClick={generateOutline} disabled={loading}>
               {loading ? <Loader2 className="size-4 animate-spin" /> : <ListTree className="size-4" />}
               {loading ? t('steps:outline.generating') : t('steps:outline.generateBtn')}
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 overflow-hidden">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 overflow-hidden lg:grid-cols-12">
         {/* Left: Character & Story Reference */}
-        <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2 custom-scrollbar">
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-            <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-4">{t('steps:outline.contextTitle')}</h4>
-            <div className="space-y-4">
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                <span className="text-[10px] font-black text-gray-400 block mb-1">{t('steps:outline.workTitle')}</span>
-                <p className="text-sm font-bold text-gray-800">{project.title}</p>
+        <div className="space-y-4 overflow-y-auto pr-1 lg:col-span-4">
+          <Card className="p-5">
+            <h4 className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('steps:outline.contextTitle')}</h4>
+            <div className="space-y-3">
+              <div className="rounded-md border border-border bg-muted/40 p-3">
+                <span className="mb-0.5 block text-[10px] uppercase tracking-wider text-muted-foreground">{t('steps:outline.workTitle')}</span>
+                <p className="font-serif text-sm font-medium">{project.title}</p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                <span className="text-[10px] font-black text-gray-400 block mb-1">{t('steps:outline.storyCore')}</span>
-                <p className="text-xs text-gray-600 leading-relaxed line-clamp-6">{project.intro}</p>
+              <div className="rounded-md border border-border bg-muted/40 p-3">
+                <span className="mb-0.5 block text-[10px] uppercase tracking-wider text-muted-foreground">{t('steps:outline.storyCore')}</span>
+                <p className="line-clamp-6 text-xs leading-relaxed text-muted-foreground">{project.intro}</p>
               </div>
             </div>
-          </div>
-          
+          </Card>
+
           {/* Knowledge Base Selection Card */}
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-             <div className="flex justify-between items-center mb-4">
-                <h4 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">{t('steps:outline.knowledgeTitle')}</h4>
+          <Card className="p-5">
+             <div className="mb-3 flex items-center justify-between">
+                <h4 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('steps:outline.knowledgeTitle')}</h4>
                 {(project.knowledge || []).filter(k => k.category === 'outline').length > 0 && (
                    <div className="flex gap-1">
-                      <button 
+                      <Button
+                         variant="ghost"
+                         size="sm"
+                         className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
                          onClick={() => {
                             const allIds = (project.knowledge || [])
                               .filter(k => k.category === 'outline')
                               .map(k => k.id);
                             setSelectedKnowledgeIds(new Set(allIds));
                          }}
-                         className="px-2 py-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded text-[9px] font-bold transition-all flex items-center gap-1"
                          title={t('steps:common.selectAllTitle')}
                       >
-                         <CheckCheck className="size-2" /> {t('steps:common.selectAll')}
-                      </button>
-                      <button 
+                         <CheckCheck className="size-3" /> {t('steps:common.selectAll')}
+                      </Button>
+                      <Button
+                         variant="ghost"
+                         size="sm"
+                         className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
                          onClick={() => setSelectedKnowledgeIds(new Set())}
-                         className="px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded text-[9px] font-bold transition-all flex items-center gap-1"
                          title={t('steps:common.clearTitle')}
                       >
-                         <XCircle className="size-2" /> {t('steps:common.clear')}
-                      </button>
+                         <XCircle className="size-3" /> {t('steps:common.clear')}
+                      </Button>
                    </div>
                 )}
              </div>
-             <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
-                {(project.knowledge || []).filter(k => k.category === 'outline').length === 0 ? <p className="text-xs text-gray-300 italic">{t('steps:common.noMaterial')}</p> : 
+             <div className="max-h-48 space-y-1.5 overflow-y-auto">
+                {(project.knowledge || []).filter(k => k.category === 'outline').length === 0 ? <p className="text-xs italic text-muted-foreground">{t('steps:common.noMaterial')}</p> :
                   project.knowledge.filter(k => k.category === 'outline').map(k => (
-                     <div 
+                     <div
                         key={k.id}
                         onClick={() => {
                            const newSet = new Set(selectedKnowledgeIds);
                            if (newSet.has(k.id)) newSet.delete(k.id); else newSet.add(k.id);
                            setSelectedKnowledgeIds(newSet);
                         }}
-                        className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center gap-3 ${
-                           selectedKnowledgeIds.has(k.id) ? 'bg-emerald-50 border-emerald-200' : 'bg-gray-50 border-gray-100 hover:border-gray-200'
-                        }`}
+                        className={cn(
+                          'flex cursor-pointer items-center gap-2.5 rounded-md border p-2.5 transition-colors',
+                          selectedKnowledgeIds.has(k.id)
+                            ? 'border-primary/40 bg-primary/5'
+                            : 'border-border hover:bg-muted'
+                        )}
                      >
-                        <div className={`w-4 h-4 rounded border flex items-center justify-center ${selectedKnowledgeIds.has(k.id) ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-white border-gray-300'}`}>
-                           {selectedKnowledgeIds.has(k.id) && <Check className="size-2" />}
-                        </div>
-                        <span className={`text-xs font-bold truncate ${selectedKnowledgeIds.has(k.id) ? 'text-emerald-800' : 'text-gray-600'}`}>{k.name}</span>
+                        <span className={cn(
+                          'flex size-4 shrink-0 items-center justify-center rounded border',
+                          selectedKnowledgeIds.has(k.id) ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/40'
+                        )}>
+                           {selectedKnowledgeIds.has(k.id) && <Check className="size-3" />}
+                        </span>
+                        <span className={cn('truncate text-xs', selectedKnowledgeIds.has(k.id) ? 'font-medium text-foreground' : 'text-muted-foreground')}>{k.name}</span>
                      </div>
                   ))
                 }
              </div>
-          </div>
+          </Card>
 
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-            <div className="flex justify-between items-center mb-4">
-              <h4 className="text-[10px] font-black text-purple-500 uppercase tracking-widest">{t('steps:outline.charactersTitle', { count: project.characters.length })}</h4>
-              <Users className="size-4 text-purple-200" />
+          <Card className="p-5">
+            <div className="mb-3 flex items-center justify-between">
+              <h4 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('steps:outline.charactersTitle', { count: project.characters.length })}</h4>
+              <Users className="size-4 text-muted-foreground" />
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {project.characters.length === 0 ? (
-                <p className="text-xs text-gray-400 italic">{t('steps:outline.noCharactersHint')}</p>
+                <p className="text-xs italic text-muted-foreground">{t('steps:outline.noCharactersHint')}</p>
               ) : (
                 project.characters.map(c => (
-                  <div key={c.id} className="p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-purple-200 transition-colors">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-sm font-bold text-gray-800">{c.name}</span>
-                      <span className="text-[9px] px-2 py-0.5 bg-white border rounded-full text-gray-500 font-bold">{roleLabel(c.role)}</span>
+                  <div key={c.id} className="rounded-md border border-border bg-muted/40 p-3">
+                    <div className="mb-1 flex items-center justify-between">
+                      <span className="font-serif text-sm font-medium">{c.name}</span>
+                      <Badge variant="outline">{roleLabel(c.role)}</Badge>
                     </div>
-                    <p className="text-[10px] text-gray-400 line-clamp-2">{c.personality}</p>
+                    <p className="line-clamp-2 text-xs text-muted-foreground">{c.personality}</p>
                   </div>
                 ))
               )}
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Right: Outline Editor */}
-        <div className="lg:col-span-8 flex flex-col h-full overflow-hidden">
-          <div className="bg-white rounded-3xl border border-gray-200 shadow-sm flex flex-col h-full overflow-hidden">
-            <div className="p-5 border-b bg-gray-50/50 flex justify-between items-center px-8">
+        <div className="flex min-h-0 flex-col overflow-hidden lg:col-span-8">
+          <Card className="flex h-full flex-col overflow-hidden rounded-lg">
+            <div className="flex shrink-0 items-center justify-between border-b border-border bg-muted/30 px-4 py-2.5">
               <div className="flex items-center gap-2">
-                <PenLine className="size-3.5 text-gray-400" />
-                <span className="text-xs font-black text-gray-400 tracking-widest uppercase">{t('steps:outline.editorTitle')}</span>
+                <PenLine className="size-3.5 text-muted-foreground" />
+                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('steps:outline.editorTitle')}</span>
               </div>
               <div className="flex items-center gap-4">
                 {/* Token信息显示 */}
                 {(isStreaming || isComplete || (outputMode === 'traditional' && traditionalTokens.total > 0)) && (
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1">
-                      <span className="text-[10px] font-black text-gray-400">{t('steps:common.input')}</span>
-                      <span className="text-xs font-bold text-blue-600">
-                        {isStreaming || isComplete ? streamingTokens.prompt : traditionalTokens.prompt}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-[10px] font-black text-gray-400">{t('steps:common.output')}</span>
-                      <span className="text-xs font-bold text-green-600">
-                        {isStreaming || isComplete ? streamingTokens.completion : traditionalTokens.completion}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-[10px] font-black text-gray-400">{t('steps:common.total')}</span>
-                      <span className="text-xs font-bold text-purple-600">
-                        {isStreaming || isComplete ? streamingTokens.total : traditionalTokens.total}
-                      </span>
-                    </div>
-                    {isStreaming && <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>}
+                  <div className="flex items-center gap-3 text-xs tabular-nums">
+                    <span className="text-muted-foreground">{t('steps:common.input')} <span className="font-medium text-foreground">{isStreaming || isComplete ? streamingTokens.prompt : traditionalTokens.prompt}</span></span>
+                    <span className="text-muted-foreground">{t('steps:common.output')} <span className="font-medium text-foreground">{isStreaming || isComplete ? streamingTokens.completion : traditionalTokens.completion}</span></span>
+                    <span className="text-muted-foreground">{t('steps:common.total')} <span className="font-medium text-foreground">{isStreaming || isComplete ? streamingTokens.total : traditionalTokens.total}</span></span>
+                    {isStreaming && <span className="size-1.5 animate-pulse rounded-full bg-success" />}
                   </div>
                 )}
-                <button 
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
                   onClick={() => onUpdate({ outline: '' })}
-                  className="text-[10px] font-black text-red-400 hover:text-red-500 uppercase tracking-widest transition-colors"
                 >
                   {t('steps:outline.reset')}
-                </button>
+                </Button>
               </div>
             </div>
-            <textarea 
-              className="flex-1 w-full p-10 text-gray-700 leading-loose outline-none resize-none font-serif text-lg bg-transparent custom-scrollbar"
+            <textarea
+              className="flex-1 resize-none border-0 bg-transparent p-8 font-serif text-base leading-loose outline-none placeholder:text-muted-foreground/50"
               value={outlineContent}
               onChange={(e) => onUpdate({ outline: e.target.value })}
               placeholder={t('steps:outline.editorPlaceholder')}
             />
-          </div>
+          </Card>
         </div>
       </div>
     </div>

@@ -74,6 +74,7 @@ const WorkspaceNav: React.FC<WorkspaceNavProps> = ({
           <button
             type="button"
             onClick={onOpenBookshelf}
+            aria-label={t('bookshelf')}
             className="flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <Library className="size-5" />
@@ -95,6 +96,7 @@ const WorkspaceNav: React.FC<WorkspaceNavProps> = ({
                 <button
                   type="button"
                   onClick={() => onSectionChange(section.id)}
+                  aria-label={t(section.labelKey)}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
                     'relative flex size-10 items-center justify-center rounded-lg transition-colors',
@@ -124,6 +126,7 @@ const WorkspaceNav: React.FC<WorkspaceNavProps> = ({
           <button
             type="button"
             onClick={onOpenSettings}
+            aria-label={t('settings')}
             className="flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <Settings2 className="size-5" />

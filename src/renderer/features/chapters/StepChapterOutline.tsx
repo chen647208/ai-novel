@@ -12,6 +12,14 @@ import { useTranslation, i18n, templateDisplayName } from '@/i18n';
 import { type Project, type PromptTemplate, type ModelConfig, type Chapter } from '../../../shared/types';
 import { AIService } from '../assistant/services/aiService';
 import { dialogService } from '@/shared/services/dialogService';
+import { cn } from '@/shared/utils/cn';
+import { Button } from '@/shared/ui/Button';
+import { Card } from '@/shared/ui/Card';
+import { EmptyState } from '@/shared/ui/EmptyState';
+import { Input } from '@/shared/ui/Input';
+import { Label } from '@/shared/ui/Label';
+import { Select } from '@/shared/ui/Select';
+import { Textarea } from '@/shared/ui/Textarea';
 import { BookOpen, BookOpenText, Check, CheckCheck, ChevronDown, ChevronRight, Clock, FastForward, FileOutput, Flag, Globe2, Layers, LayoutList, ListOrdered, Loader2, MapPin, PenTool, Trash2, WandSparkles, XCircle } from 'lucide-react';
 
 interface StepChapterOutlineProps {
@@ -236,73 +244,86 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
   };
 
   return (
-    <div className="max-w-7xl mx-auto h-full p-8 flex flex-col gap-6 overflow-hidden">
-      <div className="flex justify-between items-center bg-white p-6 px-10 rounded-[2rem] border border-gray-100 shadow-sm z-20">
-        <div className="flex items-center gap-5">
-          <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
-            <ListOrdered className="size-6" />
+    <div className="mx-auto flex h-full w-full max-w-7xl flex-col gap-5 overflow-hidden p-8">
+      <Card className="z-20 flex shrink-0 flex-wrap items-center justify-between gap-4 p-5">
+        <div className="flex items-center gap-4">
+          <div className="flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+            <ListOrdered className="size-5" />
           </div>
           <div>
-            <h2 className="text-2xl font-black text-gray-800 tracking-tight">{t('steps:chapters.title')}</h2>
-            <p className="text-xs text-gray-400 mt-0.5 uppercase tracking-widest font-black">AI Driven Chapter Orchestration</p>
+            <h2 className="font-serif text-xl font-medium tracking-tight">{t('steps:chapters.title')}</h2>
+            <p className="text-xs text-muted-foreground">{t('steps:chapters.subtitle')}</p>
           </div>
         </div>
-        <div className="flex gap-4 items-center">
+        <div className="flex flex-wrap items-center gap-2">
            {/* Knowledge Selector Toggle */}
            <div className="relative">
-              <button 
+              <Button
+                 variant={selectedKnowledgeIds.size > 0 ? 'secondary' : 'outline'}
+                 size="icon"
                  onClick={() => setShowKnowledgeSelector(!showKnowledgeSelector)}
-                 className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${selectedKnowledgeIds.size > 0 ? 'bg-emerald-100 text-emerald-600 border-emerald-200' : 'bg-white border-gray-200 text-gray-400 hover:text-gray-600'}`}
                  title={t('steps:chapters.knowledgeToggleTitle')}
               >
                  <BookOpenText className="size-4" />
-                 {selectedKnowledgeIds.size > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 text-white text-[9px] flex items-center justify-center rounded-full font-bold">{selectedKnowledgeIds.size}</span>}
-              </button>
-              
+                 {selectedKnowledgeIds.size > 0 && (
+                   <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-primary text-[9px] font-medium text-primary-foreground">
+                     {selectedKnowledgeIds.size}
+                   </span>
+                 )}
+              </Button>
+
               {showKnowledgeSelector && (
-                 <div className="absolute top-12 right-0 bg-white border border-gray-100 shadow-xl rounded-2xl p-4 w-72 z-50 animate-in zoom-in-95 duration-200">
-                    <div className="flex justify-between items-center mb-3">
-                       <h5 className="text-xs font-black text-gray-500 uppercase tracking-widest">{t('steps:chapters.knowledgeSelectTitle')}</h5>
+                 <div className="absolute right-0 top-11 z-50 w-72 rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-lg">
+                    <div className="mb-2 flex items-center justify-between">
+                       <h5 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('steps:chapters.knowledgeSelectTitle')}</h5>
                        <div className="flex gap-1">
-                          <button 
+                          <Button
+                             variant="ghost"
+                             size="sm"
+                             className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
                              onClick={() => {
                                 const allIds = (project.knowledge || [])
                                   .filter(k => k.category === 'chapter')
                                   .map(k => k.id);
                                 setSelectedKnowledgeIds(new Set(allIds));
                              }}
-                             className="px-2 py-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded text-[9px] font-bold transition-all flex items-center gap-1"
                              title={t('steps:common.selectAllTitle')}
                           >
-                             <CheckCheck className="size-2" /> {t('steps:common.selectAll')}
-                          </button>
-                          <button 
+                             <CheckCheck className="size-3" /> {t('steps:common.selectAll')}
+                          </Button>
+                          <Button
+                             variant="ghost"
+                             size="sm"
+                             className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
                              onClick={() => setSelectedKnowledgeIds(new Set())}
-                             className="px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded text-[9px] font-bold transition-all flex items-center gap-1"
                              title={t('steps:common.clearTitle')}
                           >
-                             <XCircle className="size-2" /> {t('steps:common.clear')}
-                          </button>
+                             <XCircle className="size-3" /> {t('steps:common.clear')}
+                          </Button>
                        </div>
                     </div>
-                    <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
-                       {(project.knowledge || []).filter(k => k.category === 'chapter').length === 0 ? <p className="text-xs text-gray-300 italic">{t('steps:common.noMaterial')}</p> :
+                    <div className="max-h-60 space-y-1 overflow-y-auto">
+                       {(project.knowledge || []).filter(k => k.category === 'chapter').length === 0 ? <p className="text-xs italic text-muted-foreground">{t('steps:common.noMaterial')}</p> :
                           project.knowledge.filter(k => k.category === 'chapter').map(k => (
-                             <div 
+                             <div
                                 key={k.id}
                                 onClick={() => {
                                    const newSet = new Set(selectedKnowledgeIds);
                                    if (newSet.has(k.id)) newSet.delete(k.id); else newSet.add(k.id);
                                    setSelectedKnowledgeIds(newSet);
                                 }}
-                                className={`p-2 rounded-lg border cursor-pointer transition-all flex items-center gap-2 ${
-                                   selectedKnowledgeIds.has(k.id) ? 'bg-emerald-50 border-emerald-200' : 'bg-gray-50 border-gray-100 hover:border-gray-200'
-                                }`}
+                                className={cn(
+                                  'flex cursor-pointer items-center gap-2 rounded-md border p-2 transition-colors',
+                                  selectedKnowledgeIds.has(k.id) ? 'border-primary/40 bg-primary/5' : 'border-transparent hover:bg-muted'
+                                )}
                              >
-                                <div className={`w-3 h-3 rounded border flex items-center justify-center ${selectedKnowledgeIds.has(k.id) ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-white border-gray-300'}`}>
-                                   {selectedKnowledgeIds.has(k.id) && <Check className="size-4 text-[6px]" />}
-                                </div>
-                                <span className={`text-[10px] font-bold truncate flex-1 text-left ${selectedKnowledgeIds.has(k.id) ? 'text-emerald-800' : 'text-gray-600'}`}>{k.name}</span>
+                                <span className={cn(
+                                  'flex size-3.5 shrink-0 items-center justify-center rounded border',
+                                  selectedKnowledgeIds.has(k.id) ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/40'
+                                )}>
+                                   {selectedKnowledgeIds.has(k.id) && <Check className="size-2.5" />}
+                                </span>
+                                <span className={cn('flex-1 truncate text-left text-xs', selectedKnowledgeIds.has(k.id) ? 'font-medium text-foreground' : 'text-muted-foreground')}>{k.name}</span>
                              </div>
                           ))
                        }
@@ -311,130 +332,99 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
               )}
            </div>
 
-          
-          <select 
+          <Select
             value={selectedPromptId}
             onChange={(e) => setSelectedPromptId(e.target.value)}
-            className="text-xs font-bold border-2 border-gray-100 rounded-xl px-4 py-2 outline-none focus:border-blue-500 transition-all bg-gray-50 h-10"
+            className="h-10 w-auto"
           >
             {chapterPrompts.map(p => <option key={p.id} value={p.id}>{templateDisplayName(p)}</option>)}
-          </select>
-          <div className="flex bg-gray-100 p-1 rounded-2xl gap-1">
-            <button 
-              onClick={() => generateChapters(false)}
-              disabled={loading || continueLoading}
-              className={`px-6 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
-                loading ? 'bg-gray-200 text-gray-400' : 'bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200 active:scale-95'
-              }`}
-            >
+          </Select>
+          <div className="flex items-center gap-2">
+            <Button onClick={() => generateChapters(false)} disabled={loading || continueLoading}>
               {loading ? <Loader2 className="size-4 animate-spin" /> : <WandSparkles className="size-4" />}
               {loading ? t('steps:chapters.generating') : t('steps:chapters.regenerate')}
-            </button>
-            
+            </Button>
+
             {project.chapters.length > 0 && (
-              <button 
-                onClick={() => generateChapters(true)}
-                disabled={loading || continueLoading}
-                className={`px-6 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
-                  continueLoading ? 'bg-gray-200 text-gray-400' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-100 active:scale-95'
-                }`}
-              >
+              <Button variant="outline" onClick={() => generateChapters(true)} disabled={loading || continueLoading}>
                 {continueLoading ? <Loader2 className="size-4 animate-spin" /> : <FastForward className="size-4" />}
                 {continueLoading ? t('steps:chapters.continuing') : t('steps:chapters.continueBtn')}
-              </button>
+              </Button>
             )}
           </div>
-          
-        </div>
-      </div>
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-8 overflow-hidden z-10">
-        <div className="lg:col-span-1 bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col overflow-hidden">
-          <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-            <BookOpen className="size-4" /> {t('steps:chapters.outlineRefTitle')}
+        </div>
+      </Card>
+
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-5 overflow-hidden lg:grid-cols-4">
+        <Card className="flex min-h-0 flex-col overflow-hidden p-5 lg:col-span-1">
+          <h4 className="mb-3 flex shrink-0 items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <BookOpen className="size-3.5" /> {t('steps:chapters.outlineRefTitle')}
           </h4>
-          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar text-xs text-gray-500 leading-relaxed italic opacity-80 whitespace-pre-wrap text-left">
+          <div className="flex-1 overflow-y-auto pr-1 text-xs italic leading-relaxed text-muted-foreground whitespace-pre-wrap">
             {project.outline || t('steps:chapters.outlineEmpty')}
           </div>
-        </div>
+        </Card>
 
-        <div className="lg:col-span-3 bg-gray-50/30 rounded-[2.5rem] border border-gray-200/50 overflow-hidden flex flex-col">
-          <div className="p-6 border-b bg-white flex justify-between items-center px-10">
-            <span className="text-xs font-black text-gray-400 uppercase flex items-center gap-2">
-              <LayoutList className="size-4" /> {t('steps:chapters.chapterListPreview', { count: project.chapters.length })}
+        <Card className="flex min-h-0 flex-col overflow-hidden rounded-lg p-0 lg:col-span-3">
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
+            <span className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <LayoutList className="size-3.5" /> {t('steps:chapters.chapterListPreview', { count: project.chapters.length })}
             </span>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               {/* Token消耗显示 */}
               {traditionalTokens.total > 0 && (
-                <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-xl p-3 shadow-lg">
-                  <div className="flex items-center gap-4">
-                    <div className="text-center">
-                      <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('steps:chapters.inputToken')}</div>
-                      <div className="text-sm font-bold text-blue-600">
-                        {traditionalTokens.prompt}
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('steps:chapters.outputToken')}</div>
-                      <div className="text-sm font-bold text-green-600">
-                        {traditionalTokens.completion}
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('steps:chapters.totalLabel')}</div>
-                      <div className="text-sm font-bold text-purple-600">
-                        {traditionalTokens.total}
-                      </div>
-                    </div>
-                  </div>
+                <div className="flex items-center gap-3 rounded-md border border-border bg-muted/40 px-3 py-1.5 text-xs tabular-nums">
+                  <span className="text-muted-foreground">{t('steps:chapters.inputToken')} <span className="font-medium text-foreground">{traditionalTokens.prompt}</span></span>
+                  <span className="text-muted-foreground">{t('steps:chapters.outputToken')} <span className="font-medium text-foreground">{traditionalTokens.completion}</span></span>
+                  <span className="text-muted-foreground">{t('steps:chapters.totalLabel')} <span className="font-medium text-foreground">{traditionalTokens.total}</span></span>
                 </div>
               )}
-              <button 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => onUpdate({ chapters: [...project.chapters, { id: Date.now().toString(), title: t('steps:chapters.defaultNewChapter', { num: project.chapters.length + 1 }), summary: '', content: '', order: project.chapters.length }] })}
-                className="px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-black transition-all"
               >
                 {t('steps:chapters.manualAdd')}
-              </button>
-              <button 
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={exportChaptersToTxt}
                 disabled={project.chapters.length === 0}
-                className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
-                  project.chapters.length === 0 
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                    : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
-                }`}
               >
-                <FileOutput className="size-4" />
+                <FileOutput className="size-3.5" />
                 {t('steps:chapters.exportTxt')}
-              </button>
+              </Button>
             </div>
           </div>
-          
-          <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
+
+          <div className="flex-1 space-y-4 overflow-y-auto p-5">
             {(() => {
               // 过滤掉虚拟章节（order < 0的章节）
               const regularChapters = project.chapters.filter(chapter => chapter.order >= 0);
               const sortedChapters = regularChapters.sort((a,b) => a.order - b.order);
-              
+
               if (sortedChapters.length === 0) {
                 return (
-                  <div className="h-full flex flex-col items-center justify-center text-gray-300 py-20">
-                    <Layers className="size-4 text-6xl mb-6 opacity-10" />
-                    <p className="font-black text-gray-400">{t('steps:chapters.emptyTitle')}</p>
-                    <p className="text-xs mt-2 text-center max-w-xs">{t('steps:chapters.emptyHint')}</p>
-                  </div>
+                  <EmptyState
+                    className="h-full"
+                    icon={Layers}
+                    title={t('steps:chapters.emptyTitle')}
+                    description={t('steps:chapters.emptyHint')}
+                  />
                 );
               }
-              
+
               return sortedChapters.map((chap, idx) => (
-                <div key={chap.id} className="bg-white border border-gray-100 rounded-[1.5rem] p-8 shadow-sm group hover:shadow-md hover:border-blue-100 transition-all animate-in slide-in-from-right-4">
-                  <div className="flex items-center gap-5 mb-5 border-b border-gray-50 pb-5">
-                    <div className="w-10 h-10 rounded-2xl bg-gray-50 text-gray-400 flex items-center justify-center font-black text-xs group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                <div key={chap.id} className="group rounded-lg border border-border bg-card p-5 shadow-sm transition-colors hover:border-primary/30">
+                  <div className="mb-4 flex items-center gap-4 border-b border-border pb-4">
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-medium text-muted-foreground">
                       {idx + 1}
                     </div>
-                    <div className="flex-1 text-left">
-                      <input 
-                        className="w-full font-black text-lg text-gray-800 bg-transparent border-none focus:ring-0 p-0"
+                    <div className="min-w-0 flex-1">
+                      <Input
+                        className="h-auto border-none bg-transparent p-0 font-serif text-base font-medium shadow-none focus-visible:ring-0"
                         value={chap.title}
                         onChange={(e) => {
                           const newChaps = project.chapters.map(c => c.id === chap.id ? { ...c, title: e.target.value } : c);
@@ -443,26 +433,25 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
                         placeholder={t('steps:chapters.titlePlaceholder')}
                       />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button 
-                        onClick={() => onEnterWriting(chap.id)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-black shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2"
-                      >
-                        <PenTool className="size-4" /> {t('steps:chapters.writeThis')}
-                      </button>
-                      <button 
+                    <div className="flex shrink-0 items-center gap-1">
+                      <Button size="sm" onClick={() => onEnterWriting(chap.id)}>
+                        <PenTool className="size-3.5" /> {t('steps:chapters.writeThis')}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-7 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
                         onClick={() => onUpdate({ chapters: project.chapters.filter(c => c.id !== chap.id) })}
-                        className="text-gray-200 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-2"
                       >
                         <Trash2 className="size-4" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
-                  
-                  <div className="text-left mb-4">
-                    <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2 block">{t('steps:chapters.summaryLabel')}</span>
-                    <textarea 
-                      className="w-full text-sm text-gray-600 bg-gray-50/50 rounded-2xl p-4 border-none focus:ring-2 focus:ring-blue-100 resize-none leading-relaxed min-h-[100px]"
+
+                  <div className="mb-1">
+                    <Label className="mb-1.5 block text-[10px] uppercase tracking-wider text-muted-foreground">{t('steps:chapters.summaryLabel')}</Label>
+                    <Textarea
+                      className="min-h-24 resize-none bg-muted/40 leading-relaxed"
                       value={chap.summary}
                       onChange={(e) => {
                         const newChaps = project.chapters.map(c => c.id === chap.id ? { ...c, summary: e.target.value } : c);
@@ -471,10 +460,10 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
                       placeholder={t('steps:chapters.summaryPlaceholder')}
                     />
                   </div>
-                  
+
                   {/* 世界关联信息编辑器 */}
-                  <ChapterWorldRelationEditor 
-                    chapter={chap} 
+                  <ChapterWorldRelationEditor
+                    chapter={chap}
                     project={project}
                     onUpdate={(updates) => {
                       const newChaps = project.chapters.map(c => c.id === chap.id ? { ...c, ...updates } : c);
@@ -485,7 +474,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
               ));
             })()}
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );
@@ -531,17 +520,18 @@ const ChapterWorldRelationEditor: React.FC<ChapterWorldRelationEditorProps> = ({
   };
 
   return (
-    <div className="mt-4 pt-4 border-t border-gray-100">
+    <div className="mt-3 border-t border-border pt-3">
       <button
+        type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center gap-2 text-xs text-gray-500 hover:text-amber-600 transition-colors"
+        className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
       >
-        {isExpanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
-        <span className="flex items-center gap-2">
-          <Globe2 className="size-4 text-amber-500" />
+        {isExpanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
+        <span className="flex items-center gap-1.5">
+          <Globe2 className="size-3.5" />
           {t('steps:chapters.worldRelation')}
           {(mainLocation || involvedFactions.length > 0) && (
-            <span className="text-amber-600 font-medium">
+            <span className="text-foreground">
               ({[mainLocation?.name, involvedFactions.length > 0 && t('steps:chapters.factionsCount', { count: involvedFactions.length })].filter(Boolean).join(', ')})
             </span>
           )}
@@ -549,17 +539,17 @@ const ChapterWorldRelationEditor: React.FC<ChapterWorldRelationEditorProps> = ({
       </button>
 
       {isExpanded && (
-        <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4 animate-in fade-in">
+        <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-3">
           {/* 主要发生地点 */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-600 flex items-center gap-2">
-              <MapPin className="size-4 text-emerald-500" />
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <MapPin className="size-3.5" />
               {t('steps:chapters.mainLocation')}
-            </label>
-            <select
+            </Label>
+            <Select
               value={chapter.mainLocationId || ''}
               onChange={(e) => onUpdate({ mainLocationId: e.target.value || undefined })}
-              className="w-full text-xs bg-white px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-100 focus:border-emerald-300"
+              className="h-8 text-xs"
             >
               <option value="">{t('steps:chapters.noneOption')}</option>
               {locations.map(location => (
@@ -567,35 +557,35 @@ const ChapterWorldRelationEditor: React.FC<ChapterWorldRelationEditorProps> = ({
                   {location.name} ({location.type})
                 </option>
               ))}
-            </select>
+            </Select>
             {mainLocation && (
-              <div className="text-xs text-gray-500 bg-emerald-50/50 p-2 rounded-lg">
-                <div className="font-medium text-emerald-700">{mainLocation.name}</div>
-                <div className="text-gray-400 truncate">{mainLocation.description?.substring(0, 40)}...</div>
+              <div className="rounded border border-border bg-muted/40 p-2 text-xs">
+                <div className="font-medium">{mainLocation.name}</div>
+                <div className="truncate text-muted-foreground">{mainLocation.description?.substring(0, 40)}...</div>
               </div>
             )}
           </div>
 
           {/* 涉及势力 */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-600 flex items-center gap-2">
-              <Flag className="size-4 text-amber-500" />
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Flag className="size-3.5" />
               {t('steps:chapters.involvedFactions')}
-            </label>
-            <div className="max-h-32 overflow-y-auto space-y-1 bg-gray-50 rounded-xl p-2">
+            </Label>
+            <div className="max-h-32 space-y-0.5 overflow-y-auto rounded-md border border-border bg-muted/30 p-1.5">
               {factions.length === 0 ? (
-                <span className="text-xs text-gray-400 italic">{t('steps:chapters.noFactions')}</span>
+                <span className="text-xs italic text-muted-foreground">{t('steps:chapters.noFactions')}</span>
               ) : (
                 factions.map(faction => (
-                  <label 
-                    key={faction.id} 
-                    className="flex items-center gap-2 text-xs cursor-pointer hover:bg-white p-1.5 rounded transition-colors"
+                  <label
+                    key={faction.id}
+                    className="flex cursor-pointer items-center gap-2 rounded p-1.5 text-xs transition-colors hover:bg-muted"
                   >
                     <input
                       type="checkbox"
                       checked={chapter.involvedFactionIds?.includes(faction.id) || false}
                       onChange={() => toggleFaction(faction.id)}
-                      className="rounded border-gray-300 text-amber-500 focus:ring-amber-500"
+                      className="size-3.5 accent-primary"
                     />
                     <span className="truncate">{faction.name}</span>
                   </label>
@@ -605,20 +595,21 @@ const ChapterWorldRelationEditor: React.FC<ChapterWorldRelationEditorProps> = ({
           </div>
 
           {/* 故事时间点 */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-600 flex items-center gap-2">
-              <Clock className="size-4 text-indigo-500" />
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Clock className="size-3.5" />
               {t('steps:chapters.storyTime')}
-              {timeline && <span className="text-gray-400 font-normal">({timeline.config.calendarSystem})</span>}
-            </label>
-            
+              {timeline && <span className="font-normal text-muted-foreground/70">({timeline.config.calendarSystem})</span>}
+            </Label>
+
             {timeline ? (
               <div className="space-y-2">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-[10px] text-gray-500 mb-1">{t('steps:chapters.yearLabel')}</label>
-                    <input
+                    <Label className="mb-1 block text-[10px] text-muted-foreground">{t('steps:chapters.yearLabel')}</Label>
+                    <Input
                       type="number"
+                      className="h-8 text-xs"
                       value={chapter.storyDate?.year || ''}
                       onChange={(e) => onUpdate({
                         storyDate: {
@@ -626,14 +617,14 @@ const ChapterWorldRelationEditor: React.FC<ChapterWorldRelationEditorProps> = ({
                           year: parseInt(e.target.value) || 0
                         }
                       })}
-                      className="w-full text-xs bg-white px-2 py-1.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300"
                       placeholder={timeline.config.startYear?.toString() || '0'}
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] text-gray-500 mb-1">{t('steps:chapters.displayLabel')}</label>
-                    <input
+                    <Label className="mb-1 block text-[10px] text-muted-foreground">{t('steps:chapters.displayLabel')}</Label>
+                    <Input
                       type="text"
+                      className="h-8 text-xs"
                       value={chapter.storyDate?.display || ''}
                       onChange={(e) => onUpdate({
                         storyDate: {
@@ -642,20 +633,19 @@ const ChapterWorldRelationEditor: React.FC<ChapterWorldRelationEditorProps> = ({
                           display: e.target.value
                         }
                       })}
-                      className="w-full text-xs bg-white px-2 py-1.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300"
                       placeholder={t('steps:chapters.displayPlaceholder')}
                     />
                   </div>
                 </div>
-                
+
                 {/* 关联时间线事件 */}
                 {timeline.events?.length > 0 && (
                   <div>
-                    <label className="block text-[10px] text-gray-500 mb-1">{t('steps:chapters.linkedEvent')}</label>
-                    <select
+                    <Label className="mb-1 block text-[10px] text-muted-foreground">{t('steps:chapters.linkedEvent')}</Label>
+                    <Select
                       value={chapter.timelineEventId || ''}
                       onChange={(e) => onUpdate({ timelineEventId: e.target.value || undefined })}
-                      className="w-full text-xs bg-white px-2 py-1.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300"
+                      className="h-8 text-xs"
                     >
                       <option value="">{t('steps:chapters.noneOption')}</option>
                       {timeline.events.map(event => (
@@ -663,12 +653,12 @@ const ChapterWorldRelationEditor: React.FC<ChapterWorldRelationEditorProps> = ({
                           {event.title} ({event.date?.display || event.date?.year})
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="text-xs text-gray-400 italic bg-gray-50 p-3 rounded-lg">
+              <div className="rounded-md border border-border bg-muted/30 p-2.5 text-xs italic text-muted-foreground">
                 {t('steps:chapters.noTimeline')}
               </div>
             )}

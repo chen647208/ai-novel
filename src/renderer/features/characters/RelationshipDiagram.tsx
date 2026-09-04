@@ -11,6 +11,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from '@/i18n';
 import { type Character } from '../../../shared/types';
 import { roleLabel } from './displayLabels';
+import { Button } from '@/shared/ui/Button';
 import { Heart, RefreshCw, X } from 'lucide-react';
 
 interface RelationshipDiagramProps {
@@ -136,40 +137,27 @@ const RelationshipDiagram: React.FC<RelationshipDiagramProps> = ({ characters, o
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-gray-950 flex items-center justify-center overflow-hidden animate-in fade-in duration-500">
-      {/* 背景装饰 */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500 rounded-full blur-[120px]"></div>
-      </div>
-
-      <header className="absolute top-0 left-0 right-0 p-8 flex justify-between items-center z-10">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-background">
+      <header className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between p-6">
         <div>
-          <h2 className="text-3xl font-black text-white tracking-tighter">{t('diagram.title')}</h2>
-          <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">Intertwined Destinies Map</p>
+          <h2 className="font-serif text-2xl font-medium tracking-tight text-foreground">{t('diagram.title')}</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">{t('diagram.subtitle')}</p>
         </div>
-        <div className="flex items-center gap-4">
-          <button
-            onClick={resetLayout}
-            className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-all border border-white/10 flex items-center gap-2"
-            title={t('diagram.resetTitle')}
-          >
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={resetLayout} title={t('diagram.resetTitle')}>
             <RefreshCw className="size-4" />
             {t('diagram.reset')}
-          </button>
-          <button 
-            onClick={onClose}
-            className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all border border-white/10"
-          >
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="size-4" />
-          </button>
+          </Button>
         </div>
       </header>
 
       {/* SVG 绘图区域 */}
-      <svg 
+      <svg
         ref={svgRef}
-        className="w-full h-full cursor-grab active:cursor-grabbing"
+        className="h-full w-full cursor-grab active:cursor-grabbing"
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
@@ -197,21 +185,21 @@ const RelationshipDiagram: React.FC<RelationshipDiagramProps> = ({ characters, o
               key={i}
               x1={source.x} y1={source.y}
               x2={target.x} y2={target.y}
-              stroke={isRelatedToSelected ? "#60a5fa" : "#334155"}
+              stroke={isRelatedToSelected ? 'var(--primary)' : 'var(--border)'}
               strokeWidth={isRelatedToSelected ? 2 : 1}
-              strokeDasharray={isRelatedToSelected ? "0" : "5,5"}
+              strokeDasharray={isRelatedToSelected ? '0' : '5,5'}
               className="transition-all duration-500"
-              opacity={selectedId ? (isRelatedToSelected ? 1 : 0.1) : 0.4}
+              opacity={selectedId ? (isRelatedToSelected ? 1 : 0.15) : 0.5}
             />
           );
         })}
 
         {/* 绘制节点 */}
         {nodes.map((node) => (
-          <g 
-            key={node.id} 
+          <g
+            key={node.id}
             transform={`translate(${node.x}, ${node.y})`}
-            className={`cursor-pointer transition-all duration-500 ${draggingId === node.id ? 'cursor-grabbing' : 'cursor-move'}`}
+            className={`transition-all duration-500 ${draggingId === node.id ? 'cursor-grabbing' : 'cursor-move'}`}
             onClick={() => {
               // 如果正在拖拽，不触发点击选中
               if (!draggingId) {
@@ -219,34 +207,34 @@ const RelationshipDiagram: React.FC<RelationshipDiagramProps> = ({ characters, o
               }
             }}
             onMouseDown={(e) => handleMouseDown(e, node.id)}
-            style={{ 
+            style={{
               opacity: selectedId ? (selectedId === node.id || links.some(l => (l.source === node.id && l.target === selectedId) || (l.target === node.id && l.source === selectedId)) ? 1 : 0.2) : 1,
               pointerEvents: draggingId && draggingId !== node.id ? 'none' : 'auto'
             }}
           >
-            <circle 
+            <circle
               r={selectedId === node.id ? 45 : 35}
               fill={getRoleColor(node.role)}
-              filter={selectedId === node.id ? "url(#glow)" : ""}
+              filter={selectedId === node.id ? 'url(#glow)' : ''}
               className="transition-all"
             />
-            <circle 
+            <circle
               r={selectedId === node.id ? 40 : 30}
-              fill="#0f172a"
+              fill="var(--card)"
             />
-            <text 
-              dy=".3em" 
-              textAnchor="middle" 
-              fill="white" 
-              className="text-[10px] font-black select-none pointer-events-none"
+            <text
+              dy=".3em"
+              textAnchor="middle"
+              fill="var(--foreground)"
+              className="select-none text-[10px] font-medium pointer-events-none"
             >
               {node.name}
             </text>
-            <text 
+            <text
               y="50"
-              textAnchor="middle" 
-              fill={getRoleColor(node.role)} 
-              className="text-[8px] font-black uppercase tracking-tighter select-none pointer-events-none opacity-60"
+              textAnchor="middle"
+              fill={getRoleColor(node.role)}
+              className="select-none text-[8px] uppercase opacity-70 pointer-events-none"
             >
               {roleLabel(node.role)}
             </text>
@@ -256,37 +244,37 @@ const RelationshipDiagram: React.FC<RelationshipDiagramProps> = ({ characters, o
 
       {/* 侧边信息卡片 */}
       {selectedChar && (
-        <div className="absolute right-8 top-32 bottom-8 w-80 bg-gray-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 text-white animate-in slide-in-from-right duration-500 shadow-2xl flex flex-col">
-          <div className="mb-6">
-            <span 
-              className="text-[10px] font-black px-2 py-0.5 rounded uppercase mb-2 inline-block"
-              style={{ backgroundColor: getRoleColor(selectedChar.role) + '33', color: getRoleColor(selectedChar.role) }}
+        <div className="absolute bottom-8 right-8 top-28 flex w-80 flex-col rounded-lg border border-border bg-card p-6 text-card-foreground shadow-lg">
+          <div className="mb-5">
+            <span
+              className="mb-2 inline-block rounded px-2 py-0.5 text-[10px] font-medium uppercase"
+              style={{ backgroundColor: getRoleColor(selectedChar.role) + '26', color: getRoleColor(selectedChar.role) }}
             >
               {roleLabel(selectedChar.role)}
             </span>
-            <h3 className="text-3xl font-black">{selectedChar.name}</h3>
-            <p className="text-gray-400 text-sm mt-1">{t('diagram.ageLabel', { age: selectedChar.age })}</p>
+            <h3 className="font-serif text-2xl font-medium">{selectedChar.name}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">{t('diagram.ageLabel', { age: selectedChar.age })}</p>
           </div>
 
-          <div className="space-y-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+          <div className="flex-1 space-y-5 overflow-y-auto pr-1">
             <div>
-              <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-                <Heart className="size-4 text-red-400" /> {t('diagram.relationsTitle')}
+              <h4 className="mb-1.5 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <Heart className="size-3.5" /> {t('diagram.relationsTitle')}
               </h4>
-              <p className="text-sm leading-relaxed text-gray-300 italic">
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 {selectedChar.relationships || t('diagram.noRelations')}
               </p>
             </div>
 
             <div>
-              <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">{t('diagram.graphExplain')}</h4>
-              <ul className="space-y-2">
+              <h4 className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('diagram.graphExplain')}</h4>
+              <ul className="space-y-1.5">
                 {links.filter(l => l.source === selectedId).map((link, i) => {
                   const target = nodes.find(n => n.id === link.target);
                   return (
-                    <li key={i} className="text-xs bg-white/5 p-3 rounded-xl border border-white/5">
-                      <span className="font-bold text-blue-400">→ {target?.name}</span>
-                      <p className="mt-1 text-gray-400 opacity-80">{t('diagram.hasIntersection')}</p>
+                    <li key={i} className="rounded-md border border-border bg-muted/40 p-2.5 text-xs">
+                      <span className="font-medium text-foreground">→ {target?.name}</span>
+                      <p className="mt-0.5 text-muted-foreground">{t('diagram.hasIntersection')}</p>
                     </li>
                   );
                 })}
@@ -294,18 +282,15 @@ const RelationshipDiagram: React.FC<RelationshipDiagramProps> = ({ characters, o
             </div>
           </div>
 
-          <button
-            onClick={() => setSelectedId(null)}
-            className="mt-6 w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold transition-all"
-          >
+          <Button variant="outline" size="sm" className="mt-4 w-full" onClick={() => setSelectedId(null)}>
             {t('diagram.backToOverview')}
-          </button>
+          </Button>
         </div>
       )}
 
       {/* 操作提示 */}
       {!selectedId && (
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 px-6 py-3 bg-white/5 backdrop-blur-md rounded-full border border-white/10 text-white/50 text-xs font-medium">
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 rounded-full border border-border bg-card/80 px-5 py-2 text-xs text-muted-foreground backdrop-blur-sm">
           {draggingId ? t('diagram.hintDragging') : t('diagram.hintIdle')}
         </div>
       )}

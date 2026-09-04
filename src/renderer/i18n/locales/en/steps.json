@@ -73,6 +73,7 @@
   },
   "chapters": {
     "title": "Structured Chapter Outline",
+    "subtitle": "AI-driven chapter orchestration",
     "knowledgeToggleTitle": "Select knowledge reference",
     "knowledgeSelectTitle": "Select reference material",
     "generating": "Structuring...",

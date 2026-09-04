@@ -17,6 +17,7 @@
   },
   "newBook": {
     "titleRequired": "请输入书籍标题",
+    "duplicateRequired": "请选择要复制的书籍",
     "title": "新建书籍",
     "subtitle": "开始你的新创作旅程",
     "titleLabel": "书籍标题",

@@ -28,7 +28,8 @@
   },
   "openDiagram": "Open Relationship Map",
   "archive": {
-    "title": "World & Character Archive",
+    "title": "Character Archive",
+    "total": "{{n}} characters",
     "clearConfirm": "Clear all?",
     "clear": "Clear",
     "addManually": "Add Manually",
@@ -143,6 +144,7 @@
   },
   "diagram": {
     "title": "Destiny Map",
+    "subtitle": "A web of intertwined fates",
     "resetTitle": "Reset to circular layout",
     "reset": "Reset Layout",
     "ageLabel": "Age: {{age}}",

@@ -15,7 +15,12 @@ import RelationshipDiagram from './RelationshipDiagram';
 import CompactCharacterCard from './CompactCharacterCard';
 import CharacterModal from './CharacterModal';
 import { dialogService } from '@/shared/services/dialogService';
-import { AlertCircle, Check, CheckCheck, Loader2, Network, Plus, Settings, Trash2, UserRound, Wand2, XCircle } from 'lucide-react';
+import { cn } from '@/shared/utils/cn';
+import { Button } from '@/shared/ui/Button';
+import { Card } from '@/shared/ui/Card';
+import { EmptyState } from '@/shared/ui/EmptyState';
+import { Select } from '@/shared/ui/Select';
+import { AlertCircle, Check, CheckCheck, Loader2, Network, Plus, Settings, Trash2, UserRound, WandSparkles, XCircle } from 'lucide-react';
 
 interface StepCharactersProps {
   project: Project;
@@ -338,157 +343,159 @@ const StepCharacters: React.FC<StepCharactersProps> = ({ project, prompts, activ
   };
 
   return (
-    <div className="max-w-7xl mx-auto h-full flex flex-col p-8 space-y-6 overflow-hidden">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1 overflow-hidden">
-        
+    <div className="mx-auto flex h-full w-full max-w-7xl flex-col overflow-hidden p-8">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 overflow-hidden lg:grid-cols-12">
+
         {/* 左侧：世界观与策略 */}
-        <div className="lg:col-span-4 flex flex-col space-y-6 overflow-y-auto pr-2 pb-10 custom-scrollbar text-left">
-          <div className="bg-gray-900 rounded-[2rem] p-6 text-white shadow-2xl relative border border-white/5">
-            <header className="mb-6 flex justify-between">
-              <div className="text-left">
-                <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">{t('strategy.title')}</h4>
-                <p className="text-[10px] text-gray-400">{t('strategy.subtitle')}</p>
+        <div className="flex flex-col gap-4 overflow-y-auto pr-1 pb-4 lg:col-span-4">
+          <Card className="p-5">
+            <header className="mb-4 flex items-start justify-between">
+              <div>
+                <h4 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('strategy.title')}</h4>
+                <p className="mt-0.5 text-xs text-muted-foreground">{t('strategy.subtitle')}</p>
               </div>
-              <button onClick={onOpenSettings} className="text-gray-500 hover:text-white transition-colors"><Settings className="size-4" /></button>
+              <Button variant="ghost" size="icon" className="size-7" onClick={onOpenSettings}>
+                <Settings className="size-4" />
+              </Button>
             </header>
-            
-            <div className="space-y-4">
-              <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-left">
-                 <span className="text-[9px] text-gray-500 block mb-0.5">{t('strategy.templateLabel')}</span>
-                 <select value={selectedPromptId} onChange={(e) => setSelectedPromptId(e.target.value)} className="w-full bg-transparent border-none p-0 text-white font-bold outline-none cursor-pointer text-[11px]">
-                  {characterPrompts.map(p => <option key={p.id} value={p.id} className="bg-gray-900">{templateDisplayName(p)}</option>)}
-                </select>
+
+            <div className="space-y-3">
+              <div>
+                <span className="mb-1 block text-[10px] uppercase tracking-wider text-muted-foreground">{t('strategy.templateLabel')}</span>
+                <Select value={selectedPromptId} onChange={(e) => setSelectedPromptId(e.target.value)}>
+                  {characterPrompts.map(p => <option key={p.id} value={p.id}>{templateDisplayName(p)}</option>)}
+                </Select>
               </div>
-              
+
               {/* 生成按钮 */}
-              <div className="space-y-3">
-                <button 
-                  onClick={generateCharacters} 
-                  disabled={loading}
-                  className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-xs transition-all flex items-center justify-center gap-2 shadow-xl shadow-blue-500/20 active:scale-95"
-                >
-                  {loading ? <Loader2 className="size-4 animate-spin" /> : <Wand2 className="size-3" />}
-                  <span>{loading ? t('generating') : t('generateBtn')}</span>
-                </button>
-                
-                {/* Token消耗显示 */}
-                {traditionalTokens.total > 0 && (
-                  <div className="bg-white/10 border border-white/20 rounded-xl p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="text-center">
-                        <div className="text-[8px] font-black text-gray-300 uppercase tracking-widest">{t('tokens.input')}</div>
-                        <div className="text-xs font-bold text-blue-300">
-                          {traditionalTokens.prompt}
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-[8px] font-black text-gray-300 uppercase tracking-widest">{t('tokens.output')}</div>
-                        <div className="text-xs font-bold text-green-300">
-                          {traditionalTokens.completion}
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-[8px] font-black text-gray-300 uppercase tracking-widest">{t('tokens.total')}</div>
-                        <div className="text-xs font-bold text-purple-300">
-                          {traditionalTokens.total}
-                        </div>
-                      </div>
+              <Button className="w-full" onClick={generateCharacters} disabled={loading}>
+                {loading ? <Loader2 className="size-4 animate-spin" /> : <WandSparkles className="size-4" />}
+                <span>{loading ? t('generating') : t('generateBtn')}</span>
+              </Button>
+
+              {/* Token消耗显示 */}
+              {traditionalTokens.total > 0 && (
+                <div className="rounded-md border border-border bg-muted/40 p-3">
+                  <div className="flex items-center justify-between text-center">
+                    <div>
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('tokens.input')}</div>
+                      <div className="text-sm font-medium tabular-nums">{traditionalTokens.prompt}</div>
                     </div>
-                    <div className="flex items-center justify-center gap-2 mt-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                      <span className="text-[10px] text-gray-300">{t('tokens.done')}</span>
+                    <div>
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('tokens.output')}</div>
+                      <div className="text-sm font-medium tabular-nums">{traditionalTokens.completion}</div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('tokens.total')}</div>
+                      <div className="text-sm font-medium tabular-nums">{traditionalTokens.total}</div>
                     </div>
                   </div>
-                )}
-              </div>
+                  <div className="mt-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                    <span className="size-1.5 rounded-full bg-success" />
+                    {t('tokens.done')}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
+          </Card>
 
           {/* 世界蓝本选择 */}
-          <div className="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm text-left">
-            <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-3">{t('blueprint.title')}</h4>
-            <div className="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+          <Card className="p-5">
+            <h4 className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('blueprint.title')}</h4>
+            <div className="max-h-40 space-y-1.5 overflow-y-auto pr-1">
               {inspirationOptions.map((opt, idx) => (
-                <div key={idx} onClick={() => setSelectedIndex(idx)} className={`p-2.5 rounded-xl border-2 cursor-pointer transition-all ${selectedIndex === idx ? 'border-blue-500 bg-blue-50/50' : 'border-gray-50 bg-gray-50 hover:border-gray-200'}`}>
-                  <h5 className="font-bold text-gray-800 text-[10px] truncate">{idx + 1}. {opt.title}</h5>
+                <div
+                  key={idx}
+                  onClick={() => setSelectedIndex(idx)}
+                  className={cn(
+                    'cursor-pointer rounded-md border p-2.5 transition-colors',
+                    selectedIndex === idx ? 'border-primary/40 bg-primary/5' : 'border-border hover:bg-muted'
+                  )}
+                >
+                  <h5 className={cn('truncate text-xs', selectedIndex === idx ? 'font-medium text-foreground' : 'text-muted-foreground')}>{idx + 1}. {opt.title}</h5>
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
 
           {/* Knowledge Base Selection Card */}
-          <div className="bg-white border border-gray-200 rounded-3xl p-5 shadow-sm text-left">
-             <div className="flex justify-between items-center mb-3">
-                <h4 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">{t('knowledge.title')}</h4>
+          <Card className="p-5">
+             <div className="mb-3 flex items-center justify-between">
+                <h4 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('knowledge.title')}</h4>
                 {(project.knowledge || []).filter(k => k.category === 'character').length > 0 && (
                    <div className="flex gap-1">
-                      <button
+                      <Button
+                         variant="ghost"
+                         size="sm"
+                         className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
                          onClick={selectAllKnowledge}
-                         className="px-2 py-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded text-[9px] font-bold transition-all flex items-center gap-1"
                          title={t('knowledge.selectAllTitle')}
                       >
-                         <CheckCheck className="size-2" /> {t('knowledge.selectAll')}
-                      </button>
-                      <button
+                         <CheckCheck className="size-3" /> {t('knowledge.selectAll')}
+                      </Button>
+                      <Button
+                         variant="ghost"
+                         size="sm"
+                         className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
                          onClick={clearAllKnowledge}
-                         className="px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded text-[9px] font-bold transition-all flex items-center gap-1"
                          title={t('knowledge.clearTitle')}
                       >
-                         <XCircle className="size-2" /> {t('knowledge.clear')}
-                      </button>
+                         <XCircle className="size-3" /> {t('knowledge.clear')}
+                      </Button>
                    </div>
                 )}
              </div>
-             <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
-                {(project.knowledge || []).filter(k => k.category === 'character').length === 0 ? <p className="text-xs text-gray-300 italic">{t('knowledge.noMaterial')}</p> :
+             <div className="max-h-48 space-y-1.5 overflow-y-auto">
+                {(project.knowledge || []).filter(k => k.category === 'character').length === 0 ? <p className="text-xs italic text-muted-foreground">{t('knowledge.noMaterial')}</p> :
                   project.knowledge.filter(k => k.category === 'character').map(k => (
-                     <div 
+                     <div
                         key={k.id}
                         onClick={() => toggleKnowledge(k.id)}
-                        className={`p-2.5 rounded-xl border-2 cursor-pointer transition-all flex items-center gap-3 ${
-                           selectedKnowledgeIds.has(k.id) ? 'bg-emerald-50 border-emerald-200' : 'bg-gray-50 border-gray-50 hover:border-gray-200'
-                        }`}
+                        className={cn(
+                          'flex cursor-pointer items-center gap-2.5 rounded-md border p-2.5 transition-colors',
+                          selectedKnowledgeIds.has(k.id) ? 'border-primary/40 bg-primary/5' : 'border-border hover:bg-muted'
+                        )}
                      >
-                        <div className={`w-3 h-3 rounded border flex items-center justify-center ${selectedKnowledgeIds.has(k.id) ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-white border-gray-300'}`}>
-                           {selectedKnowledgeIds.has(k.id) && <Check className="size-4 text-[6px]" />}
-                        </div>
-                        <span className={`text-[10px] font-bold truncate ${selectedKnowledgeIds.has(k.id) ? 'text-emerald-800' : 'text-gray-600'}`}>{k.name}</span>
+                        <span className={cn(
+                          'flex size-3.5 shrink-0 items-center justify-center rounded border',
+                          selectedKnowledgeIds.has(k.id) ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/40'
+                        )}>
+                           {selectedKnowledgeIds.has(k.id) && <Check className="size-2.5" />}
+                        </span>
+                        <span className={cn('truncate text-xs', selectedKnowledgeIds.has(k.id) ? 'font-medium text-foreground' : 'text-muted-foreground')}>{k.name}</span>
                      </div>
                   ))
                 }
              </div>
-          </div>
-          
-          <button onClick={() => setShowDiagram(true)} className="w-full py-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-2xl text-[11px] font-black transition-all flex items-center justify-center gap-2 border border-emerald-100">
+          </Card>
+
+          <Button variant="outline" className="w-full" onClick={() => setShowDiagram(true)}>
             <Network className="size-4" /> {t('openDiagram')}
-          </button>
+          </Button>
         </div>
 
         {/* 右侧：角色档案列表 */}
-        <div className="lg:col-span-8 flex flex-col h-full bg-white rounded-[3rem] border border-gray-100 shadow-xl overflow-hidden">
-          <div className="px-10 py-6 border-b flex justify-between items-center bg-gray-50/30">
-            <div className="text-left">
-              <h3 className="text-xl font-black text-gray-900 tracking-tighter">{t('archive.title')}</h3>
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">LOCAL DATA ARCHIVE ({project.characters?.length || 0})</p>
+        <div className="flex min-h-0 flex-col overflow-hidden lg:col-span-8">
+          <Card className="flex h-full flex-col overflow-hidden rounded-lg">
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
+            <div>
+              <h3 className="font-serif text-lg font-medium tracking-tight">{t('archive.title')}</h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">{t('archive.total', { n: project.characters?.length || 0 })}</p>
             </div>
             <div className="flex gap-2">
-              <button 
+              <Button
                 type="button"
+                variant={clearConfirm ? 'destructive' : 'outline'}
+                size="sm"
                 onClick={handleClearClick}
                 disabled={(project.characters || []).length === 0}
-                className={`px-4 py-2.5 rounded-xl text-[10px] font-black transition-all flex items-center gap-2 border ${
-                  clearConfirm
-                    ? 'bg-red-600 text-white border-red-600 hover:bg-red-700 animate-pulse'
-                    : (project.characters || []).length === 0 
-                      ? 'text-gray-300 border-gray-100 bg-gray-50 cursor-not-allowed opacity-50' 
-                      : 'text-red-500 border-red-100 bg-red-50 hover:bg-red-100'
-                }`}
               >
-                {clearConfirm ? <AlertCircle className="size-2.5" /> : <Trash2 className="size-2.5" />}
+                {clearConfirm ? <AlertCircle className="size-3.5" /> : <Trash2 className="size-3.5" />}
                 {clearConfirm ? t('archive.clearConfirm') : t('archive.clear')}
-              </button>
-              <button 
+              </Button>
+              <Button
                 type="button"
+                size="sm"
                 onClick={() => onUpdate({
                   characters: [...(project.characters || []), {
                     id: Date.now().toString(),
@@ -508,43 +515,44 @@ const StepCharacters: React.FC<StepCharactersProps> = ({ project, prompts, activ
                     characterArc: ''
                   }]
                 })}
-                className="px-6 py-2.5 bg-gray-900 text-white rounded-xl text-[10px] font-black hover:bg-gray-800 transition-all flex items-center gap-2 shadow-lg active:scale-95"
               >
-                <Plus className="size-4 text-[9px]" /> {t('archive.addManually')}
-              </button>
+                <Plus className="size-3.5" /> {t('archive.addManually')}
+              </Button>
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-10 bg-gray-50/20 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-5">
             {(project.characters || []).length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center py-20 text-gray-300">
-                <UserRound className="size-12 mb-6 opacity-20" />
-                <h3 className="text-base font-black text-gray-400">{t('archive.emptyTitle')}</h3>
-                <p className="text-[10px] mt-2 opacity-60">{t('archive.emptyHint')}</p>
-              </div>
+              <EmptyState
+                className="h-full"
+                icon={UserRound}
+                title={t('archive.emptyTitle')}
+                description={t('archive.emptyHint')}
+              />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {(project.characters || []).map((char) => (
-                  <div key={char.id} className="relative group">
+                  <div key={char.id} className="group relative">
                     <CompactCharacterCard
                       character={char}
                       onClick={() => handleOpenModal(char.id)}
                     />
                     {/* 删除按钮 - 悬浮在卡片右上角 */}
-                    <button 
+                    <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteClick(char.id);
                       }}
-                      className={`absolute top-4 right-4 z-10 w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm ${
-                        deleteConfirmId === char.id 
-                          ? 'bg-red-500 text-white w-20' 
-                          : 'bg-white/80 backdrop-blur-sm text-gray-400 hover:text-red-500 hover:bg-red-50/80'
-                      }`}
+                      className={cn(
+                        'absolute right-3 top-3 z-10 flex h-8 items-center justify-center rounded-md px-2 text-xs transition-all',
+                        deleteConfirmId === char.id
+                          ? 'w-20 bg-destructive font-medium text-white'
+                          : 'w-8 bg-card/80 text-muted-foreground opacity-0 backdrop-blur-sm hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100'
+                      )}
                     >
                       {deleteConfirmId === char.id ? (
-                        <span className="text-xs font-bold animate-pulse">{t('archive.deleteConfirm')}</span>
+                        <span className="animate-pulse">{t('archive.deleteConfirm')}</span>
                       ) : (
                         <Trash2 className="size-4" />
                       )}
@@ -554,6 +562,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({ project, prompts, activ
               </div>
             )}
           </div>
+          </Card>
         </div>
       </div>
 

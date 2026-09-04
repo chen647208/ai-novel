@@ -11,7 +11,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation, i18n } from '@/i18n';
 import { type Timeline, type TimelineEvent, type HistoryDate, type Character, type Location, type Faction, type Chapter } from '../../../shared/types';
 import { dialogService } from '@/shared/services/dialogService';
-import { Clock, Flag, MapPin, Plus, Save, Settings, Trash, User } from 'lucide-react';
+import { cn } from '@/shared/utils/cn';
+import { Button } from '@/shared/ui/Button';
+import { Input } from '@/shared/ui/Input';
+import { Label } from '@/shared/ui/Label';
+import { Select } from '@/shared/ui/Select';
+import { Textarea } from '@/shared/ui/Textarea';
+import { Clock, Flag, MapPin, Plus, Save, Settings, Trash2, User } from 'lucide-react';
 
 interface TimelineEditorProps {
   projectId: string;
@@ -21,6 +27,47 @@ interface TimelineEditorProps {
   factions: Faction[];
   chapters: Chapter[];
   onSave: (timeline: Timeline) => void;
+}
+
+/** 关联对象勾选网格（角色/地点/势力共用）。 */
+function RelatedToggleGrid({
+  items,
+  selectedIds,
+  onToggle,
+  emptyText,
+}: {
+  items: Array<{ id: string; name: string }>;
+  selectedIds: string[] | undefined;
+  onToggle: (id: string) => void;
+  emptyText: string;
+}) {
+  if (items.length === 0) {
+    return <p className="text-xs italic text-muted-foreground">{emptyText}</p>;
+  }
+  return (
+    <div className="grid max-h-24 grid-cols-2 gap-2 overflow-y-auto">
+      {items.map(item => {
+        const checked = selectedIds?.includes(item.id) || false;
+        return (
+          <label
+            key={item.id}
+            className={cn(
+              'flex cursor-pointer items-center gap-2 rounded-md border p-2 transition-colors',
+              checked ? 'border-primary/40 bg-primary/5' : 'border-transparent bg-muted/30 hover:bg-muted'
+            )}
+          >
+            <input
+              type="checkbox"
+              checked={checked}
+              onChange={() => onToggle(item.id)}
+              className="size-3.5 accent-primary"
+            />
+            <span className="truncate text-xs">{item.name}</span>
+          </label>
+        );
+      })}
+    </div>
+  );
 }
 
 /**
@@ -161,18 +208,18 @@ export const TimelineEditor: React.FC<TimelineEditorProps> = ({
     return t(`type.${type}`);
   };
 
-  // 获取事件类型颜色
+  // 获取事件类型颜色（语义色，双主题安全）
   const getEventTypeColor = (type: TimelineEvent['type']) => {
     const colors: Record<TimelineEvent['type'], string> = {
-      plot: 'bg-blue-100 text-blue-700',
-      character: 'bg-green-100 text-green-700',
-      world: 'bg-purple-100 text-purple-700',
-      faction: 'bg-amber-100 text-amber-700',
-      battle: 'bg-red-100 text-red-700',
-      discovery: 'bg-cyan-100 text-cyan-700',
-      other: 'bg-gray-100 text-gray-700'
+      plot: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+      character: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+      world: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+      faction: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+      battle: 'bg-destructive/10 text-destructive',
+      discovery: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
+      other: 'bg-muted text-muted-foreground'
     };
-    return colors[type] || 'bg-gray-100 text-gray-700';
+    return colors[type] || 'bg-muted text-muted-foreground';
   };
 
   // 格式化日期显示
@@ -185,33 +232,41 @@ export const TimelineEditor: React.FC<TimelineEditorProps> = ({
     return parts.join('') || t('date.unset');
   };
 
+  /** 切换某类关联对象的勾选状态。 */
+  const toggleRelation = (key: 'relatedCharacterIds' | 'relatedLocationIds' | 'relatedFactionIds', id: string) => {
+    if (!selectedEvent) return;
+    const currentIds = selectedEvent[key] || [];
+    const newIds = currentIds.includes(id)
+      ? currentIds.filter(x => x !== id)
+      : [...currentIds, id];
+    updateEvent(selectedEvent.id, { [key]: newIds });
+  };
+
   return (
     <div className="space-y-4">
       {/* 时间线配置 */}
-      <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
-        <h4 className="text-sm font-bold text-indigo-800 mb-3 flex items-center gap-2">
-          <Settings className="size-4" />
+      <div className="rounded-lg border border-border bg-muted/30 p-4">
+        <h4 className="mb-3 flex items-center gap-2 text-sm font-medium">
+          <Settings className="size-4 text-muted-foreground" />
           {t('editor.configTitle')}
         </h4>
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-bold text-gray-600 mb-1">{t('editor.nameLabel')}</label>
-            <input
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">{t('editor.nameLabel')}</Label>
+            <Input
               type="text"
               value={localTimeline.config?.name || ''}
               onChange={(e) => updateConfig({ name: e.target.value })}
               placeholder={t('editor.namePlaceholder')}
-              className="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-indigo-200 outline-none"
             />
           </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-600 mb-1">{t('editor.calendarLabel')}</label>
-            <input
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">{t('editor.calendarLabel')}</Label>
+            <Input
               type="text"
               value={localTimeline.config?.calendarSystem || ''}
               onChange={(e) => updateConfig({ calendarSystem: e.target.value })}
               placeholder={t('editor.calendarPlaceholder')}
-              className="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-indigo-200 outline-none"
             />
           </div>
         </div>
@@ -220,11 +275,11 @@ export const TimelineEditor: React.FC<TimelineEditorProps> = ({
       {/* 工具栏 */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-gray-600">{t('editor.filterLabel')}</span>
-          <select
+          <span className="text-sm text-muted-foreground">{t('editor.filterLabel')}</span>
+          <Select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as TimelineEvent['type'] | 'all')}
-            className="px-3 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-indigo-200 outline-none"
+            className="h-8 w-auto text-sm"
           >
             <option value="all">{t('filter.allTypes')}</option>
             <option value="plot">{t('type.plot')}</option>
@@ -234,82 +289,81 @@ export const TimelineEditor: React.FC<TimelineEditorProps> = ({
             <option value="battle">{t('type.battle')}</option>
             <option value="discovery">{t('type.discovery')}</option>
             <option value="other">{t('type.other')}</option>
-          </select>
+          </Select>
         </div>
-        <button
-          onClick={addEvent}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 transition-colors flex items-center gap-2"
-        >
+        <Button onClick={addEvent}>
           <Plus className="size-4" />
           {t('editor.addEvent')}
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-5 gap-4">
         {/* 事件列表 */}
-        <div className="col-span-2 bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-          <div className="p-3 border-b border-gray-200 bg-gray-100 flex justify-between items-center">
-            <h4 className="text-sm font-bold text-gray-700">
+        <div className="col-span-2 overflow-hidden rounded-lg border border-border bg-card">
+          <div className="flex items-center justify-between border-b border-border bg-muted/30 p-3">
+            <h4 className="text-sm font-medium">
               {t('editor.eventList')} ({filteredEvents.length})
             </h4>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               {t('eventsCount', { count: localTimeline.events?.length || 0 })}
             </span>
           </div>
           <div className="max-h-[400px] overflow-y-auto">
             {filteredEvents.length === 0 ? (
-              <div className="p-4 text-center text-gray-400 text-sm">
+              <div className="p-4 text-center text-sm text-muted-foreground">
                 {filterType !== 'all' ? t('editor.emptyFiltered') : t('editor.emptyAll')}
               </div>
             ) : (
               <div className="relative">
                 {/* 时间线轴线 */}
-                <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-indigo-200"></div>
-                
+                <div className="absolute bottom-0 left-4 top-0 w-px bg-border"></div>
+
                 {filteredEvents.map((event) => (
                   <div
                     key={event.id}
                     onClick={() => setSelectedEventId(event.id)}
-                    className={`relative p-3 cursor-pointer transition-colors ${
+                    className={cn(
+                      'relative cursor-pointer border-b border-border p-3 transition-colors last:border-0',
                       selectedEventId === event.id
-                        ? 'bg-indigo-50'
-                        : 'hover:bg-gray-100'
-                    }`}
+                        ? 'bg-primary/5'
+                        : 'hover:bg-accent/40'
+                    )}
                   >
                     {/* 时间点标记 */}
-                    <div className={`absolute left-3 top-4 w-3 h-3 rounded-full border-2 ${
+                    <div className={cn(
+                      'absolute left-[13px] top-4 size-3 rounded-full border-2',
                       selectedEventId === event.id
-                        ? 'bg-indigo-500 border-indigo-500'
-                        : 'bg-white border-indigo-300'
-                    }`}></div>
-                    
+                        ? 'border-primary bg-primary'
+                        : 'border-border bg-card'
+                    )}></div>
+
                     <div className="ml-8">
                       <div className="flex items-center gap-2">
-                        <span className={`text-xs px-2 py-0.5 rounded ${getEventTypeColor(event.type)}`}>
+                        <span className={cn('rounded px-1.5 py-0.5 text-xs', getEventTypeColor(event.type))}>
                           {getEventTypeLabel(event.type)}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                           {formatDate(event.date)}
                         </span>
                       </div>
-                      <h5 className="font-bold text-sm text-gray-800 mt-1">
+                      <h5 className="mt-1 font-serif text-sm font-medium">
                         {event.title}
                       </h5>
-                      <p className="text-xs text-gray-500 line-clamp-2 mt-0.5">
+                      <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
                         {event.description || t('editor.noDescription')}
                       </p>
-                      
+
                       {/* 关联信息 */}
                       {((event.relatedCharacterIds?.length ?? 0) > 0 || (event.relatedLocationIds?.length ?? 0) > 0 || (event.relatedFactionIds?.length ?? 0) > 0) && (
-                        <div className="flex gap-2 mt-1 text-xs text-gray-400">
+                        <div className="mt-1 flex gap-2 text-xs text-muted-foreground">
                           {(event.relatedCharacterIds?.length ?? 0) > 0 && (
-                            <span><User className="size-4 mr-1" />{event.relatedCharacterIds?.length ?? 0}</span>
+                            <span className="flex items-center gap-1"><User className="size-3.5" />{event.relatedCharacterIds?.length ?? 0}</span>
                           )}
                           {(event.relatedLocationIds?.length ?? 0) > 0 && (
-                            <span><MapPin className="size-4 mr-1" />{event.relatedLocationIds?.length ?? 0}</span>
+                            <span className="flex items-center gap-1"><MapPin className="size-3.5" />{event.relatedLocationIds?.length ?? 0}</span>
                           )}
                           {(event.relatedFactionIds?.length ?? 0) > 0 && (
-                            <span><Flag className="size-4 mr-1" />{event.relatedFactionIds?.length ?? 0}</span>
+                            <span className="flex items-center gap-1"><Flag className="size-3.5" />{event.relatedFactionIds?.length ?? 0}</span>
                           )}
                         </div>
                       )}
@@ -324,36 +378,36 @@ export const TimelineEditor: React.FC<TimelineEditorProps> = ({
         {/* 事件详情编辑 */}
         <div className="col-span-3">
           {selectedEvent ? (
-            <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-4 animate-in fade-in max-h-[500px] overflow-y-auto">
+            <div className="max-h-[500px] space-y-4 overflow-y-auto rounded-lg border border-border bg-card p-4">
               {/* 头部 */}
-              <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                <h4 className="font-bold text-gray-800">{t('editor.detailTitle')}</h4>
-                <button
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <h4 className="text-sm font-medium">{t('editor.detailTitle')}</h4>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-destructive"
                   onClick={() => deleteEvent(selectedEvent.id)}
-                  className="text-red-500 hover:text-red-600 text-sm flex items-center gap-1"
                 >
-                  <Trash className="size-4" />
+                  <Trash2 className="size-4" />
                   {t('editor.delete')}
-                </button>
+                </Button>
               </div>
 
               {/* 基本信息 */}
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-gray-600 mb-1">{t('editor.titleLabel')}</label>
-                  <input
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">{t('editor.titleLabel')}</Label>
+                  <Input
                     type="text"
                     value={selectedEvent.title}
                     onChange={(e) => updateEvent(selectedEvent.id, { title: e.target.value })}
-                    className="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-indigo-200 outline-none"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-600 mb-1">{t('editor.typeLabel')}</label>
-                  <select
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">{t('editor.typeLabel')}</Label>
+                  <Select
                     value={selectedEvent.type}
                     onChange={(e) => updateEvent(selectedEvent.id, { type: e.target.value as TimelineEvent['type'] })}
-                    className="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-indigo-200 outline-none"
                   >
                     <option value="plot">{t('type.plot')}</option>
                     <option value="character">{t('type.character')}</option>
@@ -362,93 +416,90 @@ export const TimelineEditor: React.FC<TimelineEditorProps> = ({
                     <option value="battle">{t('type.battle')}</option>
                     <option value="discovery">{t('type.discovery')}</option>
                     <option value="other">{t('type.other')}</option>
-                  </select>
+                  </Select>
                 </div>
               </div>
 
               {/* 日期 */}
-              <div className="bg-indigo-50/50 p-3 rounded-lg border border-indigo-100">
-                <h5 className="text-xs font-bold text-indigo-800 mb-2">{t('editor.dateTitle')}</h5>
+              <div className="rounded-lg border border-border bg-muted/30 p-3">
+                <h5 className="mb-2 text-xs font-medium text-muted-foreground">{t('editor.dateTitle')}</h5>
                 <div className="grid grid-cols-4 gap-2">
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">{t('editor.yearLabel')}</label>
-                    <input
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">{t('editor.yearLabel')}</Label>
+                    <Input
                       type="number"
                       value={selectedEvent.date.year || 0}
                       onChange={(e) => updateEvent(selectedEvent.id, {
                         date: { ...selectedEvent.date, year: parseInt(e.target.value) || 0 }
                       })}
-                      className="w-full px-2 py-1.5 text-sm border rounded focus:ring-2 focus:ring-indigo-200 outline-none"
+                      className="h-8 text-sm"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">{t('editor.monthLabel')}</label>
-                    <input
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">{t('editor.monthLabel')}</Label>
+                    <Input
                       type="number"
                       value={selectedEvent.date.month || ''}
                       onChange={(e) => updateEvent(selectedEvent.id, {
                         date: { ...selectedEvent.date, month: e.target.value ? parseInt(e.target.value) : undefined }
                       })}
-                      className="w-full px-2 py-1.5 text-sm border rounded focus:ring-2 focus:ring-indigo-200 outline-none"
+                      className="h-8 text-sm"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">{t('editor.dayLabel')}</label>
-                    <input
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">{t('editor.dayLabel')}</Label>
+                    <Input
                       type="number"
                       value={selectedEvent.date.day || ''}
                       onChange={(e) => updateEvent(selectedEvent.id, {
                         date: { ...selectedEvent.date, day: e.target.value ? parseInt(e.target.value) : undefined }
                       })}
-                      className="w-full px-2 py-1.5 text-sm border rounded focus:ring-2 focus:ring-indigo-200 outline-none"
+                      className="h-8 text-sm"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">{t('editor.displayLabel')}</label>
-                    <input
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">{t('editor.displayLabel')}</Label>
+                    <Input
                       type="text"
                       value={selectedEvent.date.display || ''}
                       onChange={(e) => updateEvent(selectedEvent.id, {
                         date: { ...selectedEvent.date, display: e.target.value }
                       })}
                       placeholder={t('editor.displayPlaceholder')}
-                      className="w-full px-2 py-1.5 text-sm border rounded focus:ring-2 focus:ring-indigo-200 outline-none"
+                      className="h-8 text-sm"
                     />
                   </div>
                 </div>
               </div>
 
               {/* 描述 */}
-              <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1">{t('editor.descLabel')}</label>
-                <textarea
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">{t('editor.descLabel')}</Label>
+                <Textarea
                   value={selectedEvent.description}
                   onChange={(e) => updateEvent(selectedEvent.id, { description: e.target.value })}
                   placeholder={t('editor.descPlaceholder')}
                   rows={3}
-                  className="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-indigo-200 outline-none resize-none"
                 />
               </div>
 
               {/* 影响 */}
-              <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1">{t('editor.impactLabel')}</label>
-                <textarea
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">{t('editor.impactLabel')}</Label>
+                <Textarea
                   value={selectedEvent.impact || ''}
                   onChange={(e) => updateEvent(selectedEvent.id, { impact: e.target.value })}
                   placeholder={t('editor.impactPlaceholder')}
                   rows={2}
-                  className="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-indigo-200 outline-none resize-none bg-indigo-50/30"
                 />
               </div>
 
               {/* 关联章节 */}
-              <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1">{t('editor.relatedChapterLabel')}</label>
-                <select
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">{t('editor.relatedChapterLabel')}</Label>
+                <Select
                   value={selectedEvent.relatedChapterId || ''}
                   onChange={(e) => updateEvent(selectedEvent.id, { relatedChapterId: e.target.value || undefined })}
-                  className="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-indigo-200 outline-none"
                 >
                   <option value="">{t('editor.noLink')}</option>
                   {chapters.map(chapter => (
@@ -456,118 +507,46 @@ export const TimelineEditor: React.FC<TimelineEditorProps> = ({
                       {t('editor.chapterOption', { num: chapter.order + 1, title: chapter.title })}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
 
               {/* 关联角色 */}
-              <div className="border-t border-gray-100 pt-3">
-                <label className="block text-xs font-bold text-gray-600 mb-2">{t('editor.relatedCharactersLabel')}</label>
-                {characters.length === 0 ? (
-                  <p className="text-xs text-gray-400 italic">{t('editor.noCharacters')}</p>
-                ) : (
-                  <div className="grid grid-cols-2 gap-2 max-h-24 overflow-y-auto">
-                    {characters.map(character => (
-                      <label
-                        key={character.id}
-                        className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-colors ${
-                          selectedEvent.relatedCharacterIds?.includes(character.id)
-                            ? 'bg-green-50 border border-green-200'
-                            : 'bg-gray-50 border border-transparent hover:bg-gray-100'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedEvent.relatedCharacterIds?.includes(character.id) || false}
-                          onChange={() => {
-                            const currentIds = selectedEvent.relatedCharacterIds || [];
-                            const newIds = currentIds.includes(character.id)
-                              ? currentIds.filter(id => id !== character.id)
-                              : [...currentIds, character.id];
-                            updateEvent(selectedEvent.id, { relatedCharacterIds: newIds });
-                          }}
-                          className="rounded text-green-600 focus:ring-green-500"
-                        />
-                        <span className="text-xs truncate">{character.name}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
+              <div className="border-t border-border pt-3">
+                <Label className="mb-2 block text-xs text-muted-foreground">{t('editor.relatedCharactersLabel')}</Label>
+                <RelatedToggleGrid
+                  items={characters}
+                  selectedIds={selectedEvent.relatedCharacterIds}
+                  onToggle={(id) => toggleRelation('relatedCharacterIds', id)}
+                  emptyText={t('editor.noCharacters')}
+                />
               </div>
 
               {/* 关联地点 */}
-              <div className="border-t border-gray-100 pt-3">
-                <label className="block text-xs font-bold text-gray-600 mb-2">{t('editor.relatedLocationsLabel')}</label>
-                {locations.length === 0 ? (
-                  <p className="text-xs text-gray-400 italic">{t('editor.noLocations')}</p>
-                ) : (
-                  <div className="grid grid-cols-2 gap-2 max-h-24 overflow-y-auto">
-                    {locations.map(location => (
-                      <label
-                        key={location.id}
-                        className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-colors ${
-                          selectedEvent.relatedLocationIds?.includes(location.id)
-                            ? 'bg-emerald-50 border border-emerald-200'
-                            : 'bg-gray-50 border border-transparent hover:bg-gray-100'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedEvent.relatedLocationIds?.includes(location.id) || false}
-                          onChange={() => {
-                            const currentIds = selectedEvent.relatedLocationIds || [];
-                            const newIds = currentIds.includes(location.id)
-                              ? currentIds.filter(id => id !== location.id)
-                              : [...currentIds, location.id];
-                            updateEvent(selectedEvent.id, { relatedLocationIds: newIds });
-                          }}
-                          className="rounded text-emerald-600 focus:ring-emerald-500"
-                        />
-                        <span className="text-xs truncate">{location.name}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
+              <div className="border-t border-border pt-3">
+                <Label className="mb-2 block text-xs text-muted-foreground">{t('editor.relatedLocationsLabel')}</Label>
+                <RelatedToggleGrid
+                  items={locations}
+                  selectedIds={selectedEvent.relatedLocationIds}
+                  onToggle={(id) => toggleRelation('relatedLocationIds', id)}
+                  emptyText={t('editor.noLocations')}
+                />
               </div>
 
               {/* 关联势力 */}
-              <div className="border-t border-gray-100 pt-3">
-                <label className="block text-xs font-bold text-gray-600 mb-2">{t('editor.relatedFactionsLabel')}</label>
-                {factions.length === 0 ? (
-                  <p className="text-xs text-gray-400 italic">{t('editor.noFactions')}</p>
-                ) : (
-                  <div className="grid grid-cols-2 gap-2 max-h-24 overflow-y-auto">
-                    {factions.map(faction => (
-                      <label
-                        key={faction.id}
-                        className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-colors ${
-                          selectedEvent.relatedFactionIds?.includes(faction.id)
-                            ? 'bg-amber-50 border border-amber-200'
-                            : 'bg-gray-50 border border-transparent hover:bg-gray-100'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedEvent.relatedFactionIds?.includes(faction.id) || false}
-                          onChange={() => {
-                            const currentIds = selectedEvent.relatedFactionIds || [];
-                            const newIds = currentIds.includes(faction.id)
-                              ? currentIds.filter(id => id !== faction.id)
-                              : [...currentIds, faction.id];
-                            updateEvent(selectedEvent.id, { relatedFactionIds: newIds });
-                          }}
-                          className="rounded text-amber-600 focus:ring-amber-500"
-                        />
-                        <span className="text-xs truncate">{faction.name}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
+              <div className="border-t border-border pt-3">
+                <Label className="mb-2 block text-xs text-muted-foreground">{t('editor.relatedFactionsLabel')}</Label>
+                <RelatedToggleGrid
+                  items={factions}
+                  selectedIds={selectedEvent.relatedFactionIds}
+                  onToggle={(id) => toggleRelation('relatedFactionIds', id)}
+                  emptyText={t('editor.noFactions')}
+                />
               </div>
             </div>
           ) : (
-            <div className="h-full flex items-center justify-center text-gray-400">
-              <div className="text-center">
-                <Clock className="size-10 mb-2 opacity-30" />
+            <div className="flex h-full items-center justify-center">
+              <div className="text-center text-muted-foreground">
+                <Clock className="mx-auto mb-2 size-10 opacity-30" strokeWidth={1.5} />
                 <p className="text-sm">{t('editor.selectToEdit')}</p>
               </div>
             </div>
@@ -577,14 +556,11 @@ export const TimelineEditor: React.FC<TimelineEditorProps> = ({
 
       {/* 保存按钮 */}
       {hasChanges && (
-        <div className="flex justify-end pt-4 border-t border-gray-100 animate-in fade-in">
-          <button
-            onClick={handleSave}
-            className="px-6 py-2 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-colors flex items-center gap-2"
-          >
+        <div className="flex justify-end border-t border-border pt-4">
+          <Button onClick={handleSave}>
             <Save className="size-4" />
             {t('editor.save')}
-          </button>
+          </Button>
         </div>
       )}
     </div>

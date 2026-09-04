@@ -14,7 +14,16 @@ import { type Project, type PromptTemplate, type ModelConfig, type KnowledgeItem
 import { AIService } from '../assistant/services/aiService';
 import WorldViewEditor from '../world/WorldViewEditor';
 import { dialogService } from '@/shared/services/dialogService';
-import { BookOpenText, Bot, Check, CheckCheck, ChevronDown, ChevronUp, CloudUpload, Globe, Lightbulb, Loader2, Pause, Pen, Play, Square, Trash2, WandSparkles, XCircle } from 'lucide-react';
+import { cn } from '@/shared/utils/cn';
+import { Badge } from '@/shared/ui/Badge';
+import { Button } from '@/shared/ui/Button';
+import { Card } from '@/shared/ui/Card';
+import { EmptyState } from '@/shared/ui/EmptyState';
+import { Input } from '@/shared/ui/Input';
+import { Label } from '@/shared/ui/Label';
+import { Select } from '@/shared/ui/Select';
+import { Textarea } from '@/shared/ui/Textarea';
+import { BookOpenText, Bot, Check, CheckCheck, ChevronDown, ChevronUp, CloudUpload, Globe, Lightbulb, Loader2, Pause, PenLine, Play, Square, Trash2, WandSparkles, XCircle } from 'lucide-react';
 
 interface StepInspirationProps {
   project: Project | null;
@@ -347,21 +356,21 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
-      <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold flex items-center">
-            <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3 text-sm">1</span>
+    <div className="mx-auto max-w-4xl space-y-6 pb-10">
+      <Card className="p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="flex items-center gap-2 text-base font-semibold tracking-tight">
+            <PenLine className="size-4 text-muted-foreground" />
             {t('steps:inspiration.stepTitle')}
           </h3>
           {(input || results) && (
-            <button onClick={handleClear} className="text-xs text-gray-400 hover:text-red-500 font-bold transition-colors">
-              <Trash2 className="size-4 mr-1" />{t('steps:inspiration.clearContent')}
-            </button>
+            <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground" onClick={handleClear}>
+              <Trash2 className="size-3.5" />{t('steps:inspiration.clearContent')}
+            </Button>
           )}
         </div>
-        
-        <textarea
+
+        <Textarea
           value={input}
           onChange={(e) => {
              setInput(e.target.value);
@@ -369,61 +378,71 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
              onUpdate({ inspiration: e.target.value });
           }}
           placeholder={t('steps:inspiration.inputPlaceholder')}
-          className="w-full h-40 p-4 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none transition-all text-gray-700"
+          className="min-h-40 resize-none leading-relaxed"
         />
         
         {/* Knowledge Base Selection */}
-        <div className="mt-4 border-t border-gray-100 pt-4">
-             <div className="flex items-center justify-between mb-3">
+        <div className="mt-4 border-t border-border pt-4">
+             <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <BookOpenText className="size-4 text-blue-500" />
-                    <span className="text-xs font-bold text-gray-500">{t('steps:inspiration.knowledgeRef')}</span>
+                    <BookOpenText className="size-4 text-muted-foreground" />
+                    <span className="text-xs font-medium text-muted-foreground">{t('steps:inspiration.knowledgeRef')}</span>
                 </div>
+                <div className="flex items-center gap-1.5">
                 {(project?.knowledge || []).filter(k => k.category === 'inspiration').length > 0 && (
-                   <div className="flex gap-1">
-                      <button 
+                   <>
+                      <Button
+                         variant="ghost"
+                         size="sm"
+                         className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
                          onClick={selectAllKnowledge}
-                         className="px-2 py-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded text-[9px] font-bold transition-all flex items-center gap-1"
                          title={t('steps:common.selectAllTitle')}
                       >
-                         <CheckCheck className="size-2" /> {t('steps:common.selectAll')}
-                      </button>
-                      <button 
+                         <CheckCheck className="size-3" /> {t('steps:common.selectAll')}
+                      </Button>
+                      <Button
+                         variant="ghost"
+                         size="sm"
+                         className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
                          onClick={clearAllKnowledge}
-                         className="px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded text-[9px] font-bold transition-all flex items-center gap-1"
                          title={t('steps:common.clearTitle')}
                       >
-                         <XCircle className="size-2" /> {t('steps:common.clear')}
-                      </button>
-                   </div>
+                         <XCircle className="size-3" /> {t('steps:common.clear')}
+                      </Button>
+                   </>
                 )}
-                <label className="cursor-pointer px-3 py-1.5 bg-gray-100 hover:bg-blue-50 hover:text-blue-600 text-gray-500 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1.5 border border-transparent hover:border-blue-100">
-                    <CloudUpload className="size-4" /> {t('steps:inspiration.uploadNew')}
+                <label className="flex cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+                    <CloudUpload className="size-3.5" /> {t('steps:inspiration.uploadNew')}
                     <input type="file" multiple className="hidden" onChange={handleFileUpload} accept=".txt,.md,.json,.csv" />
                 </label>
+                </div>
              </div>
-             
+
              {inspirationKnowledge.length === 0 ? (
-                <div className="text-xs text-gray-400 italic pl-6 bg-gray-50/50 py-3 rounded-lg border border-dashed border-gray-200 text-center">
+                <div className="rounded-lg border border-dashed border-border py-4 text-center text-xs text-muted-foreground">
                    {t('steps:inspiration.noKnowledge')}<br/>
                    <span className="text-[10px] opacity-70">{t('steps:inspiration.noKnowledgeHint')}</span>
                 </div>
              ) : (
-                <div className="max-h-48 overflow-y-auto custom-scrollbar pr-2">
+                <div className="max-h-48 overflow-y-auto pr-2">
                    <div className="flex flex-wrap gap-2">
                       {inspirationKnowledge.map(k => k && (
                          <button
                            key={k.id}
                            onClick={() => toggleKnowledge(k.id)}
-                           className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center gap-2 ${
-                              selectedKnowledgeIds.has(k.id) 
-                                ? 'bg-blue-50 border-blue-200 text-blue-700 shadow-sm' 
-                                : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'
-                           }`}
+                           className={cn(
+                             'flex items-center gap-2 rounded-md border px-2.5 py-1 text-xs transition-colors',
+                             selectedKnowledgeIds.has(k.id)
+                               ? 'border-primary/40 bg-primary/5 text-foreground'
+                               : 'border-border text-muted-foreground hover:bg-muted'
+                           )}
                          >
-                            <div className={`w-3 h-3 rounded-full border flex items-center justify-center ${selectedKnowledgeIds.has(k.id) ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-300'}`}>
-                               {selectedKnowledgeIds.has(k.id) && <Check className="size-4 text-[6px] text-white" />}
-                            </div>
+                            <span className={cn(
+                              'flex size-3.5 items-center justify-center rounded-full border',
+                              selectedKnowledgeIds.has(k.id) ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/40'
+                            )}>
+                               {selectedKnowledgeIds.has(k.id) && <Check className="size-2.5" />}
+                            </span>
                             {k.name || t('steps:common.unnamedFile')}
                          </button>
                       ))}
@@ -433,132 +452,112 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
         </div>
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500 font-bold">{t('steps:common.outputMode')}</span>
-              <select 
+              <Label className="text-sm font-normal text-muted-foreground">{t('steps:common.outputMode')}</Label>
+              <Select
                 value={outputMode}
                 onChange={(e) => setOutputMode(e.target.value as OutputMode)}
-                className="text-sm border rounded-lg px-3 py-1.5 bg-gray-50 outline-none focus:ring-2 focus:ring-blue-100 cursor-pointer"
+                className="h-8 w-auto text-sm"
               >
                 <option value="streaming">{t('steps:common.streaming')}</option>
                 <option value="traditional">{t('steps:common.traditional')}</option>
-              </select>
+              </Select>
             </div>
-            
+
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500 font-bold">{t('steps:common.promptTemplate')}</span>
-              <select 
+              <Label className="text-sm font-normal text-muted-foreground">{t('steps:common.promptTemplate')}</Label>
+              <Select
                 value={selectedPromptId}
                 onChange={(e) => setSelectedPromptId(e.target.value)}
-                className="text-sm border rounded-lg px-3 py-1.5 bg-gray-50 outline-none focus:ring-2 focus:ring-blue-100 cursor-pointer"
+                className="h-8 w-auto text-sm"
               >
                 {prompts.filter(p => p.category === 'inspiration').map(p => (
                   <option key={p.id} value={p.id}>{templateDisplayName(p)}</option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
-          
-          <div className="flex items-center gap-3">
+
+          <div className="flex items-center gap-2">
             {/* Token 信息显示 */}
             {(isStreaming && streamingTokens.total > 0) || (!isStreaming && traditionalTokens.total > 0) ? (
-              <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
-                <div className="flex items-center gap-1">
-                  <span className="text-xs font-bold text-gray-500">Tokens:</span>
-                  <span className="text-xs font-bold text-blue-600">
-                    {isStreaming ? streamingTokens.total : traditionalTokens.total}
-                  </span>
-                </div>
-                <div className="h-3 w-px bg-gray-300"></div>
-                <div className="flex items-center gap-1">
-                  <span className="text-[10px] text-gray-400">{t('steps:common.input')}</span>
-                  <span className="text-xs font-bold text-gray-600">
-                    {isStreaming ? streamingTokens.prompt : traditionalTokens.prompt}
-                  </span>
-                </div>
-                <div className="h-3 w-px bg-gray-300"></div>
-                <div className="flex items-center gap-1">
-                  <span className="text-[10px] text-gray-400">{t('steps:common.output')}</span>
-                  <span className="text-xs font-bold text-gray-600">
-                    {isStreaming ? streamingTokens.completion : traditionalTokens.completion}
-                  </span>
-                </div>
+              <div className="flex items-center gap-2 rounded-md border border-border bg-muted/50 px-3 py-1.5 text-xs">
+                <span className="font-medium text-muted-foreground">Tokens:</span>
+                <span className="font-semibold tabular-nums text-foreground">
+                  {isStreaming ? streamingTokens.total : traditionalTokens.total}
+                </span>
+                <span className="h-3 w-px bg-border" />
+                <span className="text-muted-foreground">{t('steps:common.input')}</span>
+                <span className="tabular-nums text-foreground">
+                  {isStreaming ? streamingTokens.prompt : traditionalTokens.prompt}
+                </span>
+                <span className="h-3 w-px bg-border" />
+                <span className="text-muted-foreground">{t('steps:common.output')}</span>
+                <span className="tabular-nums text-foreground">
+                  {isStreaming ? streamingTokens.completion : traditionalTokens.completion}
+                </span>
               </div>
             ) : null}
-            
+
             {/* 流式控制按钮 */}
             {isStreaming && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handlePauseResume}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center gap-1.5 ${
-                    isPaused 
-                      ? 'bg-yellow-50 border-yellow-200 text-yellow-700 hover:bg-yellow-100' 
-                      : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
+              <>
+                <Button variant="outline" size="sm" onClick={handlePauseResume}>
                   {isPaused ? <Play className="size-3.5" /> : <Pause className="size-3.5" />}
                   {isPaused ? t('steps:common.resume') : t('steps:common.pause')}
-                </button>
-                <button
-                  onClick={handleStopStreaming}
-                  className="px-3 py-1.5 rounded-lg text-xs font-bold border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-all flex items-center gap-1.5"
-                >
+                </Button>
+                <Button variant="outline" size="sm" className="text-destructive hover:text-destructive" onClick={handleStopStreaming}>
                   <Square className="size-3.5" />
                   {t('steps:common.stop')}
-                </button>
-              </div>
+                </Button>
+              </>
             )}
-            
+
             {/* 生成按钮 */}
-            <button 
+            <Button
               onClick={generate}
               disabled={loading || (!input && selectedKnowledgeIds.size === 0)}
-              className={`px-8 py-2.5 rounded-xl font-bold text-white shadow-lg transition-all flex items-center ${
-                loading || (!input && selectedKnowledgeIds.size === 0) ? 'bg-gray-300 cursor-not-allowed shadow-none' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200 active:scale-95'
-              }`}
             >
-              {loading ? <Loader2 className="size-4 animate-spin mr-2" /> : <WandSparkles className="size-4 mr-2" />}
+              {loading ? <Loader2 className="size-4 animate-spin" /> : <WandSparkles className="size-4" />}
               {loading ? t('steps:inspiration.generating') : t('steps:inspiration.generateBtn')}
-            </button>
+            </Button>
           </div>
         </div>
-      </section>
+      </Card>
 
       {/* ===== 世界观设定（可选增强功能） ===== */}
-      <section className="bg-white/50 p-4 rounded-xl border border-gray-200">
+      <Card>
         <button
           onClick={() => setShowWorldView(!showWorldView)}
-          className="w-full flex items-center justify-between text-left"
+          className="flex w-full items-center justify-between p-4 text-left"
         >
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
-              project?.worldView ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-500'
-            }`}>
-              <Globe className="size-5" />
+            <div className={cn(
+              'flex size-9 items-center justify-center rounded-lg transition-colors',
+              project?.worldView ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground'
+            )}>
+              <Globe className="size-4" />
             </div>
             <div>
-              <h4 className="font-bold text-gray-800">{t('steps:inspiration.worldTitle')}</h4>
-              <p className="text-xs text-gray-500">
-                {project?.worldView 
-                  ? t('steps:inspiration.worldConfigured') 
+              <h4 className="text-sm font-medium">{t('steps:inspiration.worldTitle')}</h4>
+              <p className="text-xs text-muted-foreground">
+                {project?.worldView
+                  ? t('steps:inspiration.worldConfigured')
                   : t('steps:inspiration.worldOptional')}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {project?.worldView && (
-              <span className="px-2 py-1 bg-purple-100 text-purple-600 rounded-lg text-xs font-bold">
-                {t('steps:inspiration.enabled')}
-              </span>
+              <Badge variant="secondary">{t('steps:inspiration.enabled')}</Badge>
             )}
-            {showWorldView ? <ChevronUp className="size-4 text-gray-400 transition-transform" /> : <ChevronDown className="size-4 text-gray-400 transition-transform" />}
+            {showWorldView ? <ChevronUp className="size-4 text-muted-foreground" /> : <ChevronDown className="size-4 text-muted-foreground" />}
           </div>
         </button>
-        
+
         {showWorldView && (
-          <div className="mt-4 pt-4 border-t border-gray-100 animate-in fade-in">
+          <div className="border-t border-border p-4">
             <WorldViewEditor
               projectId={project?.id || ''}
               worldView={project?.worldView}
@@ -568,40 +567,40 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
             />
           </div>
         )}
-      </section>
+      </Card>
 
       {results ? (
-        <section className="bg-white p-8 rounded-[2rem] shadow-lg border border-gray-100 border-l-8 border-l-blue-500 animate-in zoom-in duration-300">
-          <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-50">
+        <Card className="overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-3">
              <div className="flex items-center gap-2">
-                <Bot className="size-4 text-blue-500" />
-                <h3 className="text-lg font-black text-gray-800">{t('steps:inspiration.aiPlan')}</h3>
-                <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded ml-2 font-bold">{t('steps:common.editable')}</span>
+                <Bot className="size-4 text-muted-foreground" />
+                <h3 className="text-sm font-semibold">{t('steps:inspiration.aiPlan')}</h3>
+                <Badge variant="secondary">{t('steps:common.editable')}</Badge>
              </div>
-             <div className="flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-lg">
-                <span className="text-xs font-bold text-gray-400">{t('steps:inspiration.bookName')}</span>
-                <input 
+             <div className="flex items-center gap-1.5 rounded-md border border-border bg-muted/50 px-2.5 py-1">
+                <span className="text-xs text-muted-foreground">{t('steps:inspiration.bookName')}</span>
+                <Input
                   placeholder={t('steps:inspiration.bookNamePlaceholder')}
-                  className="text-sm font-bold bg-transparent border-none focus:ring-0 outline-none text-gray-800 w-48"
+                  className="h-6 w-40 border-none bg-transparent px-1 text-sm font-medium shadow-none focus-visible:ring-0"
                   value={project?.title || ''}
                   onChange={(e) => onUpdate({ title: e.target.value })}
                 />
-                <Pen className="size-3.5 text-gray-300" />
              </div>
           </div>
-          <textarea
-            className="w-full min-h-[500px] p-4 -ml-4 rounded-xl border-2 border-transparent hover:border-gray-100 focus:border-blue-100 focus:bg-blue-50/10 outline-none resize-y transition-all text-gray-600 leading-loose whitespace-pre-wrap font-medium custom-scrollbar"
+          <Textarea
+            className="min-h-[500px] rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 resize-y leading-loose whitespace-pre-wrap font-serif text-base"
             value={results}
             onChange={(e) => onUpdate({ intro: e.target.value })}
             placeholder={t('steps:inspiration.resultPlaceholder')}
             spellCheck={false}
           />
-        </section>
+        </Card>
       ) : (
-        <div className="text-center py-10 opacity-50">
-          <Lightbulb className="size-10 text-gray-200 mb-4" />
-          <p className="text-gray-400 text-sm">{t('steps:inspiration.emptyHint')}</p>
-        </div>
+        <EmptyState
+          icon={Lightbulb}
+          title={t('steps:inspiration.emptyHint')}
+          className="py-16"
+        />
       )}
     </div>
   );

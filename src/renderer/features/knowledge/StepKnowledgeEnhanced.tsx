@@ -24,6 +24,13 @@ import SmartRecommender from '../assistant/SmartRecommender';
 import EnhancedTimeline from '../timeline/EnhancedTimeline';
 import KnowledgeFeaturePanels from './components/KnowledgeFeaturePanels';
 import { dialogService } from '@/shared/services/dialogService';
+import { cn } from '@/shared/utils/cn';
+import { Button } from '@/shared/ui/Button';
+import { Card } from '@/shared/ui/Card';
+import { EmptyState } from '@/shared/ui/EmptyState';
+import { Input } from '@/shared/ui/Input';
+import { Select } from '@/shared/ui/Select';
+import { Textarea } from '@/shared/ui/Textarea';
 import { BookOpen, Bot, Brain, Calendar, Clock, CloudUpload, FileText, Flag, Globe, Loader2, MapPinned, PenLine, Search, Settings2, Tag, X } from 'lucide-react';
 
 interface StepKnowledgeEnhancedProps {
@@ -385,218 +392,136 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
   };
 
   return (
-    <div className="max-w-7xl mx-auto h-full flex flex-col">
+    <div className="mx-auto flex h-full max-w-7xl flex-col">
       <div className="flex-none p-8 pb-4">
-        <div className="flex justify-between items-end border-b pb-6 border-gray-100">
+        <div className="flex items-end justify-between border-b border-border pb-6">
           <div>
-            <h2 className="text-3xl font-black text-gray-800 tracking-tight">{t('center.title')}</h2>
-            <p className="text-gray-500 mt-1 italic font-medium">{t('center.subtitle')}</p>
+            <h2 className="font-serif text-2xl font-semibold tracking-tight">{t('center.title')}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{t('center.subtitle')}</p>
           </div>
 
           {vectorStats && (
-            <div className="flex items-center gap-4 text-sm">
-              <div className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg border border-blue-100">
-                <span className="font-bold">{vectorStats.count}</span> {t('center.vectorDocs')}
-              </div>
-              <div className="px-3 py-1 bg-green-50 text-green-600 rounded-lg border border-green-100">
-                <span className="font-bold">{vectorStats.dimensions}</span> {t('center.dimUnit')}
-              </div>
+            <div className="flex items-center gap-2">
+              <span className="rounded-md border border-border bg-muted/40 px-3 py-1.5 text-xs tabular-nums text-muted-foreground">
+                <span className="font-medium text-foreground">{vectorStats.count}</span> {t('center.vectorDocs')}
+              </span>
+              <span className="rounded-md border border-border bg-muted/40 px-3 py-1.5 text-xs tabular-nums text-muted-foreground">
+                <span className="font-medium text-foreground">{vectorStats.dimensions}</span> {t('center.dimUnit')}
+              </span>
             </div>
           )}
         </div>
 
         <div className="mt-6">
           <div className="flex gap-3">
-          <div className="flex-1 relative">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              placeholder={t('center.searchPlaceholder')}
-              className="w-full px-6 py-4 rounded-2xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
-            />
-            <button
-              onClick={() => handleSemanticSearch(searchQuery)}
-              disabled={isSearching || !searchQuery.trim()}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-            >
-              {isSearching ? (
-                <>
-                  <Loader2 className="size-4 animate-spin mr-2" />
-                  {t('center.searching')}
-                </>
-              ) : (
-                <>
-                  <Search className="size-4 mr-2" />
-                  {t('center.search')}
-                </>
-              )}
-            </button>
-          </div>
-          
-          <div className="flex items-center gap-2 bg-gray-100 rounded-xl px-3">
-            <button
-              onClick={() => setSearchMode('hybrid')}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${
-                searchMode === 'hybrid' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'text-gray-600 hover:bg-gray-200'
-              }`}
-              title={t('center.hybridTitle')}
-            >
-              <Bot className="size-4" />
-              <span className="hidden sm:inline">{t('center.modeHybrid')}</span>
-            </button>
-            <button
-              onClick={() => setSearchMode('semantic')}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${
-                searchMode === 'semantic'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-600 hover:bg-gray-200'
-              }`}
-              title={t('center.semanticTitle')}
-            >
-              <Brain className="size-4" />
-              <span className="hidden sm:inline">{t('center.modeSemantic')}</span>
-            </button>
-            <button
-              onClick={() => setSearchMode('keyword')}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${
-                searchMode === 'keyword'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-600 hover:bg-gray-200'
-              }`}
-              title={t('center.keywordTitle')}
-            >
-              <Search className="size-4" />
-              <span className="hidden sm:inline">{t('center.modeKeyword')}</span>
-            </button>
-          </div>
-        </div>
+            <div className="relative flex-1">
+              <Input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !isSearching && searchQuery.trim()) handleSemanticSearch(searchQuery);
+                }}
+                placeholder={t('center.searchPlaceholder')}
+                className="pr-28"
+              />
+              <Button
+                size="sm"
+                onClick={() => handleSemanticSearch(searchQuery)}
+                disabled={isSearching || !searchQuery.trim()}
+                className="absolute right-1.5 top-1/2 -translate-y-1/2"
+              >
+                {isSearching ? <Loader2 className="size-3.5 animate-spin" /> : <Search className="size-3.5" />}
+                {isSearching ? t('center.searching') : t('center.search')}
+              </Button>
+            </div>
 
-        <div className="mt-2 text-xs text-gray-500 flex items-center gap-4">
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-            <span>{t('center.hybridLegend')}</span>
+            <div className="flex items-center gap-1 rounded-lg border border-border bg-muted/40 p-1">
+              {([
+                { mode: 'hybrid' as const, icon: Bot, title: t('center.hybridTitle'), label: t('center.modeHybrid') },
+                { mode: 'semantic' as const, icon: Brain, title: t('center.semanticTitle'), label: t('center.modeSemantic') },
+                { mode: 'keyword' as const, icon: Search, title: t('center.keywordTitle'), label: t('center.modeKeyword') },
+              ]).map(({ mode, icon: Icon, title, label }) => (
+                <button
+                  key={mode}
+                  onClick={() => setSearchMode(mode)}
+                  title={title}
+                  className={cn(
+                    'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                    searchMode === mode
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                  )}
+                >
+                  <Icon className="size-4" />
+                  <span className="hidden sm:inline">{label}</span>
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-            <span>{t('center.semanticLegend')}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-green-500"></div>
-            <span>{t('center.keywordLegend')}</span>
+
+          <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-primary" />
+              {t('center.hybridLegend')}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-sky-500" />
+              {t('center.semanticLegend')}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-emerald-500" />
+              {t('center.keywordLegend')}
+            </span>
           </div>
         </div>
-      </div>
       </div>{/* 固定头部区域结束 */}
 
       <div className="flex-1 overflow-y-auto px-8 pb-8 space-y-6">
 
       <div className="grid grid-cols-5 gap-3">
-        <div className={`p-4 rounded-xl border transition-all ${
-          project.worldView ? 'bg-purple-50 border-purple-200' : 'bg-white border-gray-200'
-        }`}>
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-              project.worldView ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-400'
-            }`}>
-              <Globe className="size-5" />
+        {([
+          { icon: Globe, label: t('center.statsWorldview'), value: project.worldView ? t('center.set') : t('center.unset'), active: !!project.worldView },
+          { icon: MapPinned, label: t('center.statsLocation'), value: project.locations?.length ? t('center.countUnit', { count: project.locations.length }) : t('center.notDefined'), active: !!project.locations?.length },
+          { icon: Flag, label: t('center.statsFaction'), value: project.factions?.length ? t('center.countUnit', { count: project.factions.length }) : t('center.notDefined'), active: !!project.factions?.length },
+          { icon: Clock, label: t('center.statsTimeline'), value: project.timeline?.events?.length ? t('center.eventsCount', { count: project.timeline.events.length }) : t('center.notDefined'), active: !!project.timeline?.events?.length },
+          { icon: Settings2, label: t('center.statsRule'), value: project.ruleSystems?.length ? t('center.countUnit', { count: project.ruleSystems.length }) : t('center.notDefined'), active: !!project.ruleSystems?.length },
+        ]).map(({ icon: Icon, label, value, active }) => (
+          <div
+            key={label}
+            className={cn(
+              'flex items-center gap-3 rounded-lg border p-4 transition-colors',
+              active ? 'border-primary/40 bg-primary/5' : 'border-border bg-card'
+            )}
+          >
+            <div
+              className={cn(
+                'flex size-9 shrink-0 items-center justify-center rounded-lg',
+                active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+              )}
+            >
+              <Icon className="size-4.5" />
             </div>
-            <div>
-              <h4 className="font-bold text-gray-800 text-sm">{t('center.statsWorldview')}</h4>
-              <p className="text-xs text-gray-500">
-                {project.worldView ? t('center.set') : t('center.unset')}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className={`p-4 rounded-xl border transition-all ${
-          project.locations?.length ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-gray-200'
-        }`}>
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-              project.locations?.length ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-400'
-            }`}>
-              <MapPinned className="size-5" />
-            </div>
-            <div>
-              <h4 className="font-bold text-gray-800 text-sm">{t('center.statsLocation')}</h4>
-              <p className="text-xs text-gray-500">
-                {project.locations?.length ? t('center.countUnit', { count: project.locations.length }) : t('center.notDefined')}
-              </p>
+            <div className="min-w-0">
+              <h4 className="text-sm font-medium leading-tight">{label}</h4>
+              <p className="truncate text-xs text-muted-foreground">{value}</p>
             </div>
           </div>
-        </div>
-
-        <div className={`p-4 rounded-xl border transition-all ${
-          project.factions?.length ? 'bg-amber-50 border-amber-200' : 'bg-white border-gray-200'
-        }`}>
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-              project.factions?.length ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-400'
-            }`}>
-              <Flag className="size-5" />
-            </div>
-            <div>
-              <h4 className="font-bold text-gray-800 text-sm">{t('center.statsFaction')}</h4>
-              <p className="text-xs text-gray-500">
-                {project.factions?.length ? t('center.countUnit', { count: project.factions.length }) : t('center.notDefined')}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className={`p-4 rounded-xl border transition-all ${
-          project.timeline?.events?.length ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-gray-200'
-        }`}>
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-              project.timeline?.events?.length ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-400'
-            }`}>
-              <Clock className="size-5" />
-            </div>
-            <div>
-              <h4 className="font-bold text-gray-800 text-sm">{t('center.statsTimeline')}</h4>
-              <p className="text-xs text-gray-500">
-                {project.timeline?.events?.length ? t('center.eventsCount', { count: project.timeline.events.length }) : t('center.notDefined')}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className={`p-4 rounded-xl border transition-all ${
-          project.ruleSystems?.length ? 'bg-rose-50 border-rose-200' : 'bg-white border-gray-200'
-        }`}>
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-              project.ruleSystems?.length ? 'bg-rose-100 text-rose-600' : 'bg-gray-100 text-gray-400'
-            }`}>
-              <Settings2 className="size-5" />
-            </div>
-            <div>
-              <h4 className="font-bold text-gray-800 text-sm">{t('center.statsRule')}</h4>
-              <p className="text-xs text-gray-500">
-                {project.ruleSystems?.length ? t('center.countUnit', { count: project.ruleSystems.length }) : t('center.notDefined')}
-              </p>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
 
       {showSearchResults && searchResults.length > 0 && (
-        <div className="mb-6 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-            <h3 className="font-bold text-gray-700">
+        <Card className="mb-6 overflow-hidden">
+          <div className="flex items-center justify-between border-b border-border bg-muted/30 p-4">
+            <h3 className="text-sm font-medium">
               {t('center.searchResultsTitle', { count: searchResults.length })}
-              <span className="ml-2 text-sm font-normal text-gray-500">
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
                 {searchMode === 'hybrid' ? t('center.searchModeHybrid') : searchMode === 'semantic' ? t('center.searchModeSemantic') : t('center.searchModeKeyword')}
               </span>
             </h3>
             <button
               onClick={() => setShowSearchResults(false)}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-muted-foreground transition-colors hover:text-foreground"
             >
               <X className="size-4" />
             </button>
@@ -605,7 +530,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
             {searchResults.map((result) => (
               <div
                 key={result.document.id}
-                className="p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+                className="cursor-pointer border-b border-border p-4 transition-colors last:border-0 hover:bg-accent/40"
                 onClick={() => {
                   const item = project.knowledge?.find(k => k.id === result.document.knowledgeItemId);
                   if (item) {
@@ -614,37 +539,36 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
                   }
                 }}
               >
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex-1">
-                    <h4 className="font-bold text-gray-800 text-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <h4 className="truncate text-sm font-medium">
                       {result.metadata?.name || t('center.unnamedDoc')}
-                      <span className="ml-2 text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
+                      <span className="ml-2 rounded border border-border bg-muted/40 px-1.5 py-0.5 text-xs font-normal text-muted-foreground">
                         {result.metadata?.category || t('center.unknown')}
                       </span>
                     </h4>
-                    <p className="text-gray-600 text-sm mt-1 line-clamp-2">
+                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                       {result.content}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <div className="text-xs text-gray-500 mb-1">
+                  <div className="shrink-0 text-right">
+                    <div className="text-xs tabular-nums text-muted-foreground">
                       {formatScore(result.combinedScore)}
                     </div>
-                    <div className="flex items-center gap-1 text-xs">
-                      <span className={`px-1.5 py-0.5 rounded ${
-                        result.semanticScore > result.keywordScore 
-                          ? 'bg-purple-100 text-purple-700' 
-                          : 'bg-green-100 text-green-700'
-                      }`}>
-                        {result.semanticScore > result.keywordScore ? t('center.scoreSemantic') : t('center.scoreKeyword')}
-                      </span>
-                    </div>
+                    <span className={cn(
+                      'mt-1 inline-block rounded px-1.5 py-0.5 text-xs',
+                      result.semanticScore > result.keywordScore
+                        ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400'
+                        : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                    )}>
+                      {result.semanticScore > result.keywordScore ? t('center.scoreSemantic') : t('center.scoreKeyword')}
+                    </span>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </Card>
       )}
 
       <KnowledgeFeaturePanels
@@ -668,7 +592,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
       />
 
       {showLocationEditor && (
-        <div className="bg-white p-6 rounded-2xl border border-emerald-200 shadow-sm animate-in fade-in max-h-[500px] overflow-y-auto">
+        <div className="max-h-[500px] overflow-y-auto rounded-lg border border-border bg-card p-6">
           <LocationEditor
             projectId={project.id}
             locations={project.locations || []}
@@ -681,7 +605,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
       )}
 
       {showTimelineEditor && (
-        <div className="bg-white p-6 rounded-2xl border border-indigo-200 shadow-sm animate-in fade-in max-h-[600px] overflow-y-auto">
+        <div className="max-h-[600px] overflow-y-auto rounded-lg border border-border bg-card p-6">
           <TimelineEditor
             projectId={project.id}
             timeline={project.timeline}
@@ -697,7 +621,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
       )}
 
       {showRuleSystemEditor && (
-        <div className="bg-white p-6 rounded-2xl border border-rose-200 shadow-sm animate-in fade-in max-h-[600px] overflow-y-auto">
+        <div className="max-h-[600px] overflow-y-auto rounded-lg border border-border bg-card p-6">
           <RuleSystemEditor
             projectId={project.id}
             ruleSystems={project.ruleSystems || []}
@@ -763,7 +687,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
       )}
 
       {showFactionEditor && (
-        <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-sm animate-in fade-in max-h-[500px] overflow-y-auto">
+        <div className="max-h-[500px] overflow-y-auto rounded-lg border border-border bg-card p-6">
           <FactionEditor
             projectId={project.id}
             factions={project.factions || []}
@@ -776,64 +700,68 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
         </div>
       )}
 
-      <div className="flex-1 grid grid-cols-3 gap-6 overflow-hidden">
-        <div className="col-span-1 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-gray-100 bg-gray-50">
-            <h3 className="font-bold text-gray-700">{t('center.knowledgeList')}</h3>
+      <div className="grid flex-1 grid-cols-3 gap-6 overflow-hidden">
+        <Card className="col-span-1 flex flex-col overflow-hidden">
+          <div className="flex-none border-b border-border bg-muted/30 p-4">
+            <h3 className="text-sm font-medium">{t('center.knowledgeList')}</h3>
             <div className="mt-2 flex flex-wrap gap-1">
               {(['all', 'inspiration', 'character', 'outline', 'chapter', 'writing'] as const).map(category => (
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-3 py-1 text-xs rounded-lg transition-colors ${
+                  className={cn(
+                    'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
                     selectedCategory === category
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground hover:bg-accent hover:text-foreground'
+                  )}
                 >
                   {getCategoryDisplayName(category)}
                 </button>
               ))}
             </div>
           </div>
-          
+
           <div className="flex-1 overflow-y-auto p-4">
             {getFilteredKnowledge().length === 0 ? (
-              <div className="text-center py-8 text-gray-400">
-                <BookOpen className="size-8 mb-2" />
-                <p>{t('center.emptyContent')}</p>
-                <p className="text-sm mt-1">{t('center.emptyContentHint')}</p>
-              </div>
+              <EmptyState
+                icon={BookOpen}
+                title={t('center.emptyContent')}
+                description={t('center.emptyContentHint')}
+                className="py-8"
+              />
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {getFilteredKnowledge().map(item => (
                   <div
                     key={item.id}
-                    className={`p-3 rounded-xl border cursor-pointer transition-all hover:shadow-sm ${
+                    className={cn(
+                      'group cursor-pointer rounded-lg border p-3 transition-colors',
                       viewingItem?.id === item.id
-                        ? 'border-blue-300 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
+                        ? 'border-primary/40 bg-primary/5'
+                        : 'border-border hover:bg-accent/40'
+                    )}
                     onClick={() => setViewingItem(item)}
                   >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-800 text-sm truncate">{item.name}</h4>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
-                          <span className="px-1.5 py-0.5 bg-gray-100 rounded">
+                    <div className="flex items-start justify-between">
+                      <div className="min-w-0 flex-1">
+                        <h4 className="truncate text-sm font-medium">{item.name}</h4>
+                        <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                          <span className="rounded border border-border bg-muted/40 px-1.5 py-0.5">
                             {t(`categoryShort.${item.category}`)}
                           </span>
-                          <span>{formatSize(item.size)}</span>
+                          <span className="tabular-nums">{formatSize(item.size)}</span>
                           <span>{new Date(item.addedAt).toLocaleDateString(i18n.language)}</span>
                         </div>
                       </div>
                       <button
                         onClick={(e) => handleDeleteClick(e, item.id)}
-                        className={`ml-2 px-2 py-1 text-xs rounded transition-colors ${
+                        className={cn(
+                          'ml-2 shrink-0 rounded px-2 py-1 text-xs transition-colors',
                           deleteConfirmId === item.id
-                            ? 'bg-red-600 text-white'
-                            : 'text-gray-400 hover:text-red-500 hover:bg-red-50'
-                        }`}
+                            ? 'bg-destructive text-destructive-foreground'
+                            : 'text-muted-foreground opacity-0 hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100'
+                        )}
                       >
                         {deleteConfirmId === item.id ? t('center.confirmDelete') : t('center.delete')}
                       </button>
@@ -843,14 +771,15 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
               </div>
             )}
           </div>
-          
-          <div className="p-4 border-t border-gray-100">
+
+          <div className="flex-none border-t border-border p-4">
             <div
-              className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
+              className={cn(
+                'rounded-lg border-2 border-dashed p-6 text-center transition-colors',
                 dragActive
-                  ? 'border-blue-400 bg-blue-50'
-                  : 'border-gray-300 hover:border-gray-400'
-              }`}
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border hover:border-muted-foreground/40'
+              )}
               onDragEnter={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -874,9 +803,9 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
                 }
               }}
             >
-              <CloudUpload className="size-8 text-gray-400 mb-2" />
-              <p className="text-gray-600">{t('center.dropTitle')}</p>
-              <p className="text-sm text-gray-400 mt-1">{t('center.dropHint')}</p>
+              <CloudUpload className="mx-auto size-8 text-muted-foreground" strokeWidth={1.5} />
+              <p className="mt-2 text-sm text-foreground">{t('center.dropTitle')}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{t('center.dropHint')}</p>
               <input
                 type="file"
                 id="file-upload"
@@ -891,117 +820,110 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({ project, 
               />
               <label
                 htmlFor="file-upload"
-                className="inline-block mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer transition-colors"
+                className="mt-3 inline-flex h-8 cursor-pointer items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
               >
                 {t('selectFiles')}
               </label>
             </div>
-            
+
             {isIndexing && (
-              <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm font-medium text-blue-700">{t('center.indexing')}</span>
-                  <span className="text-xs text-blue-600">{indexProgress}%</span>
+              <div className="mt-4 rounded-md border border-border bg-muted/40 p-3">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-xs font-medium">
+                    <Loader2 className="size-3.5 animate-spin" />
+                    {t('center.indexing')}
+                  </span>
+                  <span className="text-xs tabular-nums text-muted-foreground">{indexProgress}%</span>
                 </div>
-                <div className="w-full bg-blue-200 rounded-full h-1.5">
-                  <div 
-                    className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all duration-300"
                     style={{ width: `${indexProgress}%` }}
-                  ></div>
+                  />
                 </div>
               </div>
             )}
           </div>
-        </div>
+        </Card>
 
-        <div className="col-span-2 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-            <h3 className="font-bold text-gray-700">
+        <Card className="col-span-2 flex flex-col overflow-hidden">
+          <div className="flex flex-none items-center justify-between gap-2 border-b border-border bg-muted/30 p-4">
+            <h3 className="text-sm font-medium">
               {viewingItem ? t('center.editTitle') : t('center.selectToEdit')}
             </h3>
             {viewingItem && (
               <div className="flex items-center gap-2">
-                <select
+                <Select
                   value={editCategory}
                   onChange={(e) => {
                     setEditCategory(e.target.value as KnowledgeCategory);
                     setIsDirty(true);
                   }}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-lg bg-white"
+                  className="h-8 w-auto text-sm"
                 >
                   {(['inspiration', 'character', 'outline', 'chapter', 'writing'] as KnowledgeCategory[]).map(category => (
                     <option key={category} value={category}>{t(`category.${category}`)}</option>
                   ))}
-                </select>
-                <button
-                  onClick={handleSave}
-                  disabled={!isDirty}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    isDirty
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  }`}
-                >
+                </Select>
+                <Button size="sm" onClick={handleSave} disabled={!isDirty}>
                   {t('center.saveChanges')}
-                </button>
+                </Button>
               </div>
             )}
           </div>
-          
+
           <div className="flex-1 overflow-hidden">
             {viewingItem ? (
-              <div className="h-full flex flex-col">
-                <div className="p-4 border-b border-gray-100">
-                  <input
-                    type="text"
+              <div className="flex h-full flex-col">
+                <div className="flex-none border-b border-border p-4">
+                  <Input
                     value={editName}
                     onChange={(e) => {
                       setEditName(e.target.value);
                       setIsDirty(true);
                     }}
                     placeholder={t('center.titlePlaceholder')}
-                    className="w-full px-4 py-2 text-lg font-bold border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                    className="font-serif text-lg"
                   />
-                  <div className="mt-3 flex items-center gap-4 text-sm text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <FileText className="size-4" />
-                      <span>{formatSize(viewingItem.size)}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="size-4" />
-                      <span>{new Date(viewingItem.addedAt).toLocaleString(i18n.language)}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Tag className="size-4" />
-                      <span>{viewingItem.type.toUpperCase()}</span>
-                    </div>
+                  <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1.5">
+                      <FileText className="size-3.5" />
+                      <span className="tabular-nums">{formatSize(viewingItem.size)}</span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="size-3.5" />
+                      {new Date(viewingItem.addedAt).toLocaleString(i18n.language)}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Tag className="size-3.5" />
+                      {viewingItem.type.toUpperCase()}
+                    </span>
                   </div>
                 </div>
-                
+
                 <div className="flex-1 overflow-hidden">
-                  <textarea
+                  <Textarea
                     value={editContent}
                     onChange={(e) => {
                       setEditContent(e.target.value);
                       setIsDirty(true);
                     }}
                     placeholder={t('center.contentPlaceholder')}
-                    className="w-full h-full p-4 border-none resize-none outline-none font-mono text-sm"
-                    style={{ minHeight: '300px' }}
+                    className="h-full min-h-[300px] w-full resize-none rounded-none border-0 bg-transparent font-mono text-sm leading-relaxed shadow-none focus-visible:ring-0"
                   />
                 </div>
               </div>
             ) : (
-              <div className="h-full flex items-center justify-center text-gray-400">
-                <div className="text-center">
-                  <PenLine className="size-10 mb-3" />
-                  <p>{t('center.emptyEditor')}</p>
-                  <p className="text-sm mt-1">{t('center.emptyEditorHint')}</p>
-                </div>
+              <div className="flex h-full items-center justify-center">
+                <EmptyState
+                  icon={PenLine}
+                  title={t('center.emptyEditor')}
+                  description={t('center.emptyEditorHint')}
+                />
               </div>
             )}
           </div>
-        </div>
+        </Card>
       </div>
       </div>{/* 可滚动内容区域结束 */}
 

@@ -17,6 +17,7 @@
   },
   "newBook": {
     "titleRequired": "Please enter a book title",
+    "duplicateRequired": "Please select a book to duplicate",
     "title": "New Book",
     "subtitle": "Start your new creative journey",
     "titleLabel": "Book Title",

@@ -73,6 +73,7 @@
   },
   "chapters": {
     "title": "结构化章节细纲",
+    "subtitle": "AI 驱动的章节编排",
     "knowledgeToggleTitle": "选择知识库参考",
     "knowledgeSelectTitle": "选择参考资料",
     "generating": "架构中...",

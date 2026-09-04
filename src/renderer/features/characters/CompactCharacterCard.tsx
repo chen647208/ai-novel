@@ -11,6 +11,7 @@ import React from 'react';
 import { useTranslation } from '@/i18n';
 import { type Character } from '../../../shared/types';
 import { roleLabel, genderLabel } from './displayLabels';
+import { cn } from '@/shared/utils/cn';
 import { ChevronRight, Crown, Eye, Info, Skull, Star, User, Users, type LucideIcon } from 'lucide-react';
 
 interface CompactCharacterCardProps {
@@ -24,15 +25,15 @@ const CompactCharacterCard: React.FC<CompactCharacterCardProps> = ({ character, 
   const getRoleConfig = (role: string): { color: string; icon: LucideIcon } => {
     const roleLower = role.toLowerCase();
     if (roleLower.includes('主')) {
-      return { color: 'bg-amber-100 text-amber-700 border-amber-200', icon: Crown };
+      return { color: 'border-amber-500/25 bg-amber-500/10 text-amber-600 dark:text-amber-400', icon: Crown };
     }
     if (roleLower.includes('反')) {
-      return { color: 'bg-red-100 text-red-700 border-red-200', icon: Skull };
+      return { color: 'border-destructive/25 bg-destructive/10 text-destructive', icon: Skull };
     }
     if (roleLower.includes('配')) {
-      return { color: 'bg-blue-100 text-blue-700 border-blue-200', icon: Users };
+      return { color: 'border-sky-500/25 bg-sky-500/10 text-sky-600 dark:text-sky-400', icon: Users };
     }
-    return { color: 'bg-gray-100 text-gray-600 border-gray-200', icon: User };
+    return { color: 'border-border bg-muted text-muted-foreground', icon: User };
   };
 
   const roleConfig = getRoleConfig(character.role);
@@ -40,59 +41,57 @@ const CompactCharacterCard: React.FC<CompactCharacterCardProps> = ({ character, 
   const genderText = genderLabel(character.gender);
 
   return (
-    <div 
-      className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer h-full flex flex-col"
+    <div
+      className="flex h-full cursor-pointer flex-col rounded-lg border border-border bg-card p-5 text-card-foreground shadow-sm transition-colors hover:border-primary/40 hover:bg-accent/40"
       onClick={onClick}
     >
       {/* 顶部：角色名称和类型 */}
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1">
-          <h3 className="text-xl font-black text-gray-900 truncate">{character.name}</h3>
-          <div className="flex items-center gap-2 mt-1">
-            <span className={`text-[10px] font-black px-3 py-1 rounded-full border ${roleConfig.color} flex items-center gap-1.5`}>
-              <roleConfig.icon className="size-2" />
+      <div className="mb-3 flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate font-serif text-lg font-medium">{character.name}</h3>
+          <div className="mt-1.5 flex flex-wrap items-center gap-2">
+            <span className={cn('flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium', roleConfig.color)}>
+              <roleConfig.icon className="size-2.5" />
               {roleText}
             </span>
-            <span className="text-[10px] text-gray-400 font-medium">
+            <span className="text-[10px] text-muted-foreground">
               {genderText}
             </span>
-            <span className="text-[10px] text-gray-400 font-medium">
+            <span className="text-[10px] text-muted-foreground">
               {character.age ? t('card.ageSuffix', { age: character.age }) : t('card.ageUnknown')}
             </span>
           </div>
         </div>
-        <div className="text-gray-300 hover:text-gray-600 transition-colors">
-          <ChevronRight className="size-4" />
-        </div>
+        <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
       </div>
 
       {/* 外观描述 */}
-      <div className="mb-4 flex-1">
-        <div className="flex items-center gap-2 mb-2">
-          <Eye className="size-3.5 text-blue-400" />
-          <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{t('card.appearanceTitle')}</span>
+      <div className="mb-3 flex-1">
+        <div className="mb-1.5 flex items-center gap-1.5">
+          <Eye className="size-3 text-muted-foreground" />
+          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t('card.appearanceTitle')}</span>
         </div>
-        <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
+        <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
           {character.appearance || t('card.noAppearance')}
         </p>
       </div>
 
       {/* 标志性特征 */}
-      <div className="pt-4 border-t border-gray-50">
-        <div className="flex items-center gap-2 mb-2">
-          <Star className="size-3.5 text-amber-400" />
-          <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">{t('card.featuresTitle')}</span>
+      <div className="border-t border-border pt-3">
+        <div className="mb-1.5 flex items-center gap-1.5">
+          <Star className="size-3 text-muted-foreground" />
+          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t('card.featuresTitle')}</span>
         </div>
-        <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+        <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
           {character.distinctiveFeatures || t('card.noFeatures')}
         </p>
       </div>
 
       {/* 底部提示 */}
-      <div className="mt-4 pt-3 border-t border-gray-50 flex justify-between items-center">
-        <span className="text-[9px] text-gray-400 font-medium">{t('card.clickHint')}</span>
-        <span className="text-[9px] text-gray-300">
-          <Info className="size-4 mr-1" />
+      <div className="mt-3 flex items-center justify-between border-t border-border pt-2.5 text-[10px] text-muted-foreground">
+        <span>{t('card.clickHint')}</span>
+        <span className="flex items-center gap-1 opacity-70">
+          <Info className="size-3" />
           {t('card.detail')}
         </span>
       </div>

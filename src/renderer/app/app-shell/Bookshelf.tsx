@@ -275,8 +275,8 @@ const Bookshelf: React.FC<BookshelfProps> = ({
       <NewBookModal
         isOpen={isNewBookOpen}
         onClose={() => setIsNewBookOpen(false)}
-        onCreate={(title, description, templateType) => {
-          onCreateBook(title, description, templateType);
+        onCreate={(title, description, templateType, sourceBookId) => {
+          onCreateBook(title, description, templateType, sourceBookId);
           setIsNewBookOpen(false);
         }}
         existingBooks={books.map(b => ({ id: b.id, title: b.title }))}
