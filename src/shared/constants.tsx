@@ -51,14 +51,14 @@ export const DEFAULT_PROMPTS: PromptTemplate[] = [
     category: 'writing',
     name: '沉浸式正文创作',
     nameKey: 'prompts:p5',
-    content: '根据小说大纲及角色设定，请为我创作《{title}》的正式内容。当前章节：{chapter_title}，细纲：{summary}。要求注重细节描写。'
+    content: '根据小说大纲及角色设定，请为我创作《{title}》的正式内容。当前章节：{chapter_title}，细纲：{summary}。要求注重细节描写。以干净的小说正文散文输出，段落之间空一行，不要使用任何 Markdown 符号。'
   },
   {
     id: 'p-w2',
     category: 'writing',
     name: '智能逻辑续写',
     nameKey: 'prompts:p-w2',
-    content: '请根据当前正文内容：{content}，结合本章细纲：{summary}，进行逻辑严密的续写。保持文风一致，推动剧情发展。'
+    content: '请根据当前正文内容：{content}，结合本章细纲：{summary}，进行逻辑严密的续写。保持文风一致，推动剧情发展。以干净的小说正文散文输出，段落之间空一行，不要使用任何 Markdown 符号。'
   },
   {
     id: 'p6',

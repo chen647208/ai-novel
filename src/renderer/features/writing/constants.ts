@@ -21,6 +21,11 @@ export const FLOATING_MENU_OFFSET_X = 10;
 export const FLOATING_MENU_OFFSET_Y = 10;
 export const FLOATING_MENU_VIEWPORT_MARGIN = 20;
 
+// 正文生成统一输出格式约束（AI 提示词内容，按 i18n 约定保持语言无关、不翻译）。
+// 模型常把 Markdown 符号或开场白混入小说正文，画布为纯文本编辑区无法渲染，故在调用前强制约束为干净散文。
+export const WRITING_OUTPUT_FORMAT_DIRECTIVE =
+  '\n\n### 输出格式要求\n直接输出小说正文，不要任何开场白、解释、标题或"以下是…"之类的话。使用中文标点，段落之间空一行分隔；严禁使用任何 Markdown 符号（如 # 标题、* 或 ** 加粗、- 列表、` 代码块、> 引用、--- 分隔线）。';
+
 export const INITIAL_BATCH_PROGRESS: BatchProgress = {
   current: 0,
   total: 0,

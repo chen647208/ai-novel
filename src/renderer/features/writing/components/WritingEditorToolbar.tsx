@@ -45,23 +45,23 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
   return (
     <div
       className={cn(
-        'sticky top-0 z-10 flex items-center justify-between border-b border-border px-10 py-4 transition-colors',
+        'sticky top-0 z-10 flex flex-wrap items-center justify-between gap-y-2 border-b border-border px-10 py-4 transition-colors',
         isFocusMode ? 'bg-background/80 backdrop-blur-sm' : 'bg-card'
       )}
     >
-      <div className="flex items-center gap-5">
+      <div className="flex min-w-[240px] flex-1 items-center gap-5">
         {!isFocusMode && (
           <Button variant="ghost" size="icon" className="size-9 shrink-0" onClick={onBack} title={t('toolbar.back')}>
             <ArrowLeft className="size-4" />
           </Button>
         )}
-        <div className="flex flex-col">
+        <div className="flex min-w-0 flex-col">
           <span className="text-xs font-medium uppercase tracking-wider text-primary">{t('toolbar.writingLabel')}</span>
           {activeChapterId ? (
             <input
               className={cn(
-                'border-none bg-transparent p-0 font-serif text-2xl font-medium text-foreground outline-none placeholder:text-muted-foreground/40',
-                isFocusMode ? 'w-[60ch]' : 'w-96'
+                'w-full min-w-0 border-none bg-transparent p-0 font-serif text-2xl font-medium text-foreground outline-none placeholder:text-muted-foreground/40',
+                isFocusMode ? 'max-w-[60ch]' : 'max-w-96'
               )}
               value={activeChapterTitle}
               onChange={(event) => onTitleChange(event.target.value)}
@@ -72,7 +72,7 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
           )}
         </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-3">
         {/* 统计信息：本章 + 全书 + 今日 */}
         <div
           className="mr-1 hidden items-center gap-3 text-xs text-muted-foreground lg:flex"

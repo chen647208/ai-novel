@@ -29,6 +29,7 @@ import {
   INITIAL_BATCH_PROGRESS,
   INITIAL_GENERATION_MODAL_STATE,
   INITIAL_TOKEN_USAGE,
+  WRITING_OUTPUT_FORMAT_DIRECTIVE,
 } from './constants';
 import type {
   BatchMode,
@@ -484,6 +485,8 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
        finalPrompt += `\n\n要求：请撰写约 ${targetWordCount} 字的正文内容。`;
     }
 
+    finalPrompt += WRITING_OUTPUT_FORMAT_DIRECTIVE;
+
     const shouldUseStreaming = outputMode === 'streaming' && activeModel.supportsStreaming !== false;
 
     if (shouldUseStreaming) {
@@ -761,6 +764,8 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
       }
 
       finalPrompt += `\n\n要求：请撰写约 ${targetWordCount} 字的正文内容。`;
+
+      finalPrompt += WRITING_OUTPUT_FORMAT_DIRECTIVE;
 
       const shouldUseStreaming = outputMode === 'streaming' && activeModel.supportsStreaming !== false;
 
@@ -1104,7 +1109,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
         />
       )}
 
-      <div className="flex h-full flex-1 flex-col bg-muted/30">
+      <div className="flex h-full min-w-0 flex-1 flex-col bg-muted/30">
         <WritingEditorToolbar
           activeChapterId={activeChapterId}
           activeChapterTitle={activeChapter?.title || ""}
