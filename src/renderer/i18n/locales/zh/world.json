@@ -1,0 +1,329 @@
+{
+  "unknown": "未知",
+  "faction": {
+    "searchPlaceholder": "搜索势力...",
+    "add": "添加势力",
+    "defaultName": "新势力",
+    "listTitle": "势力列表 ({{count}})",
+    "noMatch": "无匹配势力",
+    "empty": "暂无势力，点击添加",
+    "unknownLeader": "未知",
+    "territoriesCount": "{{count}}领地",
+    "membersCount": "{{count}}成员",
+    "detailsTitle": "势力详情",
+    "delete": "删除",
+    "deleteConfirm": "确定要删除这个势力吗？相关的关联关系也会被清除。",
+    "noOtherFactions": "没有可关联的其他势力",
+    "nameLabel": "势力名称",
+    "typeLabel": "势力类型",
+    "descLabel": "势力描述",
+    "descPlaceholder": "描述这个势力的历史、目标和特点...",
+    "ideologyLabel": "理念/信仰",
+    "ideologyPlaceholder": "如：正义、秩序、自由、征服...",
+    "emblemLabel": "标志/旗帜",
+    "emblemPlaceholder": "描述势力的标志或旗帜...",
+    "foundedLabel": "创立时间",
+    "foundedPlaceholder": "如：第三纪元45年",
+    "strengthTitle": "实力评估",
+    "militaryLabel": "军事实力",
+    "militaryPlaceholder": "如：强大、中等、弱小",
+    "economicLabel": "经济实力",
+    "economicPlaceholder": "如：富裕、一般、贫困",
+    "influenceLabel": "影响力",
+    "influencePlaceholder": "如：广泛、区域、有限",
+    "overallLabel": "综合评估",
+    "overallPlaceholder": "如：一流、二流、三流",
+    "leaderLabel": "势力领袖",
+    "leaderUnset": "未设置",
+    "relationsLabel": "势力关系",
+    "addRelation": "添加关系",
+    "noRelations": "暂无势力关系",
+    "relationWith": "与",
+    "relationDescPlaceholder": "关系描述",
+    "territoryLabel": "控制领地",
+    "noLocations": "暂无地点，请先创建地点",
+    "membersLabel": "势力成员",
+    "noCharacters": "暂无角色，请先创建角色",
+    "selectHint": "选择左侧势力进行编辑",
+    "save": "保存势力设定",
+    "type": {
+      "kingdom": "王国",
+      "empire": "帝国",
+      "sect": "门派/宗派",
+      "guild": "公会/行会",
+      "family": "家族",
+      "tribe": "部落",
+      "organization": "组织",
+      "alliance": "联盟",
+      "other": "其他"
+    },
+    "relationType": {
+      "ally": "同盟",
+      "enemy": "敌对",
+      "neutral": "中立",
+      "vassal": "附庸",
+      "suzerain": "宗主",
+      "rival": "竞争",
+      "trade": "贸易"
+    }
+  },
+  "location": {
+    "searchPlaceholder": "搜索地点...",
+    "add": "添加地点",
+    "defaultName": "新地点",
+    "listTitle": "地点列表 ({{count}})",
+    "noMatch": "无匹配地点",
+    "empty": "暂无地点，点击添加",
+    "unknownFaction": "未知势力",
+    "detailsTitle": "地点详情",
+    "delete": "删除",
+    "deleteConfirm": "确定要删除这个地点吗？相关的关联关系也会被清除。",
+    "noOtherLocations": "没有可关联的其他地点",
+    "nameLabel": "地点名称",
+    "typeLabel": "地点类型",
+    "descLabel": "地点描述",
+    "descPlaceholder": "描述这个地点的外观、氛围、特色...",
+    "geoTitle": "地理属性",
+    "terrainLabel": "地形",
+    "terrainPlaceholder": "如：平原、山脉、森林",
+    "climateLabel": "气候",
+    "climatePlaceholder": "如：温带、热带、寒冷",
+    "resourcesLabel": "资源（逗号分隔）",
+    "resourcesPlaceholder": "如：铁矿、木材、魔晶",
+    "tagsLabel": "特征标签（逗号分隔）",
+    "tagsPlaceholder": "如：繁华、危险、神秘、古老",
+    "controlledByLabel": "控制势力",
+    "noFactionOption": "无（中立/无主）",
+    "connectionsLabel": "地点关联",
+    "addConnection": "添加关联",
+    "noConnections": "暂无关联地点",
+    "selectHint": "选择左侧地点进行编辑",
+    "save": "保存地点设定",
+    "type": {
+      "city": "城市",
+      "region": "区域",
+      "building": "建筑",
+      "landmark": "地标",
+      "dungeon": "副本/迷宫",
+      "wilderness": "野外",
+      "other": "其他"
+    },
+    "connectionType": {
+      "adjacent": "相邻",
+      "trade": "贸易",
+      "conflict": "冲突",
+      "ally": "同盟",
+      "subordinate": "从属"
+    }
+  },
+  "worldview": {
+    "tabMagic": "魔法/修炼",
+    "tabTech": "科技水平",
+    "tabHistory": "历史背景",
+    "save": "保存世界观设定",
+    "magic": {
+      "title": "魔法/修炼体系",
+      "nameLabel": "体系名称",
+      "namePlaceholder": "如：灵力体系、魔法体系、斗气体系",
+      "descLabel": "体系概述",
+      "descPlaceholder": "描述这个体系的基本原理和特点...",
+      "castingLabel": "施法方式",
+      "castingPlaceholder": "如：咒语、手势、意念、符咒",
+      "limitationsLabel": "限制条件",
+      "limitationsPlaceholder": "如：魔力消耗、施法材料、副作用、禁忌...",
+      "rulesLabel": "体系规则",
+      "rulePlaceholder": "规则 {{num}}",
+      "addRule": "添加规则",
+      "levelsLabel": "等级/境界划分",
+      "levelNum": "等级 {{num}}",
+      "levelNamePlaceholder": "等级名称（如：炼气期）",
+      "levelDescPlaceholder": "等级描述",
+      "addLevel": "添加等级"
+    },
+    "tech": {
+      "title": "科技水平",
+      "eraLabel": "时代名称",
+      "eraPlaceholder": "如：蒸汽时代、赛博朋克、星际时代",
+      "descLabel": "科技水平描述",
+      "descPlaceholder": "描述这个世界的整体科技水平...",
+      "energyLabel": "能源类型",
+      "energyPlaceholder": "如：蒸汽、核能、灵石",
+      "transportLabel": "交通方式",
+      "transportPlaceholder": "如：马车、飞船、传送门",
+      "commLabel": "通讯方式",
+      "commPlaceholder": "如：信鸽、电报、心灵感应",
+      "limitationsLabel": "技术限制",
+      "limitationsPlaceholder": "如：无法突破光速、能源枯竭、AI反叛...",
+      "techLabel": "关键技术",
+      "techPlaceholder": "技术 {{num}}",
+      "addTech": "添加技术"
+    },
+    "history": {
+      "title": "历史背景",
+      "overviewLabel": "历史概述",
+      "overviewPlaceholder": "描述这个世界的整体历史脉络...",
+      "calendarLabel": "历法系统",
+      "calendarPlaceholder": "如：公元、纪元、XX历",
+      "eventsLabel": "关键历史事件",
+      "eventNum": "事件 {{num}}",
+      "eventNamePlaceholder": "事件名称",
+      "eventDatePlaceholder": "日期（如：第三纪元45年）",
+      "eventDescPlaceholder": "事件描述",
+      "eventImpactPlaceholder": "对当前故事的影响（可选）",
+      "addEvent": "添加历史事件"
+    }
+  },
+  "rule": {
+    "addTitle": "添加规则系统",
+    "empty": "暂无规则系统，点击上方按钮添加",
+    "levelsCount": "{{count}} 个等级",
+    "charactersCount": "{{count}} 个角色",
+    "newName": "新{{type}}",
+    "defaultLevelName": "等级 {{num}}",
+    "deleteConfirm": "确定要删除这个规则系统吗？相关的角色关联也会被清除。",
+    "nameLabel": "系统名称",
+    "descLabel": "系统描述",
+    "descPlaceholder": "描述这个规则系统的基本原理和应用范围...",
+    "levelsTitle": "等级/层次",
+    "addLevel": "添加等级",
+    "noLevels": "暂无等级",
+    "levelNamePlaceholder": "等级名称",
+    "levelDescPlaceholder": "等级描述",
+    "levelReqPlaceholder": "晋升条件",
+    "levelAbilitiesPlaceholder": "等级能力/特权",
+    "charactersTitle": "适用角色",
+    "noCharacters": "暂无角色",
+    "save": "保存规则系统",
+    "type": {
+      "cultivation": "修炼体系",
+      "magic": "魔法等级",
+      "tech": "科技等级",
+      "currency": "货币体系",
+      "organization": "组织制度",
+      "profession": "职业体系",
+      "title": "称号/爵位",
+      "custom": "自定义"
+    }
+  },
+  "graph": {
+    "title": "世界观关系图谱",
+    "viewTypeLabel": "视图类型",
+    "layoutLabel": "布局方式",
+    "filterLabel": "显示筛选",
+    "optionsLabel": "视图选项",
+    "reset": "重置布局",
+    "close": "关闭",
+    "closeDetails": "关闭详情",
+    "legend": "图例",
+    "relatedCount": "相关节点 ({{count}})",
+    "hintDragging": "拖动节点调整位置",
+    "hintIdle": "点击选中节点，拖动调整位置",
+    "unset": "未设置",
+    "personality": "性格特征",
+    "background": "背景故事",
+    "relationships": "关系网络",
+    "description": "描述",
+    "ideology": "理念",
+    "tags": "标签",
+    "time": "时间",
+    "link": {
+      "relationship": "关联",
+      "belongs": "成员",
+      "participates": "参与"
+    },
+    "layout": {
+      "force": "力导向",
+      "circular": "圆形",
+      "hierarchical": "层次"
+    },
+    "filter": {
+      "showCharacters": "角色",
+      "showFactions": "势力",
+      "showLocations": "地点",
+      "showEvents": "事件",
+      "showRules": "规则"
+    },
+    "option": {
+      "showLabels": "显示标签",
+      "highlightMainCharacters": "高亮主角"
+    },
+    "viewType": {
+      "character": "角色关系",
+      "faction": "势力网络",
+      "location": "地理关联",
+      "timeline": "时间线",
+      "worldview": "世界观",
+      "mixed": "综合视图"
+    },
+    "nodeType": {
+      "character": "角色",
+      "faction": "势力",
+      "location": "地点",
+      "event": "事件",
+      "rule": "规则",
+      "worldview": "世界观",
+      "other": "节点"
+    }
+  },
+  "rules": {
+    "factionDangling": {
+      "message": "角色「{{name}}」关联的势力不存在",
+      "suggestion": "请重新选择所属势力或创建该势力"
+    },
+    "homeLocationDangling": {
+      "message": "角色「{{name}}」的出身地点不存在",
+      "suggestion": "请重新选择出身地点"
+    },
+    "currentLocationDangling": {
+      "message": "角色「{{name}}」的当前位置不存在",
+      "suggestion": "请重新选择当前位置"
+    },
+    "hqDangling": {
+      "message": "势力「{{name}}」的总部地点不存在",
+      "suggestion": "请重新选择总部地点"
+    },
+    "territoryDangling": {
+      "message": "势力「{{name}}」的领土地点不存在",
+      "suggestion": "请清理无效的领土地点"
+    },
+    "leaderDangling": {
+      "message": "势力「{{name}}」的领袖不存在",
+      "suggestion": "请重新选择领袖角色"
+    },
+    "sceneDangling": {
+      "message": "章节「{{name}}」的主场景地点不存在",
+      "suggestion": "请重新选择主场景"
+    },
+    "chapterFactionDangling": {
+      "message": "章节「{{name}}」涉及的势力不存在",
+      "suggestion": "请清理无效的势力引用"
+    },
+    "chapterEventDangling": {
+      "message": "章节「{{name}}」关联的时间线事件不存在",
+      "suggestion": "请重新关联时间线事件"
+    },
+    "duplicateEvent": {
+      "message": "事件「{{name}}」与「{{other}}」标题相同，可能是重复",
+      "suggestion": "请检查是否为重复事件"
+    },
+    "ageInvalid": {
+      "message": "角色「{{name}}」的年龄 {{age}} 看起来不合理",
+      "suggestion": "请检查年龄设置"
+    },
+    "duplicateName": {
+      "message": "存在 {{count}} 个名为「{{name}}」的角色",
+      "suggestion": "如果这不是同一人，请考虑使用不同的名字区分"
+    },
+    "noMembers": {
+      "message": "势力「{{name}}」目前没有成员",
+      "suggestion": "考虑为该势力添加成员角色"
+    },
+    "leaderNotMember": {
+      "message": "势力「{{name}}」的领袖「{{leader}}」不属于该势力",
+      "suggestion": "建议将领袖的所属势力设为该势力"
+    },
+    "detailsConfidence": "置信度: {{score}}%, 证据: {{evidence}}",
+    "targetUnknown": "未知",
+    "progressStarting": "开始AI语义检查..."
+  }
+}

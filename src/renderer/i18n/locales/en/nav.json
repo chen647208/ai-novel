@@ -1,0 +1,18 @@
+{
+  "steps": {
+    "inspiration": "Inspiration",
+    "world": "World Building",
+    "characters": "Characters & Factions",
+    "outline": "Novel Outline",
+    "chapterOutline": "Chapter Outline"
+  },
+  "books": {
+    "manage": "Book Manager",
+    "multi": "Multi-book writing",
+    "desc": "Manage all your novel projects"
+  },
+  "settings": "System Settings (API)",
+  "data": "Data Management",
+  "factoryReset": "Factory Reset",
+  "factoryResetTip": "Delete all data, including API keys"
+}

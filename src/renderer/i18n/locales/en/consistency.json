@@ -1,0 +1,136 @@
+{
+  "defaultNames": {
+    "character": "Character Consistency Check",
+    "faction": "Faction Behavior Logic Check",
+    "location": "Location Consistency Check",
+    "timeline": "Timeline Logic Check",
+    "cross": "Cross-Reference Consistency Check",
+    "similarity": "Similarity Analysis"
+  },
+  "defaultDescs": {
+    "character": "Detects contradictions in character background, personality, and goals",
+    "faction": "Checks faction settings against actual behavior for consistency",
+    "location": "Detects contradictions in location descriptions",
+    "timeline": "Checks logical order and causality of timeline events",
+    "cross": "Checks cross-references between elements for consistency",
+    "similarity": "Analyzes whether similar items are true duplicates or merely similar"
+  },
+  "needEmbedding": "Please configure an Embedding provider first\n\nPath: Settings → Embedding Models",
+  "needModel": "Please configure an AI model provider first\n\nPath: Settings → Model Providers",
+  "similarityDetails": "Similarity: {{score}}%, shared keywords: {{keywords}}",
+  "autoFixConfirm": "Auto-fix all fixable issues? This will clear invalid references.",
+  "title": "Worldview Consistency Check",
+  "subtitle": "Check the consistency and integrity of project data",
+  "checking": "Checking...",
+  "recheck": "Re-check",
+  "noEmbedding": "No Embedding model configured. Set up an embedding provider first",
+  "noModel": "No AI model configured. Set up a model provider first",
+  "configured": "Configured: {{name}}",
+  "autoFix": "Auto-fix",
+  "noIssues": "No consistency issues found!",
+  "suggestionLabel": "Suggestion",
+  "detailsLabel": "Details",
+  "goToEdit": "Edit",
+  "lastCheck": "Last check: {{time}}",
+  "filter": {
+    "all": "All",
+    "categoryLabel": "Category",
+    "typeLabel": "Type"
+  },
+  "type": {
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info"
+  },
+  "category": {
+    "character": "Character",
+    "faction": "Faction",
+    "location": "Location",
+    "chapter": "Chapter",
+    "timeline": "Timeline",
+    "rule": "Rule"
+  },
+  "mode": {
+    "rule": "Rule Check",
+    "vector": "Vector Similarity",
+    "ai": "AI Semantic Check",
+    "hybrid": "Hybrid Check"
+  },
+  "summary": {
+    "found": "Issues found",
+    "errors": "Errors",
+    "warnings": "Warnings",
+    "infos": "Infos"
+  },
+  "promptCategory": {
+    "semantic_character": "Character Semantic Check",
+    "semantic_faction": "Faction Semantic Check",
+    "semantic_location": "Location Semantic Check",
+    "semantic_timeline": "Timeline Logic Check",
+    "semantic_cross": "Cross-reference Check",
+    "similarity_detection": "Similarity Detection"
+  },
+  "validation": {
+    "contentRequired": "Prompt content cannot be empty",
+    "contentNeedsVariable": "Prompt content should contain variable placeholders (e.g. {projectTitle})",
+    "categoryRequired": "A template category is required",
+    "nameRequired": "Template name cannot be empty",
+    "variablesRequired": "Template should define at least one variable",
+    "recommendVariable": "Consider including variable {{variable}} for context",
+    "importJsonError": "Import failed: invalid JSON format"
+  },
+  "pm": {
+    "title": "Consistency Check Prompt Templates",
+    "subtitle": "Customize the prompt templates used by AI semantic checks and vector similarity detection",
+    "newTemplate": "New Template",
+    "defaultTemplateName": "New Check Template",
+    "defaultNoDelete": "Default templates cannot be deleted",
+    "importFailed": "Import failed",
+    "duplicateSuffix": "{{name}} (copy)",
+    "resetConfirm": "Reset all custom templates? This deletes every custom template and restores the defaults.",
+    "all": "All",
+    "empty": "No templates yet",
+    "defaultBadge": "Default",
+    "namePlaceholder": "Template name",
+    "duplicateTitle": "Duplicate template",
+    "deleteTitle": "Delete template",
+    "categoryLabel": "Category",
+    "modesLabel": "Applicable Modes",
+    "modeAi": "AI check",
+    "modeVector": "Vector detection",
+    "variablesLabel": "Available Variables",
+    "variablesCount": "{{count}} variables",
+    "descLabel": "Description",
+    "descPlaceholder": "Describe what this template is for...",
+    "contentLabel": "Prompt Content",
+    "contentPlaceholder": "Enter the prompt template content here...",
+    "definedVarsLabel": "Defined Variables",
+    "validateBtn": "Validate Template",
+    "validResult": "Template is valid",
+    "importTitle": "Import Templates",
+    "exportTitle": "Export Templates",
+    "exportHint": "Copy the JSON below and save it to a file, or share it with others",
+    "copied": "Copied to clipboard",
+    "copyBtn": "Copy to Clipboard",
+    "importHint": "Paste template JSON to import",
+    "importPlaceholder": "Paste JSON here...",
+    "importSuccess": "Imported {{count}} templates",
+    "importBtn": "Import Templates"
+  },
+  "progress": {
+    "generatingEmbeddings": "Generating vector embeddings...",
+    "detecting": "Detecting similarities...",
+    "done": "Detection complete"
+  },
+  "issue": {
+    "charSimilarity": "Characters \"{{a}}\" and \"{{b}}\" are {{score}}% similar",
+    "factionSimilarity": "Factions \"{{a}}\" and \"{{b}}\" are {{score}}% similar",
+    "locationSimilarity": "Locations \"{{a}}\" and \"{{b}}\" are {{score}}% similar"
+  },
+  "suggestion": {
+    "mergeCharacters": "Consider merging these two characters or changing one's profile to distinguish them",
+    "checkCharacters": "Review both character descriptions to make them clearly distinct",
+    "checkFactions": "Review both faction descriptions to make them clearly distinct",
+    "checkLocations": "Review both location descriptions to make them clearly distinct"
+  }
+}

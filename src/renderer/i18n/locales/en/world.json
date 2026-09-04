@@ -1,0 +1,329 @@
+{
+  "unknown": "Unknown",
+  "faction": {
+    "searchPlaceholder": "Search factions...",
+    "add": "Add Faction",
+    "defaultName": "New Faction",
+    "listTitle": "Factions ({{count}})",
+    "noMatch": "No matching factions",
+    "empty": "No factions yet, click to add",
+    "unknownLeader": "Unknown",
+    "territoriesCount": "{{count}} territories",
+    "membersCount": "{{count}} members",
+    "detailsTitle": "Faction Details",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this faction? Related links will also be removed.",
+    "noOtherFactions": "No other factions to link",
+    "nameLabel": "Faction Name",
+    "typeLabel": "Faction Type",
+    "descLabel": "Description",
+    "descPlaceholder": "Describe this faction's history, goals and traits...",
+    "ideologyLabel": "Ideology / Beliefs",
+    "ideologyPlaceholder": "e.g. Justice, order, freedom, conquest...",
+    "emblemLabel": "Emblem / Banner",
+    "emblemPlaceholder": "Describe the faction's emblem or banner...",
+    "foundedLabel": "Founded",
+    "foundedPlaceholder": "e.g. Year 45 of the Third Era",
+    "strengthTitle": "Strength Assessment",
+    "militaryLabel": "Military",
+    "militaryPlaceholder": "e.g. Strong, moderate, weak",
+    "economicLabel": "Economy",
+    "economicPlaceholder": "e.g. Wealthy, average, poor",
+    "influenceLabel": "Influence",
+    "influencePlaceholder": "e.g. Widespread, regional, limited",
+    "overallLabel": "Overall",
+    "overallPlaceholder": "e.g. First-rate, second-rate, third-rate",
+    "leaderLabel": "Leader",
+    "leaderUnset": "Not set",
+    "relationsLabel": "Faction Relations",
+    "addRelation": "Add Relation",
+    "noRelations": "No faction relations yet",
+    "relationWith": "with",
+    "relationDescPlaceholder": "Relation description",
+    "territoryLabel": "Controlled Territories",
+    "noLocations": "No locations yet, create locations first",
+    "membersLabel": "Members",
+    "noCharacters": "No characters yet, create characters first",
+    "selectHint": "Select a faction on the left to edit",
+    "save": "Save Factions",
+    "type": {
+      "kingdom": "Kingdom",
+      "empire": "Empire",
+      "sect": "Sect / Order",
+      "guild": "Guild",
+      "family": "Clan",
+      "tribe": "Tribe",
+      "organization": "Organization",
+      "alliance": "Alliance",
+      "other": "Other"
+    },
+    "relationType": {
+      "ally": "Ally",
+      "enemy": "Enemy",
+      "neutral": "Neutral",
+      "vassal": "Vassal",
+      "suzerain": "Suzerain",
+      "rival": "Rival",
+      "trade": "Trade"
+    }
+  },
+  "location": {
+    "searchPlaceholder": "Search locations...",
+    "add": "Add Location",
+    "defaultName": "New Location",
+    "listTitle": "Locations ({{count}})",
+    "noMatch": "No matching locations",
+    "empty": "No locations yet, click to add",
+    "unknownFaction": "Unknown faction",
+    "detailsTitle": "Location Details",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this location? Related links will also be removed.",
+    "noOtherLocations": "No other locations to link",
+    "nameLabel": "Location Name",
+    "typeLabel": "Location Type",
+    "descLabel": "Description",
+    "descPlaceholder": "Describe this location's look, atmosphere and features...",
+    "geoTitle": "Geography",
+    "terrainLabel": "Terrain",
+    "terrainPlaceholder": "e.g. Plains, mountains, forest",
+    "climateLabel": "Climate",
+    "climatePlaceholder": "e.g. Temperate, tropical, frigid",
+    "resourcesLabel": "Resources (comma-separated)",
+    "resourcesPlaceholder": "e.g. Iron, timber, mana crystals",
+    "tagsLabel": "Tags (comma-separated)",
+    "tagsPlaceholder": "e.g. Bustling, dangerous, mysterious, ancient",
+    "controlledByLabel": "Controlling Faction",
+    "noFactionOption": "None (neutral/unclaimed)",
+    "connectionsLabel": "Location Links",
+    "addConnection": "Add Link",
+    "noConnections": "No linked locations",
+    "selectHint": "Select a location on the left to edit",
+    "save": "Save Locations",
+    "type": {
+      "city": "City",
+      "region": "Region",
+      "building": "Building",
+      "landmark": "Landmark",
+      "dungeon": "Dungeon / Labyrinth",
+      "wilderness": "Wilderness",
+      "other": "Other"
+    },
+    "connectionType": {
+      "adjacent": "Adjacent",
+      "trade": "Trade",
+      "conflict": "Conflict",
+      "ally": "Allied",
+      "subordinate": "Subordinate"
+    }
+  },
+  "worldview": {
+    "tabMagic": "Magic / Cultivation",
+    "tabTech": "Technology",
+    "tabHistory": "History",
+    "save": "Save Worldview",
+    "magic": {
+      "title": "Magic / Cultivation System",
+      "nameLabel": "System Name",
+      "namePlaceholder": "e.g. Spiritual power, magic, battle qi system",
+      "descLabel": "Overview",
+      "descPlaceholder": "Describe this system's basic principles and traits...",
+      "castingLabel": "Casting Method",
+      "castingPlaceholder": "e.g. Incantations, gestures, willpower, talismans",
+      "limitationsLabel": "Limitations",
+      "limitationsPlaceholder": "e.g. Mana cost, materials, side effects, taboos...",
+      "rulesLabel": "System Rules",
+      "rulePlaceholder": "Rule {{num}}",
+      "addRule": "Add Rule",
+      "levelsLabel": "Levels / Realms",
+      "levelNum": "Level {{num}}",
+      "levelNamePlaceholder": "Level name (e.g. Qi Refining)",
+      "levelDescPlaceholder": "Level description",
+      "addLevel": "Add Level"
+    },
+    "tech": {
+      "title": "Technology Level",
+      "eraLabel": "Era Name",
+      "eraPlaceholder": "e.g. Steam age, cyberpunk, space age",
+      "descLabel": "Description",
+      "descPlaceholder": "Describe this world's overall technological level...",
+      "energyLabel": "Energy Source",
+      "energyPlaceholder": "e.g. Steam, nuclear, spirit stones",
+      "transportLabel": "Transportation",
+      "transportPlaceholder": "e.g. Carriages, airships, portals",
+      "commLabel": "Communication",
+      "commPlaceholder": "e.g. Carrier pigeons, telegraph, telepathy",
+      "limitationsLabel": "Technical Limits",
+      "limitationsPlaceholder": "e.g. Lightspeed unbreakable, energy depletion, AI rebellion...",
+      "techLabel": "Key Technologies",
+      "techPlaceholder": "Technology {{num}}",
+      "addTech": "Add Technology"
+    },
+    "history": {
+      "title": "Historical Background",
+      "overviewLabel": "Overview",
+      "overviewPlaceholder": "Describe this world's overall historical arc...",
+      "calendarLabel": "Calendar System",
+      "calendarPlaceholder": "e.g. Common Era, Epoch, XX Calendar",
+      "eventsLabel": "Key Historical Events",
+      "eventNum": "Event {{num}}",
+      "eventNamePlaceholder": "Event name",
+      "eventDatePlaceholder": "Date (e.g. Year 45 of the Third Era)",
+      "eventDescPlaceholder": "Event description",
+      "eventImpactPlaceholder": "Impact on the current story (optional)",
+      "addEvent": "Add Event"
+    }
+  },
+  "rule": {
+    "addTitle": "Add Rule System",
+    "empty": "No rule systems yet, click a button above to add",
+    "levelsCount": "{{count}} levels",
+    "charactersCount": "{{count}} characters",
+    "newName": "New {{type}}",
+    "defaultLevelName": "Level {{num}}",
+    "deleteConfirm": "Delete this rule system? Related character links will also be removed.",
+    "nameLabel": "System Name",
+    "descLabel": "Description",
+    "descPlaceholder": "Describe this rule system's principles and scope...",
+    "levelsTitle": "Levels / Tiers",
+    "addLevel": "Add Level",
+    "noLevels": "No levels yet",
+    "levelNamePlaceholder": "Level name",
+    "levelDescPlaceholder": "Level description",
+    "levelReqPlaceholder": "Promotion requirements",
+    "levelAbilitiesPlaceholder": "Level abilities / privileges",
+    "charactersTitle": "Applicable Characters",
+    "noCharacters": "No characters",
+    "save": "Save Rule Systems",
+    "type": {
+      "cultivation": "Cultivation",
+      "magic": "Magic Ranks",
+      "tech": "Tech Levels",
+      "currency": "Currency",
+      "organization": "Organization",
+      "profession": "Professions",
+      "title": "Titles / Ranks",
+      "custom": "Custom"
+    }
+  },
+  "graph": {
+    "title": "Worldview Graph",
+    "viewTypeLabel": "View Type",
+    "layoutLabel": "Layout",
+    "filterLabel": "Filters",
+    "optionsLabel": "View Options",
+    "reset": "Reset Layout",
+    "close": "Close",
+    "closeDetails": "Close Details",
+    "legend": "Legend",
+    "relatedCount": "Related nodes ({{count}})",
+    "hintDragging": "Drag nodes to reposition",
+    "hintIdle": "Click to select a node, drag to reposition",
+    "unset": "Not set",
+    "personality": "Personality",
+    "background": "Background",
+    "relationships": "Relationships",
+    "description": "Description",
+    "ideology": "Ideology",
+    "tags": "Tags",
+    "time": "Time",
+    "link": {
+      "relationship": "Linked",
+      "belongs": "Member",
+      "participates": "Involved"
+    },
+    "layout": {
+      "force": "Force",
+      "circular": "Circular",
+      "hierarchical": "Hierarchy"
+    },
+    "filter": {
+      "showCharacters": "Characters",
+      "showFactions": "Factions",
+      "showLocations": "Locations",
+      "showEvents": "Events",
+      "showRules": "Rules"
+    },
+    "option": {
+      "showLabels": "Show labels",
+      "highlightMainCharacters": "Highlight protagonists"
+    },
+    "viewType": {
+      "character": "Characters",
+      "faction": "Faction Network",
+      "location": "Geography",
+      "timeline": "Timeline",
+      "worldview": "Worldview",
+      "mixed": "Overview"
+    },
+    "nodeType": {
+      "character": "Character",
+      "faction": "Faction",
+      "location": "Location",
+      "event": "Event",
+      "rule": "Rule",
+      "worldview": "Worldview",
+      "other": "Node"
+    }
+  },
+  "rules": {
+    "factionDangling": {
+      "message": "The faction of character \"{{name}}\" does not exist",
+      "suggestion": "Re-select the faction or create it"
+    },
+    "homeLocationDangling": {
+      "message": "The home location of character \"{{name}}\" does not exist",
+      "suggestion": "Re-select the home location"
+    },
+    "currentLocationDangling": {
+      "message": "The current location of character \"{{name}}\" does not exist",
+      "suggestion": "Re-select the current location"
+    },
+    "hqDangling": {
+      "message": "The headquarters location of faction \"{{name}}\" does not exist",
+      "suggestion": "Re-select the headquarters location"
+    },
+    "territoryDangling": {
+      "message": "A territory location of faction \"{{name}}\" does not exist",
+      "suggestion": "Remove the invalid territory location"
+    },
+    "leaderDangling": {
+      "message": "The leader of faction \"{{name}}\" does not exist",
+      "suggestion": "Re-select the leader character"
+    },
+    "sceneDangling": {
+      "message": "The main scene location of chapter \"{{name}}\" does not exist",
+      "suggestion": "Re-select the main scene"
+    },
+    "chapterFactionDangling": {
+      "message": "A faction referenced by chapter \"{{name}}\" does not exist",
+      "suggestion": "Remove the invalid faction reference"
+    },
+    "chapterEventDangling": {
+      "message": "The timeline event linked to chapter \"{{name}}\" does not exist",
+      "suggestion": "Re-link a timeline event"
+    },
+    "duplicateEvent": {
+      "message": "Events \"{{name}}\" and \"{{other}}\" share the same title and may be duplicates",
+      "suggestion": "Check whether they are duplicate events"
+    },
+    "ageInvalid": {
+      "message": "The age {{age}} of character \"{{name}}\" looks unreasonable",
+      "suggestion": "Check the age setting"
+    },
+    "duplicateName": {
+      "message": "{{count}} characters share the name \"{{name}}\"",
+      "suggestion": "If they are not the same person, consider using different names"
+    },
+    "noMembers": {
+      "message": "Faction \"{{name}}\" currently has no members",
+      "suggestion": "Consider adding member characters to this faction"
+    },
+    "leaderNotMember": {
+      "message": "The leader \"{{leader}}\" of faction \"{{name}}\" is not a member of it",
+      "suggestion": "Consider setting the leader's faction to this faction"
+    },
+    "detailsConfidence": "Confidence: {{score}}%, evidence: {{evidence}}",
+    "targetUnknown": "Unknown",
+    "progressStarting": "Starting AI semantic check..."
+  }
+}

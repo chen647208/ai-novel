@@ -1,0 +1,24 @@
+{
+  "appName": "AI Novelist",
+  "confirm": "Confirm",
+  "cancel": "Cancel",
+  "save": "Save",
+  "close": "Close",
+  "delete": "Delete",
+  "export": "Export",
+  "import": "Import",
+  "reset": "Reset",
+  "loading": "Loading…",
+  "dialog": {
+    "untitled": "Dialog",
+    "gotIt": "Got it"
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "regionError": "An error occurred while rendering the \"{{scope}}\" area. Your data is saved locally and won't be lost.",
+    "appError": "An error occurred while rendering the app. Your data is saved locally and won't be lost.",
+    "unknown": "Unknown error",
+    "retry": "Retry",
+    "reload": "Reload app"
+  }
+}

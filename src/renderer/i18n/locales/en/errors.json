@@ -1,0 +1,23 @@
+{
+  "noValidModel": "No valid AI model is configured.",
+  "streamingUnsupported": "The current model configuration does not support streaming output, so it automatically fell back to the standard output mode. To enable streaming, turn on 'Streaming support' in the model settings.",
+  "connSuccess": "Connection test succeeded!\nModel: {{model}}\nResponse: {{response}}",
+  "connInfo": "Connection is fine, but the response content is unexpected\nModel: {{model}}\nResponse: {{response}}",
+  "apiKeyMissing": "{{provider}} API Key is not configured.",
+  "endpointMissing": "No {{provider}} endpoint URL is configured.",
+  "endpointMissingGeneric": "No endpoint URL is configured.",
+  "requestFailed": "{{provider}} request failed: {{message}}",
+  "requestFailedGeneric": "Request failed: {{message}}",
+  "requestFailedUnknown": "Request failed: unknown error",
+  "requestFailedStatus": "Request failed ({{status}}): {{detail}}",
+  "streamReadFailed": "Unable to read the response stream.",
+  "streamError": "{{provider}} stream returned an error.",
+  "streamErrorGeneric": "The stream returned an error.",
+  "streamException": "{{provider}} streaming exception: {{message}}",
+  "streamExceptionGeneric": "Streaming exception: {{message}}",
+  "streamFailed": "{{provider}} streaming failed: {{message}}",
+  "sdkStreamError": "{{provider}} SDK streaming error: {{message}}",
+  "jsonValidationFailed": "The returned JSON failed structure validation.",
+  "jsonParseFailed": "JSON parse failed: {{message}}",
+  "unknown": "Unknown error"
+}

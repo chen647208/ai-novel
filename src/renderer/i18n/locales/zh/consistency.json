@@ -1,0 +1,136 @@
+{
+  "defaultNames": {
+    "character": "角色描述一致性检查",
+    "faction": "势力行为逻辑检查",
+    "location": "地点描述一致性检查",
+    "timeline": "时间线逻辑检查",
+    "cross": "跨引用一致性检查",
+    "similarity": "相似度分析判断"
+  },
+  "defaultDescs": {
+    "character": "检查角色背景、性格、目标等描述是否存在矛盾",
+    "faction": "检查势力设定与实际行为是否一致",
+    "location": "检查地点描述是否存在矛盾",
+    "timeline": "检查时间线事件的逻辑顺序和因果关系",
+    "cross": "检查不同元素间的引用描述是否一致",
+    "similarity": "用于分析相似项目是否真正重复或只是相似"
+  },
+  "needEmbedding": "请先配置 Embedding 模型服务商\n\n路径：系统设置 → 向量模型",
+  "needModel": "请先配置 AI 模型服务商\n\n路径：系统设置 → 模型提供商",
+  "similarityDetails": "相似度: {{score}}%, 共同关键词: {{keywords}}",
+  "autoFixConfirm": "确定要自动修复所有可修复的问题吗？这将清除无效的引用。",
+  "title": "世界观一致性检查",
+  "subtitle": "检查项目数据的一致性和完整性",
+  "checking": "检查中...",
+  "recheck": "重新检查",
+  "noEmbedding": "未配置 Embedding 模型，请先配置向量模型服务商",
+  "noModel": "未配置 AI 模型，请先配置模型服务商",
+  "configured": "已配置: {{name}}",
+  "autoFix": "一键修复",
+  "noIssues": "未发现一致性问题！",
+  "suggestionLabel": "建议",
+  "detailsLabel": "详情",
+  "goToEdit": "前往编辑",
+  "lastCheck": "上次检查: {{time}}",
+  "filter": {
+    "all": "全部",
+    "categoryLabel": "分类",
+    "typeLabel": "类型"
+  },
+  "type": {
+    "error": "错误",
+    "warning": "警告",
+    "info": "提示"
+  },
+  "category": {
+    "character": "角色",
+    "faction": "势力",
+    "location": "地点",
+    "chapter": "章节",
+    "timeline": "时间线",
+    "rule": "规则"
+  },
+  "mode": {
+    "rule": "规则检查",
+    "vector": "向量相似度",
+    "ai": "AI语义检查",
+    "hybrid": "混合检查"
+  },
+  "summary": {
+    "found": "发现问题",
+    "errors": "错误",
+    "warnings": "警告",
+    "infos": "提示"
+  },
+  "promptCategory": {
+    "semantic_character": "角色语义检查",
+    "semantic_faction": "势力语义检查",
+    "semantic_location": "地点语义检查",
+    "semantic_timeline": "时间线逻辑检查",
+    "semantic_cross": "跨引用一致性检查",
+    "similarity_detection": "相似度检测"
+  },
+  "validation": {
+    "contentRequired": "提示词内容不能为空",
+    "contentNeedsVariable": "提示词内容应包含变量占位符（如 {projectTitle}）",
+    "categoryRequired": "必须选择模板分类",
+    "nameRequired": "模板名称不能为空",
+    "variablesRequired": "模板应定义至少一个变量",
+    "recommendVariable": "建议包含变量 {{variable}} 以提供上下文",
+    "importJsonError": "导入失败：JSON格式错误"
+  },
+  "pm": {
+    "title": "一致性检查提示词模板",
+    "subtitle": "自定义AI语义检查和向量相似度检测使用的提示词模板",
+    "newTemplate": "新建模板",
+    "defaultTemplateName": "新检查模板",
+    "defaultNoDelete": "默认模板不能删除",
+    "importFailed": "导入失败",
+    "duplicateSuffix": "{{name}} (副本)",
+    "resetConfirm": "确定要重置所有自定义模板吗？这将删除所有自定义模板并恢复默认模板。",
+    "all": "全部",
+    "empty": "暂无模板",
+    "defaultBadge": "默认模板",
+    "namePlaceholder": "模板名称",
+    "duplicateTitle": "复制模板",
+    "deleteTitle": "删除模板",
+    "categoryLabel": "模板分类",
+    "modesLabel": "适用模式",
+    "modeAi": "AI检查",
+    "modeVector": "向量检测",
+    "variablesLabel": "可用变量",
+    "variablesCount": "{{count}} 个变量",
+    "descLabel": "模板描述",
+    "descPlaceholder": "描述此模板的用途...",
+    "contentLabel": "提示词内容",
+    "contentPlaceholder": "在此输入提示词模板内容...",
+    "definedVarsLabel": "已定义变量",
+    "validateBtn": "验证模板",
+    "validResult": "模板有效",
+    "importTitle": "导入模板",
+    "exportTitle": "导出模板",
+    "exportHint": "复制以下JSON代码保存到文件，或分享给其他用户",
+    "copied": "已复制到剪贴板",
+    "copyBtn": "复制到剪贴板",
+    "importHint": "粘贴模板JSON代码进行导入",
+    "importPlaceholder": "在此粘贴JSON代码...",
+    "importSuccess": "成功导入 {{count}} 个模板",
+    "importBtn": "导入模板"
+  },
+  "progress": {
+    "generatingEmbeddings": "正在生成向量嵌入...",
+    "detecting": "正在检测相似度...",
+    "done": "检测完成"
+  },
+  "issue": {
+    "charSimilarity": "角色「{{a}}」与「{{b}}」相似度高达 {{score}}%",
+    "factionSimilarity": "势力「{{a}}」与「{{b}}」相似度高达 {{score}}%",
+    "locationSimilarity": "地点「{{a}}」与「{{b}}」相似度高达 {{score}}%"
+  },
+  "suggestion": {
+    "mergeCharacters": "建议合并这两个角色或修改其中一个的设定以区分",
+    "checkCharacters": "建议检查两个角色的描述，确保它们有明显的区别",
+    "checkFactions": "建议检查两个势力的描述，确保它们有明显的区别",
+    "checkLocations": "建议检查两个地点的描述，确保它们有明显的区别"
+  }
+}

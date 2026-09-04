@@ -1,0 +1,36 @@
+{
+  "manager": {
+    "current": "Current Book",
+    "noneSelected": "No book selected",
+    "new": "New Book",
+    "count_one": "{{count}} book",
+    "count_other": "{{count}} books"
+  },
+  "item": {
+    "deleteConfirm": "Delete \"{{title}}\"? This cannot be undone.",
+    "moreActions": "More actions",
+    "rename": "Rename",
+    "duplicate": "Duplicate",
+    "minutesAgo": "{{count}} min ago",
+    "hoursAgo": "{{count}} hr ago",
+    "daysAgo": "{{count}} days ago"
+  },
+  "newBook": {
+    "titleRequired": "Please enter a book title",
+    "title": "New Book",
+    "subtitle": "Start your new creative journey",
+    "titleLabel": "Book Title",
+    "titlePlaceholder": "e.g. Love Among the Stars",
+    "descLabel": "Description (optional)",
+    "descPlaceholder": "Briefly describe your story theme or inspiration...",
+    "methodLabel": "Creation Method",
+    "blank": "Blank Template",
+    "blankDesc": "Start from scratch with full freedom",
+    "duplicate": "Duplicate Existing Book",
+    "duplicateDesc": "Based on the structure and content of an existing book",
+    "selectToDuplicate": "Select a book to duplicate",
+    "example": "Example Template",
+    "exampleDesc": "Use a preset story structure and samples",
+    "create": "Create Book"
+  }
+}

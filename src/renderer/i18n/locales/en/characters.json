@@ -1,0 +1,157 @@
+{
+  "labels": {
+    "unknown": "Unknown"
+  },
+  "strategy": {
+    "title": "AI Core Strategy",
+    "subtitle": "Shaping souls from your worldbuilding",
+    "templateLabel": "Parsing Template"
+  },
+  "generating": "Mining character profiles...",
+  "generateBtn": "Generate World Cast",
+  "tokens": {
+    "input": "Input",
+    "output": "Output",
+    "total": "Total",
+    "done": "Generation complete"
+  },
+  "blueprint": {
+    "title": "Story Blueprint"
+  },
+  "knowledge": {
+    "title": "Knowledge Base References",
+    "selectAll": "All",
+    "selectAllTitle": "Select all files",
+    "clear": "Clear",
+    "clearTitle": "Clear selection",
+    "noMaterial": "No material yet"
+  },
+  "openDiagram": "Open Relationship Map",
+  "archive": {
+    "title": "World & Character Archive",
+    "clearConfirm": "Clear all?",
+    "clear": "Clear",
+    "addManually": "Add Manually",
+    "emptyTitle": "No profiles yet",
+    "emptyHint": "Generate from the left, or click \"Add Manually\" at the top right",
+    "deleteConfirm": "Delete?",
+    "defaultName": "New Character"
+  },
+  "generateFailed": "Generation failed: {{error}}",
+  "parseFailed": "Parsing failed. Please check the model output format.",
+  "generateErrorGeneric": "An error occurred during generation.",
+  "defaultTemplateName": "Character Generation Template",
+  "chapterTitle": "Character Generation",
+  "historySummary": "Character generation history",
+  "card": {
+    "ageSuffix": "{{age}} yrs",
+    "ageUnknown": "Age unknown",
+    "appearanceTitle": "Appearance",
+    "noAppearance": "No appearance description",
+    "featuresTitle": "Distinctive Features",
+    "noFeatures": "No distinctive features",
+    "clickHint": "Click to view full profile",
+    "detail": "Details"
+  },
+  "modal": {
+    "nameLabel": "Character Name",
+    "namePlaceholder": "Enter character name",
+    "roleLabel": "Role",
+    "genderLabel": "Gender",
+    "roleOptions": {
+      "protagonist": "Protagonist",
+      "antagonist": "Antagonist",
+      "supporting": "Supporting",
+      "other": "Other"
+    },
+    "genderOptions": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other",
+      "unknown": "Unknown"
+    },
+    "ageLabel": "Age",
+    "agePlaceholder": "e.g. 25",
+    "saveAndClose": "Save & Close",
+    "basic": {
+      "title": "Basic Info",
+      "occupation": "Occupation",
+      "occupationPlaceholder": "e.g. Knight, mage, merchant...",
+      "motivation": "Motivation / Goal",
+      "motivationPlaceholder": "The character's core drive and goals..."
+    },
+    "appearance": {
+      "title": "Appearance",
+      "description": "Appearance",
+      "descriptionPlaceholder": "Height, build, hair and eye color, clothing style...",
+      "features": "Distinctive Features",
+      "featuresPlaceholder": "Special marks, accessories, scars, tattoos..."
+    },
+    "personality": {
+      "title": "Personality",
+      "placeholder": "Traits, values, habits, catchphrases..."
+    },
+    "background": {
+      "title": "Background",
+      "placeholder": "Origins, family, key experiences, turning points..."
+    },
+    "abilities": {
+      "title": "Strengths & Weaknesses",
+      "strengths": "Strengths / Abilities",
+      "strengthsPlaceholder": "Special skills, talents, equipment, resources...",
+      "weaknesses": "Weaknesses / Flaws",
+      "weaknessesPlaceholder": "Physical/mental weaknesses, fears, limits, traumas..."
+    },
+    "relations": {
+      "title": "Relationship Web",
+      "placeholder": "Relationships with other characters, social network, allies/enemies..."
+    },
+    "arc": {
+      "title": "Character Arc",
+      "placeholder": "Development trajectory, transformation, final destination..."
+    }
+  },
+  "birth": {
+    "title": "Birth Info (optional)",
+    "set": "Set",
+    "calcType": "Age Calculation",
+    "manual": "Manual input",
+    "auto": "Auto (requires birth date)",
+    "currentAge": "Current Age",
+    "storyTime": "Current Story Time",
+    "storyTimePlaceholder": "e.g. Year 100 of the Third Era",
+    "date": "Birth Date",
+    "dateWithCalendar": "Birth Date ({{calendar}})",
+    "year": "Year",
+    "month": "Month",
+    "day": "Day",
+    "display": "Display Text",
+    "displayPlaceholder": "First year of the Third Era",
+    "displayExample": "e.g. First year of the Third Era",
+    "calculatedAge": "Calculated age: {{age}} yrs"
+  },
+  "world": {
+    "title": "World Relations",
+    "linked": "Linked: {{names}}",
+    "hint": "Set the character's place and affiliation in the world",
+    "faction": "Faction",
+    "homeLocation": "Home Location",
+    "currentLocation": "Current Location",
+    "ruleSystem": "Level System",
+    "none": "-- None --",
+    "selectLevel": "-- Select Level --"
+  },
+  "diagram": {
+    "title": "Destiny Map",
+    "resetTitle": "Reset to circular layout",
+    "reset": "Reset Layout",
+    "ageLabel": "Age: {{age}}",
+    "relationsTitle": "Core Relationships",
+    "noRelations": "No relationship details yet",
+    "graphExplain": "Map Legend",
+    "hasIntersection": "Connected",
+    "backToOverview": "Back to Overview",
+    "hintDragging": "Drag nodes to reposition, release to place",
+    "hintIdle": "Click a node for details, drag to reposition"
+  }
+}

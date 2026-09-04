@@ -1,0 +1,157 @@
+{
+  "labels": {
+    "unknown": "未知"
+  },
+  "strategy": {
+    "title": "AI 核心策略",
+    "subtitle": "基于世界观自动塑造灵魂",
+    "templateLabel": "选择解析模板"
+  },
+  "generating": "正在挖掘角色档案...",
+  "generateBtn": "一键生成世界体系",
+  "tokens": {
+    "input": "输入Token",
+    "output": "输出Token",
+    "total": "总计",
+    "done": "生成完成"
+  },
+  "blueprint": {
+    "title": "世界蓝本选择"
+  },
+  "knowledge": {
+    "title": "引用知识库资料",
+    "selectAll": "全选",
+    "selectAllTitle": "全选所有文件",
+    "clear": "清空",
+    "clearTitle": "清空所有选择",
+    "noMaterial": "暂无资料"
+  },
+  "openDiagram": "开启命运关系图谱",
+  "archive": {
+    "title": "世界与角色档案库",
+    "clearConfirm": "确定清空？",
+    "clear": "清空库",
+    "addManually": "手动添加",
+    "emptyTitle": "目前没有任何档案",
+    "emptyHint": "请从左侧一键生成或手动点击右上角“手动添加”",
+    "deleteConfirm": "删除?",
+    "defaultName": "新角色"
+  },
+  "generateFailed": "生成失败: {{error}}",
+  "parseFailed": "识别失败，请检查模型输出格式。",
+  "generateErrorGeneric": "生成过程中发生错误。",
+  "defaultTemplateName": "角色生成模板",
+  "chapterTitle": "角色生成",
+  "historySummary": "角色生成历史记录",
+  "card": {
+    "ageSuffix": "{{age}}岁",
+    "ageUnknown": "年龄未知",
+    "appearanceTitle": "外观描述",
+    "noAppearance": "暂无外观描述",
+    "featuresTitle": "标志性特征",
+    "noFeatures": "暂无标志性特征",
+    "clickHint": "点击查看完整档案",
+    "detail": "详细"
+  },
+  "modal": {
+    "nameLabel": "角色名字",
+    "namePlaceholder": "输入角色名字",
+    "roleLabel": "角色类型",
+    "genderLabel": "性别",
+    "roleOptions": {
+      "protagonist": "主角",
+      "antagonist": "反派",
+      "supporting": "配角",
+      "other": "其他"
+    },
+    "genderOptions": {
+      "male": "男",
+      "female": "女",
+      "other": "其他",
+      "unknown": "未知"
+    },
+    "ageLabel": "年龄",
+    "agePlaceholder": "例如：25岁",
+    "saveAndClose": "保存并关闭",
+    "basic": {
+      "title": "基本信息",
+      "occupation": "职业/身份",
+      "occupationPlaceholder": "例如：骑士、法师、商人...",
+      "motivation": "动机/目标",
+      "motivationPlaceholder": "角色的核心驱动力和目标..."
+    },
+    "appearance": {
+      "title": "外观特征",
+      "description": "外观描述",
+      "descriptionPlaceholder": "身高、体型、发色、眼睛颜色、服装风格等...",
+      "features": "标志性特征",
+      "featuresPlaceholder": "特别的标记、饰品、疤痕、纹身等..."
+    },
+    "personality": {
+      "title": "性格特征",
+      "placeholder": "性格特点、价值观、习惯、口头禅等..."
+    },
+    "background": {
+      "title": "背景设定",
+      "placeholder": "出身、家庭背景、重要经历、转折点等..."
+    },
+    "abilities": {
+      "title": "能力与弱点",
+      "strengths": "优势/能力",
+      "strengthsPlaceholder": "特殊技能、天赋、装备、资源等...",
+      "weaknesses": "弱点/缺陷",
+      "weaknessesPlaceholder": "生理/心理弱点、恐惧、限制、创伤等..."
+    },
+    "relations": {
+      "title": "角色关系网",
+      "placeholder": "与其他角色的关系、社交网络、盟友/敌人等..."
+    },
+    "arc": {
+      "title": "角色成长弧线",
+      "placeholder": "角色的发展轨迹、转变过程、最终归宿等..."
+    }
+  },
+  "birth": {
+    "title": "出生信息（可选）",
+    "set": "已设置",
+    "calcType": "年龄计算方式",
+    "manual": "手动输入",
+    "auto": "自动计算（需设置出生日期）",
+    "currentAge": "当前年龄",
+    "storyTime": "故事当前时间",
+    "storyTimePlaceholder": "例如：第三纪元100年",
+    "date": "出生日期",
+    "dateWithCalendar": "出生日期 ({{calendar}})",
+    "year": "年",
+    "month": "月",
+    "day": "日",
+    "display": "显示文本",
+    "displayPlaceholder": "第三纪元元年",
+    "displayExample": "例如：第三纪元元年",
+    "calculatedAge": "计算年龄：{{age}} 岁"
+  },
+  "world": {
+    "title": "世界关联信息",
+    "linked": "已关联: {{names}}",
+    "hint": "设置角色在世界中的位置和归属",
+    "faction": "所属势力",
+    "homeLocation": "出身地点",
+    "currentLocation": "当前地点",
+    "ruleSystem": "等级体系",
+    "none": "-- 无 --",
+    "selectLevel": "-- 选择等级 --"
+  },
+  "diagram": {
+    "title": "人物命运图谱",
+    "resetTitle": "重置为圆形布局",
+    "reset": "重置布局",
+    "ageLabel": "年龄：{{age}}",
+    "relationsTitle": "核心关系网",
+    "noRelations": "暂无详细关系描述",
+    "graphExplain": "角色图谱说明",
+    "hasIntersection": "存在交集",
+    "backToOverview": "返回全局视图",
+    "hintDragging": "拖动节点调整位置，松开鼠标放置",
+    "hintIdle": "点击节点查看详情，拖动节点调整位置"
+  }
+}

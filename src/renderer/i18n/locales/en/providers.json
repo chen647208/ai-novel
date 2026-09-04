@@ -1,0 +1,111 @@
+{
+  "model": {
+    "deepseek": {
+      "name": "DeepSeek",
+      "description": "Official DeepSeek API. The V4 series is strong at reasoning and creative writing; OpenAI-compatible, just add a Key.",
+      "tips": ["Create an API Key at platform.deepseek.com", "Endpoint is preset, no need to fill in", "Choose deepseek-v4-pro (flagship) or v4-flash (faster)"]
+    },
+    "kimi": {
+      "name": "Kimi (Moonshot)",
+      "description": "Official Moonshot Kimi API with ultra-long context; OpenAI-compatible, just add a Key.",
+      "tips": ["Get an API Key at platform.moonshot.cn", "Endpoint is preset", "kimi-k3 is the latest flagship"]
+    },
+    "zhipu": {
+      "name": "GLM (Zhipu)",
+      "description": "Official Zhipu GLM API with excellent Chinese understanding and generation; OpenAI-compatible, just add a Key.",
+      "tips": ["Get an API Key at open.bigmodel.cn", "Endpoint is preset", "glm-5.3 is the latest flagship"]
+    },
+    "qwen": {
+      "name": "Qwen (Alibaba Bailian)",
+      "description": "Alibaba Cloud Bailian DashScope compatible mode, Qwen series; OpenAI-compatible, just add a Key.",
+      "tips": ["Enable Bailian and get an API Key in the console", "Endpoint is preset (compatible-mode)", "qwen3.8-max is the latest flagship"]
+    },
+    "minimax": {
+      "name": "MiniMax",
+      "description": "Official MiniMax API over the Anthropic-compatible protocol, just add a Key.",
+      "tips": ["Get an API Key in the minimaxi.com console", "Endpoint is preset (Anthropic protocol)", "MiniMax-M3 is the latest flagship"]
+    },
+    "openai": {
+      "name": "OpenAI (Chat)",
+      "description": "Official OpenAI Chat Completions endpoint",
+      "tips": ["Get an API Key at platform.openai.com", "Endpoint is preset", "A proxy may be required in some regions"]
+    },
+    "openai-responses": {
+      "name": "OpenAI (Reasoning / Responses)",
+      "description": "OpenAI Responses API, the new interface for reasoning models (input/instructions)",
+      "tips": ["Same Key/endpoint as the chat interface", "Reasoning models do not accept temperature", "Suited for generation that needs a chain of thought"]
+    },
+    "anthropic": {
+      "name": "Anthropic",
+      "description": "Official Anthropic Claude Messages endpoint",
+      "tips": ["Get an API Key at console.anthropic.com", "Endpoint is preset", "temperature caps at 1.0 and is auto-clamped above it"]
+    },
+    "gemini": {
+      "name": "Google Gemini",
+      "description": "Official Google Gemini API (native REST), just add a Key.",
+      "tips": ["Get an API Key at aistudio.google.com", "Leave the endpoint blank to use the official default", "You can override with a proxy URL"]
+    },
+    "ollama": {
+      "name": "Ollama (Local)",
+      "description": "Locally-run open-source model service; no network or Key needed, data stays fully local.",
+      "tips": ["Install and start Ollama: ollama serve", "Download a model: ollama pull llama3.3", "Leave the API Key blank", "Enter a locally downloaded model name"]
+    },
+    "custom-openai": {
+      "name": "Custom OpenAI-compatible",
+      "description": "Any OpenAI Chat Completions-compatible endpoint (self-hosted gateway, third-party aggregator, etc.)",
+      "tips": ["Fill in the endpoint (including /v1)", "Fill in the API Key as required upstream (blank for local proxies)", "Enter a model identifier supported upstream"]
+    },
+    "custom-anthropic": {
+      "name": "Custom Anthropic-compatible",
+      "description": "Any Anthropic Messages-compatible endpoint",
+      "tips": ["Fill in the endpoint base (e.g. https://host/anthropic/v1)", "Fill in the API Key", "Enter an upstream model identifier"]
+    }
+  },
+  "embedding": {
+    "ollama": {
+      "name": "Ollama (Local)",
+      "description": "Locally-run embedding models; data is processed entirely on-device, no network needed, best privacy.",
+      "models": ["Recommended: high-quality general-purpose embedding model", "Lightweight: fast with low resource usage", "Large model: better semantic understanding"],
+      "tips": ["Install Ollama first: visit https://ollama.com/download", "Pull a model: ollama pull nomic-embed-text", "Start the service: ollama serve", "Leave the API Key blank or enter any characters", "Enter a downloaded model name, e.g. nomic-embed-text"]
+    },
+    "lmstudio": {
+      "name": "LM Studio (Local)",
+      "description": "A GUI local model manager that can load any Sentence-BERT model; suited for advanced users.",
+      "models": ["Light and fast, suits most scenarios", "Better quality with stronger semantics", "Chinese-optimized, recommended for Chinese"],
+      "tips": ["Download and install LM Studio: https://lmstudio.ai", "Search and download an embedding model in the app", "Start the local server (Local Server tab)", "Default port is 1234, changeable in settings", "Supports any HuggingFace-format embedding model"]
+    },
+    "siliconflow": {
+      "name": "SiliconFlow (Recommended)",
+      "description": "Offers many open-source embedding models (bge-m3, Qwen Embedding, etc.), fully OpenAI-API-compatible, great value.",
+      "models": ["⭐ Strongly recommended: multilingual, supports 8192-token long text", "Pro version: higher quality, for production", "Chinese-optimized: excellent in Chinese scenarios", "Ultra-long context: supports 32768 tokens, for long documents", "Balanced choice: trade-off of performance and quality"],
+      "tips": ["Free credits on signup, beginner-friendly", "Fully OpenAI-API-compatible, easy to integrate", "Recommended bge-m3 model, excellent and cost-effective", "Supports BAAI, Alibaba Qwen and more model series", "Fast and stable access within China"]
+    },
+    "bailian": {
+      "name": "Alibaba Bailian (Recommended)",
+      "description": "From Alibaba Cloud; text-embedding-v3 performs excellently, supports dynamic dimension adjustment, enterprise-grade stability.",
+      "models": ["⭐ Latest: best quality, supports dynamic dimension adjustment", "Stable version: widely validated, reliable", "Previous generation: good compatibility"],
+      "tips": ["Requires an Alibaba Cloud account with Bailian enabled", "Supports the dimensions parameter for custom output (768/1024/1536)", "text-embedding-v3 is among the best Chinese models today", "Alibaba Cloud enterprise-grade stability", "Supports encoding_format: float or base64"],
+      "specialFeatures": ["Dynamic dimension adjustment"]
+    },
+    "volcano": {
+      "name": "BytePlus Volcano Ark",
+      "description": "From ByteDance; Doubao embedding models served via the Volcano Ark platform.",
+      "models": ["Doubao embedding: ByteDance in-house, stable quality", "Large version: higher dimensions, better expressiveness"],
+      "tips": ["Create an inference endpoint on the Volcano Ark platform", "The model name is the endpoint ID (e.g. ep-20240101-xxxxxx)", "After creating an endpoint in the console, copy its ID as the model name", "Supports ByteDance's Doubao model series", "Suited for users already on Volcano Cloud"]
+    },
+    "openai-compatible": {
+      "name": "OpenAI / OpenAI-compatible",
+      "description": "Official OpenAI embedding API, the industry benchmark; also usable for other OpenAI-compatible services.",
+      "models": ["Best quality: highest-quality embedding vectors", "⭐ Value: fast and affordable, recommended for most scenarios", "Previous generation: best compatibility"],
+      "tips": ["Requires an international credit card", "Get the API Key on the OpenAI platform", "A proxy may be required in some regions", "Supports the dimensions parameter to reduce vector size", "text-embedding-3-small has the best value"]
+    }
+  },
+  "quickAdd": {
+    "siliconflow-bge-m3": "SiliconFlow bge-m3",
+    "bailian-v3": "Alibaba Bailian v3",
+    "ollama-local": "Ollama Local",
+    "openai-api": "OpenAI",
+    "lmstudio-local": "LM Studio",
+    "volcano-ark": "Volcano Ark"
+  }
+}

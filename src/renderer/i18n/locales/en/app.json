@@ -1,0 +1,56 @@
+{
+  "home": {
+    "title": "Creation Center",
+    "subtitle": "Start from a spark of inspiration and build your grand world.",
+    "backup": "Backup",
+    "importAll": "Import All Data",
+    "exportCurrentBook": "Export Current Book",
+    "importSingleBookTip": "Import a single book",
+    "importBook": "Import Book"
+  },
+  "model": {
+    "notConfiguredKey": "The current model has no API Key / endpoint configured",
+    "noneConfigured": "No AI model configured yet",
+    "goSettings": "Go to settings",
+    "noneSelected": "No model selected"
+  },
+  "empty": {
+    "noProject": "Please start a new project first",
+    "goCreate": "Create one"
+  },
+  "topbar": {
+    "currentProject": "Current Project",
+    "noBookSelected": "No novel selected",
+    "clearProjectTip": "Clear all generated content in the current project",
+    "deleteProjectTip": "Delete the current project",
+    "checkUpdateTip": "Check for updates",
+    "viewHistoryTip": "View AI generation history",
+    "history": "History"
+  },
+  "reset": {
+    "factoryTitle": "Factory Reset",
+    "clearTitle": "Clear All Generated Content",
+    "factoryDesc": "This will delete ALL DATA, including your API Keys and all settings. The app will force-restart. This action cannot be undone!",
+    "clearDesc": "This will delete all novel projects and drafts. Your API Keys and model configuration will be preserved. The app will refresh to apply changes.",
+    "confirmExecute": "Confirm",
+    "failed": "Something went wrong. Please try clearing your browser cache manually."
+  },
+  "book": {
+    "defaultTitle": "New Novel",
+    "duplicateTitle": "{{title}} (Copy)",
+    "importedTitle": "{{title}} (Imported)",
+    "deleteConfirm": "Are you sure you want to delete this book? This action cannot be undone.",
+    "exportNeedSelect": "Please select a book to export first",
+    "renameImportTitle": "Rename Imported Book",
+    "renameImportMessage": "A book named \"{{title}}\" already exists. Please enter a new name:",
+    "importSuccess": "Book \"{{title}}\" imported successfully!",
+    "importFailed": "Import failed: {{message}}",
+    "clearConfirm": "⚠️ Are you sure you want to clear all content of \"{{title}}\"?\nThe project is kept, but inspiration, outline and chapters will be removed.",
+    "deleteProjectTitle": "Delete Project Warning",
+    "deleteProjectConfirm": "Are you sure you want to delete \"{{title}}\"?"
+  },
+  "importAll": {
+    "success": "All data imported successfully!",
+    "failed": "Import failed or was cancelled."
+  }
+}

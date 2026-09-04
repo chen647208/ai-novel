@@ -1,0 +1,23 @@
+{
+  "noValidModel": "未配置有效的 AI 模型。",
+  "streamingUnsupported": "当前模型配置不支持流式输出，已自动使用传统输出模式。如需流式输出，请在模型设置中开启'流式输出支持'。",
+  "connSuccess": "连接测试成功！\n模型: {{model}}\n响应: {{response}}",
+  "connInfo": "连接正常，但响应内容不符合预期\n模型: {{model}}\n响应: {{response}}",
+  "apiKeyMissing": "{{provider}} API Key 未配置。",
+  "endpointMissing": "未配置 {{provider}} 接口地址。",
+  "endpointMissingGeneric": "未配置接口地址。",
+  "requestFailed": "{{provider}} 请求失败: {{message}}",
+  "requestFailedGeneric": "接口请求失败: {{message}}",
+  "requestFailedUnknown": "接口请求失败: 未知错误",
+  "requestFailedStatus": "请求失败 ({{status}}): {{detail}}",
+  "streamReadFailed": "无法读取响应流",
+  "streamError": "{{provider}} 流式返回错误",
+  "streamErrorGeneric": "流式返回错误",
+  "streamException": "{{provider}} 流式调用异常: {{message}}",
+  "streamExceptionGeneric": "流式调用异常: {{message}}",
+  "streamFailed": "{{provider}} 流式调用失败: {{message}}",
+  "sdkStreamError": "{{provider}} SDK 流式错误: {{message}}",
+  "jsonValidationFailed": "返回的 JSON 未通过结构校验",
+  "jsonParseFailed": "JSON 解析失败: {{message}}",
+  "unknown": "未知错误"
+}

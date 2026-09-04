@@ -1,0 +1,56 @@
+{
+  "home": {
+    "title": "创作中心",
+    "subtitle": "从一段小小的灵感开始，构建你的宏大世界。",
+    "backup": "备份",
+    "importAll": "导入全部数据",
+    "exportCurrentBook": "导出当前书籍",
+    "importSingleBookTip": "导入单个书籍",
+    "importBook": "导入书籍"
+  },
+  "model": {
+    "notConfiguredKey": "当前模型尚未配置 API Key / 端点",
+    "noneConfigured": "尚未配置可用的 AI 模型",
+    "goSettings": "去设置",
+    "noneSelected": "未选模型"
+  },
+  "empty": {
+    "noProject": "请先开始一个新的创作项目",
+    "goCreate": "去创建"
+  },
+  "topbar": {
+    "currentProject": "当前项目",
+    "noBookSelected": "未选择小说",
+    "clearProjectTip": "清空当前项目所有生成内容",
+    "deleteProjectTip": "删除当前项目",
+    "checkUpdateTip": "检查更新",
+    "viewHistoryTip": "查看AI生成历史记录",
+    "history": "历史记录"
+  },
+  "reset": {
+    "factoryTitle": "恢复出厂设置",
+    "clearTitle": "清空所有生成内容",
+    "factoryDesc": "此操作将删除【全部数据】，包括您的 API Key 和所有设置。应用将强制重启。此操作不可撤销！",
+    "clearDesc": "此操作将删除所有小说项目和草稿。您的 API Key 和模型配置将被保留。应用将刷新以应用更改。",
+    "confirmExecute": "确认执行",
+    "failed": "操作异常，请尝试手动清除浏览器缓存。"
+  },
+  "book": {
+    "defaultTitle": "新小说",
+    "duplicateTitle": "{{title}} (副本)",
+    "importedTitle": "{{title}} (导入)",
+    "deleteConfirm": "确定要删除这本书籍吗？此操作不可撤销。",
+    "exportNeedSelect": "请先选择一个书籍进行导出",
+    "renameImportTitle": "重命名导入书籍",
+    "renameImportMessage": "已存在名为《{{title}}》的书籍。请输入新的书籍名称：",
+    "importSuccess": "书籍《{{title}}》导入成功！",
+    "importFailed": "导入失败：{{message}}",
+    "clearConfirm": "⚠️ 确定要清空小说《{{title}}》的所有内容吗？\n保留项目，但清除灵感、大纲和章节。",
+    "deleteProjectTitle": "删除项目警告",
+    "deleteProjectConfirm": "确定要删除《{{title}}》吗？"
+  },
+  "importAll": {
+    "success": "全部数据导入成功！",
+    "failed": "导入失败或已取消。"
+  }
+}

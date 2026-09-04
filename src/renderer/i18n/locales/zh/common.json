@@ -1,0 +1,24 @@
+{
+  "appName": "AI小说家",
+  "confirm": "确定",
+  "cancel": "取消",
+  "save": "保存",
+  "close": "关闭",
+  "delete": "删除",
+  "export": "导出",
+  "import": "导入",
+  "reset": "重置",
+  "loading": "加载中…",
+  "dialog": {
+    "untitled": "对话框",
+    "gotIt": "知道了"
+  },
+  "errorBoundary": {
+    "title": "界面出现异常",
+    "regionError": "区域「{{scope}}」渲染时发生错误，你的数据已保存在本地，不会丢失。",
+    "appError": "应用渲染时发生错误，你的数据已保存在本地，不会丢失。",
+    "unknown": "未知错误",
+    "retry": "重试渲染",
+    "reload": "重新加载应用"
+  }
+}

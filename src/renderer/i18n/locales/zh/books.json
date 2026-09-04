@@ -1,0 +1,36 @@
+{
+  "manager": {
+    "current": "当前书籍",
+    "noneSelected": "未选择书籍",
+    "new": "新建书籍",
+    "count_one": "{{count}} 本",
+    "count_other": "{{count}} 本"
+  },
+  "item": {
+    "deleteConfirm": "确定要删除《{{title}}》吗？此操作不可撤销。",
+    "moreActions": "更多操作",
+    "rename": "重命名",
+    "duplicate": "复制",
+    "minutesAgo": "{{count}}分钟前",
+    "hoursAgo": "{{count}}小时前",
+    "daysAgo": "{{count}}天前"
+  },
+  "newBook": {
+    "titleRequired": "请输入书籍标题",
+    "title": "新建书籍",
+    "subtitle": "开始你的新创作旅程",
+    "titleLabel": "书籍标题",
+    "titlePlaceholder": "例如：星辰之恋",
+    "descLabel": "书籍描述（可选）",
+    "descPlaceholder": "简单描述你的故事主题或灵感来源...",
+    "methodLabel": "创建方式",
+    "blank": "空白模板",
+    "blankDesc": "从零开始，完全自由创作",
+    "duplicate": "复制现有书籍",
+    "duplicateDesc": "基于已有书籍的结构和内容",
+    "selectToDuplicate": "选择要复制的书籍",
+    "example": "示例模板",
+    "exampleDesc": "使用预设的故事结构和示例",
+    "create": "创建书籍"
+  }
+}

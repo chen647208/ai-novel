@@ -1,0 +1,111 @@
+{
+  "model": {
+    "deepseek": {
+      "name": "DeepSeek",
+      "description": "深度求索官方 API，V4 系列在推理与创作上表现强劲，OpenAI 兼容、只需填 Key",
+      "tips": ["在 platform.deepseek.com 创建 API Key", "端点已预置，无需手填", "模型选 deepseek-v4-pro（旗舰）或 v4-flash（更快）"]
+    },
+    "kimi": {
+      "name": "Kimi（月之暗面）",
+      "description": "月之暗面 Kimi 官方 API，超长上下文，OpenAI 兼容、只需填 Key",
+      "tips": ["在 platform.moonshot.cn 获取 API Key", "端点已预置", "kimi-k3 为最新旗舰"]
+    },
+    "zhipu": {
+      "name": "GLM（智谱）",
+      "description": "智谱 GLM 官方 API，中文理解与生成优秀，OpenAI 兼容、只需填 Key",
+      "tips": ["在 open.bigmodel.cn 获取 API Key", "端点已预置", "glm-5.3 为最新旗舰"]
+    },
+    "qwen": {
+      "name": "通义千问（阿里百炼）",
+      "description": "阿里云百炼 DashScope 兼容模式，通义千问系列，OpenAI 兼容、只需填 Key",
+      "tips": ["开通百炼并在控制台获取 API Key", "端点已预置（compatible-mode）", "qwen3.8-max 为最新旗舰"]
+    },
+    "minimax": {
+      "name": "MiniMax",
+      "description": "MiniMax 官方 API，走 Anthropic 兼容协议，只需填 Key",
+      "tips": ["在 minimaxi.com 控制台获取 API Key", "端点已预置（Anthropic 协议）", "MiniMax-M3 为最新旗舰"]
+    },
+    "openai": {
+      "name": "OpenAI（对话兼容）",
+      "description": "OpenAI 官方 Chat Completions 接口",
+      "tips": ["在 platform.openai.com 获取 API Key", "端点已预置", "部分地区需代理访问"]
+    },
+    "openai-responses": {
+      "name": "OpenAI（思考 / Responses）",
+      "description": "OpenAI Responses API，面向推理模型的新接口（input/instructions）",
+      "tips": ["与对话接口同一 Key/端点", "推理模型不接受 temperature", "适合需要思考链的生成"]
+    },
+    "anthropic": {
+      "name": "Anthropic",
+      "description": "Anthropic Claude 官方 Messages 接口",
+      "tips": ["在 console.anthropic.com 获取 API Key", "端点已预置", "temperature 上限为 1.0，超出会自动收敛"]
+    },
+    "gemini": {
+      "name": "Google Gemini",
+      "description": "Google Gemini 官方 API（原生 REST），只需填 Key",
+      "tips": ["在 aistudio.google.com 获取 API Key", "端点留空即走官方默认", "可填代理地址覆盖"]
+    },
+    "ollama": {
+      "name": "Ollama（本地模型）",
+      "description": "本地运行的开源模型服务，无需网络与 Key，数据完全本地",
+      "tips": ["安装并启动 Ollama：ollama serve", "ollama pull llama3.3 下载模型", "API Key 留空即可", "模型名填已下载的本地模型"]
+    },
+    "custom-openai": {
+      "name": "自定义 OpenAI 兼容",
+      "description": "任意 OpenAI Chat Completions 兼容端点（自建网关、第三方聚合等）",
+      "tips": ["填写接口地址（含 /v1）", "按上游要求填 API Key（本地代理可留空）", "模型名填上游支持的标识"]
+    },
+    "custom-anthropic": {
+      "name": "自定义 Anthropic 兼容",
+      "description": "任意 Anthropic Messages 兼容端点",
+      "tips": ["填写接口 base（如 https://host/anthropic/v1）", "填写 API Key", "模型名填上游标识"]
+    }
+  },
+  "embedding": {
+    "ollama": {
+      "name": "Ollama (本地)",
+      "description": "本地运行的Embedding模型，数据完全本地处理，无需联网，隐私性最佳",
+      "models": ["推荐：高质量的通用嵌入模型", "轻量级：速度快，资源占用低", "大模型：更好的语义理解能力"],
+      "tips": ["需要先安装Ollama：访问 https://ollama.com/download", "拉取模型：ollama pull nomic-embed-text", "启动服务：ollama serve", "API Key留空或填写任意字符", "模型名称填写已下载的模型名，如：nomic-embed-text"]
+    },
+    "lmstudio": {
+      "name": "LM Studio (本地)",
+      "description": "图形化本地模型管理工具，支持加载任意Sentence-BERT模型，适合高级用户",
+      "models": ["轻量快速，适合大多数场景", "质量更好，语义理解更强", "中文优化，中文场景推荐"],
+      "tips": ["下载并安装LM Studio：https://lmstudio.ai", "在App中搜索并下载Embedding模型", "启动本地服务器（Local Server标签页）", "默认端口为1234，可在设置中修改", "支持任意HuggingFace格式的Embedding模型"]
+    },
+    "siliconflow": {
+      "name": "硅基流动 (推荐)",
+      "description": "提供多种开源Embedding模型，包括bge-m3、千问Embedding等，OpenAI API完全兼容，性价比高",
+      "models": ["⭐ 强烈推荐：多语言，支持8192 tokens长文本", "专业版：质量更高，适合生产环境", "中文优化：在中文场景下表现优秀", "超长上下文：支持32768 tokens，适合长文档", "平衡选择：性能和质量的平衡"],
+      "tips": ["注册即送免费额度，新用户友好", "OpenAI API完全兼容，易于接入", "推荐bge-m3模型，效果优秀且性价比高", "支持BAAI、阿里千问等多个系列模型", "国内访问速度快，稳定性高"]
+    },
+    "bailian": {
+      "name": "阿里百炼 (推荐)",
+      "description": "阿里云出品，text-embedding-v3效果优秀，支持动态维度调整，企业级稳定性",
+      "models": ["⭐ 最新版：效果最佳，支持动态维度调整", "稳定版：经过广泛验证，稳定可靠", "上一代模型：兼容性好"],
+      "tips": ["需要阿里云账号并开通百炼服务", "支持dimensions参数自定义输出维度（768/1024/1536）", "text-embedding-v3是目前中文效果最好的模型之一", "阿里云企业级稳定性保障", "支持encoding_format: float或base64"],
+      "specialFeatures": ["动态维度调整"]
+    },
+    "volcano": {
+      "name": "字节火山云",
+      "description": "字节跳动旗下，豆包Embedding模型，通过火山方舟平台提供服务",
+      "models": ["豆包嵌入模型：字节自研，效果稳定", "大版本：更高维度，更好的表达能力"],
+      "tips": ["需要在火山方舟平台创建推理接入点", "模型名称为接入点ID（格式如：ep-20240101-xxxxxx）", "在控制台创建接入点后，复制ID作为模型名称使用", "支持字节跳动的豆包系列模型", "适合已在使用火山云服务的用户"]
+    },
+    "openai-compatible": {
+      "name": "OpenAI / OpenAI兼容",
+      "description": "OpenAI官方Embedding API，业界标杆，也可用于其他OpenAI兼容服务",
+      "models": ["效果最好：最高质量的嵌入向量", "⭐ 性价比：速度快，价格优惠，推荐大多数场景", "上一代模型：兼容性最好"],
+      "tips": ["需要国际信用卡支付", "API Key在OpenAI平台获取", "部分地区需要科学上网", "支持dimensions参数减少向量维度", "text-embedding-3-small性价比最高"]
+    }
+  },
+  "quickAdd": {
+    "siliconflow-bge-m3": "硅基流动 bge-m3",
+    "bailian-v3": "阿里百炼 v3",
+    "ollama-local": "Ollama本地",
+    "openai-api": "OpenAI",
+    "lmstudio-local": "LM Studio",
+    "volcano-ark": "火山云"
+  }
+}

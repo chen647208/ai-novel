@@ -1,0 +1,63 @@
+{
+  "defaultNames": {
+    "character": "Default Character Template",
+    "location": "Default Location Template",
+    "faction": "Default Faction Template",
+    "timeline": "Default Timeline Event Template",
+    "rule": "Default Rule System Template",
+    "magic": "Default Magic System Template",
+    "tech": "Default Tech Level Template",
+    "history": "Default History Template"
+  },
+  "commandType": {
+    "character": "Character",
+    "location": "Location",
+    "faction": "Faction",
+    "timeline": "Timeline event",
+    "rule": "Rule system",
+    "event": "Plot event",
+    "magic": "Magic system",
+    "tech": "Technology level",
+    "history": "History"
+  },
+  "create": {
+    "noDescription": "Please provide a specific description after the command, e.g. \"/{{command}} {{example}}\"",
+    "noDescriptionExample": "an ancient mysterious temple",
+    "noModel": "No AI model configured. Please select a model in the AI Assistant and try again",
+    "aiCallFailed": "AI call failed: {{error}}",
+    "emptyResponse": "The AI returned nothing. Please check the model configuration or try again",
+    "creationFailed": "Creation failed: {{error}}",
+    "unknownError": "Unknown error",
+    "invalidFormat": "The AI response is malformed and could not be parsed as JSON. Please retry or rephrase the description",
+    "unsupportedCommand": "Unsupported command type: {{command}}",
+    "success": "✅ Created {{typeName}}: **\"{{name}}\"**\n\nIt has been added to the project. Click edit to fine-tune the details.",
+    "unnamed": "Unnamed"
+  },
+  "report": {
+    "allFilled": "✅ All fields filled correctly",
+    "missing": "⚠️ Missing fields (auto-filled with defaults): {{fields}}",
+    "defaulted": "📝 Fields using default values: {{fields}}",
+    "filled": "✅ Filled fields: {{count}}",
+    "fieldJoiner": ", "
+  },
+  "validate": {
+    "categoryRequired": "Template category is required",
+    "nameRequired": "Template name cannot be empty",
+    "contentRequired": "Template content cannot be empty",
+    "descriptionVariableRequired": "Template content must include the {description} variable",
+    "requiredFieldsRequired": "requiredFields (the list of required fields) must be defined"
+  },
+  "prompt": {
+    "templateMissing": "No prompt template found for command type {{command}}"
+  },
+  "variables": {
+    "description": "The user's description text",
+    "context": "Project context summary (worldview, existing characters/locations/factions, etc.)",
+    "projectTitle": "Project title",
+    "worldView": "Worldview summary",
+    "calendarSystem": "Calendar system name (set it in the timeline first)",
+    "existingCharacters": "List of existing characters",
+    "existingLocations": "List of existing locations",
+    "existingFactions": "List of existing factions"
+  }
+}

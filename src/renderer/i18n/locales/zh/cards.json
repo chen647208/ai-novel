@@ -1,0 +1,63 @@
+{
+  "defaultNames": {
+    "character": "默认角色模板",
+    "location": "默认地点模板",
+    "faction": "默认势力模板",
+    "timeline": "默认时间线事件模板",
+    "rule": "默认规则系统模板",
+    "magic": "默认魔法体系模板",
+    "tech": "默认科技水平模板",
+    "history": "默认历史背景模板"
+  },
+  "commandType": {
+    "character": "角色",
+    "location": "地点",
+    "faction": "势力",
+    "timeline": "时间线事件",
+    "rule": "规则系统",
+    "event": "剧情事件",
+    "magic": "魔法体系",
+    "tech": "科技水平",
+    "history": "历史背景"
+  },
+  "create": {
+    "noDescription": "请在命令后提供具体描述，例如：\"/{{command}} {{example}}\"",
+    "noDescriptionExample": "一个神秘的古老寺庙",
+    "noModel": "未配置AI模型，请在AI助手中选择一个模型后重试",
+    "aiCallFailed": "AI调用失败：{{error}}",
+    "emptyResponse": "AI返回为空，请检查模型配置或重试",
+    "creationFailed": "创建失败：{{error}}",
+    "unknownError": "未知错误",
+    "invalidFormat": "AI返回格式不正确，无法解析为JSON，请重试或修改描述",
+    "unsupportedCommand": "不支持的命令类型: {{command}}",
+    "success": "✅ 成功创建{{typeName}}：**「{{name}}」**\n\n已添加到项目中，您可以点击编辑进行细节调整。",
+    "unnamed": "未命名"
+  },
+  "report": {
+    "allFilled": "✅ 所有字段已正确填充",
+    "missing": "⚠️ 缺失字段（已自动填充默认值）：{{fields}}",
+    "defaulted": "📝 使用默认值的字段：{{fields}}",
+    "filled": "✅ 已填充字段：{{count}}个",
+    "fieldJoiner": "、"
+  },
+  "validate": {
+    "categoryRequired": "模板分类不能为空",
+    "nameRequired": "模板名称不能为空",
+    "contentRequired": "模板内容不能为空",
+    "descriptionVariableRequired": "模板内容必须包含 {description} 变量",
+    "requiredFieldsRequired": "必须定义 requiredFields（必填字段列表）"
+  },
+  "prompt": {
+    "templateMissing": "未找到命令类型 {{command}} 的提示词模板"
+  },
+  "variables": {
+    "description": "用户输入的描述文本",
+    "context": "项目上下文摘要（包含世界观、已有角色/地点/势力等）",
+    "projectTitle": "项目标题",
+    "worldView": "世界观设定摘要",
+    "calendarSystem": "历法系统名称（需要先在时间线中设置）",
+    "existingCharacters": "已有角色列表",
+    "existingLocations": "已有地点列表",
+    "existingFactions": "已有势力列表"
+  }
+}
