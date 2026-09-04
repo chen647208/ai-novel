@@ -7,6 +7,7 @@
   "delete": "Delete",
   "export": "Export",
   "import": "Import",
+  "rename": "Rename",
   "reset": "Reset",
   "loading": "Loading…",
   "dialog": {

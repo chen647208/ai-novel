@@ -1,12 +1,26 @@
 {
-  "home": {
-    "title": "Creation Center",
-    "subtitle": "Start from a spark of inspiration and build your grand world.",
-    "backup": "Backup",
+  "bookshelf": {
+    "title": "Bookshelf",
+    "subtitle": "All your novel projects. Click a card to continue writing.",
+    "search": "Search titles…",
+    "newBook": "New Book",
+    "importBook": "Import Book",
+    "backup": "Backup All",
     "importAll": "Import All Data",
-    "exportCurrentBook": "Export Current Book",
-    "importSingleBookTip": "Import a single book",
-    "importBook": "Import Book"
+    "empty": {
+      "title": "No books yet",
+      "desc": "Create a new book or import an existing book file to get started."
+    },
+    "noResults": "No matching books",
+    "noContent": "Nothing yet — click to start writing.",
+    "current": "Current",
+    "open": "Open",
+    "renameTitle": "Rename Book",
+    "renameMessage": "Enter a new title:",
+    "duplicate": "Duplicate",
+    "words": "Words",
+    "chapters": "Chapters",
+    "characters": "Characters"
   },
   "model": {
     "notConfiguredKey": "The current model has no API Key / endpoint configured",
@@ -19,8 +33,10 @@
     "goCreate": "Create one"
   },
   "topbar": {
-    "currentProject": "Current Project",
     "noBookSelected": "No novel selected",
+    "statKnowledge": "Knowledge entries",
+    "statCharacters": "Characters",
+    "statChapters": "Chapters",
     "clearProjectTip": "Clear all generated content in the current project",
     "deleteProjectTip": "Delete the current project",
     "checkUpdateTip": "Check for updates",

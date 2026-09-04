@@ -4,15 +4,9 @@
     "world": "World Building",
     "characters": "Characters & Factions",
     "outline": "Novel Outline",
-    "chapterOutline": "Chapter Outline"
+    "chapterOutline": "Chapter Outline",
+    "writing": "Writing Editor"
   },
-  "books": {
-    "manage": "Book Manager",
-    "multi": "Multi-book writing",
-    "desc": "Manage all your novel projects"
-  },
-  "settings": "System Settings (API)",
-  "data": "Data Management",
-  "factoryReset": "Factory Reset",
-  "factoryResetTip": "Delete all data, including API keys"
+  "bookshelf": "Bookshelf",
+  "settings": "Settings"
 }

@@ -1,12 +1,26 @@
 {
-  "home": {
-    "title": "创作中心",
-    "subtitle": "从一段小小的灵感开始，构建你的宏大世界。",
-    "backup": "备份",
+  "bookshelf": {
+    "title": "书籍库",
+    "subtitle": "你的全部小说项目，点击卡片继续创作。",
+    "search": "搜索书名…",
+    "newBook": "新建书籍",
+    "importBook": "导入书籍",
+    "backup": "备份全部",
     "importAll": "导入全部数据",
-    "exportCurrentBook": "导出当前书籍",
-    "importSingleBookTip": "导入单个书籍",
-    "importBook": "导入书籍"
+    "empty": {
+      "title": "还没有书籍",
+      "desc": "新建一本书，或导入已有的书籍文件开始创作。"
+    },
+    "noResults": "没有匹配的书籍",
+    "noContent": "暂无内容，点击开始创作。",
+    "current": "当前",
+    "open": "打开",
+    "renameTitle": "重命名书籍",
+    "renameMessage": "请输入新的书名：",
+    "duplicate": "创建副本",
+    "words": "字数",
+    "chapters": "章节",
+    "characters": "角色"
   },
   "model": {
     "notConfiguredKey": "当前模型尚未配置 API Key / 端点",
@@ -19,8 +33,10 @@
     "goCreate": "去创建"
   },
   "topbar": {
-    "currentProject": "当前项目",
     "noBookSelected": "未选择小说",
+    "statKnowledge": "知识库条目",
+    "statCharacters": "角色",
+    "statChapters": "章节",
     "clearProjectTip": "清空当前项目所有生成内容",
     "deleteProjectTip": "删除当前项目",
     "checkUpdateTip": "检查更新",

@@ -4,15 +4,9 @@
     "world": "世界构建中心",
     "characters": "角色与势力",
     "outline": "小说大纲",
-    "chapterOutline": "章节细纲"
+    "chapterOutline": "章节细纲",
+    "writing": "写作编辑器"
   },
-  "books": {
-    "manage": "书籍管理",
-    "multi": "多书籍创作",
-    "desc": "管理你的所有小说项目"
-  },
-  "settings": "系统设置 (API)",
-  "data": "数据管理",
-  "factoryReset": "恢复出厂设置",
-  "factoryResetTip": "删除所有数据，包括 API Key"
+  "bookshelf": "书籍库",
+  "settings": "设置"
 }

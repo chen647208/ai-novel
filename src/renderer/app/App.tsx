@@ -16,23 +16,41 @@ import { repository } from '../shared/services/repository';
 import { changeLanguage, getEffectiveLanguage, i18n, useTranslation } from '../i18n';
 import { autoBackupService } from '../shared/services/autoBackupService';
 import { vectorIntegrationService } from '../features/knowledge/services/vectorIntegrationService';
-import Sidebar from './app-shell/Sidebar';
+import Bookshelf from './app-shell/Bookshelf';
+import WorkspaceNav, { type SectionId } from './app-shell/WorkspaceNav';
+import WorkspaceTopbar from './app-shell/WorkspaceTopbar';
 import DialogHost from './app-shell/DialogHost';
+import ToastHost from './app-shell/ToastHost';
 import SettingsModal from '../features/settings/SettingsModal';
 import StepInspiration from '../features/inspiration/StepInspiration';
-import StepKnowledgeEnhanced from '../features/knowledge/StepKnowledgeEnhanced'; // 新增导入：增强版知识库组件
+import StepKnowledgeEnhanced from '../features/knowledge/StepKnowledgeEnhanced';
 import StepCharacters from '../features/characters/StepCharacters';
 import StepOutline from '../features/outline/StepOutline';
 import StepChapterOutline from '../features/chapters/StepChapterOutline';
 import WritingEditor from '../features/writing/WritingEditor';
-import GlobalAssistant from '../features/assistant/GlobalAssistant'; // 导入全局助手
-import AIHistoryViewer from '../features/writing/AIHistoryViewer'; // 新增导入：AI历史记录查看器
-import VersionCheckModal from '../features/version/VersionCheckModal'; // 新增导入：版本检查模态框
+import GlobalAssistant from '../features/assistant/GlobalAssistant';
+import AIHistoryViewer from '../features/writing/AIHistoryViewer';
+import VersionCheckModal from '../features/version/VersionCheckModal';
 import { persistDiff } from './persistDiff';
 import { dialogService } from '@/shared/services/dialogService';
-import { applyTheme, resolveTheme, watchSystemTheme } from '@/shared/services/themeService';
+import { applyTheme, watchSystemTheme } from '@/shared/services/themeService';
 import { Button } from '@/shared/ui/Button';
-import { BookDown, BookHeart, BookOpen, BookUp, Cpu, Download, Eraser, History, List, Moon, Plug, RefreshCw, Skull, Sun, Trash2, Upload, Users } from 'lucide-react';
+import { EmptyState } from '@/shared/ui/EmptyState';
+import { TooltipProvider } from '@/shared/ui/Tooltip';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/shared/ui/AlertDialog';
+import { BookHeart, Plug, Skull, Trash2 } from 'lucide-react';
+
+/** 顶层视图：书籍库首页 或 单书工作台。 */
+type AppView = 'bookshelf' | 'workspace';
 
 const App: React.FC = () => {
   const { t } = useTranslation(['app', 'common']);
@@ -41,15 +59,15 @@ const App: React.FC = () => {
   // 上一次已落盘的状态快照，用于差分持久化；null 表示尚未建立基线（首帧走整体写）。
   const lastPersistedRef = useRef<AppState | null>(null);
 
-  const [currentStep, setCurrentStep] = useState(0);
+  const [view, setView] = useState<AppView>('bookshelf');
+  const [section, setSection] = useState<SectionId>('inspiration');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
   const [resetKey, setResetKey] = useState(0);
-  const [isHistoryViewerOpen, setIsHistoryViewerOpen] = useState(false); // 新增：历史记录查看器状态
-  const [isVersionCheckOpen, setIsVersionCheckOpen] = useState(false); // 新增：版本检查模态框状态
+  const [isHistoryViewerOpen, setIsHistoryViewerOpen] = useState(false);
+  const [isVersionCheckOpen, setIsVersionCheckOpen] = useState(false);
 
-  // --- 新增：自定义确认弹窗状态 ---
-  // 用于替代 window.confirm，防止浏览器拦截导致无反应
+  // 重置确认弹窗状态（factory_reset / clear_projects），经 AlertDialog 呈现
   const [resetModal, setResetModal] = useState<ResetModalState>({ isOpen: false, type: null });
 
   // 加载初始状态
@@ -79,7 +97,7 @@ const App: React.FC = () => {
           logger.debug('没有找到保存的状态，使用初始状态');
           lastPersistedRef.current = INITIAL_APP_STATE;
         }
-        
+
         // 初始化向量集成服务（包括Embedding服务）
         await vectorIntegrationService.initialize();
       } catch (error) {
@@ -138,14 +156,12 @@ const App: React.FC = () => {
     return watchSystemTheme(() => applyTheme('system'));
   }, [state.theme]);
 
-  // 书籍管理相关函数
-  const handleBookSelect = useCallback((bookId: string) => {
-    setState(prev => ({
-      ...prev,
-      activeProjectId: bookId
-    }));
-    // 切换到灵感生成步骤（步骤0）
-    setCurrentStep(0);
+  // 打开一本书并进入工作台（默认落在灵感分区）
+  const openBook = useCallback((bookId: string) => {
+    setState(prev => ({ ...prev, activeProjectId: bookId }));
+    setSection('inspiration');
+    setEditingChapterId(null);
+    setView('workspace');
   }, []);
 
   const handleBookCreate = useCallback((title: string, description?: string, templateType?: 'blank' | 'duplicate' | 'example', sourceBookId?: string) => {
@@ -181,17 +197,17 @@ const App: React.FC = () => {
       projects: [...prev.projects, newBook],
       activeProjectId: newBook.id
     }));
-    
-    // 切换到灵感生成步骤
-    setCurrentStep(0);
+
+    setSection('inspiration');
+    setView('workspace');
   }, [state.projects]);
 
   const handleBookRename = useCallback((bookId: string, newTitle: string) => {
     setState(prev => ({
       ...prev,
-      projects: prev.projects.map(p => 
-        p.id === bookId 
-          ? { ...p, title: newTitle, lastModified: Date.now() } 
+      projects: prev.projects.map(p =>
+        p.id === bookId
+          ? { ...p, title: newTitle, lastModified: Date.now() }
           : p
       )
     }));
@@ -199,20 +215,19 @@ const App: React.FC = () => {
 
   const handleBookDelete = useCallback(async (bookId: string) => {
     if (await dialogService.confirm({ message: i18n.t('app:book.deleteConfirm'), danger: true })) {
+      const wasActive = state.activeProjectId === bookId;
+      const remaining = state.projects.filter(p => p.id !== bookId);
       setState(prev => ({
         ...prev,
         projects: prev.projects.filter(p => p.id !== bookId),
-        activeProjectId: prev.activeProjectId === bookId ? 
-          (prev.projects.length > 1 ? prev.projects[0]?.id ?? null : null) : 
-          prev.activeProjectId
+        activeProjectId: wasActive ? (remaining[0]?.id ?? null) : prev.activeProjectId
       }));
-      
-      // 如果没有活动项目了，切换到灵感生成步骤
-      if (state.activeProjectId === bookId && state.projects.length === 1) {
-        setCurrentStep(0);
+      // 删除后已无书籍：回到书籍库空态
+      if (wasActive && remaining.length === 0) {
+        setView('bookshelf');
       }
     }
-  }, [state.activeProjectId, state.projects.length]);
+  }, [state.activeProjectId, state.projects]);
 
   const handleBookDuplicate = useCallback((bookId: string) => {
     const sourceBook = state.projects.find(p => p.id === bookId);
@@ -236,26 +251,20 @@ const App: React.FC = () => {
       projects: [...prev.projects, newBook],
       activeProjectId: newBook.id
     }));
-    
-    // 切换到灵感生成步骤
-    setCurrentStep(0);
+    setSection('inspiration');
+    setView('workspace');
   }, [state.projects]);
 
-  // 新增：导出当前书籍
-  const handleExportCurrentBook = useCallback(() => {
-    if (!activeProject) {
-      dialogService.alert(i18n.t('app:book.exportNeedSelect'));
-      return;
-    }
-    
-    repository.exportBook(activeProject);
-  }, [activeProject]);
+  // 导出当前书籍（书籍库卡片菜单与工作台共用）
+  const handleExportBook = useCallback((book: Project) => {
+    repository.exportBook(book);
+  }, []);
 
-  // 新增：导入单个书籍
+  // 导入单个书籍
   const handleImportBook = useCallback(async () => {
     try {
       const importedBook = await repository.importBook();
-      
+
       // 检查是否已存在相同标题的书籍
       const existingBook = state.projects.find(p => p.title === importedBook.title);
       if (existingBook) {
@@ -272,15 +281,13 @@ const App: React.FC = () => {
 
         importedBook.title = newTitle;
       }
-      
+
       setState(prev => ({
         ...prev,
         projects: [...prev.projects, importedBook],
         activeProjectId: importedBook.id
       }));
-      
-      // 切换到灵感生成步骤
-      setCurrentStep(0);
+
       dialogService.alert(i18n.t('app:book.importSuccess', { title: importedBook.title }));
     } catch (error) {
       console.error('Failed to import book:', error);
@@ -290,10 +297,25 @@ const App: React.FC = () => {
     }
   }, [state.projects]);
 
+  // 全量数据导入（书籍库顶栏入口）
+  const handleImportAll = useCallback(async () => {
+    logger.debug('开始导入全部数据...');
+    const newState = await repository.importAll();
+    if (!newState) {
+      throw new Error('导入的数据为空');
+    }
+    // 规范化并覆盖所有数据
+    const validatedState = normalizeImportedState(newState);
+    setState(validatedState);
+    setResetKey(prev => prev + 1);
+    logger.debug('全部数据导入完成，状态已覆盖');
+    dialogService.alert(i18n.t('app:importAll.success'));
+  }, []);
+
   const updateProject = useCallback((updates: Partial<Project>) => {
     setState(prev => {
       const { activeProjectId, projects } = prev;
-      
+
       if (!activeProjectId) {
         const newProject: Project = {
           id: Date.now().toString(),
@@ -303,8 +325,8 @@ const App: React.FC = () => {
           characters: [],
           outline: '',
           chapters: [],
-          virtualChapters: [], // 新增：初始化虚拟章节数组
-          knowledge: [], // 初始化
+          virtualChapters: [],
+          knowledge: [],
           lastModified: Date.now(),
           ...updates
         };
@@ -316,9 +338,9 @@ const App: React.FC = () => {
       } else {
         return {
           ...prev,
-          projects: projects.map(p => 
-            p.id === activeProjectId 
-              ? { ...p, ...updates, lastModified: Date.now() } 
+          projects: projects.map(p =>
+            p.id === activeProjectId
+              ? { ...p, ...updates, lastModified: Date.now() }
               : p
           )
         };
@@ -326,7 +348,7 @@ const App: React.FC = () => {
     });
   }, []);
 
-  // --- 触发逻辑：点击按钮只打开自定义弹窗 ---
+  // --- 触发逻辑：点击按钮只打开确认弹窗 ---
   const triggerFactoryReset = () => {
     setResetModal({ isOpen: true, type: 'factory_reset' });
   };
@@ -334,7 +356,7 @@ const App: React.FC = () => {
   // --- 执行逻辑：真正的数据清除 ---
   const executeReset = async () => {
     const type = resetModal.type;
-    
+
     try {
       if (type === 'factory_reset') {
         // 1. 恢复出厂设置
@@ -357,7 +379,7 @@ const App: React.FC = () => {
     }
   };
 
-  // 3. 仅重置当前项目内容 (普通操作，无需强制刷新)
+  // 仅清空当前项目内容（普通操作，无需强制刷新）
   const handleResetCurrentProject = async () => {
     if (!activeProject) return;
     if (await dialogService.confirm({ message: i18n.t('app:book.clearConfirm', { title: activeProject.title }), danger: true })) {
@@ -367,10 +389,10 @@ const App: React.FC = () => {
         characters: [],
         outline: '',
         chapters: [],
-        virtualChapters: [], // 清空虚拟章节
-        knowledge: [] // 清空知识库
+        virtualChapters: [],
+        knowledge: []
       });
-      setCurrentStep(0);
+      setSection('inspiration');
       setEditingChapterId(null);
       setResetKey(prev => prev + 1);
     }
@@ -384,348 +406,211 @@ const App: React.FC = () => {
         projects: prev.projects.filter(p => p.id !== activeProject.id),
         activeProjectId: null
       }));
-      setCurrentStep(0);
+      setSection('inspiration');
+      setEditingChapterId(null);
       setResetKey(prev => prev + 1);
+      setView('bookshelf');
     }
   };
 
-  const handleStepChange = (step: number) => {
-    setCurrentStep(step);
-    if (step !== 5) setEditingChapterId(null); // 编辑器步骤现在是 5
+  const handleSectionChange = (next: SectionId) => {
+    setSection(next);
+    if (next !== 'writing') setEditingChapterId(null);
   };
 
-  const renderStepContent = () => {
-    if (!activeProject && currentStep !== 0) {
+  const renderSection = () => {
+    if (!activeProject) {
       return (
-        <div className="flex flex-col items-center justify-center h-full text-gray-400">
-           <BookHeart className="size-10 mb-4 text-gray-300" />
-           <p className="font-bold">{t('empty.noProject')}</p>
-           <Button onClick={() => setCurrentStep(0)} className="mt-4">{t('empty.goCreate')}</Button>
-        </div>
+        <EmptyState
+          className="h-full"
+          icon={BookHeart}
+          title={t('empty.noProject')}
+          action={<Button onClick={() => setView('bookshelf')}>{t('empty.goCreate')}</Button>}
+        />
       );
     }
 
     if (!activeModel || !isModelConfigured(activeModel)) {
       return (
-        <div className="flex flex-col items-center justify-center h-full text-gray-400">
-          <Plug className="size-10 mb-4 text-gray-300" />
-          <p className="font-bold">{activeModel ? t('model.notConfiguredKey') : t('model.noneConfigured')}</p>
-          <Button onClick={() => setIsSettingsOpen(true)} className="mt-4">{t('model.goSettings')}</Button>
-        </div>
+        <EmptyState
+          className="h-full"
+          icon={Plug}
+          title={activeModel ? t('model.notConfiguredKey') : t('model.noneConfigured')}
+          action={<Button onClick={() => setIsSettingsOpen(true)}>{t('model.goSettings')}</Button>}
+        />
       );
     }
 
-    if (currentStep === 0) {
-      return (
-        <div className="p-8 overflow-y-auto h-full">
-           <div className="mb-8 flex justify-between items-center">
-              <div className="text-left">
-                <h2 className="text-3xl font-black text-gray-800 tracking-tight">{t('home.title')}</h2>
-                <p className="text-gray-500 mt-2">{t('home.subtitle')}</p>
-              </div>
-              <div className="flex gap-3">
-                 {/* 全数据备份/导入按钮 */}
-                 <button onClick={() => repository.exportAll(state)} className="px-4 py-2 border rounded-lg hover:bg-gray-50 text-sm font-medium transition-colors">
-                    <Download className="size-4 mr-2" />{t('home.backup')}
-                 </button>
-                 <button 
-                   onClick={async () => {
-                     try {
-                       logger.debug('开始导入全部数据...');
-                       const newState = await repository.importAll();
-                       logger.debug('导入的数据状态:', newState);
-                       logger.debug('导入的projects数量:', newState?.projects?.length || 0);
-                       logger.debug('导入的activeProjectId:', newState?.activeProjectId);
-                       
-                       // 验证导入的数据
-                       if (!newState) {
-                         throw new Error('导入的数据为空');
-                       }
-
-                       // 规范化并覆盖所有数据
-                       const validatedState = normalizeImportedState(newState);
-                       setState(validatedState);
-                       setResetKey(prev => prev + 1);
-                       logger.debug('全部数据导入完成，状态已覆盖');
-                       dialogService.alert(i18n.t('app:importAll.success'));
-                     } catch (err) {
-                       console.error('导入失败:', err);
-                       dialogService.alert(i18n.t('app:importAll.failed'));
-                     }
-                   }}
-                   className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 text-sm font-medium cursor-pointer transition-colors shadow-lg"
-                 >
-                    <Upload className="size-4 mr-2" />{t('home.importAll')}
-                 </button>
-                 
-                 {/* 当前书籍导出/导入按钮 */}
-                 {activeProject && (
-                   <>
-                     <div className="h-6 border-l border-gray-300 mx-1"></div>
-                     <button 
-                       onClick={handleExportCurrentBook}
-                       className="px-4 py-2 border border-blue-200 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 text-sm font-medium transition-colors"
-                       title={t('home.exportCurrentBook')}
-                     >
-                       <BookDown className="size-4 mr-2" />{t('home.exportCurrentBook')}
-                     </button>
-                     <button 
-                       onClick={handleImportBook}
-                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium cursor-pointer transition-colors shadow-lg"
-                       title={t('home.importSingleBookTip')}
-                     >
-                       <BookUp className="size-4 mr-2" />{t('home.importBook')}
-                     </button>
-                   </>
-                 )}
-              </div>
-           </div>
-           <StepInspiration 
-             project={activeProject} 
-             prompts={state.prompts} 
-             activeModel={activeModel} 
-             onUpdate={updateProject} 
-           />
-        </div>
-      );
-    }
-
-    // Step 1: Knowledge Base (Enhanced with ChromaDB + Sentence-BERT)
-    if (currentStep === 1 && activeProject) {
-       return (
-         <StepKnowledgeEnhanced 
+    switch (section) {
+      case 'inspiration':
+        return (
+          <div className="h-full overflow-y-auto p-8">
+            <StepInspiration
+              project={activeProject}
+              prompts={state.prompts}
+              activeModel={activeModel}
+              onUpdate={updateProject}
+            />
+          </div>
+        );
+      case 'world':
+        return (
+          <StepKnowledgeEnhanced
             project={activeProject}
             onUpdate={updateProject}
             activeModel={activeModel}
-         />
-       );
+          />
+        );
+      case 'characters':
+        return (
+          <StepCharacters
+            project={activeProject}
+            prompts={state.prompts}
+            activeModel={activeModel}
+            onUpdate={updateProject}
+            onOpenSettings={() => setIsSettingsOpen(true)}
+          />
+        );
+      case 'outline':
+        return (
+          <StepOutline
+            project={activeProject}
+            prompts={state.prompts}
+            activeModel={activeModel}
+            onUpdate={updateProject}
+            onOpenSettings={() => setIsSettingsOpen(true)}
+          />
+        );
+      case 'chapters':
+        return (
+          <StepChapterOutline
+            project={activeProject}
+            prompts={state.prompts}
+            activeModel={activeModel}
+            onUpdate={updateProject}
+            onOpenSettings={() => setIsSettingsOpen(true)}
+            onEnterWriting={(id) => {
+              setEditingChapterId(id);
+              setSection('writing');
+            }}
+          />
+        );
+      case 'writing':
+        return (
+          <WritingEditor
+            project={activeProject}
+            prompts={state.prompts}
+            activeModel={activeModel}
+            onUpdate={updateProject}
+            initialChapterId={editingChapterId}
+            onBack={() => handleSectionChange('chapters')}
+          />
+        );
+      default:
+        return null;
     }
-
-    // Step 2: Characters
-    if (currentStep === 2 && activeProject) {
-      return (
-        <StepCharacters 
-          project={activeProject}
-          prompts={state.prompts}
-          activeModel={activeModel}
-          onUpdate={updateProject}
-          onOpenSettings={() => setIsSettingsOpen(true)}
-        />
-      );
-    }
-
-    // Step 3: Outline
-    if (currentStep === 3 && activeProject) {
-      return (
-        <StepOutline 
-          project={activeProject}
-          prompts={state.prompts}
-          activeModel={activeModel}
-          onUpdate={updateProject}
-          onOpenSettings={() => setIsSettingsOpen(true)}
-        />
-      );
-    }
-
-    // Step 4: Chapter Outline
-    if (currentStep === 4 && activeProject) {
-      return (
-        <StepChapterOutline 
-          project={activeProject}
-          prompts={state.prompts}
-          activeModel={activeModel}
-          onUpdate={updateProject}
-          onOpenSettings={() => setIsSettingsOpen(true)}
-          onEnterWriting={(id) => {
-            setEditingChapterId(id);
-            setCurrentStep(5); // Switch to writing editor
-          }}
-        />
-      );
-    }
-
-    // Step 5: Writing Editor
-    if (currentStep === 5 && activeProject) {
-      return (
-        <WritingEditor 
-          project={activeProject} 
-          prompts={state.prompts} 
-          activeModel={activeModel}
-          onUpdate={updateProject}
-          initialChapterId={editingChapterId}
-          onBack={() => setCurrentStep(4)} // Back to chapter list
-        />
-      );
-    }
-
-    return null;
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-gray-50 relative">
-      {/* 全局对话框宿主：承载 dialogService 的 alert/confirm 队列 */}
+    <TooltipProvider delayDuration={200}>
+    <div className="relative flex h-screen w-screen overflow-hidden bg-background">
+      {/* 全局对话框/轻提示宿主：承载 dialogService 队列与 toast */}
       <DialogHost />
-      {/* 
-         GLOBAL ASSISTANT 
-         This floats above everything else.
-      */}
-      <GlobalAssistant 
-        models={state.models} 
+      <ToastHost />
+
+      {/* 全局助手悬浮层 */}
+      <GlobalAssistant
+        models={state.models}
         activeModelId={state.activeModelId}
-        project={activeProject} // Pass active project for context awareness
-        prompts={state.prompts} // Pass prompts for analysis features
-        onUpdate={updateProject} // 新增：传递数据更新回调
+        project={activeProject}
+        prompts={state.prompts}
+        onUpdate={updateProject}
       />
 
-      {/* 重置确认专用模态框 */}
-      {resetModal.isOpen && (
-        <div className="fixed inset-0 z-[9999] bg-gray-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 border border-gray-100 flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 ${resetModal.type === 'factory_reset' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
-                 {resetModal.type === 'factory_reset' ? <Skull className="size-8" /> : <Trash2 className="size-8" />}
-              </div>
-              
-              <h3 className="text-2xl font-black text-gray-900 mb-2">
-                {resetModal.type === 'factory_reset' ? t('reset.factoryTitle') : t('reset.clearTitle')}
-              </h3>
-              
-              <p className="text-gray-500 text-sm leading-relaxed mb-8">
-                {resetModal.type === 'factory_reset'
-                  ? t('reset.factoryDesc')
-                  : t('reset.clearDesc')
-                }
-              </p>
-              
-              <div className="flex gap-4 w-full">
-                <button 
-                  onClick={() => setResetModal({ isOpen: false, type: null })}
-                  className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors"
-                >
-                  {t('common:cancel')}
-                </button>
-                <button 
-                  onClick={executeReset}
-                  className={`flex-1 py-3 text-white font-bold rounded-xl shadow-lg transition-transform active:scale-95 ${
-                    resetModal.type === 'factory_reset' 
-                      ? 'bg-red-600 hover:bg-red-700 shadow-red-200' 
-                      : 'bg-amber-500 hover:bg-amber-600 shadow-amber-200'
-                  }`}
-                >
-                  {t('reset.confirmExecute')}
-                </button>
-              </div>
-           </div>
-        </div>
-      )}
+      {/* 重置确认专用弹窗（Radix AlertDialog，焦点管理内建） */}
+      <AlertDialog
+        open={resetModal.isOpen}
+        onOpenChange={open => { if (!open) setResetModal({ isOpen: false, type: null }); }}
+      >
+        <AlertDialogContent className="max-w-md text-center">
+          <div className={`mx-auto flex size-14 items-center justify-center rounded-full ${
+            resetModal.type === 'factory_reset' ? 'bg-destructive/10 text-destructive' : 'bg-warning/10 text-warning'
+          }`}>
+            {resetModal.type === 'factory_reset' ? <Skull className="size-7" /> : <Trash2 className="size-7" />}
+          </div>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {resetModal.type === 'factory_reset' ? t('reset.factoryTitle') : t('reset.clearTitle')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {resetModal.type === 'factory_reset' ? t('reset.factoryDesc') : t('reset.clearDesc')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="justify-center">
+            <AlertDialogCancel onClick={() => setResetModal({ isOpen: false, type: null })}>
+              {t('common:cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction danger onClick={executeReset}>
+              {t('reset.confirmExecute')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-      {currentStep !== 5 && ( // 注意这里的 5
-        <Sidebar 
-          currentStep={currentStep} 
-          onStepChange={handleStepChange} 
-          activeProject={!!activeProject}
-          onOpenSettings={() => setIsSettingsOpen(true)}
-          onFactoryReset={triggerFactoryReset}
-          // 书籍管理相关props
-          books={state.projects}
-          activeBookId={state.activeProjectId}
-          onBookSelect={handleBookSelect}
-          onBookCreate={handleBookCreate}
-          onBookRename={handleBookRename}
-          onBookDelete={handleBookDelete}
-          onBookDuplicate={handleBookDuplicate}
-        />
-      )}
-      
-      <main className="flex-1 flex flex-col min-w-0">
-        {currentStep !== 5 && ( // 注意这里的 5
-          <header className="h-16 border-b bg-white flex items-center justify-between px-8 shadow-sm z-10 shrink-0">
-             <div className="flex items-center gap-3 text-left">
-                <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded">{t('topbar.currentProject')}</span>
-                <div className="flex items-center gap-2">
-                   <h2 className="font-bold text-gray-800 truncate max-w-xs text-lg">{activeProject?.title || t('topbar.noBookSelected')}</h2>
-                   {activeProject && (
-                      <div className="flex gap-1 ml-2">
-                        <button 
-                          onClick={handleResetCurrentProject}
-                          title={t('topbar.clearProjectTip')}
-                          className="w-6 h-6 rounded hover:bg-red-50 text-gray-300 hover:text-red-500 transition-colors flex items-center justify-center"
-                        >
-                           <Eraser className="size-3.5" />
-                        </button>
-                        <button 
-                          onClick={handleDeleteCurrentProject}
-                          title={t('topbar.deleteProjectTip')}
-                          className="w-6 h-6 rounded hover:bg-red-50 text-gray-300 hover:text-red-600 transition-colors flex items-center justify-center"
-                        >
-                           <Trash2 className="size-3.5" />
-                        </button>
-                      </div>
-                   )}
-                </div>
-             </div>
-             
-             <div className="flex items-center gap-4">
-                {activeProject && (
-                  <div className="text-xs text-gray-400 font-medium">
-                     <span className="mr-3"><BookOpen className="size-4 mr-1" />{activeProject.knowledge?.length || 0}</span>
-                     <span className="mr-3"><Users className="size-4 mr-1" />{activeProject.characters.length}</span>
-                     <span className="mr-3"><List className="size-4 mr-1" />{activeProject.chapters.length}</span>
-                  </div>
-                )}
-                {/* 主题快速切换：在当前生效的浅/深之间翻转（显式落盘，覆盖 system 偏好） */}
-                <button
-                  onClick={() => handleThemeChange(resolveTheme(state.theme) === 'dark' ? 'light' : 'dark')}
-                  className="flex size-8 items-center justify-center rounded-md text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
-                  title={resolveTheme(state.theme) === 'dark' ? t('topbar.themeToLight') : t('topbar.themeToDark')}
-                >
-                  {resolveTheme(state.theme) === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
-                </button>
-                {/* 版本号显示和检查按钮 */}
-                <div className="flex items-center gap-2">
-                  <div className="text-xs text-gray-400 font-medium bg-gray-50 px-2 py-1 rounded border border-gray-200">
-                    v{__APP_VERSION__}
-                  </div>
-                  <button
-                    onClick={() => setIsVersionCheckOpen(true)}
-                    className="w-6 h-6 rounded-full hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors flex items-center justify-center"
-                    title={t('topbar.checkUpdateTip')}
-                  >
-                    <RefreshCw className="size-3.5" />
-                  </button>
-                </div>
-                {/* 历史记录按钮 */}
-                {activeProject && (
-                  (activeProject.chapters.some(chapter => chapter.history && chapter.history.length > 0) ||
-                   (activeProject.virtualChapters && activeProject.virtualChapters.some(chapter => chapter.history && chapter.history.length > 0))
-                  ) && (
-                    <button
-                      onClick={() => setIsHistoryViewerOpen(true)}
-                      className="flex items-center text-sm text-gray-500 bg-purple-50 px-3 py-1.5 rounded-full border border-purple-100 cursor-pointer hover:bg-purple-100 transition-colors"
-                      title={t('topbar.viewHistoryTip')}
-                    >
-                      <History className="size-4 mr-2 text-purple-500" />
-                      <span className="font-medium text-purple-700">{t('topbar.history')}</span>
-                    </button>
-                  )
-                )}
-                <div 
-                  className="flex items-center text-sm text-gray-500 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 cursor-pointer hover:bg-blue-100 transition-colors"
-                  onClick={() => setIsSettingsOpen(true)}
-                >
-                  <Cpu className="size-4 mr-2 text-blue-500" />
-                  <span className="font-medium text-blue-700">{activeModel?.name || t('model.noneSelected')}</span>
-                </div>
-             </div>
-          </header>
-        )}
-
-        <div className="flex-1 overflow-hidden relative bg-gray-50" key={resetKey}>
-          {renderStepContent()}
+      {view === 'bookshelf' ? (
+        <div className="min-w-0 flex-1">
+          <Bookshelf
+            books={state.projects}
+            activeBookId={state.activeProjectId}
+            onOpenBook={openBook}
+            onCreateBook={handleBookCreate}
+            onRenameBook={handleBookRename}
+            onDeleteBook={handleBookDelete}
+            onDuplicateBook={handleBookDuplicate}
+            onExportBook={handleExportBook}
+            onImportBook={handleImportBook}
+            onExportAll={() => repository.exportAll(state)}
+            onImportAll={handleImportAll}
+          />
         </div>
-      </main>
+      ) : (
+        <>
+          {/* 写作分区为全屏沉浸模式，隐藏导航栏与顶栏 */}
+          {section !== 'writing' && (
+            <WorkspaceNav
+              activeSection={section}
+              onSectionChange={handleSectionChange}
+              onOpenBookshelf={() => setView('bookshelf')}
+              onOpenSettings={() => setIsSettingsOpen(true)}
+              project={activeProject}
+            />
+          )}
+
+          <main className="flex min-w-0 flex-1 flex-col">
+            {section !== 'writing' && (
+              <WorkspaceTopbar
+                project={activeProject}
+                activeModel={activeModel}
+                theme={state.theme}
+                onThemeChange={handleThemeChange}
+                onOpenBookshelf={() => setView('bookshelf')}
+                onOpenSettings={() => setIsSettingsOpen(true)}
+                onClearProject={handleResetCurrentProject}
+                onDeleteProject={handleDeleteCurrentProject}
+                onOpenHistory={() => setIsHistoryViewerOpen(true)}
+                onOpenVersionCheck={() => setIsVersionCheckOpen(true)}
+              />
+            )}
+
+            <div className="relative min-h-0 flex-1 overflow-hidden bg-background" key={resetKey}>
+              {renderSection()}
+            </div>
+          </main>
+        </>
+      )}
 
       {isSettingsOpen && (
-        <SettingsModal 
+        <SettingsModal
           models={state.models}
           activeModelId={state.activeModelId}
           prompts={state.prompts}
@@ -766,7 +651,7 @@ const App: React.FC = () => {
 
       {/* AI历史记录查看器 */}
       {isHistoryViewerOpen && activeProject && (
-        <AIHistoryViewer 
+        <AIHistoryViewer
           project={activeProject}
           onUpdate={updateProject}
           onClose={() => setIsHistoryViewerOpen(false)}
@@ -774,13 +659,13 @@ const App: React.FC = () => {
       )}
 
       {/* 版本检查模态框 */}
-      <VersionCheckModal 
+      <VersionCheckModal
         isOpen={isVersionCheckOpen}
         onClose={() => setIsVersionCheckOpen(false)}
       />
     </div>
+    </TooltipProvider>
   );
 };
 
 export default App;
-
