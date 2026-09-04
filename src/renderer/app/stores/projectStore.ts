@@ -1,0 +1,101 @@
+/*
+ * 本文件属于 AI小说家 (ai-novel) 项目。
+ * Copyright (C) 2026 chen647208
+ * SPDX-License-Identifier: AGPL-3.0-only
+ *
+ * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
+ * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ */
+
+/**
+ * 项目 store（06 篇 §2.2 双 store 划分：写作热路径）。
+ *
+ * 章节正文/大纲/角色/知识库等高频编辑数据；按书不可变更新，写路径收敛为
+ * updateActiveProject / upsertProject / removeProject 三个动作，persistDiff
+ * 以引用比较判定 saveProject/deleteProject 增量。
+ */
+
+import { create } from 'zustand';
+import { type Project } from '../../../shared/types';
+import { i18n } from '../../i18n';
+
+interface ProjectState {
+  projects: Project[];
+  activeProjectId: string | null;
+  /** 从 repository 载入的初始状态整体灌入（首启动/全量导入/删除后重定向）。 */
+  hydrate: (projects: Project[], activeProjectId: string | null) => void;
+  setActiveProject: (bookId: string | null) => void;
+  /** 更新活动书（无活动书时按旧语义创建默认书）；正文/大纲等编辑统一入口。 */
+  updateActiveProject: (updates: Partial<Project>) => void;
+  /** 整书插入或替换（新建/复制/导入）。 */
+  upsertProject: (book: Project) => void;
+  /** 删除书；若删除的是活动书则活动指针落到剩余首本或 null。 */
+  removeProject: (bookId: string) => void;
+  /** 重命名书。 */
+  renameProject: (bookId: string, title: string) => void;
+}
+
+export const useProjectStore = create<ProjectState>()((set) => ({
+  projects: [],
+  activeProjectId: null,
+  hydrate: (projects, activeProjectId) => set({ projects, activeProjectId }),
+  setActiveProject: (bookId) => set({ activeProjectId: bookId }),
+
+  updateActiveProject: (updates) =>
+    set((state) => {
+      const { activeProjectId, projects } = state;
+      if (!activeProjectId) {
+        const newProject: Project = {
+          id: Date.now().toString(),
+          title: i18n.t('app:book.defaultTitle'),
+          inspiration: '',
+          intro: '',
+          characters: [],
+          outline: '',
+          chapters: [],
+          virtualChapters: [],
+          knowledge: [],
+          lastModified: Date.now(),
+          ...updates,
+        };
+        return { projects: [...projects, newProject], activeProjectId: newProject.id };
+      }
+      return {
+        projects: projects.map((p) =>
+          p.id === activeProjectId ? { ...p, ...updates, lastModified: Date.now() } : p,
+        ),
+      };
+    }),
+
+  upsertProject: (book) =>
+    set((state) => {
+      const exists = state.projects.some((p) => p.id === book.id);
+      return {
+        projects: exists
+          ? state.projects.map((p) => (p.id === book.id ? book : p))
+          : [...state.projects, book],
+        activeProjectId: book.id,
+      };
+    }),
+
+  removeProject: (bookId) =>
+    set((state) => {
+      const wasActive = state.activeProjectId === bookId;
+      const remaining = state.projects.filter((p) => p.id !== bookId);
+      return {
+        projects: remaining,
+        activeProjectId: wasActive ? (remaining[0]?.id ?? null) : state.activeProjectId,
+      };
+    }),
+
+  renameProject: (bookId, title) =>
+    set((state) => ({
+      projects: state.projects.map((p) =>
+        p.id === bookId ? { ...p, title, lastModified: Date.now() } : p,
+      ),
+    })),
+}));
+
+/** 便捷选择器：当前活动书（无则 null）。 */
+export const selectActiveProject = (s: ProjectState): Project | null =>
+  s.projects.find((p) => p.id === s.activeProjectId) ?? null;

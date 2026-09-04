@@ -27,11 +27,11 @@
 | 1.2 | CM6 novelDsl language（大纲/卡片/prompt 区）+ @tag 校验波浪线 | M | ⬜ 待做（依赖 CM6 依赖安装 + 索引 tags 作补全源） |
 | 1.3 | 单一变更管线：transaction → Store.apply → entity_changes + Revision | M | 🟡 **Revision 落底后端已完成并测试**：`saveProject(project, {agentId, cause})` → 正文实质变化才追加 `revisions`（seq 续号、author=agentId、cause 留底），`loadRevisions(nodeId)` 读取；entity_changes 贯穿 agentId（双引擎 6 测）。**Store.apply/UI 接线待做**（随 1.1b/1.5） |
 | 1.4 | 8 个写作原语扩展（enterFlow/placeholder/darlings/ghostOutline/…） | L | ⬜ 待做（依赖 1.1b 画布落地） |
-| 1.5 | Zustand 双 store；App.tsx 收编（<150 行）；persistDiff 做一致性哨兵 | M | ⬜ 待做（App.tsx 现为单一 `useState<AppState>`+persistDiff 差分写；逐 feature 切走需交互回归） |
+| 1.5 | Zustand 双 store；App.tsx 收编（<150 行）；persistDiff 做一致性哨兵 | M | ✅ **已完成并交互回归**：`stores/settingsStore.ts`（模型/提示词/一致性/外观切片，setLanguage/setTheme 即时生效）+ `stores/projectStore.ts`（书籍 CRUD 动作，写路径收敛 updateActiveProject/upsertProject/removeProject/renameProject，11 测）；`stores/persistenceBridge.ts` 订阅双 store → persistDiff 差分落盘 + 自动备份（首启基线不整体重写）；`App.tsx` 148 行纯装配，引导在 `useAppBootstrap`，书籍/导入动作在 `useBookActions`，工作台路由在 `app-shell/WorkspaceView`，设置宿主 `SettingsModalHost`，重置弹窗 `ResetAlertDialog`。浏览器回归：建书/进书/编辑/灵感回写/全量重载持久化均通过 |
 | 1.6 | UI 宪法落地：NewBookModal 先建后改；引导模式与自由工作区并存 | S | ⬜ 待做 |
 
 **退出标准**：06 篇 §6 全部 5 条；textarea 出依赖树；编辑延迟基准达标。
-**本轮边界说明**：M1 的 schema/序列化/修订管线/画布替换为纯逻辑或已完成交互冒烟，`npm run verify` 全绿（416 测试）。状态收编、写作原语、CM6 触及运行中 App 的中心状态，须配交互回归验证，未在无验证条件下盲改。
+**本轮边界说明**：M1 的 schema/序列化/修订管线/画布替换/状态收编均已完成并验证，`npm run verify` 全绿（427 测试）。写作原语、CM6 触及运行中 App 的编辑器扩展层，须配交互回归验证，未在无验证条件下盲改。
 
 ## M2 AI 换代（→ v1.7）｜ 设计依据：05 篇
 
