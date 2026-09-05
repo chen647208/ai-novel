@@ -1,0 +1,27 @@
+{
+  "name": "ai-novel-dsl",
+  "displayName": "AI Novel DSL",
+  "description": "AI小说家 (ai-novel) 的 novelDsl 大纲/正文 DSL 语法高亮与语言支持（VS Code 线，design/08 M5）。",
+  "version": "0.1.0",
+  "publisher": "novalocal",
+  "license": "AGPL-3.0-only",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Programming Languages"],
+  "contributes": {
+    "languages": [
+      {
+        "id": "novel-dsl",
+        "aliases": ["AI Novel DSL", "novelDsl"],
+        "extensions": [".nmd", ".novel.md"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "novel-dsl",
+        "scopeName": "source.novel-dsl",
+        "path": "./syntaxes/novel-dsl.tmLanguage.json"
+      }
+    ]
+  }
+}

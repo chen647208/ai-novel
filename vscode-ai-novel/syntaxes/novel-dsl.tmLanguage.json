@@ -1,0 +1,67 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "AI Novel DSL",
+  "scopeName": "source.novel-dsl",
+  "patterns": [
+    { "include": "#frontmatter" },
+    { "include": "#heading" },
+    { "include": "#scene-break" },
+    { "include": "#keyword-line" },
+    { "include": "#hard-link" },
+    { "include": "#tag-ref" },
+    { "include": "#placeholder" },
+    { "include": "#protected-mark" }
+  ],
+  "repository": {
+    "frontmatter": {
+      "comment": "文档头部元数据（--- 包围）",
+      "begin": "^---\\s*$",
+      "end": "^---\\s*$",
+      "patterns": [
+        { "match": "^([A-Za-z_-]+)\\s*:", "captures": { "1": "entity.name.tag.novel-dsl" } }
+      ],
+      "name": "meta.frontmatter.novel-dsl"
+    },
+    "heading": {
+      "comment": "Markdown 标题（章节/分卷）",
+      "match": "^#{1,6}\\s+.*$",
+      "name": "entity.name.section.novel-dsl"
+    },
+    "scene-break": {
+      "comment": "场景分隔（＊ 行或 *** ）",
+      "match": "^(\\*\\s*){3,}$|^＊(　＊)+$",
+      "name": "constant.character.escape.novel-dsl"
+    },
+    "keyword-line": {
+      "comment": "关键字声明行（# @role: value / @status: draft 等）",
+      "match": "^\\s*#@?([\\w-]+)\\s*:\\s*(.*)$",
+      "captures": {
+        "1": "entity.name.tag.novel-dsl",
+        "2": "string.other.novel-dsl"
+      }
+    },
+    "hard-link": {
+      "comment": "wiki 硬链接 [[nodeId|别名]] / [[别名]]",
+      "match": "\\[\\[([^\\]|]+)(?:\\|([^\\]]+))?\\]\\]",
+      "captures": {
+        "1": "entity.name.function.novel-dsl",
+        "2": "string.other.link.novel-dsl"
+      }
+    },
+    "tag-ref": {
+      "comment": "@tag 软引用（@角色名 / @地点）",
+      "match": "@([\\w\\u4e00-\\u9fff-]+)",
+      "name": "variable.other.novel-dsl"
+    },
+    "placeholder": {
+      "comment": "NEO 式占位符 {name|kind}",
+      "match": "\\{[^|{}]+\\|[^{}]+\\}",
+      "name": "entity.name.type.novel-dsl"
+    },
+    "protected-mark": {
+      "comment": "受保护标记行",
+      "match": "^\\s*\\[protected\\].*$",
+      "name": "markup.deleted.novel-dsl"
+    }
+  }
+}
