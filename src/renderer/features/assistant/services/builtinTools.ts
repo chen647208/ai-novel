@@ -16,6 +16,7 @@
  * proposal diff 面），summary/foreshadow 随 M2.6 会话流改造。
  */
 import { ToolRegistry, type ToolContext, type ToolSpec } from '@core/ai';
+import { aiGatewayClient, type CallOptions } from '@/shared/services/ai/gatewayClient';
 import type { ModelConfig, Project } from '@shared/types';
 import type { IndexSnapshot } from '@core/index';
 import { AICardCreationService } from '@/features/cards/services/aiCardCreationService';
@@ -209,9 +210,136 @@ export const indexQueryTool: ToolSpec = {
   },
 };
 
+
+
+// ── 生成类工具（write:proposal：产出提案文本，经审批后由用户落稿）──────
+
+async function generateProposal(ctx: ToolContext, prompt: string): Promise<{ ok: boolean; data?: unknown; error?: string }> {
+  const response = await aiGatewayClient.complete(modelOf(ctx), prompt, { signal: ctx.signal } as CallOptions);
+  if (response.error) {
+    return { ok: false, error: response.error };
+  }
+  return { ok: true, data: { text: response.content, tokens: response.tokens } };
+}
+
+/** core.text.continue：从既有正文续写（提案）。 */
+export const textContinueTool: ToolSpec = {
+  id: 'core.text.continue',
+  description: '根据既有正文片段续写后文，返回建议文本（不直接写入稿件）。',
+  parameters: {
+    type: 'object',
+    properties: {
+      text: { type: 'string', description: '既有正文（结尾处衔接续写）' },
+      instruction: { type: 'string', description: '补充要求（情节走向/字数/风格）' },
+    },
+    required: ['text'],
+  },
+  permission: 'write:proposal',
+  async execute(req, ctx) {
+    const args = (req.args ?? {}) as { text?: unknown; instruction?: unknown };
+    const text = str(args.text, 'text');
+    const instruction = typeof args.instruction === 'string' ? args.instruction : '自然承接前文推进剧情';
+    const project = projectOf(ctx);
+    const prompt = `你是小说续写助手。书名《${project.title}》。
+请承接下面正文的结尾续写约 400-800 字，要求：${instruction}。只输出正文，不要解释。
+
+【既有正文结尾】
+${text.slice(-3000)}`;
+    return generateProposal(ctx, prompt);
+  },
+};
+
+/** core.text.rewrite：按指令重写既有正文（提案，diff 由审批面构造）。 */
+export const textRewriteTool: ToolSpec = {
+  id: 'core.text.rewrite',
+  description: '按改写指令重写给出的正文片段（去 AI 味/调整节奏/换视角等），返回建议文本。',
+  parameters: {
+    type: 'object',
+    properties: {
+      text: { type: 'string', description: '待重写的正文' },
+      instruction: { type: 'string', description: '改写要求' },
+    },
+    required: ['text', 'instruction'],
+  },
+  permission: 'write:proposal',
+  skillHint: 'ai-flavor-removal',
+  async execute(req, ctx) {
+    const args = (req.args ?? {}) as { text?: unknown; instruction?: unknown };
+    const text = str(args.text, 'text');
+    const instruction = str(args.instruction, 'instruction');
+    const prompt = `你是小说改写助手。按以下要求重写正文：${instruction}。保持事实与设定一致，只输出改写后的正文，不要解释。
+
+【原文】
+${text.slice(0, 8000)}`;
+    return generateProposal(ctx, prompt);
+  },
+};
+
+/** core.outline.generate：从灵感/梗概生成大纲草案（提案）。 */
+export const outlineGenerateTool: ToolSpec = {
+  id: 'core.outline.generate',
+  description: '根据灵感与设定生成小说大纲草案（分卷/分章结构建议）。',
+  parameters: {
+    type: 'object',
+    properties: {
+      inspiration: { type: 'string', description: '灵感/一句话梗概' },
+      chapterCount: { type: 'number', description: '期望章节数，默认 30' },
+    },
+    required: ['inspiration'],
+  },
+  permission: 'write:proposal',
+  skillHint: 'snowflake',
+  async execute(req, ctx) {
+    const args = (req.args ?? {}) as { inspiration?: unknown; chapterCount?: unknown };
+    const inspiration = str(args.inspiration, 'inspiration');
+    const count = typeof args.chapterCount === 'number' ? Math.floor(args.chapterCount) : 30;
+    const project = projectOf(ctx);
+    const prompt = `你是小说大纲策划。书名《${project.title}》，灵感：${inspiration}。
+请给出约 ${count} 章的大纲草案：分卷、每卷主线、每章一行（含冲突与结果：转折/推进/受挫）。只输出大纲。`;
+    return generateProposal(ctx, prompt);
+  },
+};
+
+/** core.chapter.plan：为单章生成细纲（提案）。 */
+export const chapterPlanTool: ToolSpec = {
+  id: 'core.chapter.plan',
+  description: '为指定章节生成本章细纲（场景拆分/出场角色/钩子）。',
+  parameters: {
+    type: 'object',
+    properties: {
+      chapterTitle: { type: 'string', description: '章节标题' },
+      chapterSummary: { type: 'string', description: '本章概要/大纲条目' },
+      previousRecap: { type: 'string', description: '前情提要（可选）' },
+    },
+    required: ['chapterTitle', 'chapterSummary'],
+  },
+  permission: 'write:proposal',
+  async execute(req, ctx) {
+    const args = (req.args ?? {}) as { chapterTitle?: unknown; chapterSummary?: unknown; previousRecap?: unknown };
+    const title = str(args.chapterTitle, 'chapterTitle');
+    const summary = str(args.chapterSummary, 'chapterSummary');
+    const recap = typeof args.previousRecap === 'string' ? `
+【前情提要】${args.previousRecap}` : '';
+    const prompt = `你是章节细纲策划。为《${title}》生成本章细纲：场景拆分（每场景的地点/人物/冲突/结果）、出场角色、章末钩子。${recap}
+【本章概要】${summary}
+只输出细纲。`;
+    return generateProposal(ctx, prompt);
+  },
+};
+
 /** 首批内置工具清单。 */
 export function createBuiltinTools(): ToolSpec[] {
-  return [cardGenerateTool, cardCommandTool, consistencyScanTool, recommendNextTool, indexQueryTool];
+  return [
+    cardGenerateTool,
+    cardCommandTool,
+    consistencyScanTool,
+    recommendNextTool,
+    indexQueryTool,
+    textContinueTool,
+    textRewriteTool,
+    outlineGenerateTool,
+    chapterPlanTool,
+  ];
 }
 
 /** 创建并装配内置工具的注册表（会话/宿主启动时调用；M3 起插件在返回实例上续注）。 */
