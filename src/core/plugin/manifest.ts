@@ -74,6 +74,8 @@ export interface PluginManifest {
   host: string;
   license: string;
   engine?: string;
+  /** 依赖的其他插件 id → 版本区间；激活按拓扑序，缺失/不满足/循环 = failed */
+  dependencies?: Record<string, string>;
   contributes?: PluginContribution;
   permissions?: PluginPermissions;
   activation?: 'onDemand' | 'onStartup';
@@ -100,6 +102,24 @@ export type ManifestValidateResult =
 
 const ID_RE = /^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)+$/;
 const SEMVER_RE = /^\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/;
+
+/** 版本区间匹配：^x.y.z（同主版本且 ≥）/ ~x.y.z（同主.次且 ≥）/ * / 精确版本。 */
+export function satisfiesRange(version: string, range: string): boolean {
+  const parse = (v: string): [number, number, number] => {
+    const [a = '0', b = '0', c = '0'] = v.replace(/^[~^*]\s*/, '').split('.');
+    return [Number(a), Number(b), Number(c)];
+  };
+  if (range.trim() === '*') return true;
+  const ver = parse(version);
+  if (range.startsWith('^') || range.startsWith('~')) {
+    const base = parse(range);
+    const sameMinor = ver[0] === base[0] && ver[1] === base[1];
+    return range.startsWith('^')
+      ? ver[0] === base[0] && ver >= base
+      : sameMinor && ver >= base;
+  }
+  return JSON.stringify(parse(range)) === JSON.stringify(ver);
+}
 
 function str(v: unknown): v is string {
   return typeof v === 'string';
@@ -155,6 +175,22 @@ export function validateManifest(raw: unknown): ManifestValidateResult {
 
   if (m.activation !== undefined && m.activation !== 'onDemand' && m.activation !== 'onStartup') {
     fail('activation', '必须是 onDemand 或 onStartup');
+  }
+
+  if (m.dependencies !== undefined) {
+    if (typeof m.dependencies !== 'object' || m.dependencies === null || Array.isArray(m.dependencies)) {
+      fail('dependencies', '必须是 { 插件id: 版本区间 } 对象');
+    } else {
+      for (const [depId, range] of Object.entries(m.dependencies as Record<string, unknown>)) {
+        if (!ID_RE.test(depId)) fail(`dependencies.${depId}`, '依赖 id 必须是反向域名');
+        if (typeof range !== 'string' || !/^([~^*]?\d+\.\d+\.\d+|\*)$/.test(range)) {
+          fail(`dependencies.${depId}`, '版本区间必须是 ^x.y.z / ~x.y.z / x.y.z / *');
+        }
+      }
+      if (str(m.id) && Object.keys(m.dependencies as Record<string, unknown>).includes(m.id)) {
+        fail(`dependencies.${m.id}`, '不能依赖自身');
+      }
+    }
   }
 
   if (issues.length) return { ok: false, issues };

@@ -42,6 +42,8 @@ export interface PluginManifest {
   keywords?: string[];
   /** 宿主版本区间（如 ^2.0.0）；不匹配则贡献整体失效并上报 */
   host: string;
+  /** 依赖的其他插件 id → 版本区间；激活按拓扑序，缺失/不满足/循环 = failed */
+  dependencies?: Record<string, string>;
   license: string;
   engine?: string;
   contributes?: PluginContribution;

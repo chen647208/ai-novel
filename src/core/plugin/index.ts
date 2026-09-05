@@ -45,6 +45,15 @@ export {
   type AssemblyRow,
 } from './bundles.js';
 export {
+  createPluginContext,
+  registeredTasks,
+  drainTasks,
+  type PluginContext,
+  type PluginContextOptions,
+  type TaskHandle,
+} from './context.js';
+export { BUILTIN_BUNDLE_MANIFESTS } from './builtin/manifests.js';
+export {
   profileByName,
   enabledFeatureIds,
   isFeatureEnabled,

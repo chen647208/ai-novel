@@ -81,6 +81,23 @@ interface PluginStatus { id: string; state: PluginState; error?: PluginError; ac
 
 内置功能同样吃规则（`core.character`、`/core:export`）——dogfooding 保证命名空间不是摆设。
 
+### 3.1 插件间交互协议（day-1 硬约束，DSH 乱象对策）
+
+插件间**只允许**通过以下四条通道交互，其余一律视为违规：
+
+| 通道 | 形态 | 约束 |
+|---|---|---|
+| 事件 | EventBus `plugin.<shortId>.<event>` | 只能发布本域事件，越域抛错（PluginContext 强制） |
+| 贡献点 | tools/sections/skills/types 注册表 | 经宿主注册返回 Disposable，禁止直接改宿主对象 |
+| 依赖 | manifest `dependencies: { id: 版本区间 }` | 激活按拓扑序；缺失/不满足/循环 = failed 且 cause 完整 |
+| 数据 | PluginContext.store（权限代理） | deny-by-default，未声明域直接拒绝 |
+
+**禁止**：直接 import 其他插件的内部模块；monkey-patch 宿主对象；绕过
+权限代理触达数据。运行时由 PluginContext（core/plugin/context.ts）强制
+1/3/4，贡献点由注册表结构上保证 2。内置三 bundle（core/world/ai）以
+同一 manifest 形态声明依赖（ai → world → core），作为交互规范的
+dogfooding 样例。
+
 ## 4. 贡献点详表（9 类，v0 先开 3 类）
 
 | # | 贡献点 | 形态 | 开放期 |

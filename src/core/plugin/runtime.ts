@@ -21,6 +21,7 @@
  */
 import {
   PermissionDenied,
+  satisfiesRange,
   assertPermission,
   toPluginError,
   validateManifest,
@@ -55,20 +56,7 @@ export interface PluginHostOptions {
   hostVersion: string;
 }
 
-function hostSatisfies(range: string, hostVersion: string): boolean {
-  // 支持 ^x.y.z 与 * ；裸版本视为精确匹配
-  const parse = (v: string): [number, number, number] => {
-    const [a = '0', b = '0', c = '0'] = v.replace(/^[~^*]\s*/, '').split('.');
-    return [Number(a), Number(b), Number(c)];
-  };
-  if (range.trim() === '*') return true;
-  const host = parse(hostVersion);
-  if (range.startsWith('^') || range.startsWith('~')) {
-    const base = parse(range);
-    return host[0] === base[0] && (range.startsWith('^') || (host[1] === base[1] && host[0] === base[0])) && host >= base;
-  }
-  return JSON.stringify(parse(range)) === JSON.stringify(host);
-}
+
 
 export class PluginHost {
   private readonly plugins = new Map<string, DiscoveredPlugin>();
@@ -130,14 +118,30 @@ export class PluginHost {
     this.statuses.set(id, { id, state: 'failed', error: toPluginError(id, phase, error) });
   }
 
-  /** 激活：装配贡献点（逐项 try-catch），幂等。 */
-  activate(pluginId: string): void {
+  /** 激活：装配贡献点（逐项 try-catch），幂等。依赖先于依赖方激活（拓扑序）。 */
+  activate(pluginId: string, activating = new Set<string>()): void {
     const status = this.statuses.get(pluginId);
     const plugin = this.plugins.get(pluginId);
     if (!status || !plugin || status.state === 'active' || status.state === 'disabled') return;
     try {
-      if (!hostSatisfies(plugin.manifest.host, this.hostVersion)) {
+      if (!satisfiesRange(this.hostVersion, plugin.manifest.host)) {
         throw new Error(`宿主版本 ${this.hostVersion} 不满足插件要求 ${plugin.manifest.host}`);
+      }
+      // 依赖：先激活依赖方；缺失/版本不满足/循环都让本插件 failed（04 篇 §2）
+      for (const [depId, range] of Object.entries(plugin.manifest.dependencies ?? {})) {
+        if (activating.has(depId)) {
+          throw new Error(`循环依赖：${[...activating, pluginId].join(' → ')} → ${depId}`);
+        }
+        const dep = this.plugins.get(depId);
+        if (!dep) throw new Error(`缺少依赖插件：${depId}（要求 ${range}）`);
+        if (!satisfiesRange(dep.manifest.version, range)) {
+          throw new Error(`依赖 ${depId} 版本 ${dep.manifest.version} 不满足要求 ${range}`);
+        }
+        this.activate(depId, new Set([...activating, pluginId]));
+        const depStatus = this.statuses.get(depId);
+        if (depStatus?.state === 'failed') {
+          throw new Error(`依赖 ${depId} 激活失败：${depStatus.error?.message ?? ''}`);
+        }
       }
       const disposables = this.installer(plugin) ?? [];
       this.installed.set(pluginId, disposables);
@@ -152,10 +156,48 @@ export class PluginHost {
     }
   }
 
-  /** 濑激活入口：按需激活未激活插件。 */
+  /** 懒激活入口：按需激活未激活插件。 */
   ensureActive(pluginId: string): void {
     const status = this.statuses.get(pluginId);
     if (status && status.state === 'discovered') this.activate(pluginId);
+  }
+
+  /**
+   * 批量激活全部 discovered 插件：按依赖拓扑排序（Kahn），
+   * 环与缺失依赖让相关插件 failed，其余照常。
+   */
+  activateAll(): void {
+    const pending = [...this.statuses.values()].filter((s) => s.state === 'discovered').map((s) => s.id);
+    const indegree = new Map<string, number>();
+    const dependents = new Map<string, string[]>();
+    for (const id of pending) {
+      const deps = Object.keys(this.plugins.get(id)?.manifest.dependencies ?? {}).filter((d) => pending.includes(d));
+      indegree.set(id, deps.length);
+      for (const d of deps) {
+        dependents.set(d, [...(dependents.get(d) ?? []), id]);
+      }
+    }
+    const queue = pending.filter((id) => (indegree.get(id) ?? 0) === 0);
+    while (queue.length) {
+      const id = queue.shift()!;
+      this.activate(id);
+      for (const next of dependents.get(id) ?? []) {
+        const left = (indegree.get(next) ?? 0) - 1;
+        indegree.set(next, left);
+        if (left === 0) queue.push(next);
+      }
+    }
+    // 剩余 = 环上的插件：显式标 failed（附环信息）
+    for (const id of pending) {
+      const status = this.statuses.get(id);
+      if (status && status.state === 'discovered') {
+        this.activate(id, new Set(pending));
+        if (this.statuses.get(id)?.state === 'discovered') {
+          status.state = 'failed';
+          status.error = toPluginError(id, 'activate', new Error('依赖等待队列停滞（疑似循环依赖）'));
+        }
+      }
+    }
   }
 
   /** 禁用（配置级）：unwind 全部注册，状态置 disabled。 */
