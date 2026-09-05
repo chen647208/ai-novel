@@ -2,38 +2,45 @@
 
 ## 适用范围
 
-本文件覆盖全局助手、上下文分析、聊天工作区和智能推荐能力。
-对应代码位于 `src/renderer/features/assistant`。
+全局助手（AI 写作助手）：聊天、Agent 工具调用、三档审批、会话事件留痕、
+智能推荐。对应代码位于 `src/renderer/features/assistant`。
 
 ## 核心文件
 
-- `GlobalAssistant.tsx`：全局助手主编排器
-- `SmartRecommender.tsx`：根据当前场景生成推荐项
-- `components/AssistantChatWorkspace.tsx`：聊天区、输入区与附件区
+- `GlobalAssistant.tsx`：全局助手主编排器（聊天区、面板切换、停止生成）
+- `components/AssistantChatWorkspace.tsx`：聊天记录展示、模板选择、附件、输入区
 - `components/AssistantContextPanel.tsx`：上下文分析与项目快照面板
 - `components/AssistantEditPanel.tsx`：项目数据编辑面板
-- `services/aiService.ts`：模型调用与 AI 交互服务
-- `services/smartRecommendationService.ts`：推荐规则与推荐结果计算
-- `services/aiContextBuilder.ts`：上下文拼装
-- `services/aiSemanticCheckService.ts`：语义检查能力
-- `utils.ts`：助手域内通用工具函数
+- `components/ApprovalHost.tsx`：审批对话框 + 待审箱角标（write 档操作经用户批准）
+- `components/SessionEventBrowser.tsx`：会话事件流回放（AI 历史的事件浏览器形态）
+- `services/aiRuntime.ts`：应用级 AI 运行时单例（assembler/registry/catalog/broker/sessionManager）
+- `services/aiSessionManager.ts`：会话管理器——jsonl 落盘、技能渐进注入、工具编排
+- `services/builtinTools.ts`：内置工具（卡片生成/命令解析/一致性扫描/推荐/索引查询/续写/重写/大纲/章节细纲）
+- `services/skillCatalogSetup.ts`：内置 5 写法技能装载（黄金三章/雪片法/POV/伏笔回收/AI 味消除）
+- `services/smartRecommendationService.ts` / `aiSemanticCheckService.ts`：推荐与语义检查（已工具化）
 
-## 主要职责
+## 运行链路（M2 自举后）
 
-- `GlobalAssistant.tsx` 负责窗口状态、拖拽、尺寸、消息发送编排与面板切换
-- `AssistantChatWorkspace.tsx` 负责聊天记录展示、模板选择、文件上传和输入交互
-- `AssistantContextPanel.tsx` 负责上下文浏览、分析和辅助展示
-- `AssistantEditPanel.tsx` 负责项目局部数据的编辑入口
-- `SmartRecommender.tsx` 负责根据当前写作上下文、人物、地点和势力给出推荐项
+普通对话消息 → `AiSessionManager.run`：
 
-## 依赖关系
+1. `ai.request` 拦截门（minimal 发行档在此整体否决 AI）
+2. PromptAssembler 装配（身份/作品/世界观/索引摘要/工具清单/激活技能/任务）
+3. 网关补全 → 解析 `{reply, toolCalls}` JSON 协议
+4. 工具按 permission 三档路由：read 直通、write:proposal 弹审批、
+   write:direct 直接生效并留审计
+5. 工具结果回填 → 循环（maxTurns 上限）→ 最终答复进聊天区
 
-- 助手能力会读取当前项目、知识条目、人物与提示词数据
-- AI 调用会复用共享的模型配置与写作上下文
-- 智能推荐会和知识库、世界观及写作过程联动
+触发词命中的写法技能会话内自动激活全文，会话结束即卸载。
 
-## 维护建议
+## 会话留痕
 
-- 新增窗口内视图优先拆到 `components`
-- 上下文拼装、推荐计算、AI 请求等逻辑优先下沉到 `services`
-- `GlobalAssistant.tsx` 保持编排层定位，避免重新堆积大段业务实现
+每轮全程事件化（turn/llm/tool/approval）落
+`userData/ai-sessions/<bookId>/<sessionId>.jsonl`；
+「AI 历史 → 会话事件流」页签可回放。审批待审箱：超时或手动搁置的
+write 请求挂起，顶栏待审箱角标可逐条决定，绝不静默应用。
+
+## 外部 agent 平权
+
+MCP server（`node build/main/main/mcp/server.js`）暴露读工具与写提案；
+外部 agent 的写提案经 `pending-proposals.jsonl` 进入同一待审箱，
+由用户批准——与内置助手同权同源。

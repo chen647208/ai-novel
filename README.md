@@ -1,99 +1,94 @@
-﻿# AI 小说创作助手
+﻿# AI 小说创作助手（NovaLocal AI Novelist）
 
-这是一个以本地优先为核心的 Electron + React + TypeScript 桌面应用，面向小说创作场景，支持书籍管理、灵感生成、人物构建、大纲设计、章节规划、伏笔追踪、知识库管理与正文写作。
+以本地优先为核心的 Electron + React + TypeScript 桌面小说创作工具——
+**既要 AI，也要纯写作**：AI 换代后的工具/审批/技能体系与完整的离线写作
+能力并存，数据主权在用户（SQLite 单一事务管线 + 开放格式导出）。
 
 ![CI](https://github.com/chen647208/ai-novel/actions/workflows/ci.yml/badge.svg)
 
 ## 技术栈
 
-- Electron 39
-- React 19
-- TypeScript（渲染层与主进程均 strict）
-- Vite 6
-- Tailwind CSS 4
-- electron-builder
-- vitest（单元测试）
+- Electron 44、React 19、TypeScript（渲染层/主进程均 strict）
+- Vite 6、Tailwind CSS 4、TipTap/CodeMirror 6、i18next（中英）
+- SQLite（node:sqlite 主进程托管）、Vectra 向量索引、electron-builder、vitest
 
 ## 特性亮点
 
-- 多 Provider AI：Gemini（原生 + OpenAI 兼容端点）、OpenAI 兼容、Ollama，统一适配器架构
-- 流式生成、可取消（停止生成）、瞬时失败自动重试、结构化 JSON 输出
-- 沉浸式写作：编辑快照自动保存与恢复、字数/全书统计、专注模式、多格式导出（TXT/Markdown/HTML）
-- 伏笔追踪：埋设/回收/超期管理，AI 自动检测本章回收，并在生成时注入未回收伏笔
-- 知识库向量检索、世界观图谱、时间线、一致性检查、全局助手
+**写作**
+- TipTap 正文画布 + CM6 novelDsl 大纲编辑器（@tag 校验波浪线）
+- 伏笔追踪（埋设/回收/超期 + AI 检测）、知识库向量检索、世界观图谱、时间线
+- 导出构建管线：Build Profile（选择→变换→渲染）三段式，txt/md/html 内置
+  渲染器，导出预览 + 成稿字数与统计面板同源；Profile 支持 JSON/YAML 分享
+- 逐条目加密：AES-256-GCM 受保护会话，逐章加密/解密
 
-## 当前目录结构
+**AI（v1.7 换代架构）**
+- 网关在主进程：API Key 不进渲染端；四 Provider 适配器 + 流式（requestId
+  多路推送）+ 取消 + 重试 + 结构化 JSON
+- Agent 循环：PromptAssembler 分区装配 → 工具调用（首批 9 内置工具，
+  插件可贡献）→ 三档审批（建议/改写/直接；超时降级待审箱，绝不静默应用）
+- 写法技能：SKILL.md 渐进注入（黄金三章/雪片法/POV/伏笔回收/AI 味消除，
+  内置 5 个，社区可分发）
+- 会话事件流：全程 jsonl 留痕、可回放可审计；MCP 双向（外部 agent 与
+  内置助手平权，写操作走同一审批管线）
+
+**插件与同步（v2.0 地基）**
+- manifest v0 声明式贡献点（skills/types/buildProfiles/hooks）、依赖拓扑
+  激活、故障隔离、unwind 不变量、权限 deny-by-default、交互命名空间强制
+- 插件状态面板 + 发行档（完整/网文/严肃文学/纯写作；minimal 即时禁用
+  全部 AI）+ 装配树查看器；MIT SDK（`sdk/`）独立发行
+- 同步地基：entity_changes bundle 导出/导入 + 冲突副本合并（LWW 禁用）
+
+## 目录结构
 
 ```text
 src/
-  main/                       # Electron 主进程与 preload（TypeScript）
-    main.ts                   # 窗口、安全策略、文件/对话框 IPC
-    preload.ts                # contextBridge 暴露的语义化 API
-    channels.ts               # IPC 通道常量
-    logger.ts                 # 文件日志
-    vector-ipc.ts             # Vectra 向量索引 IPC 托管
-    tsconfig.json             # 主进程（NodeNext/ESM）
-    tsconfig.preload.json     # 预加载（CommonJS）
+  main/                    # Electron 主进程（Provider 容器：sqlite/vector/file/dialog/ai-gateway/window）
+    ai/                    # AI 网关：适配器 + sse/retry + i18n（build/main/main/ 产物）
+    mcp/                   # MCP stdio server（外部 agent 平权接入）
   renderer/
-    app/                      # 应用入口、壳层、初始化状态
-    constants/                # 渲染层专用常量
-    features/                 # 按功能域组织（books/inspiration/characters/outline/
-                              #   chapters/writing/foreshadowing/knowledge/assistant/
-                              #   world/timeline/consistency/settings/version）
-    shared/
-      services/ai/            # AI 调用核心（适配器 + SSE + 重试 + JSON）
-      services/storage.ts     # 本地持久化与迁移
-      components/             # ErrorBoundary 等共享组件
-    index.tsx
-  shared/                     # 跨进程共享类型与常量
-  assets/                     # 图标与静态资源
-build/                        # 构建产物（renderer / main / release）
-docs/                         # 中文文档
-scripts/                      # 构建辅助脚本
-.github/workflows/            # CI 与发布工作流
+    app/                   # 壳层、双 store（project/settings）、持久化桥
+    features/              # 功能域（books/writing/assistant/…15 个）
+    shared/services/       # 网关客户端、存储、仓库（SQLite/JSON/wasm 三后端）
+    editor/                # TipTap schema/commands/serialization
+  core/                    # 领域层：entities/dsl/index/build/sync/plugin/ai（纯 TS，双端可用）
+  shared/                  # 跨进程类型与 i18n 目录（catalog + locales）
+sdk/                       # @ai-novel/plugin-sdk（MIT 独立发行）
+docs/                      # 中文文档（design/ 蓝图、features/ 说明、guides/ 指南）
+docs-site/                 # VitePress 文档站（npm run docs:dev）
+vscode-ai-novel/           # VS Code 线：novelDsl 语法扩展
 ```
 
 ## 核心文档
 
 - `docs/README.md`：文档总览与阅读顺序
-- `docs/guides/project-structure.md`：项目结构与分层约定
-- `docs/guides/build-and-release.md`：构建、打包与产物说明
-- `docs/guides/ci-and-release.md`：CI 与基于标签的发布流程
-- `docs/features/ai-layer.md`：AI 调用层架构
-- `docs/features/foreshadowing.md`：伏笔追踪
+- `docs/design/`：M0–M5 设计蓝图（01 现状 → 08 路线图）
+- `docs/features/`：功能说明（ai-layer / assistant / writing / plugins-and-sync / …）
+- `docs/guides/acceptance-report.md`：M0–M5 验收报告（逐项标准与证据）
 
 ## 常用命令
 
-- `npm run dev`：启动前端开发服务器
-- `npm run electron:dev`：启动 Electron 开发模式
-- `npm run verify`：本地完整校验（类型检查 + 测试 + 构建），与 CI 一致
-- `npm run test`：运行单元测试
-- `npm run typecheck:all`：渲染层与主进程类型检查
-- `npm run dist:win` / `dist:mac` / `dist:linux`：生成对应平台安装包（x64 + arm64；不含 32 位）
-
-## 发布
-
-确认稳定版本后打 `v*` 标签推送，即触发 GitHub Actions 自动构建三端桌面包并发布 Release。详见 `docs/guides/ci-and-release.md`。
+- `npm run dev` / `npm run electron:dev`：开发模式
+- `npm run verify`：本地完整校验（lint + 类型 + 测试 + 许可头 + 构建），与 CI 一致
+- `npm run docs:dev` / `docs:build`：文档站本地预览 / 静态构建
+- `npm run dist:win` / `dist:mac` / `dist:linux`：平台安装包（x64 + arm64）
 
 ## 关键路径
 
-- 主进程入口：`src/main/main.ts`
-- 预加载脚本：`src/main/preload.ts`
-- 渲染进程入口：`src/renderer/index.tsx`
-- 应用壳层入口：`src/renderer/app/App.tsx`
-- AI 调用核心：`src/renderer/shared/services/ai/`
-- 渲染层共享存储：`src/renderer/shared/services/storage.ts`
-- 共享类型总出口：`src/shared/types.ts`
+- 主进程入口：`src/main/main.ts`（Provider 容器装配）
+- AI 网关：`src/main/ai/gateway.ts`；渲染端客户端：`src/renderer/shared/services/ai/gatewayClient.ts`
+- 编排层（工具/审批/会话/技能/装配）：`src/core/ai/`
+- 插件运行时：`src/core/plugin/`；构建管线：`src/core/build/`；同步协议：`src/core/sync/`
+
+## 发布
+
+确认稳定版本后打 `v*` 标签推送，触发 GitHub Actions 自动构建三端桌面包并发布 Release。详见 `docs/guides/ci-and-release.md`。
 
 ## 许可与商业授权
 
-本项目采用**双重许可**：
-
-- **社区版**：AGPL-3.0（见 `LICENSE`）。任何分发或衍生（含通过网络/SaaS 提供）都必须以 AGPL-3.0 开源对应源码。
-- **商业版**：需要在闭源产品中集成、或提供不公开源码的网络服务，请获取商业授权——联系 **3308786104@qq.com**，协议模板见 `docs/COMMERCIAL-LICENSE.md`。
-
+双重许可：社区版 **AGPL-3.0**（含网络/SaaS 使用）；商业闭源集成请联系
+**3308786104@qq.com**，协议模板见 `docs/COMMERCIAL-LICENSE.md`，
 详见 `docs/guides/licensing.md`。
 
 ## 贡献
 
-欢迎贡献！请先阅读 `CONTRIBUTING.md`；所有贡献需签署 `docs/CLA.md`（贡献者保留版权，授予维护者再许可含闭源商用的权利，以支撑双重授权）。
+欢迎贡献！请先阅读 `CONTRIBUTING.md`；所有贡献需签署 `docs/CLA.md`。

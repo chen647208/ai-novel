@@ -24,11 +24,21 @@
 - `WritingEditorCanvas.tsx` 负责正文输入区与状态遮罩
 - `AIHistoryViewer.tsx` 与 `AIHistoryRecordList.tsx` 负责历史记录筛选、排序、展示与操作
 
+## 导出与成稿字数（M4）
+
+- 导出统一走 `src/core/build` 三段式管线（选择→变换→渲染）：
+  `utils.ts` 的 `buildExportContent` 是管线适配器，txt/md/html 三格式
+  由渲染器注册表产出（渲染器与变换器均为插件贡献点）。
+- 导出弹窗内置「预览」：md 渲染 / html iframe / txt 等宽面板 + 成稿字数。
+- 统计面板的 `builtCharCount` 与导出同源（`runBuild` 单一口径）。
+- Profile 支持 JSON/YAML 双序列化（`serializeProfileYaml`/`parseProfileYaml`），
+  `.yml` 可 diff 可分享。
+
 ## 与其他模块的关系
 
 - 写作过程会读取主流程生成的章节、人物、知识条目和提示词
-- AI 调用依赖助手域和设置域中的模型配置能力
-- 历史记录与正文内容通过共享存储服务持久化
+- AI 调用经网关客户端（`shared/services/ai/gatewayClient`）走主进程网关
+- 历史记录（含会话事件流浏览器）与正文内容通过共享存储服务持久化
 
 ## 维护建议
 
