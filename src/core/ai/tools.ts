@@ -11,7 +11,7 @@
  * 工具注册表（docs/design/05 §2）。
  *
  * 工具是 AI 触达数据与功能的唯一入口：schema 即契约，permission 决定审批档位
- * （M2.5 消费）。注册期校验重名与必填语义，杜绝 harness「run_code description
+ * （审批路由消费）。注册期校验重名与必填语义，杜绝 harness「run_code description
  * 死循环」类问题——schema lint 是宿主职责。纯模块，渲染端/测试共用。
  */
 
@@ -26,7 +26,7 @@ export interface ToolCallRequest {
 
 /** 工具执行上下文：宿主注入，工具不得绕过它触达数据。 */
 export interface ToolContext {
-  /** 当前书籍项目快照（M2.5 起换为权限代理） */
+  /** 当前书籍项目快照（宿主侧负责权限裁剪） */
   project?: unknown;
   /** 本轮使用的模型配置 */
   modelConfig?: unknown;
@@ -55,7 +55,7 @@ export interface ToolSpec {
   /** 参数 JSON Schema */
   parameters: Record<string, unknown>;
   permission: ToolPermission;
-  /** 关联技能 id（渐进加载触发器，M2.4） */
+  /** 关联技能 id（渐进加载触发器） */
   skillHint?: string;
   execute(req: ToolCallRequest, ctx: ToolContext): Promise<ToolOutput>;
 }
@@ -125,7 +125,7 @@ export class ToolRegistry {
 
   /**
    * 执行工具：未知工具/权限缺失返回失败 ToolOutput（不抛错，调用方统一走事件流）。
-   * M2.5 审批管线在 write:* 档位接入：这里只做权限检查的最后一道防线。
+   * 审批管线在 write:* 档位接入：这里只做权限检查的最后一道防线。
    */
   async execute(id: string, args: unknown, ctx: ToolContext = {}, callId = `call_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`): Promise<ToolOutput> {
     const spec = this.tools.get(id);

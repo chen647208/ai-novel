@@ -97,7 +97,7 @@ export class ApprovalBroker {
 
   private listeners = new Set<ApprovalListener>();
 
-  /** 订阅新审批请求（桌面弹窗表面在 M2.5b 接入；多表面可多订阅，先答先得）。 */
+  /** 订阅新审批请求（桌面弹窗表面即 ApprovalHost；多表面可多订阅，先答先得）。 */
   onRequest(listener: ApprovalListener): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);

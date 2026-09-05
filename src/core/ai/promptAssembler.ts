@@ -24,9 +24,9 @@ export interface PromptContext {
   project?: unknown;
   /** 全书索引快照（src/core/index） */
   index?: unknown;
-  /** 激活技能（M2.4 渐进注入：会话内显式激活后才非空） */
+  /** 激活技能（渐进注入：会话内显式激活后才非空） */
   activeSkill?: { name: string; body: string } | null;
-  /** 本轮可用工具清单（M2.2 ToolRegistry 提供） */
+  /** 本轮可用工具清单（ToolRegistry 提供） */
   toolSchemas?: Array<{ id: string; description: string; parameters: string }> | null;
   /** 用户本轮任务原文 */
   userTask?: string;

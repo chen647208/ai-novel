@@ -1,8 +1,8 @@
 ﻿# AI 小说创作助手（NovaLocal AI Novelist）
 
 以本地优先为核心的 Electron + React + TypeScript 桌面小说创作工具——
-**既要 AI，也要纯写作**：AI 换代后的工具/审批/技能体系与完整的离线写作
-能力并存，数据主权在用户（SQLite 单一事务管线 + 开放格式导出）。
+**既要 AI，也要纯写作**：AI 工具/审批/技能体系与完整的离线写作能力并存，
+数据主权在用户（SQLite 单一事务管线 + 开放格式导出）。
 
 ![CI](https://github.com/chen647208/ai-novel/actions/workflows/ci.yml/badge.svg)
 
@@ -21,7 +21,7 @@
   渲染器，导出预览 + 成稿字数与统计面板同源；Profile 支持 JSON/YAML 分享
 - 逐条目加密：AES-256-GCM 受保护会话，逐章加密/解密
 
-**AI（v1.7 换代架构）**
+**AI**
 - 网关在主进程：API Key 不进渲染端；四 Provider 适配器 + 流式（requestId
   多路推送）+ 取消 + 重试 + 结构化 JSON
 - Agent 循环：PromptAssembler 分区装配 → 工具调用（首批 9 内置工具，
@@ -31,7 +31,7 @@
 - 会话事件流：全程 jsonl 留痕、可回放可审计；MCP 双向（外部 agent 与
   内置助手平权，写操作走同一审批管线）
 
-**插件与同步（v2.0 地基）**
+**插件与同步**
 - manifest v0 声明式贡献点（skills/types/buildProfiles/hooks）、依赖拓扑
   激活、故障隔离、unwind 不变量、权限 deny-by-default、交互命名空间强制
 - 插件状态面板 + 发行档（完整/网文/严肃文学/纯写作；minimal 即时禁用

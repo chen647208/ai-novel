@@ -253,7 +253,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       return;
     }
     
-    // ── Agent 循环（M2.7 自举）：装配 → 网关 → 工具（三档审批）→ 答复 ──
+    // ── Agent 循环：装配 → 网关 → 工具（三档审批）→ 答复 ──
     setIsLoading(true);
 
     const activeModel = models.find(m => m.id === currentModelId) || models[0];

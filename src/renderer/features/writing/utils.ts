@@ -113,7 +113,7 @@ const escapeHtml = (text: string) =>
     .replace(/"/g, '&quot;');
 
 export const buildExportContent = (project: Project, selectedChapterIds: Set<string>, format: ExportFormat = 'txt') => {
-  // M4.2：导出统一走 core/build 三段式管线（选择→变换→渲染），
+  // 导出统一走 core/build 三段式管线（选择→变换→渲染），
   // 与写作统计、插件渲染器共享同一实现（单一口径，无双轨）。
   const selected = new Set(selectedChapterIds);
   const { nodes, attrs } = projectToBuildEntities(project);

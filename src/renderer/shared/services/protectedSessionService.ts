@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-/** 应用级受保护会话单例（M4.5b）：口令驻留内存，lock 即抹除。 */
+/** 应用级受保护会话单例：口令驻留内存，lock 即抹除。 */
 import { ProtectedSession } from '@core/crypto';
 
 export const protectedSession = new ProtectedSession();

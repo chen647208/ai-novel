@@ -205,7 +205,7 @@ export const indexDigestSection: PromptSection = {
   },
 };
 
-/** activeSkill：激活技能的完整方法论正文（渐进注入的门在 M2.4：只有激活才有值）。 */
+/** activeSkill：激活技能的完整方法论正文（渐进注入：只有激活才有值）。 */
 export const activeSkillSection: PromptSection = {
   id: 'activeSkill',
   title: '当前技能',
@@ -216,7 +216,7 @@ export const activeSkillSection: PromptSection = {
   },
 };
 
-/** toolSchemas：本轮可用工具的 id/描述/参数（M2.2 ToolRegistry 注入）。 */
+/** toolSchemas：本轮可用工具的 id/描述/参数（ToolRegistry 注入）。 */
 export const toolSchemasSection: PromptSection = {
   id: 'toolSchemas',
   title: '可用工具',

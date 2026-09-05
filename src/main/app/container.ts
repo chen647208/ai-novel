@@ -14,7 +14,7 @@ import type { BrowserWindow } from 'electron';
  *
  * 每个子系统是一个 Provider：boot 注册 IPC / 初始化资源，shutdown 释放。
  * 容器按注册序 boot、逆序 shutdown，取代 main.ts 里手写的调用顺序，
- * 让 M2 的 AI 网关、M3 的插件宿主以同样方式接入。
+ * AI 网关与插件宿主以同样方式接入。
  */
 export interface ProviderContext {
   /** 当前主窗口（可能为 null：窗口未建或已关）。对话框等 IPC 需要它作父窗口。 */

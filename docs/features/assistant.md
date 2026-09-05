@@ -17,9 +17,9 @@
 - `services/aiSessionManager.ts`：会话管理器——jsonl 落盘、技能渐进注入、工具编排
 - `services/builtinTools.ts`：内置工具（卡片生成/命令解析/一致性扫描/推荐/索引查询/续写/重写/大纲/章节细纲）
 - `services/skillCatalogSetup.ts`：内置 5 写法技能装载（黄金三章/雪片法/POV/伏笔回收/AI 味消除）
-- `services/smartRecommendationService.ts` / `aiSemanticCheckService.ts`：推荐与语义检查（已工具化）
+- `services/smartRecommendationService.ts` / `aiSemanticCheckService.ts`：推荐与语义检查（经工具注册表暴露）
 
-## 运行链路（M2 自举后）
+## 运行链路
 
 普通对话消息 → `AiSessionManager.run`：
 

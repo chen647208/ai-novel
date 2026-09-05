@@ -8,7 +8,7 @@
  */
 
 /**
- * 同步服务（M4.4b）：把 core/sync 协议接到应用的 SQLite 存储。
+ * 同步服务：把 core/sync 协议接到应用的 SQLite 存储。
  *
  * 导出：读全书实体 + 变更记录 → canonicalHash 合成 SyncChange → bundle JSON。
  * 导入：读 bundle → mergeBundle（LWW 禁用）→ INSERT OR REPLACE 应用插入集

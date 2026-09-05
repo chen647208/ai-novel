@@ -34,7 +34,7 @@ export const sessionManager = new AiSessionManager({
   events: eventBus,
 });
 
-// ── 插件宿主（M3）───────────────────────────────────────────────────
+// ── 插件宿主 ───────────────────────────────────────────────────
 
 const DISABLED_KEY = 'plugins.disabled';
 

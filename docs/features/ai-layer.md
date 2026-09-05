@@ -1,7 +1,7 @@
-﻿# AI 调用层架构（M2 换代后）
+﻿# AI 调用层架构
 
-AI 调用已重构为「主进程网关 + 渲染端客户端 + 工具/审批/会话」四层（design/05）。
-适配器协议实现全部位于**主进程** `src/main/ai/`，API Key 不进入渲染端。
+AI 调用采用「主进程网关 + 渲染端客户端 + 工具/审批/会话」四层（design/05）。
+适配器协议实现位于**主进程** `src/main/ai/`，API Key 不进入渲染端。
 
 ## 分层
 
@@ -25,13 +25,12 @@ AI 调用已重构为「主进程网关 + 渲染端客户端 + 工具/审批/会
 
 ## 渲染端（src/renderer/shared/services/ai/）
 
-- `gatewayClient.ts`：类型化客户端（唯一出口）。契约与旧进程内适配器一致：
+- `gatewayClient.ts`：类型化客户端（渲染端唯一出口）。契约：
   complete/stream 不抛错，失败经 `AIResponse.error` / 最终 onChunk 块返回。
 - `json.ts`：`callJSON` 结构化输出 + 修复重试（validate 函数不可跨 IPC，
   编排留在渲染端）。
-- `AIService` 门面（features/assistant/services/aiService.ts）：历史静态 API
-  `call / callStreaming / callJSON / testConnection`，内部委托网关客户端，
-  全部消费方零改动。
+- `AIService` 门面（features/assistant/services/aiService.ts）：静态 API
+  `call / callStreaming / callJSON / testConnection`，内部委托网关客户端。
 
 ## 线上契约
 

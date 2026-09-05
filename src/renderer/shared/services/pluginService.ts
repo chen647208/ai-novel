@@ -8,7 +8,7 @@
  */
 
 /**
- * 插件服务（渲染端，M3.2）：磁盘发现 + 装配进运行时。
+ * 插件服务（渲染端）：磁盘发现 + 装配进运行时。
  *
  * 插件布局：userData/plugins/<pluginId>/plugin.json（+ 贡献点文件）。
  * v0 开放资源型贡献点：skills（SKILL.md 写法技能）→ SkillCatalog；

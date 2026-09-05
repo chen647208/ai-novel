@@ -12,8 +12,8 @@
  *
  * 本批工具把既有服务原样接入注册表（工具化转写，非新功能）：
  * 卡片生成/命令解析、一致性扫描、智能推荐、索引查询。
- * 写作编辑器内联的 text/outline/chapter 工具随 M2.5 审批管线接线（涉及
- * proposal diff 面），summary/foreshadow 随 M2.6 会话流改造。
+ * text/outline/chapter 工具的编辑器接线（涉及 proposal diff 面）与
+ * summary/foreshadow 工具为当前边界，随组件级重构推进。
  */
 import { ToolRegistry, type ToolContext, type ToolSpec } from '@core/ai';
 import { aiGatewayClient, type CallOptions } from '@/shared/services/ai/gatewayClient';

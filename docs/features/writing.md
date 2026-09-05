@@ -24,7 +24,7 @@
 - `WritingEditorCanvas.tsx` 负责正文输入区与状态遮罩
 - `AIHistoryViewer.tsx` 与 `AIHistoryRecordList.tsx` 负责历史记录筛选、排序、展示与操作
 
-## 导出与成稿字数（M4）
+## 导出与成稿字数
 
 - 导出统一走 `src/core/build` 三段式管线（选择→变换→渲染）：
   `utils.ts` 的 `buildExportContent` 是管线适配器，txt/md/html 三格式

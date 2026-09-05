@@ -10,7 +10,7 @@
 /**
  * 内置写法技能装配（docs/design/05 §3）。
  * 技能正文以 ?raw 打包进渲染端（离线可用）；用户目录/插件/书籍级来源
- * 由 M2.6/M3 的发现层级接入，在返回的 SkillCatalog 上续注。
+ * 由插件发现层级接入，在返回的 SkillCatalog 上续注。
  */
 import { SkillCatalog } from '@core/ai';
 

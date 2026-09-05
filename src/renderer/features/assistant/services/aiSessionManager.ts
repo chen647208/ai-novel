@@ -8,7 +8,7 @@
  */
 
 /**
- * 渲染端会话管理器（M2.6b）：把 core/ai 的 Agent 循环接到应用真实环境——
+ * 渲染端会话管理器：把 core/ai 的 Agent 循环接到应用真实环境——
  * jsonl 落盘（userData/ai-sessions/<bookId>/）、技能目录、工具注册表、
  * 审批 broker 全部在此装配。UI（GlobalAssistant / 审批面板 / 事件浏览器）
  * 只消费这里暴露的会话与状态。

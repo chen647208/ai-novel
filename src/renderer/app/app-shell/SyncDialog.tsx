@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-/** 同步对话框（M4.4b）：导出/导入同步包 + 冲突副本报告。 */
+/** 同步对话框：导出/导入同步包 + 冲突副本报告。 */
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftRight } from 'lucide-react';
