@@ -9,6 +9,10 @@
 
 /** 同步地基出口（docs/design/03 entity_changes 协议 + 08 M4）。 */
 export {
+  MemorySyncTransport,
+  type SyncTransport,
+} from './transport.js';
+export {
   buildBundle,
   mergeBundle,
   localState,
