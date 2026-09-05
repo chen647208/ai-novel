@@ -3,11 +3,11 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { templateDisplayName } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
@@ -249,6 +249,22 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
     );
     onUpdate({ chapters: newChapters });
   };
+
+  // Enter×3 连按：在当前章之后插入新章并切换过去（默认名「第N章」，不阻塞继续输入）。
+  const handleNewChapter = useCallback(() => {
+    const chapters = projectRef.current.chapters;
+    const nextOrder = chapters.reduce((m, c) => Math.max(m, c.order), -1) + 1;
+    const num = chapters.filter(c => c.order >= 0).length + 1;
+    const newChapter: Chapter = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      title: t('canvas.newChapterTitle', { num }),
+      summary: '',
+      content: '',
+      order: nextOrder,
+    };
+    onUpdate({ chapters: [...chapters, newChapter] });
+    setActiveChapterId(newChapter.id);
+  }, [onUpdate, t]);
 
   const handleClearContent = async () => {
     if (await dialogService.confirm({ message: t('editor.clearContentConfirm'), danger: true })) {
@@ -1155,6 +1171,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
           onKeyUp={handleKeySelect}
           onMouseMove={handleMouseMove}
           onContentChange={updateChapterContent}
+          onNewChapter={handleNewChapter}
           onStopStreaming={stopStreaming}
           onStopBatchGeneration={stopBatchGeneration}
         />

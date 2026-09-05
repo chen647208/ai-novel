@@ -94,6 +94,7 @@
     "electron-builder": "^26.15.3",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "jsdom": "^29.1.1",
     "lucide-react": "^1.40.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",

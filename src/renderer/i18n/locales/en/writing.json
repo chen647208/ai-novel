@@ -287,7 +287,8 @@
   },
   "canvas": {
     "placeholderReady": "Start writing; select text to summon the AI polish tools...",
-    "placeholderEmpty": "Pick a chapter from the catalog on the left..."
+    "placeholderEmpty": "Pick a chapter from the catalog on the left...",
+    "newChapterTitle": "Chapter {{num}}"
   },
   "utils": {
     "tokenUsage": "Input: {{input}} | Output: {{output}} | Total: {{total}}",

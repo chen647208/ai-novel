@@ -3,14 +3,15 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { createNovelExtensions } from '../../../editor/schema';
+import { createWritingPrimitives } from '../../../editor/primitives';
 import { dslToPmDoc, pmDocToDsl, type PmNode } from '../../../editor/serialization';
 import type { NovelEditorHandle } from '../types';
 import { cn } from '@/shared/utils/cn';
@@ -22,6 +23,8 @@ interface TipTapCanvasProps {
   /** 生成中且非流式时锁定编辑；流式期间以只读方式回显增量。 */
   isGenerating: boolean;
   isStreaming: boolean;
+  /** Enter×3 连按：宿主创建新章并切换（不阻塞继续输入）。 */
+  onNewChapter?: () => void;
   onContentChange: (content: string) => void;
   onMouseUp: (event: React.MouseEvent<HTMLDivElement>) => void;
   onKeyUp: () => void;
@@ -33,18 +36,24 @@ interface TipTapCanvasProps {
  * 并通过 NovelEditorHandle 向编排层暴露 PM 语义的选区与坐标。
  */
 const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function TipTapCanvas(
-  { content, activeChapterId, isFocusMode, isGenerating, isStreaming, onContentChange, onMouseUp, onKeyUp, onMouseMove },
+  { content, activeChapterId, isFocusMode, isGenerating, isStreaming, onNewChapter, onContentChange, onMouseUp, onKeyUp, onMouseMove },
   ref,
 ) {
   const { t } = useTranslation('writing');
   // 回调经 ref 传递，避免每次渲染重建编辑器实例。
   const onChangeRef = useRef(onContentChange);
   onChangeRef.current = onContentChange;
+  const onNewChapterRef = useRef(onNewChapter);
+  onNewChapterRef.current = onNewChapter;
   // 记录最近一次由本编辑器吐出的 DSL，用于区分「外部受控更新」与「自身回环」。
   const lastEmitted = useRef<string>(content);
   const [isEmpty, setIsEmpty] = useState(() => content.trim().length === 0);
 
-  const extensions = useMemo(() => createNovelExtensions(), []);
+  // schema 节点 + 8 写作原语（enterFlow 的新章回调经 ref 转发，保持扩展集稳定不重建）。
+  const extensions = useMemo(
+    () => [...createNovelExtensions(), ...createWritingPrimitives({ onNewChapter: () => onNewChapterRef.current?.() })],
+    [],
+  );
 
   const editor = useEditor({
     extensions,
@@ -95,6 +104,17 @@ const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function T
       },
       focus() {
         editor?.commands.focus();
+      },
+      harvestDarling() {
+        if (!editor) return false;
+        return editor.commands.harvestDarling();
+      },
+      insertGhostOutline(synopsis: string) {
+        if (!editor) return false;
+        return editor.commands.insertGhostOutline(synopsis);
+      },
+      setSpellcheck(enabled: boolean) {
+        editor?.commands.setSpellcheck(enabled);
       },
     }),
     [editor],
