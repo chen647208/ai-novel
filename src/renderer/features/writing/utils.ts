@@ -9,7 +9,7 @@
 
 import type { AIHistoryRecord, Chapter, Project } from '../../../shared/types';
 import { runBuild, type BuildProfile } from '@core/build';
-import type { NodeEntity, AttributeEntity } from '@core/entities';
+import type { NodeEntity, AttributeEntity, EdgeEntity } from '@core/entities';
 import { i18n } from '@/i18n';
 import { Bot, Brain, Cpu, Feather, Server, type LucideIcon } from 'lucide-react';
 import {
@@ -78,6 +78,33 @@ export const getPreviousChapterSummaryIds = (chapters: Chapter[], currentChapter
 
 export type ExportFormat = 'txt' | 'md' | 'html';
 
+/** Project.chapters → 构建管线实体视图（导出与统计共用，单一口径）。 */
+export function projectToBuildEntities(project: Project): { nodes: NodeEntity[]; attrs: AttributeEntity[]; edges: EdgeEntity[] } {
+  return {
+    nodes: project.chapters.map((c) => ({
+      id: c.id,
+      bookId: project.id,
+      type: 'novel.chapter',
+      title: c.title,
+      body: c.content || i18n.t('writing:export.noContent'),
+      createdAt: 0,
+      updatedAt: 0,
+      erased: false,
+    })),
+    attrs: project.chapters.map((c) => ({
+      id: `attr-order-${c.id}`,
+      nodeId: c.id,
+      type: 'label' as never,
+      name: 'order',
+      value: String(c.order),
+      inheritable: false,
+      position: 0,
+      erased: false,
+    })),
+    edges: [],
+  };
+}
+
 const escapeHtml = (text: string) =>
   text
     .replace(/&/g, '&amp;')
@@ -89,26 +116,7 @@ export const buildExportContent = (project: Project, selectedChapterIds: Set<str
   // M4.2：导出统一走 core/build 三段式管线（选择→变换→渲染），
   // 与写作统计、插件渲染器共享同一实现（单一口径，无双轨）。
   const selected = new Set(selectedChapterIds);
-  const nodes: NodeEntity[] = project.chapters.map((c) => ({
-    id: c.id,
-    bookId: project.id,
-    type: 'novel.chapter',
-    title: c.title,
-    body: c.content || i18n.t('writing:export.noContent'),
-    createdAt: 0,
-    updatedAt: 0,
-    erased: false,
-  }));
-  const attrs: AttributeEntity[] = project.chapters.map((c) => ({
-    id: `attr-order-${c.id}`,
-    nodeId: c.id,
-    type: 'attr' as never,
-    name: 'order',
-    value: String(c.order),
-    inheritable: false,
-    position: 0,
-    erased: false,
-  }));
+  const { nodes, attrs } = projectToBuildEntities(project);
 
   // 章节标题模板沿用 i18n 文案：用哨兵 %N/%T 先生成骨架，管线再回填真值
   const chapterTemplate = i18n.t('writing:export.chapterHeader', { num: '%N', title: '%T' });

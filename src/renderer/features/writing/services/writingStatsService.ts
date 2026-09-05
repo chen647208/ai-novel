@@ -12,6 +12,8 @@
  */
 import type { Project } from '../../../../shared/types';
 import { i18n } from '@/i18n';
+import { DEFAULT_BUILD_PROFILE, runBuild } from '@core/build';
+import { projectToBuildEntities } from '../utils';
 
 export interface ChapterStats {
   /** 总字符数（含空白） */
@@ -46,6 +48,8 @@ export interface BookStats {
   chapterCount: number;
   writtenChapterCount: number; // 有正文的章节数
   totalCharCount: number;
+  /** 成稿字数：与导出同源的管线文本净字符数（07 §5-4 单一口径） */
+  builtCharCount: number;
   todayCharCount: number; // 今日新增（基于快照差值，近似值）
   averageChapterChars: number;
 }
@@ -67,10 +71,14 @@ export function computeBookStats(project: Project, now: number = Date.now()): Bo
     if (current > baseline) todayCharCount += current - baseline;
   }
 
+  // 成稿字数与导出走同一管线（默认 profile 的正文文本）
+  const { text: builtText } = runBuild(DEFAULT_BUILD_PROFILE, projectToBuildEntities(project));
+
   return {
     chapterCount: chapters.length,
     writtenChapterCount: writtenChapters.length,
     totalCharCount,
+    builtCharCount: computeChapterStats(builtText).charCount,
     todayCharCount,
     averageChapterChars: writtenChapters.length > 0 ? Math.round(totalCharCount / writtenChapters.length) : 0,
   };
