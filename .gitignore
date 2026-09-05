@@ -38,3 +38,7 @@ i18n-scan.txt
 # ZCode session artifacts (plans, local cache)
 .zcode/
 
+
+# 文档站构建产物
+docs-site/.vitepress/dist
+docs-site/.vitepress/cache

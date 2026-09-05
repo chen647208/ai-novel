@@ -25,6 +25,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "docs:sync": "node scripts/sync-docs.mjs",
+    "docs:dev": "vitepress dev docs-site",
+    "docs:build": "node scripts/sync-docs.mjs && vitepress build docs-site",
+    "docs:preview": "vitepress preview docs-site",
     "electron:dev": "npm run build:electron && concurrently -k \"vite\" \"wait-on http://localhost:3000 && electron .\"",
     "build:electron": "npm run build:electron:main && npm run build:electron:preload",
     "build:electron:main": "tsc -p src/main/tsconfig.json",
@@ -110,6 +114,7 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.68.0",
     "vite": "^6.4.1",
+    "vitepress": "^1.6.4",
     "vitest": "^4.1.11",
     "wait-on": "^9.0.3"
   }

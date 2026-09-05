@@ -5,7 +5,7 @@
 ## 1. 模型：选择 → 变换 → 渲染（编译式导出）
 
 ```
-BuildProfile（声明式数据，存 books/<id>/.novel/builds/*.yml，可 diff 可分享）
+BuildProfile（声明式数据，存 books/{id}/.novel/builds/*.yml，可 diff 可分享）
   ├─ selection:  选哪些内容
   ├─ transform:  怎么改写结构
   └─ render:     输出成什么
@@ -62,7 +62,7 @@ interface BuildPipeline {
 | 现状 | 去向 |
 |---|---|
 | writing 的 TXT/MD/HTML 导出 + dialogService 另存为 | 变成内置三个渲染器 + 默认 profile"快速导出" |
-| 单书导出（repository.exportBook） | 升级为 DSL 目录打包（.zip of books/<id>/，即开放格式导出） |
+| 单书导出（repository.exportBook） | 升级为 DSL 目录打包（.zip of books/{id}/，即开放格式导出） |
 | 全量导出（exportAll） | 保留（设置+全部书的 .zip） |
 
 ## 5. 验收标准
