@@ -106,8 +106,9 @@ export class PromptAssembler {
         kept = kept.slice(0, -1);
         truncated = true;
       }
-      if (kept.length === 1 && kept[0]!.text.length > budget) {
-        kept = [{ id: kept[0]!.id, text: truncateText(kept[0]!.text, budget) }];
+      const only = kept[0];
+      if (kept.length === 1 && only && only.text.length > budget) {
+        kept = [{ id: only.id, text: truncateText(only.text, budget) }];
         truncated = true;
       }
     }

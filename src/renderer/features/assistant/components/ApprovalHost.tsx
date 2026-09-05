@@ -74,9 +74,11 @@ const ApprovalHost: React.FC = () => {
     const poll = (): void => {
       void (async () => {
         try {
-          const base = await window.electronAPI!.getAppDataPath();
+          const api = window.electronAPI;
+          if (!api) return;
+          const base = await api.getAppDataPath();
           const file = `${base}/ai-sessions/pending-proposals.jsonl`;
-          const content = await window.electronAPI!.readFile(file);
+          const content = await api.readFile(file);
           for (const line of content.split('\n')) {
             if (!line.trim()) continue;
             try {

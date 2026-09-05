@@ -16,17 +16,14 @@
  * 禁用清单持久化在设置域（配置级 disabled，不碰插件文件）。
  */
 import { parseSkillMd, type SkillCatalog } from '@core/ai';
-import {
-  installHooks,
-  installTypeTemplates,
+import { PluginHost, installHooks, installTypeTemplates, typeTemplateId } from '@core/plugin';
+import type {
   BuildProfileRegistry,
   EventBus,
-  PluginHost,
-  typeTemplateId,
-  type DiscoveredPlugin,
-  type Disposable,
-  type PluginStatus,
-  type PluginHostOptions,
+  DiscoveredPlugin,
+  Disposable,
+  PluginStatus,
+  PluginHostOptions,
 } from '@core/plugin';
 import { builtinRegistry } from '@core/types-registry';
 

@@ -55,10 +55,11 @@ export const ProtectedSessionDialog: React.FC = () => {
   };
 
   const encryptChapter = async (chapterId: string, content: string): Promise<void> => {
+    if (!project) return;
     try {
       const envelope = await protectedSession.encrypt(content);
       useProjectStore.getState().updateActiveProject({
-        chapters: project!.chapters.map((c) => (c.id === chapterId ? { ...c, content: envelope } : c)),
+        chapters: project.chapters.map((c) => (c.id === chapterId ? { ...c, content: envelope } : c)),
       } as never);
       refresh();
     } catch (err) {
@@ -67,10 +68,11 @@ export const ProtectedSessionDialog: React.FC = () => {
   };
 
   const decryptChapter = async (chapterId: string, envelope: string): Promise<void> => {
+    if (!project) return;
     try {
       const plain = await protectedSession.decrypt(envelope);
       useProjectStore.getState().updateActiveProject({
-        chapters: project!.chapters.map((c) => (c.id === chapterId ? { ...c, content: plain } : c)),
+        chapters: project.chapters.map((c) => (c.id === chapterId ? { ...c, content: plain } : c)),
       } as never);
       refresh();
     } catch (err) {
@@ -110,12 +112,13 @@ export const ProtectedSessionDialog: React.FC = () => {
             ) : (
               <div className="max-h-72 space-y-2 overflow-auto">
                 {(project?.chapters ?? []).map((c) => {
-                  const encrypted = c.content?.startsWith('enc.v1:') ?? false;
+                  const encrypted = (c.content ?? '').startsWith('enc.v1:');
+                  const chapterContent = c.content ?? '';
                   return (
                     <div key={c.id} className="flex items-center justify-between gap-2 rounded-md border border-border p-2 text-sm">
                       <span className="truncate">{c.title}</span>
                       {encrypted ? (
-                        <Button size="sm" variant="outline" onClick={() => void decryptChapter(c.id, c.content!)} disabled={busy}>
+                        <Button size="sm" variant="outline" onClick={() => void decryptChapter(c.id, chapterContent)} disabled={busy}>
                           {t('protected.decrypt')}
                         </Button>
                       ) : (

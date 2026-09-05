@@ -179,7 +179,8 @@ export class PluginHost {
     }
     const queue = pending.filter((id) => (indegree.get(id) ?? 0) === 0);
     while (queue.length) {
-      const id = queue.shift()!;
+      const id = queue.shift();
+      if (id === undefined) break;
       this.activate(id);
       for (const next of dependents.get(id) ?? []) {
         const left = (indegree.get(next) ?? 0) - 1;

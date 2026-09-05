@@ -63,8 +63,10 @@ export function parseSkillMd(md: string, source: Skill['source'], sourceFile = '
   const meta: Record<string, string> = {};
   for (const line of frontmatter.split('\n')) {
     const kv = line.match(/^([A-Za-z_-]+)\s*:\s*(.*)$/);
-    if (kv) {
-      meta[kv[1]!.toLowerCase()] = kv[2]!.trim();
+    const key = kv?.[1];
+    const value = kv?.[2];
+    if (key && value !== undefined) {
+      meta[key.toLowerCase()] = value.trim();
     }
   }
 
@@ -77,8 +79,9 @@ export function parseSkillMd(md: string, source: Skill['source'], sourceFile = '
   const triggers = new Set<string>();
   // description 里的「触发词：a、b」
   const inlineTrigger = description.match(/触发词[:：]\s*(.+)$/);
-  if (inlineTrigger) {
-    for (const t of inlineTrigger[1]!.split(/[、,，]/)) {
+  const inlineWords = inlineTrigger?.[1];
+  if (inlineWords) {
+    for (const t of inlineWords.split(/[、,，]/)) {
       const word = t.trim();
       if (word) triggers.add(word.toLowerCase());
     }
@@ -180,7 +183,8 @@ export class SkillCatalog {
     }
     if (!lines.length) {
       // 单条描述就超预算：硬截断描述
-      const first = this.skills.values().next().value!;
+      const first = this.skills.values().next().value;
+      if (!first) return undefined;
       return `- ${first.name}：${first.description.slice(0, Math.max(0, this.manifestBudget - first.name.length - 3))}…`;
     }
     if (truncated) lines.push(`（另有技能未列出，可按名称查询）`);

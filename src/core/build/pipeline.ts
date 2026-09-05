@@ -136,7 +136,9 @@ export function transform(profile: BuildProfile, nodes: SelectedNode[]): DocBloc
   }
 
   // 尾部分隔符去掉
-  while (blocks.length && blocks.at(-1)!.kind === 'separator') blocks.pop();
+  for (let last = blocks.at(-1); last && last.kind === 'separator'; last = blocks.at(-1)) {
+    blocks.pop();
+  }
   return blocks;
 }
 

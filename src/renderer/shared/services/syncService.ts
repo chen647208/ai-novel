@@ -63,9 +63,11 @@ export async function exportSyncBundle(bookId: string, bookTitle: string): Promi
     defaultPath: `${bookTitle || bookId}-sync-${new Date().toISOString().slice(0, 10)}.json`,
     filters: [{ name: 'AI Novel Sync', extensions: ['json'] }],
   };
-  const save = await window.electronAPI!.saveFileDialog(saveOptions);
+  const api = window.electronAPI;
+  if (!api) throw new Error('同步需要桌面环境');
+  const save = await api.saveFileDialog(saveOptions);
   if (save.canceled || !save.filePath) throw new Error('已取消导出');
-  await window.electronAPI!.writeFile(save.filePath, JSON.stringify(bundle, null, 2));
+  await api.writeFile(save.filePath, JSON.stringify(bundle, null, 2));
   return { path: save.filePath, changeCount: changes.length };
 }
 

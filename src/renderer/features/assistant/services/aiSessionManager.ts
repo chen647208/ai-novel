@@ -18,15 +18,17 @@ import {
   AiSession,
   registerBuiltinSections,
   runAgentSession,
-  type AiEvent,
-  type AgentTurnResult,
-  type ApprovalBroker,
-  type PromptAssembler,
-  type SessionSink,
-  type SkillCatalog,
-  type ToolRegistry,
 } from '@core/ai';
-import { EventBus, type SeamPolicy } from '@core/plugin';
+import type {
+  AgentTurnResult,
+  AiEvent,
+  ApprovalBroker,
+  PromptAssembler,
+  SessionSink,
+  SkillCatalog,
+  ToolRegistry,
+} from '@core/ai';
+import type { EventBus, SeamPolicy } from '@core/plugin';
 import type { ModelConfig, Project } from '@shared/types';
 import { aiGatewayClient } from '@/shared/services/ai/gatewayClient.js';
 
