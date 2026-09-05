@@ -1,107 +1,63 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 /*
- * 设计令牌体系（shadcn-on-Tailwind-v4 模式）。
+ * 设计令牌体系（Tailwind v4 + Lightning CSS 适配版）。
  *
- * 结构：:root/.dark 定义原始 CSS 变量 → @theme inline 映射为 --color-*/--radius-*/--font-*，
- * 由 Tailwind 生成 bg-background、text-muted-foreground、rounded-lg 等工具类。
- * 工具类直接出现在 JSX 中，Lightning CSS 按用量生成，不存在仅经 var() 引用被摇树裁掉的问题。
+ * 关键约束：本项目的 Lightning CSS 管线（Tailwind 内部处理，非 Vite minifier，
+ * cssMinify 关掉也没用）会把「:root / html 等元素或伪类选择器里的自定义属性」整块摇树裁掉，
+ * 并对「类选择器里同名的自定义属性」按源码顺序去重只留最后一处。于是 shadcn 常见的
+ * 「:root 放浅色 + .dark 放同名深色覆盖」写法在这里失效：先出现的 :root 令牌被裁，
+ * 浅色主题下 --background 等全部未定义，所有 bg-* 解析为透明，模态蒙版（bg-black/50）
+ * 直接透出黑底、整个界面发黑灰。
+ *
+ * 解法：把每个 --color-* 令牌用 light-dark(浅色, 深色) 定义在 @theme 里（唯一真源）。
+ * @theme 生成的 :root,:host 主题块是 Tailwind 自己管理的、实测不会被裁；light-dark()
+ * 依 color-scheme 自动取值，主题切换只需 .dark 覆盖 color-scheme（普通属性，不参与
+ * 自定义属性去重，稳定存活）。组件层引用 var(--color-*) 别名，运行期一定解析。
+ * Electron 44 / Chromium 136 原生支持 light-dark()。
  *
  * 风格：现代极简（暖中性 stone 基底 + 墨黑主操作 + 靛蓝单一强调色），
  * 文学点缀由衬线字体栈（标题/正文编辑器）承载。深色主题为浅色令牌的同色相暖炭镜像。
  */
-
-@custom-variant dark (&:is(.dark *));
-
-:root {
-  color-scheme: light;
-
-  --background: #fafaf9;
-  --foreground: #1c1917;
-  --card: #ffffff;
-  --card-foreground: #1c1917;
-  --popover: #ffffff;
-  --popover-foreground: #1c1917;
-  --primary: #1c1917;
-  --primary-foreground: #fafaf9;
-  --secondary: #f5f5f4;
-  --secondary-foreground: #292524;
-  --muted: #f5f5f4;
-  --muted-foreground: #78716c;
-  --accent: #f0efed;
-  --accent-foreground: #1c1917;
-  --destructive: #dc2626;
-  --destructive-foreground: #ffffff;
-  --success: #059669;
-  --warning: #d97706;
-  --border: #e7e5e4;
-  --input: #e7e5e4;
-  --ring: #4f46e5;
-  --link: #4338ca;
-
-  --radius: 0.5rem;
-}
-
 .dark {
   color-scheme: dark;
-
-  --background: #171513;
-  --foreground: #e8e6e3;
-  --card: #211f1c;
-  --card-foreground: #e8e6e3;
-  --popover: #211f1c;
-  --popover-foreground: #e8e6e3;
-  --primary: #e8e6e3;
-  --primary-foreground: #1c1917;
-  --secondary: #2c2925;
-  --secondary-foreground: #e8e6e3;
-  --muted: #2c2925;
-  --muted-foreground: #a39e97;
-  --accent: #33302b;
-  --accent-foreground: #e8e6e3;
-  --destructive: #ef4444;
-  --destructive-foreground: #171513;
-  --success: #34d399;
-  --warning: #fbbf24;
-  --border: #38342f;
-  --input: #38342f;
-  --ring: #818cf8;
-  --link: #a5b4fc;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-link: var(--link);
+@theme {
+  --color-background: light-dark(#fafaf9, #171513);
+  --color-foreground: light-dark(#1c1917, #e8e6e3);
+  --color-card: light-dark(#ffffff, #211f1c);
+  --color-card-foreground: light-dark(#1c1917, #e8e6e3);
+  --color-popover: light-dark(#ffffff, #211f1c);
+  --color-popover-foreground: light-dark(#1c1917, #e8e6e3);
+  --color-primary: light-dark(#1c1917, #e8e6e3);
+  --color-primary-foreground: light-dark(#fafaf9, #1c1917);
+  --color-secondary: light-dark(#f5f5f4, #2c2925);
+  --color-secondary-foreground: light-dark(#292524, #e8e6e3);
+  --color-muted: light-dark(#f5f5f4, #2c2925);
+  --color-muted-foreground: light-dark(#78716c, #a39e97);
+  --color-accent: light-dark(#f0efed, #33302b);
+  --color-accent-foreground: light-dark(#1c1917, #e8e6e3);
+  --color-destructive: light-dark(#dc2626, #ef4444);
+  --color-destructive-foreground: light-dark(#ffffff, #171513);
+  --color-success: light-dark(#059669, #34d399);
+  --color-warning: light-dark(#d97706, #fbbf24);
+  --color-border: light-dark(#e7e5e4, #38342f);
+  --color-input: light-dark(#e7e5e4, #38342f);
+  --color-ring: light-dark(#4f46e5, #818cf8);
+  --color-link: light-dark(#4338ca, #a5b4fc);
 
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC",
     "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
   --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", Georgia,
     "Times New Roman", serif;
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: calc(0.5rem - 4px);
+  --radius-md: calc(0.5rem - 2px);
+  --radius-lg: 0.5rem;
+  --radius-xl: calc(0.5rem + 4px);
 
   --animate-fade-in: fade-in 0.15s ease-out;
   --animate-fade-out: fade-out 0.12s ease-in;
@@ -149,7 +105,7 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
   ::selection {
-    background-color: color-mix(in oklab, var(--ring) 22%, transparent);
+    background-color: color-mix(in oklab, var(--color-ring) 22%, transparent);
   }
 
   /* 桌面应用细滚动条，跟随主题 */
@@ -161,13 +117,13 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: color-mix(in oklab, var(--muted-foreground) 30%, transparent);
+    background: color-mix(in oklab, var(--color-muted-foreground) 30%, transparent);
     border-radius: 8px;
     border: 2px solid transparent;
     background-clip: content-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in oklab, var(--muted-foreground) 55%, transparent);
+    background: color-mix(in oklab, var(--color-muted-foreground) 55%, transparent);
     background-clip: content-box;
   }
 }
@@ -194,10 +150,10 @@
   .novel-canvas .ProseMirror h2 { font-size: 1.35em; }
   .novel-canvas .ProseMirror h3 { font-size: 1.15em; }
   .novel-canvas .ProseMirror blockquote {
-    border-left: 3px solid color-mix(in oklab, var(--primary) 40%, transparent);
+    border-left: 3px solid color-mix(in oklab, var(--color-primary) 40%, transparent);
     margin: 1em 0;
     padding-left: 1em;
-    color: var(--muted-foreground);
+    color: var(--color-muted-foreground);
   }
   .novel-canvas .ProseMirror ul,
   .novel-canvas .ProseMirror ol {
@@ -214,7 +170,7 @@
   }
   .novel-scene-break::before {
     content: "＊　＊　＊";
-    color: var(--muted-foreground);
+    color: var(--color-muted-foreground);
     letter-spacing: 0.3em;
     font-size: 0.9em;
   }
@@ -223,8 +179,8 @@
   .novel-keyword {
     font-family: var(--font-mono, ui-monospace, monospace);
     font-size: 0.82em;
-    color: var(--muted-foreground);
-    background: color-mix(in oklab, var(--muted-foreground) 8%, transparent);
+    color: var(--color-muted-foreground);
+    background: color-mix(in oklab, var(--color-muted-foreground) 8%, transparent);
     border-radius: 6px;
     padding: 2px 8px;
     margin: 0 0 0.5em;
@@ -232,9 +188,9 @@
 
   /* 硬链接 [[tag|display]] */
   .novel-chapter-ref {
-    color: var(--primary);
+    color: var(--color-primary);
     text-decoration: none;
-    border-bottom: 1px dashed color-mix(in oklab, var(--primary) 50%, transparent);
+    border-bottom: 1px dashed color-mix(in oklab, var(--color-primary) 50%, transparent);
     cursor: pointer;
   }
   .novel-chapter-ref:hover {
@@ -243,8 +199,8 @@
 
   /* NEO 式占位符 {name|kind} */
   .novel-placeholder {
-    color: color-mix(in oklab, var(--primary) 80%, var(--foreground));
-    background: color-mix(in oklab, var(--primary) 12%, transparent);
+    color: color-mix(in oklab, var(--color-primary) 80%, var(--color-foreground));
+    background: color-mix(in oklab, var(--color-primary) 12%, transparent);
     border-radius: 4px;
     padding: 0 4px;
     font-size: 0.92em;
@@ -252,38 +208,38 @@
 
   /* 弃稿锚点 */
   .novel-darling-slot {
-    border: 1px dashed color-mix(in oklab, var(--muted-foreground) 45%, transparent);
+    border: 1px dashed color-mix(in oklab, var(--color-muted-foreground) 45%, transparent);
     border-radius: 8px;
     padding: 0.6em 0.9em;
     margin: 0 0 1.15em;
-    color: var(--muted-foreground);
+    color: var(--color-muted-foreground);
     font-style: italic;
   }
 
   /* 幽灵大纲（灰色可覆盖） */
   .novel-ghost-note {
-    color: color-mix(in oklab, var(--muted-foreground) 75%, transparent);
+    color: color-mix(in oklab, var(--color-muted-foreground) 75%, transparent);
     font-style: italic;
   }
 
   /* 对话块 */
   .novel-dialogue {
     padding-left: 1em;
-    border-left: 2px solid color-mix(in oklab, var(--border) 80%, transparent);
+    border-left: 2px solid color-mix(in oklab, var(--color-border) 80%, transparent);
   }
 
   /* @tag 软引用高亮 */
   .novel-tag-ref {
-    background: color-mix(in oklab, var(--primary) 14%, transparent);
+    background: color-mix(in oklab, var(--color-primary) 14%, transparent);
     border-radius: 3px;
     padding: 0 2px;
   }
 
   /* CM6 novelDsl 编辑器外壳 */
   .novel-dsl-editor {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-background);
     font-size: 0.9rem;
     line-height: 1.7;
     display: flex;
@@ -310,40 +266,39 @@
   }
   /* novelDsl 语法着色（随明暗主题自适应） */
   .cm-novel-heading {
-    color: var(--foreground);
+    color: var(--color-foreground);
     font-weight: 700;
   }
   .cm-novel-keyword {
-    color: var(--primary);
+    color: var(--color-primary);
     font-weight: 600;
   }
   .cm-novel-value {
-    color: var(--foreground);
+    color: var(--color-foreground);
   }
   .cm-novel-link {
-    color: var(--accent-foreground);
-    background: color-mix(in oklab, var(--accent) 16%, transparent);
+    color: var(--color-accent-foreground);
+    background: color-mix(in oklab, var(--color-accent) 16%, transparent);
     border-radius: 3px;
   }
   .cm-novel-frontmatter {
-    color: var(--muted-foreground);
+    color: var(--color-muted-foreground);
     font-style: italic;
   }
   .cm-novel-scenebreak {
-    color: var(--muted-foreground);
+    color: var(--color-muted-foreground);
     letter-spacing: 0.3em;
   }
   .cm-novel-tag {
-    color: var(--primary);
-    background: color-mix(in oklab, var(--primary) 12%, transparent);
+    color: var(--color-primary);
+    background: color-mix(in oklab, var(--color-primary) 12%, transparent);
     border-radius: 3px;
   }
   .cm-novel-placeholder {
-    color: var(--muted-foreground);
-    background: color-mix(in oklab, var(--muted) 60%, transparent);
+    color: var(--color-muted-foreground);
+    background: color-mix(in oklab, var(--color-muted) 60%, transparent);
     border-radius: 3px;
     font-family: var(--font-mono, ui-monospace, monospace);
     font-size: 0.85em;
   }
 }
-

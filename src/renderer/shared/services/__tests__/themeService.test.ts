@@ -3,8 +3,8 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 import { describe, it, expect, vi, afterEach } from 'vitest';
@@ -47,18 +47,27 @@ describe('systemPrefersDark / resolveTheme', () => {
 });
 
 describe('applyTheme', () => {
-  it('dark 时给 <html> 加 .dark，light 时移除', () => {
+  it('切换 .dark 类并设置内联 color-scheme 驱动 light-dark()', () => {
     const classes = new Set<string>();
-    vi.stubGlobal('document', { documentElement: { classList: { toggle: (name: string, on: boolean) => { if (on) classes.add(name); else classes.delete(name); } } } });
+    const style: { colorScheme?: string } = {};
+    vi.stubGlobal('document', {
+      documentElement: {
+        classList: { toggle: (name: string, on: boolean) => { if (on) classes.add(name); else classes.delete(name); } },
+        style,
+      },
+    });
     stubMatchMedia(false);
 
     expect(applyTheme('dark')).toBe('dark');
     expect(classes.has('dark')).toBe(true);
+    expect(style.colorScheme).toBe('dark');
 
     expect(applyTheme('light')).toBe('light');
     expect(classes.has('dark')).toBe(false);
+    expect(style.colorScheme).toBe('light');
 
     expect(applyTheme('system')).toBe('light');
+    expect(style.colorScheme).toBe('light');
   });
 });
 
