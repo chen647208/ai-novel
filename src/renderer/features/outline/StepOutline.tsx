@@ -3,8 +3,8 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 import React, { useState, useMemo, useRef } from 'react';
@@ -20,6 +20,10 @@ import { Card } from '@/shared/ui/Card';
 import { Select } from '@/shared/ui/Select';
 import { Check, CheckCheck, Eye, ListTree, Loader2, Pause, PenLine, Pencil, Play, Square, Users, XCircle } from 'lucide-react';
 import { MarkdownView } from '@/shared/ui/Markdown';
+import { DslEditor } from '@/editor/cm6/DslEditor';
+import { collectProjectTags } from '@/editor/cm6/projectTags';
+import { useSettingsStore } from '@/app/stores/settingsStore';
+import { resolveTheme } from '@/shared/services/themeService';
 
 interface StepOutlineProps {
   project: Project;
@@ -56,6 +60,10 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
   const outlineContent = isStreaming ? streamingContent : (project.outline || '');
   // 预览（Markdown 渲染）⇄ 编辑（textarea）切换；有内容时默认预览
   const [outlineEditing, setOutlineEditing] = useState(false);
+  // 大纲 DSL 编辑器的合法标签集（人物/地点/势力名），驱动 @tag 校验与 [[链接]] 补全
+  const outlineTags = useMemo(() => collectProjectTags(project), [project]);
+  const theme = useSettingsStore((s) => s.theme);
+  const isDark = resolveTheme(theme) === 'dark';
 
   // 流式回调处理函数
   const handleStreamingChunk = (response: StreamingAIResponse, finalPrompt?: string) => {
@@ -439,12 +447,17 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
               </div>
             </div>
             {outlineEditing || !outlineContent ? (
-              <textarea
-                className="flex-1 resize-none border-0 bg-transparent p-8 font-serif text-base leading-loose outline-none placeholder:text-muted-foreground/50"
-                value={outlineContent}
-                onChange={(e) => onUpdate({ outline: e.target.value })}
-                placeholder={t('steps:outline.editorPlaceholder')}
-              />
+              <div className="flex-1 min-h-0 p-4">
+                <DslEditor
+                  value={outlineContent}
+                  onChange={(v) => onUpdate({ outline: v })}
+                  validTags={outlineTags}
+                  placeholder={t('steps:outline.editorPlaceholder')}
+                  dark={isDark}
+                  height="100%"
+                  className="novel-dsl-editor h-full"
+                />
+              </div>
             ) : (
               <div className="custom-scrollbar flex-1 overflow-y-auto p-8">
                 <MarkdownView content={outlineContent} className="font-serif text-base" />

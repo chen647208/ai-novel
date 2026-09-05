@@ -278,5 +278,72 @@
     border-radius: 3px;
     padding: 0 2px;
   }
+
+  /* CM6 novelDsl 编辑器外壳 */
+  .novel-dsl-editor {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--background);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    display: flex;
+    flex-direction: column;
+  }
+  .novel-dsl-editor .cm-editor {
+    background: transparent;
+    flex: 1;
+    min-height: 0;
+  }
+  .novel-dsl-editor .cm-scroller {
+    overflow: auto;
+  }
+  .novel-dsl-editor .cm-editor.cm-focused {
+    outline: none;
+  }
+  .novel-dsl-editor .cm-content {
+    font-family: var(--font-serif, ui-serif, Georgia, serif);
+    padding: 0.5rem 0.75rem;
+  }
+  .novel-dsl-editor .cm-gutters {
+    background: transparent;
+    border: none;
+  }
+  /* novelDsl 语法着色（随明暗主题自适应） */
+  .cm-novel-heading {
+    color: var(--foreground);
+    font-weight: 700;
+  }
+  .cm-novel-keyword {
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .cm-novel-value {
+    color: var(--foreground);
+  }
+  .cm-novel-link {
+    color: var(--accent-foreground);
+    background: color-mix(in oklab, var(--accent) 16%, transparent);
+    border-radius: 3px;
+  }
+  .cm-novel-frontmatter {
+    color: var(--muted-foreground);
+    font-style: italic;
+  }
+  .cm-novel-scenebreak {
+    color: var(--muted-foreground);
+    letter-spacing: 0.3em;
+  }
+  .cm-novel-tag {
+    color: var(--primary);
+    background: color-mix(in oklab, var(--primary) 12%, transparent);
+    border-radius: 3px;
+  }
+  .cm-novel-placeholder {
+    color: var(--muted-foreground);
+    background: color-mix(in oklab, var(--muted) 60%, transparent);
+    border-radius: 3px;
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.85em;
+  }
 }
 
