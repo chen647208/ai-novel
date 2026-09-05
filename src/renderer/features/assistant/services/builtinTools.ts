@@ -17,6 +17,7 @@
  */
 import { ToolRegistry, type ToolContext, type ToolSpec } from '@core/ai';
 import type { ModelConfig, Project } from '@shared/types';
+import type { IndexSnapshot } from '@core/index';
 import { AICardCreationService } from '@/features/cards/services/aiCardCreationService';
 import { AICardCommandService } from '@/features/cards/services/aiCardCommandService';
 import {
@@ -175,7 +176,7 @@ export const indexQueryTool: ToolSpec = {
     const args = (req.args ?? {}) as { query?: unknown; tag?: unknown; limit?: unknown };
     const query = str(args.query, 'query');
     const limit = typeof args.limit === 'number' && args.limit > 0 ? Math.floor(args.limit) : 20;
-    const idx = index as import('@core/index').IndexSnapshot;
+    const idx = index as IndexSnapshot;
 
     switch (query) {
       case 'tags': {

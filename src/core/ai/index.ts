@@ -25,6 +25,14 @@ export {
   type PendingApproval,
 } from './approval.js';
 export {
+  SkillCatalog,
+  parseSkillMd,
+  type Skill,
+  type SkillCatalogOptions,
+  type SkillParseError,
+  type ParsedSkillFile,
+} from './skills.js';
+export {
   ToolRegistry,
   lintToolSchema,
   type ToolPermission,
