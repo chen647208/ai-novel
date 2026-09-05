@@ -151,6 +151,7 @@ const WritingEditorOverlayLayer: React.FC<WritingEditorOverlayLayerProps> = ({
 
       <ExportChapterModal
         isOpen={exportModalOpen}
+        project={project}
         chapters={project.chapters}
         selectedChapterIds={selectedExportChapterIds}
         format={exportFormat}

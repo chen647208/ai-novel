@@ -259,7 +259,11 @@
     "chapterHeader": "Chapter {{num}}: {{title}}",
     "noContent": "(no content)",
     "introLabel": "Synopsis:\n",
-    "bookTitleTxt": "\"{{title}}\""
+    "bookTitleTxt": "\"{{title}}\"",
+    "previewShow": "Preview",
+    "previewHide": "Hide preview",
+    "previewTitle": "Export preview (same pipeline as export)",
+    "previewCharCount": "Final word count: {{count}}"
   },
   "summarySection": {
     "title": "Chapter Content Summary",

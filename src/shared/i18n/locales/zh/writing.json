@@ -259,7 +259,11 @@
     "chapterHeader": "第 {{num}} 章：{{title}}",
     "noContent": "（暂无内容）",
     "introLabel": "简介：\n",
-    "bookTitleTxt": "《{{title}}》"
+    "bookTitleTxt": "《{{title}}》",
+    "previewShow": "预览",
+    "previewHide": "收起预览",
+    "previewTitle": "导出预览（与导出文件同源管线）",
+    "previewCharCount": "成稿字数：{{count}}"
   },
   "summarySection": {
     "title": "章节正文摘要",

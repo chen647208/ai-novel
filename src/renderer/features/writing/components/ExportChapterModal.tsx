@@ -7,10 +7,12 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Chapter } from '../../../../shared/types';
-import type { ExportFormat } from '../utils';
+import type { Chapter, Project } from '../../../../shared/types';
+import { buildExportContent, type ExportFormat } from '../utils';
+import { computeChapterStats } from '../services/writingStatsService';
+import MarkdownView from '@/shared/ui/Markdown';
 import { Button } from '@/shared/ui/Button';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
 import { cn } from '@/shared/utils/cn';
@@ -18,6 +20,7 @@ import { AlignLeft, Check, Code, FileOutput, Globe, type LucideIcon } from 'luci
 
 interface ExportChapterModalProps {
   isOpen: boolean;
+  project: Project;
   chapters: Chapter[];
   selectedChapterIds: Set<string>;
   format: ExportFormat;
@@ -36,6 +39,7 @@ const FORMAT_OPTIONS: Array<{ value: ExportFormat; label: string; icon: LucideIc
 
 const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
   isOpen,
+  project,
   chapters,
   selectedChapterIds,
   format,
@@ -47,6 +51,12 @@ const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
 }) => {
   const { t } = useTranslation('writing');
   const sortedChapters = [...chapters].sort((a, b) => a.order - b.order);
+  const [showPreview, setShowPreview] = useState(false);
+  const previewText = useMemo(
+    () => (showPreview ? buildExportContent(project, selectedChapterIds, format) : ''),
+    [showPreview, project, selectedChapterIds, format],
+  );
+  const previewStats = useMemo(() => (showPreview ? computeChapterStats(previewText) : null), [showPreview, previewText]);
 
   return (
     <Dialog
@@ -83,6 +93,9 @@ const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
           </div>
           <Button variant="link" size="sm" className="h-auto shrink-0 p-0 text-xs whitespace-nowrap" onClick={onToggleAll}>
             {selectedChapterIds.size === chapters.length ? t('export.deselectAll') : t('export.selectAll')}
+          </Button>
+          <Button variant="link" size="sm" className="h-auto shrink-0 p-0 text-xs whitespace-nowrap" onClick={() => setShowPreview((v) => !v)}>
+            {showPreview ? t('export.previewHide') : t('export.previewShow')}
           </Button>
         </div>
 
@@ -131,6 +144,24 @@ const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
             })
           )}
         </div>
+
+        {showPreview && (
+          <div className="flex min-h-0 flex-1 flex-col border-t border-border">
+            <div className="flex shrink-0 items-center justify-between border-b border-border px-6 py-2 text-xs text-muted-foreground">
+              <span>{t('export.previewTitle')}</span>
+              {previewStats && <span className="tabular-nums">{t('export.previewCharCount', { count: previewStats.charCount })}</span>}
+            </div>
+            <div className="custom-scrollbar min-h-0 flex-1 overflow-auto bg-background p-4">
+              {format === 'html' ? (
+                <iframe title="preview" srcDoc={previewText} className="h-80 w-full rounded-md border border-border bg-white" />
+              ) : format === 'md' ? (
+                <MarkdownView content={previewText} />
+              ) : (
+                <pre className="whitespace-pre-wrap font-sans text-sm leading-7">{previewText}</pre>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-muted/30 px-6 py-4">
           <Button variant="ghost" onClick={onClose}>{t('export.cancel')}</Button>
