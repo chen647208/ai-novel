@@ -25,6 +25,21 @@ export {
   type PendingApproval,
 } from './approval.js';
 export {
+  runAgentSession,
+  parseAgentReply,
+  type AgentLoopDeps,
+  type AgentTurnResult,
+  type AgentTurnToolCall,
+} from './agentLoop.js';
+export {
+  AiSession,
+  serializeEvent,
+  parseEventLine,
+  type AiEvent,
+  type SessionSink,
+  type SessionOptions,
+} from './session.js';
+export {
   SkillCatalog,
   parseSkillMd,
   type Skill,
