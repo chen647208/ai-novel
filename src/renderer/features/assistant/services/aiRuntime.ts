@@ -29,3 +29,24 @@ export const sessionManager = new AiSessionManager({
   catalog: skillCatalog,
   broker: approvalBroker,
 });
+
+// ── 插件宿主（M3）───────────────────────────────────────────────────
+
+const DISABLED_KEY = 'plugins.disabled';
+
+function readDisabledList(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(DISABLED_KEY) ?? '[]') as string[];
+  } catch {
+    return [];
+  }
+}
+
+export function saveDisabledList(ids: string[]): void {
+  localStorage.setItem(DISABLED_KEY, JSON.stringify(ids));
+}
+
+/** 启动期插件装载（预览环境无文件系统时空宿主）。状态面板复用同一 Promise。 */
+export const pluginHostPromise = import('@/shared/services/pluginService').then((m) =>
+  m.bootstrapPlugins(skillCatalog, String(__APP_VERSION__), readDisabledList()),
+);

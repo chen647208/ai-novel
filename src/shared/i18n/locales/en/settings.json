@@ -9,7 +9,8 @@
     "system": "Setup Guide",
     "storage": "Data Storage",
     "embedding": "Embedding Models",
-    "general": "General"
+    "general": "General",
+    "plugins": "Plugins"
   },
   "general": {
     "title": "General Settings",
@@ -262,5 +263,18 @@
     "newCharacterTemplate": "New Character Template",
     "duplicateName": "{{name}} (Copy)",
     "importFailedJson": "Import failed: invalid JSON format"
+  },
+  "plugins": {
+    "title": "Plugin Management",
+    "description": "Discovered plugins and their runtime state. Disabling is config-level; plugin files are kept.",
+    "failedCount": "{{count}} failed",
+    "empty": "No plugins installed. Put plugin folders under the plugins/ directory of the app data path.",
+    "enable": "Enable",
+    "disable": "Disable",
+    "state.discovered": "inactive",
+    "state.active": "active",
+    "state.failed": "failed",
+    "state.disabled": "disabled",
+    "state.uninstalled": "uninstalled"
   }
 }

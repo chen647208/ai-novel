@@ -9,7 +9,8 @@
     "system": "配置教程",
     "storage": "数据存储",
     "embedding": "向量模型",
-    "general": "通用"
+    "general": "通用",
+    "plugins": "插件"
   },
   "general": {
     "title": "通用设置",
@@ -262,5 +263,18 @@
     "newCharacterTemplate": "新角色模板",
     "duplicateName": "{{name}} (副本)",
     "importFailedJson": "导入失败：JSON格式错误"
+  },
+  "plugins": {
+    "title": "插件管理",
+    "description": "已发现的插件及其运行状态。禁用为配置级操作，不删除插件文件。",
+    "failedCount": "{{count}} 个失败",
+    "empty": "尚未安装任何插件。将插件目录放入应用数据目录的 plugins/ 下即可。",
+    "enable": "启用",
+    "disable": "禁用",
+    "state.discovered": "未激活",
+    "state.active": "运行中",
+    "state.failed": "失败",
+    "state.disabled": "已禁用",
+    "state.uninstalled": "已卸载"
   }
 }
