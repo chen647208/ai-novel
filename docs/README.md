@@ -45,13 +45,7 @@ Trail of Bits、Cloudflare coding standards、WordPress 文档风格指南同款
 - `features/plugins-and-sync.md`：插件系统、同步（冲突副本）、逐条目加密、导出构建管线
 - `features/version.md`：版本信息、更新检查与版本历史
 
-### 3. 外部调研与设计输入（research/）
-
-- `research/README.md`：调研索引——9 个同类开源写作项目 + codex/deepseek-harness 的机制拆解与可提取清单
-- `research/10-architecture-blueprint.md`：架构蓝图总纲（五条设计公理、分层架构、红线清单）
-- `research/11-migration-plan.md`：早期迁移粗排（已被 `design/08` 取代，保留作调研输入）
-
-### 4. 目标设计（design/）
+### 3. 目标设计（design/）
 
 - `design/README.md`：v2 设计索引——现状评估、目标架构、数据层、插件系统、AI 层、编辑器、导出、M0–M5 路线图
 - 注意：design/ 是**前瞻性设计**，描述目标而非现状；功能落地后回写进 features/ 对应文档
@@ -59,7 +53,7 @@ Trail of Bits、Cloudflare coding standards、WordPress 文档风格指南同款
 ## 当前文档范围
 
 - `features/` 与 `guides/` 只覆盖当前仓库里已经存在并在主线中使用的结构
-- `research/` 与 `design/` 是设计输入与目标方案，允许描述未实现内容（以各自 README 的性质声明为准）
+- `design/` 是目标方案（前瞻蓝图），允许描述未实现内容（以 design/README 的性质声明为准）
 - 已移除的兼容层不会再单独保留说明文档
 - 如代码继续调整，优先更新本目录和 `README.md`
 

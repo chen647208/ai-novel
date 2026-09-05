@@ -56,7 +56,7 @@ Project { id, title, inspiration, intro, outline,
 - **许可证治理**：`scripts/add-license-headers.mjs` + `headers:check` 强制每文件 AGPL 头；`docs/guides/licensing.md`。
 - **打包**：electron-builder（win/mac/linux 三平台脚本齐）。
 
-## 5. 与目标蓝图（research/10）的差距矩阵
+## 5. 与目标蓝图（10 篇架构总纲）的差距矩阵
 
 | 蓝图要求 | 现状 | 差距等级 |
 |---|---|---|
@@ -73,7 +73,7 @@ Project { id, title, inspiration, intro, outline,
 | i18n/主题/CI/许可证治理 | **已达标** | — |
 | 多模型适配器 | **已达标**（5 家流式） | — |
 
-## 6. 对 research/11 迁移计划的两处修正（本文实测）
+## 6. 对迁移计划粗排（11 篇）的两处修正（本文实测）
 
 1. **WP0.2 不是从零建存储**：`StorageRepository` + `SqlDriver` + `MIGRATIONS` + FTS5 已存在且设计良好（"文档行+FTS"混合模型是刻意的 Phase 0）。迁移应表述为：**schema v1（文档行）→ v2（实体行 + entity_changes）**，在同一抽象上扩展，而不是推倒。
 2. **向量层需要合并**：7 个向量/embedding 服务应收敛为 1 个 `EmbeddingProvider` + 1 个 `VectorIndex`（并入索引器），这是 P0 顺带的减脂项。

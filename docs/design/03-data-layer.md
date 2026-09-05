@@ -1,6 +1,6 @@
 # 03 数据层设计：六实体、类型注册表、DSL 与索引
 
-> 依据：research/01（novelWriter 标签/Build）、03（Trilium 六实体/entity_changes/BAttribute 源码细节）、05（Manuskript 字段清单）。落点：扩展现有 `repository/` 抽象，schema v1 → v2。
+> 依据：novelWriter 标签/Build、Trilium 六实体/entity_changes/BAttribute 源码细节、Manuskript 字段清单（调研归档于 git 历史）。落点：扩展现有 `repository/` 抽象，schema v1 → v2。
 
 ## 1. 六实体（`src/core/entities/`）
 

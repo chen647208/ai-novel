@@ -1,6 +1,6 @@
 # 04 插件系统设计：manifest v0、贡献点与运行时
 
-> 依据：research/09（合成方案）+ 07（codex manifest 实测）+ 04（Twine 版本区间/函数契约）+ 08（harness 社区设计债 → day-1 清单）。
+> 依据：编辑器内核与插件规范调研（合成方案）+ codex manifest 实测 + Twine 版本区间/函数契约 + deepseek-harness 社区设计债 → day-1 清单（调研归档于 git 历史）。
 > 定位声明：插件规范是**产品地基**不是扩展选项——功能广度靠生态供给（05 篇 bibisco 教训），核心只做数据模型 + 扩展机制。
 
 ## 1. manifest v0（`plugin.json`，schema 在 `src/core/plugin/manifest.ts` 定义）

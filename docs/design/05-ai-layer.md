@@ -1,6 +1,6 @@
 # 05 AI 层设计：工具注册表、写法技能与审批管线
 
-> 依据：research/07（codex 五层，源码实测）+ 08（harness 审批路由教训）。落点：现有 `shared/services/ai/`（适配器层，质量良好）保留上移，`assistant/` 与 `cards/` 的 4 个硬编码 prompt 服务重构为工具。
+> 依据：codex 五层源码实测 + deepseek-harness 审批路由教训（调研归档于 git 历史）。落点：现有 `shared/services/ai/`（适配器层，质量良好）保留上移，`assistant/` 与 `cards/` 的 4 个硬编码 prompt 服务重构为工具。
 
 ## 1. 分层
 

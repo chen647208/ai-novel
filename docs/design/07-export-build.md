@@ -1,6 +1,6 @@
 # 07 导出设计：Build Profile 三段式管线
 
-> 依据：research/01（novelWriter BuildSettings 全字段实测）。落点：替换现有单路径导出（writing 的 TXT/MD/HTML + 原生另存为）。
+> 依据：novelWriter BuildSettings 全字段实测（调研归档于 git 历史）。落点：替换现有单路径导出（writing 的 TXT/MD/HTML + 原生另存为）。
 
 ## 1. 模型：选择 → 变换 → 渲染（编译式导出）
 

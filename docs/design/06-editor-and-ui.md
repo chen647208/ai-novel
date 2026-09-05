@@ -1,6 +1,6 @@
 # 06 编辑器与 UI 设计：双内核、写作原语与槽位系统
 
-> 依据：research/09（TipTap/CM6 源码实测）、06（写作原语清单）、04（Twine UI 宪法）。落点：替换 `WritingEditorCanvas` 的 textarea，重写 App.tsx 状态层；Radix/Tailwind/i18n 全部保留。
+> 依据：TipTap/CM6 源码实测、写作原语清单、Twine UI 宪法（调研归档于 git 历史）。落点：替换 `WritingEditorCanvas` 的 textarea，重写 App.tsx 状态层；Radix/Tailwind/i18n 全部保留。
 
 ## 1. 双内核接入
 
