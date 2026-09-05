@@ -20,7 +20,7 @@
 | 1 | 双 profile 产出正确差异 | ✅ | 投稿版/设定集测试（c02fa95） |
 | 2 | profile 往返无损 | ✅ | roundtripProfile 测试 |
 | 3 | 插件贡献变换器 + 渲染器不改内核可选用 | ✅ | reverse-order 变换器 + rtf 渲染器测试（注册表为公开贡献点） |
-| 4 | 导出字数与统计面板一致（同源） | 🟡 | 管线 `runBuild` 返回成稿文本供统计共用（单一口径的前提已就位）；writingStatsService 切换到管线文本的接线待做 |
+| 4 | 导出字数与统计面板一致（同源） | ✅ | `builtCharCount`（ab8cc0b）：统计面板与导出共用 `runBuild` 管线文本，同源断言测试 |
 
 ## 04 插件系统（§10 五条）
 
