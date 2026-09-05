@@ -9,9 +9,10 @@
 
 /**
  * Build Profile（docs/design/07 §2）：选择 → 变换 → 渲染 的声明式定义。
- * Profile 是一等公民：多套并存、可 diff、可分享。v0 序列化为 JSON
- * （.novel/builds/*.json）；YAML 序列化随导入导出 UI 接入。
+ * Profile 是一等公民：多套并存、可 diff、可分享。序列化支持 JSON 与
+ * YAML（.novel/builds/*.yml，js-yaml 双向往返，验收 2）。
  */
+import yaml from 'js-yaml';
 
 export interface BuildSelection {
   /** 参与构建的类型模板 id；'*' 后缀为类别通配（如 'card.*'） */
@@ -95,6 +96,24 @@ export const COMPENDIUM_BUILD_PROFILE: BuildProfile = {
 /** 深拷贝往返（验收 2：编辑→保存→重载无损）。 */
 export function roundtripProfile(profile: BuildProfile): BuildProfile {
   return JSON.parse(JSON.stringify(profile)) as BuildProfile;
+}
+
+/** Profile → YAML 文本（.yml 分享单元）。 */
+export function serializeProfileYaml(profile: BuildProfile): string {
+  return yaml.dump(profile, { lineWidth: 120, noRefs: true });
+}
+
+/** YAML 文本 → Profile；结构校验失败抛错（导入 UI 捕获提示）。 */
+export function parseProfileYaml(text: string): BuildProfile {
+  const parsed = yaml.load(text);
+  if (typeof parsed !== 'object' || parsed === null) {
+    throw new Error('Profile YAML 必须是对象');
+  }
+  const m = parsed as Record<string, unknown>;
+  for (const key of ['name', 'format', 'selection', 'transform', 'render']) {
+    if (!(key in m)) throw new Error(`Profile YAML 缺少字段：${key}`);
+  }
+  return m as unknown as BuildProfile;
 }
 
 /** 前缀匹配类型：'card.*' 匹配所有 card.*；否则精确相等。 */

@@ -12,6 +12,8 @@ import {
   DEFAULT_BUILD_PROFILE,
   COMPENDIUM_BUILD_PROFILE,
   roundtripProfile,
+  serializeProfileYaml,
+  parseProfileYaml,
   runBuild,
   registerTransformer,
   registerRenderer,
@@ -110,5 +112,27 @@ describe('验收 3：插件贡献点（变换器 + 渲染器）不改内核可�
     const reversed = listTransformers().find((t) => t.id === 'example.reverse-order')!.apply(nodes);
     const blocks = runBuild(profile, { nodes: reversed as never, attrs: [], edges: [] });
     expect(blocks.text.startsWith('{\\rtf1')).toBe(true);
+  });
+});
+
+describe('YAML 序列化（design/07 §2 .yml 分享单元）', () => {
+  it('YAML 往返无损', () => {
+    const yamlText = serializeProfileYaml(draftProfile);
+    expect(yamlText).toContain('name: 起点投稿版');
+    const loaded = parseProfileYaml(yamlText);
+    expect(loaded).toEqual(draftProfile);
+  });
+
+  it('YAML 双档往返互不串扰', () => {
+    const a = parseProfileYaml(serializeProfileYaml(DEFAULT_BUILD_PROFILE));
+    const b = parseProfileYaml(serializeProfileYaml(COMPENDIUM_BUILD_PROFILE));
+    expect(a.format).toBe('md');
+    expect(b.format).toBe('html');
+    expect(a.selection.rootSwitches.cards).toBe(false);
+    expect(b.selection.rootSwitches.cards).toBe(true);
+  });
+
+  it('缺字段报错', () => {
+    expect(() => parseProfileYaml('name: x\nformat: txt')).toThrow(/缺少字段/);
   });
 });

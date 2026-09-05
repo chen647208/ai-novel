@@ -12,6 +12,8 @@ export {
   DEFAULT_BUILD_PROFILE,
   COMPENDIUM_BUILD_PROFILE,
   roundtripProfile,
+  serializeProfileYaml,
+  parseProfileYaml,
   typeMatches,
   type BuildProfile,
   type BuildSelection,
