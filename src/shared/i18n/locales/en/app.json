@@ -101,5 +101,22 @@
     "reportSkipped": "Skipped (up to date): {{count}}",
     "reportManual": "Needs manual review: {{count}}",
     "conflictCopies": "Conflict copies (local kept, remote saved as copies)"
+  },
+  "protected": {
+    "title": "Protected Session",
+    "description": "Encrypt individual chapters with a passphrase (AES-256-GCM). The passphrase lives in memory for this session only and is lost on quit — without it content cannot be recovered.",
+    "passphrasePlaceholder": "Enter passphrase",
+    "unlockHint": "Unlock to encrypt/decrypt chapters on this page.",
+    "unlock": "Unlock",
+    "unlockFailed": "Unlock failed",
+    "lock": "Lock",
+    "close": "Close",
+    "encrypt": "Encrypt",
+    "decrypt": "Decrypt",
+    "encryptFailed": "Encryption failed",
+    "decryptFailed": "Decryption failed",
+    "encryptConfirmTitle": "Encrypt chapter?",
+    "encryptConfirmMessage": "\"{{title}}\" will be encrypted into an envelope. Without the passphrase it cannot be recovered.",
+    "noChapters": "No chapters in this book yet"
   }
 }

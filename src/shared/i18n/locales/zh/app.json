@@ -101,5 +101,22 @@
     "reportSkipped": "已同步跳过：{{count}} 条",
     "reportManual": "需人工处理：{{count}} 条",
     "conflictCopies": "冲突副本（本地已保留，远端以副本落库）"
+  },
+  "protected": {
+    "title": "受保护会话",
+    "description": "用口令加密单个章节（AES-256-GCM）。口令只存在于本次会话内存，关闭应用即失效——忘记口令将无法还原。",
+    "passphrasePlaceholder": "输入口令",
+    "unlockHint": "解锁后可对本页章节逐个加密/解密。",
+    "unlock": "解锁",
+    "unlockFailed": "解锁失败",
+    "lock": "锁定",
+    "close": "关闭",
+    "encrypt": "加密",
+    "decrypt": "解密",
+    "encryptFailed": "加密失败",
+    "decryptFailed": "解密失败",
+    "encryptConfirmTitle": "加密章节？",
+    "encryptConfirmMessage": "《{{title}}》的正文将被加密为信封。没有口令将无法还原，请牢记口令。",
+    "noChapters": "本书暂无章节"
   }
 }

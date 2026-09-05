@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 
 import SyncDialog from './SyncDialog';
+import ProtectedSessionDialog from './ProtectedSessionDialog';
 
 interface WorkspaceTopbarProps {
   project: Project | null;
@@ -199,6 +200,7 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
         )}
 
         <SyncDialog project={project} />
+        <ProtectedSessionDialog />
 
         <Button
           variant="ghost"
