@@ -36,6 +36,15 @@ export {
   type InterceptHandler,
 } from './events.js';
 export {
+  BUILTIN_FEATURES,
+  BUILTIN_BUNDLES,
+  assemblyTree,
+  type FeatureDecl,
+  type Bundle,
+  type Profile,
+  type AssemblyRow,
+} from './bundles.js';
+export {
   installHooks,
   installTypeTemplates,
   BuildProfileRegistry,

@@ -275,6 +275,10 @@
     "state.active": "运行中",
     "state.failed": "失败",
     "state.disabled": "已禁用",
-    "state.uninstalled": "已卸载"
+    "state.uninstalled": "已卸载",
+    "tree": {
+      "show": "查看装配树",
+      "hide": "收起装配树"
+    }
   }
 }

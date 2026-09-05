@@ -275,6 +275,10 @@
     "state.active": "active",
     "state.failed": "failed",
     "state.disabled": "disabled",
-    "state.uninstalled": "uninstalled"
+    "state.uninstalled": "uninstalled",
+    "tree": {
+      "show": "Show assembly tree",
+      "hide": "Hide assembly tree"
+    }
   }
 }

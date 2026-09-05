@@ -14,11 +14,12 @@ import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
 import { pluginHostPromise, saveDisabledList } from '@/features/assistant/services/aiRuntime';
-import type { PluginStatus } from '@core/plugin';
+import { assemblyTree, type AssemblyRow, type PluginStatus } from '@core/plugin';
 
 const PluginSettingsPanel: React.FC = () => {
   const { t } = useTranslation('settings');
   const [statuses, setStatuses] = useState<PluginStatus[] | null>(null);
+  const [tree, setTree] = useState<AssemblyRow[] | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -61,6 +62,21 @@ const PluginSettingsPanel: React.FC = () => {
         {failed > 0 && <Badge variant="destructive">{t('plugins.failedCount', { count: failed })}</Badge>}
       </div>
       <p className="text-sm text-muted-foreground">{t('plugins.description')}</p>
+
+      <div>
+        <Button size="sm" variant="outline" onClick={() => setTree((v) => (v ? null : assemblyTree({ name: 'current', plugins: ['com.novalocal.bundle.core', 'com.novalocal.bundle.world', 'com.novalocal.bundle.ai'], policies: {} })))}>
+          {tree ? t('plugins.tree.hide') : t('plugins.tree.show')}
+        </Button>
+        {tree && (
+          <div className="mt-2 overflow-x-auto rounded-lg border border-border p-3 font-mono text-xs">
+            {tree.map((row) => (
+              <div key={row.feature} className={row.enabled ? 'text-foreground' : 'text-muted-foreground'}>
+                {row.enabled ? '✓' : '✗'} {row.feature} <span className="text-muted-foreground">← {row.source}{row.reason ? `（${row.reason}）` : ''}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {!statuses.length && <div className="rounded-lg border border-border p-6 text-center text-sm text-muted-foreground">{t('plugins.empty')}</div>}
 
