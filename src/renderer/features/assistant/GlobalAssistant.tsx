@@ -13,6 +13,8 @@ import { type KnowledgeItem, type OutputMode, type Character, type Location, typ
 import { type GlobalAssistantProps, type ChatMessage, type AssistantCategory, type AssistantEditCategory, type SyncStatus, type EditingData, type AssistantWindowSize } from './types';
 import { type LooseRecord, asRecord, asStr } from '../../shared/utils/loose';
 import { AIService } from './services/aiService';
+import { sessionManager } from './services/aiRuntime';
+import { indexService } from '@core/index';
 import { AICardCreationService } from '../cards/services/aiCardCreationService';
 import { AICardCommandService } from '../cards/services/aiCardCommandService';
 import { getDefaultCardPrompts } from '../cards/services/cardPromptService';
@@ -251,17 +253,9 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       return;
     }
     
+    // ── Agent 循环（M2.7 自举）：装配 → 网关 → 工具（三档审批）→ 答复 ──
     setIsLoading(true);
-    const userMsg: ChatMessage = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: text,
-      attachments: attachments,
-      timestamp: Date.now()
-    };
-    
-    setMessages(prev => [...prev, userMsg]);
-    
+
     const activeModel = models.find(m => m.id === currentModelId) || models[0];
     if (!activeModel) {
       setMessages(prev => [...prev, {
@@ -274,101 +268,35 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       setIsLoading(false);
       return;
     }
-    
-    const contextPrompt = messages.slice(-10).map(m => 
-      `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`
-    ).join('\n\n');
 
-    let currentContent = text;
+    const controller = new AbortController();
+    streamAbortRef.current = controller;
+
+    let taskText = text;
     if (attachments && attachments.length > 0) {
       const fileContent = attachments.map(f => `[参考内容: ${f.name}]\n${f.content.substring(0, 15000)}... (内容过长已截断)`).join('\n\n');
-      currentContent += `\n\n### 附带参考资料:\n${fileContent}`;
+      taskText += `\n\n### 附带参考资料:\n${fileContent}`;
     }
 
-    const finalPrompt = `以下是对话历史：\n${contextPrompt}\n\nUser: ${currentContent}\n\nAssistant:`;
+    const result = await sessionManager.run({
+      bookId: project?.id,
+      task: taskText,
+      project,
+      index: (project && indexService.snapshot(project.id)) || undefined,
+      model: activeModel,
+      signal: controller.signal,
+    });
 
-    const shouldUseStreaming = outputMode === 'streaming' && activeModel.supportsStreaming !== false;
-    
-    if (shouldUseStreaming) {
-      const aiMsgId = (Date.now() + 1).toString();
-      const aiMsg: ChatMessage = {
-        id: aiMsgId,
-        role: 'assistant',
-        content: '',
-        timestamp: Date.now(),
-        isStreaming: true
-      };
-      
-      setMessages(prev => [...prev, aiMsg]);
-      setStreamingMessageId(aiMsgId);
-      const controller = new AbortController();
-      streamAbortRef.current = controller;
-      
-      try {
-        await AIService.callStreaming(activeModel, finalPrompt, (response) => {
-          setMessages(prev => prev.map(msg => {
-            if (msg.id === aiMsgId) {
-              return {
-                ...msg,
-                content: response.content,
-                tokens: response.tokens,
-                model: response.model,
-                finishReason: response.finishReason,
-                error: response.error,
-                isStreaming: !response.isComplete
-              };
-            }
-            return msg;
-          }));
-          
-          if (response.isComplete) {
-            setStreamingMessageId(null);
-            setIsLoading(false);
-            streamAbortRef.current = null;
-          }
-        }, { signal: controller.signal });
-      } catch (err) {
-        setMessages(prev => prev.map(msg => {
-          if (msg.id === aiMsgId) {
-            return {
-              ...msg,
-              content: t('chat.streamFailedContent', { error: err instanceof Error ? err.message : t('chat.unknownError') }),
-              isStreaming: false,
-              error: t('chat.streamFailed')
-            };
-          }
-          return msg;
-        }));
-        setStreamingMessageId(null);
-        setIsLoading(false);
-        streamAbortRef.current = null;
-      }
-    } else {
-      try {
-        const response = await AIService.call(activeModel, finalPrompt);
-        const aiMsg: ChatMessage = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: response.content,
-          tokens: response.tokens,
-          model: response.model,
-          finishReason: response.finishReason,
-          error: response.error,
-          timestamp: Date.now()
-        };
-        setMessages(prev => [...prev, aiMsg]);
-      } catch {
-        setMessages(prev => [...prev, {
-          id: Date.now().toString(),
-          role: 'assistant',
-          content: t('chat.callFailedContent'),
-          timestamp: Date.now(),
-          error: t('chat.callFailed')
-        }]);
-      } finally {
-        setIsLoading(false);
-      }
-    }
+    streamAbortRef.current = null;
+    setStreamingMessageId(null);
+    setMessages(prev => [...prev, {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant' as const,
+      content: result.ok ? result.reply : (result.error ?? t('chat.callFailedContent')),
+      timestamp: Date.now(),
+      error: result.ok ? undefined : t('chat.callFailed'),
+    }]);
+    setIsLoading(false);
   };
 
   const handleSendMessage = () => {
