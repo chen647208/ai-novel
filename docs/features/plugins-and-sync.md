@@ -1,0 +1,51 @@
+# 插件系统、同步与逐条目加密（M3/M4 落地功能）
+
+> 本文回写 M3（插件化）与 M4（同步/加密）已落地的用户可见能力。设计蓝图见
+> `design/04-plugin-system.md` 与 `design/03-data-layer.md`；验收证据见
+> `guides/acceptance-report.md`。
+
+## 插件系统（M3）
+
+- **manifest v0**：插件 = `userData/plugins/<反向域名 id>/plugin.json` + 贡献文件。
+  校验错误定位到 JSON 路径；`host` 版本区间不匹配则贡献整体失效并上报。
+- **资源型贡献点（v0）**：
+  - `skills`：SKILL.md 写法技能，进入技能目录（渐进注入、可卸载）
+  - `types`：类型模板（强制 `短id.` 命名空间前缀，防抢占内置类型）
+  - `buildProfiles`：导出构建档（JSON，构建管线消费）
+  - `hooks`：声明式策略（JSON，v0 支持 ai 接缝的 inject/filter）
+- **运行时**：逐插件 try-catch 故障隔离；一切注册返回 `Disposable`，
+  禁用/卸载时逆序释放（unwind 不变量）；权限 deny-by-default。
+- **状态面板**：设置 → 插件——状态徽标、错误 cause 链详情、一键禁用/启用
+  （配置级，持久化于 localStorage）。
+- **发行档**：完整 / 网文 / 严肃文学 / 纯写作（minimal）。minimal 经
+  `ai.request` 拦截器即时禁用全部 AI 请求（会话与工具），切回即恢复。
+- **SDK**：`sdk/`（`@ai-novel/plugin-sdk`，MIT 独立发行，与宿主 AGPL 解耦）。
+
+## 同步（M4）
+
+- **协议**：`src/core/sync` —— bundle = 变更记录（entity_changes 派生）+
+  实体快照；`canonicalHash`（FNV-1a 稳定序列化）为跨设备合并判定依据。
+- **合并规则（LWW 禁用）**：本地缺失→插入；内容一致→跳过；双方都改→
+  **冲突副本**（本地保留，远端以 `conflict-<id>` 新 id 落库、属性随迁）；
+  attrs/edges 冲突报告人工处理，绝不自动覆盖。
+- **UI**：工作台顶栏 ⇄ 同步——导出同步包（JSON 另存为）/ 导入合并 +
+  应用报告（已应用/已跳过/需人工 + 冲突副本清单）。
+- 后续：transport 云化（协议与传输已解耦）、逐设备 instance 管理。
+
+## 逐条目加密（M4）
+
+- **核心**：`src/core/crypto` —— AES-256-GCM + PBKDF2（21 万次迭代），
+  信封 `enc.v1:<salt>.<iv>.<ciphertext>`（全 base64）直接存入章节正文。
+- **受保护会话**：顶栏盾牌——口令驻留内存（会话级），按信封盐缓存派生
+  密钥（跨会话同口令可解）；锁定即抹除。解锁后可对章节逐个加密/解密
+  （加密二次确认警示不可逆）。
+- 后续：与编辑器渲染的透明集成（解锁态自动解密显示）。
+
+## 导出构建（M4，design/07）
+
+- `src/core/build` 三段式管线：selection（类型通配/单点排除/整类开关/
+  状态过滤）→ transform（`%N %T` 标题模板、重编号、stripTags、引用替换）
+  → render（txt/md/html 内置；变换器与渲染器为插件贡献点）。
+- 写作编辑器导出弹窗即管线适配器：含导出预览（md 渲染/html iframe/txt）
+  与成稿字数——统计面板 `builtCharCount` 与导出同源（单一口径）。
+- Profile 支持 JSON/YAML 双序列化（`.yml` 可 diff 可分享）。
