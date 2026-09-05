@@ -3,8 +3,8 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 /**
@@ -20,8 +20,8 @@
  *    现统一放入 config 字段，系统提示词真正生效
  */
 import { GoogleGenAI } from '@google/genai';
-import { i18n } from '@/i18n';
-import type { ModelConfig, AIResponse, StreamingAIResponse } from '../../../../../shared/types';
+import { aiT } from '../i18n.js';
+import type { ModelConfig, AIResponse, StreamingAIResponse } from '../../../shared/types.js';
 import { cleanModelOutput, extractGeminiTokenUsage, isAbortError, readErrorResponse } from '../messages.js';
 import { createSSEParser } from '../sse.js';
 import { AIRequestError, DEFAULT_TEMPERATURE, type CallOptions, type ProviderAdapter } from '../types.js';
@@ -133,7 +133,7 @@ async function streamViaSDK(
   let accumulated = '';
   for await (const raw of stream as AsyncIterable<{ text?: string } & GeminiResponse>) {
     if (options?.signal?.aborted) {
-      onChunk({ content: accumulated, error: '生成已取消', isComplete: true, isStreaming: false });
+      onChunk({ content: accumulated, error: aiT('streamCancelled'), isComplete: true, isStreaming: false });
       return;
     }
     const delta = typeof raw.text === 'string' ? raw.text : geminiText(raw);
@@ -158,7 +158,7 @@ export const geminiAdapter: ProviderAdapter = {
 
   async complete(model: ModelConfig, prompt: string, options?: CallOptions): Promise<AIResponse> {
     if (!model.apiKey) {
-      return { content: '', error: i18n.t('errors:apiKeyMissing', { provider: 'Gemini' }) };
+      return { content: '', error: aiT('apiKeyMissing', { provider: 'Gemini' }) };
     }
     try {
       if (isOpenAICompatibleEndpoint(model)) {
@@ -183,9 +183,9 @@ export const geminiAdapter: ProviderAdapter = {
       return await completeViaSDK(model, prompt, options);
     } catch (error) {
       if (isAbortError(error)) {
-        return { content: '', error: '请求已取消', metadata: { prompt, modelConfig: model } };
+        return { content: '', error: aiT('streamCancelled'), metadata: { prompt, modelConfig: model } };
       }
-      return { content: '', error: i18n.t('errors:requestFailed', { provider: 'Gemini', message: error instanceof Error ? error.message : String(error) }) };
+      return { content: '', error: aiT('requestFailed', { provider: 'Gemini', message: error instanceof Error ? error.message : String(error) }) };
     }
   },
 
@@ -196,7 +196,7 @@ export const geminiAdapter: ProviderAdapter = {
     options?: CallOptions,
   ): Promise<void> {
     if (!model.apiKey) {
-      onChunk({ content: '', error: i18n.t('errors:apiKeyMissing', { provider: 'Gemini' }), isComplete: true });
+      onChunk({ content: '', error: aiT('apiKeyMissing', { provider: 'Gemini' }), isComplete: true });
       return;
     }
     if (model.supportsStreaming === false) {
@@ -216,7 +216,7 @@ export const geminiAdapter: ProviderAdapter = {
           { retries: options?.retries ?? 2, signal: options?.signal },
         );
         const reader = res.body?.getReader();
-        if (!reader) throw new Error(i18n.t('errors:streamReadFailed'));
+        if (!reader) throw new Error(aiT('streamReadFailed'));
 
         const decoder = new TextDecoder();
         let tokens: AIResponse['tokens'];
@@ -264,7 +264,7 @@ export const geminiAdapter: ProviderAdapter = {
       } catch (error) {
         onChunk({
           content: accumulated,
-          error: isAbortError(error) ? '生成已取消' : i18n.t('errors:streamFailed', { provider: 'Gemini', message: error instanceof Error ? error.message : String(error) }),
+          error: isAbortError(error) ? aiT('streamCancelled') : aiT('streamFailed', { provider: 'Gemini', message: error instanceof Error ? error.message : String(error) }),
           isComplete: true,
           isStreaming: false,
         });
@@ -277,7 +277,7 @@ export const geminiAdapter: ProviderAdapter = {
     } catch (error) {
       onChunk({
         content: '',
-        error: isAbortError(error) ? '生成已取消' : i18n.t('errors:sdkStreamError', { provider: 'Gemini', message: error instanceof Error ? error.message : String(error) }),
+        error: isAbortError(error) ? aiT('streamCancelled') : aiT('sdkStreamError', { provider: 'Gemini', message: error instanceof Error ? error.message : String(error) }),
         isComplete: true,
         isStreaming: false,
       });

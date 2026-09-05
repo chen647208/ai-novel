@@ -10,6 +10,7 @@
   "requestFailedGeneric": "接口请求失败: {{message}}",
   "requestFailedUnknown": "接口请求失败: 未知错误",
   "requestFailedStatus": "请求失败 ({{status}}): {{detail}}",
+  "streamCancelled": "生成已取消",
   "streamReadFailed": "无法读取响应流",
   "streamError": "{{provider}} 流式返回错误",
   "streamErrorGeneric": "流式返回错误",

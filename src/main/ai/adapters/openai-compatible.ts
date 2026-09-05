@@ -3,8 +3,8 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 /**
@@ -12,8 +12,8 @@
  * 覆盖三类上游：provider=openai-chat、provider=ollama、
  * 以及使用 /v1beta/openai/ 兼容端点的 Gemini 配置。
  */
-import { i18n } from '@/i18n';
-import type { ModelConfig, AIResponse, StreamingAIResponse } from '../../../../../shared/types';
+import { aiT } from '../i18n.js';
+import type { ModelConfig, AIResponse, StreamingAIResponse } from '../../../shared/types.js';
 import { buildMessages, cleanModelOutput, extractOpenAITokenUsage, isAbortError, openAIChatUrl, readErrorResponse } from '../messages.js';
 import { createSSEParser } from '../sse.js';
 import { AIRequestError, DEFAULT_TEMPERATURE, type CallOptions, type ProviderAdapter } from '../types.js';
@@ -93,11 +93,11 @@ export const openAICompatibleAdapter: ProviderAdapter = {
       };
     } catch (error) {
       if (isAbortError(error)) {
-        return { content: '', error: '请求已取消', metadata: { prompt, modelConfig: model } };
+        return { content: '', error: aiT('streamCancelled'), metadata: { prompt, modelConfig: model } };
       }
       return {
         content: '',
-        error: error instanceof Error ? i18n.t('errors:requestFailedGeneric', { message: error.message }) : i18n.t('errors:requestFailedUnknown'),
+        error: error instanceof Error ? aiT('requestFailedGeneric', { message: error.message }) : aiT('requestFailedUnknown'),
         metadata: { prompt, modelConfig: model },
       };
     }
@@ -122,7 +122,7 @@ export const openAICompatibleAdapter: ProviderAdapter = {
       );
 
       const reader = res.body?.getReader();
-      if (!reader) throw new Error(i18n.t('errors:streamReadFailed'));
+      if (!reader) throw new Error(aiT('streamReadFailed'));
 
       const decoder = new TextDecoder();
       let done = false;
@@ -180,7 +180,7 @@ export const openAICompatibleAdapter: ProviderAdapter = {
     } catch (error) {
       onChunk({
         content: accumulated,
-        error: isAbortError(error) ? '生成已取消' : i18n.t('errors:streamExceptionGeneric', { message: error instanceof Error ? error.message : String(error) }),
+        error: isAbortError(error) ? aiT('streamCancelled') : aiT('streamExceptionGeneric', { message: error instanceof Error ? error.message : String(error) }),
         isComplete: true,
         isStreaming: false,
       });

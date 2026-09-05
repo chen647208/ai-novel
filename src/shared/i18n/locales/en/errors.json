@@ -10,6 +10,7 @@
   "requestFailedGeneric": "Request failed: {{message}}",
   "requestFailedUnknown": "Request failed: unknown error",
   "requestFailedStatus": "Request failed ({{status}}): {{detail}}",
+  "streamCancelled": "Generation cancelled",
   "streamReadFailed": "Unable to read the response stream.",
   "streamError": "{{provider}} stream returned an error.",
   "streamErrorGeneric": "The stream returned an error.",

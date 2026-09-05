@@ -3,8 +3,8 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 import { contextBridge, ipcRenderer } from 'electron';
@@ -47,5 +47,19 @@ contextBridge.exposeInMainWorld('electronAPI', {
     run: (sql: string, params?: unknown[]) => ipcRenderer.invoke(IPC.db.run, sql, params),
     all: (sql: string, params?: unknown[]) => ipcRenderer.invoke(IPC.db.all, sql, params),
     get: (sql: string, params?: unknown[]) => ipcRenderer.invoke(IPC.db.get, sql, params),
+  },
+
+  // AI 网关（适配器在主进程执行；流式事件经 streamEvent 通道按 requestId 推送）
+  aiGateway: {
+    complete: (requestId: string, model: unknown, prompt: string, options?: unknown) =>
+      ipcRenderer.invoke(IPC.ai.complete, requestId, model, prompt, options),
+    openStream: (requestId: string, model: unknown, prompt: string, options?: unknown) =>
+      ipcRenderer.invoke(IPC.ai.streamOpen, requestId, model, prompt, options),
+    abort: (requestId: string) => ipcRenderer.invoke(IPC.ai.abort, requestId),
+    onStreamEvent: (listener: (event: unknown) => void) => {
+      const handler = (_event: unknown, payload: unknown): void => listener(payload);
+      ipcRenderer.on(IPC.ai.streamEvent, handler);
+      return () => ipcRenderer.removeListener(IPC.ai.streamEvent, handler);
+    },
   },
 });

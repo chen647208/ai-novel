@@ -94,4 +94,4 @@ electronDownload:
 forceCodeSigning: false
 
 extraMetadata:
-  main: build/main/main.js
+  main: build/main/main/main.js

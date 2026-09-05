@@ -3,8 +3,8 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 /**
@@ -18,8 +18,8 @@
  *  - 响应正文在 output[].content[] 中 type==='output_text' 的 text；
  *  - 流式为 SSE，事件 response.output_text.delta 携带增量，response.completed 收尾并带 usage。
  */
-import { i18n } from '@/i18n';
-import type { ModelConfig, AIResponse, StreamingAIResponse } from '../../../../../shared/types';
+import { aiT } from '../i18n.js';
+import type { ModelConfig, AIResponse, StreamingAIResponse } from '../../../shared/types.js';
 import { cleanModelOutput, extractResponsesTokenUsage, isAbortError, readErrorResponse } from '../messages.js';
 import { createSSEParser } from '../sse.js';
 import { AIRequestError, type CallOptions, type ProviderAdapter } from '../types.js';
@@ -111,10 +111,10 @@ export const openAIResponsesAdapter: ProviderAdapter = {
 
   async complete(model: ModelConfig, prompt: string, options?: CallOptions): Promise<AIResponse> {
     if (!model.apiKey) {
-      return { content: '', error: i18n.t('errors:apiKeyMissing', { provider: 'OpenAI' }) };
+      return { content: '', error: aiT('apiKeyMissing', { provider: 'OpenAI' }) };
     }
     if (!model.endpoint?.trim()) {
-      return { content: '', error: i18n.t('errors:endpointMissingGeneric') };
+      return { content: '', error: aiT('endpointMissingGeneric') };
     }
     const url = responsesUrl(model.endpoint);
     try {
@@ -134,11 +134,11 @@ export const openAIResponsesAdapter: ProviderAdapter = {
       };
     } catch (error) {
       if (isAbortError(error)) {
-        return { content: '', error: '请求已取消', metadata: { prompt, modelConfig: model } };
+        return { content: '', error: aiT('streamCancelled'), metadata: { prompt, modelConfig: model } };
       }
       return {
         content: '',
-        error: i18n.t('errors:requestFailed', { provider: 'Responses', message: error instanceof Error ? error.message : String(error) }),
+        error: aiT('requestFailed', { provider: 'Responses', message: error instanceof Error ? error.message : String(error) }),
         metadata: { prompt, modelConfig: model },
       };
     }
@@ -151,11 +151,11 @@ export const openAIResponsesAdapter: ProviderAdapter = {
     options?: CallOptions,
   ): Promise<void> {
     if (!model.apiKey) {
-      onChunk({ content: '', error: i18n.t('errors:apiKeyMissing', { provider: 'OpenAI' }), isComplete: true });
+      onChunk({ content: '', error: aiT('apiKeyMissing', { provider: 'OpenAI' }), isComplete: true });
       return;
     }
     if (!model.endpoint?.trim()) {
-      onChunk({ content: '', error: i18n.t('errors:endpointMissingGeneric'), isComplete: true });
+      onChunk({ content: '', error: aiT('endpointMissingGeneric'), isComplete: true });
       return;
     }
     if (model.supportsStreaming === false) {
@@ -178,7 +178,7 @@ export const openAIResponsesAdapter: ProviderAdapter = {
       );
 
       const reader = res.body?.getReader();
-      if (!reader) throw new Error(i18n.t('errors:streamReadFailed'));
+      if (!reader) throw new Error(aiT('streamReadFailed'));
 
       const decoder = new TextDecoder();
       let done = false;
@@ -220,7 +220,7 @@ export const openAIResponsesAdapter: ProviderAdapter = {
             finishReason = parsed.response?.status ?? parsed.type;
             break;
           case 'error':
-            streamError = parsed.error?.message ?? parsed.message ?? i18n.t('errors:streamError', { provider: 'Responses' });
+            streamError = parsed.error?.message ?? parsed.message ?? aiT('streamError', { provider: 'Responses' });
             break;
           default:
             break;
@@ -261,7 +261,7 @@ export const openAIResponsesAdapter: ProviderAdapter = {
     } catch (error) {
       onChunk({
         content: accumulated,
-        error: isAbortError(error) ? '生成已取消' : i18n.t('errors:streamException', { provider: 'Responses', message: error instanceof Error ? error.message : String(error) }),
+        error: isAbortError(error) ? aiT('streamCancelled') : aiT('streamException', { provider: 'Responses', message: error instanceof Error ? error.message : String(error) }),
         isComplete: true,
         isStreaming: false,
       });

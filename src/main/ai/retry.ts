@@ -3,11 +3,11 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { i18n } from '@/i18n';
+import { aiT } from './i18n.js';
 import { AIRequestError } from './types.js';
 
 /** 判断错误是否值得重试：网络异常、429、5xx */
@@ -89,7 +89,7 @@ export async function withRetry<T>(fn: (attempt: number) => Promise<T>, options:
 /** 从失败响应构造 AIRequestError（统一状态码→可重试映射与 Retry-After 解析） */
 export function requestErrorFromResponse(status: number, statusText: string, bodySnippet: string): AIRequestError {
   const retryable = status === 429 || status >= 500;
-  return new AIRequestError(i18n.t('errors:requestFailedStatus', { status, detail: bodySnippet || statusText }), status, retryable);
+  return new AIRequestError(aiT('requestFailedStatus', { status, detail: bodySnippet || statusText }), status, retryable);
 }
 
 /** 解析 Retry-After 头（秒）为毫秒 */

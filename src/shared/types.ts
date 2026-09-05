@@ -3,8 +3,8 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 
@@ -104,6 +104,19 @@ export interface StreamingAIResponse extends AIResponse {
 
 // 流式回调类型
 export type StreamingCallback = (response: StreamingAIResponse) => void;
+
+/** AI 网关调用选项（跨 IPC 的线上版本）。AbortSignal 不跨进程：取消经 requestId 走 abort 通道。 */
+export interface AiCallOptions {
+  /** 瞬时失败（网络/429/5xx）的额外重试次数，默认 2 */
+  retries?: number;
+}
+
+/** AI 网关流式事件（ai:stream:event 通道载荷，按 requestId 多路分发）。
+ * delta.content 为累计值；done 携带最终完整块（含 tokens/finishReason/error/notice）。 */
+export type AiStreamEvent =
+  | { t: 'delta'; requestId: string; accumulated: string; model?: string; tokens?: AIResponse['tokens'] }
+  | { t: 'done'; requestId: string; response: StreamingAIResponse }
+  | { t: 'error'; requestId: string; error: string };
 
 export interface Character {
   id: string;
@@ -998,6 +1011,14 @@ export interface ElectronAPI {
     run: (sql: string, params?: unknown[]) => Promise<{ changes: number; lastInsertRowid: number }>;
     all: (sql: string, params?: unknown[]) => Promise<Record<string, unknown>[]>;
     get: (sql: string, params?: unknown[]) => Promise<Record<string, unknown> | undefined>;
+  };
+
+  // AI 网关（适配器在主进程执行；流式经 ai:stream:event 按 requestId 推送）
+  aiGateway: {
+    complete: (requestId: string, model: ModelConfig, prompt: string, options?: AiCallOptions) => Promise<AIResponse>;
+    openStream: (requestId: string, model: ModelConfig, prompt: string, options?: AiCallOptions) => Promise<boolean>;
+    abort: (requestId: string) => Promise<boolean>;
+    onStreamEvent: (listener: (event: AiStreamEvent) => void) => () => void;
   };
 }
 

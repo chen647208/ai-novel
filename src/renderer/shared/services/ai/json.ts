@@ -3,18 +3,19 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 /**
  * 结构化 JSON 输出：解析 + 校验 + 自动修复重试。
  * 用于卡片生成、一致性检查等要求模型返回严格 JSON 的场景。
+ * 修复循环留在渲染端：validate 是函数（不可跨 IPC），补全经网关主进程执行。
  */
 import { i18n } from '@/i18n';
 import type { ModelConfig } from '../../../../shared/types';
-import { resolveAdapter } from './resolve.js';
-import type { CallOptions } from './types.js';
+import { aiGatewayClient } from './gatewayClient.js';
+import type { CallOptions } from './gatewayClient.js';
 
 /** 从模型输出中提取 JSON 候选文本：容忍围栏、前后缀说明文字 */
 export function extractJSONCandidate(raw: string): string {
@@ -59,11 +60,10 @@ export async function callJSON<T = unknown>(
   options: JSONCallOptions<T> = {},
 ): Promise<JSONCallResult<T>> {
   const { validate, repairAttempts = 1, ...callOptions } = options;
-  const adapter = resolveAdapter(model);
   let currentPrompt = prompt;
 
   for (let attempt = 0; attempt <= repairAttempts; attempt++) {
-    const response = await adapter.complete(model, currentPrompt, callOptions);
+    const response = await aiGatewayClient.complete(model, currentPrompt, callOptions);
     if (response.error) {
       return { raw: '', error: response.error };
     }

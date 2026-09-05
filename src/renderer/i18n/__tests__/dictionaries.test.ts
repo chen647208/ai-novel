@@ -3,49 +3,49 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 import { describe, it, expect } from 'vitest';
-import zhCommon from '../locales/zh/common.json';
-import zhSettings from '../locales/zh/settings.json';
-import zhNav from '../locales/zh/nav.json';
-import zhApp from '../locales/zh/app.json';
-import zhErrors from '../locales/zh/errors.json';
-import zhProviders from '../locales/zh/providers.json';
-import zhBooks from '../locales/zh/books.json';
-import zhVersion from '../locales/zh/version.json';
-import zhTimeline from '../locales/zh/timeline.json';
-import zhForeshadow from '../locales/zh/foreshadow.json';
-import zhSteps from '../locales/zh/steps.json';
-import enCommon from '../locales/en/common.json';
-import enSettings from '../locales/en/settings.json';
-import enNav from '../locales/en/nav.json';
-import enApp from '../locales/en/app.json';
-import enErrors from '../locales/en/errors.json';
-import enProviders from '../locales/en/providers.json';
-import enBooks from '../locales/en/books.json';
-import enVersion from '../locales/en/version.json';
-import enTimeline from '../locales/en/timeline.json';
-import enForeshadow from '../locales/en/foreshadow.json';
-import enSteps from '../locales/en/steps.json';
-import zhCharacters from '../locales/zh/characters.json';
-import enCharacters from '../locales/en/characters.json';
-import zhWorld from '../locales/zh/world.json';
-import enWorld from '../locales/en/world.json';
-import zhConsistency from '../locales/zh/consistency.json';
-import enConsistency from '../locales/en/consistency.json';
-import zhKnowledge from '../locales/zh/knowledge.json';
-import enKnowledge from '../locales/en/knowledge.json';
-import zhWriting from '../locales/zh/writing.json';
-import enWriting from '../locales/en/writing.json';
-import zhAssistant from '../locales/zh/assistant.json';
-import enAssistant from '../locales/en/assistant.json';
-import zhCards from '../locales/zh/cards.json';
-import enCards from '../locales/en/cards.json';
-import zhPrompts from '../locales/zh/prompts.json';
-import enPrompts from '../locales/en/prompts.json';
+import zhCommon from '../../../shared/i18n/locales/zh/common.json';
+import zhSettings from '../../../shared/i18n/locales/zh/settings.json';
+import zhNav from '../../../shared/i18n/locales/zh/nav.json';
+import zhApp from '../../../shared/i18n/locales/zh/app.json';
+import zhErrors from '../../../shared/i18n/locales/zh/errors.json';
+import zhProviders from '../../../shared/i18n/locales/zh/providers.json';
+import zhBooks from '../../../shared/i18n/locales/zh/books.json';
+import zhVersion from '../../../shared/i18n/locales/zh/version.json';
+import zhTimeline from '../../../shared/i18n/locales/zh/timeline.json';
+import zhForeshadow from '../../../shared/i18n/locales/zh/foreshadow.json';
+import zhSteps from '../../../shared/i18n/locales/zh/steps.json';
+import enCommon from '../../../shared/i18n/locales/en/common.json';
+import enSettings from '../../../shared/i18n/locales/en/settings.json';
+import enNav from '../../../shared/i18n/locales/en/nav.json';
+import enApp from '../../../shared/i18n/locales/en/app.json';
+import enErrors from '../../../shared/i18n/locales/en/errors.json';
+import enProviders from '../../../shared/i18n/locales/en/providers.json';
+import enBooks from '../../../shared/i18n/locales/en/books.json';
+import enVersion from '../../../shared/i18n/locales/en/version.json';
+import enTimeline from '../../../shared/i18n/locales/en/timeline.json';
+import enForeshadow from '../../../shared/i18n/locales/en/foreshadow.json';
+import enSteps from '../../../shared/i18n/locales/en/steps.json';
+import zhCharacters from '../../../shared/i18n/locales/zh/characters.json';
+import enCharacters from '../../../shared/i18n/locales/en/characters.json';
+import zhWorld from '../../../shared/i18n/locales/zh/world.json';
+import enWorld from '../../../shared/i18n/locales/en/world.json';
+import zhConsistency from '../../../shared/i18n/locales/zh/consistency.json';
+import enConsistency from '../../../shared/i18n/locales/en/consistency.json';
+import zhKnowledge from '../../../shared/i18n/locales/zh/knowledge.json';
+import enKnowledge from '../../../shared/i18n/locales/en/knowledge.json';
+import zhWriting from '../../../shared/i18n/locales/zh/writing.json';
+import enWriting from '../../../shared/i18n/locales/en/writing.json';
+import zhAssistant from '../../../shared/i18n/locales/zh/assistant.json';
+import enAssistant from '../../../shared/i18n/locales/en/assistant.json';
+import zhCards from '../../../shared/i18n/locales/zh/cards.json';
+import enCards from '../../../shared/i18n/locales/en/cards.json';
+import zhPrompts from '../../../shared/i18n/locales/zh/prompts.json';
+import enPrompts from '../../../shared/i18n/locales/en/prompts.json';
 
 /** 把嵌套字典扁平化为「点号键 → 字符串值」。 */
 function flatten(obj: unknown, prefix = ''): Map<string, string> {

@@ -3,22 +3,22 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ModelConfig, AIResponse } from '../../../../../shared/types';
 
-const { mockAdapter } = vi.hoisted(() => ({
-  mockAdapter: {
-    supportsStreaming: vi.fn(() => true),
-    complete: vi.fn(),
-    stream: vi.fn(),
-  },
+const { mockComplete, mockStream } = vi.hoisted(() => ({
+  mockComplete: vi.fn(),
+  mockStream: vi.fn(),
 }));
 
-vi.mock('@/shared/services/ai/resolve.js', () => ({ resolveAdapter: () => mockAdapter }));
+// 协议实现已上移主进程网关；门面委托类型化客户端，这里桩掉客户端
+vi.mock('@/shared/services/ai/gatewayClient.js', () => ({
+  aiGatewayClient: { complete: mockComplete, stream: mockStream },
+}));
 
 import { AIService } from '../aiService';
 
@@ -42,7 +42,6 @@ const okResponse = (content: string, extra: Partial<AIResponse> = {}): AIRespons
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockAdapter.supportsStreaming.mockReturnValue(true);
 });
 
 describe('buildHistoryRecordData', () => {
@@ -74,14 +73,14 @@ describe('call', () => {
     const res = await AIService.call(null as unknown as ModelConfig, 'p');
     expect(res.content).toBe('');
     expect(res.error).toBeTruthy();
-    expect(mockAdapter.complete).not.toHaveBeenCalled();
+    expect(mockComplete).not.toHaveBeenCalled();
   });
 
-  it('委托给适配器 complete', async () => {
-    mockAdapter.complete.mockResolvedValue(okResponse('hello'));
+  it('委托网关客户端 complete', async () => {
+    mockComplete.mockResolvedValue(okResponse('hello'));
     const res = await AIService.call(model, 'p');
     expect(res.content).toBe('hello');
-    expect(mockAdapter.complete).toHaveBeenCalledWith(model, 'p', undefined);
+    expect(mockComplete).toHaveBeenCalledWith(model, 'p', undefined);
   });
 });
 
@@ -93,7 +92,7 @@ describe('callJSON', () => {
   });
 
   it('合法 JSON 一次成功', async () => {
-    mockAdapter.complete.mockResolvedValue(okResponse('{"a":1}'));
+    mockComplete.mockResolvedValue(okResponse('{"a":1}'));
     const res = await AIService.callJSON<{ a: number }>(model, 'p');
     expect(res.data).toEqual({ a: 1 });
     expect(res.error).toBeUndefined();
@@ -102,21 +101,21 @@ describe('callJSON', () => {
 
 describe('testConnection', () => {
   it('错误响应返回 [ERROR] 前缀', async () => {
-    mockAdapter.complete.mockResolvedValue({ content: '', error: 'boom' } as AIResponse);
+    mockComplete.mockResolvedValue({ content: '', error: 'boom' } as AIResponse);
     const log = await AIService.testConnection(model);
     expect(log.startsWith('[ERROR]')).toBe(true);
     expect(log).toContain('boom');
   });
 
   it('包含连接成功/success 返回 [SUCCESS]', async () => {
-    mockAdapter.complete.mockResolvedValue(okResponse('连接成功'));
+    mockComplete.mockResolvedValue(okResponse('连接成功'));
     expect((await AIService.testConnection(model)).startsWith('[SUCCESS]')).toBe(true);
-    mockAdapter.complete.mockResolvedValue(okResponse('OK, success!'));
+    mockComplete.mockResolvedValue(okResponse('OK, success!'));
     expect((await AIService.testConnection(model)).startsWith('[SUCCESS]')).toBe(true);
   });
 
   it('其他内容返回 [INFO]', async () => {
-    mockAdapter.complete.mockResolvedValue(okResponse('你好'));
+    mockComplete.mockResolvedValue(okResponse('你好'));
     expect((await AIService.testConnection(model)).startsWith('[INFO]')).toBe(true);
   });
 });
@@ -128,34 +127,13 @@ describe('callStreaming', () => {
     expect(onChunk).toHaveBeenCalledTimes(1);
     expect(onChunk.mock.calls[0]![0]!.isComplete).toBe(true);
     expect(onChunk.mock.calls[0]![0]!.error).toBeTruthy();
+    expect(mockStream).not.toHaveBeenCalled();
   });
 
-  it('支持流式时委托适配器 stream', async () => {
-    mockAdapter.stream.mockResolvedValue(undefined);
+  it('委托网关客户端 stream（降级判定在主进程网关）', async () => {
+    mockStream.mockResolvedValue(undefined);
     const onChunk = vi.fn();
     await AIService.callStreaming(model, 'p', onChunk);
-    expect(mockAdapter.stream).toHaveBeenCalledWith(model, 'p', onChunk, undefined);
-  });
-
-  it('模型关闭流式时降级为 complete 并带 notice', async () => {
-    mockAdapter.complete.mockResolvedValue(okResponse('done'));
-    const onChunk = vi.fn();
-    await AIService.callStreaming({ ...model, supportsStreaming: false }, 'p', onChunk);
-    expect(mockAdapter.stream).not.toHaveBeenCalled();
-    expect(onChunk).toHaveBeenCalledTimes(1);
-    const chunk = onChunk.mock.calls[0]![0]!;
-    expect(chunk.isComplete).toBe(true);
-    expect(chunk.isStreaming).toBe(false);
-    expect(chunk.notice).toBeTruthy();
-    expect(chunk.error).toBeUndefined();
-  });
-
-  it('适配器不支持流式时同样降级', async () => {
-    mockAdapter.supportsStreaming.mockReturnValue(false);
-    mockAdapter.complete.mockResolvedValue(okResponse('d'));
-    const onChunk = vi.fn();
-    await AIService.callStreaming(model, 'p', onChunk);
-    expect(mockAdapter.stream).not.toHaveBeenCalled();
-    expect(onChunk.mock.calls[0]![0]!.isStreaming).toBe(false);
+    expect(mockStream).toHaveBeenCalledWith(model, 'p', onChunk, undefined);
   });
 });

@@ -1,0 +1,42 @@
+/*
+ * 本文件属于 AI小说家 (ai-novel) 项目。
+ * Copyright (C) 2026 chen647208
+ * SPDX-License-Identifier: AGPL-3.0-only
+ *
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
+ */
+
+/**
+ * 主进程侧 i18n：只为网关产生的用户可见文案（适配器错误、流式提示）服务。
+ * 语言取自系统 locale（app.getLocale()），字典与渲染端同源于 src/shared/i18n/catalog。
+ */
+import i18next from 'i18next';
+import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, normalizeLanguage, resources } from '../../shared/i18n/catalog.js';
+
+/** 主进程独立实例，避免与渲染端全局单例耦合；只加载 errors 命名空间。 */
+const instance = i18next.createInstance();
+
+let initialized = false;
+
+/** 初始化主进程 i18n。幂等；gateway boot 时以 app.getLocale() 调用。 */
+export async function initAiI18n(locale: string | undefined): Promise<void> {
+  if (initialized) return;
+  await instance.init({
+    resources,
+    lng: normalizeLanguage(locale) ?? DEFAULT_LANGUAGE,
+    fallbackLng: DEFAULT_LANGUAGE,
+    supportedLngs: [...SUPPORTED_LANGUAGES],
+    ns: ['errors'],
+    defaultNS: 'errors',
+    interpolation: { escapeValue: false },
+    returnNull: false,
+  });
+  initialized = true;
+}
+
+/** 取主进程错误文案（errors 命名空间）；未初始化时回退 key，保证不抛错。 */
+export function aiT(key: string, params?: Record<string, unknown>): string {
+  if (!initialized) return key;
+  return instance.t(key, { ...params }) as string;
+}
