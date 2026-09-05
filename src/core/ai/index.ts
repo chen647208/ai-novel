@@ -16,6 +16,15 @@ export {
   type AssembleResult,
 } from './promptAssembler.js';
 export {
+  ApprovalBroker,
+  ApprovalRouter,
+  type ApprovalRequest,
+  type ApprovalDecision,
+  type ApprovalProposal,
+  type ApprovalVerdict,
+  type PendingApproval,
+} from './approval.js';
+export {
   ToolRegistry,
   lintToolSchema,
   type ToolPermission,
