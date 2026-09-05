@@ -10,6 +10,7 @@
 import React from 'react';
 import { useTranslation } from '@/i18n';
 import type { Project } from '../../../shared/types';
+import { useFeatureAvailability } from '../useFeatureAvailability';
 import { cn } from '@/shared/utils/cn';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/Tooltip';
 import { Feather, Globe, Library, ListOrdered, ListTree, PenLine, Settings2, Users } from 'lucide-react';
@@ -33,6 +34,16 @@ interface SectionDef {
   /** 分区是否已有内容（驱动完成状态点）。 */
   done: (p: Project) => boolean;
 }
+
+/** 分区 → 所属功能 id（bundle 可用性映射，design/04 §7 dogfooding）。 */
+export const SECTION_FEATURE: Record<SectionId, string> = {
+  inspiration: 'core.inspiration',
+  world: 'core.world',
+  characters: 'core.characters',
+  outline: 'core.outline',
+  chapters: 'core.chapters',
+  writing: 'core.writing',
+};
 
 export const WORKSPACE_SECTIONS: readonly SectionDef[] = [
   { id: 'inspiration', icon: PenLine, labelKey: 'steps.inspiration', done: p => !!(p.inspiration || p.intro) },
@@ -60,6 +71,8 @@ const WorkspaceNav: React.FC<WorkspaceNavProps> = ({
   project,
 }) => {
   const { t } = useTranslation('nav');
+  const availableFeatures = useFeatureAvailability();
+  const visibleSections = WORKSPACE_SECTIONS.filter((section) => availableFeatures.has(SECTION_FEATURE[section.id]));
 
   return (
     <aside className="flex w-14 shrink-0 flex-col items-center gap-1 border-r border-border bg-card py-3">
@@ -87,7 +100,7 @@ const WorkspaceNav: React.FC<WorkspaceNavProps> = ({
 
       {/* 分区导航 */}
       <nav className="flex flex-1 flex-col items-center gap-1">
-        {WORKSPACE_SECTIONS.map(section => {
+        {visibleSections.map(section => {
           const active = activeSection === section.id;
           const done = project ? section.done(project) : false;
           return (

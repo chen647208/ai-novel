@@ -13,7 +13,7 @@
  * 书籍/项目动作在 useBookActions，引导在 useAppBootstrap——本文件只做装配。
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { Project } from '../../shared/types';
 import { repository } from '../shared/services/repository';
 import { TooltipProvider } from '@/shared/ui/Tooltip';
@@ -32,6 +32,7 @@ import { useProjectStore, selectActiveProject } from './stores/projectStore';
 import { useSettingsStore } from './stores/settingsStore';
 import { composeAppState } from './stores/persistenceBridge';
 import { useAppBootstrap } from './useAppBootstrap';
+import { useFeatureAvailability } from './useFeatureAvailability';
 import { useBookActions } from './useBookActions';
 
 const App: React.FC = () => {
@@ -47,6 +48,9 @@ const App: React.FC = () => {
   const [isHistoryViewerOpen, setIsHistoryViewerOpen] = useState(false);
   const [isVersionCheckOpen, setIsVersionCheckOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
+
+  // 功能可用性（发行档）：当前分区被禁用时回退写作编辑器
+  const availableFeatures = useFeatureAvailability();
 
   // 双 store 订阅
   const activeProject = useProjectStore(selectActiveProject);
@@ -73,21 +77,39 @@ const App: React.FC = () => {
     if (next !== 'writing') setEditingChapterId(null);
   }, []);
 
+  // 当前分区不可用（minimal 档禁 AI 功能）时回退写作编辑器
+  useEffect(() => {
+    const featureBySection: Record<SectionId, string> = {
+      inspiration: 'core.inspiration',
+      world: 'core.world',
+      characters: 'core.characters',
+      outline: 'core.outline',
+      chapters: 'core.chapters',
+      writing: 'core.writing',
+    };
+    if (!availableFeatures.has(featureBySection[section] ?? 'core.writing')) {
+      setSection('writing');
+    }
+  }, [availableFeatures, section]);
+
   return (
     <TooltipProvider delayDuration={200}>
       <div className="relative flex h-screen w-screen overflow-hidden bg-background">
         <DialogHost />
         <ToastHost />
         <ApprovalHost />
-        <GlobalAssistant
-          models={models}
-          activeModelId={activeModelId}
-          project={activeProject}
-          prompts={prompts}
-          onUpdate={updateProject}
-        />
 
         <ResetAlertDialog open={resetOpen} type="factory_reset" onClose={() => setResetOpen(false)} />
+
+        {availableFeatures.has('core.assistant') && (
+          <GlobalAssistant
+            models={models}
+            activeModelId={activeModelId}
+            project={activeProject}
+            prompts={prompts}
+            onUpdate={updateProject}
+          />
+        )}
 
         {view === 'bookshelf' ? (
           <div className="min-w-0 flex-1">

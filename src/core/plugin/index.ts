@@ -45,6 +45,12 @@ export {
   type AssemblyRow,
 } from './bundles.js';
 export {
+  profileByName,
+  enabledFeatureIds,
+  isFeatureEnabled,
+  PROFILE_CHANGED_EVENT,
+} from './availability.js';
+export {
   installHooks,
   installTypeTemplates,
   BuildProfileRegistry,

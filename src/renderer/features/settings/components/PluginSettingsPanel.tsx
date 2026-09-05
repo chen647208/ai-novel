@@ -14,7 +14,7 @@ import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
 import { pluginHostPromise, saveDisabledList, eventBus } from '@/features/assistant/services/aiRuntime';
-import { assemblyTree, type AssemblyRow, type Disposable as PluginDisposable, type PluginStatus } from '@core/plugin';
+import { PROFILE_CHANGED_EVENT, assemblyTree, type AssemblyRow, type Disposable as PluginDisposable, type PluginStatus } from '@core/plugin';
 
 const PluginSettingsPanel: React.FC = () => {
   const { t } = useTranslation('settings');
@@ -36,6 +36,7 @@ const PluginSettingsPanel: React.FC = () => {
   const applyProfile = (name: string): void => {
     setProfile(name);
     localStorage.setItem('profile.current', name);
+    window.dispatchEvent(new CustomEvent(PROFILE_CHANGED_EVENT));
     if (name === 'minimal') {
       if (!profileVeto.current) {
         profileVeto.current = eventBus.intercept('ai.request', () => ({
