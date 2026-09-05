@@ -1,0 +1,207 @@
+/*
+ * 本文件属于 AI小说家 (ai-novel) 项目。
+ * Copyright (C) 2026 chen647208
+ * SPDX-License-Identifier: AGPL-3.0-only
+ *
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
+ */
+
+/**
+ * 插件 manifest v0 与校验器（docs/design/04 §1）。
+ * 校验错误定位到 JSON 路径（验收标准 1）；命名空间规则见 §3；
+ * 权限模型 deny-by-default（§6）。
+ */
+
+/** 可逆注册句柄：unwind 不变量——注册方必须返回它，宿主逆序释放。 */
+export interface Disposable {
+  dispose(): void;
+}
+
+export type PluginPhase = 'discover' | 'validate' | 'load' | 'activate' | 'deactivate' | 'runtime';
+
+/** 错误契约：cause 链完整保留，状态面板/日志/终端三处同一份。 */
+export interface PluginError {
+  pluginId: string;
+  phase: PluginPhase;
+  message: string;
+  cause: unknown[];
+}
+
+export function toPluginError(pluginId: string, phase: PluginPhase, error: unknown): PluginError {
+  const chain: unknown[] = [];
+  let cur: unknown = error;
+  while (cur) {
+    chain.push(cur instanceof Error ? cur.message : String(cur));
+    cur = (cur as { cause?: unknown }).cause;
+    if (chain.length > 5) break;
+  }
+  return {
+    pluginId,
+    phase,
+    message: error instanceof Error ? error.message : String(error),
+    cause: chain,
+  };
+}
+
+// ── manifest 类型 ──────────────────────────────────────────────────────
+
+export interface PluginPermissions {
+  read?: string[];
+  write?: string[];
+  network?: boolean;
+  ai?: { quotaPerHour?: number };
+}
+
+export interface PluginContribution {
+  types?: string[];
+  skills?: string[];
+  buildProfiles?: string[];
+  commands?: string[];
+  ui?: string[];
+  mcpServers?: Record<string, { command: string; args?: string[] }>;
+  hooks?: string;
+  editor?: string;
+  renderers?: string[];
+}
+
+export interface PluginManifest {
+  id: string;
+  name: string;
+  version: string;
+  description?: string;
+  keywords?: string[];
+  host: string;
+  license: string;
+  engine?: string;
+  contributes?: PluginContribution;
+  permissions?: PluginPermissions;
+  activation?: 'onDemand' | 'onStartup';
+  interface?: {
+    displayName?: string;
+    category?: string;
+    capabilities?: string[];
+    defaultPrompt?: string[];
+    logo?: string;
+    screenshots?: string[];
+  };
+}
+
+// ── 校验器：错误带 JSON 路径 ───────────────────────────────────────────
+
+export interface ManifestIssue {
+  path: string;
+  message: string;
+}
+
+export type ManifestValidateResult =
+  | { ok: true; manifest: PluginManifest }
+  | { ok: false; issues: ManifestIssue[] };
+
+const ID_RE = /^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)+$/;
+const SEMVER_RE = /^\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/;
+
+function str(v: unknown): v is string {
+  return typeof v === 'string';
+}
+
+/** 校验 manifest（来自 JSON.parse 的任意值）。全部问题一次报出。 */
+export function validateManifest(raw: unknown): ManifestValidateResult {
+  const issues: ManifestIssue[] = [];
+  const fail = (path: string, message: string): void => {
+    issues.push({ path, message });
+  };
+
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+    return { ok: false, issues: [{ path: '', message: 'manifest 必须是 JSON 对象' }] };
+  }
+  const m = raw as Record<string, unknown>;
+
+  if (!str(m.id)) fail('id', '缺失且必须是字符串');
+  else if (!ID_RE.test(m.id)) fail('id', `必须是反向域名（如 com.example.golden3），实际「${m.id}」`);
+
+  if (!str(m.name) || !m.name) fail('name', '缺失且必须是非空字符串');
+  if (!str(m.version) || !SEMVER_RE.test(m.version)) fail('version', '必须是语义化版本（x.y.z）');
+  if (!str(m.host) || !m.host) fail('host', '缺失：宿主版本区间（如 ^2.0.0）');
+  if (!str(m.license) || !m.license) fail('license', '缺失：插件自身许可证');
+
+  if (m.contributes !== undefined) {
+    if (typeof m.contributes !== 'object' || m.contributes === null || Array.isArray(m.contributes)) {
+      fail('contributes', '必须是对象');
+    } else {
+      for (const [key, value] of Object.entries(m.contributes)) {
+        if (value !== null && typeof value !== 'object' && !str(value)) {
+          fail(`contributes.${key}`, '必须是路径字符串或对象/数组');
+        }
+      }
+    }
+  }
+
+  if (m.permissions !== undefined) {
+    if (typeof m.permissions !== 'object' || m.permissions === null || Array.isArray(m.permissions)) {
+      fail('permissions', '必须是对象');
+    } else {
+      const p = m.permissions as Record<string, unknown>;
+      for (const key of ['read', 'write'] as const) {
+        if (p[key] !== undefined && (!Array.isArray(p[key]) || (p[key] as unknown[]).some((x) => !str(x)))) {
+          fail(`permissions.${key}`, '必须是字符串数组');
+        }
+      }
+      if (p.network !== undefined && typeof p.network !== 'boolean') {
+        fail('permissions.network', '必须是布尔值');
+      }
+    }
+  }
+
+  if (m.activation !== undefined && m.activation !== 'onDemand' && m.activation !== 'onStartup') {
+    fail('activation', '必须是 onDemand 或 onStartup');
+  }
+
+  if (issues.length) return { ok: false, issues };
+  return { ok: true, manifest: m as unknown as PluginManifest };
+}
+
+// ── 命名空间（§3）────────────────────────────────────────────────────
+
+/** 插件短 id：id 最后一段（com.example.golden3 → golden3）。 */
+export function shortId(pluginId: string): string {
+  return pluginId.split('.').at(-1) ?? pluginId;
+}
+
+export function commandId(pluginId: string, cmd: string): string {
+  return `/${shortId(pluginId)}:${cmd}`;
+}
+
+export function typeTemplateId(pluginId: string, type: string): string {
+  return `${shortId(pluginId)}.${type}`;
+}
+
+export function eventDomain(pluginId: string, event: string): string {
+  return `plugin.${shortId(pluginId)}.${event}`;
+}
+
+export function settingKey(pluginId: string, key: string): string {
+  return `plugin.${pluginId}.${key}`;
+}
+
+// ── 权限（deny-by-default）───────────────────────────────────────────
+
+export class PermissionDenied extends Error {
+  constructor(
+    readonly pluginId: string,
+    readonly domain: string,
+    readonly action: 'read' | 'write',
+    readonly causeChain: unknown[] = [],
+  ) {
+    super(`插件 ${pluginId} 未声明 ${action}:${domain} 权限`);
+    this.name = 'PermissionDenied';
+  }
+}
+
+/** 权限检查：未声明即拒绝。 */
+export function assertPermission(manifest: PluginManifest, action: 'read' | 'write', domain: string): void {
+  const list = manifest.permissions?.[action];
+  if (!list?.includes(domain)) {
+    throw new PermissionDenied(manifest.id, domain, action);
+  }
+}
