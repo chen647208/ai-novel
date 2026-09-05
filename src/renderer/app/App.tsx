@@ -25,6 +25,7 @@ import SettingsModalHost from './app-shell/SettingsModalHost';
 import WorkspaceView from './app-shell/WorkspaceView';
 import type { SectionId } from './app-shell/WorkspaceNav';
 import GlobalAssistant from '../features/assistant/GlobalAssistant';
+import ApprovalHost from '../features/assistant/components/ApprovalHost';
 import AIHistoryViewer from '../features/writing/AIHistoryViewer';
 import VersionCheckModal from '../features/version/VersionCheckModal';
 import { useProjectStore, selectActiveProject } from './stores/projectStore';
@@ -77,6 +78,7 @@ const App: React.FC = () => {
       <div className="relative flex h-screen w-screen overflow-hidden bg-background">
         <DialogHost />
         <ToastHost />
+        <ApprovalHost />
         <GlobalAssistant
           models={models}
           activeModelId={activeModelId}

@@ -173,5 +173,23 @@
     "progressCharacter": "Checking character: {{name}}",
     "progressFaction": "Checking faction: {{name}}",
     "progressLocation": "Checking location: {{name}}"
+  },
+  "approval": {
+    "title": "AI Action Approval",
+    "description": "AI requests a write-level operation. Review before approving.",
+    "toolLabel": "Tool",
+    "permissionLabel": "Permission",
+    "diffTitle": "Change Preview",
+    "suggestionTitle": "Suggestion",
+    "approve": "Approve",
+    "reject": "Reject",
+    "defer": "Decide Later",
+    "pendingTitle": "Pending Approvals",
+    "pendingEmpty": "No pending approvals",
+    "approvePending": "Approve",
+    "rejectPending": "Reject",
+    "permRead": "read",
+    "permProposal": "write proposal",
+    "permDirect": "write direct"
   }
 }

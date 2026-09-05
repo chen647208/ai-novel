@@ -173,5 +173,23 @@
     "progressCharacter": "检查角色: {{name}}",
     "progressFaction": "检查势力: {{name}}",
     "progressLocation": "检查地点: {{name}}"
+  },
+  "approval": {
+    "title": "AI 操作审批",
+    "description": "AI 请求执行一个写入档操作，请确认以下内容。",
+    "toolLabel": "工具",
+    "permissionLabel": "档位",
+    "diffTitle": "变更预览",
+    "suggestionTitle": "建议内容",
+    "approve": "批准执行",
+    "reject": "拒绝",
+    "defer": "稍后处理",
+    "pendingTitle": "待审箱",
+    "pendingEmpty": "没有挂起的审批请求",
+    "approvePending": "批准",
+    "rejectPending": "拒绝",
+    "permRead": "只读",
+    "permProposal": "改写提案",
+    "permDirect": "直接写入"
   }
 }
