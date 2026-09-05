@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-/** core/ai 编排层出口（docs/design/05 §1）：prompt 装配器 + 内置 sections。 */
+/** core/ai 编排层出口（docs/design/05 §1）：prompt 装配器 + 工具注册表 + 内置 sections。 */
 export {
   PromptAssembler,
   truncateText,
@@ -15,6 +15,15 @@ export {
   type PromptSection,
   type AssembleResult,
 } from './promptAssembler.js';
+export {
+  ToolRegistry,
+  lintToolSchema,
+  type ToolPermission,
+  type ToolCallRequest,
+  type ToolContext,
+  type ToolOutput,
+  type ToolSpec,
+} from './tools.js';
 export {
   registerBuiltinSections,
   renderWorldDigest,
