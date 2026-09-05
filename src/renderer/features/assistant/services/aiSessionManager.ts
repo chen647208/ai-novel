@@ -122,6 +122,11 @@ export class AiSessionManager {
    * 会话结束自动卸载（不跨会话残留）。
    */
   async run(input: RunSessionInput): Promise<AgentTurnResult> {
+    // 发行档策略：ai.request 拦截器可整体否决（minimal 档禁全部 AI，公理 4）
+    const gate = this.events.request('ai.request', { task: input.task, bookId: input.bookId });
+    if (!gate.allowed) {
+      return { ok: false, reply: '', turns: 0, error: gate.reason ?? 'AI 请求被发行档策略拒绝' };
+    }
     const sessionId = `sess_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
     const sink = window.electronAPI ? new FileSessionSink(sessionId, input.bookId) : undefined;
 

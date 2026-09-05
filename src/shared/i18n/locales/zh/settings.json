@@ -279,6 +279,14 @@
     "tree": {
       "show": "查看装配树",
       "hide": "收起装配树"
+    },
+    "profile": {
+      "title": "发行档",
+      "full": "完整（默认）",
+      "webnovel": "网文创作",
+      "literary": "严肃文学",
+      "minimal": "纯写作（禁 AI）",
+      "hint": "minimal 档即时禁用全部 AI 请求（会话与工具），随时可切回。"
     }
   }
 }

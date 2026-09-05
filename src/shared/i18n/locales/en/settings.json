@@ -279,6 +279,14 @@
     "tree": {
       "show": "Show assembly tree",
       "hide": "Hide assembly tree"
+    },
+    "profile": {
+      "title": "Profile",
+      "full": "Full (default)",
+      "webnovel": "Webnovel",
+      "literary": "Literary",
+      "minimal": "Minimal (no AI)",
+      "hint": "minimal disables all AI requests (sessions and tools) immediately; switch back anytime."
     }
   }
 }

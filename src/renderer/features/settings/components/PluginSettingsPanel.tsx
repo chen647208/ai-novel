@@ -8,18 +8,20 @@
  */
 
 /** 插件状态面板（docs/design/04 §2）：状态汇总 + 错误详情 + 一键禁用/启用。 */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
-import { pluginHostPromise, saveDisabledList } from '@/features/assistant/services/aiRuntime';
-import { assemblyTree, type AssemblyRow, type PluginStatus } from '@core/plugin';
+import { pluginHostPromise, saveDisabledList, eventBus } from '@/features/assistant/services/aiRuntime';
+import { assemblyTree, type AssemblyRow, type Disposable as PluginDisposable, type PluginStatus } from '@core/plugin';
 
 const PluginSettingsPanel: React.FC = () => {
   const { t } = useTranslation('settings');
   const [statuses, setStatuses] = useState<PluginStatus[] | null>(null);
   const [tree, setTree] = useState<AssemblyRow[] | null>(null);
+  const [profile, setProfile] = useState<string>(() => localStorage.getItem('profile.current') ?? 'custom');
+  const profileVeto = useRef<PluginDisposable | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -30,6 +32,22 @@ const PluginSettingsPanel: React.FC = () => {
       alive = false;
     };
   }, []);
+
+  const applyProfile = (name: string): void => {
+    setProfile(name);
+    localStorage.setItem('profile.current', name);
+    if (name === 'minimal') {
+      if (!profileVeto.current) {
+        profileVeto.current = eventBus.intercept('ai.request', () => ({
+          allowed: false,
+          reason: 'minimal 发行档已禁用全部 AI 请求',
+        }));
+      }
+    } else {
+      profileVeto.current?.dispose();
+      profileVeto.current = null;
+    }
+  };
 
   const toggle = (id: string, disabled: boolean): void => {
     void pluginHostPromise.then((host) => {
@@ -62,6 +80,23 @@ const PluginSettingsPanel: React.FC = () => {
         {failed > 0 && <Badge variant="destructive">{t('plugins.failedCount', { count: failed })}</Badge>}
       </div>
       <p className="text-sm text-muted-foreground">{t('plugins.description')}</p>
+
+      <div>
+        <div className="mb-1 text-sm font-medium">{t('plugins.profile.title')}</div>
+        <div className="flex flex-wrap gap-2">
+          {(['full', 'webnovel', 'literary', 'minimal'] as const).map((name) => (
+            <Button
+              key={name}
+              size="sm"
+              variant={profile === name ? 'default' : 'outline'}
+              onClick={() => applyProfile(name)}
+            >
+              {t(`plugins.profile.${name}`)}
+            </Button>
+          ))}
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">{t('plugins.profile.hint')}</p>
+      </div>
 
       <div>
         <Button size="sm" variant="outline" onClick={() => setTree((v) => (v ? null : assemblyTree({ name: 'current', plugins: ['com.novalocal.bundle.core', 'com.novalocal.bundle.world', 'com.novalocal.bundle.ai'], policies: {} })))}>
