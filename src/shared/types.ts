@@ -992,7 +992,7 @@ export interface ElectronAPI {
   openFileDialog: (options: FileDialogOptions) => Promise<{ canceled: boolean; filePaths: string[] }>;
   saveFileDialog: (options: SaveDialogOptions) => Promise<{ canceled: boolean; filePath?: string }>;
   openDirectoryDialog: (options: FileDialogOptions) => Promise<{ canceled: boolean; filePaths: string[] }>;
-  listDirectory: (dirPath: string) => Promise<string[]>;
+  listDirectory: (dirPath: string) => Promise<Array<{ name: string; type: 'file' | 'directory' }>>;
 
   // 向量存储操作（通过主进程代理）
   vector: {

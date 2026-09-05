@@ -125,6 +125,11 @@ export class PluginHost {
     this.loadAll([{ manifest: result.manifest, files }]);
   }
 
+  /** 发现/读取阶段失败的登记入口：状态面板可见、cause 链保留。 */
+  markFailed(id: string, phase: PluginError['phase'], error: unknown): void {
+    this.statuses.set(id, { id, state: 'failed', error: toPluginError(id, phase, error) });
+  }
+
   /** 激活：装配贡献点（逐项 try-catch），幂等。 */
   activate(pluginId: string): void {
     const status = this.statuses.get(pluginId);

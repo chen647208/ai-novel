@@ -30,11 +30,11 @@ function electron(): NonNullable<Window['electronAPI']> {
 export async function listSessionArchives(bookId: string): Promise<SessionArchiveEntry[]> {
   const base = await electron().getAppDataPath();
   const dir = `${base}/ai-sessions/${bookId}`;
-  const fileNames = await electron().listDirectory(dir);
+  const dirEntries = await electron().listDirectory(dir);
+  const fileNames = dirEntries.filter((e) => e.type === 'file' && e.name.endsWith('.jsonl')).map((e) => e.name);
   const entries: SessionArchiveEntry[] = [];
 
   for (const fileName of fileNames) {
-    if (!fileName.endsWith('.jsonl')) continue;
     try {
       const content = await electron().readFile(`${dir}/${fileName}`);
       const events = content

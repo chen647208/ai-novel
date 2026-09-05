@@ -74,7 +74,7 @@ export const fileProvider: Provider = {
       assertString(dirPath, 'dirPath');
       try {
         const entries = await fs.readdir(dirPath, { withFileTypes: true });
-        return entries.filter((e) => e.isFile()).map((e) => e.name);
+        return entries.map((e) => ({ name: e.name, type: e.isDirectory() ? ('directory' as const) : ('file' as const) }));
       } catch {
         return [];
       }
