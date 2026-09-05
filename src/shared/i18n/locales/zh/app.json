@@ -86,5 +86,20 @@
     "exportAllSuccess": "数据导出成功！",
     "jsonFilter": "JSON文件",
     "allFilesFilter": "所有文件"
+  },
+  "sync": {
+    "title": "同步",
+    "description": "用同步包在多台设备间交换本书的变更。合并遵循冲突副本策略：绝不覆盖本地改动。",
+    "hint": "当前书籍：《{{book}}》。导出生成同步包，导入合并他人变更。",
+    "export": "导出同步包",
+    "import": "导入合并",
+    "exportDone": "同步包已导出",
+    "exportDoneMessage": "共 {{count}} 条变更记录。\n路径：{{path}}",
+    "exportFailed": "导出失败",
+    "importFailed": "导入失败",
+    "reportApplied": "应用变更：{{count}} 条",
+    "reportSkipped": "已同步跳过：{{count}} 条",
+    "reportManual": "需人工处理：{{count}} 条",
+    "conflictCopies": "冲突副本（本地已保留，远端以副本落库）"
   }
 }

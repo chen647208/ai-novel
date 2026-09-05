@@ -86,5 +86,20 @@
     "exportAllSuccess": "Data exported successfully!",
     "jsonFilter": "JSON Files",
     "allFilesFilter": "All Files"
+  },
+  "sync": {
+    "title": "Sync",
+    "description": "Exchange this book's changes across devices via sync bundles. Merging uses conflict copies: local edits are never overwritten.",
+    "hint": "Current book: \"{{book}}\". Export creates a bundle; import merges changes from others.",
+    "export": "Export bundle",
+    "import": "Import & merge",
+    "exportDone": "Bundle exported",
+    "exportDoneMessage": "{{count}} changes.\nPath: {{path}}",
+    "exportFailed": "Export failed",
+    "importFailed": "Import failed",
+    "reportApplied": "Applied: {{count}}",
+    "reportSkipped": "Skipped (up to date): {{count}}",
+    "reportManual": "Needs manual review: {{count}}",
+    "conflictCopies": "Conflict copies (local kept, remote saved as copies)"
   }
 }

@@ -32,6 +32,8 @@ import {
   X,
 } from 'lucide-react';
 
+import SyncDialog from './SyncDialog';
+
 interface WorkspaceTopbarProps {
   project: Project | null;
   activeModel: ModelConfig | undefined;
@@ -195,6 +197,8 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
             </span>
           </div>
         )}
+
+        <SyncDialog project={project} />
 
         <Button
           variant="ghost"
