@@ -3,8 +3,8 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 import React, { useMemo, useState } from 'react';
@@ -33,6 +33,7 @@ import {
   Copy,
   Download,
   FolderOpen,
+  Layers,
   ListOrdered,
   MoreHorizontal,
   Pencil,
@@ -48,6 +49,8 @@ interface BookshelfProps {
   activeBookId: string | null;
   onOpenBook: (bookId: string) => void;
   onCreateBook: (title: string, description?: string, templateType?: 'blank' | 'duplicate' | 'example', sourceBookId?: string) => void;
+  /** 先建后改：一键建空白书直接进工作区（默认路径，不开模态）。 */
+  onCreateQuickBook: () => void;
   onRenameBook: (bookId: string, newTitle: string) => void;
   onDeleteBook: (bookId: string) => void;
   onDuplicateBook: (bookId: string) => void;
@@ -82,6 +85,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({
   activeBookId,
   onOpenBook,
   onCreateBook,
+  onCreateQuickBook,
   onRenameBook,
   onDeleteBook,
   onDuplicateBook,
@@ -140,7 +144,11 @@ const Bookshelf: React.FC<BookshelfProps> = ({
                 <BookUp className="size-4" />
                 {t('app:bookshelf.importBook')}
               </Button>
-              <Button size="sm" onClick={() => setIsNewBookOpen(true)}>
+              <Button variant="outline" size="sm" onClick={() => setIsNewBookOpen(true)}>
+                <Layers className="size-4" />
+                {t('app:bookshelf.newFromTemplate')}
+              </Button>
+              <Button size="sm" onClick={onCreateQuickBook}>
                 <Plus className="size-4" />
                 {t('app:bookshelf.newBook')}
               </Button>
@@ -168,7 +176,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({
             description={t('app:bookshelf.empty.desc')}
             action={
               <>
-                <Button onClick={() => setIsNewBookOpen(true)}>
+                <Button onClick={onCreateQuickBook}>
                   <Plus className="size-4" />
                   {t('app:bookshelf.newBook')}
                 </Button>

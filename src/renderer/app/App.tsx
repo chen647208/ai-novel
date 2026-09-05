@@ -3,8 +3,8 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 /**
@@ -94,6 +94,7 @@ const App: React.FC = () => {
               activeBookId={activeBookId}
               onOpenBook={actions.openBook}
               onCreateBook={actions.createBook}
+              onCreateQuickBook={actions.createQuickBook}
               onRenameBook={actions.renameBook}
               onDeleteBook={actions.deleteBook}
               onDuplicateBook={actions.duplicateBook}
@@ -122,6 +123,7 @@ const App: React.FC = () => {
             onOpenVersionCheck={() => setIsVersionCheckOpen(true)}
             onThemeChange={th => useSettingsStore.getState().setTheme(th)}
             onUpdateProject={updateProject}
+            onRenameBook={actions.renameBook}
             onNavigateToCharacter={id => { setFocusCharacterId(id); setSection('characters'); }}
             onNavigateToChapter={id => { setEditingChapterId(id); setSection('writing'); }}
           />

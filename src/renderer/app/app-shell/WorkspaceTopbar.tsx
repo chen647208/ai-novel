@@ -3,33 +3,42 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from '@/i18n';
 import type { AppTheme, ModelConfig, Project } from '../../../shared/types';
 import { resolveTheme } from '@/shared/services/themeService';
 import { Button } from '@/shared/ui/Button';
+import { Input } from '@/shared/ui/Input';
+import { WORKSPACE_SECTIONS, type SectionId } from './WorkspaceNav';
+import { suggestNextSection } from '../guidedFlow';
 import {
   BookOpen,
   ChevronRight,
+  Compass,
   Cpu,
   Eraser,
   History,
   ListOrdered,
   Moon,
+  Pencil,
   RefreshCw,
   Sun,
   Trash2,
   Users,
+  X,
 } from 'lucide-react';
 
 interface WorkspaceTopbarProps {
   project: Project | null;
   activeModel: ModelConfig | undefined;
   theme: AppTheme | undefined;
+  section: SectionId;
+  onSectionChange: (next: SectionId) => void;
+  onRenameBook: (bookId: string, newTitle: string) => void;
   onThemeChange: (theme: AppTheme) => void;
   onOpenBookshelf: () => void;
   onOpenSettings: () => void;
@@ -39,11 +48,14 @@ interface WorkspaceTopbarProps {
   onOpenVersionCheck: () => void;
 }
 
-/** 单书工作台顶栏：书名面包屑 + 项目操作 + 统计 + 主题/版本/历史/模型入口。 */
+/** 单书工作台顶栏：书名面包屑（可就地改名）+ 引导下一步建议 + 项目操作 + 统计 + 主题/版本/历史/模型入口。 */
 const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
   project,
   activeModel,
   theme,
+  section,
+  onSectionChange,
+  onRenameBook,
   onThemeChange,
   onOpenBookshelf,
   onOpenSettings,
@@ -54,6 +66,30 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
 }) => {
   const { t } = useTranslation(['app', 'nav']);
   const isDark = resolveTheme(theme) === 'dark';
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [draftTitle, setDraftTitle] = useState('');
+  const [hintDismissed, setHintDismissed] = useState(false);
+
+  const startRename = () => {
+    if (!project) return;
+    setDraftTitle(project.title);
+    setEditingTitle(true);
+  };
+  const commitRename = () => {
+    if (project) {
+      const next = draftTitle.trim();
+      if (next && next !== project.title) onRenameBook(project.id, next);
+    }
+    setEditingTitle(false);
+  };
+
+  // 引导建议：第一个未填充的分区；已在该分区或用户关闭则不提示
+  const suggested = project ? suggestNextSection(project) : null;
+  const showHint = !!project && !hintDismissed && suggested && suggested !== section;
+  const suggestedLabel = suggested
+    ? t(`nav:${WORKSPACE_SECTIONS.find((s) => s.id === suggested)?.labelKey ?? 'steps.writing'}`)
+    : '';
+
   const hasHistory =
     !!project &&
     (project.chapters.some(c => (c.history?.length ?? 0) > 0) ||
@@ -71,9 +107,54 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
           {t('nav:bookshelf')}
         </button>
         <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/60" />
-        <h2 className="truncate font-serif text-base font-medium text-foreground">
-          {project?.title || t('app:topbar.noBookSelected')}
-        </h2>
+        {editingTitle ? (
+          <Input
+            autoFocus
+            value={draftTitle}
+            onChange={(e) => setDraftTitle(e.target.value)}
+            onBlur={commitRename}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') { e.preventDefault(); commitRename(); }
+              else if (e.key === 'Escape') { setEditingTitle(false); }
+            }}
+            className="h-7 max-w-[16rem] font-serif text-base"
+            aria-label={t('app:topbar.renameTitle')}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={startRename}
+            disabled={!project}
+            title={project ? t('app:topbar.renameTip') : undefined}
+            className="group flex min-w-0 items-center gap-1 rounded-md px-1 py-0.5 text-left transition-colors hover:bg-muted disabled:pointer-events-none"
+          >
+            <h2 className="truncate font-serif text-base font-medium text-foreground">
+              {project?.title || t('app:topbar.noBookSelected')}
+            </h2>
+            {project && <Pencil className="size-3 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />}
+          </button>
+        )}
+        {showHint && suggested && (
+          <div className="ml-2 flex shrink-0 items-center gap-1 rounded-full border border-primary/30 bg-primary/5 py-0.5 pl-2 pr-0.5 text-xs">
+            <Compass className="size-3 text-primary" />
+            <button
+              type="button"
+              onClick={() => onSectionChange(suggested)}
+              className="text-primary hover:underline"
+              title={t('app:topbar.guidedGoTip')}
+            >
+              {t('app:topbar.guidedNext', { step: suggestedLabel })}
+            </button>
+            <button
+              type="button"
+              onClick={() => setHintDismissed(true)}
+              aria-label={t('app:topbar.guidedDismiss')}
+              className="flex size-4 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <X className="size-3" />
+            </button>
+          </div>
+        )}
         {project && (
           <div className="ml-1 flex shrink-0 items-center">
             <button

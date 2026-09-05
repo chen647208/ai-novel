@@ -4,6 +4,7 @@
     "subtitle": "All your novel projects. Click a card to continue writing.",
     "search": "Search titles…",
     "newBook": "New Book",
+    "newFromTemplate": "From Template",
     "importBook": "Import Book",
     "backup": "Backup All",
     "importAll": "Import All Data",
@@ -43,7 +44,12 @@
     "viewHistoryTip": "View AI generation history",
     "history": "History",
     "themeToLight": "Switch to light theme",
-    "themeToDark": "Switch to dark theme"
+    "themeToDark": "Switch to dark theme",
+    "renameTitle": "Book title",
+    "renameTip": "Click to rename",
+    "guidedNext": "Suggested next: {{step}}",
+    "guidedGoTip": "Go to this step",
+    "guidedDismiss": "Dismiss suggestion"
   },
   "reset": {
     "factoryTitle": "Factory Reset",

@@ -4,6 +4,7 @@
     "subtitle": "你的全部小说项目，点击卡片继续创作。",
     "search": "搜索书名…",
     "newBook": "新建书籍",
+    "newFromTemplate": "从模板新建",
     "importBook": "导入书籍",
     "backup": "备份全部",
     "importAll": "导入全部数据",
@@ -43,7 +44,12 @@
     "viewHistoryTip": "查看AI生成历史记录",
     "history": "历史记录",
     "themeToLight": "切换到浅色主题",
-    "themeToDark": "切换到深色主题"
+    "themeToDark": "切换到深色主题",
+    "renameTitle": "书名",
+    "renameTip": "点击修改书名",
+    "guidedNext": "建议下一步：{{step}}",
+    "guidedGoTip": "前往该步骤",
+    "guidedDismiss": "关闭建议"
   },
   "reset": {
     "factoryTitle": "恢复出厂设置",

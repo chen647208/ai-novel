@@ -3,8 +3,8 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 /**
@@ -25,6 +25,8 @@ import { normalizeImportedState } from './initialState';
 export interface BookActions {
   openBook: (bookId: string) => void;
   createBook: (title: string, description?: string, templateType?: 'blank' | 'duplicate' | 'example', sourceBookId?: string) => void;
+  /** 先建后改：一键建空白书（默认名，不开模态），直接进工作区。 */
+  createQuickBook: () => void;
   renameBook: (bookId: string, newTitle: string) => void;
   deleteBook: (bookId: string) => Promise<void>;
   duplicateBook: (bookId: string) => void;
@@ -72,6 +74,15 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
       }
     }
     useProjectStore.getState().upsertProject(newBook);
+    enterWorkspace();
+  }, [enterWorkspace]);
+
+  const createQuickBook = useCallback(() => {
+    const base = i18n.t('app:book.defaultTitle');
+    const titles = new Set(useProjectStore.getState().projects.map((p) => p.title));
+    let title = base;
+    for (let n = 2; titles.has(title); n++) title = `${base} ${n}`;
+    useProjectStore.getState().upsertProject(emptyBook(title));
     enterWorkspace();
   }, [enterWorkspace]);
 
@@ -166,5 +177,5 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
     dialogService.alert(i18n.t('app:importAll.success'));
   }, []);
 
-  return { openBook, createBook, renameBook, deleteBook, duplicateBook, exportBook, importBook, clearCurrentProject, deleteCurrentProject, importAllData };
+  return { openBook, createBook, createQuickBook, renameBook, deleteBook, duplicateBook, exportBook, importBook, clearCurrentProject, deleteCurrentProject, importAllData };
 }
