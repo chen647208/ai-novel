@@ -190,6 +190,11 @@
     "rejectPending": "拒绝",
     "permRead": "只读",
     "permProposal": "改写提案",
-    "permDirect": "直接写入"
+    "permDirect": "直接写入",
+    "eventNoSessions": "还没有会话记录",
+    "eventFailed": "失败",
+    "eventDone": "完成",
+    "tabRecords": "生成记录",
+    "tabSessions": "会话事件流"
   }
 }

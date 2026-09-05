@@ -20,6 +20,7 @@ export const IPC = {
   openFileDialog: 'open-file-dialog',
   saveFileDialog: 'save-file-dialog',
   openDirectoryDialog: 'open-directory-dialog',
+  listDirectory: 'list-directory',
   vector: {
     initialize: 'vector:initialize',
     addDocuments: 'vector:add-documents',

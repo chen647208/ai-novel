@@ -3,14 +3,15 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { dialogService } from '@/shared/services/dialogService';
 import AIHistoryRecordList from './components/history/AIHistoryRecordList';
+import SessionEventBrowser from '../assistant/components/SessionEventBrowser';
 import { toggleSetValue } from './utils';
 import { Button } from '@/shared/ui/Button';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
@@ -35,6 +36,7 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<AIHistorySortBy>('timestamp');
   const [sortOrder, setSortOrder] = useState<AIHistorySortOrder>('desc');
+  const [mainTab, setMainTab] = useState<'records' | 'sessions'>('records');
 
   const allHistoryRecords = useMemo<AIHistoryRecordWithChapter[]>(() => {
     const records: AIHistoryRecordWithChapter[] = [];
@@ -353,6 +355,22 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
       <DialogContent className="flex h-[90vh] w-[94vw] max-w-6xl flex-col gap-0 overflow-hidden p-0">
         <div className="flex shrink-0 items-center justify-between border-b border-border bg-muted/30 px-6 py-4">
           <DialogTitle className="font-serif text-lg">{t('history.modalTitle')}</DialogTitle>
+          <div className="ml-4 flex gap-1">
+            <button
+              type="button"
+              onClick={() => setMainTab('records')}
+              className={cn('rounded-md px-3 py-1 text-sm', mainTab === 'records' ? 'bg-accent font-medium' : 'text-muted-foreground hover:bg-accent/60')}
+            >
+              {t('approval.tabRecords', { ns: 'assistant' })}
+            </button>
+            <button
+              type="button"
+              onClick={() => setMainTab('sessions')}
+              className={cn('rounded-md px-3 py-1 text-sm', mainTab === 'sessions' ? 'bg-accent font-medium' : 'text-muted-foreground hover:bg-accent/60')}
+            >
+              {t('approval.tabSessions', { ns: 'assistant' })}
+            </button>
+          </div>
         </div>
 
         <div className="flex shrink-0 items-center justify-between border-b border-border bg-muted/20 px-6 py-3">
@@ -480,16 +498,22 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
           </div>
         </div>
 
-        <AIHistoryRecordList
-          variant="modal"
-          records={filteredHistoryRecords}
-          selectedHistoryIds={selectedHistoryIds}
-          searchQuery={searchQuery}
-          viewMode={viewMode}
-          selectedChapterId={selectedChapterId}
-          onToggleHistorySelection={toggleHistorySelection}
-          getChapterDisplayTitle={getChapterDisplayTitle}
-        />
+        {mainTab === 'records' ? (
+          <AIHistoryRecordList
+            variant="modal"
+            records={filteredHistoryRecords}
+            selectedHistoryIds={selectedHistoryIds}
+            searchQuery={searchQuery}
+            viewMode={viewMode}
+            selectedChapterId={selectedChapterId}
+            onToggleHistorySelection={toggleHistorySelection}
+            getChapterDisplayTitle={getChapterDisplayTitle}
+          />
+        ) : (
+          <div className="min-h-0 flex-1 overflow-auto px-6 py-4">
+            <SessionEventBrowser bookId={project.id} />
+          </div>
+        )}
 
         <div className="flex shrink-0 items-center justify-between border-t border-border bg-muted/30 px-6 py-4">
           <div className="text-sm text-muted-foreground">{t('history.footerTotal', { count: allHistoryRecords.length, size: totalStorageSizeKb })}</div>

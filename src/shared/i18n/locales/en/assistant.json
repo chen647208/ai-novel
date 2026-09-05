@@ -190,6 +190,11 @@
     "rejectPending": "Reject",
     "permRead": "read",
     "permProposal": "write proposal",
-    "permDirect": "write direct"
+    "permDirect": "write direct",
+    "eventNoSessions": "No sessions yet",
+    "eventFailed": "Failed",
+    "eventDone": "Done",
+    "tabRecords": "Records",
+    "tabSessions": "Session Events"
   }
 }
