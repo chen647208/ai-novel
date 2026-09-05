@@ -157,6 +157,15 @@ export class ApprovalBroker {
     return this.pending.get(id);
   }
 
+  /** 外部表面（MCP stdio 等）产生的提案直接入待审箱；id 冲突时忽略旧条目。 */
+  addPending(request: ApprovalRequest, reason: ApprovalPendingReason = 'deferred'): boolean {
+    if (this.waiters.has(request.id) || this.pending.has(request.id)) {
+      return false;
+    }
+    this.pending.set(request.id, { request, reason });
+    return true;
+  }
+
   /** 用户把弹出中的审批手动搁置进待审箱（不产生 timeout 判定，当前等待继续到超时）。 */
   defer(requestId: string): boolean {
     const waiter = this.waiters.get(requestId);

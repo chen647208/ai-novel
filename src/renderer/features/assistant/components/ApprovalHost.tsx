@@ -65,6 +65,41 @@ const ApprovalHost: React.FC = () => {
     setPending(approvalBroker.listPending().map((p) => p.request));
   }, []);
 
+  // MCP 出口桥：外部 agent 的写提案落盘于 pending-proposals.jsonl，轮询入待审箱
+  useEffect(() => {
+    if (!window.electronAPI) return;
+    const consumed = new Set<string>(
+      JSON.parse(localStorage.getItem('approval.mcp-consumed') ?? '[]') as string[],
+    );
+    const poll = (): void => {
+      void (async () => {
+        try {
+          const base = await window.electronAPI!.getAppDataPath();
+          const file = `${base}/ai-sessions/pending-proposals.jsonl`;
+          const content = await window.electronAPI!.readFile(file);
+          for (const line of content.split('\n')) {
+            if (!line.trim()) continue;
+            try {
+              const req = JSON.parse(line) as ApprovalRequest;
+              if (consumed.has(req.id) || !req.id || !req.proposal) continue;
+              consumed.add(req.id);
+              approvalBroker.addPending(req);
+            } catch {
+              // 单行损坏跳过
+            }
+          }
+          localStorage.setItem('approval.mcp-consumed', JSON.stringify([...consumed]));
+          refreshPending();
+        } catch {
+          // 归档不存在：尚无提案
+        }
+      })();
+    };
+    poll();
+    const timer = setInterval(poll, 5000);
+    return () => clearInterval(timer);
+  }, [refreshPending]);
+
   const settle = useCallback(
     (req: ApprovalRequest, verdict: 'approved' | 'rejected') => {
       approvalBroker.decide(req.id, verdict);
