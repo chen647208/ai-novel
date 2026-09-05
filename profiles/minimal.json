@@ -1,0 +1,6 @@
+{
+  "name": "minimal",
+  "description": "核心 + 纯写作：禁用全部 AI 请求（公理 4 的发行档实体化）",
+  "plugins": [],
+  "policies": { "ai.request": "deny" }
+}
