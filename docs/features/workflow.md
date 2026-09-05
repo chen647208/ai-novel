@@ -15,7 +15,7 @@
 ## 主流程入口
 
 - `src/renderer/app/App.tsx`：主状态编排、步骤切换和各功能域接线
-- `src/renderer/app/app-shell/Sidebar.tsx`：左侧导航、步骤切换和书籍管理入口
+- `src/renderer/app/app-shell/WorkspaceNav.tsx`：工作台左侧导航、步骤切换与完成状态点
 - `src/renderer/features/books/BookManager.tsx`：书籍列表与切换入口
 
 ## 流程分段

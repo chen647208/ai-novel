@@ -32,7 +32,7 @@
 ## 打包配置
 
 - 打包配置的唯一来源是根目录 `electron-builder.yml`（package.json 中不再保留 `build` 块）。
-- 主进程入口通过 `extraMetadata.main = build/main/main.js` 注入打包后的 package.json。
+- 主进程入口通过 `extraMetadata.main = build/main/main/main.js` 注入打包后的 package.json。
 - Electron 运行时文件（`.pak`、`locales`、`*.dll`、`snapshot_blob.bin`、`electron.asar` 等）由 electron-builder 随 Electron 发行版自动打包，**严禁在 `files` 中排除**，否则应用无法启动。
 - 运行时外部依赖仅 `vectra`（主进程动态 import）；其余依赖均为渲染层依赖，由 Vite 打包进 `build/renderer`，因此置于 devDependencies，不进入安装包 node_modules，显著减小体积。
 - 中国大陆网络下 Electron 发行版下载走 `electronDownload.mirror`（npmmirror），CI 与本地均可访问。
