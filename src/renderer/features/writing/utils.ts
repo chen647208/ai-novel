@@ -8,6 +8,8 @@
  */
 
 import type { AIHistoryRecord, Chapter, Project } from '../../../shared/types';
+import { runBuild, type BuildProfile } from '@core/build';
+import type { NodeEntity, AttributeEntity } from '@core/entities';
 import { i18n } from '@/i18n';
 import { Bot, Brain, Cpu, Feather, Server, type LucideIcon } from 'lucide-react';
 import {
@@ -84,55 +86,68 @@ const escapeHtml = (text: string) =>
     .replace(/"/g, '&quot;');
 
 export const buildExportContent = (project: Project, selectedChapterIds: Set<string>, format: ExportFormat = 'txt') => {
-  const chaptersToExport = project.chapters
-    .filter((chapter) => selectedChapterIds.has(chapter.id))
-    .sort((a, b) => a.order - b.order);
-  const chapterHeader = (num: number, title: string) => i18n.t('writing:export.chapterHeader', { num, title });
-  const noContent = i18n.t('writing:export.noContent');
+  // M4.2：导出统一走 core/build 三段式管线（选择→变换→渲染），
+  // 与写作统计、插件渲染器共享同一实现（单一口径，无双轨）。
+  const selected = new Set(selectedChapterIds);
+  const nodes: NodeEntity[] = project.chapters.map((c) => ({
+    id: c.id,
+    bookId: project.id,
+    type: 'novel.chapter',
+    title: c.title,
+    body: c.content || i18n.t('writing:export.noContent'),
+    createdAt: 0,
+    updatedAt: 0,
+    erased: false,
+  }));
+  const attrs: AttributeEntity[] = project.chapters.map((c) => ({
+    id: `attr-order-${c.id}`,
+    nodeId: c.id,
+    type: 'attr' as never,
+    name: 'order',
+    value: String(c.order),
+    inheritable: false,
+    position: 0,
+    erased: false,
+  }));
 
-  if (format === 'md') {
-    let md = `# ${project.title}\n\n`;
-    if (project.intro) md += `> ${project.intro}\n\n`;
-    chaptersToExport.forEach((chapter) => {
-      md += `## ${chapterHeader(chapter.order + 1, chapter.title)}\n\n${chapter.content || noContent}\n\n`;
-    });
-    return md;
-  }
+  // 章节标题模板沿用 i18n 文案：用哨兵 %N/%T 先生成骨架，管线再回填真值
+  const chapterTemplate = i18n.t('writing:export.chapterHeader', { num: '%N', title: '%T' });
+  const profile: BuildProfile = {
+    name: '快速导出',
+    format,
+    selection: {
+      includeTypes: ['novel.chapter'],
+      includeInactive: false,
+      exclude: project.chapters.filter((c) => !selected.has(c.id)).map((c) => `node:${c.id}`),
+      rootSwitches: { cards: false, meta: false },
+    },
+    transform: {
+      headings: { chapter: chapterTemplate, scene: '* * *', hide: [], renumber: true },
+      content: { includeSynopsis: false, includeComments: false, stripTags: [], resolveRefs: 'raw' },
+    },
+    render: { chapterPageBreak: format === 'html', stripUnicode: false },
+  };
+
+  const { text } = runBuild(profile, { nodes, attrs, edges: [] });
+
+  const header =
+    format === 'md'
+      ? `# ${project.title}\n\n${project.intro ? `> ${project.intro}\n\n` : ''}`
+      : format === 'html'
+        ? [
+            '<!DOCTYPE html>',
+            '<html lang="zh-CN"><head><meta charset="utf-8">',
+            `<title>${escapeHtml(project.title)}</title>`,
+            '</head><body>',
+            `<h1>${escapeHtml(project.title)}</h1>`,
+            project.intro ? `<p class="intro">${escapeHtml(project.intro)}</p>` : '',
+          ].join('\n')
+        : `${i18n.t('writing:export.bookTitleTxt', { title: project.title })}\n\n${project.intro ? `${i18n.t('writing:export.introLabel')}${project.intro}\n\n` : ''}`;
 
   if (format === 'html') {
-    const body = chaptersToExport
-      .map((chapter) => {
-        const paragraphs = (chapter.content || noContent)
-          .split(/\n+/)
-          .filter((p) => p.trim().length > 0)
-          .map((p) => `<p>${escapeHtml(p)}</p>`)
-          .join('\n');
-        return `<section>\n<h2>${escapeHtml(chapterHeader(chapter.order + 1, chapter.title))}</h2>\n${paragraphs}\n</section>`;
-      })
-      .join('\n');
-    return [
-      '<!DOCTYPE html>',
-      '<html lang="zh-CN"><head><meta charset="utf-8">',
-      `<title>${escapeHtml(project.title)}</title>`,
-      '<style>body{max-width:42em;margin:3em auto;padding:0 1.5em;font-family:"Songti SC",serif;line-height:1.9;color:#222}h1{text-align:center}h2{margin-top:2.5em;font-size:1.2em}p{text-indent:2em;margin:0.6em 0}</style>',
-      '</head><body>',
-      `<h1>${escapeHtml(project.title)}</h1>`,
-      project.intro ? `<p class="intro">${escapeHtml(project.intro)}</p>` : '',
-      body,
-      '</body></html>',
-    ].join('\n');
+    return `${header}${text}\n</body></html>`;
   }
-
-  let fileContent = `${i18n.t('writing:export.bookTitleTxt', { title: project.title })}\n\n`;
-  if (project.intro) {
-    fileContent += `${i18n.t('writing:export.introLabel')}${project.intro}\n\n================================\n\n`;
-  }
-
-  chaptersToExport.forEach((chapter) => {
-    fileContent += `${chapterHeader(chapter.order + 1, chapter.title)}\n\n${chapter.content || noContent}\n\n--------------------------------\n\n`;
-  });
-
-  return fileContent;
+  return `${header}${text}\n\n`;
 };
 
 const EXPORT_EXT: Record<ExportFormat, string> = { txt: 'txt', md: 'md', html: 'html' };
