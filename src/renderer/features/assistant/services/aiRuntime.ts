@@ -12,6 +12,7 @@
  * M3 插件宿主在此续注工具/section/技能，UI 层与 Agent 循环只消费这里的实例。
  */
 import { ApprovalBroker, PromptAssembler, registerBuiltinSections } from '@core/ai';
+import { BuildProfileRegistry, EventBus } from '@core/plugin';
 import { createToolRegistry } from './builtinTools';
 import { createBuiltinSkillCatalog } from './skillCatalogSetup';
 import { AiSessionManager } from './aiSessionManager';
@@ -22,12 +23,15 @@ registerBuiltinSections(assembler);
 export const toolRegistry = createToolRegistry();
 export const skillCatalog = createBuiltinSkillCatalog();
 export const approvalBroker = new ApprovalBroker();
+export const eventBus = new EventBus();
+export const buildProfileRegistry = new BuildProfileRegistry();
 
 export const sessionManager = new AiSessionManager({
   assembler,
   registry: toolRegistry,
   catalog: skillCatalog,
   broker: approvalBroker,
+  events: eventBus,
 });
 
 // ── 插件宿主（M3）───────────────────────────────────────────────────
@@ -48,5 +52,5 @@ export function saveDisabledList(ids: string[]): void {
 
 /** 启动期插件装载（预览环境无文件系统时空宿主）。状态面板复用同一 Promise。 */
 export const pluginHostPromise = import('@/shared/services/pluginService').then((m) =>
-  m.bootstrapPlugins(skillCatalog, String(__APP_VERSION__), readDisabledList()),
+  m.bootstrapPlugins({ skillCatalog, buildProfiles: buildProfileRegistry, events: eventBus }, String(__APP_VERSION__), readDisabledList()),
 );

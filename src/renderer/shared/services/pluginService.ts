@@ -16,7 +16,19 @@
  * 禁用清单持久化在设置域（配置级 disabled，不碰插件文件）。
  */
 import { parseSkillMd, type SkillCatalog } from '@core/ai';
-import { PluginHost, type DiscoveredPlugin, type Disposable, type PluginStatus, type PluginHostOptions } from '@core/plugin';
+import {
+  installHooks,
+  installTypeTemplates,
+  BuildProfileRegistry,
+  EventBus,
+  PluginHost,
+  typeTemplateId,
+  type DiscoveredPlugin,
+  type Disposable,
+  type PluginStatus,
+  type PluginHostOptions,
+} from '@core/plugin';
+import { builtinRegistry } from '@core/types-registry';
 
 function electron(): NonNullable<Window['electronAPI']> {
   if (!window.electronAPI) {
@@ -56,8 +68,14 @@ export async function discoverAndLoad(host: PluginHost, _installer: (plugin: Dis
   }
 }
 
+export interface PluginDeps {
+  skillCatalog: SkillCatalog;
+  buildProfiles: BuildProfileRegistry;
+  events: EventBus;
+}
+
 /** 贡献装配器：把资源型贡献注册进各注册表（返回 Disposable 供 unwind）。 */
-export function createContributionInstaller(skillCatalog: SkillCatalog) {
+export function createContributionInstaller(deps: PluginDeps) {
   return (plugin: DiscoveredPlugin): Disposable[] => {
     const disposables: Disposable[] = [];
     const manifest = plugin.manifest;
@@ -68,23 +86,66 @@ export function createContributionInstaller(skillCatalog: SkillCatalog) {
         if (!file.startsWith(prefix) || !file.endsWith('.md')) continue;
         const parsed = parseSkillMd(content, 'plugin', `${manifest.id}/${file}`);
         if (parsed.skill) {
-          skillCatalog.register(parsed.skill);
+          deps.skillCatalog.register(parsed.skill);
           const name = parsed.skill.name;
-          disposables.push({ dispose: () => skillCatalog.unregister(name) });
+          disposables.push({ dispose: () => deps.skillCatalog.unregister(name) });
         }
       }
     }
 
-    // types/buildProfiles 贡献随 07 篇（导出构建）里程碑接线
+    // 类型模板：强制命名空间前缀（验收 4），宿主内置注册表共享
+    for (const rel of manifest.contributes?.types ?? []) {
+      const prefix = `${rel.replace(/^\.\//, '').replace(/\/+$/, '')}/`;
+      for (const [file, content] of Object.entries(plugin.files)) {
+        if (!file.startsWith(prefix) || !file.endsWith('.json')) continue;
+        try {
+          const templates = JSON.parse(content) as Array<Record<string, unknown>>;
+          disposables.push(...installTypeTemplates(manifest.id, templates, builtinRegistry, typeTemplateId));
+        } catch {
+          // 单文件损坏跳过（状态面板可经 markFailed 观测装载期错误）
+        }
+      }
+    }
+
+    // Build Profile（07 篇导出构建消费）
+    for (const rel of manifest.contributes?.buildProfiles ?? []) {
+      const prefix = `${rel.replace(/^\.\//, '').replace(/\/+$/, '')}/`;
+      for (const [file, content] of Object.entries(plugin.files)) {
+        if (!file.startsWith(prefix) || !file.endsWith('.json')) continue;
+        try {
+          const profile = JSON.parse(content) as Parameters<BuildProfileRegistry['register']>[0];
+          disposables.push(deps.buildProfiles.register(profile));
+        } catch {
+          // 同上：损坏档案跳过
+        }
+      }
+    }
+
+    // hooks（能力接缝，JSON 声明式策略）
+    const hooksFile = manifest.contributes?.hooks;
+    if (hooksFile) {
+      const key = hooksFile.replace(/^\.\//, '');
+      const raw = plugin.files[key];
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw) as { hooks?: unknown } | unknown[];
+          const list = Array.isArray(parsed) ? parsed : ((parsed.hooks ?? []) as unknown[]);
+          disposables.push(...installHooks(list as never[], deps.events, manifest.id));
+        } catch {
+          // hooks 声明损坏跳过
+        }
+      }
+    }
+
     return disposables;
   };
 }
 
 /** 创建宿主并完成一次完整发现-装载循环（预览环境无文件系统时跳过磁盘发现）。 */
-export async function bootstrapPlugins(skillCatalog: SkillCatalog, hostVersion: string, disabled: string[]): Promise<PluginHost> {
-  const host = new PluginHost({ hostVersion, disabled }, createContributionInstaller(skillCatalog));
+export async function bootstrapPlugins(deps: PluginDeps, hostVersion: string, disabled: string[]): Promise<PluginHost> {
+  const host = new PluginHost({ hostVersion, disabled }, createContributionInstaller(deps));
   try {
-    await discoverAndLoad(host, createContributionInstaller(skillCatalog));
+    await discoverAndLoad(host, createContributionInstaller(deps));
   } catch {
     // 无 electronAPI：运行时仍可用于内置流程
   }

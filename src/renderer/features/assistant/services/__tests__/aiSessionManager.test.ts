@@ -9,6 +9,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ApprovalBroker, SkillCatalog, ToolRegistry } from '@core/ai';
+import { EventBus } from '@core/plugin';
 
 const { mockComplete } = vi.hoisted(() => ({ mockComplete: vi.fn() }));
 vi.mock('@/shared/services/ai/gatewayClient.js', () => ({
@@ -37,6 +38,7 @@ describe('AiSessionManager', () => {
       registry: new ToolRegistry(),
       catalog: new SkillCatalog(),
       broker: new ApprovalBroker(),
+      events: new EventBus(),
     });
     mockComplete.mockResolvedValue({ content: '{"reply":"回答"}', model: 'test' });
 
@@ -66,6 +68,7 @@ describe('AiSessionManager', () => {
       registry: new ToolRegistry(),
       catalog,
       broker: new ApprovalBroker(),
+      events: new EventBus(),
     });
 
     // 捕获每轮装配时 catalog.getActive() 的可见性
@@ -87,6 +90,7 @@ describe('AiSessionManager', () => {
       registry: new ToolRegistry(),
       catalog: new SkillCatalog(),
       broker: new ApprovalBroker(),
+      events: new EventBus(),
     });
     mockComplete.mockResolvedValue({ content: '{"reply":"r"}', model: 'test' });
     const result = await manager.run({ task: '普通任务', project, model });

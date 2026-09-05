@@ -30,6 +30,17 @@ export const identitySection: PromptSection = {
   },
 };
 
+/** aiPolicySection：hooks 注入的系统级策略文本（接缝 decorate 的落点）。 */
+export const aiPolicySection: PromptSection = {
+  id: 'aiPolicy',
+  title: '写作约束',
+  order: 15,
+  render(ctx: PromptContext): string | undefined {
+    const policies = (ctx.extra?.aiPolicies as string[] | undefined) ?? [];
+    return policies.length ? policies.map((text) => `- ${text}`).join('\\n') : undefined;
+  },
+};
+
 /** bookMeta：书名/类型/简介。 */
 export const bookMetaSection: PromptSection = {
   id: 'bookMeta',
@@ -230,6 +241,7 @@ export const userTaskSection: PromptSection = {
 export function registerBuiltinSections(assembler: PromptAssembler): void {
   const sections = [
     identitySection,
+    aiPolicySection,
     bookMetaSection,
     worldDigestSection,
     indexDigestSection,

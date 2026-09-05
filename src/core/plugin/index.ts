@@ -28,6 +28,21 @@ export {
   type ManifestValidateResult,
 } from './manifest.js';
 export {
+  EventBus,
+  type SeamName,
+  type SeamPolicy,
+  type VetoResult,
+  type ObserveHandler,
+  type InterceptHandler,
+} from './events.js';
+export {
+  installHooks,
+  installTypeTemplates,
+  BuildProfileRegistry,
+  type BuildProfile,
+  type HookDeclaration,
+} from './contributions.js';
+export {
   PluginHost,
   type PluginState,
   type PluginStatus,

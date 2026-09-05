@@ -26,6 +26,7 @@ import {
   type SkillCatalog,
   type ToolRegistry,
 } from '@core/ai';
+import { EventBus, type SeamPolicy } from '@core/plugin';
 import type { ModelConfig, Project } from '@shared/types';
 import { aiGatewayClient } from '@/shared/services/ai/gatewayClient.js';
 
@@ -72,6 +73,8 @@ export interface SessionManagerDeps {
   registry: ToolRegistry;
   catalog: SkillCatalog;
   broker: ApprovalBroker;
+  /** 能力接缝：ai.request 的 inject 策略在装配时注入系统约束 */
+  events: EventBus;
 }
 
 export interface RunSessionInput {
@@ -92,11 +95,14 @@ export class AiSessionManager {
   private readonly router: ApprovalRouter;
   private lastSession: AiSession | null = null;
 
+  private readonly events: EventBus;
+
   constructor(deps: SessionManagerDeps) {
     this.assembler = deps.assembler;
     this.registry = deps.registry;
     this.catalog = deps.catalog;
     this.broker = deps.broker;
+    this.events = deps.events;
     this.router = new ApprovalRouter(deps.broker);
     registerBuiltinSections(this.assembler);
   }
@@ -145,6 +151,12 @@ export class AiSessionManager {
             project: input.project,
             index: input.index,
             activeSkill: this.catalog.getActive(),
+            extra: {
+              aiPolicies: this.events
+                .policiesFor('ai')
+                .filter((p): p is SeamPolicy & { do: 'inject'; text: string } => p.do === 'inject' && p.where === 'system')
+                .map((p) => p.text),
+            },
           }),
           complete: (model, prompt, retries) => aiGatewayClient.complete(model, prompt, { retries }),
           maxTurns: input.maxTurns,

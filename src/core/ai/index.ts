@@ -61,6 +61,7 @@ export {
   renderWorldDigest,
   renderIndexDigest,
   identitySection,
+  aiPolicySection,
   bookMetaSection,
   worldDigestSection,
   indexDigestSection,

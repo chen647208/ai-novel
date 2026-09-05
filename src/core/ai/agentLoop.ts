@@ -42,8 +42,8 @@ export interface AgentLoopDeps {
   model: ModelConfig;
   /** 网关一次性补全（渲染端注入 gatewayClient/callJSON 能力） */
   complete: (model: ModelConfig, prompt: string, retries?: number) => Promise<AIResponse>;
-  /** 索引快照等装配数据的获取器（每轮重取，保证新鲜） */
-  context: () => { project?: unknown; index?: unknown; activeSkill?: { name: string; body: string } | null };
+  /** 索引快照等装配数据的获取器（每轮重取，保证新鲜）；extra 透传给 section */
+  context: () => { project?: unknown; index?: unknown; activeSkill?: { name: string; body: string } | null; extra?: Record<string, unknown> };
   maxTurns?: number;
   signal?: AbortSignal;
 }
@@ -99,6 +99,7 @@ export async function runAgentSession(deps: AgentLoopDeps, task: string): Promis
     project: ctx.project,
     index: ctx.index,
     activeSkill: ctx.activeSkill,
+    extra: ctx.extra,
     userTask: task,
     toolSchemas: deps.registry.resolveSchemas(),
   });
