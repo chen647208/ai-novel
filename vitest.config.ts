@@ -23,5 +23,19 @@ export default defineConfig({
     include: ['src/**/__tests__/**/*.test.ts'],
     globals: false,
     setupFiles: [path.resolve(rootDir, 'src/renderer/i18n/vitest-setup.ts')],
+    // 覆盖率强约束（分层锁线，低于即测试失败；只允许随测试补充上调）：
+    // - src/core 领域层高标准（当前 83.6/70.3/81.8/87.8）
+    // - src/main 主进程锁当前基线（Electron 边界代码覆盖成本高）
+    // - src/renderer 锁当前基线（UI 组件归 E2E 测试覆盖）
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.ts', 'src/**/*.tsx'],
+      exclude: ['src/**/__tests__/**', 'src/**/*.test.ts', 'src/main/mcp/**'],
+      thresholds: {
+        'src/core/**': { statements: 82, branches: 69, functions: 80, lines: 86 },
+        'src/main/**': { statements: 47, branches: 46, functions: 35, lines: 47 },
+        'src/renderer/**': { statements: 13, branches: 9, functions: 11, lines: 13 },
+      },
+    },
   },
 });
