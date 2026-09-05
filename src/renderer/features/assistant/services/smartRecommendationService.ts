@@ -3,8 +3,8 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 /**
@@ -19,7 +19,7 @@ import {
 } from '../../../../shared/types';
 import { asRecord, asRecords, asStr } from '../../../shared/utils/loose';
 import { i18n } from '@/i18n';
-import { buildWorldContextForPrompt } from './aiContextBuilder';
+import { renderWorldDigest } from '@core/ai';
 import { AIService } from './aiService';
 
 /** 可参与推荐的实体类型 */
@@ -476,7 +476,7 @@ export async function getAIEnhancedRecommendations(
   }
   
   try {
-    const worldContext = buildWorldContextForPrompt(project);
+    const worldContext = renderWorldDigest(project);
     const writingContext = context.currentContent || context.writingScene || '';
     
     const prompt = `作为世界观专家，请分析以下写作场景并推荐最相关的世界观元素。

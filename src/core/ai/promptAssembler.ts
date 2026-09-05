@@ -1,0 +1,135 @@
+/*
+ * 本文件属于 AI小说家 (ai-novel) 项目。
+ * Copyright (C) 2026 chen647208
+ * SPDX-License-Identifier: AGPL-3.0-only
+ *
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
+ */
+
+/**
+ * PromptAssembler —— prompt 组装的 section 装配器（docs/design/05 §2）。
+ *
+ * 每个逻辑块（identity / bookMeta / indexDigest / activeSkill / toolSchemas /
+ * userTask …）都是独立 section 提供者：按 order 排序装配，render 返回 undefined
+ * 表示本轮不注入。M3 插件经 hooks 在注册表上增删 section，实现「AI 功能越塞
+ * 越多、prompt 爆炸」的结构性治理。
+ *
+ * 纯模块：不依赖 DOM / Electron，渲染端与测试环境均可直接使用。
+ */
+
+/** 装配上下文：section 从这里取数据，字段可选（缺数据的 section 自然跳过）。 */
+export interface PromptContext {
+  /** 当前书籍项目（数据层快照） */
+  project?: unknown;
+  /** 全书索引快照（src/core/index） */
+  index?: unknown;
+  /** 激活技能（M2.4 渐进注入：会话内显式激活后才非空） */
+  activeSkill?: { name: string; body: string } | null;
+  /** 本轮可用工具清单（M2.2 ToolRegistry 提供） */
+  toolSchemas?: Array<{ id: string; description: string; parameters: string }> | null;
+  /** 用户本轮任务原文 */
+  userTask?: string;
+  /** 全文总预算（字符数），超限从尾部 section 开始整体丢弃 */
+  charBudget?: number;
+  /** 插件/调用方附加数据，自定义 section 消费 */
+  extra?: Record<string, unknown>;
+}
+
+/** 一个 prompt section 提供者。order 决定装配顺序，小者在前。 */
+export interface PromptSection {
+  /** 稳定 id：诊断与插件注销用 */
+  id: string;
+  /** 给模型看的段落标题（渲染为【标题】） */
+  title: string;
+  /** 装配顺序 */
+  order: number;
+  /** 渲染本段正文；返回 undefined 表示本轮无内容、不注入 */
+  render(ctx: PromptContext): string | undefined;
+}
+
+export interface AssembleResult {
+  /** 最终 prompt 文本 */
+  prompt: string;
+  /** 实际注入的 section id（按装配顺序） */
+  sections: string[];
+  /** 是否发生了预算截断 */
+  truncated: boolean;
+}
+
+const SECTION_TITLE_RE = /^【.+】$/;
+
+/** 渲染段落标题：统一包一层【】（title 已带括号则原样使用）。 */
+function renderTitle(title: string): string {
+  return SECTION_TITLE_RE.test(title) ? title : `【${title}】`;
+}
+
+/** PromptAssembler：section 注册表 + 装配器。 */
+export class PromptAssembler {
+  private readonly sections = new Map<string, PromptSection>();
+
+  /** 注册 section；同 id 覆盖（插件升级语义）。 */
+  register(section: PromptSection): this {
+    this.sections.set(section.id, section);
+    return this;
+  }
+
+  /** 注销 section（插件卸载/技能卸载时调用）。 */
+  unregister(id: string): boolean {
+    return this.sections.delete(id);
+  }
+
+  list(): string[] {
+    return [...this.sections.values()].sort((a, b) => a.order - b.order).map((s) => s.id);
+  }
+
+  /**
+   * 装配 prompt：按 order 渲染全部 section，超预算时从尾部开始整段丢弃
+   * （保住 identity/bookMeta 等高优段落，宁可丢低优上下文也不产出半截段落）。
+   */
+  assemble(ctx: PromptContext): AssembleResult {
+    const ordered = [...this.sections.values()].sort((a, b) => a.order - b.order);
+    const blocks: Array<{ id: string; text: string }> = [];
+
+    for (const section of ordered) {
+      const body = section.render(ctx);
+      if (body === undefined) continue;
+      blocks.push({ id: section.id, text: `${renderTitle(section.title)}\n${body}` });
+    }
+
+    const budget = ctx.charBudget;
+    let truncated = false;
+    let kept = blocks;
+    if (budget !== undefined && budget > 0) {
+      // 段间分隔符 \n\n 也计入预算
+      while (kept.length > 1 && kept.reduce((sum, b) => sum + b.text.length + 2, -2) > budget) {
+        kept = kept.slice(0, -1);
+        truncated = true;
+      }
+      if (kept.length === 1 && kept[0]!.text.length > budget) {
+        kept = [{ id: kept[0]!.id, text: truncateText(kept[0]!.text, budget) }];
+        truncated = true;
+      }
+    }
+
+    return {
+      prompt: kept.map((b) => b.text).join('\n\n'),
+      sections: kept.map((b) => b.id),
+      truncated,
+    };
+  }
+}
+
+/** 截断文本到 maxLength，尽量在换行处断开并标注截断。 */
+export function truncateText(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+
+  const truncated = text.substring(0, maxLength);
+  const lastNewline = truncated.lastIndexOf('\n');
+
+  if (lastNewline > maxLength * 0.8) {
+    return truncated.substring(0, lastNewline) + '\n\n[内容已截断...]';
+  }
+
+  return truncated + '\n\n[内容已截断...]';
+}

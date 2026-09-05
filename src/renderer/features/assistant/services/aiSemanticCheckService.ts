@@ -3,8 +3,8 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据自由软件基金会发布的 GNU Affero 通用公共许可证（AGPL-3.0，
- * 或您选择的后续版本）对其进行修改与分发；商业闭源使用需另行获取授权，详见 LICENSE。
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 /**
@@ -17,7 +17,7 @@ import { type LooseRecord, asRecord, asRecords, asStr, asNum, asStrArr } from '.
 import { i18n } from '@/i18n';
 import { AIService } from './aiService';
 import { ConsistencyCheckPromptService } from '../../consistency/services/consistencyCheckPromptService';
-import { buildWorldContextForPrompt } from './aiContextBuilder';
+import { renderWorldDigest } from '@core/ai';
 
 export interface SemanticIssue {
   id: string;
@@ -174,7 +174,7 @@ async function checkCharacter(
   template: ConsistencyCheckPromptTemplate
 ): Promise<SemanticIssue[]> {
   try {
-    const worldContext = buildWorldContextForPrompt(project);
+    const worldContext = renderWorldDigest(project);
     const charData = formatCharacterForCheck(char);
     
     const prompt = ConsistencyCheckPromptService.applyVariables(template, {
@@ -211,7 +211,7 @@ async function checkFaction(
   template: ConsistencyCheckPromptTemplate
 ): Promise<SemanticIssue[]> {
   try {
-    const worldContext = buildWorldContextForPrompt(project);
+    const worldContext = renderWorldDigest(project);
     const factionData = formatFactionForCheck(faction);
     
     const prompt = ConsistencyCheckPromptService.applyVariables(template, {
@@ -248,7 +248,7 @@ async function checkLocation(
   template: ConsistencyCheckPromptTemplate
 ): Promise<SemanticIssue[]> {
   try {
-    const worldContext = buildWorldContextForPrompt(project);
+    const worldContext = renderWorldDigest(project);
     const locationData = formatLocationForCheck(location);
     
     const prompt = ConsistencyCheckPromptService.applyVariables(template, {
