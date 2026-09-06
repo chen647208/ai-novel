@@ -216,6 +216,21 @@ export const activeSkillSection: PromptSection = {
   },
 };
 
+/** agentProtocol：工具调用的 JSON 协议与多步策略（order 介于技能与工具清单之间：先讲怎么调，再列有什么）。 */
+export const agentProtocolSection: PromptSection = {
+  id: 'agentProtocol',
+  title: '调用协议',
+  order: 55,
+  render(): string {
+    return [
+      '你是能使用工具的 Agent：需要查数据或生成内容时，不要猜，先调工具；拿到结果后再继续，直到任务完成或轮数上限。',
+      '调用方式：整轮输出严格 JSON：{"reply": "本轮想说的话", "toolCalls": [{"callId": "自定唯一id", "toolId": "工具id", "args": {参数}}]}；无需工具时直接输出答复文本。',
+      '多步策略：只读工具（read 档）可同轮并行多调；先读后写——生成/改写类工具依赖正文、人物、细纲时，先用读工具取到原文再调写工具；',
+      '写工具只产出提案（进审批待审，不直接落稿），在答复里告诉作者去待审箱确认；查不到数据就直说缺什么，不要编造。',
+    ].join('\n');
+  },
+};
+
 /** toolSchemas：本轮可用工具的 id/描述/参数（ToolRegistry 注入）。 */
 export const toolSchemasSection: PromptSection = {
   id: 'toolSchemas',
@@ -246,6 +261,7 @@ export function registerBuiltinSections(assembler: PromptAssembler): void {
     worldDigestSection,
     indexDigestSection,
     activeSkillSection,
+    agentProtocolSection,
     toolSchemasSection,
     userTaskSection,
   ];

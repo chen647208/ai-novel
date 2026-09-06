@@ -42,8 +42,19 @@ export interface AgentLoopDeps {
   model: ModelConfig;
   /** 网关一次性补全（渲染端注入 gatewayClient/callJSON 能力） */
   complete: (model: ModelConfig, prompt: string, retries?: number) => Promise<AIResponse>;
-  /** 索引快照等装配数据的获取器（每轮重取，保证新鲜）；extra 透传给 section */
-  context: () => { project?: unknown; index?: unknown; activeSkill?: { name: string; body: string } | null; extra?: Record<string, unknown> };
+  /**
+   * 索引快照等装配数据的获取器（每轮重取，保证新鲜）；extra 透传给 section。
+   * modelConfig/services 透传给工具执行上下文——缺失时需模型的工具会直接失败，
+   * 宿主必须提供（aiSessionManager 负责注入）。
+   */
+  context: () => {
+    project?: unknown;
+    index?: unknown;
+    activeSkill?: { name: string; body: string } | null;
+    extra?: Record<string, unknown>;
+    modelConfig?: unknown;
+    services?: Record<string, unknown>;
+  };
   maxTurns?: number;
   signal?: AbortSignal;
 }
@@ -159,7 +170,14 @@ export async function runAgentSession(deps: AgentLoopDeps, task: string): Promis
           }
         }
 
-        const output = await deps.registry.execute(call.toolId, call.args, { ...ctx, signal: deps.signal }, call.callId);
+        const output = await deps.registry.execute(call.toolId, call.args, {
+          project: ctx.project,
+          modelConfig: ctx.modelConfig,
+          index: ctx.index,
+          services: ctx.services,
+          signal: deps.signal,
+          extra: ctx.extra,
+        }, call.callId);
         await deps.session.emit({ t: 'tool.result', turn, callId: call.callId, ok: output.ok, error: output.error, at: Date.now() });
         observations.push(`[工具 ${call.toolId}] ${output.ok ? '结果' : '失败'}：${JSON.stringify(output.data ?? output.error)?.slice(0, 2000)}`);
       }

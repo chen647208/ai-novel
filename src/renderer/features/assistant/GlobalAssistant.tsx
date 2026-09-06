@@ -239,6 +239,8 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       project,
       index: (project && indexService.snapshot(project.id)) || undefined,
       model: activeModel,
+      // 检索→读章→提案的多步链：6 轮（core 默认 4 轮偏紧）
+      maxTurns: 6,
       signal: controller.signal,
     });
 

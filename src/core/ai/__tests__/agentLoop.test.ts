@@ -133,6 +133,43 @@ describe('runAgentSession', () => {
     expect(result.ok).toBe(true);
   });
 
+  it('工具执行上下文透传 modelConfig/services（宿主注入不断裂）', async () => {
+    const seen: { modelConfig?: unknown; services?: unknown; project?: unknown } = {};
+    const capture: ToolSpec = {
+      id: 'core.ctx.capture',
+      description: '捕获上下文',
+      parameters: { type: 'object', properties: {} },
+      permission: 'read',
+      execute: async (_req, ctx) => {
+        seen.modelConfig = ctx.modelConfig;
+        seen.services = ctx.services;
+        seen.project = ctx.project;
+        return { ok: true, data: {} };
+      },
+    };
+    const assembler = new PromptAssembler();
+    assembler.register({ id: 'identity', title: '身份', order: 10, render: () => '测试身份' });
+    const registry = new ToolRegistry();
+    registry.register(capture);
+    const session = new AiSession({ sessionId: 's-ctx', task: '任务', sections: [] });
+    const result = await runAgentSession({
+      assembler,
+      registry,
+      router: new ApprovalRouter(new ApprovalBroker()),
+      session,
+      model,
+      complete: async () => ({
+        content: '{"reply":"","toolCalls":[{"callId":"c1","toolId":"core.ctx.capture","args":{}}]}',
+        model: 'test',
+      }),
+      context: () => ({ project: { title: '书' }, modelConfig: model, services: { textSearch: 'fn' } }),
+    }, '取上下文');
+    expect(result.ok).toBe(true);
+    expect(seen.project).toEqual({ title: '书' });
+    expect(seen.modelConfig).toBe(model);
+    expect(seen.services).toEqual({ textSearch: 'fn' });
+  });
+
   it('llm 错误：会话失败收尾并带错误', async () => {
     const assembler = new PromptAssembler();
     const registry = new ToolRegistry();

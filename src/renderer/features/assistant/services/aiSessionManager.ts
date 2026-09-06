@@ -29,8 +29,9 @@ import type {
   ToolRegistry,
 } from '@core/ai';
 import type { EventBus, SeamPolicy } from '@core/plugin';
-import type { ModelConfig, Project } from '@shared/types';
+import type { ConsistencyCheckPromptTemplate, ModelConfig, Project } from '@shared/types';
 import { aiGatewayClient } from '@/shared/services/ai/gatewayClient.js';
+import { useSettingsStore } from '@/app/stores/settingsStore';
 
 function electron(): NonNullable<Window['electronAPI']> {
   if (!window.electronAPI) {
@@ -158,6 +159,31 @@ export class AiSessionManager {
             project: input.project,
             index: input.index,
             activeSkill: this.catalog.getActive(),
+            // 工具执行上下文：模型配置与宿主服务在此注入（缺失则需模型的工具直接失败）
+            modelConfig: input.model,
+            services: {
+              consistencyTemplates: toConsistencyRecord(useSettingsStore.getState().consistencyPrompts),
+              // 全文检索（SQLite FTS5）：延迟加载仓库，测试与预览环境不预付成本
+              textSearch: async (query: string, limit: number) => {
+                const { repository } = await import('@/shared/services/repository/index.js');
+                return repository.search(query, { projectId: input.project?.id, limit });
+              },
+              // 语义检索（向量库 + 嵌入，自动降级）：不可用返回空数组，工具层如实回填
+              semanticSearch: async (query: string, limit: number) => {
+                const projectId = input.project?.id;
+                if (!projectId) throw new Error('当前没有打开的书籍项目');
+                const { vectorIntegrationService } = await import(
+                  '@/features/knowledge/services/vectorIntegrationService'
+                );
+                const hits = await vectorIntegrationService.semanticSearchKnowledge(projectId, query, { limit });
+                return hits.map((h) => ({
+                  name: h.metadata?.name,
+                  category: h.metadata?.category,
+                  score: h.score,
+                  content: h.content.slice(0, 800),
+                }));
+              },
+            },
             extra: {
               aiPolicies: this.events
                 .policiesFor('ai')
@@ -177,6 +203,15 @@ export class AiSessionManager {
     }
   }
 
+}
+
+/** 一致性模板数组转工具要的 record（与一致性检查页同口径：按 category 建键）。 */
+function toConsistencyRecord(
+  prompts: ConsistencyCheckPromptTemplate[],
+): Record<string, ConsistencyCheckPromptTemplate> {
+  const record: Record<string, ConsistencyCheckPromptTemplate> = {};
+  for (const p of prompts) record[p.category] = p;
+  return record;
 }
 
 /** 装配默认会话管理器（App 启动时创建一次；M3 插件在此续注工具/section/技能）。 */

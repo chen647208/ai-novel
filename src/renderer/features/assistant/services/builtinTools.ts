@@ -8,12 +8,12 @@
  */
 
 /**
- * 首批内置工具（docs/design/05 §2 清单的第一批）。
+ * 首批内置工具（docs/design/05 §2 清单的第一批）+ 按需上下文第二批。
  *
- * 本批工具把既有服务原样接入注册表（工具化转写，非新功能）：
+ * 第一批把既有服务原样接入注册表（工具化转写，非新功能）：
  * 卡片生成/命令解析、一致性扫描、智能推荐、索引查询。
- * text/outline/chapter 工具的编辑器接线（涉及 proposal diff 面）与
- * summary/foreshadow 工具为当前边界，随组件级重构推进。
+ * 第二批是 Agent 按需上下文：章节/大纲/人物/知识读接口 + 全文/语义检索。
+ * 多步约定：先读后写，读工具可同轮并行；写工具只产提案（审批后落稿）。
  */
 import { ToolRegistry, type ToolContext, type ToolSpec } from '@core/ai';
 import { aiGatewayClient, type CallOptions } from '@/shared/services/ai/gatewayClient';
@@ -53,6 +53,34 @@ function str(value: unknown, label: string): string {
     throw new Error(`参数 ${label} 必须是非空字符串`);
   }
   return value;
+}
+
+function num(value: unknown, label: string, fallback: number, min: number, max: number): number {
+  if (value === undefined || value === null) return fallback;
+  const n = typeof value === 'number' ? Math.floor(value) : Number.NaN;
+  if (!Number.isFinite(n)) throw new Error(`参数 ${label} 必须是数字`);
+  return Math.min(max, Math.max(min, n));
+}
+
+/** 截断长文本并标注是否截断（工具观察窗预算有限）。 */
+function cut(text: string, maxChars: number): { text: string; truncated: boolean } {
+  if (text.length <= maxChars) return { text, truncated: false };
+  return { text: `${text.slice(0, maxChars)}\n[内容已截断…]`, truncated: true };
+}
+
+/**
+ * 宿主注入的检索函数（aiSessionManager 构造：全文走 SQLite FTS，语义走向量库）。
+ * 缺失时工具返回明确错误，引导模型换用可用工具，而不是编造结果。
+ */
+export type HostSearchFn = (query: string, limit: number) => Promise<unknown>;
+
+function searchServiceOf(ctx: ToolContext, key: 'textSearch' | 'semanticSearch'): HostSearchFn {
+  const fn = ctx.services?.[key] as unknown;
+  if (typeof fn !== 'function') {
+    const fallback = key === 'textSearch' ? '' : '，改用 core.text.search 做关键词检索';
+    throw new Error(`${key === 'textSearch' ? '全文' : '语义'}检索服务不可用（宿主未注入）${fallback}`);
+  }
+  return fn as HostSearchFn;
 }
 
 /** core.card.generate：自然语言/斜杠命令生成卡片数据（写操作走提案，不直接落库）。 */
@@ -212,6 +240,211 @@ export const indexQueryTool: ToolSpec = {
 
 
 
+// ── 按需上下文工具（read：只读直通，供 Agent 多步调用先读后写）──────
+
+/** core.chapter.list：章节目录（只含元信息，不含正文；读全文前先用它定位）。 */
+export const chapterListTool: ToolSpec = {
+  id: 'core.chapter.list',
+  description: '列出全书章节目录（序号/标题/字数/有无正文与细纲），不含正文。读正文前先用它定位章节。',
+  parameters: { type: 'object', properties: {} },
+  permission: 'read',
+  async execute(_req, ctx) {
+    const project = projectOf(ctx);
+    const chapters = [...(project.chapters ?? [])].sort((a, b) => a.order - b.order);
+    return {
+      ok: true,
+      data: {
+        total: chapters.length,
+        chapters: chapters.map((c) => ({
+          id: c.id,
+          order: c.order,
+          title: c.title,
+          charCount: c.content?.length ?? 0,
+          hasContent: (c.content?.length ?? 0) > 0,
+          hasSummary: (c.summary?.length ?? 0) > 0,
+        })),
+      },
+    };
+  },
+};
+
+/** core.chapter.read：读单章（标题/细纲/正文，可截断；跨章对比可同轮多次调用）。 */
+export const chapterReadTool: ToolSpec = {
+  id: 'core.chapter.read',
+  description: '读单个章节的标题、细纲与正文。用 chapterId 或 order 定位（order 从 0 起，界面“第 N 章”即 order N-1）。',
+  parameters: {
+    type: 'object',
+    properties: {
+      chapterId: { type: 'string', description: '章节 id（优先）' },
+      order: { type: 'number', description: '章节序号（从 0 起）' },
+      maxChars: { type: 'number', description: '正文最多返回字符数，默认 8000，上限 20000' },
+    },
+  },
+  permission: 'read',
+  async execute(req, ctx) {
+    const project = projectOf(ctx);
+    const args = (req.args ?? {}) as { chapterId?: unknown; order?: unknown; maxChars?: unknown };
+    const chapters = project.chapters ?? [];
+    const chapter = typeof args.chapterId === 'string' && args.chapterId
+      ? chapters.find((c) => c.id === args.chapterId)
+      : typeof args.order === 'number'
+        ? chapters.find((c) => c.order === Math.floor(args.order as number))
+        : undefined;
+    if (!chapter) {
+      return { ok: false, error: '未找到章节：请先用 core.chapter.list 确认 chapterId 或 order' };
+    }
+    const maxChars = num(args.maxChars, 'maxChars', 8000, 500, 20000);
+    const content = cut(chapter.content ?? '', maxChars);
+    return {
+      ok: true,
+      data: {
+        id: chapter.id,
+        order: chapter.order,
+        title: chapter.title,
+        summary: chapter.summary ?? '',
+        content: content.text,
+        contentTruncated: content.truncated,
+        charCount: chapter.content?.length ?? 0,
+      },
+    };
+  },
+};
+
+/** core.outline.read：读全书大纲 + 章节标题清单（便宜，先读它再决定细读哪章）。 */
+export const outlineReadTool: ToolSpec = {
+  id: 'core.outline.read',
+  description: '读全书大纲全文与章节标题清单。规划/续写前先读它把握全局，再用 core.chapter.read 细读。',
+  parameters: { type: 'object', properties: {} },
+  permission: 'read',
+  async execute(_req, ctx) {
+    const project = projectOf(ctx);
+    const chapters = [...(project.chapters ?? [])].sort((a, b) => a.order - b.order);
+    return {
+      ok: true,
+      data: {
+        outline: project.outline ?? '',
+        chapterCount: chapters.length,
+        chapters: chapters.map((c) => ({ order: c.order, title: c.title })),
+      },
+    };
+  },
+};
+
+/** core.character.list：人物清单（精简版；写人物相关内容前先读它）。 */
+export const characterListTool: ToolSpec = {
+  id: 'core.character.list',
+  description: '列出全书人物（姓名/定位/性格摘要），默认 20 条。涉及人物写作或一致性判断前先读它。',
+  parameters: {
+    type: 'object',
+    properties: {
+      limit: { type: 'number', description: '最多返回条数，默认 20，上限 100' },
+    },
+  },
+  permission: 'read',
+  async execute(req, ctx) {
+    const project = projectOf(ctx);
+    const limit = num((req.args as { limit?: unknown } | undefined)?.limit, 'limit', 20, 1, 100);
+    const characters = project.characters ?? [];
+    return {
+      ok: true,
+      data: {
+        total: characters.length,
+        characters: characters.slice(0, limit).map((c) => ({
+          id: c.id,
+          name: c.name,
+          role: c.role,
+          brief: (c.personality ?? '').slice(0, 120),
+        })),
+      },
+    };
+  },
+};
+
+/** core.knowledge.read：知识库条目（无参列清单；按 id 或 name 读全文）。 */
+export const knowledgeReadTool: ToolSpec = {
+  id: 'core.knowledge.read',
+  description: '读知识库：无参返回条目清单（名称/类型）；传 itemId 或 name 返回该条目全文（截断 6000 字）。',
+  parameters: {
+    type: 'object',
+    properties: {
+      itemId: { type: 'string', description: '条目 id' },
+      name: { type: 'string', description: '条目名称（模糊匹配）' },
+    },
+  },
+  permission: 'read',
+  async execute(req, ctx) {
+    const project = projectOf(ctx);
+    const args = (req.args ?? {}) as { itemId?: unknown; name?: unknown };
+    const items = project.knowledge ?? [];
+    if (typeof args.itemId === 'string' && args.itemId) {
+      const item = items.find((k) => k.id === args.itemId);
+      if (!item) return { ok: false, error: '未找到该知识条目' };
+      const content = cut(item.content ?? '', 6000);
+      return { ok: true, data: { id: item.id, name: item.name, type: item.type, content: content.text, contentTruncated: content.truncated } };
+    }
+    if (typeof args.name === 'string' && args.name.trim()) {
+      const keyword = (args.name as string).trim();
+      const item = items.find((k) => k.name === keyword) ?? items.find((k) => k.name.includes(keyword));
+      if (!item) return { ok: false, error: `未找到名称含“${keyword}”的知识条目` };
+      const content = cut(item.content ?? '', 6000);
+      return { ok: true, data: { id: item.id, name: item.name, type: item.type, content: content.text, contentTruncated: content.truncated } };
+    }
+    return {
+      ok: true,
+      data: {
+        total: items.length,
+        items: items.map((k) => ({ id: k.id, name: k.name, type: k.type, category: k.category })),
+      },
+    };
+  },
+};
+
+/** core.text.search：全文关键词检索（章节正文/知识库，FTS5 高亮片段）。 */
+export const textSearchTool: ToolSpec = {
+  id: 'core.text.search',
+  description: '全文关键词检索（章节正文与知识库，返回高亮片段）。找原文出处、回查伏笔/设定时用它。',
+  parameters: {
+    type: 'object',
+    properties: {
+      query: { type: 'string', description: '关键词（3 字以上效果最好）' },
+      limit: { type: 'number', description: '最多返回条数，默认 10，上限 30' },
+    },
+    required: ['query'],
+  },
+  permission: 'read',
+  async execute(req, ctx) {
+    const args = (req.args ?? {}) as { query?: unknown; limit?: unknown };
+    const query = str(args.query, 'query');
+    const limit = num(args.limit, 'limit', 10, 1, 30);
+    const search = searchServiceOf(ctx, 'textSearch');
+    const hits = await search(query, limit);
+    return { ok: true, data: { query, hits } };
+  },
+};
+
+/** core.text.semanticSearch：语义检索（按含义找相关知识条目；不可用时回落关键词检索）。 */
+export const textSemanticSearchTool: ToolSpec = {
+  id: 'core.text.semanticSearch',
+  description: '语义检索：按含义找相关知识条目（换词/意合场景）。嵌入服务不可用时报错并改用 core.text.search。',
+  parameters: {
+    type: 'object',
+    properties: {
+      query: { type: 'string', description: '自然语言查询' },
+      limit: { type: 'number', description: '最多返回条数，默认 8，上限 20' },
+    },
+    required: ['query'],
+  },
+  permission: 'read',
+  async execute(req, ctx) {
+    const args = (req.args ?? {}) as { query?: unknown; limit?: unknown };
+    const query = str(args.query, 'query');
+    const limit = num(args.limit, 'limit', 8, 1, 20);
+    const search = searchServiceOf(ctx, 'semanticSearch');
+    const hits = await search(query, limit);
+    return { ok: true, data: { query, hits } };
+  },
+};
+
 // ── 生成类工具（write:proposal：产出提案文本，经审批后由用户落稿）──────
 
 async function generateProposal(ctx: ToolContext, prompt: string): Promise<{ ok: boolean; data?: unknown; error?: string }> {
@@ -327,7 +560,7 @@ export const chapterPlanTool: ToolSpec = {
   },
 };
 
-/** 首批内置工具清单。 */
+/** 首批 + 按需上下文内置工具清单。 */
 export function createBuiltinTools(): ToolSpec[] {
   return [
     cardGenerateTool,
@@ -335,6 +568,13 @@ export function createBuiltinTools(): ToolSpec[] {
     consistencyScanTool,
     recommendNextTool,
     indexQueryTool,
+    chapterListTool,
+    chapterReadTool,
+    outlineReadTool,
+    characterListTool,
+    knowledgeReadTool,
+    textSearchTool,
+    textSemanticSearchTool,
     textContinueTool,
     textRewriteTool,
     outlineGenerateTool,
