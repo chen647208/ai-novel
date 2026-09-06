@@ -12,12 +12,9 @@
     "traditional": "传统输出"
   },
   "window": {
-    "fabTitle": "打开 AI 写作助手",
     "title": "AI 助手",
-    "unpinTitle": "取消置顶",
-    "pinTitle": "窗口置顶（保持在最上层）",
-    "unlockTitle": "解锁窗口（可拖动和调整大小）",
-    "lockTitle": "锁定窗口（固定位置和大小）",
+    "closeSidebar": "关闭 AI 侧边栏",
+    "resizeSidebarTitle": "拖动调整侧边栏宽度",
     "editDataTitle": "编辑项目数据",
     "contextTitle": "项目上下文分析",
     "stopStreamTitle": "停止流式响应",
@@ -47,9 +44,7 @@
     "resetTemplateTitle": "重置为默认模板",
     "inputPlaceholder": "输入问题，或使用 /角色 /地点 /势力 等命令快速创建... (Shift+Enter 换行)",
     "stopTitle": "停止生成",
-    "sendTitle": "发送",
-    "resizeLockedTitle": "窗口已锁定，无法调整大小",
-    "resizeTitle": "拖动调整窗口大小"
+    "sendTitle": "发送"
   },
   "dialog": {
     "noModel": "请先配置AI模型",

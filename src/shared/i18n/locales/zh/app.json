@@ -53,7 +53,9 @@
     "renameTip": "点击修改书名",
     "guidedNext": "建议下一步：{{step}}",
     "guidedGoTip": "前往该步骤",
-    "guidedDismiss": "关闭建议"
+    "guidedDismiss": "关闭建议",
+    "toggleAssistantTip": "开关 AI 侧边栏（Ctrl+J）",
+    "expandAssistant": "展开 AI 侧边栏（Ctrl+J）"
   },
   "reset": {
     "factoryTitle": "恢复出厂设置",

@@ -14,6 +14,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Project } from '../../shared/types';
 import { TooltipProvider } from '@/shared/ui/Tooltip';
 import Bookshelf from './app-shell/Bookshelf';
@@ -35,9 +36,11 @@ import { useSettingsStore, useUsableModel } from './stores/settingsStore';
 import { useAppBootstrap } from './useAppBootstrap';
 import { useFeatureAvailability } from './useFeatureAvailability';
 import { useBookActions } from './useBookActions';
+import { Bot } from 'lucide-react';
 
 const App: React.FC = () => {
   useAppBootstrap();
+  const { t } = useTranslation('app');
 
   // 纯 UI 态（不落盘）
   const [view, setView] = useState<'bookshelf' | 'workspace'>('bookshelf');
@@ -49,7 +52,10 @@ const App: React.FC = () => {
   const [isHistoryViewerOpen, setIsHistoryViewerOpen] = useState(false);
   const [isVersionCheckOpen, setIsVersionCheckOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
-  const [assistantLayout, setAssistantLayout] = useViewPreference<'docked' | 'floating'>('assistant.layout', 'docked');
+  const [assistantOpenPref, setAssistantOpenPref] = useViewPreference<'open' | 'closed'>('assistant.open', 'open');
+  const [assistantWidthPref, setAssistantWidthPref] = useViewPreference<string>('assistant.width', '380');
+  const assistantOpen = assistantOpenPref !== 'closed';
+  const assistantWidth = Math.min(560, Math.max(300, Number.parseInt(assistantWidthPref, 10) || 380));
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   // 功能可用性（发行档）：当前分区被禁用时回退写作编辑器
@@ -81,6 +87,21 @@ const App: React.FC = () => {
     }
   }, [uiFont, editorFont, customFonts]);
 
+  const toggleAssistant = useCallback(() => {
+    setAssistantOpenPref(assistantOpen ? 'closed' : 'open');
+  }, [assistantOpen, setAssistantOpenPref]);
+
+  // IDE 式开关：Ctrl/Cmd+J 随时显隐 AI 侧边栏
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'j') {
+        e.preventDefault();
+        toggleAssistant();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [toggleAssistant]);
   const enterWorkspace = useCallback(() => {
     setSection('inspiration'); setEditingChapterId(null); setView('workspace');
   }, []);
@@ -137,8 +158,9 @@ const App: React.FC = () => {
       project={activeProject}
       prompts={prompts}
       onUpdate={updateProject}
-      layout={assistantLayout}
-      onToggleLayout={() => setAssistantLayout(assistantLayout === 'docked' ? 'floating' : 'docked')}
+      width={assistantWidth}
+      onClose={() => setAssistantOpenPref('closed')}
+      onWidthChange={(w) => setAssistantWidthPref(String(Math.min(560, Math.max(300, Math.round(w)))))}
     />
   ) : null;
 
@@ -150,8 +172,6 @@ const App: React.FC = () => {
         <ApprovalHost />
 
         <ResetAlertDialog open={resetOpen} type="factory_reset" onClose={() => setResetOpen(false)} />
-
-        {assistantLayout === 'floating' && assistantNode}
 
         {view === 'bookshelf' ? (
           <div className="min-w-0 flex-1">
@@ -181,6 +201,8 @@ const App: React.FC = () => {
             theme={theme}
             focusCharacterId={focusCharacterId}
             editingChapterId={editingChapterId}
+            assistantOpen={assistantOpen}
+            onToggleAssistant={toggleAssistant}
             onSectionChange={handleSectionChange}
             onOpenBookshelf={() => setView('bookshelf')}
             onOpenSettings={() => setIsSettingsOpen(true)}
@@ -194,10 +216,23 @@ const App: React.FC = () => {
             onNavigateToChapter={id => { setEditingChapterId(id); setSection('writing'); }}
               />
             </div>
-            {assistantLayout === 'docked' && (
-              <div className="w-[380px] shrink-0 border-l border-border">
+            {assistantNode && assistantOpen ? (
+              <div className="shrink-0 border-l border-border" style={{ width: assistantWidth }}>
                 {assistantNode}
               </div>
+            ) : (
+              assistantNode && (
+                <div className="flex w-10 shrink-0 items-start justify-center border-l border-border bg-card pt-3">
+                  <button
+                    type="button"
+                    onClick={() => setAssistantOpenPref('open')}
+                    className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                    title={t('topbar.expandAssistant')}
+                  >
+                    <Bot className="size-4" />
+                  </button>
+                </div>
+              )
             )}
           </div>
         )}

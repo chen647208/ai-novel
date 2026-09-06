@@ -11,7 +11,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { templateDisplayName } from '@/i18n';
 import type { CardPromptTemplate, KnowledgeItem } from '../../../../shared/types';
-import type { AssistantWindowSize, ChatMessage } from '../types';
+import type { ChatMessage } from '../types';
 import { Button } from '@/shared/ui/Button';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
@@ -37,9 +37,6 @@ interface AssistantChatWorkspaceProps {
   cardPromptTemplates: CardPromptTemplate[];
   selectedCardTemplateId: string | null;
   setSelectedCardTemplateId: React.Dispatch<React.SetStateAction<string | null>>;
-  isLocked: boolean;
-  size: AssistantWindowSize;
-  setSize: React.Dispatch<React.SetStateAction<AssistantWindowSize>>;
 }
 
 // cmd 前缀是数据（aiCardCommandService 对中英别名都接受），故按语言在渲染期取用；
@@ -86,9 +83,6 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
   cardPromptTemplates,
   selectedCardTemplateId,
   setSelectedCardTemplateId,
-  isLocked,
-  size,
-  setSize,
 }) => {
   const { t, i18n } = useTranslation('assistant');
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
@@ -287,31 +281,6 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
         </div>
       )}
 
-      <div
-        className={cn('absolute bottom-0 right-0 z-10 size-4', isLocked ? 'cursor-not-allowed' : 'cursor-se-resize')}
-        onMouseDown={(event) => {
-          event.stopPropagation();
-          event.preventDefault();
-          if (isLocked) return;
-          const startX = event.clientX;
-          const startY = event.clientY;
-          const startW = size.width;
-          const startH = size.height;
-          const handleResize = (moveEvent: MouseEvent) => {
-            setSize({
-              width: Math.max(300, startW + (moveEvent.clientX - startX)),
-              height: Math.max(400, startH + (moveEvent.clientY - startY)),
-            });
-          };
-          const stopResize = () => {
-            window.removeEventListener('mousemove', handleResize);
-            window.removeEventListener('mouseup', stopResize);
-          };
-          window.addEventListener('mousemove', handleResize);
-          window.addEventListener('mouseup', stopResize);
-        }}
-        title={isLocked ? t('chat.resizeLockedTitle') : t('chat.resizeTitle')}
-      />
     </>
   );
 };

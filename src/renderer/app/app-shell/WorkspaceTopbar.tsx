@@ -21,6 +21,7 @@ import {
   Cpu,
   History,
   Moon,
+  PanelRight,
   Pencil,
   RefreshCw,
   Sun,
@@ -37,6 +38,8 @@ interface WorkspaceTopbarProps {
   activeModel: ModelConfig | undefined;
   theme: AppTheme | undefined;
   section: SectionId;
+  assistantOpen?: boolean;
+  onToggleAssistant?: () => void;
   onSectionChange: (next: SectionId) => void;
   onRenameBook: (bookId: string, newTitle: string) => void;
   onThemeChange: (theme: AppTheme) => void;
@@ -53,6 +56,8 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
   activeModel,
   theme,
   section,
+  assistantOpen,
+  onToggleAssistant,
   onSectionChange,
   onRenameBook,
   onThemeChange,
@@ -169,6 +174,18 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
 
       {/* 右侧工具区 */}
       <div className="flex shrink-0 items-center gap-2">
+        {onToggleAssistant && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleAssistant}
+            title={t('app:topbar.toggleAssistantTip')}
+            aria-pressed={assistantOpen}
+            className={assistantOpen ? 'text-primary' : undefined}
+          >
+            <PanelRight className="size-4" />
+          </Button>
+        )}
         <SyncDialog project={project} />
         <ProtectedSessionDialog />
 

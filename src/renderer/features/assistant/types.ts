@@ -16,9 +16,12 @@ export interface GlobalAssistantProps {
   project: Project | null;
   prompts: PromptTemplate[];
   onUpdate?: (updates: Partial<Project>) => void;
-  /** docked = 右侧边栏常驻；floating = 右下角悬浮球+可拖拽浮窗（旧形态保留）。 */
-  layout?: 'docked' | 'floating';
-  onToggleLayout?: () => void;
+  /** 固定右侧边栏宽度（300–560），由 App 层持久化。 */
+  width?: number;
+  /** 关闭侧边栏（App 层收起）。 */
+  onClose?: () => void;
+  /** 拖动左边框调整宽度（App 层钳制并持久化）。 */
+  onWidthChange?: (width: number) => void;
 }
 
 export interface ChatTokenUsage {
@@ -43,16 +46,6 @@ export interface ChatMessage {
 export type AssistantCategory = 'inspiration' | 'knowledge' | 'characters' | 'outline' | 'chapters';
 export type AssistantEditCategory = AssistantCategory | 'content';
 export type SyncStatus = 'idle' | 'saving' | 'saved' | 'error';
-
-export interface AssistantWindowPosition {
-  x: number;
-  y: number;
-}
-
-export interface AssistantWindowSize {
-  width: number;
-  height: number;
-}
 
 export interface EditingData extends Partial<Project> {
   editingChapterId?: string;

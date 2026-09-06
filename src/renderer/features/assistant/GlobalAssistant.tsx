@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { type KnowledgeItem, type OutputMode, type Character, type Location, type Faction, type RuleSystem, type TimelineEvent, type AICardCommand, type CreatedCard, type Timeline, type WorldView, type MagicSystem, type TechnologyLevel, type WorldHistory, type CardPromptTemplate, type Project } from '../../../shared/types';
 import { useProjectStore } from '@/app/stores/projectStore';
 import { ATTACHMENT_TRUNCATE } from '../../../shared/constants/chapters';
-import { type GlobalAssistantProps, type ChatMessage, type AssistantCategory, type AssistantEditCategory, type SyncStatus, type EditingData, type AssistantWindowSize } from './types';
+import { type GlobalAssistantProps, type ChatMessage, type AssistantCategory, type AssistantEditCategory, type SyncStatus, type EditingData } from './types';
 import { type LooseRecord, asRecord, asStr } from '../../shared/utils/loose';
 import { AIService } from './services/aiService';
 import { sessionManager } from './services/aiRuntime';
@@ -28,19 +28,11 @@ import { Select } from '@/shared/ui/Select';
 import { cn } from '@/shared/utils/cn';
 import { dialogService } from '@/shared/services/dialogService';
 import { useSettingsStore } from '../../app/stores/settingsStore';
-import { BookOpenText, Bot, CircleStop, Lock, LockOpen, Maximize2, Minus, PanelRight, PenLine, Pin, Trash2, X } from 'lucide-react';
+import { BookOpenText, Bot, CircleStop, PenLine, Trash2, X } from 'lucide-react';
 
-const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId, project, prompts, onUpdate, layout = 'floating', onToggleLayout }) => {
+const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId, project, prompts, onUpdate, width = 380, onClose, onWidthChange }) => {
   const { t } = useTranslation('assistant');
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  
-  const [position, setPosition] = useState({ x: window.innerWidth - 420, y: window.innerHeight - 650 });
-  const [size, setSize] = useState<AssistantWindowSize>({ width: 380, height: 600 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [isLocked, setIsLocked] = useState(false); // 新增：窗口锁定状态
-  const [alwaysOnTop, setAlwaysOnTop] = useState(false); // 新增：窗口置顶状态
+  const resizeRef = useRef<HTMLDivElement>(null);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -84,14 +76,13 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
   }, []);
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<HTMLDivElement>(null);
   const streamAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [messages, isOpen, contextPanelOpen]);
+  }, [messages, contextPanelOpen]);
 
   const getContextContent = useMemo(() => {
     if (!project) return "当前未打开任何项目。";
@@ -154,59 +145,6 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     });
     setAnalysisPromptId(relevant?.id || prompts[0]?.id || '');
   }, [activeCategory, prompts]);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (isLocked) return;
-    
-    const target = e.target as HTMLElement;
-    const isInHeader = dragRef.current && dragRef.current.contains(target);
-    const isInTopArea = e.clientY - position.y < 30; // 窗口顶部30px区域
-    
-    if (isInHeader || isInTopArea) {
-      setIsDragging(true);
-      setDragOffset({
-        x: e.clientX - position.x,
-        y: e.clientY - position.y
-      });
-      document.body.style.cursor = 'grabbing';
-    }
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging) {
-        let newX = e.clientX - dragOffset.x;
-        let newY = e.clientY - dragOffset.y;
-        
-        const minX = 0; // 最小左边距
-        const minY = 0; // 最小上边距
-        const maxX = window.innerWidth - (isMinimized ? 200 : size.width); // 最大左边距
-        const maxY = window.innerHeight - (isMinimized ? 60 : size.height); // 最大上边距
-        
-        newX = Math.max(minX, Math.min(newX, maxX));
-        newY = Math.max(minY, Math.min(newY, maxY));
-        
-        setPosition({
-          x: newX,
-          y: newY
-        });
-      }
-    };
-    
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      document.body.style.cursor = '';
-    };
-
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-    }
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging, dragOffset, isMinimized, size.width, size.height]);
 
   const sendMessageInternal = async (text: string, attachments: KnowledgeItem[]) => {
     if (project && AICardCommandService.isValidCommand(text)) {
@@ -773,139 +711,103 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     return chapter?.content || '';
   };
 
-  const docked = layout === 'docked';
-
-  if (!isOpen && !docked) {
-    return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-8 right-8 z-[9999] flex size-12 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-opacity hover:opacity-90"
-        title={t('window.fabTitle')}
-      >
-        <Bot className="size-6" />
-      </button>
-    );
-  }
-
-  if (!isOpen && docked) {
-    // 侧边栏形态常驻，不提供关闭（避免右侧空洞）；保留最小占位由父容器决定
-  }
+  const handleResizeStart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!onWidthChange) return;
+    const startX = e.clientX;
+    const startW = width;
+    const handleResize = (moveEvent: MouseEvent) => {
+      onWidthChange(Math.min(560, Math.max(300, startW + (startX - moveEvent.clientX))));
+    };
+    const stopResize = () => {
+      window.removeEventListener('mousemove', handleResize);
+      window.removeEventListener('mouseup', stopResize);
+    };
+    window.addEventListener('mousemove', handleResize);
+    window.addEventListener('mouseup', stopResize);
+  };
 
   return (
-    <div
-      className={docked ? 'flex h-full flex-col overflow-hidden bg-card' : 'fixed flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xl'}
-      style={docked ? undefined : {
-        left: position.x,
-        top: position.y,
-        width: isMinimized ? 200 : size.width,
-        height: isMinimized ? 60 : size.height,
-        maxWidth: '90vw',
-        maxHeight: '90vh',
-        zIndex: alwaysOnTop ? 10000 : 9999
-      }}
-    >
+    <div className="relative flex h-full flex-col overflow-hidden bg-card">
       <div
-        ref={docked ? undefined : dragRef}
-        onMouseDown={docked ? undefined : handleMouseDown}
-        className={cn('flex shrink-0 items-center justify-between border-b border-border bg-muted/40 px-4 py-2.5 select-none', isMinimized && !docked && 'h-full border-b-0')}
+        ref={resizeRef}
+        onMouseDown={handleResizeStart}
+        className="absolute inset-y-0 left-0 z-10 w-1 cursor-col-resize transition-colors hover:bg-primary/40"
+        title={t('window.resizeSidebarTitle')}
+      />
+      <div
+        className="flex shrink-0 items-center justify-between border-b border-border bg-muted/40 px-4 py-2.5"
       >
         <div className="flex items-center gap-2">
           <Bot className="size-4 text-primary" />
           <span className="text-sm font-medium text-foreground">{t('window.title')}</span>
         </div>
-        <div className="flex items-center gap-1" onMouseDown={e => e.stopPropagation()}>
-          {onToggleLayout && (
+        <div className="flex items-center gap-1">
+          {onClose && (
             <button
-              onClick={onToggleLayout}
+              onClick={onClose}
               className="flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              title={docked ? '弹出为悬浮窗' : '停靠为侧边栏'}
+              title={t('window.closeSidebar')}
             >
-              <PanelRight className="size-3.5" />
+              <X className="size-3.5" />
             </button>
-          )}
-          {!docked && (
-          <button
-            onClick={() => setAlwaysOnTop(!alwaysOnTop)}
-            className={cn('flex size-6 items-center justify-center rounded transition-colors', alwaysOnTop ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground')}
-            title={alwaysOnTop ? t('window.unpinTitle') : t('window.pinTitle')}
-          >
-            {alwaysOnTop ? <Pin className="size-3.5" /> : <Pin className="size-3.5 rotate-90" />}
-          </button>
-          )}
-          {!docked && (
-          <button
-            onClick={() => setIsLocked(!isLocked)}
-            className={cn('flex size-6 items-center justify-center rounded transition-colors', isLocked ? 'bg-warning/10 text-warning' : 'text-muted-foreground hover:bg-accent hover:text-foreground')}
-            title={isLocked ? t('window.unlockTitle') : t('window.lockTitle')}
-          >
-            {isLocked ? <Lock className="size-3.5" /> : <LockOpen className="size-3.5" />}
-          </button>
-          )}
-
-          <button onClick={() => setIsMinimized(!isMinimized)} className="flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-            {isMinimized ? <Maximize2 className="size-3.5" /> : <Minus className="size-3.5" />}
-          </button>
-          {!docked && (
-          <button onClick={() => setIsOpen(false)} className="flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive">
-            <X className="size-3.5" />
-          </button>
           )}
         </div>
       </div>
 
-      {!(isMinimized && !docked) && (
-        <>
-          <div className="flex shrink-0 items-center justify-between border-b border-border bg-muted/20 px-4 py-2 text-xs">
-             <div className="flex items-center gap-2">
-                <Select
-                  className="h-7 w-auto max-w-[140px] text-xs"
-                  value={currentModelId}
-                  onChange={(e) => handleModelChange(e.target.value)}
-                >
-                  {models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                </Select>
-                <Select
-                  className="h-7 w-auto max-w-[120px] text-xs"
-                  value={outputMode}
-                  onChange={(e) => setOutputMode(e.target.value as OutputMode)}
-                >
-                  <option value="streaming">{t('output.streaming')}</option>
-                  <option value="traditional">{t('output.traditional')}</option>
-                </Select>
-             </div>
-             <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setEditPanelOpen(!editPanelOpen)}
-                  className={cn('flex size-7 items-center justify-center rounded transition-colors', editPanelOpen ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground')}
-                  title={t('window.editDataTitle')}
-                >
-                  <PenLine className="size-4" />
-                </button>
-                <button
-                  onClick={() => setContextPanelOpen(!contextPanelOpen)}
-                  className={cn('flex size-7 items-center justify-center rounded transition-colors', contextPanelOpen ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground')}
-                  title={t('window.contextTitle')}
-                >
-                  <BookOpenText className="size-4" />
-                </button>
-                {streamingMessageId && (
-                  <button
-                    onClick={handleStopStreaming}
-                    className="flex size-7 items-center justify-center rounded text-destructive transition-colors hover:bg-destructive/10"
-                    title={t('window.stopStreamTitle')}
-                  >
-                    <CircleStop className="size-4" />
-                  </button>
-                )}
-                <button
-                  onClick={() => setMessages([])}
-                  className="flex size-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                  title={t('window.clearChatTitle')}
-                >
-                  <Trash2 className="size-4" />
-                </button>
-             </div>
+      <>
+        <div className="flex shrink-0 items-center justify-between border-b border-border bg-muted/20 px-4 py-2 text-xs">
+          <div className="flex items-center gap-2">
+            <Select
+              className="h-7 w-auto max-w-[140px] text-xs"
+              value={currentModelId}
+              onChange={(e) => handleModelChange(e.target.value)}
+            >
+              {models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+            </Select>
+            <Select
+              className="h-7 w-auto max-w-[120px] text-xs"
+              value={outputMode}
+              onChange={(e) => setOutputMode(e.target.value as OutputMode)}
+            >
+              <option value="streaming">{t('output.streaming')}</option>
+              <option value="traditional">{t('output.traditional')}</option>
+            </Select>
           </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setEditPanelOpen(!editPanelOpen)}
+              className={cn('flex size-7 items-center justify-center rounded transition-colors', editPanelOpen ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground')}
+              title={t('window.editDataTitle')}
+            >
+              <PenLine className="size-4" />
+            </button>
+            <button
+              onClick={() => setContextPanelOpen(!contextPanelOpen)}
+              className={cn('flex size-7 items-center justify-center rounded transition-colors', contextPanelOpen ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground')}
+              title={t('window.contextTitle')}
+            >
+              <BookOpenText className="size-4" />
+            </button>
+            {streamingMessageId && (
+              <button
+                onClick={handleStopStreaming}
+                className="flex size-7 items-center justify-center rounded text-destructive transition-colors hover:bg-destructive/10"
+                title={t('window.stopStreamTitle')}
+              >
+                <CircleStop className="size-4" />
+              </button>
+            )}
+            <button
+              onClick={() => setMessages([])}
+              className="flex size-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+              title={t('window.clearChatTitle')}
+            >
+              <Trash2 className="size-4" />
+            </button>
+          </div>
+        </div>
 
           {editPanelOpen && (
             <AssistantEditPanel
@@ -960,12 +862,8 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
             cardPromptTemplates={cardPromptTemplates}
             selectedCardTemplateId={selectedCardTemplateId}
             setSelectedCardTemplateId={setSelectedCardTemplateId}
-            isLocked={isLocked}
-            size={size}
-            setSize={setSize}
           />
         </>
-      )}
     </div>
   );
 };

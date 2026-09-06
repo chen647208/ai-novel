@@ -12,12 +12,9 @@
     "traditional": "Traditional"
   },
   "window": {
-    "fabTitle": "Open AI Writing Assistant",
     "title": "AI Assistant",
-    "unpinTitle": "Unpin from top",
-    "pinTitle": "Always on top (keep above other windows)",
-    "unlockTitle": "Unlock window (drag and resize)",
-    "lockTitle": "Lock window (fix position and size)",
+    "closeSidebar": "Close AI sidebar",
+    "resizeSidebarTitle": "Drag to resize the sidebar",
     "editDataTitle": "Edit project data",
     "contextTitle": "Project context analysis",
     "stopStreamTitle": "Stop streaming response",
@@ -47,9 +44,7 @@
     "resetTemplateTitle": "Reset to default template",
     "inputPlaceholder": "Type a question, or use /character /location /faction commands to create quickly... (Shift+Enter for a new line)",
     "stopTitle": "Stop generating",
-    "sendTitle": "Send",
-    "resizeLockedTitle": "Window is locked and cannot be resized",
-    "resizeTitle": "Drag to resize the window"
+    "sendTitle": "Send"
   },
   "dialog": {
     "noModel": "Please configure an AI model first",

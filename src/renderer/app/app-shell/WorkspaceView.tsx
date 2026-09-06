@@ -37,6 +37,8 @@ export interface WorkspaceViewProps {
   theme: AppTheme | undefined;
   focusCharacterId: string | null;
   editingChapterId: string | null;
+  assistantOpen?: boolean;
+  onToggleAssistant?: () => void;
   onSectionChange: (next: SectionId) => void;
   onOpenBookshelf: () => void;
   onOpenSettings: () => void;
@@ -158,6 +160,7 @@ const WorkspaceSection: React.FC<WorkspaceViewProps> = ({
 const WorkspaceView: React.FC<WorkspaceViewProps> = (props) => {
   const {
     section, activeProject, activeModel, resetKey, theme,
+    assistantOpen, onToggleAssistant,
     onSectionChange, onOpenBookshelf, onOpenSettings,
     onDeleteProject, onOpenHistory, onOpenVersionCheck,
     onThemeChange, onRenameBook,
@@ -183,6 +186,8 @@ const WorkspaceView: React.FC<WorkspaceViewProps> = (props) => {
             activeModel={activeModel}
             theme={theme}
             section={section}
+            assistantOpen={assistantOpen}
+            onToggleAssistant={onToggleAssistant}
             onSectionChange={onSectionChange}
             onRenameBook={onRenameBook}
             onThemeChange={onThemeChange}

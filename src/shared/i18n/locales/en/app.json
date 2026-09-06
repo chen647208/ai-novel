@@ -53,7 +53,9 @@
     "renameTip": "Click to rename",
     "guidedNext": "Suggested next: {{step}}",
     "guidedGoTip": "Go to this step",
-    "guidedDismiss": "Dismiss suggestion"
+    "guidedDismiss": "Dismiss suggestion",
+    "toggleAssistantTip": "Toggle AI sidebar (Ctrl+J)",
+    "expandAssistant": "Expand AI sidebar (Ctrl+J)"
   },
   "reset": {
     "factoryTitle": "Factory Reset",

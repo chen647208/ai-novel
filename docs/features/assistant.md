@@ -7,7 +7,7 @@
 
 ## 核心文件
 
-- `GlobalAssistant.tsx`：全局助手主编排器（聊天区、面板切换、停止生成）
+- `GlobalAssistant.tsx`：固定右侧边栏（显隐开关、Ctrl+J、左框拖动调宽并持久化）
 - `components/AssistantChatWorkspace.tsx`：聊天记录展示、模板选择、附件、输入区
 - `components/AssistantContextPanel.tsx`：上下文分析与项目快照面板
 - `components/AssistantEditPanel.tsx`：项目数据编辑面板
