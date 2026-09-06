@@ -26,11 +26,11 @@ describe('suggestNextSection', () => {
   it('仅 intro 也算灵感已填', () => {
     expect(suggestNextSection(project({ intro: '简介' }))).toBe('characters');
   });
-  it('有角色无大纲 → outline', () => {
-    expect(suggestNextSection(project({ inspiration: 'x', characters: [{ id: 'c', name: '林渊' } as never] }))).toBe('outline');
+  it('有角色无大纲 → structure', () => {
+    expect(suggestNextSection(project({ inspiration: 'x', characters: [{ id: 'c', name: '林渊' } as never] }))).toBe('structure');
   });
-  it('有大纲无章节 → chapters', () => {
-    expect(suggestNextSection(project({ inspiration: 'x', characters: [{ id: 'c' } as never], outline: '# 大纲' }))).toBe('chapters');
+  it('有大纲无章节 → structure', () => {
+    expect(suggestNextSection(project({ inspiration: 'x', characters: [{ id: 'c' } as never], outline: '# 大纲' }))).toBe('structure');
   });
   it('全部就绪 → writing', () => {
     expect(suggestNextSection(project({ inspiration: 'x', characters: [{ id: 'c' } as never], outline: 'o', chapters: [{ id: 'ch' } as never] }))).toBe('writing');

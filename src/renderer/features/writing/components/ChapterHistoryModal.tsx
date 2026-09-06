@@ -7,9 +7,11 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Chapter } from '../../../../shared/types';
+import type { RevisionEntity } from '@core/entities';
+import { repository } from '@/shared/services/repository';
 import { formatHistoryTimestamp, getGenerationType, getProviderIcon } from '../utils';
 import { listSnapshots, removeSnapshot } from '../services/chapterSnapshotService';
 import { dialogService } from '@/shared/services/dialogService';
@@ -41,7 +43,30 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
   onUpdateChapter,
 }) => {
   const { t } = useTranslation('writing');
-  const [tab, setTab] = useState<'ai' | 'snapshot'>('ai');
+  const [tab, setTab] = useState<'ai' | 'snapshot' | 'revisions'>('ai');
+  const [revisions, setRevisions] = useState<RevisionEntity[]>([]);
+
+  // 修订记录按需加载：节点 id 即章节 id（bridge 平铺时原样透传）；
+  // 应用走正常回写路径（onApplyContent），自然产生一条新修订，无需写回管线
+  useEffect(() => {
+    if (!isOpen || !chapter || tab !== 'revisions') return;
+    let cancelled = false;
+    const pending = repository.loadRevisions?.(chapter.id);
+    if (!pending) {
+      setRevisions([]);
+      return;
+    }
+    pending
+      .then((rows) => {
+        if (!cancelled) setRevisions([...rows].sort((a, b) => b.seq - a.seq));
+      })
+      .catch(() => {
+        if (!cancelled) setRevisions([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, chapter, tab]);
 
   if (!isOpen || !chapter) {
     return null;
@@ -95,6 +120,15 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
           >
             <Camera className="size-3.5" /> {t('chapterHistory.tabSnapshot', { count: snapshots.length })}
           </button>
+          <button
+            onClick={() => setTab('revisions')}
+            className={cn(
+              'flex items-center gap-1.5 border-b-2 px-1 py-2.5 text-xs font-medium transition-colors',
+              tab === 'revisions' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <History className="size-3.5" /> {t('chapterHistory.tabRevisions', { count: revisions.length })}
+          </button>
         </div>
 
         <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto bg-muted/20 p-5">
@@ -134,6 +168,40 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
               })
             ) : (
               <EmptyState icon={Camera} title={t('chapterHistory.noSnapshots')} description={t('chapterHistory.noSnapshotsHint')} />
+            )
+          ) : tab === 'revisions' ? (
+            revisions.length > 0 ? (
+              <div className="space-y-3">
+                {revisions.map((rev) => (
+                  <div key={rev.id} className="flex items-center justify-between gap-4 rounded-lg border border-border bg-card p-4">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                        <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs tabular-nums">#{rev.seq}</span>
+                        <span>{formatHistoryTimestamp(rev.createdAt)}</span>
+                      </div>
+                      <div className="mt-1 truncate text-xs text-muted-foreground">
+                        {t('chapterHistory.revisionAuthor')}: {rev.author}
+                        {rev.cause ? ` · ${t('chapterHistory.revisionCause')}: ${rev.cause}` : ''}
+                        {` · ${rev.body.slice(0, 60).replace(/\n/g, ' ') || t('chapterHistory.emptyPreview')}`}
+                      </div>
+                    </div>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="shrink-0"
+                      onClick={() => {
+                        onApplyContent(rev.body);
+                        onClose();
+                      }}
+                      title={t('chapterHistory.revisionApplyTitle')}
+                    >
+                      <Redo2 className="size-3.5" /> {t('chapterHistory.revisionApply')}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState icon={History} title={t('chapterHistory.noRevisions')} description={t('chapterHistory.noRevisionsHint')} />
             )
           ) : sortedHistory.length > 0 ? (
             <div className="space-y-4">

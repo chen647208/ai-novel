@@ -17,7 +17,7 @@
  * dispose——插件的任何注册都不会残留在宿主里。
  *
  * 权限：deny-by-default。资源型贡献（skills/types/buildProfiles）零代码可热载。
- * 逻辑型（editor/worker）沙箱在后续里程碑接入，本运行时不执行插件代码。
+ * 逻辑型（editor/worker）当前无沙箱，本运行时不执行插件代码。
  */
 import {
   PermissionDenied,

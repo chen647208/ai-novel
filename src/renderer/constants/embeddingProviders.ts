@@ -8,6 +8,7 @@
  */
 
 
+import { Boxes, Cloud, Cpu, Flame, Globe, Monitor, type LucideIcon } from 'lucide-react';
 import { type EmbeddingModelProvider } from '../../shared/types';
 
 /**
@@ -165,14 +166,14 @@ export const quickAddTemplates: Array<{
   nameKey: string;
   provider: EmbeddingModelProvider;
   modelName: string;
-  icon: string;
+  Icon: LucideIcon;
 }> = [
-  { id: 'siliconflow-bge-m3', nameKey: 'providers:quickAdd.siliconflow-bge-m3', provider: 'siliconflow', modelName: 'BAAI/bge-m3', icon: '🚀' },
-  { id: 'bailian-v3', nameKey: 'providers:quickAdd.bailian-v3', provider: 'bailian', modelName: 'text-embedding-v3', icon: '🔥' },
-  { id: 'ollama-local', nameKey: 'providers:quickAdd.ollama-local', provider: 'ollama', modelName: 'nomic-embed-text', icon: '⚡' },
-  { id: 'openai-api', nameKey: 'providers:quickAdd.openai-api', provider: 'openai-compatible', modelName: 'text-embedding-3-small', icon: '🌐' },
-  { id: 'lmstudio-local', nameKey: 'providers:quickAdd.lmstudio-local', provider: 'lmstudio', modelName: 'sentence-transformers/all-MiniLM-L6-v2', icon: '💻' },
-  { id: 'volcano-ark', nameKey: 'providers:quickAdd.volcano-ark', provider: 'volcano', modelName: 'doubao-embedding', icon: '📦' }
+  { id: 'siliconflow-bge-m3', nameKey: 'providers:quickAdd.siliconflow-bge-m3', provider: 'siliconflow', modelName: 'BAAI/bge-m3', Icon: Boxes },
+  { id: 'bailian-v3', nameKey: 'providers:quickAdd.bailian-v3', provider: 'bailian', modelName: 'text-embedding-v3', Icon: Flame },
+  { id: 'ollama-local', nameKey: 'providers:quickAdd.ollama-local', provider: 'ollama', modelName: 'nomic-embed-text', Icon: Cpu },
+  { id: 'openai-api', nameKey: 'providers:quickAdd.openai-api', provider: 'openai-compatible', modelName: 'text-embedding-3-small', Icon: Globe },
+  { id: 'lmstudio-local', nameKey: 'providers:quickAdd.lmstudio-local', provider: 'lmstudio', modelName: 'sentence-transformers/all-MiniLM-L6-v2', Icon: Monitor },
+  { id: 'volcano-ark', nameKey: 'providers:quickAdd.volcano-ark', provider: 'volcano', modelName: 'doubao-embedding', Icon: Cloud }
 ];
 
 // 获取默认配置参数

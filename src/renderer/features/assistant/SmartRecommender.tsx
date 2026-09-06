@@ -6,6 +6,7 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+import { logger } from '@/shared/utils/logger';
 
 /**
  * 智能推荐组件
@@ -69,7 +70,7 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
         setRecommendations(result);
       }
     } catch (error) {
-      console.error('获取推荐失败:', error);
+      logger.error('获取推荐失败:', error);
     } finally {
       setIsLoading(false);
     }

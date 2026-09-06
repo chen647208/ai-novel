@@ -6,25 +6,27 @@
 
 | 工作流 | 文件 | 触发条件 | 作用 |
 | --- | --- | --- | --- |
-| CI | `.github/workflows/ci.yml` | 推送到 `main`、针对 `main` 的 Pull Request、手动触发 | 类型检查 + 单元测试 + 全量构建 + 图标校验 |
+| CI | `.github/workflows/ci.yml` | 推送到 `main`、针对 `main` 的 Pull Request、手动触发 | 规范＋类型＋覆盖率测试＋密钥/文档扫描；非文档改动才跑 Electron 全量构建 |
 | Release | `.github/workflows/release.yml` | 推送形如 `v*` 的标签 | 三端构建桌面包并发布 GitHub Release |
 
 ## CI（持续集成）
 
-- 在 `ubuntu-latest` 上执行，安装依赖用 `npm ci`（锁定 `package-lock.json`）。
-- 步骤：
-  1. `npm run typecheck:all`：渲染层与主进程 strict 类型检查（含 `noUnusedLocals`，拦截死代码）。
-  2. `npm run test`：vitest 全量单元测试。
-  3. `npm run electron:build`：渲染进程 + 主进程 + 预加载全量构建，确保可编译产物。
-  4. `npm run check:icons`：校验 `icon.ico` / `icon.png` 资源头合法。
-- 同一分支的新提交会取消进行中的旧任务（`concurrency` + `cancel-in-progress`）。
+- 在 `ubuntu-latest` 上执行，安装依赖用 `npm ci`（锁定 `package-lock.json`），Node 依赖缓存 + 同分支新提交取消旧任务，不浪费分钟数。
+- `verify` 作业（每次必跑）：
+  1. `npm run lint`：ESLint 严格模式。
+  2. `npm run typecheck:all`：渲染层与主进程 strict 类型检查（含 `noUnusedLocals`，拦截死代码）。
+  3. `npm run test:coverage`：vitest 全量单元测试 + 覆盖率分层锁线（与本地 `verify` 一致）。
+  4. `npm run headers:check`：许可证声明头。
+  5. 密钥扫描：密钥模式零命中门禁。
+  6. 文档变迁叙事检查：`已重构为/换代后/此前是` 零命中门禁。
+- `build` 作业（重型）：仅非文档改动时跑，`npm run electron:build` + `npm run check:icons`。纯文档 PR 跳过构建。
 
 ## Release（发布）
 
 仅当推送 `v*` 标签时触发，遵循「确认稳定版本后再打标签」的原则：
 
 1. `build` 作业用矩阵在 `windows-latest`、`macos-latest`、`ubuntu-latest` 三个 runner 上并行：
-   - `npm ci` → `typecheck:all` + `test` → `electron-builder --win/--mac/--linux --publish never`。
+   - `npm ci` → `typecheck:all` + `test:coverage` → `electron-builder --win/--mac/--linux --publish never`。
    - 各平台产物通过 `actions/upload-artifact` 上传。
    - macOS 默认不签名（`CSC_IDENTITY_AUTO_DISCOVERY=false`），产物带 Gatekeeper 提示，属开源未签名分发的预期行为。
 2. `release` 作业汇总三端产物，用 `softprops/action-gh-release` 基于该标签创建 GitHub Release 并上传安装包，自动生成发布说明。
@@ -35,12 +37,12 @@
 # 1) 确认 main 分支稳定、测试全绿
 npm run verify
 
-# 2) 需要时更新版本号
-npm version patch        # 或手动改 package.json 的 version
+# 2) 同步版本号三处（package.json、releases.ts、CHANGELOG.md）
+node scripts/bump-version.mjs 1.0.1 --zh "说明" --en "notes"
 
 # 3) 提交并打标签
-git commit -am "chore: release v1.4.6"
-git tag v1.4.6
+git commit -am "chore: release v1.0.1"
+git tag v1.0.1
 git push origin main --follow-tags
 ```
 

@@ -46,7 +46,7 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ character, project, isO
 
   return (
     <Dialog open={isOpen} onOpenChange={open => { if (!open) onClose(); }}>
-      <DialogContent className="flex h-[92vh] max-w-5xl flex-col gap-0 overflow-hidden p-0">
+      <DialogContent className="flex h-[92dvh] w-[94vw] max-w-5xl flex-col gap-0 overflow-hidden p-0">
         <DialogTitle className="sr-only">{character.name || t('modal.nameLabel')}</DialogTitle>
         {/* 头部：姓名与基础属性 */}
         <div className="shrink-0 border-b border-border px-6 py-4">

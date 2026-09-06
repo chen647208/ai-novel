@@ -9,6 +9,7 @@
 
 import { AIService } from '../../assistant/services/aiService';
 import type { Chapter, ModelConfig, Project, PromptTemplate } from '../../../../shared/types';
+import type { CommitOptions } from '@/shared/services/repository/types';
 import { dialogService } from '@/shared/services/dialogService';
 import { i18n, templateDisplayName } from '@/i18n';
 
@@ -19,7 +20,7 @@ interface ExtractChapterSummaryArgs {
   prompts: PromptTemplate[];
   project: Project;
   activeModel: ModelConfig;
-  onUpdate: (updates: Partial<Project>) => void;
+  onUpdate: (updates: Partial<Project>, opts?: CommitOptions) => void;
 }
 
 export const extractChapterSummary = async ({
@@ -109,7 +110,7 @@ export const extractChapterSummary = async ({
     };
   });
 
-  onUpdate({ chapters: updatedChapters });
+  onUpdate({ chapters: updatedChapters }, { agentId: 'ai:summary', cause: selectedPromptId });
   dialogService.alert(i18n.t('writing:summaryService.success'));
 };
 

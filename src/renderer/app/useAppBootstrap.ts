@@ -21,6 +21,7 @@ import { applyTheme, watchSystemTheme } from '../shared/services/themeService';
 import { logger } from '../shared/utils/logger';
 import { useProjectStore } from './stores/projectStore';
 import { useSettingsStore } from './stores/settingsStore';
+import { bootCustomFonts } from '../features/settings/services/customFontService';
 import { composeAppState, seedPersistBaseline, startPersistenceBridge } from './stores/persistenceBridge';
 
 /** 把规范化 AppState 灌入双 store（首启动与全量导入共用）。 */
@@ -38,6 +39,9 @@ export function hydrateStoresFromState(state: typeof INITIAL_APP_STATE): void {
     activeEmbeddingModelId: state.activeEmbeddingModelId,
     language: state.language,
     theme: state.theme,
+    uiFont: state.uiFont,
+    editorFont: state.editorFont,
+    customFonts: state.customFonts ?? [],
   });
 }
 
@@ -64,10 +68,12 @@ export function useAppBootstrap(): void {
         }
         // 建立差分基线（磁盘现状 == 组合态），再启动持久化桥
         seedPersistBaseline(composeAppState());
+        // 已导入字体读回注册（逐个失败跳过，不挡启动）
+        void bootCustomFonts().catch((error) => logger.error('自定义字体加载失败:', error));
         await vectorIntegrationService.initialize();
         startPersistenceBridge();
       } catch (error) {
-        console.error('Failed to load initial state:', error);
+        logger.error('Failed to load initial state:', error);
       }
     })();
   }, []);

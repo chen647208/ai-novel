@@ -66,7 +66,7 @@ export class APIEmbeddingService implements EmbeddingService {
       this.isReady = false;
       return false;
     } catch (error) {
-      console.error('APIEmbeddingService initialization failed:', error);
+      logger.error('APIEmbeddingService initialization failed:', error);
       this.isReady = false;
       return false;
     }
@@ -109,7 +109,7 @@ export class APIEmbeddingService implements EmbeddingService {
       const embedding = await embeddingModelService.getEmbedding(this.currentConfig, text);
       return embedding;
     } catch (error) {
-      console.error('embedText failed:', error);
+      logger.error('embedText failed:', error);
       throw error;
     }
   }
@@ -139,7 +139,7 @@ export class APIEmbeddingService implements EmbeddingService {
       const embeddings = await embeddingModelService.getEmbeddings(this.currentConfig, texts);
       return embeddings;
     } catch (error) {
-      console.error('embedTexts failed:', error);
+      logger.error('embedTexts failed:', error);
       throw error;
     }
   }
@@ -205,7 +205,7 @@ export class APIEmbeddingService implements EmbeddingService {
     textChunks.forEach((chunk, index) => {
       const embedding = embeddings[index];
       if (!embedding) {
-        console.warn(`未能获取嵌入向量: ${chunk.itemId}_chunk${chunk.chunkIndex}`);
+        logger.warn(`未能获取嵌入向量: ${chunk.itemId}_chunk${chunk.chunkIndex}`);
         return;
       }
 

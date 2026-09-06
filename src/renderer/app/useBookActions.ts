@@ -6,6 +6,7 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+import { logger } from '@/shared/utils/logger';
 
 /**
  * 书籍库动作 hook：建/开/删/复制/重命名/导入导出，全部落 projectStore。
@@ -135,7 +136,7 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
       useProjectStore.getState().upsertProject(imported);
       dialogService.alert(i18n.t('app:book.importSuccess', { title: imported.title }));
     } catch (error) {
-      console.error('Failed to import book:', error);
+      logger.error('Failed to import book:', error);
       if (error instanceof Error && error.message !== '未选择文件') {
         dialogService.alert(i18n.t('app:book.importFailed', { message: error.message }));
       }

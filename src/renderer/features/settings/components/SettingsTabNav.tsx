@@ -18,35 +18,69 @@ interface SettingsTabNavProps {
   onChange: (tab: SettingsTab) => void;
 }
 
-const tabItems: Array<{ id: SettingsTab; icon: LucideIcon; labelKey: 'tab.general' | 'tab.models' | 'tab.prompts' | 'tab.cardPrompts' | 'tab.consistencyPrompts' | 'tab.system' | 'tab.storage' | 'tab.embedding' | 'tab.plugins' }> = [
-  { id: 'general', icon: SlidersHorizontal, labelKey: 'tab.general' },
-  { id: 'models', icon: Cpu, labelKey: 'tab.models' },
-  { id: 'prompts', icon: Terminal, labelKey: 'tab.prompts' },
-  { id: 'card-prompts', icon: WandSparkles, labelKey: 'tab.cardPrompts' },
-  { id: 'consistency-prompts', icon: Stethoscope, labelKey: 'tab.consistencyPrompts' },
-  { id: 'system', icon: GraduationCap, labelKey: 'tab.system' },
-  { id: 'storage', icon: Database, labelKey: 'tab.storage' },
-  { id: 'embedding', icon: Brain, labelKey: 'tab.embedding' },
-  { id: 'plugins', icon: Puzzle, labelKey: 'tab.plugins' },
+type LabelKey = 'tab.general' | 'tab.models' | 'tab.prompts' | 'tab.cardPrompts' | 'tab.consistencyPrompts' | 'tab.system' | 'tab.storage' | 'tab.embedding' | 'tab.plugins';
+
+interface TabGroup {
+  id: string;
+  labelKey: string;
+  fallback: string;
+  items: Array<{ id: SettingsTab; icon: LucideIcon; labelKey: LabelKey }>;
+}
+
+/** 9 tab 平铺改为 3 组：AI 模型 / 提示词 / 系统。数据不动，只改导航分组，降低认知负荷。 */
+const TAB_GROUPS: TabGroup[] = [
+  {
+    id: 'ai', labelKey: 'tabGroup.ai', fallback: 'AI 模型',
+    items: [
+      { id: 'models', icon: Cpu, labelKey: 'tab.models' },
+      { id: 'embedding', icon: Brain, labelKey: 'tab.embedding' },
+    ],
+  },
+  {
+    id: 'prompts', labelKey: 'tabGroup.prompts', fallback: '提示词',
+    items: [
+      { id: 'prompts', icon: Terminal, labelKey: 'tab.prompts' },
+      { id: 'card-prompts', icon: WandSparkles, labelKey: 'tab.cardPrompts' },
+      { id: 'consistency-prompts', icon: Stethoscope, labelKey: 'tab.consistencyPrompts' },
+    ],
+  },
+  {
+    id: 'system', labelKey: 'tabGroup.system', fallback: '系统',
+    items: [
+      { id: 'general', icon: SlidersHorizontal, labelKey: 'tab.general' },
+      { id: 'system', icon: GraduationCap, labelKey: 'tab.system' },
+      { id: 'storage', icon: Database, labelKey: 'tab.storage' },
+      { id: 'plugins', icon: Puzzle, labelKey: 'tab.plugins' },
+    ],
+  },
 ];
 
 const SettingsTabNav: React.FC<SettingsTabNavProps> = ({ activeTab, onChange }) => {
   const { t } = useTranslation('settings');
   return (
-    <div className="flex flex-wrap gap-2">
-      {tabItems.map((item) => (
-        <button
-          key={item.id}
-          onClick={() => onChange(item.id)}
-          className={cn(
-            'flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors whitespace-nowrap',
-            activeTab === item.id
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-          )}
-        >
-          <item.icon className="size-4" /> {t(item.labelKey)}
-        </button>
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+      {TAB_GROUPS.map((group) => (
+        <div key={group.id} className="flex items-center gap-2">
+          <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
+            {t(group.labelKey, group.fallback)}
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {group.items.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => onChange(item.id)}
+                className={cn(
+                  'flex items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors whitespace-nowrap',
+                  activeTab === item.id
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                )}
+              >
+                <item.icon className="size-3.5" /> {t(item.labelKey)}
+              </button>
+            ))}
+          </div>
+        </div>
       ))}
     </div>
   );

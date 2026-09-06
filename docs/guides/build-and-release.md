@@ -41,11 +41,11 @@
 
 本项目采用「先确认稳定版本、再打标签触发自动发布」的流程：
 
-1. 在 `main` 分支确认功能与测试稳定，更新 `package.json` 的 `version`。
-2. 打标签并推送，标签名须形如 `v1.4.5`：
+1. 在 `main` 分支确认功能与测试稳定，跑 `npm run release:bump <x.y.z>`（同步 package.json、releases.ts、CHANGELOG.md）。
+2. 打标签并推送，标签名须形如 `v1.0.1`：
    ```bash
-   git tag v1.4.5
-   git push origin v1.4.5
+   git tag v1.0.1
+   git push origin v1.0.1
    ```
 3. 推送标签会自动触发 `.github/workflows/release.yml`：在 Windows / macOS / Linux 三个 runner 上分别构建安装包，汇总后通过 GitHub Release 发布，并附带自动生成的发布说明。
 
@@ -53,6 +53,6 @@
 
 ## 维护建议
 
-- 前端体积增长时优先用懒加载与 `vite.config.ts` 的 `manualChunks` 细化分块。
+- 前端体积增长时优先用懒加载；禁止手写 `manualChunks` 分包（曾致生产包白屏，已删除）。
 - 任何改动后先本地跑 `npm run verify`，与 CI 校验保持一致。
 - 若接入自动更新（electron-updater），需在 `electron-builder.yml` 配置 `publish` 并生成 `latest.yml`，同步更新版本检查逻辑。

@@ -6,10 +6,14 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+import { logger } from '@/shared/utils/logger';
 
 import React, { useState, useMemo } from 'react';
 import { useTranslation, i18n, templateDisplayName } from '@/i18n';
-import { type Project, type PromptTemplate, type ModelConfig, type Chapter } from '../../../shared/types';
+import { type Project, type ModelConfig, type Chapter } from '../../../shared/types';
+import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
+import { VIRTUAL_CHAPTER_ORDER, KNOWLEDGE_SNIPPET_TRUNCATE, isVirtualChapter } from '../../../shared/constants/chapters';
+import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
 import { AIService } from '../assistant/services/aiService';
 import { dialogService } from '@/shared/services/dialogService';
 import { cn } from '@/shared/utils/cn';
@@ -21,19 +25,22 @@ import { Label } from '@/shared/ui/Label';
 import { MarkdownView } from '@/shared/ui/Markdown';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
-import { BookOpen, BookOpenText, Check, CheckCheck, ChevronDown, ChevronRight, Clock, FastForward, FileOutput, Flag, Globe2, Layers, LayoutList, ListOrdered, Loader2, MapPin, PenTool, Trash2, WandSparkles, XCircle } from 'lucide-react';
+import { BookOpen, BookOpenText, Check, CheckCheck, ChevronDown, ChevronRight, ChevronUp, Clock, FastForward, FileOutput, Flag, Globe2, Layers, LayoutGrid, LayoutList, ListOrdered, Loader2, MapPin, PenTool, Trash2, WandSparkles, XCircle } from 'lucide-react';
+import { useViewPreference } from '@/shared/hooks/useViewPreference';
+import { ViewModeToggle } from '@/shared/ui/ViewModeToggle';
 
 interface StepChapterOutlineProps {
   project: Project;
-  prompts: PromptTemplate[];
-  activeModel: ModelConfig;
-  onUpdate: (updates: Partial<Project>) => void;
-  onOpenSettings: () => void;
   onEnterWriting: (chapterId: string) => void;
 }
 
-const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompts, activeModel, onUpdate, onEnterWriting }) => {
+const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnterWriting }) => {
   const { t } = useTranslation(['steps', 'common']);
+  // 直读 store：死掉的 onOpenSettings 透传一并删除
+  const prompts = useSettingsStore((s) => s.prompts);
+  const activeModel = useUsableModel() as ModelConfig;
+  const updateActiveProject = useProjectStore((s) => s.updateActiveProject);
+  const onUpdate = (updates: Partial<Project>, opts?: CommitOptions) => updateActiveProject(updates, opts);
   const [loading, setLoading] = useState(false);
   const [continueLoading, setContinueLoading] = useState(false);
   
@@ -42,6 +49,32 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
   
   const chapterPrompts = useMemo(() => prompts.filter(p => p.category === 'chapter'), [prompts]);
   const [selectedPromptId, setSelectedPromptId] = useState(chapterPrompts[0]?.id || '');
+  const [chapterView, setChapterView] = useViewPreference<'cards' | 'table'>('chapters.view', 'cards');
+  // HTML5 拖拽排序（无新依赖）：拖起行/卡片 → 悬停行定点 → 放下重排 order
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dropIndex, setDropIndex] = useState<number | null>(null);
+
+  const moveChapterTo = (id: string, toIndex: number) => {
+    const sorted = [...project.chapters].sort((a, b) => a.order - b.order);
+    const from = sorted.findIndex((c) => c.id === id);
+    if (from < 0) return;
+    const clamped = Math.max(0, Math.min(sorted.length - 1, toIndex));
+    if (clamped === from) return;
+    const [moved] = sorted.splice(from, 1);
+    if (!moved) return;
+    sorted.splice(clamped, 0, moved);
+    const orderById = new Map(sorted.map((c, i) => [c.id, i] as const));
+    onUpdate({ chapters: project.chapters.map((c) => ({ ...c, order: orderById.get(c.id) ?? c.order })) });
+  };
+
+  const moveChapter = (id: string, dir: -1 | 1) => {
+    const sorted = [...project.chapters].sort((a, b) => a.order - b.order);
+    const idx = sorted.findIndex((c) => c.id === id);
+    if (idx < 0) return;
+    moveChapterTo(id, idx + dir);
+  };
+
+  const clearDragState = () => { setDragId(null); setDropIndex(null); };
   
   // Knowledge Base Selection State
   const [selectedKnowledgeIds, setSelectedKnowledgeIds] = useState<Set<string>>(new Set());
@@ -120,7 +153,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
         dialogService.alert(t('steps:chapters.exportSuccess'));
       }
     } catch (error) {
-      console.error('导出失败:', error);
+      logger.error('导出失败:', error);
       dialogService.alert(t('steps:chapters.exportFailed', { error: error instanceof Error ? error.message : t('steps:common.unknownError') }));
     }
   };
@@ -166,7 +199,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
       if (selectedKnowledgeIds.size > 0) {
          const kContent = project.knowledge
            .filter(k => selectedKnowledgeIds.has(k.id))
-           .map(k => `【参考资料：${k.name}】\n${k.content.substring(0, 8000)}`)
+           .map(k => `【参考资料：${k.name}】\n${k.content.substring(0, KNOWLEDGE_SNIPPET_TRUNCATE)}`)
            .join('\n\n');
          if (kContent) finalPrompt += `\n\n### 必须参考的世界观/设定资料 (Knowledge Base)\n请参考以下资料规划章节剧情：\n${kContent}`;
       }
@@ -182,9 +215,9 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
 
       if (parsedChapters.length > 0) {
         if (isContinue) {
-          onUpdate({ chapters: [...project.chapters, ...parsedChapters] });
+          onUpdate({ chapters: [...project.chapters, ...parsedChapters] }, { agentId: 'ai:chapters', cause: selectedPromptId });
         } else {
-          onUpdate({ chapters: parsedChapters });
+          onUpdate({ chapters: parsedChapters }, { agentId: 'ai:chapters', cause: selectedPromptId });
         }
       } else {
         dialogService.alert(t('steps:chapters.unrecognized'));
@@ -217,7 +250,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
         title: t('steps:chapters.chapterTitleGen'),
         summary: t('steps:chapters.historySummary'),
         content: '',
-        order: -100, // 特殊顺序，放在最前面
+        order: VIRTUAL_CHAPTER_ORDER, // 特殊顺序，放在最前面
         history: []
       };
       
@@ -232,11 +265,11 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
       finalVirtualChapters.unshift(updatedChapterOutlineChapter);
       
       // 更新项目数据，包含更新后的虚拟章节
-      onUpdate({ 
+      onUpdate({
         virtualChapters: finalVirtualChapters
-      });
+      }, { agentId: 'ai:chapters', cause: selectedPromptId });
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       dialogService.alert(t('steps:chapters.generateErrorGeneric'));
     } finally {
       setLoading(false);
@@ -373,6 +406,14 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
               <LayoutList className="size-3.5" /> {t('steps:chapters.chapterListPreview', { count: project.chapters.length })}
             </span>
             <div className="flex items-center gap-2">
+              <ViewModeToggle
+                value={chapterView}
+                onChange={setChapterView}
+                options={[
+                  { value: 'cards', icon: LayoutGrid, title: '卡片' },
+                  { value: 'table', icon: LayoutList, title: '横栏' },
+                ]}
+              />
               {/* Token消耗显示 */}
               {traditionalTokens.total > 0 && (
                 <div className="flex items-center gap-3 rounded-md border border-border bg-muted/40 px-3 py-1.5 text-xs tabular-nums">
@@ -403,7 +444,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
           <div className="flex-1 space-y-4 overflow-y-auto p-5">
             {(() => {
               // 过滤掉虚拟章节（order < 0的章节）
-              const regularChapters = project.chapters.filter(chapter => chapter.order >= 0);
+              const regularChapters = project.chapters.filter(chapter => !isVirtualChapter(chapter));
               const sortedChapters = regularChapters.sort((a,b) => a.order - b.order);
 
               if (sortedChapters.length === 0) {
@@ -417,8 +458,53 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
                 );
               }
 
+              if (chapterView === 'table') {
+                return (
+                  <div className="overflow-hidden rounded-lg border border-border">
+                    {sortedChapters.map((chap, idx) => (
+                      <div
+                        key={chap.id}
+                        draggable
+                        onDragStart={(e) => { setDragId(chap.id); e.dataTransfer.effectAllowed = 'move'; }}
+                        onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (dropIndex !== idx) setDropIndex(idx); }}
+                        onDrop={(e) => { e.preventDefault(); if (dragId) moveChapterTo(dragId, idx); clearDragState(); }}
+                        onDragEnd={clearDragState}
+                        className={`group flex cursor-grab items-center gap-3 px-4 py-2.5 transition-colors hover:bg-accent/40 active:cursor-grabbing ${idx > 0 ? 'border-t border-border' : ''} ${dropIndex === idx && dragId !== chap.id ? 'bg-primary/10' : ''}`}
+                      >                        <span className="w-8 shrink-0 text-xs tabular-nums text-muted-foreground">{idx + 1}</span>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-medium text-foreground">{chap.title || t('steps:chapters.titlePlaceholder')}</div>
+                          <div className="truncate text-xs text-muted-foreground">
+                            {(chap.summary || '').slice(0, 60) || '—'}
+                            {(chap.content?.length ?? 0) > 0 && ` · ${(chap.content?.length ?? 0).toLocaleString()}字`}
+                          </div>
+                        </div>
+                        <div className="flex shrink-0 items-center">
+                          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" disabled={idx === 0} onClick={() => moveChapter(chap.id, -1)} title="上移">
+                            <ChevronUp className="size-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" disabled={idx === sortedChapters.length - 1} onClick={() => moveChapter(chap.id, 1)} title="下移">
+                            <ChevronDown className="size-4" />
+                          </Button>
+                          <Button size="sm" onClick={() => onEnterWriting(chap.id)}>
+                            <PenTool className="size-3.5" /> {t('steps:chapters.writeThis')}
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }
+
               return sortedChapters.map((chap, idx) => (
-                <div key={chap.id} className="group rounded-lg border border-border bg-card p-5 shadow-sm transition-colors hover:border-primary/30">
+                <div
+                  key={chap.id}
+                  draggable
+                  onDragStart={(e) => { setDragId(chap.id); e.dataTransfer.effectAllowed = 'move'; }}
+                  onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (dropIndex !== idx) setDropIndex(idx); }}
+                  onDrop={(e) => { e.preventDefault(); if (dragId) moveChapterTo(dragId, idx); clearDragState(); }}
+                  onDragEnd={clearDragState}
+                  className={`group rounded-lg border border-border bg-card p-5 shadow-sm transition-colors hover:border-primary/30 ${dropIndex === idx && dragId !== chap.id ? 'border-primary/60 bg-primary/5' : ''}`}
+                >
                   <div className="mb-4 flex items-center gap-4 border-b border-border pb-4">
                     <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-medium text-muted-foreground">
                       {idx + 1}
@@ -435,6 +521,12 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, prompt
                       />
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
+                      <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" disabled={idx === 0} onClick={() => moveChapter(chap.id, -1)} title="上移">
+                        <ChevronUp className="size-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" disabled={idx === sortedChapters.length - 1} onClick={() => moveChapter(chap.id, 1)} title="下移">
+                        <ChevronDown className="size-4" />
+                      </Button>
                       <Button size="sm" onClick={() => onEnterWriting(chap.id)}>
                         <PenTool className="size-3.5" /> {t('steps:chapters.writeThis')}
                       </Button>

@@ -75,7 +75,7 @@ App.tsx（目标 <150 行）
 └── AuxWindows（P4 评估）：一致性报告/导出预览 → 独立 BrowserWindow（Zettlr win-* 模式）
 ```
 
-- **状态**：Zustand 双 store（02 篇 §4）。迁移策略：App.tsx 的 useState 逐 feature 切走，M1 完成收编；期间新旧并存由 `persistDiff.ts`（现有！）做一致性哨兵。
+- **状态**：Zustand 双 store（02 篇 §4）。迁移策略：App.tsx 的 useState 逐 feature 切走，M1 完成收编；期间新旧并存由 `persistDiff.ts` 做一致性哨兵。
 - 步骤式工作流（灵感→人物→大纲→章节→写作）**保留为"引导模式"**，同时提供自由工作区（无模式原则的折中：引导是可选轨道不是牢笼）。
 
 ## 5. 保留不动的资产

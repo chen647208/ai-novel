@@ -12,7 +12,7 @@
  *
  * 插件布局：userData/plugins/<pluginId>/plugin.json（+ 贡献点文件）。
  * v0 开放资源型贡献点：skills（SKILL.md 写法技能）→ SkillCatalog；
- * types/buildProfiles 贡献随对应里程碑接线（运行时已保留槽位）。
+ * types/buildProfiles 贡献当前未接线（运行时已保留槽位）。
  * 禁用清单持久化在设置域（配置级 disabled，不碰插件文件）。
  */
 import { parseSkillMd, type SkillCatalog } from '@core/ai';

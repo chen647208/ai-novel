@@ -16,6 +16,7 @@ export const createNewModelConfig = (): ModelConfig => ({
   id: Date.now().toString(),
   name: i18n.t('settings:factories.newModel'),
   provider: 'openai-chat',
+  isEnabled: true,
   endpoint: '',
   modelName: '',
 });

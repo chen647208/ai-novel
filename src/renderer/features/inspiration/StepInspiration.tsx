@@ -10,7 +10,10 @@
 import { logger } from '../../shared/utils/logger';
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation, i18n, templateDisplayName } from '@/i18n';
-import { type Project, type PromptTemplate, type ModelConfig, type KnowledgeItem, type StreamingAIResponse, type OutputMode } from '../../../shared/types';
+import { type Project, type ModelConfig, type KnowledgeItem, type StreamingAIResponse, type OutputMode } from '../../../shared/types';
+import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
+import { VIRTUAL_CHAPTER_ORDER, KNOWLEDGE_SNIPPET_TRUNCATE } from '../../../shared/constants/chapters';
+import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
 import { AIService } from '../assistant/services/aiService';
 import WorldViewEditor from '../world/WorldViewEditor';
 import { dialogService } from '@/shared/services/dialogService';
@@ -28,13 +31,16 @@ import { MarkdownView } from '@/shared/ui/Markdown';
 
 interface StepInspirationProps {
   project: Project | null;
-  prompts: PromptTemplate[];
-  activeModel: ModelConfig;
-  onUpdate: (updates: Partial<Project>) => void;
 }
 
-const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, activeModel, onUpdate }) => {
+const StepInspiration: React.FC<StepInspirationProps> = ({ project }) => {
   const { t } = useTranslation(['steps', 'common']);
+  // 直读 store：模型/提示词/更新动作不再经 App→View 层层透传
+  const prompts = useSettingsStore((s) => s.prompts);
+  // 手写 bypass 下可能为 undefined：与旧 effectiveModel 透传语义一致，AI 调用处各自报错引导
+  const activeModel = useUsableModel() as ModelConfig;
+  const updateActiveProject = useProjectStore((s) => s.updateActiveProject);
+  const onUpdate = (updates: Partial<Project>, opts?: CommitOptions) => updateActiveProject(updates, opts);
   // 调试日志
   useEffect(() => {
     logger.debug('StepInspiration组件渲染:', {
@@ -124,7 +130,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
         title: t('steps:inspiration.chapterTitle'),
         summary: t('steps:inspiration.historySummary'),
         content: '',
-        order: -100, // 特殊顺序，放在最前面
+        order: VIRTUAL_CHAPTER_ORDER, // 特殊顺序，放在最前面
         history: []
       };
       
@@ -142,12 +148,12 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
       const currentTitle = project?.title;
       const newTitle = currentTitle && currentTitle !== i18n.t('app:book.defaultTitle') ? currentTitle : (firstLine || t('steps:inspiration.untitledNovel'));
       
-      onUpdate({ 
-        inspiration: input, 
+      onUpdate({
+        inspiration: input,
         intro: finalContent,
         title: newTitle,
         virtualChapters: finalVirtualChapters
-      });
+      }, { agentId: 'ai:inspiration', cause: selectedPromptId });
     }
   };
 
@@ -194,7 +200,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
          .filter(k => k && selectedKnowledgeIds.has(k.id))
          .map(k => {
            const name = k.name || '未命名资料';
-           const content = typeof k.content === 'string' ? k.content.substring(0, 8000) : '';
+           const content = typeof k.content === 'string' ? k.content.substring(0, KNOWLEDGE_SNIPPET_TRUNCATE) : '';
            return `【参考资料：${name}】\n${content}`;
          })
          .join('\n\n');
@@ -249,7 +255,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
           title: t('steps:inspiration.chapterTitle'),
           summary: t('steps:inspiration.historySummary'),
           content: '',
-          order: -100, // 特殊顺序，放在最前面
+          order: VIRTUAL_CHAPTER_ORDER, // 特殊顺序，放在最前面
           history: []
         };
         
@@ -265,12 +271,12 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
         
         // 更新项目数据
         const firstLine = result.content.split('\n')[0]?.replace(/[#*]/g, '').trim() ?? '';
-        onUpdate({ 
-          inspiration: input, 
+        onUpdate({
+          inspiration: input,
           intro: result.content,
           title: project?.title && project.title !== i18n.t('app:book.defaultTitle') ? project.title : (firstLine || t('steps:inspiration.untitledNovel')),
           virtualChapters: finalVirtualChapters
-        });
+        }, { agentId: 'ai:inspiration', cause: selectedPromptId });
         setIsStreaming(false);
       }
     } catch (e) {
@@ -278,7 +284,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
         logger.debug('流式输出已停止');
       } else {
         dialogService.alert(t('steps:inspiration.generateFailedGeneric'));
-        console.error(e);
+        logger.error(e);
       }
     } finally {
       if (!isStreaming) {
@@ -337,7 +343,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, prompts, act
                 category: 'inspiration' as const
             });
         } catch (err) {
-            console.error("读取文件失败", err);
+            logger.error("读取文件失败", err);
             dialogService.alert(t('steps:inspiration.readFailed', { name: file.name }));
         }
       } else {

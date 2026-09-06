@@ -37,8 +37,8 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': ['warn', { prefer: 'type-imports', fixStyle: 'inline-type-imports' }],
       '@typescript-eslint/no-empty-object-type': 'warn',
 
-      // 通用纪律
-      'no-console': ['error', { allow: ['warn', 'error'] }],
+      // 通用纪律（渲染层日志唯一出口是 shared/utils/logger.ts，该文件自带豁免注释）
+      'no-console': 'error',
       eqeqeq: ['error', 'smart'],
       'prefer-const': 'error',
       'no-var': 'error',

@@ -9,6 +9,7 @@
 
 
 import { logger } from '../utils/logger';
+import { isVirtualChapter } from '../../../shared/constants/chapters';
 import { type AppState, type Project, type StorageConfig, type Chapter, type ConsistencyCheckConfig, type ConsistencyCheckPromptTemplate } from "../../../shared/types";
 import { AutoBackupService } from "./autoBackupService";
 import { dialogService } from '@/shared/services/dialogService';
@@ -25,12 +26,12 @@ const autoBackupService = AutoBackupService.getInstance();
 const migrateKnowledgeCategories = (state: AppState): AppState => {
   logger.debug('开始知识库分类迁移...');
   if (!state) {
-    console.warn('迁移失败：state为空');
+    logger.warn('迁移失败：state为空');
     return state;
   }
   
   if (!state.projects) {
-    console.warn('迁移失败：state.projects为空');
+    logger.warn('迁移失败：state.projects为空');
     return state;
   }
   
@@ -78,12 +79,12 @@ const migrateKnowledgeCategories = (state: AppState): AppState => {
 const migrateVirtualChapters = (state: AppState): AppState => {
   logger.debug('开始虚拟章节迁移...');
   if (!state) {
-    console.warn('迁移失败：state为空');
+    logger.warn('迁移失败：state为空');
     return state;
   }
   
   if (!state.projects) {
-    console.warn('迁移失败：state.projects为空');
+    logger.warn('迁移失败：state.projects为空');
     return state;
   }
   
@@ -95,8 +96,7 @@ const migrateVirtualChapters = (state: AppState): AppState => {
     const virtualChapters = project.virtualChapters || [];
     logger.debug(`项目 ${project.title} 已有 ${virtualChapters.length} 个虚拟章节`);
     
-    // 找出chapters数组中的虚拟章节（order = -100）
-    const virtualChapterIds = ['inspiration-virtual-chapter', 'characters-virtual-chapter', 'outline-virtual-chapter', 'chapter-outline-virtual-chapter'];
+    // 虚拟章节判据见 shared/constants/chapters.ts（序号为负或遗留 id）
     const regularChapters: Chapter[] = [];
     const chaptersToMigrate: Chapter[] = [];
     
@@ -105,11 +105,11 @@ const migrateVirtualChapters = (state: AppState): AppState => {
     
     chapters.forEach((chapter, chapterIndex) => {
       if (!chapter || !chapter.id) {
-        console.warn(`章节 ${chapterIndex} 无效，跳过`);
+        logger.warn(`章节 ${chapterIndex} 无效，跳过`);
         return;
       }
       
-      if (virtualChapterIds.includes(chapter.id) || chapter.order === -100) {
+      if (isVirtualChapter(chapter)) {
         // 这是虚拟章节，需要迁移
         logger.debug(`章节 ${chapterIndex}: "${chapter.title || chapter.id}" 是虚拟章节，需要迁移`);
         chaptersToMigrate.push(chapter);
@@ -175,7 +175,7 @@ const getStorageConfig = async (): Promise<StorageConfig> => {
         return JSON.parse(data);
       }
     } catch (error) {
-      console.error('Failed to load storage config:', error);
+      logger.error('Failed to load storage config:', error);
     }
   }
   return DEFAULT_STORAGE_CONFIG;
@@ -190,7 +190,7 @@ const saveStorageConfig = async (config: StorageConfig): Promise<boolean> => {
       await window.electronAPI.writeFile(configPath, JSON.stringify(config, null, 2));
       return true;
     } catch (error) {
-      console.error('Failed to save storage config:', error);
+      logger.error('Failed to save storage config:', error);
       return false;
     }
   }
@@ -211,7 +211,7 @@ const getStoragePath = async (): Promise<string> => {
         return `${appDataPath}/${STORAGE_FILE_NAME}`;
       }
     } catch (error) {
-      console.error('Failed to get storage path:', error);
+      logger.error('Failed to get storage path:', error);
       // 出错时回退到默认路径
       const appDataPath = await window.electronAPI.getAppDataPath();
       return `${appDataPath}/${STORAGE_FILE_NAME}`;
@@ -229,7 +229,7 @@ export const storage = {
         await window.electronAPI.writeFile(filePath, JSON.stringify(state, null, 2));
         logger.debug('State saved to file:', filePath);
       } catch (error) {
-        console.error('Failed to save state to file:', error);
+        logger.error('Failed to save state to file:', error);
         // 回退到localStorage
         localStorage.setItem(STORAGE_FILE_NAME, JSON.stringify(state));
       }
@@ -268,7 +268,7 @@ export const storage = {
         }
         return null;
       } catch (error) {
-        console.error('Failed to load state from file:', error);
+        logger.error('Failed to load state from file:', error);
         // 回退到localStorage
         const data = localStorage.getItem(STORAGE_FILE_NAME);
         if (data) {
@@ -299,7 +299,7 @@ export const storage = {
           await window.electronAPI.unlink(filePath);
         }
       } catch (error) {
-        console.error('Failed to delete state file:', error);
+        logger.error('Failed to delete state file:', error);
         localStorage.removeItem(STORAGE_FILE_NAME);
       }
     } else {
@@ -324,7 +324,7 @@ export const storage = {
           dialogService.alert(i18n.t('app:storage.exportAllSuccess'));
         }
       } catch (error) {
-        console.error('Failed to export data:', error);
+        logger.error('Failed to export data:', error);
         // 回退到浏览器下载
         const dataStr = JSON.stringify(state, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
@@ -384,7 +384,7 @@ export const storage = {
         }
         throw new Error('未选择文件');
       } catch (error) {
-        console.error('Failed to import data:', error);
+        logger.error('Failed to import data:', error);
         throw error;
       }
     } else {
@@ -424,7 +424,7 @@ export const storage = {
               });
               resolve(migratedState);
             } catch (err) {
-              console.error('导入数据解析失败:', err);
+              logger.error('导入数据解析失败:', err);
               reject(err);
             }
           };
@@ -463,7 +463,7 @@ export const storage = {
           autoBackupService.stopAutoBackup();
         }
       } catch (error) {
-        console.error('更新自动备份服务失败:', error);
+        logger.error('更新自动备份服务失败:', error);
       }
     }
     
@@ -473,7 +473,7 @@ export const storage = {
   // 新增：迁移数据到新路径
   migrateData: async (newConfig: StorageConfig): Promise<boolean> => {
     if (!window.electronAPI) {
-      console.error('数据迁移仅在Electron环境中可用');
+      logger.error('数据迁移仅在Electron环境中可用');
       return false;
     }
 
@@ -502,7 +502,7 @@ export const storage = {
           // 注意：这里简化处理，实际可能需要递归创建目录
           // 由于Electron API限制，我们假设目录已存在或由用户创建
         } catch (error) {
-          console.warn('Directory creation may be needed:', error);
+          logger.warn('Directory creation may be needed:', error);
         }
         
         // 保存到新路径
@@ -524,7 +524,7 @@ export const storage = {
         return true;
       }
     } catch (error) {
-      console.error('Failed to migrate data:', error);
+      logger.error('Failed to migrate data:', error);
       return false;
     }
   },
@@ -560,7 +560,7 @@ export const storage = {
           dialogService.alert(i18n.t('app:book.exportSuccess', { title: project.title }));
         }
       } catch (error) {
-        console.error('Failed to export current book:', error);
+        logger.error('Failed to export current book:', error);
         // 回退到浏览器下载
         const dataStr = JSON.stringify(project, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
@@ -615,7 +615,7 @@ export const storage = {
         }
         throw new Error('未选择文件');
       } catch (error) {
-        console.error('Failed to import book:', error);
+        logger.error('Failed to import book:', error);
         throw error;
       }
     } else {
@@ -666,7 +666,7 @@ export const storage = {
       const config = await getStorageConfig();
       return await autoBackupService.performBackup(config, () => state);
     } catch (error) {
-      console.error('手动备份失败:', error);
+      logger.error('手动备份失败:', error);
       return false;
     }
   },
@@ -685,7 +685,7 @@ export const storage = {
         logger.debug('自动备份服务已启动');
       }
     } catch (error) {
-      console.error('初始化自动备份服务失败:', error);
+      logger.error('初始化自动备份服务失败:', error);
     }
   },
 
@@ -713,7 +713,7 @@ export const storage = {
       
       return state?.consistencyCheckConfig || null;
     } catch (error) {
-      console.error('Failed to load consistency check config:', error);
+      logger.error('Failed to load consistency check config:', error);
       return null;
     }
   },
@@ -734,7 +734,7 @@ export const storage = {
       
       return state?.consistencyPrompts || null;
     } catch (error) {
-      console.error('Failed to load consistency prompts:', error);
+      logger.error('Failed to load consistency prompts:', error);
       return null;
     }
   }

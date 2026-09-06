@@ -9,7 +9,9 @@
 
 import React, { useState, useMemo, useRef } from 'react';
 import { useTranslation, templateDisplayName } from '@/i18n';
-import { type Project, type PromptTemplate, type ModelConfig, type StreamingAIResponse, type OutputMode } from '../../../shared/types';
+import { type Project, type ModelConfig, type StreamingAIResponse, type OutputMode } from '../../../shared/types';
+import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
+import { VIRTUAL_CHAPTER_ORDER, KNOWLEDGE_SNIPPET_TRUNCATE } from '../../../shared/constants/chapters';
 import { AIService } from '../assistant/services/aiService';
 import { roleLabel } from '../characters/displayLabels';
 import { dialogService } from '@/shared/services/dialogService';
@@ -22,19 +24,20 @@ import { Check, CheckCheck, Eye, ListTree, Loader2, Pause, PenLine, Pencil, Play
 import { MarkdownView } from '@/shared/ui/Markdown';
 import { DslEditor } from '@/editor/cm6/DslEditor';
 import { collectProjectTags } from '@/editor/cm6/projectTags';
-import { useSettingsStore } from '@/app/stores/settingsStore';
+import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
 import { resolveTheme } from '@/shared/services/themeService';
 
 interface StepOutlineProps {
   project: Project;
-  prompts: PromptTemplate[];
-  activeModel: ModelConfig;
-  onUpdate: (updates: Partial<Project>) => void;
-  onOpenSettings: () => void;
 }
 
-const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel, onUpdate }) => {
+const StepOutline: React.FC<StepOutlineProps> = ({ project }) => {
   const { t } = useTranslation(['steps', 'common']);
+  // 直读 store：死掉的 onOpenSettings 透传一并删除
+  const prompts = useSettingsStore((s) => s.prompts);
+  const activeModel = useUsableModel() as ModelConfig;
+  const updateActiveProject = useProjectStore((s) => s.updateActiveProject);
+  const onUpdate = (updates: Partial<Project>, opts?: CommitOptions) => updateActiveProject(updates, opts);
   const [loading, setLoading] = useState(false);
   const outlinePrompts = useMemo(() => prompts.filter(p => p.category === 'outline'), [prompts]);
   const [selectedPromptId, setSelectedPromptId] = useState(outlinePrompts[0]?.id || '');
@@ -87,7 +90,7 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
       
       // 流式完成后更新项目数据
       const finalContent = response.content || streamingContent;
-      onUpdate({ outline: finalContent });
+      onUpdate({ outline: finalContent }, { agentId: 'ai:outline', cause: selectedPromptId });
       
       // 创建AI历史记录（流式输出模式）
       if (finalPrompt) {
@@ -111,7 +114,7 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
           title: t('steps:outline.chapterTitle'),
           summary: t('steps:outline.historySummary'),
           content: '',
-          order: -100, // 特殊顺序，使其不在章节列表中显示
+          order: VIRTUAL_CHAPTER_ORDER, // 特殊顺序，使其不在章节列表中显示
           history: []
         };
         
@@ -126,10 +129,10 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
         finalVirtualChapters.unshift(updatedOutlineChapter);
         
         // 更新项目数据，包含更新后的虚拟章节
-        onUpdate({ 
+        onUpdate({
           outline: finalContent,
           virtualChapters: finalVirtualChapters
-        });
+        }, { agentId: 'ai:outline', cause: selectedPromptId });
       }
     }
   };
@@ -174,7 +177,7 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
     if (selectedKnowledgeIds.size > 0) {
        const kContent = project.knowledge
          .filter(k => selectedKnowledgeIds.has(k.id))
-         .map(k => `【参考资料：${k.name}】\n${k.content.substring(0, 8000)}`)
+         .map(k => `【参考资料：${k.name}】\n${k.content.substring(0, KNOWLEDGE_SNIPPET_TRUNCATE)}`)
          .join('\n\n');
        if (kContent) finalPrompt += `\n\n### 必须参考的世界观/设定资料 (Knowledge Base)\n请参考以下资料确保大纲符合设定：\n${kContent}`;
     }
@@ -234,7 +237,7 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
         title: t('steps:outline.chapterTitle'),
         summary: t('steps:outline.historySummary'),
         content: '',
-        order: -100, // 特殊顺序，使其不在章节列表中显示
+        order: VIRTUAL_CHAPTER_ORDER, // 特殊顺序，使其不在章节列表中显示
         history: []
       };
       
@@ -249,10 +252,10 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project, prompts, activeModel
       finalVirtualChapters.unshift(updatedOutlineChapter);
       
       // 更新项目数据
-      onUpdate({ 
+      onUpdate({
         outline: result.content,
         virtualChapters: finalVirtualChapters
-      });
+      }, { agentId: 'ai:outline', cause: selectedPromptId });
       
       setLoading(false);
     }

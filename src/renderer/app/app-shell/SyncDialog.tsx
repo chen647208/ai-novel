@@ -10,7 +10,7 @@
 /** 同步对话框：导出/导入同步包 + 冲突副本报告。 */
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeftRight } from 'lucide-react';
+import { ArrowLeftRight, Loader2 } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import {
   Dialog,
@@ -79,7 +79,7 @@ export const SyncDialog: React.FC<{ project: Project | null }> = ({ project }) =
       </Button>
 
       {open && project && (
-        <Dialog open onOpenChange={setOpen}>
+        <Dialog open onOpenChange={(v) => { if (!v && !busy) setOpen(v); }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>{t('sync.title')}</DialogTitle>
@@ -107,10 +107,12 @@ export const SyncDialog: React.FC<{ project: Project | null }> = ({ project }) =
             )}
 
             <DialogFooter>
-              <Button variant="outline" onClick={handleImport} disabled={busy}>
+              <Button variant="outline" onClick={handleImport} disabled={busy} aria-busy={busy}>
+                {busy && <Loader2 className="size-4 animate-spin" />}
                 {t('sync.import')}
               </Button>
-              <Button onClick={handleExport} disabled={busy}>
+              <Button onClick={handleExport} disabled={busy} aria-busy={busy}>
+                {busy && <Loader2 className="size-4 animate-spin" />}
                 {t('sync.export')}
               </Button>
             </DialogFooter>

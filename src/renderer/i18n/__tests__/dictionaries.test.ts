@@ -46,6 +46,8 @@ import zhCards from '../../../shared/i18n/locales/zh/cards.json';
 import enCards from '../../../shared/i18n/locales/en/cards.json';
 import zhPrompts from '../../../shared/i18n/locales/zh/prompts.json';
 import enPrompts from '../../../shared/i18n/locales/en/prompts.json';
+import zhOnboarding from '../../../shared/i18n/locales/zh/onboarding.json';
+import enOnboarding from '../../../shared/i18n/locales/en/onboarding.json';
 
 /** 把嵌套字典扁平化为「点号键 → 字符串值」。 */
 function flatten(obj: unknown, prefix = ''): Map<string, string> {
@@ -88,6 +90,7 @@ const NAMESPACES: Array<{ ns: string; zh: unknown; en: unknown }> = [
   { ns: 'assistant', zh: zhAssistant, en: enAssistant },
   { ns: 'cards', zh: zhCards, en: enCards },
   { ns: 'prompts', zh: zhPrompts, en: enPrompts },
+  { ns: 'onboarding', zh: zhOnboarding, en: enOnboarding },
 ];
 
 describe('中英字典一致性', () => {

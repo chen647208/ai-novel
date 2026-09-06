@@ -14,9 +14,6 @@ import type { ExportFormat } from './utils';
 
 export interface WritingEditorProps {
   project: Project;
-  prompts: PromptTemplate[];
-  activeModel: ModelConfig;
-  onUpdate: (updates: Partial<Project>) => void;
   initialChapterId?: string | null;
   onBack: () => void;
 }
@@ -61,6 +58,11 @@ export interface NovelEditorHandle {
   getKeyboardSelectionMenuPosition(): { x: number; y: number } | null;
   /** 聚焦编辑器。 */
   focus(): void;
+  /** 撤销/重做（StarterKit History，快照是另一条时间线，见 chapterSnapshotService）。 */
+  undo(): boolean;
+  redo(): boolean;
+  canUndo(): boolean;
+  canRedo(): boolean;
   /** 写作原语：把当前选区收割为 darlingSlot 锚点，返回是否成功。 */
   harvestDarling(): boolean;
   /** 写作原语：在当前选区插入灰色 ghostNote 场景概要。 */
@@ -138,15 +140,23 @@ export interface WritingEditorToolbarProps {
   overdueForeshadowCount: number;
   isFocusMode: boolean;
   lastSaved: number;
+  targetWordCount: number;
+  typewriter: boolean;
+  saveDirty: boolean;
+  canUndo: boolean;
+  canRedo: boolean;
   onBack: () => void;
   onTitleChange: (title: string) => void;
   onOpenExport: () => void;
   onOpenForeshadow: () => void;
   onClearContent: () => void;
+  onUndo: () => void;
+  onRedo: () => void;
   onToggleGlobalHistory: () => void;
   onOpenChapterHistory: () => void;
   onOpenSidebar: () => void;
   onToggleFocusMode: () => void;
+  onToggleTypewriter: () => void;
   onManualSnapshot: () => void;
 }
 
@@ -208,6 +218,7 @@ export interface WritingEditorCanvasProps {
   activeChapterId: string | null;
   content: string;
   isFocusMode: boolean;
+  typewriter: boolean;
   isGenerating: boolean;
   isStreaming: boolean;
   isBatchGenerating: boolean;

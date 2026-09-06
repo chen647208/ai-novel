@@ -5,6 +5,7 @@
     "search": "Search titles…",
     "newBook": "New Book",
     "newFromTemplate": "From Template",
+    "import": "Import",
     "importBook": "Import Book",
     "backup": "Backup All",
     "importAll": "Import All Data",
@@ -27,7 +28,10 @@
     "notConfiguredKey": "The current model has no API Key / endpoint configured",
     "noneConfigured": "No AI model configured yet",
     "goSettings": "Go to settings",
-    "noneSelected": "No model selected"
+    "noneSelected": "No model selected",
+    "handwriteHint": "You can start writing by hand and set up a model later",
+    "handwriteFirst": "Write by hand first",
+    "bannerHandwrite": "No usable model configured; AI is off, handwriting still works"
   },
   "empty": {
     "noProject": "Please start a new project first",

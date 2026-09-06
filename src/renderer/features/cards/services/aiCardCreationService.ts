@@ -95,7 +95,7 @@ export class AICardCreationService {
       
       // 检查AI返回是否有错误
       if (aiResponse.error) {
-        console.error('AI返回错误:', aiResponse.error);
+        logger.error('AI返回错误:', aiResponse.error);
         return {
           success: false,
           command: command.command,
@@ -121,7 +121,7 @@ export class AICardCreationService {
       const validationResult = validateAndCompleteCardData(command.command, cardData, project.id);
       
       if (!validationResult.isValid) {
-        console.warn('AI返回数据字段不完整，已自动填充:', validationResult.missingFields);
+        logger.warn('AI返回数据字段不完整，已自动填充:', validationResult.missingFields);
       }
       
       if (validationResult.defaultedFields.length > 0) {
@@ -143,7 +143,7 @@ export class AICardCreationService {
       };
       
     } catch (error) {
-      console.error('AI卡片创建失败:', error);
+      logger.error('AI卡片创建失败:', error);
       return {
         success: false,
         command: command.command,
@@ -201,7 +201,7 @@ export class AICardCreationService {
     try {
       return asRecord(JSON.parse(jsonStr));
     } catch (e) {
-      console.error('JSON解析失败:', jsonStr, e);
+      logger.error('JSON解析失败:', jsonStr, e);
       throw new Error(i18n.t('cards:create.invalidFormat'));
     }
   }

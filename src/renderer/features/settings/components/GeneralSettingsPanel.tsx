@@ -7,15 +7,19 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React from 'react';
-import { Languages, Monitor, Moon, Sun } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Download, Languages, Monitor, Moon, Sun, Trash2, Type, Upload } from 'lucide-react';
 import { useTranslation, SUPPORTED_LANGUAGES } from '@/i18n';
 import type { AppLanguage, AppTheme } from '@shared/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/Card';
 import { Label } from '@/shared/ui/Label';
 import { Select } from '@/shared/ui/Select';
+import { Button } from '@/shared/ui/Button';
 import { cn } from '@/shared/utils/cn';
 import type { GeneralSettingsPanelProps } from '../types';
+import { DEFAULT_EDITOR_FONT, DEFAULT_UI_FONT, fontPresets, resolveFontStack } from '../../../constants/fonts';
+import { importCustomFont, removeCustomFont } from '../services/customFontService';
+import { useSettingsStore } from '@/app/stores/settingsStore';
 
 const THEME_OPTIONS: {
   value: AppTheme;
@@ -33,7 +37,30 @@ const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({
   theme,
   onThemeChange,
 }) => {
-  const { t } = useTranslation('settings');
+  const { t, i18n } = useTranslation('settings');
+  const lang = i18n.language.startsWith('en') ? 'en' : 'zh';
+  // 字体即时生效（同语言/主题），直写 store 走持久化桥
+  const uiFont = useSettingsStore((s) => s.uiFont ?? DEFAULT_UI_FONT);
+  const editorFont = useSettingsStore((s) => s.editorFont ?? DEFAULT_EDITOR_FONT);
+  const customFonts = useSettingsStore((s) => s.customFonts);
+  const store = useSettingsStore.getState();
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleImportFile = async (file: File | undefined) => {
+    if (!file) return;
+    setImporting(true);
+    setImportError(null);
+    try {
+      await importCustomFont(file);
+    } catch (error) {
+      setImportError(t('general.importFailed', { message: error instanceof Error ? error.message : String(error) }));
+    } finally {
+      setImporting(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -86,6 +113,97 @@ const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({
               ))}
             </div>
             <p className="text-xs text-muted-foreground">{t('general.themeHint')}</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Type className="size-4 text-muted-foreground" />
+            {t('general.fontTitle')}
+          </CardTitle>
+          <CardDescription>{t('general.fontHint')}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid max-w-2xl grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label>{t('general.uiFontLabel')}</Label>
+              <Select value={uiFont} onChange={(e) => store.setUiFont(e.target.value)}>
+                {fontPresets.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name[lang]} · {p.license[lang]}</option>
+                ))}
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>{t('general.editorFontLabel')}</Label>
+              <Select value={editorFont} onChange={(e) => store.setEditorFont(e.target.value)}>
+                {fontPresets.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name[lang]} · {p.license[lang]}</option>
+                ))}
+                {customFonts.map((c) => (
+                  <option key={`custom:${c.id}`} value={`custom:${c.id}`}>{c.name} · {t('general.customBadge')}</option>
+                ))}
+              </Select>
+            </div>
+          </div>
+
+          <p
+            className="rounded-lg border border-border bg-muted/30 p-4 text-[15px] leading-relaxed"
+            style={{ fontFamily: resolveFontStack(editorFont, DEFAULT_EDITOR_FONT, customFonts) }}
+          >
+            {t('general.previewText')}
+          </p>
+
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={importing}
+                onClick={() => fileRef.current?.click()}
+              >
+                <Upload className="size-3.5" />
+                {importing ? t('general.importingFont') : t('general.importFont')}
+              </Button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".ttf,.otf,.woff,.woff2"
+                className="hidden"
+                onChange={(e) => void handleImportFile(e.target.files?.[0])}
+              />
+              {importError && <span className="text-xs text-destructive">{importError}</span>}
+            </div>
+            {customFonts.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {customFonts.map((c) => (
+                  <span key={c.id} className="flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-xs">
+                    <span className="max-w-40 truncate" style={{ fontFamily: `"${c.name}", serif` }}>{c.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => void removeCustomFont(c.id)}
+                      title={t('general.removeFontTitle')}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="space-y-1 pt-1">
+              {fontPresets.filter((p) => p.downloadUrl).map((p) => (
+                <div key={p.id} className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Download className="size-3.5" />
+                  <span style={{ fontFamily: p.stack }}>{p.name[lang]}</span>
+                  <span>· {p.license[lang]}</span>
+                  <a href={p.downloadUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
+                    {t('general.getFont')}
+                  </a>
+                </div>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -43,8 +43,8 @@ jobs:
       - name: 安装依赖
         run: npm ci
 
-      - name: 类型检查与测试
-        run: npm run typecheck:all && npm run test
+      - name: 类型检查与测试（含覆盖率锁线，与 CI 一致）
+        run: npm run typecheck:all && npm run test:coverage
 
       - name: 构建桌面包（${{ matrix.label }}）
         run: npx electron-builder ${{ matrix.builder }} --publish never

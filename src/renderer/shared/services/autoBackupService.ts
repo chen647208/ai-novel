@@ -69,13 +69,13 @@ export class AutoBackupService {
       // 获取当前应用状态
       const currentState = getCurrentState();
       if (!currentState) {
-        console.warn('无法获取当前应用状态，跳过备份');
+        logger.warn('无法获取当前应用状态，跳过备份');
         return false;
       }
 
       // 检查是否在Electron环境中
       if (!window.electronAPI) {
-        console.warn('不在Electron环境中，跳过备份');
+        logger.warn('不在Electron环境中，跳过备份');
         return false;
       }
 
@@ -94,7 +94,7 @@ export class AutoBackupService {
           await window.electronAPI.unlink(tempFile);
         }
       } catch (error) {
-        console.warn('创建备份目录失败:', error);
+        logger.warn('创建备份目录失败:', error);
         // 继续尝试备份，可能会失败
       }
 
@@ -115,7 +115,7 @@ export class AutoBackupService {
       logger.debug(`备份成功: ${backupFileName}`);
       return true;
     } catch (error) {
-      console.error('备份失败:', error);
+      logger.error('备份失败:', error);
       return false;
     }
   }
@@ -134,7 +134,7 @@ export class AutoBackupService {
       logger.debug(`备份清理策略: 最多保留 ${maxBackupFiles} 个备份文件`);
       
     } catch (error) {
-      console.error('清理旧备份失败:', error);
+      logger.error('清理旧备份失败:', error);
     }
   }
 
@@ -178,7 +178,7 @@ export class AutoBackupService {
   // 立即执行备份（手动触发）
   public async triggerManualBackup(getCurrentState: () => AppState | null): Promise<boolean> {
     if (!this.currentConfig) {
-      console.warn('没有可用的备份配置');
+      logger.warn('没有可用的备份配置');
       return false;
     }
 

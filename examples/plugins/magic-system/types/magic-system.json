@@ -1,0 +1,37 @@
+[
+  {
+    "id": "magic-system",
+    "label": "魔法体系",
+    "labelEn": "Magic System",
+    "icon": "sparkles",
+    "category": "card",
+    "fields": [
+      { "key": "name", "label": "体系名称", "labelEn": "Name", "type": "text", "required": true },
+      { "key": "source", "label": "力量来源", "labelEn": "Source", "type": "richtext" },
+      { "key": "cost", "label": "代价", "labelEn": "Cost", "type": "richtext" },
+      { "key": "limits", "label": "限制", "labelEn": "Limits", "type": "list" },
+      { "key": "learningCurve", "label": "修习门槛", "labelEn": "Learning Curve", "type": "text" },
+      { "key": "counterSystem", "label": "克制体系", "labelEn": "Counter System", "type": "ref", "refType": "example-magic.magic-system" },
+      { "key": "ironLaws", "label": "铁律", "labelEn": "Iron Laws", "type": "list" },
+      { "key": "status", "label": "状态", "labelEn": "Status", "type": "enum", "enum": ["draft", "canon"] }
+    ],
+    "views": ["outline", "corkboard"],
+    "statusLabels": "status"
+  },
+  {
+    "id": "magic-spell",
+    "label": "法术",
+    "labelEn": "Spell",
+    "icon": "wand",
+    "category": "card",
+    "fields": [
+      { "key": "name", "label": "法术名", "labelEn": "Name", "type": "text", "required": true },
+      { "key": "effect", "label": "效果", "labelEn": "Effect", "type": "richtext" },
+      { "key": "cost", "label": "代价", "labelEn": "Cost", "type": "text" },
+      { "key": "level", "label": "位阶", "labelEn": "Level", "type": "enum", "enum": ["cantrip", "lesser", "greater", "forbidden"] },
+      { "key": "system", "label": "所属体系", "labelEn": "System", "type": "ref", "refType": "example-magic.magic-system" },
+      { "key": "firstAppearance", "label": "首次登场", "labelEn": "First Appearance", "type": "text" }
+    ],
+    "views": ["outline", "corkboard", "table"]
+  }
+]

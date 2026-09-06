@@ -1,0 +1,25 @@
+{
+  "title": "欢迎来到 AI 小说家",
+  "subtitle": "选一种写法开始，随时可以在设置里改，不绑死",
+  "persona": {
+    "hand": {
+      "title": "手写党",
+      "desc": "纯本地写作，大纲/章节/快照全套，不绑模型也能写"
+    },
+    "assisted": {
+      "title": "AI 辅助",
+      "desc": "自己写，卡文时让 AI 润色扩写，配一个渠道即可"
+    },
+    "ai": {
+      "title": "AI 全开",
+      "desc": "大纲细纲正文全由 AI 起草，配好渠道+向量模型"
+    }
+  },
+  "suggestAssisted": "建议：配 1 个官方渠道（填 Key 即可），不够再加聚合网关。",
+  "suggestAi": "建议：配 1 个主力渠道 + 1 个向量模型（硅基流动 bge-m3 最省事）。",
+  "openSettings": "去配置",
+  "bookNameLabel": "第一本书叫什么",
+  "bookNamePlaceholder": "例如：雾港来信",
+  "defaultBookTitle": "未命名新书",
+  "start": "开始写"
+}

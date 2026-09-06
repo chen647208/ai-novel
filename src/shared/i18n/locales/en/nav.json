@@ -3,10 +3,15 @@
     "inspiration": "Inspiration",
     "world": "World Building",
     "characters": "Characters & Factions",
+    "structure": "Outline & Chapters",
     "outline": "Novel Outline",
     "chapterOutline": "Chapter Outline",
     "writing": "Writing Editor"
   },
   "bookshelf": "Bookshelf",
-  "settings": "Settings"
+  "settings": "Settings",
+  "structureTabs": {
+    "chapters": "Chapters",
+    "outline": "Outline"
+  }
 }

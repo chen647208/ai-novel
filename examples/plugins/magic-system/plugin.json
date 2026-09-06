@@ -1,0 +1,17 @@
+{
+  "$schema": "https://ai-novel.dev/schema/plugin-v0.json",
+  "id": "com.novalocal.example-magic",
+  "name": "魔法体系示例插件",
+  "version": "1.0.0",
+  "description": "官方示例：魔法体系类型模板 + 魔法设计写法技能（资源型，零代码）。",
+  "host": "^1.0.0",
+  "license": "MIT",
+  "contributes": {
+    "types": ["types"],
+    "skills": ["skills/magic-design"]
+  },
+  "permissions": {
+    "read": ["cards", "index"]
+  },
+  "activation": "onDemand"
+}

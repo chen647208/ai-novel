@@ -1,3 +1,6 @@
+# 本地项目规范
+AGENTS.LOCAL.md
+
 # Logs
 logs
 *.log
@@ -30,6 +33,11 @@ chroma_data/
 # Test / tooling artifacts
 coverage/
 .vitest/
+test-results/
+playwright-report/
+playwright/.cache/
+test-results/
+playwright-report/
 
 # Recovery / scratch leftovers
 .codex-recovery/

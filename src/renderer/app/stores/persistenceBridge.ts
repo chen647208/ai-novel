@@ -20,7 +20,7 @@ import { repository } from '../../shared/services/repository';
 import { autoBackupService } from '../../shared/services/autoBackupService';
 import { logger } from '../../shared/utils/logger';
 import { persistDiff } from '../persistDiff';
-import { useProjectStore } from './projectStore';
+import { useProjectStore, commitMetaOf } from './projectStore';
 import { useSettingsStore } from './settingsStore';
 
 /** 把两个 store 的当前值组合为逻辑 AppState（供导出/一致性哨兵使用）。 */
@@ -40,6 +40,9 @@ export function composeAppState(): AppState {
     consistencyCheckConfig: s.consistencyCheckConfig,
     language: s.language,
     theme: s.theme,
+    uiFont: s.uiFont,
+    editorFont: s.editorFont,
+    customFonts: s.customFonts,
   };
 }
 
@@ -62,7 +65,8 @@ async function flush(): Promise<void> {
     if (prev === null) {
       await repository.saveAll(next);
     } else {
-      await persistDiff(repository, prev, next);
+      // 归因随新引用绑定传入（WeakMap）：AI 落笔帧带 agentId/cause，手写帧无绑定即 user
+      await persistDiff(repository, prev, next, commitMetaOf);
     }
     const config = await repository.getStorageConfig();
     if (config.autoBackupEnabled) {

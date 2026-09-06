@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { templateDisplayName } from '@/i18n';
 import { type OutputMode } from '../../../../shared/types';
 import type { ChapterGenerationModalProps } from '../types';
+import { useSettingsStore } from '../../../app/stores/settingsStore';
 import { Button } from '@/shared/ui/Button';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
 import { Input } from '@/shared/ui/Input';
@@ -426,6 +427,15 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
 
             {/* 输出模式选择区域 */}
             <GenSection label={t('genModal.sectionOutputMode')} alignStart>
+              <Select
+                value={activeModel.id}
+                onChange={(e) => useSettingsStore.getState().setActiveModelId(e.target.value)}
+                className="mb-2 font-medium"
+              >
+                {useSettingsStore.getState().models.filter((m) => m.isEnabled !== false).map((m) => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
+                ))}
+              </Select>
               <Select value={outputMode} onChange={(e) => setOutputMode(e.target.value as OutputMode)}>
                 <option value="streaming">{t('output.streaming')}</option>
                 <option value="traditional">{t('output.traditional')}</option>

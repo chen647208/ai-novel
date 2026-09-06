@@ -50,12 +50,12 @@ export class VectorIntegrationService {
       if (this.isInitialized) {
         logger.debug('VectorIntegrationService initialized successfully');
       } else {
-        console.error('Failed to initialize VectorIntegrationService');
+        logger.error('Failed to initialize VectorIntegrationService');
       }
 
       return this.isInitialized;
     } catch (error) {
-      console.error('Failed to initialize VectorIntegrationService:', error);
+      logger.error('Failed to initialize VectorIntegrationService:', error);
       this.isInitialized = false;
       return false;
     }
@@ -125,7 +125,7 @@ export class VectorIntegrationService {
         indexedCount: documentIds.length
       };
     } catch (error) {
-      console.error(`Failed to index knowledge base for project ${projectId}:`, error);
+      logger.error(`Failed to index knowledge base for project ${projectId}:`, error);
       return {
         success: false,
         indexedCount: 0,
@@ -156,7 +156,7 @@ export class VectorIntegrationService {
       // 执行语义搜索
       return await vectorService.semanticSearch(projectId, queryEmbedding, options);
     } catch (error) {
-      console.error(`Failed to perform semantic search for project ${projectId}:`, error);
+      logger.error(`Failed to perform semantic search for project ${projectId}:`, error);
       return [];
     }
   }
@@ -183,7 +183,7 @@ export class VectorIntegrationService {
       // 执行混合搜索
       return await vectorService.hybridSearch(projectId, queryEmbedding, query, options);
     } catch (error) {
-      console.error(`Failed to perform hybrid search for project ${projectId}:`, error);
+      logger.error(`Failed to perform hybrid search for project ${projectId}:`, error);
       return [];
     }
   }
@@ -203,7 +203,7 @@ export class VectorIntegrationService {
       
       return await vectorService.getCollectionStats(projectId, dimensions);
     } catch (error) {
-      console.error(`Failed to get vector stats for project ${projectId}:`, error);
+      logger.error(`Failed to get vector stats for project ${projectId}:`, error);
       return {
         count: 0,
         dimensions: embeddingProvider.getActive().getDimensions(),
@@ -224,7 +224,7 @@ export class VectorIntegrationService {
     try {
       return await vectorService.checkConsistency(projectId);
     } catch (error) {
-      console.error(`Failed to check consistency for project ${projectId}:`, error);
+      logger.error(`Failed to check consistency for project ${projectId}:`, error);
       return {
         isConsistent: false,
         conflicts: [{
@@ -249,7 +249,7 @@ export class VectorIntegrationService {
     try {
       return await vectorService.cleanupCollection(projectId);
     } catch (error) {
-      console.error(`Failed to cleanup project ${projectId}:`, error);
+      logger.error(`Failed to cleanup project ${projectId}:`, error);
       return false;
     }
   }
@@ -349,7 +349,7 @@ export class VectorIntegrationService {
         }
       } catch (error) {
         const errorMsg = `Failed to ${update.action} knowledge item ${update.item.id}: ${error instanceof Error ? error.message : 'Unknown error'}`;
-        console.error(errorMsg);
+        logger.error(errorMsg);
         result.errors.push(errorMsg);
         result.success = false;
       }
@@ -406,7 +406,7 @@ export class VectorIntegrationService {
         exportedAt: Date.now()
       };
     } catch (error) {
-      console.error(`Failed to export vector data for project ${projectId}:`, error);
+      logger.error(`Failed to export vector data for project ${projectId}:`, error);
       throw error;
     }
   }

@@ -23,6 +23,8 @@ interface TipTapCanvasProps {
   /** 生成中且非流式时锁定编辑；流式期间以只读方式回显增量。 */
   isGenerating: boolean;
   isStreaming: boolean;
+  /** 打字机模式：光标保持在视口中部跟随滚动。 */
+  typewriter?: boolean;
   /** Enter×3 连按：宿主创建新章并切换（不阻塞继续输入）。 */
   onNewChapter?: () => void;
   onContentChange: (content: string) => void;
@@ -36,7 +38,7 @@ interface TipTapCanvasProps {
  * 并通过 NovelEditorHandle 向编排层暴露 PM 语义的选区与坐标。
  */
 const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function TipTapCanvas(
-  { content, activeChapterId, isFocusMode, isGenerating, isStreaming, onNewChapter, onContentChange, onMouseUp, onKeyUp, onMouseMove },
+  { content, activeChapterId, isFocusMode, isGenerating, isStreaming, typewriter, onNewChapter, onContentChange, onMouseUp, onKeyUp, onMouseMove },
   ref,
 ) {
   const { t } = useTranslation('writing');
@@ -84,6 +86,33 @@ const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function T
     if (editor.isEditable !== editable) editor.setEditable(editable);
   }, [editor, activeChapterId, isGenerating, isStreaming]);
 
+  // 打字机模式：选区变化时把光标收到视口约 40% 高度处，长文连写不沉底。
+  const typewriterRef = useRef(typewriter);
+  typewriterRef.current = typewriter;
+  useEffect(() => {
+    if (!editor) return;
+    const centerCaret = () => {
+      if (!typewriterRef.current) return;
+      try {
+        const { from } = editor.state.selection;
+        const coords = editor.view.coordsAtPos(from);
+        const container = editor.view.dom.closest('.custom-scrollbar') as HTMLElement | null;
+        if (!container) return;
+        const rect = container.getBoundingClientRect();
+        const delta = coords.top - rect.top - container.clientHeight * 0.4;
+        if (Math.abs(delta) > 24) container.scrollTop += delta;
+      } catch {
+        // 坐标不可用时静默
+      }
+    };
+    editor.on('selectionUpdate', centerCaret);
+    editor.on('update', centerCaret);
+    return () => {
+      editor.off('selectionUpdate', centerCaret);
+      editor.off('update', centerCaret);
+    };
+  }, [editor]);
+
   useImperativeHandle(
     ref,
     () => ({
@@ -104,6 +133,22 @@ const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function T
       },
       focus() {
         editor?.commands.focus();
+      },
+      undo() {
+        if (!editor) return false;
+        editor.commands.focus();
+        return editor.commands.undo();
+      },
+      redo() {
+        if (!editor) return false;
+        editor.commands.focus();
+        return editor.commands.redo();
+      },
+      canUndo() {
+        return editor?.can().undo() ?? false;
+      },
+      canRedo() {
+        return editor?.can().redo() ?? false;
       },
       harvestDarling() {
         if (!editor) return false;
@@ -129,6 +174,7 @@ const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function T
         'selection:bg-primary/15',
         isFocusMode ? 'max-w-3xl text-xl leading-loose' : 'max-w-4xl',
       )}
+      style={{ fontFamily: 'var(--font-reading, inherit)' }}
       onMouseUp={onMouseUp}
       onKeyUp={onKeyUp}
       onMouseMove={onMouseMove}

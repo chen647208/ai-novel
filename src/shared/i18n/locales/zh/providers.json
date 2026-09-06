@@ -55,10 +55,20 @@
       "description": "任意 OpenAI Chat Completions 兼容端点（自建网关、第三方聚合等）",
       "tips": ["填写接口地址（含 /v1）", "按上游要求填 API Key（本地代理可留空）", "模型名填上游支持的标识"]
     },
+    "gateway-openai": {
+      "name": "聚合网关（One Key 多模型）",
+      "description": "OpenRouter / 硅基流动 / 第三方聚合：一个 Key 走多家模型，地址止于 /v1",
+      "tips": ["地址止于 /v1，不要拼 /chat/completions", "一个 Key 通多家，模型名填网关侧 ID", "先刷新模型列表，再选模型测连通"]
+    },
     "custom-anthropic": {
       "name": "自定义 Anthropic 兼容",
       "description": "任意 Anthropic Messages 兼容端点",
       "tips": ["填写接口 base（如 https://host/anthropic/v1）", "填写 API Key", "模型名填上游标识"]
+    },
+    "custom-gemini": {
+      "name": "自定义 Gemini 兼容",
+      "description": "Gemini 原生 REST 兼容端点（自建代理、第三方聚合等），留空则走官方默认",
+      "tips": ["填写兼容端点 base，留空走官方默认", "填写 API Key", "含 /v1beta/openai/ 的地址自动走 OpenAI 兼容"]
     }
   },
   "embedding": {

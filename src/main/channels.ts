@@ -47,4 +47,12 @@ export const IPC = {
     streamEvent: 'ai:stream:event',
     abort: 'ai:stream:abort',
   },
+
+  // 安全密钥库（safeStorage/OS 钥匙串；渲染端只持 vault: 引用）
+  vault: {
+    isAvailable: 'vault:is-available',
+    set: 'vault:set',
+    get: 'vault:get',
+    remove: 'vault:remove',
+  },
 } as const;

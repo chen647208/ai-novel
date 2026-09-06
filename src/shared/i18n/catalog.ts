@@ -33,6 +33,7 @@ import zhWriting from './locales/zh/writing.json' with { type: 'json' };
 import zhAssistant from './locales/zh/assistant.json' with { type: 'json' };
 import zhCards from './locales/zh/cards.json' with { type: 'json' };
 import zhPrompts from './locales/zh/prompts.json' with { type: 'json' };
+import zhOnboarding from './locales/zh/onboarding.json' with { type: 'json' };
 import enCommon from './locales/en/common.json' with { type: 'json' };
 import enSettings from './locales/en/settings.json' with { type: 'json' };
 import enNav from './locales/en/nav.json' with { type: 'json' };
@@ -52,18 +53,19 @@ import enWriting from './locales/en/writing.json' with { type: 'json' };
 import enAssistant from './locales/en/assistant.json' with { type: 'json' };
 import enCards from './locales/en/cards.json' with { type: 'json' };
 import enPrompts from './locales/en/prompts.json' with { type: 'json' };
+import enOnboarding from './locales/en/onboarding.json' with { type: 'json' };
 
 /** 支持的语言。新增语言时在此扩展并补一份对应字典。 */
 export const SUPPORTED_LANGUAGES: readonly AppLanguage[] = ['zh', 'en'];
 /** 兜底语言：检测失败或语言不受支持时回退。 */
 export const DEFAULT_LANGUAGE: AppLanguage = 'zh';
 /** 命名空间清单，随功能迁移逐步扩充。 */
-export const NAMESPACES = ['common', 'settings', 'nav', 'app', 'errors', 'providers', 'books', 'version', 'timeline', 'foreshadow', 'steps', 'characters', 'world', 'consistency', 'knowledge', 'writing', 'assistant', 'cards', 'prompts'] as const;
+export const NAMESPACES = ['common', 'settings', 'nav', 'app', 'errors', 'providers', 'books', 'version', 'timeline', 'foreshadow', 'steps', 'characters', 'world', 'consistency', 'knowledge', 'writing', 'assistant', 'cards', 'prompts', 'onboarding'] as const;
 
 /** 中英字典静态打包。 */
 export const resources = {
-  zh: { common: zhCommon, settings: zhSettings, nav: zhNav, app: zhApp, errors: zhErrors, providers: zhProviders, books: zhBooks, version: zhVersion, timeline: zhTimeline, foreshadow: zhForeshadow, steps: zhSteps, characters: zhCharacters, world: zhWorld, consistency: zhConsistency, knowledge: zhKnowledge, writing: zhWriting, assistant: zhAssistant, cards: zhCards, prompts: zhPrompts },
-  en: { common: enCommon, settings: enSettings, nav: enNav, app: enApp, errors: enErrors, providers: enProviders, books: enBooks, version: enVersion, timeline: enTimeline, foreshadow: enForeshadow, steps: enSteps, characters: enCharacters, world: enWorld, consistency: enConsistency, knowledge: enKnowledge, writing: enWriting, assistant: enAssistant, cards: enCards, prompts: enPrompts },
+  zh: { common: zhCommon, settings: zhSettings, nav: zhNav, app: zhApp, errors: zhErrors, providers: zhProviders, books: zhBooks, version: zhVersion, timeline: zhTimeline, foreshadow: zhForeshadow, steps: zhSteps, characters: zhCharacters, world: zhWorld, consistency: zhConsistency, knowledge: zhKnowledge, writing: zhWriting, assistant: zhAssistant, cards: zhCards, prompts: zhPrompts, onboarding: zhOnboarding },
+  en: { common: enCommon, settings: enSettings, nav: enNav, app: enApp, errors: enErrors, providers: enProviders, books: enBooks, version: enVersion, timeline: enTimeline, foreshadow: enForeshadow, steps: enSteps, characters: enCharacters, world: enWorld, consistency: enConsistency, knowledge: enKnowledge, writing: enWriting, assistant: enAssistant, cards: enCards, prompts: enPrompts, onboarding: enOnboarding },
 } as const;
 
 /** 把任意 navigator/字符串语言标签归一化为受支持的 AppLanguage。 */

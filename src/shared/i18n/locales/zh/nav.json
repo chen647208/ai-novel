@@ -3,10 +3,15 @@
     "inspiration": "灵感生成",
     "world": "世界构建中心",
     "characters": "角色与势力",
+    "structure": "大纲细纲",
     "outline": "小说大纲",
     "chapterOutline": "章节细纲",
     "writing": "写作编辑器"
   },
   "bookshelf": "书籍库",
-  "settings": "设置"
+  "settings": "设置",
+  "structureTabs": {
+    "chapters": "细纲",
+    "outline": "大纲"
+  }
 }

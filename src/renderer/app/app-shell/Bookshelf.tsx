@@ -33,7 +33,8 @@ import {
   Copy,
   Download,
   FolderOpen,
-  Layers,
+  LayoutGrid,
+  List,
   ListOrdered,
   MoreHorizontal,
   Pencil,
@@ -43,6 +44,8 @@ import {
   Upload,
   Users,
 } from 'lucide-react';
+import { ViewModeToggle } from '@/shared/ui/ViewModeToggle';
+import { useViewPreference } from '@/shared/hooks/useViewPreference';
 
 interface BookshelfProps {
   books: Project[];
@@ -56,7 +59,6 @@ interface BookshelfProps {
   onDuplicateBook: (bookId: string) => void;
   onExportBook: (book: Project) => void;
   onImportBook: () => void;
-  onExportAll: () => void;
   onImportAll: () => Promise<void>;
 }
 
@@ -91,12 +93,12 @@ const Bookshelf: React.FC<BookshelfProps> = ({
   onDuplicateBook,
   onExportBook,
   onImportBook,
-  onExportAll,
   onImportAll,
 }) => {
   const { t, i18n } = useTranslation(['app', 'common']);
   const [query, setQuery] = useState('');
   const [isNewBookOpen, setIsNewBookOpen] = useState(false);
+  const [view, setView] = useViewPreference<'grid' | 'list'>('bookshelf.view', 'grid');
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -132,23 +134,25 @@ const Bookshelf: React.FC<BookshelfProps> = ({
           description={t('app:bookshelf.subtitle')}
           actions={
             <>
-              <Button variant="ghost" size="sm" onClick={onExportAll} title={t('app:bookshelf.backup')}>
-                <Download className="size-4" />
-                {t('app:bookshelf.backup')}
-              </Button>
-              <Button variant="ghost" size="sm" onClick={handleImportAll} title={t('app:bookshelf.importAll')}>
-                <Upload className="size-4" />
-                {t('app:bookshelf.importAll')}
-              </Button>
-              <Button variant="outline" size="sm" onClick={onImportBook}>
-                <BookUp className="size-4" />
-                {t('app:bookshelf.importBook')}
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setIsNewBookOpen(true)}>
-                <Layers className="size-4" />
-                {t('app:bookshelf.newFromTemplate')}
-              </Button>
-              <Button size="sm" onClick={onCreateQuickBook}>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Upload className="size-4" />
+                    {t('app:bookshelf.import')}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onSelect={onImportBook}>
+                    <BookUp className="size-4" />
+                    {t('app:bookshelf.importBook')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={handleImportAll}>
+                    <Upload className="size-4" />
+                    {t('app:bookshelf.importAll')}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button size="sm" onClick={() => setIsNewBookOpen(true)}>
                 <Plus className="size-4" />
                 {t('app:bookshelf.newBook')}
               </Button>
@@ -157,13 +161,23 @@ const Bookshelf: React.FC<BookshelfProps> = ({
         />
 
         {books.length > 0 && (
-          <div className="relative mb-6 max-w-xs">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder={t('app:bookshelf.search')}
-              className="pl-8"
+          <div className="relative mb-6 flex max-w-md items-center gap-2">
+            <div className="relative max-w-xs flex-1">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder={t('app:bookshelf.search')}
+                className="pl-8"
+              />
+            </div>
+            <ViewModeToggle
+              value={view}
+              onChange={setView}
+              options={[
+                { value: 'grid', icon: LayoutGrid, title: '卡片' },
+                { value: 'list', icon: List, title: '横栏' },
+              ]}
             />
           </div>
         )}
@@ -189,6 +203,45 @@ const Bookshelf: React.FC<BookshelfProps> = ({
           />
         ) : filtered.length === 0 ? (
           <EmptyState icon={Search} title={t('app:bookshelf.noResults')} />
+        ) : view === 'list' ? (
+          <div className="overflow-hidden rounded-lg border border-border">
+            {filtered.map((book, idx) => (
+              <div
+                key={book.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => onOpenBook(book.id)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onOpenBook(book.id);
+                  }
+                }}
+                className={`group flex cursor-pointer items-center gap-4 px-4 py-3 transition-colors hover:bg-accent/40 ${idx > 0 ? 'border-t border-border' : ''}`}
+              >
+                <h3 className="w-48 shrink-0 truncate font-serif text-[15px] font-medium text-foreground">
+                  {book.title}
+                </h3>
+                <p className="min-w-0 flex-1 truncate text-[13px] text-muted-foreground">
+                  {book.intro || book.inspiration || t('app:bookshelf.noContent')}
+                </p>
+                <span className="hidden shrink-0 items-center gap-1 text-xs tabular-nums text-muted-foreground sm:flex" title={t('app:bookshelf.words')}>
+                  <BookOpen className="size-3.5" />
+                  {wordCount(book).toLocaleString(i18n.language)}
+                </span>
+                <span className="hidden shrink-0 items-center gap-1 text-xs tabular-nums text-muted-foreground md:flex" title={t('app:bookshelf.chapters')}>
+                  <ListOrdered className="size-3.5" />
+                  {book.chapters.length}
+                </span>
+                <span className="shrink-0 text-xs tabular-nums text-muted-foreground">{formatLastEdited(book.lastModified, i18n.language)}</span>
+                {book.id === activeBookId && (
+                  <Badge variant="secondary" className="shrink-0">
+                    {t('app:bookshelf.current')}
+                  </Badge>
+                )}
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map(book => (
@@ -242,7 +295,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="size-6 opacity-0 transition-opacity group-hover:opacity-100 data-[state=open]:opacity-100"
+                           className="size-6 opacity-100 transition-opacity focus-visible:opacity-100 data-[state=open]:opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100"
                           onClick={e => e.stopPropagation()}
                         >
                           <MoreHorizontal className="size-4" />

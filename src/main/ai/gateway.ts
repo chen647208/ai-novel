@@ -21,6 +21,7 @@ import type { Provider } from '../app/container.js';
 import type { AiCallOptions, AiStreamEvent, AIResponse, ModelConfig } from '../../shared/types.js';
 import { aiT, initAiI18n } from './i18n.js';
 import { resolveAdapter } from './resolve.js';
+import { withVaultKey } from '../app/secureStore.js';
 
 /** 进行中的请求：requestId → 取消控制器。complete 与 stream 共用一张表。 */
 const active = new Map<string, AbortController>();
@@ -84,10 +85,14 @@ export const aiGatewayProvider: Provider = {
       if (typeof requestId !== 'string' || typeof prompt !== 'string' || !model) {
         throw new TypeError('Invalid ai:complete arguments');
       }
+      // vault 引用在此统一解为明文：适配器拿到的永远是可用 Key，渲染端无需经手
+      const keyed = await withVaultKey(model);
+      if (!keyed.ok) throw new Error(keyed.error);
+      const resolved = keyed.model;
       const controller = new AbortController();
       active.set(requestId, controller);
       try {
-        return await resolveAdapter(model).complete(model, prompt, {
+        return await resolveAdapter(resolved).complete(resolved, prompt, {
           retries: options?.retries ?? 2,
           signal: controller.signal,
         });
@@ -96,7 +101,7 @@ export const aiGatewayProvider: Provider = {
       }
     });
 
-    ipcMain.handle(IPC.ai.streamOpen, (event, requestId: string, model: ModelConfig, prompt: string, options?: AiCallOptions): boolean => {
+    ipcMain.handle(IPC.ai.streamOpen, async (event, requestId: string, model: ModelConfig, prompt: string, options?: AiCallOptions): Promise<boolean> => {
       if (typeof requestId !== 'string' || typeof prompt !== 'string' || !model) {
         throw new TypeError('Invalid ai:stream:open arguments');
       }
@@ -112,7 +117,13 @@ export const aiGatewayProvider: Provider = {
         active.delete(requestId);
       });
 
-      runAdapterStream(model, prompt, requestId, emit, {
+      const keyed = await withVaultKey(model);
+      if (!keyed.ok) {
+        emit({ t: 'error', requestId, error: keyed.error });
+        active.delete(requestId);
+        return false;
+      }
+      runAdapterStream(keyed.model, prompt, requestId, emit, {
         retries: options?.retries ?? 2,
         signal: controller.signal,
       })

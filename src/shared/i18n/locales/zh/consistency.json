@@ -19,6 +19,7 @@
   "needModel": "请先配置 AI 模型服务商\n\n路径：系统设置 → 模型提供商",
   "similarityDetails": "相似度: {{score}}%, 共同关键词: {{keywords}}",
   "autoFixConfirm": "确定要自动修复所有可修复的问题吗？这将清除无效的引用。",
+  "checkFailed": "一致性检查失败：{{error}}，可点击“重新检查”重试",
   "title": "世界观一致性检查",
   "subtitle": "检查项目数据的一致性和完整性",
   "checking": "检查中...",

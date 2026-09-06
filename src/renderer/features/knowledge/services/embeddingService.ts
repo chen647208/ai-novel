@@ -122,7 +122,7 @@ export class SimpleEmbeddingService implements EmbeddingService {
       logger.debug('SimpleEmbeddingService initialized successfully');
       return true;
     } catch (error) {
-      console.error('Failed to initialize embedding service:', error);
+      logger.error('Failed to initialize embedding service:', error);
       this.isReady = false;
       return false;
     }
@@ -163,7 +163,7 @@ export class SimpleEmbeddingService implements EmbeddingService {
         const embedding = this.createTFIDFEmbedding(text);
         embeddings.push(embedding);
       } catch {
-        console.error(`Failed to generate embedding for text: ${text.substring(0, 50)}...`);
+        logger.error(`Failed to generate embedding for text: ${text.substring(0, 50)}...`);
         embeddings.push(new Array(this.dimensions).fill(0));
       }
     }
@@ -280,7 +280,7 @@ export class SimpleEmbeddingService implements EmbeddingService {
           });
         });
       } catch (error) {
-        console.error(`Failed to create vector documents for batch ${i / batchSize}:`, error);
+        logger.error(`Failed to create vector documents for batch ${i / batchSize}:`, error);
       }
     }
 

@@ -47,7 +47,13 @@ export const fileProvider: Provider = {
 
     ipcMain.handle(IPC.readFile, async (_event, filePath: string) => {
       assertString(filePath, 'filePath');
-      return fs.readFile(filePath, 'utf-8');
+      try {
+        return await fs.readFile(filePath, 'utf-8');
+      } catch (error) {
+        // 轮询型读方（如 MCP 提案桥）常态读不存在的文件：ENOENT 静默返回空串，其余照抛
+        if ((error as NodeJS.ErrnoException).code === 'ENOENT') return '';
+        throw error;
+      }
     });
 
     ipcMain.handle(IPC.writeFile, async (_event, filePath: string, data: string) => {

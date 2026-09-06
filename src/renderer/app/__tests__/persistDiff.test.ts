@@ -101,7 +101,8 @@ describe('persistDiff 执行', () => {
     const next = { ...base, projects: [keep, project('add')], activeModelId: 'm9' };
     await persistDiff(repo, prev, next);
     expect(repo.deleteProject).toHaveBeenCalledWith('del');
-    expect(repo.saveProject).toHaveBeenCalledWith(expect.objectContaining({ id: 'add' }));
+    // 无归因绑定时 opts 透传 undefined（默认 user，由 repository 侧处理）
+    expect(repo.saveProject).toHaveBeenCalledWith(expect.objectContaining({ id: 'add' }), undefined);
     expect(repo.saveSettings).toHaveBeenCalledWith({ activeModelId: 'm9' });
     expect(repo.saveProject).not.toHaveBeenCalledWith(expect.objectContaining({ id: 'keep' }));
   });
@@ -112,5 +113,49 @@ describe('persistDiff 执行', () => {
     expect(repo.saveProject).not.toHaveBeenCalled();
     expect(repo.deleteProject).not.toHaveBeenCalled();
     expect(repo.saveSettings).not.toHaveBeenCalled();
+  });
+});
+
+describe('归因透传（agentId/cause 进 saveProject）', () => {
+  const mockRepo = () => ({
+    saveProject: vi.fn(async () => {}),
+    deleteProject: vi.fn(async () => {}),
+    saveSettings: vi.fn(async () => {}),
+  }) as unknown as StorageRepository & {
+    saveProject: ReturnType<typeof vi.fn>;
+    deleteProject: ReturnType<typeof vi.fn>;
+    saveSettings: ReturnType<typeof vi.fn>;
+  };
+
+  it('metaOf 命中的项目带 opts，不命中的不带', async () => {
+    const repo = mockRepo();
+    const edited = { ...project('edit'), title: 'AI 改的' };
+    const manual = { ...project('manual'), title: '手改的' };
+    const prev = { ...base, projects: [project('edit'), project('manual')] };
+    const next = { ...base, projects: [edited, manual] };
+    const metaOf = (p: Project) =>
+      p.id === 'edit' ? { agentId: 'ai:writing', cause: 'prompt-1' } : undefined;
+    await persistDiff(repo, prev, next, metaOf);
+    expect(repo.saveProject).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'edit' }),
+      { agentId: 'ai:writing', cause: 'prompt-1' },
+    );
+    expect(repo.saveProject).toHaveBeenCalledWith(expect.objectContaining({ id: 'manual' }), undefined);
+  });
+
+  it('store 绑定：带 opts 的更新挂 WeakMap，不带的无归因', async () => {
+    const { useProjectStore, commitMetaOf } = await import('../stores/projectStore');
+    useProjectStore.getState().hydrate([project('a')], 'a');
+    useProjectStore.getState().updateActiveProject(
+      { title: 'AI 章节' },
+      { agentId: 'ai:writing', cause: 'p1' },
+    );
+    const aiRef = useProjectStore.getState().projects[0]!;
+    expect(commitMetaOf(aiRef)).toEqual({ agentId: 'ai:writing', cause: 'p1' });
+
+    useProjectStore.getState().updateActiveProject({ title: '手改' });
+    const manualRef = useProjectStore.getState().projects[0]!;
+    expect(manualRef).not.toBe(aiRef);
+    expect(commitMetaOf(manualRef)).toBeUndefined();
   });
 });

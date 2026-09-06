@@ -76,7 +76,7 @@ export const getPreviousChapterSummaryIds = (chapters: Chapter[], currentChapter
   );
 };
 
-export type ExportFormat = 'txt' | 'md' | 'html';
+export type ExportFormat = 'txt' | 'md' | 'html' | 'rtf';
 
 /** Project.chapters → 构建管线实体视图（导出与统计共用，单一口径）。 */
 export function projectToBuildEntities(project: Project): { nodes: NodeEntity[]; attrs: AttributeEntity[]; edges: EdgeEntity[] } {
@@ -133,10 +133,32 @@ export const buildExportContent = (project: Project, selectedChapterIds: Set<str
       headings: { chapter: chapterTemplate, scene: '* * *', hide: [], renumber: true },
       content: { includeSynopsis: false, includeComments: false, stripTags: [], resolveRefs: 'raw' },
     },
-    render: { chapterPageBreak: format === 'html', stripUnicode: false },
+    render: { chapterPageBreak: format === 'html' || format === 'rtf', stripUnicode: false },
   };
 
   const { text } = runBuild(profile, { nodes, attrs, edges: [] });
+
+  // RTF 是完整文档（首行文档头 + 尾行括号）：书名块插在首行之后，保持管线纯净
+  if (format === 'rtf') {
+    const escapeRtfLocal = (s: string): string => {
+      let out = '';
+      for (const ch of s) {
+        const code = ch.codePointAt(0) ?? 0;
+        if (ch === '\\') out += '\\\\';
+        else if (ch === '{') out += '\\{';
+        else if (ch === '}') out += '\\}';
+        else if (code > 127) out += `\\u${code > 0x7fff ? code - 0x10000 : code}?`;
+        else out += ch;
+      }
+      return out;
+    };
+    const titleBlock = [
+      `{\\b\\fs36 ${escapeRtfLocal(project.title)}}\\par`,
+      ...(project.intro ? [`${escapeRtfLocal(project.intro)}\\par`, '\\par'] : []),
+    ].join('\n');
+    const [head, ...rest] = text.split('\n');
+    return [head, titleBlock, ...rest].join('\n');
+  }
 
   const header =
     format === 'md'
@@ -158,8 +180,8 @@ export const buildExportContent = (project: Project, selectedChapterIds: Set<str
   return `${header}${text}\n\n`;
 };
 
-const EXPORT_EXT: Record<ExportFormat, string> = { txt: 'txt', md: 'md', html: 'html' };
-const EXPORT_MIME: Record<ExportFormat, string> = { txt: 'text/plain', md: 'text/markdown', html: 'text/html' };
+const EXPORT_EXT: Record<ExportFormat, string> = { txt: 'txt', md: 'md', html: 'html', rtf: 'rtf' };
+const EXPORT_MIME: Record<ExportFormat, string> = { txt: 'text/plain', md: 'text/markdown', html: 'text/html', rtf: 'application/rtf' };
 
 export const buildExportFilename = (projectTitle: string, format: ExportFormat = 'txt', now: Date = new Date()) => {
   const safeTitle = projectTitle.replace(/[\\/:*?"<>|]/g, '_');

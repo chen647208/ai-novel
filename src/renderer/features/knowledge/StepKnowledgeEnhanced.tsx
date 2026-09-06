@@ -13,6 +13,9 @@ import { useTranslation } from '@/i18n';
 import { type Project, type KnowledgeItem, type KnowledgeCategory, type HybridSearchResult, type DiagramType, type ModelConfig, type EmbeddingModelConfig, type ConsistencyCheckPromptTemplate, type ConsistencyCheckConfig } from '../../../shared/types';
 import { vectorIntegrationService } from './services/vectorIntegrationService';
 import { repository } from '../../shared/services/repository';
+import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
+import { useUsableModel } from '@/app/stores/settingsStore';
+import { DEFAULT_SEMANTIC_WEIGHT, DEFAULT_KEYWORD_WEIGHT } from '../../../shared/constants/chapters';
 import { embeddingModelService } from '../settings/services/embeddingModelService';
 import LocationEditor from '../world/LocationEditor';
 import FactionEditor from '../world/FactionEditor';
@@ -35,8 +38,6 @@ import { BookOpen, Bot, Brain, Calendar, Clock, CloudUpload, FileText, Flag, Glo
 
 interface StepKnowledgeEnhancedProps {
   project: Project;
-  onUpdate: (updates: Partial<Project>) => void;
-  activeModel?: ModelConfig | null;
   /** 跳转到角色区并聚焦指定角色（跨分区导航由 App 提供） */
   onNavigateToCharacter?: (id: string) => void;
   /** 跳转到写作区并打开指定章节（跨分区导航由 App 提供） */
@@ -45,8 +46,6 @@ interface StepKnowledgeEnhancedProps {
 
 const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
   project,
-  onUpdate,
-  activeModel: propActiveModel,
   onNavigateToCharacter,
   onNavigateToChapter,
 }) => {
@@ -86,7 +85,10 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
   const [consistencyPrompts, setConsistencyPrompts] = useState<ConsistencyCheckPromptTemplate[]>([]);
   const [consistencyConfig, setConsistencyConfig] = useState<ConsistencyCheckConfig | null>(null);
   
-  const [activeModel, setActiveModel] = useState<ModelConfig | null>(propActiveModel || null);
+  const updateActiveProject = useProjectStore((s) => s.updateActiveProject);
+  const onUpdate = (updates: Partial<Project>, opts?: CommitOptions) => updateActiveProject(updates, opts);
+  const storeModel = useUsableModel();
+  const [activeModel, setActiveModel] = useState<ModelConfig | null>(storeModel ?? null);
   const [activeEmbeddingConfig, setActiveEmbeddingConfig] = useState<EmbeddingModelConfig | null>(null);
 
   // 外部导航目标（一致性检查/智能推荐「跳转到编辑」）：type 决定打开哪个面板，id 为实体 id。
@@ -143,10 +145,10 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
   };
 
   useEffect(() => {
-    if (propActiveModel) {
-      setActiveModel(propActiveModel);
+    if (storeModel) {
+      setActiveModel(storeModel);
     }
-  }, [propActiveModel]);
+  }, [storeModel]);
 
   useEffect(() => {
     const loadConfigs = async () => {
@@ -162,7 +164,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
           setActiveEmbeddingConfig(embeddingConfig);
         }
       } catch (error) {
-        console.error('Failed to load configs:', error);
+        logger.error('Failed to load configs:', error);
       }
     };
     
@@ -186,7 +188,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
         const stats = await vectorIntegrationService.getVectorStats(project.id);
         setVectorStats(stats);
       } catch (error) {
-        console.error('Failed to load vector stats:', error);
+        logger.error('Failed to load vector stats:', error);
       }
     };
 
@@ -226,7 +228,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
             category: selectedCategory === 'all' ? 'writing' : selectedCategory
           });
         } catch (err) {
-          console.error("Failed to read file", file.name, err);
+          logger.error("Failed to read file", file.name, err);
           dialogService.alert(t('readFailed', { name: file.name }));
         }
       } else {
@@ -261,11 +263,11 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
         
         logger.debug(`✅ 成功索引 ${result.indexedCount} 个文档`);
       } else {
-        console.error('❌ 索引失败:', result.error);
+        logger.error('❌ 索引失败:', result.error);
         dialogService.alert(t('center.indexFailed', { error: result.error ?? '' }));
       }
     } catch (error) {
-      console.error('❌ 索引过程中出错:', error);
+      logger.error('❌ 索引过程中出错:', error);
       dialogService.alert(t('center.indexError', { error: error instanceof Error ? error.message : String(error) }));
     } finally {
       setIsIndexing(false);
@@ -304,8 +306,8 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
           results = await vectorIntegrationService.hybridSearchKnowledge(project.id, query, {
             limit: 10,
             threshold: 0.3,
-            semanticWeight: 0.7,
-            keywordWeight: 0.3
+            semanticWeight: DEFAULT_SEMANTIC_WEIGHT,
+            keywordWeight: DEFAULT_KEYWORD_WEIGHT
           });
           break;
         case 'keyword': {
@@ -359,7 +361,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
 
       setSearchResults(results);
     } catch (error) {
-      console.error('搜索失败:', error);
+      logger.error('搜索失败:', error);
       setSearchResults([]);
     } finally {
       setIsSearching(false);
@@ -397,7 +399,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
           await indexKnowledgeItems(newList);
         }
       } catch (error) {
-        console.error('从向量数据库删除失败:', error);
+        logger.error('从向量数据库删除失败:', error);
       }
     } else {
       setDeleteConfirmId(id);
@@ -440,7 +442,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
         setVectorStats(stats);
       }
     } catch (error) {
-      console.error('更新向量数据库失败:', error);
+      logger.error('更新向量数据库失败:', error);
     }
   };
 

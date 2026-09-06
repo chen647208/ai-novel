@@ -6,10 +6,14 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+import { logger } from '@/shared/utils/logger';
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation, templateDisplayName } from '@/i18n';
-import { type Project, type PromptTemplate, type ModelConfig, type Character } from '../../../shared/types';
+import { type Project, type ModelConfig, type Character } from '../../../shared/types';
+import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
+import { VIRTUAL_CHAPTER_ORDER, KNOWLEDGE_SNIPPET_TRUNCATE } from '../../../shared/constants/chapters';
+import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
 import { AIService } from '../assistant/services/aiService';
 import RelationshipDiagram from './RelationshipDiagram';
 import CompactCharacterCard from './CompactCharacterCard';
@@ -24,9 +28,6 @@ import { AlertCircle, Check, CheckCheck, Loader2, Network, Plus, Settings, Trash
 
 interface StepCharactersProps {
   project: Project;
-  prompts: PromptTemplate[];
-  activeModel: ModelConfig;
-  onUpdate: (updates: Partial<Project>) => void;
   onOpenSettings?: () => void;
   /** 外部导航（一致性检查「跳转到编辑」等）：自动打开该角色的详情弹窗 */
   focusCharacterId?: string | null;
@@ -36,13 +37,15 @@ interface StepCharactersProps {
 
 const StepCharacters: React.FC<StepCharactersProps> = ({
   project,
-  prompts,
-  activeModel,
-  onUpdate,
   onOpenSettings,
   focusCharacterId,
   onFocusHandled,
 }) => {
+  // 直读 store：模型/提示词/更新动作不再经 App→View 层层透传
+  const prompts = useSettingsStore((s) => s.prompts);
+  const activeModel = useUsableModel() as ModelConfig;
+  const updateActiveProject = useProjectStore((s) => s.updateActiveProject);
+  const onUpdate = (updates: Partial<Project>, opts?: CommitOptions) => updateActiveProject(updates, opts);
   const { t } = useTranslation('characters');
   const [loading, setLoading] = useState(false);
   const [showDiagram, setShowDiagram] = useState(false);
@@ -232,7 +235,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
     if (selectedKnowledgeIds.size > 0 && project.knowledge) {
        const kContent = project.knowledge
          .filter(k => selectedKnowledgeIds.has(k.id))
-         .map(k => `【参考资料：${k.name}】\n${k.content.substring(0, 8000)}`)
+         .map(k => `【参考资料：${k.name}】\n${k.content.substring(0, KNOWLEDGE_SNIPPET_TRUNCATE)}`)
          .join('\n\n');
        if (kContent) finalPrompt += `\n\n### 必须参考的世界观/设定资料 (Knowledge Base)\n请务必参考以下设定资料来构建角色（如种族、职业、阵营等）：\n${kContent}`;
     }
@@ -275,7 +278,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
           title: t('chapterTitle'),
           summary: t('historySummary'),
           content: '',
-          order: -100, // 特殊顺序，使其不在章节列表中显示
+          order: VIRTUAL_CHAPTER_ORDER, // 特殊顺序，使其不在章节列表中显示
           history: []
         };
         
@@ -289,15 +292,15 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
         const finalVirtualChapters = updatedVirtualChapters.filter(c => c.id !== 'characters-virtual-chapter');
         finalVirtualChapters.unshift(updatedCharactersChapter);
         
-        onUpdate({ 
+        onUpdate({
           characters: [...(project.characters || []), ...newCharacters],
           virtualChapters: finalVirtualChapters
-        });
+        }, { agentId: 'ai:characters', cause: selectedPromptId });
       } else {
         dialogService.alert(t('parseFailed'));
       }
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       dialogService.alert(t('generateErrorGeneric'));
     } finally {
       setLoading(false);

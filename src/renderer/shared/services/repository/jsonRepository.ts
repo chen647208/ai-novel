@@ -9,7 +9,8 @@
 
 import { storage } from '../storage';
 import type { AppState, Project, StorageConfig, ConsistencyCheckConfig, ConsistencyCheckPromptTemplate } from '../../../../shared/types';
-import type { StorageRepository, SearchHit, SearchOptions } from './types';
+import type { StorageRepository, SearchHit, SearchOptions, CommitOptions } from './types';
+import type { RevisionEntity } from '@core/entities';
 
 /** 内存子串检索的片段窗口长度 */
 const SNIPPET_WINDOW = 80;
@@ -60,13 +61,16 @@ export const jsonRepository: StorageRepository = {
   saveAll: (state: AppState) => withWriteLock(() => storage.saveState(state)),
   clear: () => withWriteLock(() => storage.clearState()),
 
-  saveProject: (project: Project) => withWriteLock(async () => {
+  saveProject: (project: Project, _opts?: CommitOptions) => withWriteLock(async () => {
+    // JSON 后端无修订概念：opts 显式丢弃（审计断链，调用方已知；见 StorageRepository.loadRevisions）
     const state = (await storage.loadStateAsync()) ?? structuredClone(INITIAL_FALLBACK);
     const idx = state.projects.findIndex(p => p.id === project.id);
     if (idx >= 0) state.projects[idx] = project;
     else state.projects.push(project);
     await storage.saveState(state);
   }),
+
+  loadRevisions: async (_nodeId: string): Promise<RevisionEntity[]> => [],
 
   deleteProject: (id: string) => withWriteLock(async () => {
     const state = await storage.loadStateAsync();

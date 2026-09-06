@@ -9,6 +9,7 @@
 
 import { type ModelConfig } from '../../../../shared/types';
 import { i18n } from '@/i18n';
+import { resolveModelApiKey } from './credentialService';
 import { asRecord, asRecords, asStr } from '../../../shared/utils/loose';
 
 export class ModelListService {
@@ -17,9 +18,11 @@ export class ModelListService {
   
   // 从模型提供商API获取模型列表
   static async fetchModels(model: ModelConfig): Promise<string[]> {
+    // vault 引用先解为明文（渲染端直连场景；生成走主进程网关统一解）
+    const probe: ModelConfig = { ...model, apiKey: await resolveModelApiKey(model) };
     // 检查缓存是否有效
-    if (this.isCacheValid(model)) {
-      return model.availableModels || [];
+    if (this.isCacheValid(probe)) {
+      return probe.availableModels || [];
     }
     
     // 标记为正在获取
@@ -28,20 +31,20 @@ export class ModelListService {
     try {
       let models: string[] = [];
       
-      // 根据提供商类型使用不同的API
-      switch (model.provider) {
+      // 根据提供商类型使用不同的API（用已解引用的 probe 发请求，缓存写回原对象）
+      switch (probe.provider) {
         case 'openai-chat':
         case 'openai-responses':
-          models = await this.fetchFromOpenAICompatible(model);
+          models = await this.fetchFromOpenAICompatible(probe);
           break;
         case 'ollama':
-          models = await this.fetchFromOllama(model);
+          models = await this.fetchFromOllama(probe);
           break;
         case 'anthropic':
-          models = await this.fetchFromAnthropic(model);
+          models = await this.fetchFromAnthropic(probe);
           break;
         case 'gemini':
-          models = await this.fetchFromGemini(model);
+          models = await this.fetchFromGemini(probe);
           break;
         default:
           models = [];

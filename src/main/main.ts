@@ -18,6 +18,7 @@ import {
   vectorProvider,
   sqliteProvider,
 } from './app/providers.js';
+import { secureStoreProvider } from './app/secureStore.js';
 import { aiGatewayProvider } from './ai/gateway.js';
 
 /**
@@ -29,6 +30,7 @@ const container = new AppContainer()
   .register(vectorProvider)
   .register(fileProvider)
   .register(dialogProvider)
+  .register(secureStoreProvider)
   .register(aiGatewayProvider)
   .register(windowProvider);
 

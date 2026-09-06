@@ -10,10 +10,11 @@
 
 import { logger } from '../../../shared/utils/logger';
 import { i18n } from '@/i18n';
-import { 
-  type EmbeddingModelConfig, 
-  type EmbeddingConnectionTestResult 
+import {
+  type EmbeddingModelConfig,
+  type EmbeddingConnectionTestResult
 } from '../../../../shared/types';
+import { resolveEmbeddingApiKey } from './credentialService';
 import { asRecord, asRecords, asStr, asNum, asNumArr } from '../../../shared/utils/loose';
 import { embeddingConfigStore } from '../../../shared/services/embeddingConfigStore';
 
@@ -111,7 +112,7 @@ export class EmbeddingModelService {
       
       // 验证维度是否匹配配置
       if (actualDimensions !== config.dimensions) {
-        console.warn(`维度不匹配：配置为${config.dimensions}，实际为${actualDimensions}`);
+        logger.warn(`维度不匹配：配置为${config.dimensions}，实际为${actualDimensions}`);
       }
 
       return {
@@ -132,18 +133,19 @@ export class EmbeddingModelService {
   }
 
   /**
-   * 获取可用模型列表
+   * 获取可用模型列表（vault 引用先解为明文探针，不写回调用方对象）
    */
   async fetchModels(config: EmbeddingModelConfig): Promise<string[]> {
-    switch (config.provider) {
+    const probe: EmbeddingModelConfig = { ...config, apiKey: await resolveEmbeddingApiKey(config) };
+    switch (probe.provider) {
       case 'ollama':
-        return this.fetchOllamaModels(config);
+        return this.fetchOllamaModels(probe);
       case 'lmstudio':
       case 'siliconflow':
       case 'bailian':
       case 'volcano':
       case 'openai-compatible':
-        return this.fetchOpenAICompatibleModels(config);
+        return this.fetchOpenAICompatibleModels(probe);
       default:
         return [];
     }
@@ -172,7 +174,7 @@ export class EmbeddingModelService {
       // Ollama返回的模型列表格式：{ models: [{ name: 'xxx' }] }
       return asRecords(data.models).map((m) => asStr(m.name)).filter((name) => name !== '');
     } catch (error) {
-      console.error('获取Ollama模型列表失败:', error);
+      logger.error('获取Ollama模型列表失败:', error);
       throw error;
     }
   }
@@ -201,7 +203,7 @@ export class EmbeddingModelService {
       if (!response.ok) {
         // 某些服务商可能不支持/models端点，返回空列表
         if (response.status === 404) {
-          console.warn('该服务商不支持获取模型列表，请手动输入模型名称');
+          logger.warn('该服务商不支持获取模型列表，请手动输入模型名称');
           return [];
         }
         throw new Error(i18n.t('settings:embedding.apiRequestFailed', { status: response.status, detail: response.statusText }));
@@ -219,7 +221,7 @@ export class EmbeddingModelService {
       
       return embeddingModels.length > 0 ? embeddingModels : models;
     } catch (error) {
-      console.error('获取模型列表失败:', error);
+      logger.error('获取模型列表失败:', error);
       // 某些服务商可能不支持此接口，返回空列表不报错
       return [];
     }
@@ -254,23 +256,24 @@ export class EmbeddingModelService {
   }
 
   /**
-   * 实际调用API获取嵌入向量
+   * 实际调用API获取嵌入向量（vault 引用先解为明文探针，不写回调用方对象）
    */
   private async fetchEmbeddings(
-    config: EmbeddingModelConfig, 
+    config: EmbeddingModelConfig,
     texts: string[]
   ): Promise<number[][]> {
-    switch (config.provider) {
+    const probe: EmbeddingModelConfig = { ...config, apiKey: await resolveEmbeddingApiKey(config) };
+    switch (probe.provider) {
       case 'ollama':
-        return this.fetchOllamaEmbeddings(config, texts);
+        return this.fetchOllamaEmbeddings(probe, texts);
       case 'lmstudio':
       case 'siliconflow':
       case 'bailian':
       case 'volcano':
       case 'openai-compatible':
-        return this.fetchOpenAICompatibleEmbeddings(config, texts);
+        return this.fetchOpenAICompatibleEmbeddings(probe, texts);
       default:
-        throw new Error(i18n.t('settings:embedding.unsupportedProvider', { provider: config.provider }));
+        throw new Error(i18n.t('settings:embedding.unsupportedProvider', { provider: probe.provider }));
     }
   }
 
@@ -368,7 +371,7 @@ export class EmbeddingModelService {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('API错误响应:', errorText);
+        logger.error('API错误响应:', errorText);
         const errorData = asRecord(await response.json().catch(() => ({})));
         const errorMessage = asStr(asRecord(errorData.error).message) || asStr(errorData.message) || i18n.t('settings:embedding.apiRequestFailed', { status: response.status, detail: errorText });
         throw new Error(errorMessage);
@@ -379,7 +382,7 @@ export class EmbeddingModelService {
 
       const items = asRecords(data.data);
       if (items.length === 0) {
-        console.error('API返回格式不正确:', data);
+        logger.error('API返回格式不正确:', data);
         throw new Error(i18n.t('settings:embedding.embedBadFormat'));
       }
 
@@ -421,7 +424,7 @@ export class EmbeddingModelService {
    */
   calculateSimilarity(embedding1: number[], embedding2: number[]): number {
     if (embedding1.length !== embedding2.length) {
-      console.warn(`向量维度不匹配: ${embedding1.length} vs ${embedding2.length}`);
+      logger.warn(`向量维度不匹配: ${embedding1.length} vs ${embedding2.length}`);
       return 0;
     }
 

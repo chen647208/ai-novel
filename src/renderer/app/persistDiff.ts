@@ -8,16 +8,18 @@
  */
 
 import type { StorageRepository } from '../shared/services/repository';
+import type { CommitOptions } from '../shared/services/repository/types';
 import type { AppState, Project } from '../../shared/types';
 
 /** 非项目配置切片键（settings + meta），用于差分持久化。 */
 const NON_PROJECT_KEYS = [
   'models', 'prompts', 'cardPrompts', 'consistencyPrompts', 'consistencyCheckConfig',
   'embeddingModels', 'activeProjectId', 'activeModelId', 'activeEmbeddingModelId', 'language', 'theme',
+  'uiFont', 'editorFont', 'customFonts',
 ] as const;
 
 export type PersistOp =
-  | { kind: 'saveProject'; project: Project }
+  | { kind: 'saveProject'; project: Project; opts?: CommitOptions }
   | { kind: 'deleteProject'; id: string }
   | { kind: 'saveSettings'; patch: Partial<AppState> };
 
@@ -27,8 +29,13 @@ export type PersistOp =
  * 项目按 id 做引用比较：App 内所有项目更新都是不可变展开（改动的书必产生新引用，
  * 未改动的书保留原引用），因此引用不同即视为需要重写；id 消失即删除。
  * 配置切片按键做引用/值比较，仅把变化的键并入一个 saveSettings。
+ * metaOf 把归因绑定到新引用上（见 projectStore.commitMetaOf）：调用方不传即默认 'user'。
  */
-export function computePersistDiff(prev: AppState, next: AppState): PersistOp[] {
+export function computePersistDiff(
+  prev: AppState,
+  next: AppState,
+  metaOf?: (project: Project) => CommitOptions | undefined,
+): PersistOp[] {
   const ops: PersistOp[] = [];
 
   const prevById = new Map(prev.projects.map((p) => [p.id, p]));
@@ -37,7 +44,12 @@ export function computePersistDiff(prev: AppState, next: AppState): PersistOp[] 
     if (!nextIds.has(id)) ops.push({ kind: 'deleteProject', id });
   }
   for (const p of next.projects) {
-    if (prevById.get(p.id) !== p) ops.push({ kind: 'saveProject', project: p });
+    if (prevById.get(p.id) !== p) {
+      const op: PersistOp = { kind: 'saveProject', project: p };
+      const opts = metaOf?.(p);
+      if (opts) op.opts = opts;
+      ops.push(op);
+    }
   }
 
   const patch: Record<string, unknown> = {};
@@ -53,14 +65,19 @@ export function computePersistDiff(prev: AppState, next: AppState): PersistOp[] 
   return ops;
 }
 
-/** 执行差分：把变化增量落到 repository（SQLite 走按行写，JSON 后端内部串行化）。 */
-export async function persistDiff(repo: StorageRepository, prev: AppState, next: AppState): Promise<void> {
-  const ops = computePersistDiff(prev, next);
-  await Promise.all(ops.map((op) => {
+/** 执行差分：把变化增量落到 repository（SQLite 走按行写，JSON 后端内部串行化）。串行保序：同书 revisions seq 依赖提交顺序。 */
+export async function persistDiff(
+  repo: StorageRepository,
+  prev: AppState,
+  next: AppState,
+  metaOf?: (project: Project) => CommitOptions | undefined,
+): Promise<void> {
+  const ops = computePersistDiff(prev, next, metaOf);
+  for (const op of ops) {
     switch (op.kind) {
-      case 'saveProject': return repo.saveProject(op.project);
-      case 'deleteProject': return repo.deleteProject(op.id);
-      case 'saveSettings': return repo.saveSettings(op.patch);
+      case 'saveProject': await repo.saveProject(op.project, op.opts); break;
+      case 'deleteProject': await repo.deleteProject(op.id); break;
+      case 'saveSettings': await repo.saveSettings(op.patch); break;
     }
-  }));
+  }
 }

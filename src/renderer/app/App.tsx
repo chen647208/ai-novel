@@ -15,7 +15,6 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import type { Project } from '../../shared/types';
-import { repository } from '../shared/services/repository';
 import { TooltipProvider } from '@/shared/ui/Tooltip';
 import Bookshelf from './app-shell/Bookshelf';
 import DialogHost from './app-shell/DialogHost';
@@ -28,9 +27,11 @@ import GlobalAssistant from '../features/assistant/GlobalAssistant';
 import ApprovalHost from '../features/assistant/components/ApprovalHost';
 import AIHistoryViewer from '../features/writing/AIHistoryViewer';
 import VersionCheckModal from '../features/version/VersionCheckModal';
+import OnboardingModal, { isOnboardingDone, markOnboardingDone, type OnboardingPersona } from './app-shell/OnboardingModal';
+import { useViewPreference } from '../shared/hooks/useViewPreference';
+import { DEFAULT_EDITOR_FONT, DEFAULT_UI_FONT, resolveFontStack } from '../constants/fonts';
 import { useProjectStore, selectActiveProject } from './stores/projectStore';
-import { useSettingsStore } from './stores/settingsStore';
-import { composeAppState } from './stores/persistenceBridge';
+import { useSettingsStore, useUsableModel } from './stores/settingsStore';
 import { useAppBootstrap } from './useAppBootstrap';
 import { useFeatureAvailability } from './useFeatureAvailability';
 import { useBookActions } from './useBookActions';
@@ -48,6 +49,8 @@ const App: React.FC = () => {
   const [isHistoryViewerOpen, setIsHistoryViewerOpen] = useState(false);
   const [isVersionCheckOpen, setIsVersionCheckOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
+  const [assistantLayout, setAssistantLayout] = useViewPreference<'docked' | 'floating'>('assistant.layout', 'docked');
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // 功能可用性（发行档）：当前分区被禁用时回退写作编辑器
   const availableFeatures = useFeatureAvailability();
@@ -60,7 +63,23 @@ const App: React.FC = () => {
   const activeModelId = useSettingsStore(s => s.activeModelId);
   const prompts = useSettingsStore(s => s.prompts);
   const theme = useSettingsStore(s => s.theme);
-  const activeModel = models.find(m => m.id === activeModelId) || models[0];
+  const activeModel = useUsableModel();
+
+  // 字体应用单点：界面字体写 body，正文字体挂 --font-reading 供画布/预览消费
+  const uiFont = useSettingsStore(s => s.uiFont);
+  const editorFont = useSettingsStore(s => s.editorFont);
+  const customFonts = useSettingsStore(s => s.customFonts);
+  useEffect(() => {
+    try {
+      document.body.style.fontFamily = resolveFontStack(uiFont, DEFAULT_UI_FONT, customFonts);
+      document.documentElement.style.setProperty(
+        '--font-reading',
+        resolveFontStack(editorFont, DEFAULT_EDITOR_FONT, customFonts)
+      );
+    } catch {
+      // 非 DOM 环境（测试）静默
+    }
+  }, [uiFont, editorFont, customFonts]);
 
   const enterWorkspace = useCallback(() => {
     setSection('inspiration'); setEditingChapterId(null); setView('workspace');
@@ -83,14 +102,45 @@ const App: React.FC = () => {
       inspiration: 'core.inspiration',
       world: 'core.world',
       characters: 'core.characters',
-      outline: 'core.outline',
-      chapters: 'core.chapters',
+      structure: 'core.chapters',
       writing: 'core.writing',
     };
     if (!availableFeatures.has(featureBySection[section] ?? 'core.writing')) {
+      // structure 取并集：任一可用即留
+      if (section === 'structure' && availableFeatures.has('core.outline')) return;
       setSection('writing');
     }
   }, [availableFeatures, section]);
+
+  // 首启向导：无书且没走过向导时弹出，三类人群一次分流
+  useEffect(() => {
+    if (projects.length === 0 && !isOnboardingDone()) {
+      setShowOnboarding(true);
+    }
+  }, [projects.length]);
+
+  const handleOnboardingDone = useCallback((persona: OnboardingPersona, title: string) => {
+    markOnboardingDone(persona);
+    setShowOnboarding(false);
+    if (persona === 'hand') {
+      actions.createBook(title);
+    } else {
+      actions.createBook(title);
+      setIsSettingsOpen(true);
+    }
+  }, [actions]);
+
+  const assistantNode = availableFeatures.has('core.assistant') ? (
+    <GlobalAssistant
+      models={models}
+      activeModelId={activeModelId}
+      project={activeProject}
+      prompts={prompts}
+      onUpdate={updateProject}
+      layout={assistantLayout}
+      onToggleLayout={() => setAssistantLayout(assistantLayout === 'docked' ? 'floating' : 'docked')}
+    />
+  ) : null;
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -101,15 +151,7 @@ const App: React.FC = () => {
 
         <ResetAlertDialog open={resetOpen} type="factory_reset" onClose={() => setResetOpen(false)} />
 
-        {availableFeatures.has('core.assistant') && (
-          <GlobalAssistant
-            models={models}
-            activeModelId={activeModelId}
-            project={activeProject}
-            prompts={prompts}
-            onUpdate={updateProject}
-          />
-        )}
+        {assistantLayout === 'floating' && assistantNode}
 
         {view === 'bookshelf' ? (
           <div className="min-w-0 flex-1">
@@ -124,12 +166,13 @@ const App: React.FC = () => {
               onDuplicateBook={actions.duplicateBook}
               onExportBook={actions.exportBook}
               onImportBook={actions.importBook}
-              onExportAll={exportAllData}
               onImportAll={actions.importAllData}
             />
           </div>
         ) : (
-          <WorkspaceView
+          <div className="flex min-w-0 flex-1">
+            <div className="min-w-0 flex-1">
+              <WorkspaceView
             section={section}
             activeProject={activeProject}
             activeModel={activeModel}
@@ -141,7 +184,6 @@ const App: React.FC = () => {
             onSectionChange={handleSectionChange}
             onOpenBookshelf={() => setView('bookshelf')}
             onOpenSettings={() => setIsSettingsOpen(true)}
-            onClearProject={() => actions.clearCurrentProject(bumpReset)}
             onDeleteProject={() => actions.deleteCurrentProject(() => { bumpReset(); setView('bookshelf'); })}
             onOpenHistory={() => setIsHistoryViewerOpen(true)}
             onOpenVersionCheck={() => setIsVersionCheckOpen(true)}
@@ -150,6 +192,21 @@ const App: React.FC = () => {
             onRenameBook={actions.renameBook}
             onNavigateToCharacter={id => { setFocusCharacterId(id); setSection('characters'); }}
             onNavigateToChapter={id => { setEditingChapterId(id); setSection('writing'); }}
+              />
+            </div>
+            {assistantLayout === 'docked' && (
+              <div className="w-[380px] shrink-0 border-l border-border">
+                {assistantNode}
+              </div>
+            )}
+          </div>
+        )}
+
+        {showOnboarding && (
+          <OnboardingModal
+            open
+            onDone={handleOnboardingDone}
+            onOpenSettings={() => setIsSettingsOpen(true)}
           />
         )}
 
@@ -165,10 +222,5 @@ const App: React.FC = () => {
     </TooltipProvider>
   );
 };
-
-/** 设置切片快照（导出全量数据用）：组合双 store 即逻辑 AppState。 */
-function exportAllData() {
-  void repository.exportAll(composeAppState());
-}
 
 export default App;

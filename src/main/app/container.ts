@@ -8,6 +8,7 @@
  */
 
 import type { BrowserWindow } from 'electron';
+import { logger } from '../logger.js';
 
 /**
  * 主进程 Provider 容器（Zettlr AppServiceContainer 模式，docs/design/02）。
@@ -48,7 +49,7 @@ export class AppContainer {
       try {
         await provider.shutdown?.(ctx);
       } catch (error) {
-        console.error(`[container] provider ${provider.name} shutdown failed`, error);
+        logger.error('container', `provider ${provider.name} shutdown failed`, error);
       }
     }
   }

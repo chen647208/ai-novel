@@ -26,8 +26,10 @@ export interface ModelConfig {
   id: string;
   name: string;
   provider: ModelProvider;
-  /** 官方渠道预设 id（deepseek/kimi/glm/qwen/minimax/openai/openai-responses/anthropic/gemini/ollama）；自定义接口留空 */
+  /** 渠道预设 id：官方（deepseek/kimi/…）与自定义兼容协议（custom-openai/…）通用，决定下拉选中与官方性判定 */
   presetId?: string;
+  /** 是否在选择器/生成流程中启用。缺省视为启用，保证老数据兼容。 */
+  isEnabled?: boolean;
   endpoint?: string;
   apiKey?: string;
   modelName: string;
@@ -690,6 +692,15 @@ export interface Project {
   foreshadows?: Foreshadow[];
 }
 
+/** 自定义字体元数据（字形文件另存用户数据目录 fonts/ 下，不进状态 JSON）。 */
+export interface CustomFontMeta {
+  id: string;
+  /** 展示名（也是 @font-face 家族名） */
+  name: string;
+  fileName: string;
+  format: 'ttf' | 'otf' | 'woff' | 'woff2';
+}
+
 export interface AppState {
   projects: Project[];
   activeProjectId: string | null;
@@ -709,6 +720,12 @@ export interface AppState {
   language?: AppLanguage;
   /** 界面主题；undefined 表示默认浅色（首启），之后持久化用户选择 */
   theme?: AppTheme;
+  /** 界面字体预设 id（system 表系统默认）；undefined 表跟随系统 */
+  uiFont?: string;
+  /** 正文/编辑字体预设 id 或 custom:<id>；undefined 表默认宋体栈 */
+  editorFont?: string;
+  /** 用户导入的自定义字体（仅元数据） */
+  customFonts?: CustomFontMeta[];
 }
 
 // 向量数据库相关类型
@@ -1020,6 +1037,14 @@ export interface ElectronAPI {
     openStream: (requestId: string, model: ModelConfig, prompt: string, options?: AiCallOptions) => Promise<boolean>;
     abort: (requestId: string) => Promise<boolean>;
     onStreamEvent: (listener: (event: AiStreamEvent) => void) => () => void;
+  };
+
+  // 安全密钥库（safeStorage/OS 钥匙串；渲染端持久化只存 vault: 引用）
+  vault: {
+    isAvailable: () => Promise<boolean>;
+    set: (id: string, plaintext: string) => Promise<boolean>;
+    get: (id: string) => Promise<string | null>;
+    remove: (id: string) => Promise<boolean>;
   };
 }
 

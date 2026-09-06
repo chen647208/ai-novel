@@ -16,6 +16,9 @@ export interface GlobalAssistantProps {
   project: Project | null;
   prompts: PromptTemplate[];
   onUpdate?: (updates: Partial<Project>) => void;
+  /** docked = 右侧边栏常驻；floating = 右下角悬浮球+可拖拽浮窗（旧形态保留）。 */
+  layout?: 'docked' | 'floating';
+  onToggleLayout?: () => void;
 }
 
 export interface ChatTokenUsage {

@@ -6,19 +6,19 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+import { logger } from '@/shared/utils/logger';
 
 /**
  * 版本服务 - 处理应用版本检查和更新
  */
 
-import { dt, dtObject } from '@/i18n';
+import { dt, i18n } from '@/i18n';
+import { APP_VERSION, GITHUB_API_URL, formatVersion } from '@/shared/version';
+import { RELEASES } from '../releases';
 
-declare const __APP_VERSION__: string;
+export { formatVersion };
 
-const CURRENT_VERSION = __APP_VERSION__;
-
-const GITHUB_REPO = 'novalocal/ai-novelist';
-const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
+const CURRENT_VERSION = APP_VERSION;
 
 export interface VersionInfo {
   current: string;
@@ -74,7 +74,7 @@ export async function checkForUpdates(): Promise<UpdateCheckResult> {
       versionInfo,
     };
   } catch (error) {
-    console.error('检查更新失败:', error);
+    logger.error('检查更新失败:', error);
     return {
       success: false,
       versionInfo: {
@@ -106,8 +106,9 @@ export function compareVersions(v1: string, v2: string): number {
 }
 
 export function getVersionChangelog(version: string): string {
-  const changelog = dtObject<Record<string, string>>('version:changelog', {});
-  return changelog[version] ?? dt('version:fallbackChangelog');
+  const lang = i18n.language.startsWith('en') ? 'en' : 'zh';
+  const entry = RELEASES.find((release) => release.version === version);
+  return entry?.description[lang] ?? dt('version:fallbackChangelog');
 }
 
 export function getCurrentVersion(): string {
@@ -115,7 +116,12 @@ export function getCurrentVersion(): string {
 }
 
 export function getVersionHistory(): VersionHistoryItem[] {
-  return dtObject<VersionHistoryItem[]>('version:history', []);
+  const lang = i18n.language.startsWith('en') ? 'en' : 'zh';
+  return RELEASES.map((release) => ({
+    version: release.version,
+    date: release.date,
+    description: release.description[lang],
+  }));
 }
 
 export function getCurrentVersionInfo(): VersionInfo {
@@ -127,11 +133,4 @@ export function getCurrentVersionInfo(): VersionInfo {
     releaseUrl: null,
     publishedAt: getVersionHistory().find((item) => item.version === CURRENT_VERSION)?.date || null,
   };
-}
-
-export function formatVersion(version: string | null): string {
-  if (!version) {
-    return dt('version:unknownVersion');
-  }
-  return version.startsWith('v') ? version : `v${version}`;
 }

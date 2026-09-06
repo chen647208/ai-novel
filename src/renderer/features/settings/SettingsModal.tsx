@@ -23,6 +23,7 @@ import {
 } from '../../../shared/types';
 import { AIService } from '../assistant/services/aiService';
 import { ModelListService } from './services/modelListService';
+import { isVaultRef, persistApiKey, removeApiKey } from './services/credentialService';
 import { repository } from '../../shared/services/repository';
 import { embeddingModelService } from './services/embeddingModelService';
 import { getDefaultCardPrompts, validateCardPromptTemplate } from '../cards/services/cardPromptService';
@@ -110,7 +111,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         const config = await repository.getStorageConfig();
         setStorageConfig(config);
       } catch (error) {
-        console.error('Failed to load storage config:', error);
+        logger.error('Failed to load storage config:', error);
       }
     };
     
@@ -128,7 +129,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           setActiveEmbeddingId(activeConfig.id);
         }
       } catch (error) {
-        console.error('Failed to load embedding configs:', error);
+        logger.error('Failed to load embedding configs:', error);
       }
     };
     
@@ -143,6 +144,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const removeModel = (id: string) => {
     setLocalModels(localModels.filter(m => m.id !== id));
     if (activeId === id) setActiveId(localModels[0]?.id || null);
+    // vault 引用以模型 id 为键：删配置即删密钥，不留孤儿
+    void removeApiKey(id);
   };
 
   const updateModel = (id: string, updates: Partial<ModelConfig>) => {
@@ -245,6 +248,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     if (activeEmbeddingId === id) {
       setActiveEmbeddingId(null);
     }
+    void removeApiKey(`embedding:${id}`);
   };
 
   const updateEmbeddingConfig = (id: string, updates: Partial<EmbeddingModelConfig>) => {
@@ -282,7 +286,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         modelsLastFetched: Date.now()
       });
     } catch (error) {
-      console.error('获取Embedding模型列表失败:', error);
+      logger.error('获取Embedding模型列表失败:', error);
     } finally {
       setEmbeddingModelListLoading(prev => ({ ...prev, [config.id]: false }));
     }
@@ -302,8 +306,38 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   const handleGlobalSave = async () => {
+    // Key 入 vault：内存明文→引用，落盘只存引用；vault 不可用则明文回落并一次性提示
+    let plainFallback = 0;
+    const vaultedModels = await Promise.all(
+      localModels.map(async (m) => {
+        if (!m.apiKey) {
+          // 清空即删密钥，不留孤儿
+          void removeApiKey(m.id);
+          return m;
+        }
+        if (isVaultRef(m.apiKey)) return m;
+        const { stored, encrypted } = await persistApiKey(m.id, m.apiKey);
+        if (!encrypted) plainFallback += 1;
+        return { ...m, apiKey: stored };
+      })
+    );
+    const vaultedEmbeddings = await Promise.all(
+      embeddingConfigs.map(async (c) => {
+        if (!c.apiKey) {
+          void removeApiKey(`embedding:${c.id}`);
+          return c;
+        }
+        if (isVaultRef(c.apiKey)) return c;
+        const { stored, encrypted } = await persistApiKey(`embedding:${c.id}`, c.apiKey);
+        if (!encrypted) plainFallback += 1;
+        return { ...c, apiKey: stored };
+      })
+    );
+    if (plainFallback > 0) {
+      await dialogService.alert(i18n.t('settings:models.vaultUnavailable', { count: plainFallback }));
+    }
     // 保存模型配置
-    onSaveModels(localModels, activeId || '');
+    onSaveModels(vaultedModels, activeId || '');
     
     // 保存提示词配置
     onSavePrompts(localPrompts);
@@ -323,12 +357,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       await repository.updateStorageConfig(storageConfig);
       logger.debug('Storage config saved successfully');
     } catch (error) {
-      console.error('Failed to save storage config:', error);
+      logger.error('Failed to save storage config:', error);
     }
     
     // 保存Embedding模型配置
     try {
-      for (const config of embeddingConfigs) {
+      for (const config of vaultedEmbeddings) {
         await embeddingModelService.saveConfig(config);
       }
       if (activeEmbeddingId) {
@@ -336,7 +370,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       }
       logger.debug('Embedding configs saved successfully');
     } catch (error) {
-      console.error('Failed to save embedding configs:', error);
+      logger.error('Failed to save embedding configs:', error);
     }
     
     onClose();
@@ -420,6 +454,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       id: Date.now().toString(),
       name: i18n.t('settings:models.newModelName', { name: dt(provider.nameKey) }),
       provider: provider.protocol,
+      isEnabled: true,
       presetId: provider.official ? provider.id : undefined,
       endpoint: provider.endpoint,
       modelName: provider.recommendedModels[0] ?? '',

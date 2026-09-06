@@ -20,6 +20,6 @@ export {
 } from './config';
 export { bootstrapI18n } from './bootstrap';
 // 数据目录型（运行时组合键）取词助手：服务商名称/描述/提示、模板显示名等。
-export { dt, dtList, dtObject, templateDisplayName } from './dynamic';
+export { dt, dtList, templateDisplayName } from './dynamic';
 // 统一从 @/i18n 暴露 react-i18next 的取词入口，组件无需直接依赖第三方包路径。
 export { useTranslation, Trans } from 'react-i18next';

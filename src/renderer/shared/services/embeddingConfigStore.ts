@@ -6,6 +6,7 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+import { logger } from '@/shared/utils/logger';
 
 import { type EmbeddingModelConfig } from "../../../shared/types";
 
@@ -28,7 +29,7 @@ const readConfigs = async (): Promise<EmbeddingModelConfig[]> => {
         return JSON.parse(data);
       }
     } catch (error) {
-      console.error('Failed to load embedding configs:', error);
+      logger.error('Failed to load embedding configs:', error);
     }
   } else {
     const data = localStorage.getItem(EMBEDDING_CONFIG_FILE);
@@ -48,7 +49,7 @@ const writeConfigs = async (configs: EmbeddingModelConfig[]): Promise<boolean> =
       await window.electronAPI.writeFile(configPath, JSON.stringify(configs, null, 2));
       return true;
     } catch (error) {
-      console.error('Failed to save embedding configs:', error);
+      logger.error('Failed to save embedding configs:', error);
       return false;
     }
   } else {
@@ -77,7 +78,7 @@ export const embeddingConfigStore = {
 
       return await writeConfigs(configs);
     } catch (error) {
-      console.error('Failed to save embedding config:', error);
+      logger.error('Failed to save embedding config:', error);
       return false;
     }
   },
@@ -89,7 +90,7 @@ export const embeddingConfigStore = {
       const filtered = configs.filter(c => c.id !== id);
       return await writeConfigs(filtered);
     } catch (error) {
-      console.error('Failed to delete embedding config:', error);
+      logger.error('Failed to delete embedding config:', error);
       return false;
     }
   },
@@ -104,7 +105,7 @@ export const embeddingConfigStore = {
       }));
       return await writeConfigs(updated);
     } catch (error) {
-      console.error('Failed to set active embedding config:', error);
+      logger.error('Failed to set active embedding config:', error);
       return false;
     }
   },
@@ -115,7 +116,7 @@ export const embeddingConfigStore = {
       const configs = await readConfigs();
       return configs.find(c => c.isActive) || null;
     } catch (error) {
-      console.error('Failed to get active embedding config:', error);
+      logger.error('Failed to get active embedding config:', error);
       return null;
     }
   },
@@ -126,7 +127,7 @@ export const embeddingConfigStore = {
       const configs = await readConfigs();
       return configs.find(c => c.id === id) || null;
     } catch (error) {
-      console.error('Failed to get embedding config:', error);
+      logger.error('Failed to get embedding config:', error);
       return null;
     }
   },

@@ -13,18 +13,17 @@ import type { Project } from '../../../shared/types';
 import { useFeatureAvailability } from '../useFeatureAvailability';
 import { cn } from '@/shared/utils/cn';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/Tooltip';
-import { Feather, Globe, Library, ListOrdered, ListTree, PenLine, Settings2, Users } from 'lucide-react';
+import { Feather, Globe, Library, ListOrdered, PenLine, Settings2, Users } from 'lucide-react';
 
-/** 工作台分区标识；与旧线性向导解耦，可自由切换。 */
-export type SectionId = 'inspiration' | 'world' | 'characters' | 'outline' | 'chapters' | 'writing';
+/** 工作台分区标识；大纲与细纲已合并为 structure（一页两段），与旧线性向导解耦，可自由切换。 */
+export type SectionId = 'inspiration' | 'world' | 'characters' | 'structure' | 'writing';
 
 /** 分区标签的 i18n 键（字面量联合，满足 typed-i18n 校验）。 */
 type SectionLabelKey =
   | 'steps.inspiration'
   | 'steps.world'
   | 'steps.characters'
-  | 'steps.outline'
-  | 'steps.chapterOutline'
+  | 'steps.structure'
   | 'steps.writing';
 
 interface SectionDef {
@@ -35,13 +34,12 @@ interface SectionDef {
   done: (p: Project) => boolean;
 }
 
-/** 分区 → 所属功能 id（bundle 可用性映射，design/04 §7 dogfooding）。 */
+/** 分区 → 所属功能 id（bundle 可用性映射，design/04 §7 dogfooding）。structure 取 chapters，outline 随包同进退。 */
 export const SECTION_FEATURE: Record<SectionId, string> = {
   inspiration: 'core.inspiration',
   world: 'core.world',
   characters: 'core.characters',
-  outline: 'core.outline',
-  chapters: 'core.chapters',
+  structure: 'core.chapters',
   writing: 'core.writing',
 };
 
@@ -49,8 +47,7 @@ export const WORKSPACE_SECTIONS: readonly SectionDef[] = [
   { id: 'inspiration', icon: PenLine, labelKey: 'steps.inspiration', done: p => !!(p.inspiration || p.intro) },
   { id: 'world', icon: Globe, labelKey: 'steps.world', done: p => (p.knowledge?.length ?? 0) > 0 || !!p.worldView },
   { id: 'characters', icon: Users, labelKey: 'steps.characters', done: p => p.characters.length > 0 },
-  { id: 'outline', icon: ListTree, labelKey: 'steps.outline', done: p => !!p.outline },
-  { id: 'chapters', icon: ListOrdered, labelKey: 'steps.chapterOutline', done: p => p.chapters.length > 0 },
+  { id: 'structure', icon: ListOrdered, labelKey: 'steps.structure', done: p => !!p.outline || p.chapters.length > 0 },
   { id: 'writing', icon: Feather, labelKey: 'steps.writing', done: p => p.chapters.some(c => !!c.content) },
 ];
 
@@ -72,7 +69,13 @@ const WorkspaceNav: React.FC<WorkspaceNavProps> = ({
 }) => {
   const { t } = useTranslation('nav');
   const availableFeatures = useFeatureAvailability();
-  const visibleSections = WORKSPACE_SECTIONS.filter((section) => availableFeatures.has(SECTION_FEATURE[section.id]));
+  // structure 取 chapters 与 outline 的并集：任一可用即显示
+  const visibleSections = WORKSPACE_SECTIONS.filter((section) => {
+    if (section.id === 'structure') {
+      return availableFeatures.has('core.chapters') || availableFeatures.has('core.outline');
+    }
+    return availableFeatures.has(SECTION_FEATURE[section.id]);
+  });
 
   return (
     <aside className="flex w-14 shrink-0 flex-col items-center gap-1 border-r border-border bg-card py-3">

@@ -8,21 +8,21 @@
  */
 
 /**
- * 单书工作台视图：导航栏 + 顶栏 + 分区内容路由（灵感/世界/角色/大纲/细纲/写作）。
+ * 单书工作台视图：导航栏 + 顶栏 + 分区内容路由（灵感/世界/角色/结构/写作）。
  * 从 App.tsx 收编而来；写作分区为全屏沉浸模式，隐藏导航栏与顶栏。
+ * Step 页直读双 store，WorkspaceSection 只做守卫与路由，不再透传模型/提示词。
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type AppTheme, type ModelConfig, type Project, type PromptTemplate } from '../../../shared/types';
-import { isModelConfigured } from '../../shared/utils/modelReadiness';
+import { isModelUsable } from '../../shared/utils/modelReadiness';
 import WorkspaceNav, { type SectionId } from './WorkspaceNav';
 import WorkspaceTopbar from './WorkspaceTopbar';
+import StructureSection from './StructureSection';
 import StepInspiration from '../../features/inspiration/StepInspiration';
 import StepKnowledgeEnhanced from '../../features/knowledge/StepKnowledgeEnhanced';
 import StepCharacters from '../../features/characters/StepCharacters';
-import StepOutline from '../../features/outline/StepOutline';
-import StepChapterOutline from '../../features/chapters/StepChapterOutline';
 import WritingEditor from '../../features/writing/WritingEditor';
 import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -40,7 +40,6 @@ export interface WorkspaceViewProps {
   onSectionChange: (next: SectionId) => void;
   onOpenBookshelf: () => void;
   onOpenSettings: () => void;
-  onClearProject: () => void;
   onDeleteProject: () => void;
   onOpenHistory: () => void;
   onOpenVersionCheck: () => void;
@@ -52,11 +51,13 @@ export interface WorkspaceViewProps {
 }
 
 const WorkspaceSection: React.FC<WorkspaceViewProps> = ({
-  section, activeProject, activeModel, prompts, focusCharacterId, editingChapterId,
-  onSectionChange, onOpenBookshelf, onOpenSettings, onUpdateProject,
+  section, activeProject, activeModel, focusCharacterId, editingChapterId,
+  onSectionChange, onOpenBookshelf, onOpenSettings,
   onNavigateToCharacter, onNavigateToChapter,
 }) => {
   const { t } = useTranslation(['app', 'common']);
+  // 手写党 bypass：没模型也允许进工作台手写，AI 按钮会各自报未配置；默认仍全屏引导去设置
+  const [handwriteBypass, setHandwriteBypass] = useState(false);
 
   if (!activeProject) {
     return (
@@ -69,88 +70,96 @@ const WorkspaceSection: React.FC<WorkspaceViewProps> = ({
     );
   }
 
-  if (!activeModel || !isModelConfigured(activeModel)) {
+  const modelBlocked = !activeModel || !isModelUsable(activeModel);
+  if (modelBlocked && !handwriteBypass) {
     return (
       <EmptyState
         className="h-full"
         icon={Plug}
         title={activeModel ? t('model.notConfiguredKey') : t('model.noneConfigured')}
-        action={<Button onClick={onOpenSettings}>{t('model.goSettings')}</Button>}
+        description={t('model.handwriteHint', '也可以先手写，配好模型后再用 AI')}
+        action={
+          <div className="flex items-center gap-2">
+            <Button onClick={onOpenSettings}>{t('model.goSettings')}</Button>
+            <Button variant="ghost" onClick={() => setHandwriteBypass(true)}>
+              {t('model.handwriteFirst', '先手写看看')}
+            </Button>
+          </div>
+        }
       />
     );
   }
+  const bannerBlocked = modelBlocked && handwriteBypass;
 
+  let content: React.ReactNode = null;
   switch (section) {
     case 'inspiration':
-      return (
-        <div className="h-full overflow-y-auto p-8">
-          <StepInspiration project={activeProject} prompts={prompts} activeModel={activeModel} onUpdate={onUpdateProject} />
+      content = (
+        <div className="h-full overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <StepInspiration project={activeProject} />
         </div>
       );
+      break;
     case 'world':
-      return (
+      content = (
         <StepKnowledgeEnhanced
           project={activeProject}
-          onUpdate={onUpdateProject}
-          activeModel={activeModel}
           onNavigateToCharacter={onNavigateToCharacter}
           onNavigateToChapter={onNavigateToChapter}
         />
       );
+      break;
     case 'characters':
-      return (
+      content = (
         <StepCharacters
           project={activeProject}
-          prompts={prompts}
-          activeModel={activeModel}
-          onUpdate={onUpdateProject}
           onOpenSettings={onOpenSettings}
           focusCharacterId={focusCharacterId}
           onFocusHandled={() => onNavigateToCharacter('')}
         />
       );
-    case 'outline':
-      return (
-        <StepOutline
+      break;
+    case 'structure':
+      content = (
+        <StructureSection
           project={activeProject}
-          prompts={prompts}
-          activeModel={activeModel}
-          onUpdate={onUpdateProject}
-          onOpenSettings={onOpenSettings}
-        />
-      );
-    case 'chapters':
-      return (
-        <StepChapterOutline
-          project={activeProject}
-          prompts={prompts}
-          activeModel={activeModel}
-          onUpdate={onUpdateProject}
-          onOpenSettings={onOpenSettings}
           onEnterWriting={(id) => onNavigateToChapter(id)}
         />
       );
+      break;
     case 'writing':
-      return (
+      content = (
         <WritingEditor
           project={activeProject}
-          prompts={prompts}
-          activeModel={activeModel}
-          onUpdate={onUpdateProject}
           initialChapterId={editingChapterId}
-          onBack={() => onSectionChange('chapters')}
+          onBack={() => onSectionChange('structure')}
         />
       );
+      break;
     default:
-      return null;
+      content = null;
   }
+  return (
+    <div className="flex h-full flex-col">
+      {bannerBlocked && (
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-warning/30 bg-warning/5 px-4 py-2 text-xs">
+          <span className="flex items-center gap-2 text-muted-foreground">
+            <Plug className="size-3.5 text-warning" />
+            {t('model.bannerHandwrite', '未配置可用模型，AI 已停用，可继续手写')}
+          </span>
+          <Button size="sm" variant="outline" onClick={onOpenSettings}>{t('model.goSettings')}</Button>
+        </div>
+      )}
+      <div className="min-h-0 flex-1">{content}</div>
+    </div>
+  );
 };
 
 const WorkspaceView: React.FC<WorkspaceViewProps> = (props) => {
   const {
     section, activeProject, activeModel, resetKey, theme,
     onSectionChange, onOpenBookshelf, onOpenSettings,
-    onClearProject, onDeleteProject, onOpenHistory, onOpenVersionCheck,
+    onDeleteProject, onOpenHistory, onOpenVersionCheck,
     onThemeChange, onRenameBook,
   } = props;
 
@@ -179,7 +188,6 @@ const WorkspaceView: React.FC<WorkspaceViewProps> = (props) => {
             onThemeChange={onThemeChange}
             onOpenBookshelf={onOpenBookshelf}
             onOpenSettings={onOpenSettings}
-            onClearProject={onClearProject}
             onDeleteProject={onDeleteProject}
             onOpenHistory={onOpenHistory}
             onOpenVersionCheck={onOpenVersionCheck}

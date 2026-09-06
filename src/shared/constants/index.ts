@@ -9,3 +9,4 @@
 
 export * from './prompts.js';
 export * from './models.js';
+export * from './chapters.js';

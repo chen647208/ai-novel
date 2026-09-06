@@ -30,11 +30,12 @@ export const SETTING_KEYS = [
   'consistencyPrompts',
   'consistencyCheckConfig',
   'embeddingModels',
+  'customFonts',
 ] as const;
 export type SettingKey = (typeof SETTING_KEYS)[number];
 
 /** meta 表里以标量存储的键 */
-export const META_KEYS = ['activeProjectId', 'activeModelId', 'activeEmbeddingModelId', 'language', 'theme'] as const;
+export const META_KEYS = ['activeProjectId', 'activeModelId', 'activeEmbeddingModelId', 'language', 'theme', 'uiFont', 'editorFont'] as const;
 export type MetaKey = (typeof META_KEYS)[number];
 
 /** 迁移脚本：version 为应用该脚本后达到的版本 */

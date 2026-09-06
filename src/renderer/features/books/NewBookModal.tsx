@@ -136,7 +136,6 @@ const NewBookModal: React.FC<NewBookModalProps> = ({
                         value={selectedBookToDuplicate}
                         onChange={(e) => setSelectedBookToDuplicate(e.target.value)}
                         className="mt-2 h-8 text-sm"
-                        onClick={(e) => e.stopPropagation()}
                       >
                         <option value="">{t('books:newBook.selectToDuplicate')}</option>
                         {existingBooks.map((book) => (

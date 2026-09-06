@@ -1,6 +1,11 @@
 {
   "title": "控制台配置",
   "subtitle": "系统核心配置",
+  "tabGroup": {
+    "ai": "AI 模型",
+    "prompts": "提示词",
+    "system": "系统"
+  },
   "tab": {
     "models": "模型提供商",
     "prompts": "提示词库",
@@ -27,10 +32,21 @@
       "light": "浅色",
       "dark": "深色",
       "system": "跟随系统"
-    }
+    },
+    "fontTitle": "字体",
+    "fontHint": "只收免费可商用字体；系统里没装的点链接去官方下载，装好重启即生效。也可导入自己的 ttf/otf/woff/woff2。",
+    "uiFontLabel": "界面字体",
+    "editorFontLabel": "正文字体（编辑器与预览）",
+    "importFont": "导入自定义字体",
+    "importingFont": "导入中…",
+    "importFailed": "导入失败：{{message}}",
+    "removeFontTitle": "删除该字体",
+    "previewText": "永字八法，横竖撇捺。雾港来信，第一章：潮水漫过石阶，灯火一盏盏亮起来。The quick brown fox jumps over the lazy dog. 0123456789。",
+    "getFont": "获取",
+    "customBadge": "自定"
   },
   "footer": {
-    "persistNote": "本地数据持久化已开启，配置将自动保存在当前浏览器。",
+    "persistNote": "本地数据持久化已开启，配置将自动保存到本机应用数据目录。",
     "save": "应用并保存配置"
   },
   "prompts": {
@@ -118,9 +134,34 @@
     "testing": "通信测试中...",
     "testNow": "立即测试连接",
     "addProvider": "新增 AI 服务提供商",
+    "searchPlaceholder": "搜索渠道 / 模型…",
+    "filter": {
+      "all": "全部",
+      "enabled": "已启用",
+      "disabled": "已停用",
+      "unconfigured": "未配置"
+    },
+    "disabled": "已停用",
+    "emptyFilter": "没有匹配的渠道，换个关键词试试",
+    "emptyAll": "还没有渠道，先添加一个",
+    "enableLabel": "启用",
+    "showKey": "显示",
+    "hideKey": "隐藏",
+    "currentKeyMasked": "当前：{{mask}}",
+    "getKey": "获取 Key",
+    "gatewayHint": "聚合网关：一个 Key 走多家模型。地址止于 /v1，不要拼 /chat/completions；模型名填网关侧 ID，可刷新拉表。",
+    "diag": {
+      "auth": "多半是 Key 错/过期：重拷一次，注意首尾空格。",
+      "quota": "额度/账单问题：去控制台看余额与套餐。",
+      "rateLimit": "被限流：稍后重试，或降低并发。",
+      "network": "网络不通：检查代理/VPN 与地址能否直连。",
+      "config": "地址或模型名错：地址止于 /v1，模型名从刷新列表里选。",
+      "unknown": "未知错误：换个模型重试，或用网关单 Key 交叉验证。"
+    },
     "connecting": "正在连接中...",
     "fetchListFailed": "获取模型列表失败",
-    "newModelName": "{{name}}配置"
+    "newModelName": "{{name}}配置",
+    "vaultUnavailable": "系统钥匙串不可用，{{count}} 个 Key 将以明文保存（功能正常，仅落盘未加密）"
   },
   "storage": {
     "title": "数据存储管理",
@@ -171,6 +212,11 @@
   },
   "embedding": {
     "providerLabel": "提供商",
+    "providerGroups": {
+      "custom": "自定义（OpenAI 兼容）",
+      "local": "本地模型",
+      "cloud": "官方云服务"
+    },
     "modelNameLabel": "模型名称",
     "localCanLeaveBlank": "本地部署可留空",
     "paramsTitle": "Sentence-BERT 参数设置",
@@ -286,7 +332,7 @@
       "webnovel": "网文创作",
       "literary": "严肃文学",
       "minimal": "纯写作（禁 AI）",
-      "hint": "minimal 档即时禁用全部 AI 请求（会话与工具），随时可切回。"
+      "hint": "纯写作档即时禁用全部 AI 请求（会话与工具），随时可切回。"
     }
   }
 }

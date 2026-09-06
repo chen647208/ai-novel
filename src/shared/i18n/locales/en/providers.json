@@ -55,10 +55,20 @@
       "description": "Any OpenAI Chat Completions-compatible endpoint (self-hosted gateway, third-party aggregator, etc.)",
       "tips": ["Fill in the endpoint (including /v1)", "Fill in the API Key as required upstream (blank for local proxies)", "Enter a model identifier supported upstream"]
     },
+    "gateway-openai": {
+      "name": "Aggregator Gateway (One Key, Many Models)",
+      "description": "OpenRouter / SiliconFlow / third-party aggregators: one Key for many models, URL stops at /v1",
+      "tips": ["Stop the URL at /v1, do not append /chat/completions", "One Key covers many vendors; use the gateway model ID", "Refresh the model list first, then pick and test"]
+    },
     "custom-anthropic": {
       "name": "Custom Anthropic-compatible",
       "description": "Any Anthropic Messages-compatible endpoint",
       "tips": ["Fill in the endpoint base (e.g. https://host/anthropic/v1)", "Fill in the API Key", "Enter an upstream model identifier"]
+    },
+    "custom-gemini": {
+      "name": "Custom Gemini-compatible",
+      "description": "Gemini native REST-compatible endpoint (self-hosted proxy, third-party aggregator, etc.); blank uses the official default",
+      "tips": ["Fill in a compatible endpoint base, blank uses the official default", "Fill in the API Key", "URLs containing /v1beta/openai/ auto-use OpenAI compatibility"]
     }
   },
   "embedding": {

@@ -19,6 +19,7 @@
   "needModel": "Please configure an AI model provider first\n\nPath: Settings → Model Providers",
   "similarityDetails": "Similarity: {{score}}%, shared keywords: {{keywords}}",
   "autoFixConfirm": "Auto-fix all fixable issues? This will clear invalid references.",
+  "checkFailed": "Consistency check failed: {{error}}. You can retry with “Re-check”",
   "title": "Worldview Consistency Check",
   "subtitle": "Check the consistency and integrity of project data",
   "checking": "Checking...",

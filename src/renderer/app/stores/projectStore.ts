@@ -17,7 +17,18 @@
 
 import { create } from 'zustand';
 import { type Project } from '../../../shared/types';
+import type { CommitOptions } from '../../shared/services/repository/types';
 import { i18n } from '../../i18n';
+
+/**
+ * 变更归因绑定：新 Project 对象引用 → 本次提交的 CommitOptions。
+ * WeakMap 随对象 GC，无残留；无绑定即默认 'user'。persistDiff 经 commitMetaOf 取用。
+ */
+const commitMeta = new WeakMap<object, CommitOptions>();
+
+export function commitMetaOf(project: Project): CommitOptions | undefined {
+  return commitMeta.get(project);
+}
 
 interface ProjectState {
   projects: Project[];
@@ -25,8 +36,12 @@ interface ProjectState {
   /** 从 repository 载入的初始状态整体灌入（首启动/全量导入/删除后重定向）。 */
   hydrate: (projects: Project[], activeProjectId: string | null) => void;
   setActiveProject: (bookId: string | null) => void;
-  /** 更新活动书（无活动书时按旧语义创建默认书）；正文/大纲等编辑统一入口。 */
-  updateActiveProject: (updates: Partial<Project>) => void;
+  /**
+   * 更新活动书（无活动书时按旧语义创建默认书）；正文/大纲等编辑统一入口。
+   * opts 标注变更来源（AI 落笔传 { agentId: 'ai:<来源>', cause }），绑定到新对象引用，
+   * 由持久化桥带入 saveProject；不传即 'user'。
+   */
+  updateActiveProject: (updates: Partial<Project>, opts?: CommitOptions) => void;
   /** 整书插入或替换（新建/复制/导入）。 */
   upsertProject: (book: Project) => void;
   /** 删除书；若删除的是活动书则活动指针落到剩余首本或 null。 */
@@ -35,37 +50,41 @@ interface ProjectState {
   renameProject: (bookId: string, title: string) => void;
 }
 
-export const useProjectStore = create<ProjectState>()((set) => ({
+export const useProjectStore = create<ProjectState>()((set, get) => ({
   projects: [],
   activeProjectId: null,
   hydrate: (projects, activeProjectId) => set({ projects, activeProjectId }),
   setActiveProject: (bookId) => set({ activeProjectId: bookId }),
 
-  updateActiveProject: (updates) =>
-    set((state) => {
-      const { activeProjectId, projects } = state;
-      if (!activeProjectId) {
-        const newProject: Project = {
-          id: Date.now().toString(),
-          title: i18n.t('app:book.defaultTitle'),
-          inspiration: '',
-          intro: '',
-          characters: [],
-          outline: '',
-          chapters: [],
-          virtualChapters: [],
-          knowledge: [],
-          lastModified: Date.now(),
-          ...updates,
-        };
-        return { projects: [...projects, newProject], activeProjectId: newProject.id };
-      }
-      return {
-        projects: projects.map((p) =>
-          p.id === activeProjectId ? { ...p, ...updates, lastModified: Date.now() } : p,
-        ),
+  updateActiveProject: (updates, opts) => {
+    const { activeProjectId, projects } = get();
+    if (!activeProjectId) {
+      const newProject: Project = {
+        id: Date.now().toString(),
+        title: i18n.t('app:book.defaultTitle'),
+        inspiration: '',
+        intro: '',
+        characters: [],
+        outline: '',
+        chapters: [],
+        virtualChapters: [],
+        knowledge: [],
+        lastModified: Date.now(),
+        ...updates,
       };
-    }),
+      if (opts) commitMeta.set(newProject, opts);
+      set({ projects: [...projects, newProject], activeProjectId: newProject.id });
+      return;
+    }
+    set({
+      projects: projects.map((p) => {
+        if (p.id !== activeProjectId) return p;
+        const next = { ...p, ...updates, lastModified: Date.now() };
+        if (opts) commitMeta.set(next, opts);
+        return next;
+      }),
+    });
+  },
 
   upsertProject: (book) =>
     set((state) => {
@@ -99,3 +118,6 @@ export const useProjectStore = create<ProjectState>()((set) => ({
 /** 便捷选择器：当前活动书（无则 null）。 */
 export const selectActiveProject = (s: ProjectState): Project | null =>
   s.projects.find((p) => p.id === s.activeProjectId) ?? null;
+
+/** 调用方统一从 store 取归因类型，避免各写一遍深路径。 */
+export type { CommitOptions } from '../../shared/services/repository/types';

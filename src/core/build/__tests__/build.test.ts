@@ -16,7 +16,6 @@ import {
   parseProfileYaml,
   runBuild,
   registerTransformer,
-  registerRenderer,
   listRenderers,
   listTransformers,
   type BuildProfile,
@@ -92,16 +91,11 @@ describe('验收 1：同一本书两个 profile 产出正确差异', () => {
 });
 
 describe('验收 3：插件贡献点（变换器 + 渲染器）不改内核可被选用', () => {
-  it('reverse-order 变换器 + rtf 渲染器', () => {
+  it('reverse-order 变换器 + 内置 rtf 渲染器', () => {
     registerTransformer({
       id: 'example.reverse-order',
       description: '章节倒序（示例插件贡献）',
       apply: (nodes) => [...nodes].reverse(),
-    });
-    registerRenderer({
-      id: 'rtf',
-      description: 'RTF（示例插件贡献）',
-      render: (blocks) => `{\\rtf1\\ansi ${blocks.length} blocks}`,
     });
     expect(listTransformers().map((t) => t.id)).toContain('example.reverse-order');
     expect(listRenderers().map((r) => r.id)).toContain('rtf');
@@ -110,8 +104,41 @@ describe('验收 3：插件贡献点（变换器 + 渲染器）不改内核可�
     // profile 用 contributed 变换器：v0 经 runBuild 前手动应用
     const { nodes } = runBuild(profile, entities());
     const reversed = listTransformers().find((t) => t.id === 'example.reverse-order')!.apply(nodes);
-    const blocks = runBuild(profile, { nodes: reversed as never, attrs: [], edges: [] });
-    expect(blocks.text.startsWith('{\\rtf1')).toBe(true);
+    const built = runBuild(profile, { nodes: reversed as never, attrs: [], edges: [] });
+    expect(built.text.startsWith('{\\rtf1')).toBe(true);
+    // 倒序后第二章在前（标题已 renumber 为 1、/2、，CJK 转义后用 ASCII 序号定位）
+    expect(built.text.indexOf('\\fs32 1')).toBeLessThan(built.text.indexOf('\\fs32 2'));
+  });
+});
+
+describe('rtf 渲染器', () => {
+  it('首行文档头 + 尾行括号，章节加粗、CJK 转 \\u、特殊字符转义', () => {
+    const profile: BuildProfile = { ...DEFAULT_BUILD_PROFILE, format: 'rtf' };
+    const { text } = runBuild(profile, entities());
+    const lines = text.split('\n');
+    expect(lines[0]).toMatch(/^\{\\rtf1\\ansi/);
+    expect(lines[lines.length - 1]).toBe('}');
+    expect(text).toContain('{\\b\\fs32');
+    // 中文转 \uN? 形，原字不裸奔
+    expect(text).toContain('\\u');
+    expect(text).toContain('\\par');
+  });
+
+  it('花括号与反斜杠转义，不破坏文档括号配平', () => {
+    const es = entities();
+    es.nodes[0]!.body = ' brace {x} back\\slash ';
+    const profile: BuildProfile = { ...DEFAULT_BUILD_PROFILE, format: 'rtf' };
+    const { text } = runBuild(profile, es);
+    expect(text).toContain('\\{x\\}');
+    expect(text).toContain('back\\\\slash');
+    const opens = (text.match(/\{/g) ?? []).length;
+    const closes = (text.match(/\}/g) ?? []).length;
+    expect(opens).toBe(closes);
+  });
+
+  it('未注册格式报错并列出可用项', () => {
+    const profile: BuildProfile = { ...DEFAULT_BUILD_PROFILE, format: 'docx' };
+    expect(() => runBuild(profile, entities())).toThrow(/未注册的渲染器.*rtf/);
   });
 });
 

@@ -13,7 +13,7 @@ import type { WritingEditorToolbarProps } from '../types';
 import { formatCharCount } from '../services/writingStatsService';
 import { Button } from '@/shared/ui/Button';
 import { cn } from '@/shared/utils/cn';
-import { ArrowLeft, Camera, ChevronsRight, Eraser, FileOutput, FileText, History, Maximize2, Minimize2, Sprout } from 'lucide-react';
+import { ArrowLeft, AlignCenterVertical, Camera, ChevronsRight, Eraser, Expand, FileOutput, FileText, History, Maximize2, Minimize2, Redo2, Sprout, Undo2 } from 'lucide-react';
 
 const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
   activeChapterId,
@@ -29,6 +29,11 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
   overdueForeshadowCount,
   isFocusMode,
   lastSaved,
+  targetWordCount,
+  typewriter,
+  saveDirty,
+  canUndo,
+  canRedo,
   onBack,
   onTitleChange,
   onOpenExport,
@@ -38,10 +43,22 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
   onOpenChapterHistory,
   onOpenSidebar,
   onToggleFocusMode,
+  onToggleTypewriter,
+  onUndo,
+  onRedo,
   onManualSnapshot,
 }) => {
   const { t, i18n } = useTranslation('writing');
   const actionButton = 'text-muted-foreground';
+  const progress = targetWordCount > 0 ? Math.min(1, chapterStats.charCount / targetWordCount) : 0;
+  const toggleFullscreen = () => {
+    try {
+      if (document.fullscreenElement) void document.exitFullscreen();
+      else void document.documentElement.requestFullscreen();
+    } catch {
+      // 非 Electron/浏览器限制时静默
+    }
+  };
   return (
     <div
       className={cn(
@@ -97,6 +114,12 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
 
         {!isFocusMode && (
           <>
+            <Button variant="ghost" size="icon" className={cn('size-9 shrink-0', actionButton)} onClick={onUndo} disabled={!canUndo} title={t('toolbar.undoTitle')}>
+              <Undo2 className="size-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className={cn('size-9 shrink-0', actionButton)} onClick={onRedo} disabled={!canRedo} title={t('toolbar.redoTitle')}>
+              <Redo2 className="size-4" />
+            </Button>
             {activeChapterId && (
               <Button variant="ghost" size="sm" className={cn(actionButton, 'hover:text-foreground')} onClick={onManualSnapshot} title={t('toolbar.snapshotTitle', { count: snapshotCount })}>
                 <Camera className="size-4" /> {t('toolbar.snapshot')}
@@ -156,6 +179,18 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
         >
           {isFocusMode ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />} {isFocusMode ? t('toolbar.exitFocus') : t('toolbar.focus')}
         </Button>
+        <Button variant="ghost" size="sm" className={actionButton} onClick={toggleFullscreen} title="全屏">
+          <Expand className="size-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className={cn(actionButton, typewriter && 'bg-accent text-foreground')}
+          onClick={onToggleTypewriter}
+          title={typewriter ? '关闭打字机模式' : '开启打字机模式（光标居中跟随）'}
+        >
+          <AlignCenterVertical className="size-4" />
+        </Button>
         {!isSidebarOpen && !isFocusMode && (
           <Button variant="outline" size="icon" className="size-9 shrink-0" onClick={onOpenSidebar} title={t('toolbar.openSidebar')}>
             <ChevronsRight className="size-4" />
@@ -165,8 +200,22 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
           <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             {t('toolbar.charCountLabel')}
             <span className="tabular-nums text-foreground">{chapterStats.charCount}</span>
+            {targetWordCount > 0 && (
+              <span className="tabular-nums text-muted-foreground">/{targetWordCount}</span>
+            )}
           </span>
-          <span className="mt-0.5 text-[10px] italic text-muted-foreground/70">{t('toolbar.autoSave', { time: new Date(lastSaved).toLocaleTimeString(i18n.language) })}</span>
+          {targetWordCount > 0 && (
+            <div className="mt-1 h-1 w-28 overflow-hidden rounded-full bg-muted" title={`${chapterStats.charCount}/${targetWordCount}`}>
+              <div className="h-1 rounded-full bg-primary transition-all" style={{ width: `${Math.round(progress * 100)}%` }} />
+            </div>
+          )}
+          <span className="mt-0.5 text-xs text-muted-foreground">
+            {saveDirty ? (
+              <span className="font-medium text-warning">● 未保存</span>
+            ) : (
+              t('toolbar.autoSave', { time: new Date(lastSaved).toLocaleTimeString(i18n.language) })
+            )}
+          </span>
         </div>
       </div>
     </div>

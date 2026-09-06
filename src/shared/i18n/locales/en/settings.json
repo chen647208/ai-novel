@@ -1,6 +1,11 @@
 {
   "title": "Console Settings",
   "subtitle": "System Core Settings",
+  "tabGroup": {
+    "ai": "AI Models",
+    "prompts": "Prompts",
+    "system": "System"
+  },
   "tab": {
     "models": "Model Providers",
     "prompts": "Prompt Library",
@@ -27,10 +32,21 @@
       "light": "Light",
       "dark": "Dark",
       "system": "System"
-    }
+    },
+    "fontTitle": "Fonts",
+    "fontHint": "Only free-for-commercial-use fonts. If a font is not installed, grab it from the official link and restart. You can also import your own ttf/otf/woff/woff2.",
+    "uiFontLabel": "Interface Font",
+    "editorFontLabel": "Body Font (editor & preview)",
+    "importFont": "Import Custom Font",
+    "importingFont": "Importing…",
+    "importFailed": "Import failed: {{message}}",
+    "removeFontTitle": "Remove this font",
+    "previewText": "The quick brown fox jumps over the lazy dog. 0123456789. Tide over stone steps, lamps lit one by one.",
+    "getFont": "Get",
+    "customBadge": "Custom"
   },
   "footer": {
-    "persistNote": "Local data persistence is enabled; settings are saved automatically in this browser.",
+    "persistNote": "Local data persistence is enabled; settings are saved automatically to the app data directory on this machine.",
     "save": "Apply & Save"
   },
   "prompts": {
@@ -118,9 +134,34 @@
     "testing": "Testing connection...",
     "testNow": "Test Connection Now",
     "addProvider": "Add AI Provider",
+    "searchPlaceholder": "Search providers / models…",
+    "filter": {
+      "all": "All",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "unconfigured": "Unconfigured"
+    },
+    "disabled": "Disabled",
+    "emptyFilter": "No matching provider, try another keyword",
+    "emptyAll": "No provider yet, add one first",
+    "enableLabel": "Enabled",
+    "showKey": "Show",
+    "hideKey": "Hide",
+    "currentKeyMasked": "Current: {{mask}}",
+    "getKey": "Get Key",
+    "gatewayHint": "Aggregator gateway: one Key for many models. Stop the URL at /v1 (no /chat/completions); use the gateway model ID, refresh to pull the list.",
+    "diag": {
+      "auth": "Likely a wrong/expired Key: copy it again, watch for whitespace.",
+      "quota": "Billing/quota issue: check balance and plan in the console.",
+      "rateLimit": "Rate limited: retry later or lower concurrency.",
+      "network": "Network unreachable: check proxy/VPN and direct reachability.",
+      "config": "Wrong endpoint or model: stop the URL at /v1 and pick from the refreshed list.",
+      "unknown": "Unknown error: try another model, or cross-check with a gateway Key."
+    },
     "connecting": "Connecting...",
     "fetchListFailed": "Failed to fetch model list",
-    "newModelName": "{{name}} Config"
+    "newModelName": "{{name}} Config",
+    "vaultUnavailable": "System keychain unavailable; {{count}} key(s) will be saved in plaintext (works fine, just not encrypted at rest)"
   },
   "storage": {
     "title": "Data Storage",
@@ -171,6 +212,11 @@
   },
   "embedding": {
     "providerLabel": "Provider",
+    "providerGroups": {
+      "custom": "Custom (OpenAI-compatible)",
+      "local": "Local models",
+      "cloud": "Official cloud"
+    },
     "modelNameLabel": "Model Name",
     "localCanLeaveBlank": "Can be blank for local",
     "paramsTitle": "Sentence-BERT Parameters",

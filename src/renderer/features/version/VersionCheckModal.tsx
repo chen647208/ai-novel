@@ -6,6 +6,7 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+import { logger } from '@/shared/utils/logger';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation, i18n } from '@/i18n';
@@ -42,7 +43,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
       const result = await checkForUpdates();
       setUpdateResult(result);
     } catch (error) {
-      console.error('自动检查更新失败:', error);
+      logger.error('自动检查更新失败:', error);
     }
   }, []);
 
@@ -68,7 +69,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
       const result = await checkForUpdates();
       setUpdateResult(result);
     } catch (error) {
-      console.error('检查更新失败:', error);
+      logger.error('检查更新失败:', error);
       setUpdateResult({
         success: false,
         versionInfo: currentVersionInfo,
@@ -111,7 +112,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
       }, 1000);
 
     } catch (error) {
-      console.error('下载更新失败:', error);
+      logger.error('下载更新失败:', error);
       setIsDownloading(false);
       setUpdateResult({
         ...updateResult,

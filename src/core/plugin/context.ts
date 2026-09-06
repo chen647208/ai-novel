@@ -100,7 +100,7 @@ export function createPluginContext(pluginId: string, options: PluginContextOpti
           throw new Error(`权限拒绝：${pluginId} 未声明 read:${dom}`);
         }
         if (!options.dataAdapter) {
-          throw new Error(`数据域 ${dom} 的适配器随 worker 沙箱里程碑接入`);
+          throw new Error(`数据域 ${dom} 暂无适配器（当前未注入 dataAdapter）`);
         }
         return options.dataAdapter.read(dom, query);
       },

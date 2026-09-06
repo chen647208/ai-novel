@@ -16,6 +16,7 @@ import { BuildProfileRegistry, EventBus } from '@core/plugin';
 import { createToolRegistry } from './builtinTools';
 import { createBuiltinSkillCatalog } from './skillCatalogSetup';
 import { AiSessionManager } from './aiSessionManager';
+import { APP_VERSION } from '@/shared/version';
 
 const assembler = new PromptAssembler();
 registerBuiltinSections(assembler);
@@ -52,5 +53,5 @@ export function saveDisabledList(ids: string[]): void {
 
 /** 启动期插件装载（预览环境无文件系统时空宿主）。状态面板复用同一 Promise。 */
 export const pluginHostPromise = import('@/shared/services/pluginService').then((m) =>
-  m.bootstrapPlugins({ skillCatalog, buildProfiles: buildProfileRegistry, events: eventBus }, String(__APP_VERSION__), readDisabledList()),
+  m.bootstrapPlugins({ skillCatalog, buildProfiles: buildProfileRegistry, events: eventBus }, APP_VERSION, readDisabledList()),
 );

@@ -15,7 +15,7 @@
  */
 
 import { create } from 'zustand';
-import { type AppState, type AppLanguage, type AppTheme, type CardPromptTemplate, type ConsistencyCheckPromptTemplate, type EmbeddingModelConfig, type ModelConfig, type PromptTemplate } from '../../../shared/types';
+import { type AppState, type AppLanguage, type AppTheme, type CardPromptTemplate, type ConsistencyCheckPromptTemplate, type CustomFontMeta, type EmbeddingModelConfig, type ModelConfig, type PromptTemplate } from '../../../shared/types';
 import { INITIAL_APP_STATE } from '../initialState';
 import { changeLanguage } from '../../i18n';
 import { applyTheme } from '../../shared/services/themeService';
@@ -33,15 +33,24 @@ interface SettingsState {
   activeEmbeddingModelId: string | null;
   language: AppLanguage | undefined;
   theme: AppTheme | undefined;
+  uiFont: string | undefined;
+  editorFont: string | undefined;
+  customFonts: CustomFontMeta[];
   /** 从 repository 载入的初始状态整体灌入（首启动/全量导入）。 */
   hydrate: (patch: Partial<SettingsState>) => void;
   setModels: (models: ModelConfig[], activeModelId: string | null) => void;
+  /** 全局助手/顶栏切换模型时直写，消除 GlobalAssistant 私设 currentModelId 分叉。 */
+  setActiveModelId: (activeModelId: string | null) => void;
   setPrompts: (prompts: PromptTemplate[]) => void;
   setCardPrompts: (cardPrompts: CardPromptTemplate[]) => void;
   setConsistencyPrompts: (prompts: ConsistencyCheckPromptTemplate[]) => void;
   setConsistencyConfig: (config: ConsistencyConfig) => void;
   setLanguage: (language: AppLanguage) => void;
   setTheme: (theme: AppTheme) => void;
+  setUiFont: (uiFont: string) => void;
+  setEditorFont: (editorFont: string) => void;
+  addCustomFont: (meta: CustomFontMeta) => void;
+  removeCustomFont: (id: string) => void;
 }
 
 const {
@@ -64,8 +73,14 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   activeEmbeddingModelId: null,
   language: undefined,
   theme: undefined,
+  uiFont: undefined,
+  editorFont: undefined,
+  customFonts: [],
   hydrate: (patch) => set(patch),
   setModels: (models, activeModelId) => set({ models, activeModelId }),
+  setActiveModelId: (activeModelId) => set({ activeModelId }),
+  addCustomFont: (meta) => set((s) => ({ customFonts: [...s.customFonts, meta] })),
+  removeCustomFont: (id) => set((s) => ({ customFonts: s.customFonts.filter((c) => c.id !== id) })),
   setPrompts: (prompts) => set({ prompts }),
   setCardPrompts: (cardPrompts) => set({ cardPrompts }),
   setConsistencyPrompts: (consistencyPrompts) => set({ consistencyPrompts }),
@@ -79,4 +94,21 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
     set({ theme });
     applyTheme(theme);
   },
+  // 字体切换即时生效（App 订阅后写 body/--font-reading），持久化走差分桥
+  setUiFont: (uiFont) => set({ uiFont }),
+  setEditorFont: (editorFont) => set({ editorFont }),
 }));
+
+/**
+ * 可用模型单源选择器：已启用 && 已配置，跳过停用项。
+ * 各 Step/弹窗直读它，不再经 App→View→Step 层层透传 activeModel。
+ */
+export function useUsableModel(): ModelConfig | undefined {
+  const models = useSettingsStore((s) => s.models);
+  const activeModelId = useSettingsStore((s) => s.activeModelId);
+  return (
+    models.find((m) => m.id === activeModelId && m.isEnabled !== false) ??
+    models.find((m) => m.isEnabled !== false) ??
+    models[0]
+  );
+}

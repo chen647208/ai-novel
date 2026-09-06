@@ -6,10 +6,13 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+import { logger } from '@/shared/utils/logger';
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { type KnowledgeItem, type OutputMode, type Character, type Location, type Faction, type RuleSystem, type TimelineEvent, type AICardCommand, type CreatedCard, type Timeline, type WorldView, type MagicSystem, type TechnologyLevel, type WorldHistory, type CardPromptTemplate } from '../../../shared/types';
+import { type KnowledgeItem, type OutputMode, type Character, type Location, type Faction, type RuleSystem, type TimelineEvent, type AICardCommand, type CreatedCard, type Timeline, type WorldView, type MagicSystem, type TechnologyLevel, type WorldHistory, type CardPromptTemplate, type Project } from '../../../shared/types';
+import { useProjectStore } from '@/app/stores/projectStore';
+import { ATTACHMENT_TRUNCATE } from '../../../shared/constants/chapters';
 import { type GlobalAssistantProps, type ChatMessage, type AssistantCategory, type AssistantEditCategory, type SyncStatus, type EditingData, type AssistantWindowSize } from './types';
 import { type LooseRecord, asRecord, asStr } from '../../shared/utils/loose';
 import { AIService } from './services/aiService';
@@ -24,9 +27,10 @@ import AssistantChatWorkspace from './components/AssistantChatWorkspace';
 import { Select } from '@/shared/ui/Select';
 import { cn } from '@/shared/utils/cn';
 import { dialogService } from '@/shared/services/dialogService';
-import { BookOpenText, Bot, CircleStop, Lock, LockOpen, Maximize2, Minus, PenLine, Pin, Trash2, X } from 'lucide-react';
+import { useSettingsStore } from '../../app/stores/settingsStore';
+import { BookOpenText, Bot, CircleStop, Lock, LockOpen, Maximize2, Minus, PanelRight, PenLine, Pin, Trash2, X } from 'lucide-react';
 
-const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId, project, prompts, onUpdate }) => {
+const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId, project, prompts, onUpdate, layout = 'floating', onToggleLayout }) => {
   const { t } = useTranslation('assistant');
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -41,7 +45,20 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [currentModelId, setCurrentModelId] = useState<string>(activeModelId || models[0]?.id || '');
+  const firstEnabledModel = models.find((m) => m.isEnabled !== false) ?? models[0];
+  const updateActiveProject = useProjectStore((s) => s.updateActiveProject);
+  // AI 产物归因：助手生成的卡片/角色标注来源，用户手改走 onUpdate 默认 user
+  const commitAICard = (updates: Partial<Project>) =>
+    updateActiveProject(updates, { agentId: 'ai:assistant' });
+  // 单源：助手内切换直接写回 settingsStore，不再私设分叉状态。外部 activeModelId 变化时跟随。
+  const [currentModelId, setCurrentModelId] = useState<string>(activeModelId || firstEnabledModel?.id || '');
+  useEffect(() => {
+    if (activeModelId) setCurrentModelId(activeModelId);
+  }, [activeModelId]);
+  const handleModelChange = (id: string) => {
+    setCurrentModelId(id);
+    useSettingsStore.getState().setActiveModelId(id);
+  };
   const [pendingFiles, setPendingFiles] = useState<KnowledgeItem[]>([]);
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
   const [outputMode, setOutputMode] = useState<OutputMode>('streaming');
@@ -203,8 +220,8 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       };
       setMessages(prev => [...prev, userMsg]);
       
-      const activeModel = models.find(m => m.id === currentModelId) || models[0];
-      
+      const activeModel = models.find((m) => m.id === currentModelId && m.isEnabled !== false) ?? models.find((m) => m.isEnabled !== false) ?? models[0];
+
       if (!activeModel) {
         const errorMsg: ChatMessage = {
           id: (Date.now() + 1).toString(),
@@ -274,7 +291,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
 
     let taskText = text;
     if (attachments && attachments.length > 0) {
-      const fileContent = attachments.map(f => `[参考内容: ${f.name}]\n${f.content.substring(0, 15000)}... (内容过长已截断)`).join('\n\n');
+      const fileContent = attachments.map(f => `[参考内容: ${f.name}]\n${f.content.substring(0, ATTACHMENT_TRUNCATE)}... (内容过长已截断)`).join('\n\n');
       taskText += `\n\n### 附带参考资料:\n${fileContent}`;
     }
 
@@ -376,7 +393,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
             category: 'writing' as const
           });
         } catch (err) {
-          console.error("Failed to read file", file.name, err);
+          logger.error("Failed to read file", file.name, err);
         }
       }
     }
@@ -393,23 +410,23 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     
     switch (command) {
       case 'character':
-        onUpdate({
+        commitAICard({
           characters: [...(project.characters || []), data as Character]
         });
         break;
       case 'location':
-        onUpdate({
+        commitAICard({
           locations: [...(project.locations || []), data as Location]
         });
         break;
       case 'faction':
-        onUpdate({
+        commitAICard({
           factions: [...(project.factions || []), data as Faction]
         });
         break;
       case 'timeline':
       case 'event':
-        onUpdate({
+        commitAICard({
           timeline: {
             ...(project.timeline || { id: Math.random().toString(36).substr(2, 9), projectId: project.id, config: { calendarSystem: 'default' }, events: [], createdAt: Date.now(), updatedAt: Date.now() }),
             events: [...(project.timeline?.events || []), data as TimelineEvent]
@@ -417,12 +434,12 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
         });
         break;
       case 'rule':
-        onUpdate({
+        commitAICard({
           ruleSystems: [...(project.ruleSystems || []), data as RuleSystem]
         });
         break;
       case 'magic':
-        onUpdate({
+        commitAICard({
           worldView: {
             ...(project.worldView || { id: Math.random().toString(36).substr(2, 9), projectId: project.id, createdAt: Date.now(), updatedAt: Date.now() }),
             magicSystem: data as MagicSystem
@@ -430,7 +447,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
         });
         break;
       case 'tech':
-        onUpdate({
+        commitAICard({
           worldView: {
             ...(project.worldView || { id: Math.random().toString(36).substr(2, 9), projectId: project.id, createdAt: Date.now(), updatedAt: Date.now() }),
             technologyLevel: data as TechnologyLevel
@@ -438,7 +455,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
         });
         break;
       case 'history':
-        onUpdate({
+        commitAICard({
           worldView: {
             ...(project.worldView || { id: Math.random().toString(36).substr(2, 9), projectId: project.id, createdAt: Date.now(), updatedAt: Date.now() }),
             history: data as WorldHistory
@@ -487,7 +504,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       
       setTimeout(() => setSyncStatus('idle'), 3000);
     } catch (error) {
-      console.error('Failed to save data:', error);
+      logger.error('Failed to save data:', error);
       setSyncStatus('error');
     }
   };
@@ -719,15 +736,15 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
         
         const updatedCharacters = [...(project.characters || []), newCharacter];
         if (onUpdate) {
-          onUpdate({ characters: updatedCharacters });
+          commitAICard({ characters: updatedCharacters });
         }
         
         setCharacterGenerationPrompt('');
         dialogService.alert(t('dialog.characterGenerated'));
       } else {
-        console.error('Failed to parse character response:', parseError);
-        console.error('Original response:', response.content);
-        console.error('Extracted JSON:', extractedJSON);
+        logger.error('Failed to parse character response:', parseError);
+        logger.error('Original response:', response.content);
+        logger.error('Extracted JSON:', extractedJSON);
         
         dialogService.alert(t('dialog.characterParseFailed', {
           preview: response.content.substring(0, 500),
@@ -735,7 +752,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
         }));
       }
     } catch (error) {
-      console.error('Failed to generate character:', error);
+      logger.error('Failed to generate character:', error);
       dialogService.alert(t('dialog.characterGenerateFailed'));
     } finally {
       setIsGeneratingCharacter(false);
@@ -756,7 +773,9 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     return chapter?.content || '';
   };
 
-  if (!isOpen) {
+  const docked = layout === 'docked';
+
+  if (!isOpen && !docked) {
     return (
       <button
         onClick={() => setIsOpen(true)}
@@ -768,10 +787,14 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     );
   }
 
+  if (!isOpen && docked) {
+    // 侧边栏形态常驻，不提供关闭（避免右侧空洞）；保留最小占位由父容器决定
+  }
+
   return (
     <div
-      className="fixed flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xl"
-      style={{
+      className={docked ? 'flex h-full flex-col overflow-hidden bg-card' : 'fixed flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xl'}
+      style={docked ? undefined : {
         left: position.x,
         top: position.y,
         width: isMinimized ? 200 : size.width,
@@ -782,15 +805,25 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       }}
     >
       <div
-        ref={dragRef}
-        onMouseDown={handleMouseDown}
-        className={cn('flex shrink-0 items-center justify-between border-b border-border bg-muted/40 px-4 py-2.5 select-none', isMinimized && 'h-full border-b-0')}
+        ref={docked ? undefined : dragRef}
+        onMouseDown={docked ? undefined : handleMouseDown}
+        className={cn('flex shrink-0 items-center justify-between border-b border-border bg-muted/40 px-4 py-2.5 select-none', isMinimized && !docked && 'h-full border-b-0')}
       >
         <div className="flex items-center gap-2">
           <Bot className="size-4 text-primary" />
           <span className="text-sm font-medium text-foreground">{t('window.title')}</span>
         </div>
         <div className="flex items-center gap-1" onMouseDown={e => e.stopPropagation()}>
+          {onToggleLayout && (
+            <button
+              onClick={onToggleLayout}
+              className="flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              title={docked ? '弹出为悬浮窗' : '停靠为侧边栏'}
+            >
+              <PanelRight className="size-3.5" />
+            </button>
+          )}
+          {!docked && (
           <button
             onClick={() => setAlwaysOnTop(!alwaysOnTop)}
             className={cn('flex size-6 items-center justify-center rounded transition-colors', alwaysOnTop ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground')}
@@ -798,7 +831,8 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
           >
             {alwaysOnTop ? <Pin className="size-3.5" /> : <Pin className="size-3.5 rotate-90" />}
           </button>
-
+          )}
+          {!docked && (
           <button
             onClick={() => setIsLocked(!isLocked)}
             className={cn('flex size-6 items-center justify-center rounded transition-colors', isLocked ? 'bg-warning/10 text-warning' : 'text-muted-foreground hover:bg-accent hover:text-foreground')}
@@ -806,24 +840,27 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
           >
             {isLocked ? <Lock className="size-3.5" /> : <LockOpen className="size-3.5" />}
           </button>
+          )}
 
           <button onClick={() => setIsMinimized(!isMinimized)} className="flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
             {isMinimized ? <Maximize2 className="size-3.5" /> : <Minus className="size-3.5" />}
           </button>
+          {!docked && (
           <button onClick={() => setIsOpen(false)} className="flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive">
             <X className="size-3.5" />
           </button>
+          )}
         </div>
       </div>
 
-      {!isMinimized && (
+      {!(isMinimized && !docked) && (
         <>
           <div className="flex shrink-0 items-center justify-between border-b border-border bg-muted/20 px-4 py-2 text-xs">
              <div className="flex items-center gap-2">
                 <Select
                   className="h-7 w-auto max-w-[140px] text-xs"
                   value={currentModelId}
-                  onChange={(e) => setCurrentModelId(e.target.value)}
+                  onChange={(e) => handleModelChange(e.target.value)}
                 >
                   {models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
                 </Select>

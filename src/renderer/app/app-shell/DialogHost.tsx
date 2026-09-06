@@ -70,7 +70,7 @@ const DialogHost: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[10001] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       role="presentation"
       onKeyDown={onKeyDown}
     >

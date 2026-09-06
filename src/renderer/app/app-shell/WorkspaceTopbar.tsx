@@ -16,24 +16,21 @@ import { Input } from '@/shared/ui/Input';
 import { WORKSPACE_SECTIONS, type SectionId } from './WorkspaceNav';
 import { suggestNextSection } from '../guidedFlow';
 import {
-  BookOpen,
   ChevronRight,
   Compass,
   Cpu,
-  Eraser,
   History,
-  ListOrdered,
   Moon,
   Pencil,
   RefreshCw,
   Sun,
   Trash2,
-  Users,
   X,
 } from 'lucide-react';
 
 import SyncDialog from './SyncDialog';
 import ProtectedSessionDialog from './ProtectedSessionDialog';
+import VersionBadge from '@/features/version/components/VersionBadge';
 
 interface WorkspaceTopbarProps {
   project: Project | null;
@@ -45,13 +42,12 @@ interface WorkspaceTopbarProps {
   onThemeChange: (theme: AppTheme) => void;
   onOpenBookshelf: () => void;
   onOpenSettings: () => void;
-  onClearProject: () => void;
   onDeleteProject: () => void;
   onOpenHistory: () => void;
   onOpenVersionCheck: () => void;
 }
 
-/** 单书工作台顶栏：书名面包屑（可就地改名）+ 引导下一步建议 + 项目操作 + 统计 + 主题/版本/历史/模型入口。 */
+/** 单书工作台顶栏：书名面包屑（可就地改名）+ 引导下一步建议 + 删除 + 主题/版本/历史/模型入口。 */
 const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
   project,
   activeModel,
@@ -62,7 +58,6 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
   onThemeChange,
   onOpenBookshelf,
   onOpenSettings,
-  onClearProject,
   onDeleteProject,
   onOpenHistory,
   onOpenVersionCheck,
@@ -162,14 +157,6 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
           <div className="ml-1 flex shrink-0 items-center">
             <button
               type="button"
-              onClick={onClearProject}
-              title={t('app:topbar.clearProjectTip')}
-              className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
-            >
-              <Eraser className="size-3.5" />
-            </button>
-            <button
-              type="button"
               onClick={onDeleteProject}
               title={t('app:topbar.deleteProjectTip')}
               className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
@@ -182,23 +169,6 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
 
       {/* 右侧工具区 */}
       <div className="flex shrink-0 items-center gap-2">
-        {project && (
-          <div className="mr-1 hidden items-center gap-3 text-xs text-muted-foreground md:flex">
-            <span className="flex items-center gap-1" title={t('app:topbar.statKnowledge')}>
-              <BookOpen className="size-3.5" />
-              {project.knowledge?.length || 0}
-            </span>
-            <span className="flex items-center gap-1" title={t('app:topbar.statCharacters')}>
-              <Users className="size-3.5" />
-              {project.characters.length}
-            </span>
-            <span className="flex items-center gap-1" title={t('app:topbar.statChapters')}>
-              <ListOrdered className="size-3.5" />
-              {project.chapters.length}
-            </span>
-          </div>
-        )}
-
         <SyncDialog project={project} />
         <ProtectedSessionDialog />
 
@@ -212,9 +182,7 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
         </Button>
 
         <div className="flex items-center gap-1">
-          <span className="rounded border border-border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
-            v{__APP_VERSION__}
-          </span>
+          <VersionBadge />
           <Button
             variant="ghost"
             size="icon"

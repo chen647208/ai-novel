@@ -51,7 +51,7 @@ export class EmbeddingProvider {
         logger.debug('Using API Embedding Service');
         return apiEmbeddingService;
       }
-      console.warn('API Embedding not available (config missing or not tested), falling back to local TF-IDF');
+      logger.warn('API Embedding not available (config missing or not tested), falling back to local TF-IDF');
       this.useAPI = false;
       this.current = simpleEmbeddingService;
     }

@@ -8,13 +8,15 @@
  */
 
 import type { ModelConfig } from '../../../shared/types';
+import { findProviderPreset } from '../../constants/modelProviders';
 
 /**
  * 判断一个模型是否“可直接用于生成”——不同提供方所需凭证不同：
  *   - gemini：走官方 API，必须有 apiKey；
  *   - ollama：本地服务，必须有 endpoint，无需 key；
  *   - openai-chat / openai-responses / anthropic：必须有 endpoint；
- *     官方渠道（presetId 存在，端点已预置）额外要求 apiKey，自定义代理可只给端点。
+ *     官方渠道（preset 标记 official）额外要求 apiKey，自定义兼容协议可只给端点。
+ *     preset 身份以 presetId 为准（含自定义渠道 id），缺失时按旧语义回落。
  *
  * 用于首启引导：默认模型对象虽存在，但未填凭证时不应放行到生成流程，
  * 而应引导用户去设置，避免直接吃到生硬的接口报错。
@@ -23,6 +25,9 @@ export function isModelConfigured(model: ModelConfig | null | undefined): boolea
   if (!model) return false;
   const hasEndpoint = Boolean(model.endpoint && model.endpoint.trim());
   const hasKey = Boolean(model.apiKey && model.apiKey.trim());
+  const preset = model.presetId ? findProviderPreset(model.presetId) : undefined;
+  // 官方性：有 preset 查表；无 preset 的历史数据按旧规则（有 id 即官方）回落
+  const isOfficial = preset ? preset.official : Boolean(model.presetId);
   switch (model.provider) {
     case 'gemini':
       return hasKey;
@@ -31,8 +36,18 @@ export function isModelConfigured(model: ModelConfig | null | undefined): boolea
     case 'openai-chat':
     case 'openai-responses':
     case 'anthropic':
-      return hasEndpoint && (model.presetId ? hasKey : true);
+      return hasEndpoint && (isOfficial ? hasKey : true);
     default:
       return false;
   }
+}
+
+/**
+ * 可用 = 已启用 && 已配置。停用的渠道不参与 activeModel 兜底与生成守卫，
+ * 与 Cherry Studio 的 provider.isEnabled 语义一致。
+ */
+export function isModelUsable(model: ModelConfig | null | undefined): boolean {
+  if (!model) return false;
+  if (model.isEnabled === false) return false;
+  return isModelConfigured(model);
 }

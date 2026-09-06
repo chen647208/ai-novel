@@ -18,6 +18,7 @@ const WritingEditorCanvas: React.FC<WritingEditorCanvasProps> = ({
   activeChapterId,
   content,
   isFocusMode,
+  typewriter,
   isGenerating,
   isStreaming,
   isBatchGenerating,
@@ -42,6 +43,7 @@ const WritingEditorCanvas: React.FC<WritingEditorCanvasProps> = ({
         isFocusMode={isFocusMode}
         isGenerating={isGenerating}
         isStreaming={isStreaming}
+        typewriter={typewriter}
         onNewChapter={onNewChapter}
         onContentChange={onContentChange}
         onMouseUp={onMouseUp}

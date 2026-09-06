@@ -1,5 +1,5 @@
 {
-  "title": "世界知识库 (Knowledge Base)",
+  "title": "世界知识库",
   "subtitle": "上传设定集、魔法体系、历史年表等资料。AI 在写作时可参考这些内容。",
   "readFailed": "读取文件 {{name}} 失败",
   "formatUnsupported": "文件 {{name}} 格式不支持。目前仅支持 txt, md, json 等纯文本格式。请将 Word 文档另存为 txt 后上传。",

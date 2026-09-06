@@ -65,6 +65,18 @@ describe('isModelConfigured', () => {
     expect(isModelConfigured(model({ provider: 'ollama', endpoint: 'http://localhost:11434/v1' }))).toBe(true);
   });
 
+  it('自定义 presetId（custom-*/gateway-*）按兼容协议判定：仅需 endpoint', () => {
+    expect(
+      isModelConfigured(model({ provider: 'openai-chat', presetId: 'custom-openai', endpoint: 'https://api.x/v1' })),
+    ).toBe(true);
+    expect(
+      isModelConfigured(model({ provider: 'openai-chat', presetId: 'gateway-openai', endpoint: 'https://gw.example/v1' })),
+    ).toBe(true);
+    expect(
+      isModelConfigured(model({ provider: 'gemini', presetId: 'custom-gemini', apiKey: 'AIza-xxx' })),
+    ).toBe(true);
+  });
+
   it('默认模型（DeepSeek 官方渠道未填 key）应判为未配置，触发首启引导', () => {
     const defaultModel = model({
       id: 'default-deepseek',

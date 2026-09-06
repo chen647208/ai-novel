@@ -6,6 +6,7 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+import { logger } from '@/shared/utils/logger';
 
 /**
  * 世界观一致性检查服务
@@ -514,7 +515,7 @@ export async function performAdvancedConsistencyCheck(
       
       aiIssues = convertSemanticIssuesToStandard(semanticResult);
     } catch (error) {
-      console.error('AI语义检查失败:', error);
+      logger.error('AI语义检查失败:', error);
     }
   }
   

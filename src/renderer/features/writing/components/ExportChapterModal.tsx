@@ -16,7 +16,7 @@ import MarkdownView from '@/shared/ui/Markdown';
 import { Button } from '@/shared/ui/Button';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
 import { cn } from '@/shared/utils/cn';
-import { AlignLeft, Check, Code, FileOutput, Globe, type LucideIcon } from 'lucide-react';
+import { AlignLeft, Check, Code, FileOutput, FileText, Globe, type LucideIcon } from 'lucide-react';
 
 interface ExportChapterModalProps {
   isOpen: boolean;
@@ -35,6 +35,7 @@ const FORMAT_OPTIONS: Array<{ value: ExportFormat; label: string; icon: LucideIc
   { value: 'txt', label: 'TXT', icon: AlignLeft },
   { value: 'md', label: 'Markdown', icon: Code },
   { value: 'html', label: 'HTML', icon: Globe },
+  { value: 'rtf', label: 'RTF', icon: FileText },
 ];
 
 const ExportChapterModal: React.FC<ExportChapterModalProps> = ({

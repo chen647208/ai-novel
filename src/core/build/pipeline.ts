@@ -200,10 +200,51 @@ function renderHtml(blocks: DocBlock[], profile: BuildProfile): string {
   return `<!DOCTYPE html>\n<html lang="zh-CN"><head><meta charset="utf-8"><style>body{font-family:'${font}',serif;line-height:${line};}</style></head><body>\n${body}\n</body></html>`;
 }
 
-// 内置渲染器（md/txt/html）
+function escapeRtf(s: string): string {
+  let out = '';
+  for (const ch of s) {
+    const code = ch.codePointAt(0) ?? 0;
+    if (ch === '\\') out += '\\\\';
+    else if (ch === '{') out += '\\{';
+    else if (ch === '}') out += '\\}';
+    else if (ch === '\n') out += ' ';
+    else if (code > 127) out += `\\u${code > 0x7fff ? code - 0x10000 : code}?`;
+    else out += ch;
+  }
+  return out;
+}
+
+/**
+ * RTF 渲染（Word/WPS 可直接打开）：首行为文档头（fonttbl+默认样式），
+ * 尾行是闭合括号；章节标题加粗放大，分页符跟随 profile.render.chapterPageBreak。
+ * 导出侧在首行后插入书名块（见 writing/utils.buildExportContent），故首行须保持单行。
+ */
+function renderRtf(blocks: DocBlock[], profile: BuildProfile): string {
+  const font = profile.render.font ?? 'SimSun';
+  const lines = [
+    `{\\rtf1\\ansi\\ansicpg936\\deff0{\\fonttbl{\\f0 ${font};}}\\viewkind4\\uc1\\pard\\lang2052\\f0\\fs24`,
+  ];
+  for (const b of blocks) {
+    if (b.kind === 'chapter') {
+      const page = profile.render.chapterPageBreak ? '\\page ' : '';
+      lines.push(`${page}{\\b\\fs32 ${escapeRtf(b.text)}}\\par`);
+    } else if (b.kind === 'separator') {
+      lines.push(`${escapeRtf(b.text)}\\par`);
+    } else {
+      for (const p of b.text.split('\n\n')) {
+        lines.push(`${escapeRtf(p)}\\par`);
+      }
+    }
+  }
+  lines.push('}');
+  return lines.join('\n');
+}
+
+// 内置渲染器（md/txt/html/rtf）
 registerRenderer({ id: 'txt', description: '纯文本', render: (b) => renderTxt(b) });
 registerRenderer({ id: 'md', description: 'Markdown', render: (b, p) => renderMd(b, p) });
 registerRenderer({ id: 'html', description: 'HTML（内联样式，可直接打印）', render: (b, p) => renderHtml(b, p) });
+registerRenderer({ id: 'rtf', description: 'RTF（Word/WPS 可直接打开）', render: (b, p) => renderRtf(b, p) });
 
 /** 渲染入口：按 profile.format 找渲染器，未注册则报错。 */
 export function renderDoc(blocks: DocBlock[], profile: BuildProfile): string {

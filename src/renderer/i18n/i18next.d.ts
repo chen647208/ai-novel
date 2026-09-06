@@ -25,6 +25,7 @@ import type zhKnowledge from '../../shared/i18n/locales/zh/knowledge.json';
 import type zhWriting from '../../shared/i18n/locales/zh/writing.json';
 import type zhAssistant from '../../shared/i18n/locales/zh/assistant.json';
 import type zhCards from '../../shared/i18n/locales/zh/cards.json';
+import type zhOnboarding from '../../shared/i18n/locales/zh/onboarding.json';
 
 /**
  * 类型化翻译键：以中文母版字典推导 resources 形状，使 t() 的键与命名空间在编译期受检、
@@ -54,6 +55,7 @@ declare module 'i18next' {
       writing: typeof zhWriting;
       assistant: typeof zhAssistant;
       cards: typeof zhCards;
+      onboarding: typeof zhOnboarding;
     };
   }
 }

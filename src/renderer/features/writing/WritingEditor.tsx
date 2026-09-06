@@ -6,12 +6,13 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+import { logger } from '@/shared/utils/logger';
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { templateDisplayName } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
-import { type AIHistoryRecord, type Chapter, type PromptTemplate, type StreamingAIResponse } from '../../../shared/types';
+import { type AIHistoryRecord, type Chapter, type ModelConfig, type Project, type PromptTemplate, type StreamingAIResponse } from '../../../shared/types';
 import { AIService } from '../assistant/services/aiService';
 import WritingEditorToolbar from './components/WritingEditorToolbar';
 import WritingSidebar from './components/WritingSidebar';
@@ -53,12 +54,49 @@ import {
   type ExportFormat,
 } from './utils';
 import { applySelectionReplacement } from '../../editor/commands';
+import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
+import { PROMPT_KNOWLEDGE_TRUNCATE, isVirtualChapter } from '../../../shared/constants/chapters';
+import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
 
-const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeModel, onUpdate, initialChapterId, onBack }) => {
+const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId, onBack }) => {
   const { t } = useTranslation('writing');
+  // 直读 store：模型/提示词/更新动作不再经 App→View 层层透传
+  const prompts = useSettingsStore((s) => s.prompts);
+  // 手写 bypass 下可能为 undefined：与旧 effectiveModel 透传语义一致
+  const activeModel = useUsableModel() as ModelConfig;
+  const updateActiveProject = useProjectStore((s) => s.updateActiveProject);
+  const onUpdate = useCallback(
+    (updates: Partial<Project>, opts?: CommitOptions) => updateActiveProject(updates, opts),
+    [updateActiveProject],
+  );
+
+  // AI 落笔归因：模板回写正文时标注 agentId + 模板 cause，手写路径不经此函数
+  const commitAIChapters = (chapters: Chapter[], template: PromptTemplate) =>
+    onUpdate({ chapters }, {
+      agentId: template.category === 'edit' ? 'ai:edit' : 'ai:writing',
+      cause: template.id,
+    });
   const [activeChapterId, setActiveChapterId] = useState<string | null>(initialChapterId || null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [lastSaved, setLastSaved] = useState<number>(Date.now());
+  const [saveDirty, setSaveDirty] = useState(false);
+  const [typewriter, setTypewriter] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('editor.typewriter') === '1';
+    } catch {
+      return false;
+    }
+  });
+  const toggleTypewriter = () => {
+    setTypewriter((v) => {
+      try {
+        localStorage.setItem('editor.typewriter', v ? '0' : '1');
+      } catch {
+        // 忽略
+      }
+      return !v;
+    });
+  };
   const [isGenerating, setIsGenerating] = useState(false);
   const [outputMode, setOutputMode] = useState(DEFAULT_OUTPUT_MODE);
   
@@ -136,14 +174,18 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
   // onUpdate 通过 ref 持有最新引用，避免定时器 effect 依赖回调身份
   const onUpdateRef = useRef(onUpdate);
   onUpdateRef.current = onUpdate;
+  const saveDirtyRef = useRef(false);
+  saveDirtyRef.current = saveDirty;
 
   useEffect(() => {
     const timer = setInterval(() => {
+      if (!saveDirtyRef.current) return;
       onUpdateRef.current({});
       setLastSaved(Date.now());
+      setSaveDirty(false);
     }, 10000);
     return () => clearInterval(timer);
-  }, [activeChapter?.content]);
+  }, []);
 
   // ===== 手动编辑快照：定时捕获，防误删/误覆盖 =====
   const projectRef = useRef(project);
@@ -219,11 +261,11 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
 
   const updateChapterContent = (text: string) => {
     if (!activeChapterId) return;
-    const newChapters = project.chapters.map(c => 
+    const newChapters = project.chapters.map(c =>
       c.id === activeChapterId ? { ...c, content: text } : c
     );
     onUpdate({ chapters: newChapters });
-    setLastSaved(Date.now());
+    setSaveDirty(true);
   };
 
   const updateChapterSummary = (summary: string) => {
@@ -254,7 +296,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
   const handleNewChapter = useCallback(() => {
     const chapters = projectRef.current.chapters;
     const nextOrder = chapters.reduce((m, c) => Math.max(m, c.order), -1) + 1;
-    const num = chapters.filter(c => c.order >= 0).length + 1;
+    const num = chapters.filter(c => !isVirtualChapter(c)).length + 1;
     const newChapter: Chapter = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       title: t('canvas.newChapterTitle', { num }),
@@ -404,6 +446,9 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
     const targetChapter = genModal.chapter || activeChapter;
     if (!targetChapter) return;
 
+    // 写前快照：AI 落笔前先保一次，失败可从快照/历史找回（定时/切章快照不覆盖此路径）。
+    snapshotChapterIfDue(targetChapter.id, 'manual');
+
     setIsGenerating(true);
     setMenuPos(null);
     setEditModalOpen(false);
@@ -436,7 +481,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
     if (selectedKnowledgeIds.size > 0 && project.knowledge) {
        const knowledgeContent = project.knowledge
           .filter(k => selectedKnowledgeIds.has(k.id))
-          .map(k => `【参考资料：${k.name}】\n${k.content.substring(0, 10000)}`) // 简单防止过长
+          .map(k => `【参考资料：${k.name}】\n${k.content.substring(0, PROMPT_KNOWLEDGE_TRUNCATE)}`) // 简单防止过长
           .join('\n\n');
        
        if (knowledgeContent) {
@@ -567,7 +612,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
                 }
                 return c;
               });
-              onUpdate({ chapters: updatedChapters });
+              commitAIChapters(updatedChapters, template);
             } else {
               const currentContent = targetChapter.content || "";
               const newContent = currentContent.length < 50 ? result : (currentContent + "\n\n" + result);
@@ -595,7 +640,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
                 }
                 return c;
               });
-              onUpdate({ chapters: newChapters });
+              commitAIChapters(newChapters, template);
             }
             
             setIsGenerating(false);
@@ -604,7 +649,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
           }
         }, { signal: abortController.signal });
       } catch (err) {
-        console.error(err);
+        logger.error(err);
         setIsStreaming(false);
         setIsGenerating(false);
         setStreamingAbortController(null);
@@ -646,7 +691,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
             }
             return c;
           });
-          onUpdate({ chapters: updatedChapters });
+          commitAIChapters(updatedChapters, template);
         } else {
           const currentContent = targetChapter.content || "";
           const newContent = currentContent.length < 50 ? result.content : (currentContent + "\n\n" + result.content);
@@ -674,10 +719,10 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
             }
             return c;
           });
-          onUpdate({ chapters: newChapters });
+          commitAIChapters(newChapters, template);
         }
       } catch (err) {
-        console.error(err);
+        logger.error(err);
         dialogService.alert(t('editor.callFailed'));
       } finally {
         setIsGenerating(false);
@@ -718,7 +763,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
       if (selectedKnowledgeIds.size > 0 && project.knowledge) {
          const knowledgeContent = project.knowledge
             .filter(k => selectedKnowledgeIds.has(k.id))
-            .map(k => `【参考资料：${k.name}】\n${k.content.substring(0, 10000)}`)
+            .map(k => `【参考资料：${k.name}】\n${k.content.substring(0, PROMPT_KNOWLEDGE_TRUNCATE)}`)
             .join('\n\n');
          
          if (knowledgeContent) {
@@ -866,7 +911,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
         return { content: newContent, historyRecord };
       }
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       throw err;
     }
   };
@@ -901,7 +946,8 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
 
         const chapter = chaptersToGenerate[i];
         if (!chapter) continue;
-        
+
+        snapshotChapterIfDue(chapter.id, 'manual');
         setBatchProgress({
           current: i + 1,
           total: chaptersToGenerate.length,
@@ -919,7 +965,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
           
           await new Promise(resolve => setTimeout(resolve, 500));
         } catch (err) {
-          console.error(`生成章节 ${chapter.title} 失败:`, err);
+          logger.error(`生成章节 ${chapter.title} 失败:`, err);
           continue;
         }
       }
@@ -939,14 +985,14 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
           return c;
         });
         
-        onUpdate({ chapters: newChapters });
-        
+        onUpdate({ chapters: newChapters }, { agentId: 'ai:writing-batch', cause: selectedGenPromptId });
+
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
       dialogService.alert(t('editor.batchDone', { count: chapterUpdates.length }));
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       dialogService.alert(t('editor.batchFailed', { error: err instanceof Error ? err.message : t('editor.unknownError') }));
     } finally {
       setIsBatchGenerating(false);
@@ -1022,7 +1068,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
         onUpdate,
       });
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       dialogService.alert(t('editor.extractSummaryFailed'));
     } finally {
       setIsExtractingSummary(false);
@@ -1143,6 +1189,11 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
           overdueForeshadowCount={overdueForeshadowCount}
           isFocusMode={isFocusMode}
           lastSaved={lastSaved}
+          targetWordCount={targetWordCount}
+          typewriter={typewriter}
+          saveDirty={saveDirty}
+          canUndo={editorRef.current?.canUndo() ?? false}
+          canRedo={editorRef.current?.canRedo() ?? false}
           onBack={onBack}
           onTitleChange={updateActiveChapterTitle}
           onOpenExport={handleOpenExportModal}
@@ -1152,6 +1203,9 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
           onOpenChapterHistory={() => setIsHistoryViewerOpen(true)}
           onOpenSidebar={() => setIsSidebarOpen(true)}
           onToggleFocusMode={() => setIsFocusMode((v) => !v)}
+          onToggleTypewriter={toggleTypewriter}
+          onUndo={() => editorRef.current?.undo()}
+          onRedo={() => editorRef.current?.redo()}
           onManualSnapshot={handleManualSnapshot}
         />
 
@@ -1160,6 +1214,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, prompts, activeM
           activeChapterId={activeChapterId}
           content={isStreaming ? streamingContent : (activeChapter?.content || "")}
           isFocusMode={isFocusMode}
+          typewriter={typewriter}
           isGenerating={isGenerating}
           isStreaming={isStreaming}
           isBatchGenerating={isBatchGenerating}

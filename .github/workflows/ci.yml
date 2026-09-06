@@ -7,23 +7,41 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# 同一分支的新提交取消旧的进行中任务
+# 同一分支的新提交取消旧的进行中任务：不浪费 CI 分钟数
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # 变更分类：纯文档改动跳过重构建（Electron 构建是分钟级开销）
+  changes:
+    name: 变更分类
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - name: 检出代码（含历史，供 diff）
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 判断是否含非文档改动
+        id: filter
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          elif git diff --name-only "origin/${{ github.base_ref }}...HEAD" | grep -qEv '\.md$'; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+          fi
+
   verify:
-    name: 类型检查 · 测试 · 构建
+    name: 规范 · 类型 · 测试（含覆盖率锁线）
     runs-on: ubuntu-latest
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
-
-      - name: 安装系统依赖（Electron 运行库，供构建校验）
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgbm-dev libnss3 libatk-bridge2.0-0 libgtk-3-0 libasound2 || true
 
       - name: 配置 Node
         uses: actions/setup-node@v4
@@ -40,14 +58,53 @@ jobs:
       - name: 类型检查（渲染层 + 主进程，strict）
         run: npm run typecheck:all
 
-      - name: 单元测试
-        run: npm run test
+      - name: 单元测试（含覆盖率分层锁线，与本地 verify 一致）
+        run: npm run test:coverage
 
       - name: 校验许可证声明头（AGPL-3.0 / SPDX）
         run: npm run headers:check
+
+      - name: 密钥扫描（零命中门禁）
+        run: |
+          ! git grep -nE 'sk-[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{35}|-----BEGIN [A-Z ]*PRIVATE KEY|xox[bap]-' -- . ':!package-lock.json'
+
+      - name: 文档变迁叙事检查（只写现在）
+        run: |
+          ! grep -rnE '已重构为|换代后|此前是' docs/ src/ --include='*.md' --include='*.ts' --include='*.tsx'
+
+  build:
+    name: 构建校验（Electron）
+    runs-on: ubuntu-latest
+    needs: [verify, changes]
+    if: needs.changes.outputs.code == 'true'
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装系统依赖（Electron 运行库，供构建校验）
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgbm-dev libnss3 libatk-bridge2.0-0 libgtk-3-0 libasound2 xvfb libxss1 libxtst6 libatspi2.0-0 || true
+
+      - name: 配置 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci
+        env:
+          # E2E 只用仓库自带 electron，不下 Playwright 浏览器
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
 
       - name: 构建渲染层与主进程产物
         run: npm run electron:build
 
       - name: 校验图标资源
         run: npm run check:icons
+
+      - name: E2E 启动冒烟（xvfb 无头，数据目录隔离）
+        run: xvfb-run -a npm run test:e2e
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'

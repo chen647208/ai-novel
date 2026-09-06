@@ -91,6 +91,15 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
   setSize,
 }) => {
   const { t, i18n } = useTranslation('assistant');
+  const inputRef = React.useRef<HTMLTextAreaElement>(null);
+
+  // 输入框自增高：随内容（含两行占位符）撑开，上限 max-h-32。
+  React.useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 128)}px`;
+  }, [input]);
   return (
     <>
       <div
@@ -240,8 +249,9 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
               <input type="file" multiple className="hidden" onChange={handleFileUpload} accept=".txt,.md,.json,.js,.ts,.csv" />
             </label>
             <Textarea
-              className="max-h-32 min-h-[40px] flex-1"
-              rows={1}
+              ref={inputRef}
+              className="max-h-32 min-h-[58px] flex-1"
+              rows={2}
               placeholder={t('chat.inputPlaceholder')}
               value={input}
               onChange={(event) => setInput(event.target.value)}

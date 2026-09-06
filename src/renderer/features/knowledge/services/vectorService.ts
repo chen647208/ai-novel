@@ -10,6 +10,7 @@
 import { logger } from '../../../shared/utils/logger';
 import { i18n } from '@/i18n';
 import { type VectorDocument, type SearchResult, type SearchOptions, type CollectionStats, type HybridSearchResult, type HybridSearchOptions, type VectorConsistencyResult, type ElectronAPI, type KnowledgeCategory } from '../../../../shared/types';
+import { DEFAULT_SEMANTIC_WEIGHT, DEFAULT_KEYWORD_WEIGHT } from '../../../../shared/constants/chapters';
 
 type VectorBridgeAPI = NonNullable<ElectronAPI['vector']>;
 
@@ -82,7 +83,7 @@ export class VectorService {
           logger.debug('VectorService initialized successfully (Electron mode)');
           return true;
         } else {
-          console.error('VectorService initialization failed:', result.error);
+          logger.error('VectorService initialization failed:', result.error);
           // 降级到内存模式
           this.isElectronMode = false;
         }
@@ -94,7 +95,7 @@ export class VectorService {
       this.isElectronMode = false;
       return true;
     } catch (error) {
-      console.error('Failed to initialize VectorService:', error);
+      logger.error('Failed to initialize VectorService:', error);
       this.isInitialized = false;
       return false;
     }
@@ -150,7 +151,7 @@ export class VectorService {
       logger.debug(`Added ${ids.length} documents to project ${projectId} (Memory)`);
       return ids;
     } catch (error) {
-      console.error(`Failed to add documents to project ${projectId}:`, error);
+      logger.error(`Failed to add documents to project ${projectId}:`, error);
       throw error;
     }
   }
@@ -192,7 +193,7 @@ export class VectorService {
       });
       return true;
     } catch (error) {
-      console.error(`Failed to update document ${document.id}:`, error);
+      logger.error(`Failed to update document ${document.id}:`, error);
       return false;
     }
   }
@@ -220,7 +221,7 @@ export class VectorService {
       }
       return true;
     } catch (error) {
-      console.error(`Failed to delete documents:`, error);
+      logger.error(`Failed to delete documents:`, error);
       return false;
     }
   }
@@ -230,7 +231,7 @@ export class VectorService {
    */
   private cosineSimilarity(a: number[], b: number[]): number {
     if (a.length !== b.length) {
-      console.warn(`Vector dimension mismatch: ${a.length} vs ${b.length}`);
+      logger.warn(`Vector dimension mismatch: ${a.length} vs ${b.length}`);
       return 0;
     }
 
@@ -283,7 +284,7 @@ export class VectorService {
         if (result.success && result.results) {
           return result.results as SearchResult[];
         } else {
-          console.error('Semantic search failed:', result.error);
+          logger.error('Semantic search failed:', result.error);
           return [];
         }
       }
@@ -322,7 +323,7 @@ export class VectorService {
         .sort((a, b) => b.score - a.score)
         .slice(0, limit);
     } catch (error) {
-      console.error(`Failed to perform semantic search for project ${projectId}:`, error);
+      logger.error(`Failed to perform semantic search for project ${projectId}:`, error);
       return [];
     }
   }
@@ -353,7 +354,7 @@ export class VectorService {
           ...result,
           semanticScore: result.score,
           keywordScore: 0,
-          combinedScore: result.score * (options.semanticWeight || 0.7)
+          combinedScore: result.score * (options.semanticWeight || DEFAULT_SEMANTIC_WEIGHT)
         });
       });
 
@@ -375,8 +376,8 @@ export class VectorService {
           if (existing) {
             existing.keywordScore = keywordScore;
             existing.combinedScore = 
-              (existing.semanticScore * (options.semanticWeight || 0.7)) +
-              (keywordScore * (options.keywordWeight || 0.3));
+              (existing.semanticScore * (options.semanticWeight || DEFAULT_SEMANTIC_WEIGHT)) +
+              (keywordScore * (options.keywordWeight || DEFAULT_KEYWORD_WEIGHT));
           }
         });
       }
@@ -386,7 +387,7 @@ export class VectorService {
         .sort((a, b) => b.combinedScore - a.combinedScore)
         .slice(0, options.limit || 10);
     } catch (error) {
-      console.error(`Failed to perform hybrid search for project ${projectId}:`, error);
+      logger.error(`Failed to perform hybrid search for project ${projectId}:`, error);
       return [];
     }
   }
@@ -408,7 +409,7 @@ export class VectorService {
         if (result.success && result.stats) {
           return result.stats as CollectionStats;
         } else {
-          console.error('Get stats failed:', result.error);
+          logger.error('Get stats failed:', result.error);
         }
       }
       
@@ -435,7 +436,7 @@ export class VectorService {
         lastUpdated: Date.now()
       };
     } catch (error) {
-      console.error(`Failed to get stats for project ${projectId}:`, error);
+      logger.error(`Failed to get stats for project ${projectId}:`, error);
       return {
         count: 0,
         dimensions: dimensions || 384,
@@ -465,7 +466,7 @@ export class VectorService {
       this.memoryCollections.delete(projectId);
       return true;
     } catch (error) {
-      console.error(`Failed to cleanup collection for project ${projectId}:`, error);
+      logger.error(`Failed to cleanup collection for project ${projectId}:`, error);
       return false;
     }
   }
@@ -533,7 +534,7 @@ export class VectorService {
         score: conflicts.length === 0 ? 1.0 : Math.max(0, 1 - conflicts.length * 0.1)
       };
     } catch (error) {
-      console.error(`Failed to check consistency for project ${projectId}:`, error);
+      logger.error(`Failed to check consistency for project ${projectId}:`, error);
       return {
         isConsistent: false,
         conflicts: [{

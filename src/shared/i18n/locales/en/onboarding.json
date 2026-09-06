@@ -1,0 +1,25 @@
+{
+  "title": "Welcome to AI Novelist",
+  "subtitle": "Pick a writing style to start. You can change it in Settings anytime",
+  "persona": {
+    "hand": {
+      "title": "Handwriting",
+      "desc": "Pure local writing with outline, chapters and snapshots. No model needed"
+    },
+    "assisted": {
+      "title": "AI Assisted",
+      "desc": "Write yourself, let AI polish and expand when stuck. One provider is enough"
+    },
+    "ai": {
+      "title": "Full AI",
+      "desc": "AI drafts the outline and chapters. Set up providers and embedding models"
+    }
+  },
+  "suggestAssisted": "Tip: add 1 official provider (just fill in the Key), add a gateway later if needed.",
+  "suggestAi": "Tip: add 1 main provider + 1 embedding model (SiliconFlow bge-m3 is the easy choice).",
+  "openSettings": "Open settings",
+  "bookNameLabel": "Name your first book",
+  "bookNamePlaceholder": "e.g. Letters from Fog Harbor",
+  "defaultBookTitle": "Untitled book",
+  "start": "Start writing"
+}

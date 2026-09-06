@@ -7,7 +7,7 @@
 本仓库源码在 **GNU Affero General Public License v3.0**（见 `LICENSE`）下授权。要点：
 
 - **强传染性（copyleft）**：任何分发或基于本项目的衍生作品，必须以 AGPL-3.0 开源完整对应源码。
-- **网络服务条款（第 13 条）**：即使不"分发"二进制，只要让用户通过网络（如 SaaS、Web 服务）使用修改版，也必须向这些用户提供源码。这堵住了"云端托管规避开源"的漏洞。
+- **网络服务条款（第 13 条）**：通过网络向用户提供修改版服务（如 SaaS、Web 服务）时，同样必须向这些用户提供完整源码；不分发二进制也不能免除该义务。
 - **允许商用**：AGPL 本身不禁止商业使用；但商用者若不愿开源其改动，就必须走下面的商业授权。
 
 ## 商业版：专有授权
@@ -29,12 +29,12 @@
 
 - 协议正文：`docs/CLA.md`（贡献者保留版权，授予维护者永久、不可撤销、可再许可含闭源商用的版权与专利许可）。
 - 贡献指南：`CONTRIBUTING.md`；PR 模板含 CLA 确认项。
-- 校验工具：**cla-assistant**，配置见仓库根 `.classistant.json`，在 Pull Request 上自动检查签署状态。
+- 校验工具：**cla-assistant**，配置见仓库根 `.cla-assistant.json`，在 Pull Request 上自动检查签署状态。
 
 ### 启用 cla-assistant（一次性，需仓库管理员操作）
 
 1. 安装 GitHub App：访问 https://cla-assistant.io ，用仓库管理员账号登录并授权 `chen647208/ai-novel` 仓库。
-2. cla-assistant 会读取仓库根的 `.classistant.json`，其中 `path` 指向 `docs/CLA.md`。
+2. cla-assistant 会读取仓库根的 `.cla-assistant.json`，其中 `path` 指向 `docs/CLA.md`。
 3. 在仓库 Settings → Branches 对 `main` 开启分支保护，并把 cla-assistant 的 `license/cla` 状态检查设为必需（Required check），未签署 CLA 的 PR 即无法合并。
 4. 建议创建两个标签 `cla: yes` / `cla: no`（配置已引用）。
 

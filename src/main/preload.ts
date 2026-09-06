@@ -63,4 +63,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
       return () => ipcRenderer.removeListener(IPC.ai.streamEvent, handler);
     },
   },
+  // 安全密钥库（safeStorage/OS 钥匙串；渲染端只持 vault: 引用）
+  vault: {
+    isAvailable: () => ipcRenderer.invoke(IPC.vault.isAvailable),
+    set: (id: string, plaintext: string) => ipcRenderer.invoke(IPC.vault.set, id, plaintext),
+    get: (id: string) => ipcRenderer.invoke(IPC.vault.get, id),
+    remove: (id: string) => ipcRenderer.invoke(IPC.vault.remove, id),
+  },
 });

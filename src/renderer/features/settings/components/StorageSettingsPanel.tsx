@@ -6,6 +6,7 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+import { logger } from '@/shared/utils/logger';
 
 import React from 'react';
 import { useTranslation } from '@/i18n';
@@ -163,7 +164,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                             setStorageConfig({ ...storageConfig, dataPath: result.filePaths[0] ?? '' });
                           }
                         } catch (error) {
-                          console.error('选择目录失败:', error);
+                          logger.error('选择目录失败:', error);
                         }
                       } else {
                         dialogService.alert(t('storage.electronUnavailable'));
@@ -242,7 +243,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                             // 暂时先显示提示
                             dialogService.alert(t('storage.manualBackupNote'));
                           } catch (error) {
-                            console.error('手动备份失败:', error);
+                            logger.error('手动备份失败:', error);
                           }
                         }}
                       >

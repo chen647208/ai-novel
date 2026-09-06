@@ -164,6 +164,12 @@ export class SqliteRepository implements StorageRepository {
     if (lang === 'zh' || lang === 'en') state.language = lang;
     const theme = meta.get('theme');
     if (theme === 'light' || theme === 'dark' || theme === 'system') state.theme = theme;
+    const uiFont = meta.get('uiFont');
+    if (typeof uiFont === 'string' && uiFont.length > 0) state.uiFont = uiFont;
+    const editorFont = meta.get('editorFont');
+    if (typeof editorFont === 'string' && editorFont.length > 0) state.editorFont = editorFont;
+    const customFonts = parse<AppState['customFonts']>('customFonts');
+    if (Array.isArray(customFonts)) state.customFonts = customFonts;
     return state;
   }
 
@@ -274,7 +280,7 @@ export class SqliteRepository implements StorageRepository {
       await tx.run(`DELETE FROM nodes_fts`, []);
       await tx.run(`DELETE FROM settings`, []);
       await tx.run(
-        `DELETE FROM meta WHERE key IN ('activeProjectId','activeModelId','activeEmbeddingModelId','language','theme')`,
+        `DELETE FROM meta WHERE key IN ('activeProjectId','activeModelId','activeEmbeddingModelId','language','theme','uiFont','editorFont')`,
         []
       );
     });

@@ -38,15 +38,3 @@ export function dtList(key: string): string[] {
   });
   return Array.isArray(value) ? (value as string[]) : [];
 }
-
-/**
- * 取对象/对象数组型译文（如版本更新日志映射、版本历史条目数组）。
- * 键含点号（版本号）或值为对象数组时无法用类型化键或 dtList，按调用时语言以 returnObjects 解析。
- * 缺失或非对象时返回 fallback（默认空对象），调用方自行按结构使用。
- */
-export function dtObject<T>(key: string, fallback: T): T {
-  const value = (i18n.t.bind(i18n) as (k: string, o?: Record<string, unknown>) => unknown)(key, {
-    returnObjects: true,
-  });
-  return value && typeof value === 'object' ? (value as T) : fallback;
-}
