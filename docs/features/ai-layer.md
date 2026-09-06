@@ -20,6 +20,9 @@ AI 调用采用「主进程网关 + 渲染端客户端 + 工具/审批/会话」
 - `adapters/`：anthropic / gemini（原生 + OpenAI 兼容端点 + SDK）/ openai-compatible
   （含 ollama）/ openai-responses 四适配器 + `sse`（增量解析）/ `retry`
   （指数退避、Retry-After）/ `messages`（构建/清洗/用量提取）。
+- 缓存：anthropic 在 system 块与末条 user 消息打 ephemeral 断点（对标 OpenCode，
+  Agent 循环前缀稳定可复用，用量透出 cacheRead/cacheWrite）；
+  openai/gemini 走服务端自动前缀缓存，无需客户端标记。
 - `i18n.ts`：主进程独立 i18next 实例（errors 命名空间），字典与渲染端同源
   `src/shared/i18n`。
 

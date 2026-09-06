@@ -133,6 +133,26 @@ describe('runAgentSession', () => {
     expect(result.ok).toBe(true);
   });
 
+  it('末轮硬切文本：上限轮不再执行工具，收口答复为准', async () => {
+    const call = '{"reply":"","toolCalls":[{"callId":"c1","toolId":"core.index.query","args":{"query":"tags"}}]}';
+    const { deps, session } = makeDeps([call, call, '{"reply":"收口结论"}'], { maxTurns: 2 });
+    const result = await runAgentSession(deps, '长链');
+    expect(result.ok).toBe(true);
+    expect(result.turns).toBe(2);
+    expect(result.reply).toBe('收口结论');
+    // 上限轮的调用未执行：只有第一轮的 tool.result
+    expect(session.events.filter((e) => e.t === 'tool.result')).toHaveLength(1);
+  });
+
+  it('同一工具组合连调三轮即判定转圈停止', async () => {
+    const same = '{"reply":"","toolCalls":[{"callId":"c","toolId":"core.index.query","args":{"query":"tags"}}]}';
+    const { deps } = makeDeps([same], { maxTurns: 10 });
+    const result = await runAgentSession(deps, '转圈');
+    expect(result.ok).toBe(true);
+    expect(result.turns).toBe(3);
+    expect(result.reply).toContain('重复');
+  });
+
   it('工具执行上下文透传 modelConfig/services（宿主注入不断裂）', async () => {
     const seen: { modelConfig?: unknown; services?: unknown; project?: unknown } = {};
     const capture: ToolSpec = {

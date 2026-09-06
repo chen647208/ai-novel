@@ -99,19 +99,37 @@ describe('anthropicAdapter.complete', () => {
     const body = JSON.parse(init.body as string);
     expect(body.max_tokens).toBe(8192);
     expect(body.temperature).toBe(1);
-    expect(body.messages).toEqual([{ role: 'user', content: 'hi' }]);
+    expect(body.messages).toEqual([
+      { role: 'user', content: [{ type: 'text', text: 'hi', cache_control: { type: 'ephemeral' } }] },
+    ]);
     expect(body.system).toBeUndefined();
   });
 
-  it('system 提示词走顶层 system 字段，不混入 messages；maxTokens 显式则透传', async () => {
+  it('system 提示词走顶层 system 块（带缓存断点），不混入 messages；maxTokens 显式则透传', async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ content: [{ type: 'text', text: 'ok' }] }));
     vi.stubGlobal('fetch', fetchMock);
     await anthropicAdapter.complete({ ...baseModel, systemPrompt: '你是小说家', maxTokens: 4096 }, 'hi');
     const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     const body = JSON.parse(init.body as string);
-    expect(body.system).toBe('你是小说家');
-    expect(body.messages).toEqual([{ role: 'user', content: 'hi' }]);
+    expect(body.system).toEqual([{ type: 'text', text: '你是小说家', cache_control: { type: 'ephemeral' } }]);
+    expect(body.messages).toEqual([
+      { role: 'user', content: [{ type: 'text', text: 'hi', cache_control: { type: 'ephemeral' } }] },
+    ]);
     expect(body.max_tokens).toBe(4096);
+  });
+
+  it('响应 usage 含缓存计数时透出 cacheRead/cacheWrite', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          content: [{ type: 'text', text: 'ok' }],
+          usage: { input_tokens: 1200, output_tokens: 30, cache_creation_input_tokens: 1100, cache_read_input_tokens: 100 },
+        }),
+      ),
+    );
+    const r = await anthropicAdapter.complete(baseModel, 'hi');
+    expect(r.tokens).toEqual({ prompt: 1200, completion: 30, total: 1230, cacheRead: 100, cacheWrite: 1100 });
   });
 
   it('缺少 API Key 直接返回错误，不发请求', async () => {

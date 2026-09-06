@@ -56,6 +56,10 @@ export interface TokenUsage {
   prompt: number;
   completion: number;
   total: number;
+  /** 缓存命中读入（Anthropic cache_read_input_tokens；OpenAI/Gemini 自动缓存不透出则缺席） */
+  cacheRead?: number;
+  /** 缓存写入（Anthropic cache_creation_input_tokens） */
+  cacheWrite?: number;
 }
 
 /**

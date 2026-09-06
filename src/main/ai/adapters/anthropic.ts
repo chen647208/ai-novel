@@ -17,6 +17,9 @@
  *  - temperature 合法区间 0–1，超出自动收敛（小说默认温度 1.0 恰在上界）；
  *  - system 提示词走顶层 system 字段，不混入 messages；
  *  - 流式为 SSE，事件 message_start / content_block_delta(text_delta) / message_delta / message_stop。
+ * 缓存（对标 OpenCode 的做法）：system 块与最后一条 user 消息打 ephemeral breakpoint
+ *  （上限 4 个，这里用 2 个）；Agent 循环每轮 prompt = 同一前缀 + 追加观察，
+ *  前缀命中缓存，只有尾部增量按全价计费。OpenAI/Gemini 走服务端自动前缀缓存，无需客户端标记。
  */
 import { aiT } from '../i18n.js';
 import type { ModelConfig, AIResponse, StreamingAIResponse } from '../../../shared/types.js';
@@ -41,15 +44,36 @@ interface AnthropicContentBlock {
 interface AnthropicResponse {
   content?: AnthropicContentBlock[];
   stop_reason?: string | null;
-  usage?: { input_tokens?: number; output_tokens?: number };
+  usage?: {
+    input_tokens?: number;
+    output_tokens?: number;
+    cache_creation_input_tokens?: number;
+    cache_read_input_tokens?: number;
+  };
 }
 interface AnthropicStreamEvent {
   type?: string;
   delta?: { type?: string; text?: string; stop_reason?: string };
   message?: AnthropicResponse;
-  usage?: { input_tokens?: number; output_tokens?: number };
+  usage?: {
+    input_tokens?: number;
+    output_tokens?: number;
+    cache_creation_input_tokens?: number;
+    cache_read_input_tokens?: number;
+  };
   error?: { message?: string };
 }
+
+/** prompt 缓存断点（ephemeral，5 分钟 TTL；Anthropic 单请求上限 4 个）。 */
+const CACHE_BREAKPOINT = { type: 'ephemeral' } as const;
+
+interface AnthropicTextBlock {
+  type: 'text';
+  text: string;
+  cache_control?: typeof CACHE_BREAKPOINT;
+}
+
+type AnthropicMessageContent = string | AnthropicTextBlock[];
 
 /**
  * 规范化 Messages 端点：兼容两种 base 形态。
@@ -71,12 +95,26 @@ export function clampAnthropicTemperature(value: number | undefined): number {
   return Math.min(1, Math.max(0, t));
 }
 
-function anthropicPayload(model: ModelConfig, prompt: string): { system?: string; messages: Array<{ role: 'user' | 'assistant'; content: string }> } {
+function anthropicPayload(
+  model: ModelConfig,
+  prompt: string,
+): {
+  system?: AnthropicTextBlock[];
+  messages: Array<{ role: 'user' | 'assistant'; content: AnthropicMessageContent }>;
+} {
   const chat = buildMessages(model, prompt);
-  const system = chat.filter((m) => m.role === 'system').map((m) => m.content).join('\n\n') || undefined;
-  const messages = chat
-    .filter((m) => m.role !== 'system')
-    .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+  const systemText = chat.filter((m) => m.role === 'system').map((m) => m.content).join('\n\n') || undefined;
+  // system 整体打一个断点：身份/世界观/工具清单是大块稳定前缀，跨轮复用
+  const system = systemText ? [{ type: 'text' as const, text: systemText, cache_control: CACHE_BREAKPOINT }] : undefined;
+  const rest = chat.filter((m) => m.role !== 'system');
+  const messages = rest.map((m, i) => {
+    const role = m.role as 'user' | 'assistant';
+    // 最后一条 user 消息打断点：本轮新增的工具观察拼在尾部，下轮成为缓存前缀
+    if (role === 'user' && i === rest.length - 1) {
+      return { role, content: [{ type: 'text' as const, text: m.content, cache_control: CACHE_BREAKPOINT }] };
+    }
+    return { role, content: m.content };
+  });
   return { system, messages };
 }
 
@@ -192,11 +230,19 @@ export const anthropicAdapter: ProviderAdapter = {
     let finishReason: string | undefined;
     let promptTokens = 0;
     let completionTokens = 0;
+    let cacheRead: number | undefined;
+    let cacheWrite: number | undefined;
     let streamError: string | undefined;
 
     const currentTokens = (): AIResponse['tokens'] =>
       promptTokens || completionTokens
-        ? { prompt: promptTokens, completion: completionTokens, total: promptTokens + completionTokens }
+        ? {
+            prompt: promptTokens,
+            completion: completionTokens,
+            total: promptTokens + completionTokens,
+            ...(cacheRead !== undefined ? { cacheRead } : {}),
+            ...(cacheWrite !== undefined ? { cacheWrite } : {}),
+          }
         : undefined;
 
     try {
@@ -221,6 +267,12 @@ export const anthropicAdapter: ProviderAdapter = {
         switch (parsed.type) {
           case 'message_start':
             promptTokens = parsed.message?.usage?.input_tokens ?? promptTokens;
+            if (typeof parsed.message?.usage?.cache_read_input_tokens === 'number') {
+              cacheRead = parsed.message.usage.cache_read_input_tokens;
+            }
+            if (typeof parsed.message?.usage?.cache_creation_input_tokens === 'number') {
+              cacheWrite = parsed.message.usage.cache_creation_input_tokens;
+            }
             break;
           case 'content_block_delta': {
             const delta = parsed.delta;

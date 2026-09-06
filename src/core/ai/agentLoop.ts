@@ -66,7 +66,13 @@ export interface AgentTurnResult {
   error?: string;
 }
 
-const DEFAULT_MAX_TURNS = 4;
+const DEFAULT_MAX_TURNS = 30;
+
+/**
+ * 同一工具组合连续重复阈值：达到即判定转圈并收口（OpenCode doom-loop 熔断的轻量版——
+ * 那里阈值 3 次相同调用后弹审批问用户，这里直接停并告诉模型换路）。
+ */
+const DOOM_LOOP_THRESHOLD = 3;
 
 /** 解析模型回复为 {reply, toolCalls}；容忍围栏与多余文字。 */
 export function parseAgentReply(content: string): AgentModelReply {
@@ -120,6 +126,8 @@ export async function runAgentSession(deps: AgentLoopDeps, task: string): Promis
   let prompt = assembled.prompt;
   let lastReply = '';
   let turn = 0;
+  let prevTurnSig = '';
+  let repeatStreak = 0;
 
   try {
     for (turn = 1; turn <= maxTurns; turn++) {
@@ -139,6 +147,35 @@ export async function runAgentSession(deps: AgentLoopDeps, task: string): Promis
 
       const calls = parsed.toolCalls ?? [];
       if (!calls.length) break;
+
+      // 熔断 1：末轮硬切文本（对标 OpenCode 的 steps 语义——上限轮不再执行工具，
+      // 只追加收口指令取最终答复；软提示会被部分模型无视，见 anomalyco/opencode#3743）
+      if (turn === maxTurns) {
+        const closing = await deps.complete(
+          deps.model,
+          `${prompt}\n\n【轮数已达上限】不再调用工具，直接给出当前结论：已完成什么、还差什么、下一步建议。`,
+          0,
+        );
+        if (!closing.error) {
+          await deps.session.emit({ t: 'llm.done', turn, at: Date.now() });
+          lastReply = parseAgentReply(closing.content).reply || lastReply;
+        }
+        await deps.session.emit({ t: 'turn.end', turn, turns: turn, at: Date.now() });
+        break;
+      }
+
+      // 熔断 2：同一工具组合连续重复（转圈）即停，不再浪费轮数
+      const sig = calls.map((c) => `${c.toolId}:${JSON.stringify(c.args)}`).join('|');
+      if (sig === prevTurnSig) {
+        repeatStreak += 1;
+      } else {
+        prevTurnSig = sig;
+        repeatStreak = 1;
+      }
+      if (repeatStreak >= DOOM_LOOP_THRESHOLD) {
+        lastReply = `${lastReply}\n\n[连续 ${repeatStreak} 轮重复同一工具调用，已停止。请换个问法、缩小范围或补充信息后重试。]`.trim();
+        break;
+      }
 
       // 工具结果以结构化文本回填，驱动下一轮
       const observations: string[] = [];
@@ -183,10 +220,6 @@ export async function runAgentSession(deps: AgentLoopDeps, task: string): Promis
       }
 
       prompt = `${assembled.prompt}\n\n【工具执行记录】\n${observations.join('\n')}\n\n请基于以上工具结果继续：如已完成请直接给出答复；如需更多工具调用请输出 JSON。`;
-      if (turn === maxTurns) {
-        await deps.session.emit({ t: 'turn.end', turn, turns: turn, at: Date.now() });
-        break;
-      }
     }
 
     await deps.session.emit({ t: 'turn.end', turn, turns: turn, at: Date.now() });

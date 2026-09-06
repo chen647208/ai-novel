@@ -54,13 +54,25 @@ export function extractGeminiTokenUsage(data: unknown): TokenUsage | undefined {
   };
 }
 
-/** 从 Anthropic Messages 响应体提取 token 用量（input_tokens / output_tokens） */
+/** 从 Anthropic Messages 响应体提取 token 用量（含缓存读写计数） */
 export function extractAnthropicTokenUsage(data: unknown): TokenUsage | undefined {
-  const usage = (data as { usage?: { input_tokens?: number; output_tokens?: number } })?.usage;
+  const usage = (
+    data as {
+      usage?: {
+        input_tokens?: number;
+        output_tokens?: number;
+        cache_creation_input_tokens?: number;
+        cache_read_input_tokens?: number;
+      };
+    }
+  )?.usage;
   if (!usage) return undefined;
   const prompt = usage.input_tokens ?? 0;
   const completion = usage.output_tokens ?? 0;
-  return { prompt, completion, total: prompt + completion };
+  const result: TokenUsage = { prompt, completion, total: prompt + completion };
+  if (typeof usage.cache_read_input_tokens === 'number') result.cacheRead = usage.cache_read_input_tokens;
+  if (typeof usage.cache_creation_input_tokens === 'number') result.cacheWrite = usage.cache_creation_input_tokens;
+  return result;
 }
 
 /** 从 OpenAI Responses API 响应体提取 token 用量（input_tokens / output_tokens / total_tokens） */
