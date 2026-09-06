@@ -171,7 +171,7 @@ const App: React.FC = () => {
           </div>
         ) : (
           <div className="flex min-w-0 flex-1">
-            <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 flex-1">
               <WorkspaceView
             section={section}
             activeProject={activeProject}

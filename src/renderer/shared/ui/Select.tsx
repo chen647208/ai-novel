@@ -93,7 +93,7 @@ export function Select({ className, children, value, defaultValue, onChange, dis
           'flex h-9 w-full items-center justify-between gap-2 whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-left text-sm shadow-sm',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60',
           'disabled:cursor-not-allowed disabled:opacity-50',
-          'data-[placeholder]:text-muted-foreground [&>span:last-child]:truncate',
+          'data-[placeholder]:text-muted-foreground [&>span:first-child]:truncate',
           className
         )}
         id={id}
