@@ -224,7 +224,8 @@
     "enterFocusTitle": "进入专注模式",
     "exitFocusTitle": "退出专注模式",
     "charCountLabel": "字数: ",
-    "autoSave": "自动保存: {{time}}"
+    "autoSave": "自动保存: {{time}}",
+    "unsaved": "未保存"
   },
   "editModal": {
     "title": "AI 润色与扩写",
@@ -301,7 +302,11 @@
   "canvas": {
     "placeholderReady": "泼墨挥毫，选中文字可唤出 AI 润色工具...",
     "placeholderEmpty": "请点击左侧目录选择章节...",
-    "newChapterTitle": "第{{num}}章"
+    "newChapterTitle": "第{{num}}章",
+    "emptyBookTitle": "还没有章节",
+    "emptyBookHint": "先建第一章，或回结构页用 AI 生成章节细纲后再来写作。",
+    "createFirstChapter": "新建第一章",
+    "backToStructure": "回结构页"
   },
   "utils": {
     "tokenUsage": "输入: {{input}} | 输出: {{output}} | 总计: {{total}}",

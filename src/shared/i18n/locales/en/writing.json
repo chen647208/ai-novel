@@ -224,7 +224,8 @@
     "enterFocusTitle": "Enter focus mode",
     "exitFocusTitle": "Exit focus mode",
     "charCountLabel": "Characters: ",
-    "autoSave": "Autosaved: {{time}}"
+    "autoSave": "Autosaved: {{time}}",
+    "unsaved": "Unsaved"
   },
   "editModal": {
     "title": "AI Polish & Expansion",
@@ -301,7 +302,11 @@
   "canvas": {
     "placeholderReady": "Start writing; select text to summon the AI polish tools...",
     "placeholderEmpty": "Pick a chapter from the catalog on the left...",
-    "newChapterTitle": "Chapter {{num}}"
+    "newChapterTitle": "Chapter {{num}}",
+    "emptyBookTitle": "No chapters yet",
+    "emptyBookHint": "Create the first chapter, or go back to Structure to generate chapter plans with AI first.",
+    "createFirstChapter": "Create first chapter",
+    "backToStructure": "Back to Structure"
   },
   "utils": {
     "tokenUsage": "Input: {{input}} | Output: {{output}} | Total: {{total}}",

@@ -30,6 +30,7 @@ import { BookHeart, Plug } from 'lucide-react';
 
 export interface WorkspaceViewProps {
   section: SectionId;
+  structureSub?: 'outline' | 'chapters';
   activeProject: Project | null;
   activeModel: ModelConfig | undefined;
   prompts: PromptTemplate[];
@@ -39,7 +40,7 @@ export interface WorkspaceViewProps {
   editingChapterId: string | null;
   assistantOpen?: boolean;
   onToggleAssistant?: () => void;
-  onSectionChange: (next: SectionId) => void;
+  onSectionChange: (next: SectionId, sub?: 'outline' | 'chapters') => void;
   onOpenBookshelf: () => void;
   onOpenSettings: () => void;
   onDeleteProject: () => void;
@@ -53,7 +54,7 @@ export interface WorkspaceViewProps {
 }
 
 const WorkspaceSection: React.FC<WorkspaceViewProps> = ({
-  section, activeProject, activeModel, focusCharacterId, editingChapterId,
+  section, structureSub, activeProject, activeModel, focusCharacterId, editingChapterId,
   onSectionChange, onOpenBookshelf, onOpenSettings,
   onNavigateToCharacter, onNavigateToChapter,
 }) => {
@@ -125,6 +126,7 @@ const WorkspaceSection: React.FC<WorkspaceViewProps> = ({
       content = (
         <StructureSection
           project={activeProject}
+          initialSub={structureSub}
           onEnterWriting={(id) => onNavigateToChapter(id)}
         />
       );

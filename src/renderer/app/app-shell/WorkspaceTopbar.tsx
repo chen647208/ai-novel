@@ -40,7 +40,7 @@ interface WorkspaceTopbarProps {
   section: SectionId;
   assistantOpen?: boolean;
   onToggleAssistant?: () => void;
-  onSectionChange: (next: SectionId) => void;
+  onSectionChange: (next: SectionId, sub?: 'outline' | 'chapters') => void;
   onRenameBook: (bookId: string, newTitle: string) => void;
   onThemeChange: (theme: AppTheme) => void;
   onOpenBookshelf: () => void;
@@ -86,9 +86,10 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
     setEditingTitle(false);
   };
 
-  // 引导建议：第一个未填充的分区；已在该分区或用户关闭则不提示
+  // 引导建议：第一个未填充的分区；进结构页时深链到缺的那一段（缺大纲→大纲，否则细纲）
   const suggested = project ? suggestNextSection(project) : null;
   const showHint = !!project && !hintDismissed && suggested && suggested !== section;
+  const suggestedSub = suggested === 'structure' && project && !project.outline?.trim() ? 'outline' as const : 'chapters' as const;
   const suggestedLabel = suggested
     ? t(`nav:${WORKSPACE_SECTIONS.find((s) => s.id === suggested)?.labelKey ?? 'steps.writing'}`)
     : '';
@@ -142,7 +143,7 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
             <Compass className="size-3 text-primary" />
             <button
               type="button"
-              onClick={() => onSectionChange(suggested)}
+              onClick={() => onSectionChange(suggested, suggested === 'structure' ? suggestedSub : undefined)}
               className="text-primary hover:underline"
               title={t('app:topbar.guidedGoTip')}
             >

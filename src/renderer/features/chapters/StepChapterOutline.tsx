@@ -158,6 +158,18 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
     }
   };
 
+  // 章节 prompt 上下文块：人物设定 + 书名简介（模板无占位符时追加，保证不断联）
+  const buildChapterContextBlock = (p: Project): string => {
+    const charDetails = (p.characters ?? [])
+      .slice(0, 12)
+      .map((c) => `【${c.name}】(${c.role})：${c.personality ?? ''}`)
+      .join('\n');
+    const parts = ['', '### 本书设定（规划细纲必须服从）', `书名：《${p.title}》`];
+    if (p.intro?.trim()) parts.push(`简介：${p.intro}`);
+    if (charDetails) parts.push(`人物：\n${charDetails}`);
+    return parts.join('\n');
+  };
+
   const generateChapters = async (isContinue: boolean = false) => {
     if (!project.outline) {
       dialogService.alert(t('steps:chapters.noOutline'));
@@ -189,10 +201,12 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
           .replace('{outline}', project.outline)
           .replace('{count}', project.chapters.length.toString())
           .replace('{next_count}', (project.chapters.length + 1).toString())
-          .replace('{existing_chapters}', existingInfo);
+          .replace('{existing_chapters}', existingInfo)
+          + buildChapterContextBlock(project);
       } else {
-        // 全量生成模式
+        // 全量生成模式：带上人物与书名简介（与大纲页同口径），细纲不断联
         finalPrompt = template.replace('{outline}', project.outline);
+        finalPrompt += buildChapterContextBlock(project);
       }
       
       // Inject Knowledge
@@ -217,7 +231,20 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
         if (isContinue) {
           onUpdate({ chapters: [...project.chapters, ...parsedChapters] }, { agentId: 'ai:chapters', cause: selectedPromptId });
         } else {
-          onUpdate({ chapters: parsedChapters }, { agentId: 'ai:chapters', cause: selectedPromptId });
+          // 全量生成按 order 合并：既有章节的正文/历史/快照/摘要原位保留，只更新标题与细纲；
+          // 超出 AI 输出范围的既有章节保留（防丢手写章）
+          const prevByOrder = new Map(project.chapters.map((c) => [c.order, c]));
+          const merged = parsedChapters.map((pc) => {
+            const prev = prevByOrder.get(pc.order);
+            return prev
+              ? { ...pc, id: prev.id, content: prev.content, history: prev.history, snapshots: prev.snapshots, contentSummary: prev.contentSummary }
+              : pc;
+          });
+          const kept = project.chapters.filter((c) => !merged.some((m) => m.order === c.order));
+          onUpdate(
+            { chapters: [...merged, ...kept].sort((a, b) => a.order - b.order) },
+            { agentId: 'ai:chapters', cause: selectedPromptId },
+          );
         }
       } else {
         dialogService.alert(t('steps:chapters.unrecognized'));
@@ -401,7 +428,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
         </Card>
 
         <Card className="flex min-h-0 flex-col overflow-hidden rounded-lg p-0 lg:col-span-3">
-          <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
+          <div className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-border px-4">
             <span className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
               <LayoutList className="size-3.5" /> {t('steps:chapters.chapterListPreview', { count: project.chapters.length })}
             </span>

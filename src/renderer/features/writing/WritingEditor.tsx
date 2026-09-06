@@ -54,6 +54,8 @@ import {
   type ExportFormat,
 } from './utils';
 import { applySelectionReplacement } from '../../editor/commands';
+import { Button } from '@/shared/ui/Button';
+import { EmptyState } from '@/shared/ui/EmptyState';
 import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
 import { PROMPT_KNOWLEDGE_TRUNCATE, isVirtualChapter } from '../../../shared/constants/chapters';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
@@ -168,8 +170,16 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   useEffect(() => {
     if (initialChapterId) {
       setActiveChapterId(initialChapterId);
-    } 
+    }
   }, [initialChapterId]);
+
+  // 左栏直达写作时没有活动章：有章则默认选中第一章，无章则画布显示建章 CTA
+  useEffect(() => {
+    if (!activeChapterId && project.chapters.length > 0) {
+      const first = [...project.chapters].sort((a, b) => a.order - b.order)[0];
+      if (first) setActiveChapterId(first.id);
+    }
+  }, [activeChapterId, project.chapters]);
 
   // onUpdate 通过 ref 持有最新引用，避免定时器 effect 依赖回调身份
   const onUpdateRef = useRef(onUpdate);
@@ -1209,6 +1219,20 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           onManualSnapshot={handleManualSnapshot}
         />
 
+        {project.chapters.length === 0 ? (
+          <div className="flex flex-1 items-center justify-center">
+            <EmptyState
+              title={t('canvas.emptyBookTitle')}
+              description={t('canvas.emptyBookHint')}
+              action={
+                <div className="flex items-center gap-2">
+                  <Button onClick={handleNewChapter}>{t('canvas.createFirstChapter')}</Button>
+                  <Button variant="ghost" onClick={onBack}>{t('canvas.backToStructure')}</Button>
+                </div>
+              }
+            />
+          </div>
+        ) : (
         <WritingEditorCanvas
           editorRef={editorRef}
           activeChapterId={activeChapterId}
@@ -1230,6 +1254,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           onStopStreaming={stopStreaming}
           onStopBatchGeneration={stopBatchGeneration}
         />
+        )}
       </div>
 
       <ForeshadowPanel

@@ -7,39 +7,49 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from '@/i18n';
 import type { Project } from '../../../shared/types';
 import StepOutline from '../../features/outline/StepOutline';
 import StepChapterOutline from '../../features/chapters/StepChapterOutline';
 import { useViewPreference } from '@/shared/hooks/useViewPreference';
 import { SegmentedControl } from '@/shared/ui/ViewModeToggle';
+import { PageHeader } from '@/shared/ui/PageHeader';
 
 interface StructureSectionProps {
   project: Project;
   onEnterWriting: (chapterId: string) => void;
+  /** 引导深链：外部指定子页（大纲/细纲）时切过去；平时沿用用户偏好 */
+  initialSub?: 'outline' | 'chapters';
 }
 
 /**
  * 结构页（一页两段）：大纲 ⇄ 细纲子页签共用一页，原先两个一级分区合并。
  * StepOutline / StepChapterOutline 已直读 store，这里只负责子页签与进写作跳转。
+ * 默认落大纲（正向创作流先见大纲），细纲是第二步。
  */
-const StructureSection: React.FC<StructureSectionProps> = ({ project, onEnterWriting }) => {
+const StructureSection: React.FC<StructureSectionProps> = ({ project, onEnterWriting, initialSub }) => {
   const { t } = useTranslation('nav');
-  const [sub, setSub] = useViewPreference<'outline' | 'chapters'>('structure.subtab', 'chapters');
+  const [sub, setSub] = useViewPreference<'outline' | 'chapters'>('structure.subtab', 'outline');
+
+  useEffect(() => {
+    if (initialSub) setSub(initialSub);
+  }, [initialSub, setSub]);
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex shrink-0 items-center gap-1 border-b border-border bg-card px-5 py-2">
-        <SegmentedControl
-          value={sub}
-          onChange={setSub}
-          options={[
-            { value: 'chapters', label: t('structureTabs.chapters') },
-            { value: 'outline', label: t('structureTabs.outline') },
-          ]}
-        />
-      </div>
+      <PageHeader
+        left={
+          <SegmentedControl
+            value={sub}
+            onChange={setSub}
+            options={[
+              { value: 'chapters', label: t('structureTabs.chapters') },
+              { value: 'outline', label: t('structureTabs.outline') },
+            ]}
+          />
+        }
+      />
       <div className="min-h-0 flex-1">
         {sub === 'outline' ? (
           <StepOutline project={project} />

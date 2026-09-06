@@ -225,7 +225,10 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
   };
 
   const generateCharacters = async () => {
-    if (!activeInspiration.summary) return;
+    if (!activeInspiration.summary?.trim()) {
+      dialogService.alert(t('noInspiration'));
+      return;
+    }
     
     setLoading(true);
 
@@ -501,10 +504,10 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
         {/* 右侧：角色档案列表 */}
         <div className="flex min-h-0 flex-col overflow-hidden lg:col-span-8">
           <Card className="flex h-full flex-col overflow-hidden rounded-lg">
-          <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
-            <div>
-              <h3 className="font-serif text-lg font-medium tracking-tight">{t('archive.title')}</h3>
-              <p className="mt-0.5 text-xs text-muted-foreground">{t('archive.total', { n: project.characters?.length || 0 })}</p>
+          <div className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-border px-4">
+            <div className="flex min-w-0 items-baseline gap-2.5">
+              <h3 className="truncate font-serif text-base font-medium tracking-tight">{t('archive.title')}</h3>
+              <span className="shrink-0 text-xs text-muted-foreground">{t('archive.total', { n: project.characters?.length || 0 })}</span>
             </div>
             <div className="flex gap-2">
               <Button

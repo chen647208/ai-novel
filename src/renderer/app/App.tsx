@@ -45,6 +45,7 @@ const App: React.FC = () => {
   // 纯 UI 态（不落盘）
   const [view, setView] = useState<'bookshelf' | 'workspace'>('bookshelf');
   const [section, setSection] = useState<SectionId>('inspiration');
+  const [structureSub, setStructureSub] = useState<'outline' | 'chapters' | undefined>(undefined);
   const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
   const [focusCharacterId, setFocusCharacterId] = useState<string | null>(null);
   const [resetKey, setResetKey] = useState(0);
@@ -112,8 +113,9 @@ const App: React.FC = () => {
   const updateProject = useCallback((updates: Partial<Project>) => {
     useProjectStore.getState().updateActiveProject(updates);
   }, []);
-  const handleSectionChange = useCallback((next: SectionId) => {
+  const handleSectionChange = useCallback((next: SectionId, sub?: 'outline' | 'chapters') => {
     setSection(next);
+    if (next === 'structure' && sub) setStructureSub(sub);
     if (next !== 'writing') setEditingChapterId(null);
   }, []);
 
@@ -194,6 +196,7 @@ const App: React.FC = () => {
             <div className="flex min-w-0 flex-1">
               <WorkspaceView
             section={section}
+            structureSub={structureSub}
             activeProject={activeProject}
             activeModel={activeModel}
             prompts={prompts}
