@@ -38,6 +38,26 @@ export interface ApprovalProposal {
   diff?: string;
   /** 建议文本（「建议」档位：只给文字不落库） */
   suggestion?: string;
+  /**
+   * 可执行载荷（MCP/外部提案）：批准后由渲染端执行器真实落库。
+   * 缺席 = 纯文本提案（批准仅关闭待审）。
+   */
+  exec?: McpProposalExec;
+}
+
+/** 外部提案落库动作：章节正文覆写或卡片写入（节点 id 与章节 id 同源，见 bridge 平铺集）。 */
+export interface McpProposalExec {
+  kind: 'chapter-write' | 'card-write';
+  /** 目标书 id（缺席时执行器按章节 id 全库定位，卡片写必须提供） */
+  bookId?: string;
+  /** 目标章节节点 id（chapter-write 必填） */
+  nodeId?: string;
+  /** 卡片类型（card-write，如 character/location/faction） */
+  type?: string;
+  /** 展示标题 */
+  title: string;
+  /** 正文/卡片内容 */
+  body: string;
 }
 
 export interface ApprovalRequest {

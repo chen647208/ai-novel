@@ -21,6 +21,7 @@ export {
   type ApprovalRequest,
   type ApprovalDecision,
   type ApprovalProposal,
+  type McpProposalExec,
   type ApprovalVerdict,
   type PendingApproval,
 } from './approval.js';

@@ -43,4 +43,5 @@ write 请求挂起，顶栏待审箱角标可逐条决定，绝不静默应用�
 
 MCP server（`node build/main/main/mcp/server.js`）暴露读工具与写提案；
 外部 agent 的写提案经 `pending-proposals.jsonl` 进入同一待审箱，
-由用户批准——与内置助手同权同源。
+用户批准后由执行器真实落库（章节写先补快照，卡片写走命令管线、
+失败回落知识库），标注 `ai:mcp`——与内置助手同权同源。

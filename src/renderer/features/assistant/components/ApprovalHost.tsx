@@ -27,6 +27,8 @@ import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import type { ApprovalRequest } from '@core/ai';
 import { approvalBroker } from '../services/aiRuntime';
+import { executeMcpProposal } from '../services/mcpProposalExecutor';
+import { dialogService } from '@/shared/services/dialogService';
 
 /** diff 行渲染：+ 绿 / - 红 / 其余中性。 */
 const DiffPreview: React.FC<{ diff: string }> = ({ diff }) => (
@@ -104,11 +106,22 @@ const ApprovalHost: React.FC = () => {
 
   const settle = useCallback(
     (req: ApprovalRequest, verdict: 'approved' | 'rejected') => {
-      approvalBroker.decide(req.id, verdict);
-      setQueue((q) => q.filter((r) => r.id !== req.id));
-      refreshPending();
+      void (async () => {
+        if (verdict === 'approved' && req.proposal.exec) {
+          const r = await executeMcpProposal(req.proposal.exec, req.id);
+          if (!r.ok) {
+            dialogService.alert(t('approval.mcpFailed', { error: r.error ?? '' }));
+            refreshPending();
+            return;
+          }
+          dialogService.alert(t('approval.mcpApplied', { result: r.applied ?? '' }));
+        }
+        approvalBroker.decide(req.id, verdict);
+        setQueue((q) => q.filter((r) => r.id !== req.id));
+        refreshPending();
+      })();
     },
-    [refreshPending],
+    [refreshPending, t],
   );
 
   const defer = useCallback(
@@ -122,10 +135,21 @@ const ApprovalHost: React.FC = () => {
 
   const decidePending = useCallback(
     (req: ApprovalRequest, verdict: 'approved' | 'rejected') => {
-      approvalBroker.decide(req.id, verdict);
-      refreshPending();
+      void (async () => {
+        if (verdict === 'approved' && req.proposal.exec) {
+          const r = await executeMcpProposal(req.proposal.exec, req.id);
+          if (!r.ok) {
+            dialogService.alert(t('approval.mcpFailed', { error: r.error ?? '' }));
+            refreshPending();
+            return;
+          }
+          dialogService.alert(t('approval.mcpApplied', { result: r.applied ?? '' }));
+        }
+        approvalBroker.decide(req.id, verdict);
+        refreshPending();
+      })();
     },
-    [refreshPending],
+    [refreshPending, t],
   );
 
   const pendingCount = pending.length;

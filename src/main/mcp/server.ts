@@ -99,17 +99,43 @@ function searchNodes(bookId: string, keyword: string): Array<{ id: string; type:
 
 // ── 写提案（进待审箱，不直接落库）─────────────────────────────────────
 
+function bookIdOfNode(nodeId: string): string | undefined {
+  try {
+    const row = getDb()
+      .prepare(`SELECT book_id FROM nodes WHERE id = ? AND erased = 0`)
+      .get(nodeId) as { book_id?: string } | undefined;
+    return row?.book_id;
+  } catch {
+    return undefined;
+  }
+}
+
 function appendProposal(toolId: string, args: Record<string, unknown>): { accepted: boolean; proposalId: string } {
   const proposalId = `mcp_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+  const title = String(args.title ?? toolId);
+  const body = String(args.body ?? '');
+  const nodeId = typeof args.nodeId === 'string' && args.nodeId ? args.nodeId : undefined;
+  // bookId 优先用调用方显式值，否则按节点反查（章节写）；卡片写缺 bookId 则由渲染端执行器拒绝并提示
+  const bookId =
+    (typeof args.bookId === 'string' && args.bookId ? args.bookId : undefined) ??
+    (nodeId ? bookIdOfNode(nodeId) : undefined);
   const line = JSON.stringify({
     id: proposalId,
     callId: proposalId,
     toolId,
     permission: 'write:proposal',
     proposal: {
-      title: String(args.title ?? toolId),
+      title,
       summary: '来自外部 MCP agent 的写入提案',
-      suggestion: String(args.body ?? ''),
+      suggestion: body,
+      exec: {
+        kind: toolId === 'propose_chapter_write' ? 'chapter-write' : 'card-write',
+        bookId,
+        nodeId,
+        type: typeof args.type === 'string' ? args.type : undefined,
+        title,
+        body,
+      },
     },
     createdAt: Date.now(),
   });
@@ -159,6 +185,7 @@ const TOOLS = [
         title: { type: 'string', description: '提案标题' },
         type: { type: 'string', description: '节点类型，如 character/location/faction' },
         body: { type: 'string', description: '卡片内容（Markdown）' },
+        bookId: { type: 'string', description: '目标书籍 id（缺席则执行器拒绝并提示）' },
       },
       required: ['title'],
     },
@@ -172,6 +199,7 @@ const TOOLS = [
         title: { type: 'string', description: '提案标题，如「重写第 3 章」' },
         nodeId: { type: 'string', description: '目标章节节点 id' },
         body: { type: 'string', description: '新的正文全文' },
+        bookId: { type: 'string', description: '目标书籍 id（缺席时按节点反查）' },
       },
       required: ['title', 'nodeId', 'body'],
     },
@@ -251,6 +279,9 @@ function dispatch(method: string, params: Record<string, unknown>): Record<strin
   }
 }
 
+/** 导出分发器（单测直接调用；stdio 入口走 handleLine）。 */
+export { dispatch };
+
 function handleLine(line: string): void {
   let msg: JsonRpcRequest;
   try {
@@ -286,4 +317,7 @@ function main(): void {
   process.stdin.resume();
 }
 
-main();
+const invokedDirectly = (process.argv[1] ?? '').replace(/\\/g, '/').endsWith('mcp/server.js');
+if (invokedDirectly) {
+  main();
+}
