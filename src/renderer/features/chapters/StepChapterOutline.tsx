@@ -10,7 +10,7 @@ import { logger } from '@/shared/utils/logger';
 
 import React, { useState, useMemo } from 'react';
 import { useTranslation, i18n, templateDisplayName } from '@/i18n';
-import { type Project, type ModelConfig, type Chapter } from '../../../shared/types';
+import { type Project, type Chapter } from '../../../shared/types';
 import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
 import { VIRTUAL_CHAPTER_ORDER, KNOWLEDGE_SNIPPET_TRUNCATE, isVirtualChapter } from '../../../shared/constants/chapters';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
@@ -33,13 +33,15 @@ import { ViewModeToggle } from '@/shared/ui/ViewModeToggle';
 interface StepChapterOutlineProps {
   project: Project;
   onEnterWriting: (chapterId: string) => void;
+  /** 跨页接力：缺大纲时去大纲子页，由工作台注入 */
+  onGoSection?: (next: 'structure', sub?: 'outline' | 'chapters') => void;
 }
 
-const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnterWriting }) => {
+const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnterWriting, onGoSection }) => {
   const { t } = useTranslation(['steps', 'common']);
   // 直读 store：死掉的 onOpenSettings 透传一并删除
   const prompts = useSettingsStore((s) => s.prompts);
-  const activeModel = useUsableModel() as ModelConfig;
+  const activeModel = useUsableModel();
   const updateActiveProject = useProjectStore((s) => s.updateActiveProject);
   const onUpdate = (updates: Partial<Project>, opts?: CommitOptions) => updateActiveProject(updates, opts);
   const [loading, setLoading] = useState(false);
@@ -174,6 +176,10 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
   const generateChapters = async (isContinue: boolean = false) => {
     if (!project.outline) {
       dialogService.alert(t('steps:chapters.noOutline'));
+      return;
+    }
+    if (!activeModel) {
+      dialogService.alert(t('steps:common.noModel'));
       return;
     }
     
@@ -402,13 +408,13 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
             {chapterPrompts.map(p => <option key={p.id} value={p.id}>{templateDisplayName(p)}</option>)}
           </Select>
           <div className="flex items-center gap-2">
-            <Button onClick={() => generateChapters(false)} disabled={loading || continueLoading}>
+            <Button onClick={() => generateChapters(false)} disabled={loading || continueLoading || !activeModel} title={!activeModel ? t('steps:common.noModel') : undefined}>
               {loading ? <Spinner className="size-4" /> : <WandSparkles className="size-4" />}
               {loading ? t('steps:chapters.generating') : t('steps:chapters.regenerate')}
             </Button>
 
             {project.chapters.length > 0 && (
-              <Button variant="outline" onClick={() => generateChapters(true)} disabled={loading || continueLoading}>
+              <Button variant="outline" onClick={() => generateChapters(true)} disabled={loading || continueLoading || !activeModel} title={!activeModel ? t('steps:common.noModel') : undefined}>
                 {continueLoading ? <Spinner className="size-4" /> : <FastForward className="size-4" />}
                 {continueLoading ? t('steps:chapters.continuing') : t('steps:chapters.continueBtn')}
               </Button>
@@ -424,7 +430,18 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
             <BookOpen className="size-3.5" /> {t('steps:chapters.outlineRefTitle')}
           </h4>
           <div className="custom-scrollbar flex-1 overflow-y-auto pr-1 text-xs text-muted-foreground">
-            {project.outline ? <MarkdownView content={project.outline} className="text-xs [&_*]:text-current" /> : t('steps:chapters.outlineEmpty')}
+            {project.outline ? (
+              <MarkdownView content={project.outline} className="text-xs [&_*]:text-current" />
+            ) : (
+              <div className="space-y-2">
+                <p>{t('steps:chapters.outlineEmpty')}</p>
+                {onGoSection && (
+                  <Button variant="ghost" size="sm" onClick={() => onGoSection('structure', 'outline')}>
+                    {t('steps:chapters.goOutline')}
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </Card>
 
@@ -438,8 +455,8 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
                 value={chapterView}
                 onChange={setChapterView}
                 options={[
-                  { value: 'cards', icon: LayoutGrid, title: '卡片' },
-                  { value: 'table', icon: LayoutList, title: '横栏' },
+                  { value: 'cards', icon: LayoutGrid, title: t('steps:chapters.viewGrid') },
+                  { value: 'table', icon: LayoutList, title: t('steps:chapters.viewList') },
                 ]}
               />
               {/* Token消耗显示 */}
@@ -482,6 +499,13 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
                     icon={Layers}
                     title={t('steps:chapters.emptyTitle')}
                     description={t('steps:chapters.emptyHint')}
+                    action={
+                      project.outline?.trim() ? (
+                        <Button onClick={() => generateChapters(false)} disabled={loading || !activeModel}>
+                          {t('steps:chapters.generateNow')}
+                        </Button>
+                      ) : undefined
+                    }
                   />
                 );
               }
@@ -507,10 +531,10 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
                           </div>
                         </div>
                         <div className="flex shrink-0 items-center">
-                          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" disabled={idx === 0} onClick={() => moveChapter(chap.id, -1)} title="上移">
+                          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" disabled={idx === 0} onClick={() => moveChapter(chap.id, -1)} title={t('steps:chapters.moveUp')}>
                             <ChevronUp className="size-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" disabled={idx === sortedChapters.length - 1} onClick={() => moveChapter(chap.id, 1)} title="下移">
+                          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" disabled={idx === sortedChapters.length - 1} onClick={() => moveChapter(chap.id, 1)} title={t('steps:chapters.moveDown')}>
                             <ChevronDown className="size-4" />
                           </Button>
                           <Button size="sm" onClick={() => onEnterWriting(chap.id)}>
@@ -549,10 +573,10 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
                       />
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
-                      <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" disabled={idx === 0} onClick={() => moveChapter(chap.id, -1)} title="上移">
+                      <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" disabled={idx === 0} onClick={() => moveChapter(chap.id, -1)} title={t('steps:chapters.moveUp')}>
                         <ChevronUp className="size-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" disabled={idx === sortedChapters.length - 1} onClick={() => moveChapter(chap.id, 1)} title="下移">
+                      <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" disabled={idx === sortedChapters.length - 1} onClick={() => moveChapter(chap.id, 1)} title={t('steps:chapters.moveDown')}>
                         <ChevronDown className="size-4" />
                       </Button>
                       <Button size="sm" onClick={() => onEnterWriting(chap.id)}>

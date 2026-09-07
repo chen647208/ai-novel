@@ -99,7 +99,7 @@ const WorkspaceSection: React.FC<WorkspaceViewProps> = ({
     case 'inspiration':
       content = (
         <div className="h-full overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <StepInspiration project={activeProject} />
+          <StepInspiration project={activeProject} onGoSection={onSectionChange} />
         </div>
       );
       break;
@@ -119,6 +119,7 @@ const WorkspaceSection: React.FC<WorkspaceViewProps> = ({
           onOpenSettings={onOpenSettings}
           focusCharacterId={focusCharacterId}
           onFocusHandled={() => onNavigateToCharacter('')}
+          onGoSection={onSectionChange}
         />
       );
       break;
@@ -127,6 +128,7 @@ const WorkspaceSection: React.FC<WorkspaceViewProps> = ({
         <StructureSection
           project={activeProject}
           initialSub={structureSub}
+          onGoSection={onSectionChange}
           onEnterWriting={(id) => onNavigateToChapter(id)}
         />
       );
@@ -136,7 +138,7 @@ const WorkspaceSection: React.FC<WorkspaceViewProps> = ({
         <WritingEditor
           project={activeProject}
           initialChapterId={editingChapterId}
-          onBack={() => onSectionChange('structure')}
+          onBack={() => onSectionChange('structure', 'chapters')}
         />
       );
       break;
@@ -182,7 +184,7 @@ const WorkspaceView: React.FC<WorkspaceViewProps> = (props) => {
       )}
 
       <main className="flex min-w-0 flex-1 flex-col">
-        {section !== 'writing' && activeModel && (
+        {section !== 'writing' && (
           <WorkspaceTopbar
             project={activeProject}
             activeModel={activeModel}

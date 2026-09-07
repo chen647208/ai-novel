@@ -36,6 +36,7 @@ import { useSettingsStore, useUsableModel } from './stores/settingsStore';
 import { useAppBootstrap } from './useAppBootstrap';
 import { useFeatureAvailability } from './useFeatureAvailability';
 import { useBookActions } from './useBookActions';
+import { isSectionVisible } from './sectionFeatures';
 import { Bot } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 
@@ -120,7 +121,7 @@ const App: React.FC = () => {
   const handleSectionChange = useCallback((next: SectionId, sub?: 'outline' | 'chapters') => {
     setSection(next);
     if (next === 'structure' && sub) setStructureSub(sub);
-    if (next !== 'writing') setEditingChapterId(null);
+    // 切离写作不清空活动章节：往返保留上下文，进书/重置时才清
   }, []);
 
   // 分区快捷键：Ctrl/Cmd+1..5（工作台内有效，与 USER_GUIDE 对齐）
@@ -139,18 +140,9 @@ const App: React.FC = () => {
     return () => window.removeEventListener('keydown', onSectionKey);
   }, [view, handleSectionChange]);
 
-  // 当前分区不可用（minimal 档禁 AI 功能）时回退写作编辑器
+  // 当前分区不可用（minimal 档禁 AI 功能）时回退写作编辑器（映射单源见 sectionFeatures）
   useEffect(() => {
-    const featureBySection: Record<SectionId, string> = {
-      inspiration: 'core.inspiration',
-      world: 'core.world',
-      characters: 'core.characters',
-      structure: 'core.chapters',
-      writing: 'core.writing',
-    };
-    if (!availableFeatures.has(featureBySection[section] ?? 'core.writing')) {
-      // structure 取并集：任一可用即留
-      if (section === 'structure' && availableFeatures.has('core.outline')) return;
+    if (!isSectionVisible(section, (id) => availableFeatures.has(id))) {
       setSection('writing');
     }
   }, [availableFeatures, section]);

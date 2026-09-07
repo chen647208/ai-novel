@@ -20,7 +20,7 @@ const PluginSettingsPanel: React.FC = () => {
   const { t } = useTranslation('settings');
   const [statuses, setStatuses] = useState<PluginStatus[] | null>(null);
   const [tree, setTree] = useState<AssemblyRow[] | null>(null);
-  const [profile, setProfile] = useState<string>(() => localStorage.getItem('profile.current') ?? 'custom');
+  const [profile, setProfile] = useState<string>(() => localStorage.getItem('profile.current') ?? 'full');
   const profileVeto = useRef<PluginDisposable | null>(null);
 
   useEffect(() => {

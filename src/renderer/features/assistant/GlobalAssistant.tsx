@@ -227,6 +227,8 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
 
     const controller = new AbortController();
     streamAbortRef.current = controller;
+    // Agent 整轮可停止：停止键靠该 id 显示，中止经 signal 传入循环
+    setStreamingMessageId('agent');
 
     let taskText = text;
     if (attachments && attachments.length > 0) {

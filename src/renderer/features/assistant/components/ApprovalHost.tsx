@@ -13,7 +13,7 @@
  * （批准/拒绝/稍后处理）；「稍后」与超时的请求进待审箱，左下角角标
  * 可打开列表逐条决定。多并发请求排队，先到先审。
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -25,6 +25,7 @@ import {
 } from '@/shared/ui/Dialog';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
+import { X } from 'lucide-react';
 import type { ApprovalRequest } from '@core/ai';
 import { approvalBroker } from '../services/aiRuntime';
 import { executeMcpProposal } from '../services/mcpProposalExecutor';
@@ -53,6 +54,9 @@ const ApprovalHost: React.FC = () => {
   const [queue, setQueue] = useState<ApprovalRequest[]>([]);
   const [pending, setPending] = useState<ApprovalRequest[]>([]);
   const [pendingOpen, setPendingOpen] = useState(false);
+  const [mcpBridgeError, setMcpBridgeError] = useState(false);
+  // 桥接曾经通后又不通才算异常：首启无文件属正常，不报错
+  const mcpBridgeOk = useRef(false);
   const current = queue[0] ?? null;
 
   useEffect(() => {
@@ -94,8 +98,11 @@ const ApprovalHost: React.FC = () => {
           }
           localStorage.setItem('approval.mcp-consumed', JSON.stringify([...consumed]));
           refreshPending();
+          mcpBridgeOk.current = true;
+          setMcpBridgeError(false);
         } catch {
-          // 归档不存在：尚无提案
+          // 归档不存在或读取失败：曾经通后又不通才提示，首启无文件属正常
+          setMcpBridgeError(mcpBridgeOk.current);
         }
       })();
     };
@@ -208,7 +215,7 @@ const ApprovalHost: React.FC = () => {
         </Dialog>
       )}
 
-      {pendingCount > 0 && !current && (
+      {pendingCount > 0 && (
         <button
           type="button"
           onClick={() => { setPendingOpen((v) => !v); refreshPending(); }}
@@ -223,7 +230,15 @@ const ApprovalHost: React.FC = () => {
 
       {pendingOpen && pendingCount > 0 && (
         <div className="fixed bottom-16 left-4 z-40 w-96 rounded-lg border border-border bg-card p-3 shadow-xl">
-          <div className="mb-2 font-medium">{t('approval.pendingTitle')}</div>
+          <div className="mb-2 flex items-center justify-between">
+            <span className="font-medium">{t('approval.pendingTitle')}</span>
+            <Button variant="ghost" size="icon" className="size-6" onClick={() => setPendingOpen(false)} title={t('approval.closePending')}>
+              <X className="size-3.5" />
+            </Button>
+          </div>
+          {mcpBridgeError && (
+            <p className="mb-2 text-xs text-warning">{t('approval.mcpBridgeError')}</p>
+          )}
           <div className="max-h-72 space-y-2 overflow-auto">
             {pending.map((req) => (
               <div key={req.id} className="rounded-md border border-border p-2 text-sm">
@@ -232,6 +247,11 @@ const ApprovalHost: React.FC = () => {
                   <span className="text-xs text-muted-foreground">{req.toolId}</span>
                 </div>
                 {req.proposal.summary && <p className="mb-2 text-xs text-muted-foreground">{req.proposal.summary}</p>}
+                {req.proposal.diff && (
+                  <div className="mb-2">
+                    <DiffPreview diff={req.proposal.diff} />
+                  </div>
+                )}
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => decidePending(req, 'rejected')}>
                     {t('approval.rejectPending')}

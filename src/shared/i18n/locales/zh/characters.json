@@ -42,6 +42,7 @@
   "parseFailed": "识别失败，请检查模型输出格式。",
   "generateErrorGeneric": "生成过程中发生错误。",
   "noInspiration": "缺少可用的灵感/简介：请先回灵感页填写简介，再来生成角色。",
+  "goInspiration": "去灵感页补充简介",
   "defaultTemplateName": "角色生成模板",
   "chapterTitle": "角色生成",
   "historySummary": "角色生成历史记录",

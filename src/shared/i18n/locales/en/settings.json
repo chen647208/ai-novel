@@ -96,6 +96,8 @@
   "models": {
     "namePlaceholder": "Name this model...",
     "activeBadge": "Active",
+    "deploymentLocal": "Local",
+    "deploymentCloud": "Cloud",
     "deleteTitle": "Delete this model",
     "connectionLog": "Connection log",
     "channelLabel": "Select Channel",

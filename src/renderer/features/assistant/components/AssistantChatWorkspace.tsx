@@ -105,7 +105,20 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
         {messages.length === 0 && (
           <div className="mt-20 text-center text-muted-foreground">
             <MessagesSquare className="mx-auto mb-3 size-10 opacity-40" />
-            <p className="text-xs">{t('chat.empty')}</p>
+            <p className="mb-3 text-xs">{t('chat.empty')}</p>
+            <div className="mx-auto flex max-w-[260px] flex-col gap-1.5">
+              {[t('chat.tryAsk1'), t('chat.tryAsk2'), t('chat.tryAsk3')].map((example) => (
+                <Button
+                  key={example}
+                  variant="outline"
+                  size="sm"
+                  className="h-auto whitespace-normal py-1.5 text-xs font-normal"
+                  onClick={() => setInput(example)}
+                >
+                  {example}
+                </Button>
+              ))}
+            </div>
           </div>
         )}
         {messages.map((msg) => (
@@ -169,7 +182,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
         )}
       </div>
 
-      {!contextPanelOpen && pendingFiles.length > 0 && (
+      {pendingFiles.length > 0 && (
         <div className="flex shrink-0 gap-2 overflow-x-auto border-t border-border bg-primary/5 px-4 py-2 custom-scrollbar">
           {pendingFiles.map((file, index) => (
             <div key={index} className="flex items-center gap-1 whitespace-nowrap rounded-md border border-border bg-card px-2 py-1 text-2xs text-foreground">
@@ -186,8 +199,11 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
         </div>
       )}
 
-      {!contextPanelOpen && (
+      {/* 输入区常驻：上下文面板打开时只收起快捷命令与模板行，输入框不消失 */}
+      {
         <div className="shrink-0 border-t border-border bg-card p-3">
+          {!contextPanelOpen && (
+          <>
           <div className="mb-2 flex flex-wrap items-center gap-1.5">
             <span className="py-1 text-2xs uppercase tracking-wider text-muted-foreground">{t('chat.quickCreateLabel')}</span>
             {quickCommands.map((item) => {
@@ -239,6 +255,8 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
               )}
             </div>
           )}
+          </>
+          )}
 
           <div className="flex items-end gap-2">
             <label className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
@@ -282,7 +300,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
             )}
           </div>
         </div>
-      )}
+      }
 
     </>
   );

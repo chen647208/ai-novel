@@ -10,7 +10,7 @@
 import { logger } from '../../shared/utils/logger';
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation, i18n, templateDisplayName } from '@/i18n';
-import { type Project, type ModelConfig, type KnowledgeItem, type StreamingAIResponse, type OutputMode } from '../../../shared/types';
+import { type Project, type KnowledgeItem, type StreamingAIResponse, type OutputMode } from '../../../shared/types';
 import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
 import { VIRTUAL_CHAPTER_ORDER, KNOWLEDGE_SNIPPET_TRUNCATE } from '../../../shared/constants/chapters';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
@@ -32,14 +32,16 @@ import { MarkdownView } from '@/shared/ui/Markdown';
 
 interface StepInspirationProps {
   project: Project | null;
+  /** 跨页接力：空态下一步跳转（如去角色页），由工作台注入 */
+  onGoSection?: (next: 'characters') => void;
 }
 
-const StepInspiration: React.FC<StepInspirationProps> = ({ project }) => {
+const StepInspiration: React.FC<StepInspirationProps> = ({ project, onGoSection }) => {
   const { t } = useTranslation(['steps', 'common']);
   // 直读 store：模型/提示词/更新动作不再经 App→View 层层透传
   const prompts = useSettingsStore((s) => s.prompts);
   // 手写 bypass 下可能为 undefined：与旧 effectiveModel 透传语义一致，AI 调用处各自报错引导
-  const activeModel = useUsableModel() as ModelConfig;
+  const activeModel = useUsableModel();
   const updateActiveProject = useProjectStore((s) => s.updateActiveProject);
   const onUpdate = (updates: Partial<Project>, opts?: CommitOptions) => updateActiveProject(updates, opts);
   // 调试日志
@@ -88,6 +90,8 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project }) => {
 
   // 流式回调处理函数
   const handleStreamingChunk = (response: StreamingAIResponse, finalPrompt?: string) => {
+    // 无模型时不该进到这里（generate 已拦截）：防御性直接返回
+    if (!activeModel) return;
     // 契约：response.content 为累计全文，直接替换（旧实现按增量累加导致内容重复）
     if (response.content) {
       setStreamingContent(response.content);
@@ -180,6 +184,10 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project }) => {
 
   const generate = async () => {
     if (!input) return;
+    if (!activeModel) {
+      dialogService.alert(t('steps:common.noModel'));
+      return;
+    }
     
     // 重置流式状态
     setStreamingContent('');
@@ -527,10 +535,11 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project }) => {
               </>
             )}
 
-            {/* 生成按钮 */}
+            {/* 生成按钮（无模型时禁用，手写不受影响） */}
             <Button
               onClick={generate}
-              disabled={loading || (!input && selectedKnowledgeIds.size === 0)}
+              disabled={loading || !activeModel || (!input && selectedKnowledgeIds.size === 0)}
+              title={!activeModel ? t('steps:common.noModel') : undefined}
             >
               {loading ? <Spinner className="size-4" /> : <WandSparkles className="size-4" />}
               {loading ? t('steps:inspiration.generating') : t('steps:inspiration.generateBtn')}
@@ -631,6 +640,13 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project }) => {
           icon={Lightbulb}
           title={t('steps:inspiration.emptyHint')}
           className="py-16"
+          action={
+            onGoSection ? (
+              <Button variant="outline" onClick={() => onGoSection('characters')}>
+                {t('steps:inspiration.goCharacters')}
+              </Button>
+            ) : undefined
+          }
         />
       )}
     </div>

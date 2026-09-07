@@ -199,7 +199,8 @@ export class AiSessionManager {
                 .map((p) => p.text),
             },
           }),
-          complete: (model, prompt, retries) => aiGatewayClient.complete(model, prompt, { retries }),
+          complete: (model, prompt, retries) =>
+            aiGatewayClient.complete(model, prompt, { retries, signal: input.signal }),
           maxTurns: input.maxTurns,
           signal: input.signal,
           // 首轮预算 24000 字符（约 8–12k token，32k 上下文模型留足工具观察与输出空间）

@@ -14,6 +14,7 @@
       "desc": "新建一本书，或导入已有的书籍文件开始创作。"
     },
     "noResults": "没有匹配的书籍",
+    "clearSearch": "清空搜索",
     "noContent": "暂无内容，点击开始创作。",
     "current": "当前",
     "open": "打开",

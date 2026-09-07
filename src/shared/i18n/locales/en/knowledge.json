@@ -1,8 +1,8 @@
 {
-  "title": "World Knowledge Base",
+  "title": "World Building Center",
   "subtitle": "Upload setting collections, magic systems, chronologies and more. The AI can reference them while writing.",
   "readFailed": "Failed to read file {{name}}",
-  "formatUnsupported": "File {{name}} format is not supported. Only plain-text formats (txt, md, json, etc.) are supported. Save Word documents as txt before uploading.",
+  "formatUnsupported": "File {{name}} format is not supported. Only plain-text formats (txt, md, json, csv, etc.) are supported. Save Word documents as txt before uploading.",
   "category": {
     "all": "All",
     "inspiration": "Inspiration",

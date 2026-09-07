@@ -14,6 +14,7 @@
       "desc": "Create a new book or import an existing book file to get started."
     },
     "noResults": "No matching books",
+    "clearSearch": "Clear search",
     "noContent": "Nothing yet — click to start writing.",
     "current": "Current",
     "open": "Open",

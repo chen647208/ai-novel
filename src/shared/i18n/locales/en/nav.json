@@ -11,7 +11,7 @@
   "bookshelf": "Bookshelf",
   "settings": "Settings",
   "structureTabs": {
-    "chapters": "Chapters",
-    "outline": "Outline"
+    "outline": "Outline",
+    "chapters": "Chapters"
   }
 }

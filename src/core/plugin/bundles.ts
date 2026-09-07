@@ -64,7 +64,7 @@ export const BUILTIN_FEATURES: readonly FeatureDecl[] = [
 export const BUILTIN_BUNDLES: readonly Bundle[] = [
   { id: 'com.novalocal.bundle.core', name: '核心写作', description: '纯写作最小集', features: ['core.settings', 'core.export', 'core.index', 'core.writing', 'core.chapters', 'core.outline', 'core.inspiration'] },
   { id: 'com.novalocal.bundle.world', name: '世界与角色', description: '世界构建/角色势力/时间线/知识库', features: ['core.world', 'core.characters', 'core.timeline', 'core.knowledge'] },
-  { id: 'com.novalocal.bundle.ai', name: 'AI 创作套件', description: '助手/卡片/一致性/伏笔（依赖 AI 网关）', features: ['core.assistant', 'core.cards', 'core.consistency', 'core.foreshadowing'] },
+  { id: 'com.novalocal.bundle.ai', name: 'AI 创作套件', description: '助手/卡片/一致性/伏笔（依赖 AI 网关与索引）', features: ['core.assistant', 'core.cards', 'core.consistency', 'core.foreshadowing'] },
 ] as const;
 
 /** 汇报每行装配的来源（bundle/patch），profile 策略拒绝的行给出原因。 */

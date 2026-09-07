@@ -14,7 +14,7 @@
 
 import { assemblyTree, BUILTIN_BUNDLES, type Profile } from './bundles.js';
 
-/** 发行档名 → Profile（与 profiles/*.json 及设置面板的选择对应）。 */
+/** 发行档名 → Profile（档名以 bundles.ts 与设置面板为准，无外部 profiles/*.json 文件）。 */
 export function profileByName(name: string): Profile {
   switch (name) {
     case 'minimal':

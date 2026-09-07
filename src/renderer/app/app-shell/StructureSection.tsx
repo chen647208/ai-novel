@@ -21,6 +21,8 @@ interface StructureSectionProps {
   onEnterWriting: (chapterId: string) => void;
   /** 引导深链：外部指定子页（大纲/细纲）时切过去；平时沿用用户偏好 */
   initialSub?: 'outline' | 'chapters';
+  /** 跨页接力透传（如细纲缺大纲时去大纲子页） */
+  onGoSection?: (next: 'structure', sub?: 'outline' | 'chapters') => void;
 }
 
 /**
@@ -28,7 +30,7 @@ interface StructureSectionProps {
  * StepOutline / StepChapterOutline 已直读 store，这里只负责子页签与进写作跳转。
  * 默认落大纲（正向创作流先见大纲），细纲是第二步。
  */
-const StructureSection: React.FC<StructureSectionProps> = ({ project, onEnterWriting, initialSub }) => {
+const StructureSection: React.FC<StructureSectionProps> = ({ project, onEnterWriting, initialSub, onGoSection }) => {
   const { t } = useTranslation('nav');
   const [sub, setSub] = useViewPreference<'outline' | 'chapters'>('structure.subtab', 'outline');
 
@@ -54,7 +56,7 @@ const StructureSection: React.FC<StructureSectionProps> = ({ project, onEnterWri
         {sub === 'outline' ? (
           <StepOutline project={project} />
         ) : (
-          <StepChapterOutline project={project} onEnterWriting={onEnterWriting} />
+          <StepChapterOutline project={project} onEnterWriting={onEnterWriting} onGoSection={onGoSection} />
         )}
       </div>
     </div>

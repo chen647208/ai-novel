@@ -69,9 +69,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ open, onDone, 
           {persona !== 'hand' && (
             <div className="rounded-lg border border-border bg-card p-3 text-xs text-muted-foreground">
               {persona === 'assisted' ? t('suggestAssisted') : t('suggestAi')}
-              <button onClick={onOpenSettings} className="ml-2 font-medium text-primary hover:underline">
+              <Button variant="link" onClick={onOpenSettings} className="ml-2 h-auto p-0 text-xs">
                 {t('openSettings')}
-              </button>
+              </Button>
             </div>
           )}
           <div>
@@ -79,7 +79,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ open, onDone, 
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('bookNamePlaceholder')} />
           </div>
         </div>
-        <div className="flex justify-end gap-2 border-t border-border bg-muted/30 px-6 py-4">
+        <div className="flex justify-between gap-2 border-t border-border bg-muted/30 px-6 py-4">
+          <Button variant="ghost" onClick={() => onDone('hand', t('defaultBookTitle'))}>{t('skip')}</Button>
           <Button onClick={() => onDone(persona, title.trim() || t('defaultBookTitle'))}>{t('start')}</Button>
         </div>
       </DialogContent>

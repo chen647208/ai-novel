@@ -96,6 +96,8 @@
   "models": {
     "namePlaceholder": "给模型起个名字...",
     "activeBadge": "当前",
+    "deploymentLocal": "本地",
+    "deploymentCloud": "云端",
     "deleteTitle": "删除该模型",
     "connectionLog": "连接日志",
     "channelLabel": "选择渠道",

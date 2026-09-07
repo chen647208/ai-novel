@@ -10,7 +10,7 @@ import { logger } from '@/shared/utils/logger';
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation, templateDisplayName } from '@/i18n';
-import { type Project, type ModelConfig, type Character } from '../../../shared/types';
+import { type Project, type Character } from '../../../shared/types';
 import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
 import { VIRTUAL_CHAPTER_ORDER, KNOWLEDGE_SNIPPET_TRUNCATE } from '../../../shared/constants/chapters';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
@@ -34,6 +34,8 @@ interface StepCharactersProps {
   focusCharacterId?: string | null;
   /** 聚焦已消费的通知，父组件据此清除 focusCharacterId，避免重复弹出 */
   onFocusHandled?: () => void;
+  /** 跨页接力：缺简介时回灵感页补充，由工作台注入 */
+  onGoSection?: (next: 'inspiration') => void;
 }
 
 const StepCharacters: React.FC<StepCharactersProps> = ({
@@ -41,13 +43,14 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
   onOpenSettings,
   focusCharacterId,
   onFocusHandled,
+  onGoSection,
 }) => {
   // 直读 store：模型/提示词/更新动作不再经 App→View 层层透传
   const prompts = useSettingsStore((s) => s.prompts);
-  const activeModel = useUsableModel() as ModelConfig;
+  const activeModel = useUsableModel();
   const updateActiveProject = useProjectStore((s) => s.updateActiveProject);
   const onUpdate = (updates: Partial<Project>, opts?: CommitOptions) => updateActiveProject(updates, opts);
-  const { t } = useTranslation('characters');
+  const { t } = useTranslation(['characters', 'steps']);
   const [loading, setLoading] = useState(false);
   const [showDiagram, setShowDiagram] = useState(false);
   const [modalCharacterId, setModalCharacterId] = useState<string | null>(null);
@@ -230,6 +233,10 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
       dialogService.alert(t('noInspiration'));
       return;
     }
+    if (!activeModel) {
+      dialogService.alert(t('steps:common.noModel'));
+      return;
+    }
     
     setLoading(true);
 
@@ -395,11 +402,16 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
                 </Select>
               </div>
 
-              {/* 生成按钮 */}
-              <Button className="w-full" onClick={generateCharacters} disabled={loading}>
+              {/* 生成按钮（无模型时禁用，手写不受影响） */}
+              <Button className="w-full" onClick={generateCharacters} disabled={loading || !activeModel} title={!activeModel ? t('steps:common.noModel') : undefined}>
                 {loading ? <Spinner className="size-4" /> : <WandSparkles className="size-4" />}
                 <span>{loading ? t('generating') : t('generateBtn')}</span>
               </Button>
+              {!activeInspiration.summary?.trim() && onGoSection && (
+                <Button variant="ghost" size="sm" className="w-full" onClick={() => onGoSection('inspiration')}>
+                  {t('goInspiration')}
+                </Button>
+              )}
 
               {/* Token消耗显示 */}
               {traditionalTokens.total > 0 && (

@@ -20,6 +20,7 @@
   "openSettings": "去配置",
   "bookNameLabel": "第一本书叫什么",
   "bookNamePlaceholder": "例如：雾港来信",
-  "defaultBookTitle": "未命名新书",
-  "start": "开始写"
+  "defaultBookTitle": "新小说",
+  "start": "开始写",
+  "skip": "跳过"
 }

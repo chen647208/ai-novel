@@ -20,6 +20,7 @@
   "openSettings": "Open settings",
   "bookNameLabel": "Name your first book",
   "bookNamePlaceholder": "e.g. Letters from Fog Harbor",
-  "defaultBookTitle": "Untitled book",
-  "start": "Start writing"
+  "defaultBookTitle": "New Novel",
+  "start": "Start writing",
+  "skip": "Skip"
 }

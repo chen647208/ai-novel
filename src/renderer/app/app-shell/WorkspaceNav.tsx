@@ -13,6 +13,7 @@ import type { Project } from '../../../shared/types';
 import { useFeatureAvailability } from '../useFeatureAvailability';
 import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
+import { isSectionVisible } from '../sectionFeatures';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/Tooltip';
 import { Feather, Globe, Library, ListOrdered, PenLine, Settings2, Users } from 'lucide-react';
 
@@ -35,14 +36,7 @@ interface SectionDef {
   done: (p: Project) => boolean;
 }
 
-/** 分区 → 所属功能 id（bundle 可用性映射，design/04 §7 dogfooding）。structure 取 chapters，outline 随包同进退。 */
-export const SECTION_FEATURE: Record<SectionId, string> = {
-  inspiration: 'core.inspiration',
-  world: 'core.world',
-  characters: 'core.characters',
-  structure: 'core.chapters',
-  writing: 'core.writing',
-};
+export { SECTION_FEATURE } from '../sectionFeatures';
 
 export const WORKSPACE_SECTIONS: readonly SectionDef[] = [
   { id: 'inspiration', icon: PenLine, labelKey: 'steps.inspiration', done: p => !!(p.inspiration || p.intro) },
@@ -70,13 +64,8 @@ const WorkspaceNav: React.FC<WorkspaceNavProps> = ({
 }) => {
   const { t } = useTranslation('nav');
   const availableFeatures = useFeatureAvailability();
-  // structure 取 chapters 与 outline 的并集：任一可用即显示
-  const visibleSections = WORKSPACE_SECTIONS.filter((section) => {
-    if (section.id === 'structure') {
-      return availableFeatures.has('core.chapters') || availableFeatures.has('core.outline');
-    }
-    return availableFeatures.has(SECTION_FEATURE[section.id]);
-  });
+  // structure 取 chapters 与 outline 的并集：任一可用即显示（单源见 isSectionVisible）
+  const visibleSections = WORKSPACE_SECTIONS.filter((section) => isSectionVisible(section.id, (id) => availableFeatures.has(id)));
 
   return (
     <aside className="flex w-14 shrink-0 flex-col items-center gap-1 border-r border-border bg-card py-3">

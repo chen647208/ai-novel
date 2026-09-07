@@ -9,7 +9,7 @@
 
 import { useState } from 'react';
 
-/** 视图偏好（卡片/列表/大纲）：localStorage 持久化，Scrivener 式多形态。 */
+/** 视图偏好（网格/列表/大纲）：localStorage 持久化，Scrivener 式多形态。 */
 export function useViewPreference<T extends string>(key: string, defaultValue: T): [T, (v: T) => void] {
   const [value, setValue] = useState<T>(() => {
     try {

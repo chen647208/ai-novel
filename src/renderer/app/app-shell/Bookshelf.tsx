@@ -202,7 +202,15 @@ const Bookshelf: React.FC<BookshelfProps> = ({
             }
           />
         ) : filtered.length === 0 ? (
-          <EmptyState icon={Search} title={t('app:bookshelf.noResults')} />
+          <EmptyState
+            icon={Search}
+            title={t('app:bookshelf.noResults')}
+            action={
+              <Button variant="outline" onClick={() => setQuery('')}>
+                {t('app:bookshelf.clearSearch')}
+              </Button>
+            }
+          />
         ) : view === 'list' ? (
           <div className="overflow-hidden rounded-lg border border-border">
             {filtered.map((book, idx) => (

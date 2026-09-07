@@ -91,7 +91,8 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
   const showHint = !!project && !hintDismissed && suggested && suggested !== section;
   const suggestedSub = suggested === 'structure' && project && !project.outline?.trim() ? 'outline' as const : 'chapters' as const;
   const suggestedLabel = suggested
-    ? t(`nav:${WORKSPACE_SECTIONS.find((s) => s.id === suggested)?.labelKey ?? 'steps.writing'}`)
+    ? t(`nav:${WORKSPACE_SECTIONS.find((s) => s.id === suggested)?.labelKey ?? 'steps.writing'}`) +
+      (suggested === 'structure' ? `·${t(`nav:structureTabs.${suggestedSub}`)}` : '')
     : '';
   const sectionLabel = t(`nav:${WORKSPACE_SECTIONS.find((s) => s.id === section)?.labelKey ?? 'steps.writing'}`);
 

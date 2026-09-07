@@ -42,6 +42,7 @@
   "parseFailed": "Parsing failed. Please check the model output format.",
   "generateErrorGeneric": "An error occurred during generation.",
   "noInspiration": "No usable inspiration/synopsis: fill in the synopsis on the Inspiration page first, then generate characters.",
+  "goInspiration": "Add inspiration first",
   "defaultTemplateName": "Character Generation Template",
   "chapterTitle": "Character Generation",
   "historySummary": "Character generation history",

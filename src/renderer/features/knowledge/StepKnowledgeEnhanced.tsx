@@ -532,11 +532,11 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
               {t('center.hybridLegend')}
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full bg-sky-500" />
+              <span className="size-2 rounded-full bg-chart-1" />
               {t('center.semanticLegend')}
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full bg-emerald-500" />
+              <span className="size-2 rounded-full bg-chart-5" />
               {t('center.keywordLegend')}
             </span>
           </div>
@@ -624,8 +624,8 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
                     <span className={cn(
                       'mt-1 inline-block rounded px-1.5 py-0.5 text-xs',
                       result.semanticScore > result.keywordScore
-                        ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400'
-                        : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                        ? 'bg-chart-1/10 text-chart-1'
+                        : 'bg-chart-5/10 text-chart-5'
                     )}>
                       {result.semanticScore > result.keywordScore ? t('center.scoreSemantic') : t('center.scoreKeyword')}
                     </span>
@@ -789,6 +789,11 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
                 title={t('center.emptyContent')}
                 description={t('center.emptyContentHint')}
                 className="py-8"
+                action={
+                  <Button onClick={() => document.getElementById('file-upload')?.click()}>
+                    {t('selectFiles')}
+                  </Button>
+                }
               />
             ) : (
               <div className="space-y-2">
@@ -814,17 +819,17 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
                           <span>{new Date(item.addedAt).toLocaleDateString(i18n.language)}</span>
                         </div>
                       </div>
-                      <button
+                      <Button
+                        variant={deleteConfirmId === item.id ? 'destructive' : 'ghost'}
+                        size="sm"
                         onClick={(e) => handleDeleteClick(e, item.id)}
                         className={cn(
-                          'ml-2 shrink-0 rounded px-2 py-1 text-xs transition-colors',
-                          deleteConfirmId === item.id
-                            ? 'bg-destructive text-destructive-foreground'
-                            : 'text-muted-foreground opacity-0 hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100'
+                          'ml-2 h-auto shrink-0 px-2 py-1 text-xs font-normal',
+                          deleteConfirmId !== item.id && 'opacity-0 group-hover:opacity-100'
                         )}
                       >
                         {deleteConfirmId === item.id ? t('center.confirmDelete') : t('center.delete')}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))}

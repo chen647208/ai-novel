@@ -26,14 +26,19 @@ describe('suggestNextSection', () => {
   it('仅 intro 也算灵感已填', () => {
     expect(suggestNextSection(project({ intro: '简介' }))).toBe('characters');
   });
-  it('有角色无大纲 → structure', () => {
-    expect(suggestNextSection(project({ inspiration: 'x', characters: [{ id: 'c', name: '林渊' } as never] }))).toBe('structure');
+  it('有角色无世界 → world', () => {
+    expect(suggestNextSection(project({ inspiration: 'x', characters: [{ id: 'c', name: '林渊' } as never] }))).toBe('world');
+  });
+  it('有知识库跳过世界 → structure', () => {
+    expect(
+      suggestNextSection(project({ inspiration: 'x', characters: [{ id: 'c' } as never], knowledge: [{ id: 'k' } as never] })),
+    ).toBe('structure');
   });
   it('有大纲无章节 → structure', () => {
-    expect(suggestNextSection(project({ inspiration: 'x', characters: [{ id: 'c' } as never], outline: '# 大纲' }))).toBe('structure');
+    expect(suggestNextSection(project({ inspiration: 'x', characters: [{ id: 'c' } as never], outline: '# 大纲', knowledge: [{ id: 'k' } as never] }))).toBe('structure');
   });
   it('全部就绪 → writing', () => {
-    expect(suggestNextSection(project({ inspiration: 'x', characters: [{ id: 'c' } as never], outline: 'o', chapters: [{ id: 'ch' } as never] }))).toBe('writing');
+    expect(suggestNextSection(project({ inspiration: 'x', characters: [{ id: 'c' } as never], outline: 'o', chapters: [{ id: 'ch' } as never], knowledge: [{ id: 'k' } as never] }))).toBe('writing');
   });
   it('空白字符串不算已填', () => {
     expect(suggestNextSection(project({ inspiration: '   ', outline: '  ' }))).toBe('inspiration');
