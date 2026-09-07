@@ -1,0 +1,8 @@
+# 换行策略：文本自动转换（库内 LF，Windows 检出 CRLF），二进制不碰。
+* text=auto
+*.png binary
+*.jpg binary
+*.ico binary
+*.icns binary
+*.wasm binary
+*.woff2 binary
