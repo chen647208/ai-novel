@@ -16,7 +16,7 @@ import { ATTACHMENT_TRUNCATE } from '../../../shared/constants/chapters';
 import { type GlobalAssistantProps, type ChatMessage, type AssistantCategory, type AssistantEditCategory, type SyncStatus, type EditingData } from './types';
 import { type LooseRecord, asRecord, asStr } from '../../shared/utils/loose';
 import { AIService } from './services/aiService';
-import { sessionManager } from './services/aiRuntime';
+import { approvalBroker, sessionManager } from './services/aiRuntime';
 import { indexService } from '@core/index';
 import { AICardCreationService } from '../cards/services/aiCardCreationService';
 import { AICardCommandService } from '../cards/services/aiCardCommandService';
@@ -182,13 +182,32 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       
       if (result) {
         if (result.success && result.data) {
-          addCardToProject(result.command, result.data);
-          
+          // 斜杠建卡同样走审批：先弹框确认，批准后落库（与 Agent 工具同标准）
+          const decision = await approvalBroker.request({
+            callId: `cmd_${Date.now().toString(36)}`,
+            toolId: 'core.card.generate',
+            permission: 'write:proposal',
+            proposal: {
+              title: result.message,
+              summary: t('chat.cardApprovalHint'),
+              suggestion: JSON.stringify(result.data, null, 2)?.slice(0, 2000),
+            },
+          });
+          const applied = decision.verdict === 'approved';
+          if (applied) {
+            addCardToProject(result.command, result.data);
+          }
+
           const systemMsg: ChatMessage = {
             id: (Date.now() + 1).toString(),
             role: 'assistant',
-            content: result.message,
+            content: applied
+              ? result.message
+              : decision.verdict === 'rejected'
+                ? t('chat.cardRejected')
+                : t('chat.cardDeferred'),
             timestamp: Date.now(),
+            error: applied ? undefined : t('chat.creationPending'),
           };
           setMessages(prev => [...prev, systemMsg]);
         } else {
