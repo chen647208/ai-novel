@@ -46,7 +46,7 @@ describe('ToolRegistry', () => {
     expect(lintToolSchema('ok', { type: 'object', properties: { x: {} }, required: ['x'] })).toBeNull();
   });
 
-  it('执行：未知工具与取消返回失败输出而非抛错', async () => {
+  it('执行：未知工具与取消返回失败输出', async () => {
     const reg = new ToolRegistry();
     reg.register(tool('core.ok'));
 

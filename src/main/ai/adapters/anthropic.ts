@@ -12,7 +12,7 @@
  * 覆盖官方 api.anthropic.com 与 Anthropic 兼容网关（如 MiniMax /anthropic/v1）。
  *
  * 协议要点（对照官方文档）：
- *  - 鉴权用 x-api-key + anthropic-version 头，而非 Bearer；
+ *  - 鉴权头为 x-api-key + anthropic-version；
  *  - max_tokens 为必填，未配置时兜底 8192；
  *  - temperature 合法区间 0–1，超出自动收敛（小说默认温度 1.0 恰在上界）；
  *  - system 提示词走顶层 system 字段，不混入 messages；

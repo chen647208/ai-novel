@@ -14,7 +14,7 @@ import { IpcSqlDriver } from './ipcDriver';
 import { WasmSqliteDriver } from './wasmDriver';
 
 /**
- * 应用数据的唯一入口。UI/App 一律 `import { repository }` 而非具体后端。
+ * 应用数据的唯一入口：统一经 `import { repository }` 访问。
  *
  * 按运行环境探测选择：
  *   - 桌面(Electron，有 electronAPI.db) → SQLite(IpcSqlDriver → 主进程 node:sqlite)

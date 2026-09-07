@@ -13,9 +13,8 @@
  * 三档路由：read 直接放行；write:proposal 必须经 approve/reject；
  * write:direct 直接放行但调用方必须存 Revision（本引擎只记录审计事件）。
  *
- * 超时降级（harness ask-user 教训）：审批请求带超时，超时绝不静默应用，
- * 而是进「待审箱」挂起；用户事后在 UI 里决定。多表面 fan-out
- * first-answer-wins 由后续表面层（M4 辅助窗口）在 broker 之上实现。
+ * 超时降级：审批请求带超时；超时进入「待审箱」挂起，用户事后在 UI 里决定；
+ * 禁止静默应用。多表面 fan-out first-answer-wins 由后续表面层在 broker 之上实现。
  *
  * 纯模块：无 DOM / Electron 依赖。
  */

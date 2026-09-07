@@ -138,7 +138,7 @@ describe('IndexService', () => {
     svc.rebuild('b1', entities);
     svc.clear();
     expect(svc.snapshot('b1')).toBeNull();
-    // clear 后指纹也清空，相同输入会重算而非命中旧缓存
+    // clear 后指纹也清空，相同输入重新计算
     const s = svc.rebuild('b1', entities);
     expect(s).not.toBeNull();
   });

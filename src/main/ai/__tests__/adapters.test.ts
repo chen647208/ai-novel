@@ -208,7 +208,7 @@ describe('geminiAdapter', () => {
     expect(r.error).toContain('API Key');
   });
 
-  it('supportsStreaming=false 时降级为传统模式（notice 而非 error）', async () => {
+  it('supportsStreaming=false 时降级为传统模式（notice 级别）', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ candidates: [{ content: { parts: [{ text: 'ok' }] } }] })));
     const chunks: StreamingAIResponse[] = [];
     await geminiAdapter.stream({ ...nativeModel, supportsStreaming: false }, 'hi', (c) => chunks.push(c));

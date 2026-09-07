@@ -7,7 +7,7 @@
 
 | # | 标准 | 状态 | 证据 |
 |---|---|---|---|
-| 1 | 断网/无 Key：纯写作正常，AI 显示未配置而非报错 | ✅ | 网关错误一律经 `AIResponse.error` 返回；minimal 发行档整体拒绝 AI 请求（2354e7d，`ai.request` 拦截门） |
+| 1 | 断网/无 Key：纯写作正常，AI 按钮提示未配置原因 | ✅ | 网关错误一律经 `AIResponse.error` 返回；minimal 发行档整体拒绝 AI 请求（2354e7d，`ai.request` 拦截门） |
 | 2 | AI 改稿全链路留痕：tool call → proposal → diff → 审批 → transaction → Revision → entity_changes(agentId) | ✅ | 会话事件 `tool.call/tool.approval/tool.result` 落 jsonl（20bb6f8）；`ApprovalRouter` write:direct 审计回调（8b3081b）；`CommitOptions.agentId` 写入 entity_changes 与 Revision（M1.3）；callId 贯穿三级 |
 | 3 | 技能渐进加载：清单 <500 token，激活全文注入可卸载 | ✅ | SkillCatalog manifest 预算 1600 字（≈500 token 中文）+ 测试（0feb8c6） |
 | 4 | MCP 出口：外部 agent 完成「读大纲→改人物卡→写回」 | ✅ | stdio server 冒烟实测（list_books/get_node/propose_card_write，7a2b8ea）；写走待审箱桥（ApprovalHost 轮询） |

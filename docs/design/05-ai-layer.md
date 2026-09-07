@@ -118,7 +118,7 @@ type AiEvent =
 
 ## 8. 验收标准
 
-1. 断网/无 Key：全部纯写作功能正常（公理 4）；AI 功能显示未配置而非报错。
+1. 断网/无 Key：全部纯写作功能正常（公理 4）；AI 功能提示未配置原因。
 2. 一次 AI 改稿全链路留痕：tool call → proposal → diff → 审批 → transaction → Revision → entity_changes(agentId)。
 3. 技能渐进加载：注入清单 token 数 < 500；激活技能后全文注入且可卸载。
 4. MCP 出口：用外部 codex CLI 连我们的 server 完成"读大纲→改人物卡→写回"闭环。

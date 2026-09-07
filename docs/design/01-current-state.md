@@ -75,9 +75,9 @@ Project { id, title, inspiration, intro, outline,
 
 ## 6. 对迁移计划粗排（11 篇）的两处修正（本文实测）
 
-1. **WP0.2 不是从零建存储**：`StorageRepository` + `SqlDriver` + `MIGRATIONS` + FTS5 已存在且设计良好（"文档行+FTS"混合模型是刻意的 Phase 0）。迁移应表述为：**schema v1（文档行）→ v2（实体行 + entity_changes）**，在同一抽象上扩展，而不是推倒。
+1. **WP0.2 在现有存储上扩展**：`StorageRepository` + `SqlDriver` + `MIGRATIONS` + FTS5 已存在且设计良好（"文档行+FTS"混合模型是刻意的 Phase 0）。迁移路径为：**schema v1（文档行）→ v2（实体行 + entity_changes）**，在同一抽象上扩展。
 2. **向量层需要合并**：7 个向量/embedding 服务应收敛为 1 个 `EmbeddingProvider` + 1 个 `VectorIndex`（并入索引器），这是 P0 顺带的减脂项。
 
 ## 7. 结论
 
-这个项目的真实底色是：**领域建模有野心（世界观/伏笔/一致性/图谱类型都定义过）、工程基建扎实（CI/测试/许可证/i18n）、但数据与扩展机制停在 1.0（文档 JSON + textarea + 硬编码 AI）**。设计方向不是补功能，而是把已有的领域概念装进"实体+索引+插件"的新地基——大量已定义的类型（MagicSystem、Faction、RuleSystem…）恰好证明"类型注册表"是刚需：它们每个都是未来类型模板的一个实例。
+这个项目的真实底色是：**领域建模有野心（世界观/伏笔/一致性/图谱类型都定义过）、工程基建扎实（CI/测试/许可证/i18n）、但数据与扩展机制停在 1.0（文档 JSON + textarea + 硬编码 AI）**。设计方向是把已有的领域概念装进"实体+索引+插件"的新地基——大量已定义的类型（MagicSystem、Faction、RuleSystem…）恰好证明"类型注册表"是刚需：它们每个都是未来类型模板的一个实例。

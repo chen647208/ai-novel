@@ -54,7 +54,7 @@
 1. **AI model setup** (required before using AI features):
    - Click the model name in the top bar (e.g. "No model selected")
    - Open "Model settings", pick an official channel and fill in the Key (DeepSeek/Kimi etc.)
-   - Without a model you can still handwrite; AI buttons explain the missing model instead of erroring
+   - Without a model you can still handwrite; AI buttons explain the missing model
 
 2. **Create your first book**:
    - On first launch a wizard pops up; click "Skip" to create a blank book (stay in the library, click the card to enter; picking a persona also opens model settings)

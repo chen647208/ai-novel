@@ -48,7 +48,7 @@ Trail of Bits、Cloudflare coding standards、WordPress 文档风格指南同款
 ### 3. 目标设计（design/）
 
 - `design/README.md`：v2 设计索引——现状评估、目标架构、数据层、插件系统、AI 层、编辑器、导出、M0–M5 路线图
-- 注意：design/ 是**前瞻性设计**，描述目标而非现状；功能落地后回写进 features/ 对应文档
+- 注意：design/ 是**前瞻性设计**，描述目标；功能落地后回写进 features/ 对应文档，现状以 features/ 为准
 
 ## 当前文档范围
 
