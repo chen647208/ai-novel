@@ -11,6 +11,7 @@ import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, use
 import { useTranslation } from 'react-i18next';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { createNovelExtensions } from '../../../editor/schema';
+import { findMatches } from '../../../editor/findReplace';
 import { createWritingPrimitives } from '../../../editor/primitives';
 import { dslToPmDoc, pmDocToDsl, type PmNode } from '../../../editor/serialization';
 import type { NovelEditorHandle } from '../types';
@@ -160,6 +161,36 @@ const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function T
       },
       setSpellcheck(enabled: boolean) {
         editor?.commands.setSpellcheck(enabled);
+      },
+      selectRange(from: number, to: number) {
+        if (!editor) return false;
+        try {
+          const { state } = editor;
+          const max = state.doc.content.size;
+          const a = Math.max(0, Math.min(from, max));
+          const b = Math.max(0, Math.min(to, max));
+          if (a >= b) return false;
+          editor.commands.focus();
+          editor.commands.setTextSelection({ from: a, to: b });
+          const coords = editor.view.coordsAtPos(b);
+          editor.view.dom.ownerDocument?.defaultView?.scrollTo?.({ top: coords.top - 200 });
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      findAll(query: string, caseSensitive: boolean) {
+        if (!editor) return [];
+        return findMatches(editor.state.doc, query, caseSensitive);
+      },
+      replaceRange(from: number, to: number, text: string) {
+        if (!editor) return false;
+        try {
+          editor.commands.focus();
+          return editor.commands.insertContentAt({ from, to }, text);
+        } catch {
+          return false;
+        }
       },
     }),
     [editor],

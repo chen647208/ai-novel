@@ -71,6 +71,12 @@ export interface NovelEditorHandle {
   insertGhostOutline(synopsis: string): boolean;
   /** 写作原语：主动开关拼写检查（默认关闭，无红波浪线常驻）。 */
   setSpellcheck(enabled: boolean): void;
+  /** 查找替换支撑：选中文档区间并滚动到可见（越界返回 false）。 */
+  selectRange(from: number, to: number): boolean;
+  /** 查找替换支撑：当前文档内全部文本匹配（文档坐标）。 */
+  findAll(query: string, caseSensitive: boolean): Array<{ from: number; to: number }>;
+  /** 查找替换支撑：区间替换为纯文本，返回是否成功。 */
+  replaceRange(from: number, to: number, text: string): boolean;
 }
 
 export interface GenerationModalState {
@@ -165,6 +171,7 @@ export interface WritingEditorToolbarProps {
   onRetryAI: () => void;
   spellcheckOn: boolean;
   onToggleSpellcheck: () => void;
+  onToggleFind: () => void;
 }
 
 export interface WritingSelectionMenuProps {

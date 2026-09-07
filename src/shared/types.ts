@@ -1027,6 +1027,8 @@ export interface ElectronAPI {
   // 对话框
   openFileDialog: (options: FileDialogOptions) => Promise<{ canceled: boolean; filePaths: string[] }>;
   saveFileDialog: (options: SaveDialogOptions) => Promise<{ canceled: boolean; filePath?: string }>;
+  /** HTML 打印为 PDF（主进程隐藏窗口渲染；返回是否取消）。 */
+  printPdf: (html: string, defaultPath: string) => Promise<{ canceled: boolean }>;
   openDirectoryDialog: (options: FileDialogOptions) => Promise<{ canceled: boolean; filePaths: string[] }>;
   listDirectory: (dirPath: string) => Promise<Array<{ name: string; type: 'file' | 'directory' }>>;
 

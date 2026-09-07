@@ -16,7 +16,7 @@ import MarkdownView from '@/shared/ui/Markdown';
 import { Button } from '@/shared/ui/Button';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
 import { cn } from '@/shared/utils/cn';
-import { AlignLeft, Check, Code, FileOutput, FileText, Globe, type LucideIcon } from 'lucide-react';
+import { AlignLeft, Check, Code, FileDown, FileOutput, FileText, Globe, type LucideIcon } from 'lucide-react';
 
 interface ExportChapterModalProps {
   isOpen: boolean;
@@ -36,6 +36,7 @@ const FORMAT_OPTIONS: Array<{ value: ExportFormat; label: string; icon: LucideIc
   { value: 'md', label: 'Markdown', icon: Code },
   { value: 'html', label: 'HTML', icon: Globe },
   { value: 'rtf', label: 'RTF', icon: FileText },
+  { value: 'pdf', label: 'PDF', icon: FileDown },
 ];
 
 const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
@@ -54,7 +55,8 @@ const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
   const sortedChapters = [...chapters].sort((a, b) => a.order - b.order);
   const [showPreview, setShowPreview] = useState(false);
   const previewText = useMemo(
-    () => (showPreview ? buildExportContent(project, selectedChapterIds, format) : ''),
+    // PDF 预览复用 HTML 渲染（打印即所见）
+    () => (showPreview ? buildExportContent(project, selectedChapterIds, format === 'pdf' ? 'html' : format) : ''),
     [showPreview, project, selectedChapterIds, format],
   );
   const previewStats = useMemo(() => (showPreview ? computeChapterStats(previewText) : null), [showPreview, previewText]);

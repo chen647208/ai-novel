@@ -19,6 +19,7 @@ export const IPC = {
   deleteFile: 'delete-file',
   openFileDialog: 'open-file-dialog',
   saveFileDialog: 'save-file-dialog',
+  printPdf: 'print-pdf',
   openDirectoryDialog: 'open-directory-dialog',
   listDirectory: 'list-directory',
   vector: {

@@ -28,6 +28,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveFileDialog: (options: unknown) => ipcRenderer.invoke(IPC.saveFileDialog, options),
   openDirectoryDialog: (options: unknown) => ipcRenderer.invoke(IPC.openDirectoryDialog, options),
   listDirectory: (dirPath: string) => ipcRenderer.invoke(IPC.listDirectory, dirPath),
+  printPdf: (html: string, defaultPath: string) => ipcRenderer.invoke(IPC.printPdf, html, defaultPath),
 
   // 向量存储操作（主进程托管 Vectra 索引）
   vector: {

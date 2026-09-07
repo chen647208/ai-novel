@@ -228,6 +228,7 @@
     "redoTitle": "Redo (Ctrl+Shift+Z)",
     "retryTitle": "Regenerate with the last settings",
     "spellTitle": "Spellcheck toggle (built-in)",
+    "findTitle": "Find & replace (Ctrl+F)",
     "exitFocus": "Exit focus",
     "enterFocusTitle": "Enter focus mode",
     "exitFocusTitle": "Exit focus mode",
@@ -262,6 +263,18 @@
     "stoppedHint": "Kept {{count}} interrupted characters. Merge into the chapter or discard.",
     "keepPartial": "Keep partial",
     "discardPartial": "Discard"
+  },
+  "findbar": {
+    "queryPlaceholder": "Find...",
+    "replacePlaceholder": "Replace with...",
+    "count": "{{current}}/{{total}}",
+    "noResults": "No matches",
+    "caseTitle": "Match case",
+    "prev": "Previous (Shift+Enter)",
+    "next": "Next (Enter)",
+    "replace": "Replace current",
+    "replaceAll": "Replace all",
+    "close": "Close (Esc)"
   },
   "export": {
     "title": "Export Novel Content",

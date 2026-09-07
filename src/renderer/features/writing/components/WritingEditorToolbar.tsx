@@ -14,7 +14,7 @@ import { formatCharCount } from '../services/writingStatsService';
 import { Button } from '@/shared/ui/Button';
 import { PageHeader, PageHeaderDivider } from '@/shared/ui/PageHeader';
 import { cn } from '@/shared/utils/cn';
-import { ArrowLeft, AlignCenterVertical, Camera, ChevronsRight, Eraser, Expand, FileOutput, FileText, History, Maximize2, Minimize2, Redo2, RotateCcw, SpellCheck, Sprout, Undo2 } from 'lucide-react';
+import { ArrowLeft, AlignCenterVertical, Camera, ChevronsRight, Eraser, Expand, FileOutput, FileText, History, Maximize2, Minimize2, Redo2, RotateCcw, Search, SpellCheck, Sprout, Undo2 } from 'lucide-react';
 
 const iconBtn = 'size-8 text-muted-foreground';
 const textBtn = 'h-8 gap-1.5 px-2 text-xs text-muted-foreground';
@@ -55,6 +55,7 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
   onRetryAI,
   spellcheckOn,
   onToggleSpellcheck,
+  onToggleFind,
 }) => {
   const { t, i18n } = useTranslation('writing');
   const progress = targetWordCount > 0 ? Math.min(1, chapterStats.charCount / targetWordCount) : 0;
@@ -142,6 +143,9 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
                 title={t('toolbar.spellTitle')}
               >
                 <SpellCheck className="size-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className={iconBtn} onClick={onToggleFind} title={t('toolbar.findTitle')}>
+                <Search className="size-4" />
               </Button>
               {activeChapterId && (
                 <Button variant="ghost" size="sm" className={textBtn} onClick={onManualSnapshot} title={t('toolbar.snapshotTitle', { count: snapshotCount })}>

@@ -117,6 +117,29 @@ export const dialogProvider: Provider = {
       const win = ctx.getMainWindow();
       return win ? dialog.showOpenDialog(win, merged) : dialog.showOpenDialog(merged);
     });
+
+    // HTML 打印为 PDF：隐藏窗口渲染 → 原生另存为 → 二进制落盘（渲染层不碰二进制）
+    ipcMain.handle(IPC.printPdf, async (_event, html: string, defaultPath: string) => {
+      if (typeof html !== 'string' || typeof defaultPath !== 'string') {
+        throw new TypeError('Invalid printPdf args');
+      }
+      const win = new BrowserWindow({ show: false, webPreferences: { sandbox: true } });
+      try {
+        await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+        const pdf = await win.webContents.printToPDF({ printBackground: true });
+        const target = await dialog.showSaveDialog(ctx.getMainWindow() ?? win, {
+          title: '导出 PDF',
+          defaultPath,
+          filters: [{ name: 'PDF', extensions: ['pdf'] }],
+        });
+        if (target.canceled || !target.filePath) return { canceled: true };
+        await fs.mkdir(path.dirname(target.filePath), { recursive: true });
+        await fs.writeFile(target.filePath, pdf);
+        return { canceled: false };
+      } finally {
+        win.destroy();
+      }
+    });
   },
 };
 

@@ -76,7 +76,7 @@ export const getPreviousChapterSummaryIds = (chapters: Chapter[], currentChapter
   );
 };
 
-export type ExportFormat = 'txt' | 'md' | 'html' | 'rtf';
+export type ExportFormat = 'txt' | 'md' | 'html' | 'rtf' | 'pdf';
 
 /** Project.chapters → 构建管线实体视图（导出与统计共用，单一口径）。 */
 export function projectToBuildEntities(project: Project): { nodes: NodeEntity[]; attrs: AttributeEntity[]; edges: EdgeEntity[] } {
@@ -120,9 +120,11 @@ export const buildExportContent = (project: Project, selectedChapterIds: Set<str
 
   // 章节标题模板沿用 i18n 文案：用哨兵 %N/%T 先生成骨架，管线再回填真值
   const chapterTemplate = i18n.t('writing:export.chapterHeader', { num: '%N', title: '%T' });
+  // PDF 复用 HTML 管线产出（主进程打印为 PDF），文件名与保存走 pdf 分支
+  const buildFormat = format === 'pdf' ? 'html' : format;
   const profile: BuildProfile = {
     name: '快速导出',
-    format,
+    format: buildFormat,
     selection: {
       includeTypes: ['novel.chapter'],
       includeInactive: false,
@@ -133,7 +135,7 @@ export const buildExportContent = (project: Project, selectedChapterIds: Set<str
       headings: { chapter: chapterTemplate, scene: '* * *', hide: [], renumber: true },
       content: { includeSynopsis: false, includeComments: false, stripTags: [], resolveRefs: 'raw' },
     },
-    render: { chapterPageBreak: format === 'html' || format === 'rtf', stripUnicode: false },
+    render: { chapterPageBreak: buildFormat === 'html' || format === 'rtf', stripUnicode: false },
   };
 
   const { text } = runBuild(profile, { nodes, attrs, edges: [] });
@@ -163,7 +165,7 @@ export const buildExportContent = (project: Project, selectedChapterIds: Set<str
   const header =
     format === 'md'
       ? `# ${project.title}\n\n${project.intro ? `> ${project.intro}\n\n` : ''}`
-      : format === 'html'
+      : buildFormat === 'html'
         ? [
             '<!DOCTYPE html>',
             '<html lang="zh-CN"><head><meta charset="utf-8">',
@@ -174,14 +176,14 @@ export const buildExportContent = (project: Project, selectedChapterIds: Set<str
           ].join('\n')
         : `${i18n.t('writing:export.bookTitleTxt', { title: project.title })}\n\n${project.intro ? `${i18n.t('writing:export.introLabel')}${project.intro}\n\n` : ''}`;
 
-  if (format === 'html') {
+  if (buildFormat === 'html') {
     return `${header}${text}\n</body></html>`;
   }
   return `${header}${text}\n\n`;
 };
 
-const EXPORT_EXT: Record<ExportFormat, string> = { txt: 'txt', md: 'md', html: 'html', rtf: 'rtf' };
-const EXPORT_MIME: Record<ExportFormat, string> = { txt: 'text/plain', md: 'text/markdown', html: 'text/html', rtf: 'application/rtf' };
+const EXPORT_EXT: Record<ExportFormat, string> = { txt: 'txt', md: 'md', html: 'html', rtf: 'rtf', pdf: 'pdf' };
+const EXPORT_MIME: Record<ExportFormat, string> = { txt: 'text/plain', md: 'text/markdown', html: 'text/html', rtf: 'application/rtf', pdf: 'application/pdf' };
 
 export const buildExportFilename = (projectTitle: string, format: ExportFormat = 'txt', now: Date = new Date()) => {
   const safeTitle = projectTitle.replace(/[\\/:*?"<>|]/g, '_');
@@ -194,6 +196,20 @@ export const buildExportFilename = (projectTitle: string, format: ExportFormat =
  */
 export const saveExportFile = async (filename: string, content: string, format: ExportFormat): Promise<void> => {
   const api = typeof window !== 'undefined' ? window.electronAPI : undefined;
+  // PDF：主进程隐藏窗口渲染打印（渲染层不碰二进制）；Web 回退浏览器打印（用户选存为 PDF）
+  if (format === 'pdf') {
+    if (api?.printPdf) {
+      await api.printPdf(content, filename);
+      return;
+    }
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    printWindow.document.write(content);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    return;
+  }
   if (api?.saveFileDialog && api?.writeFile) {
     const result = await api.saveFileDialog({
       title: i18n.t('writing:export.fileDialogTitle'),
