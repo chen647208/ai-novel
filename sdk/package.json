@@ -1,7 +1,7 @@
 {
   "name": "@ai-novel/plugin-sdk",
   "version": "0.1.0",
-  "description": "红月（RedMoon）插件 SDK：类型契约与运行时垫片（MIT 独立发行，与宿主 AGPL 解耦）。",
+  "description": "红月（Hongyue）插件 SDK：类型契约与运行时垫片（MIT 独立发行，与宿主 AGPL 解耦）。",
   "license": "MIT",
   "type": "module",
   "main": "src/index.ts",

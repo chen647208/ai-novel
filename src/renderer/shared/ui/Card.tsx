@@ -1,5 +1,5 @@
 /*
- * 本文件属于 红月 (RedMoon) 项目。
+ * 本文件属于 红月 (Hongyue) 项目。
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *

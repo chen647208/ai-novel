@@ -1,7 +1,7 @@
 ---
 layout: home
 hero:
-  name: 红月 (RedMoon)
+  name: 红月 (Hongyue)
   tagline: 本地优先的 AI 小说创作助手——既要 AI，也要纯写作；数据主权在你。
   actions:
     - theme: brand
