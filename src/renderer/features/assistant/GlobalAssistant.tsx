@@ -25,6 +25,7 @@ import AssistantContextPanel from './components/AssistantContextPanel';
 import AssistantEditPanel from './components/AssistantEditPanel';
 import AssistantChatWorkspace from './components/AssistantChatWorkspace';
 import { Select } from '@/shared/ui/Select';
+import { Button } from '@/shared/ui/Button';
 import { cn } from '@/shared/utils/cn';
 import { dialogService } from '@/shared/services/dialogService';
 import { useSettingsStore } from '../../app/stores/settingsStore';
@@ -748,13 +749,15 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
         </div>
         <div className="flex items-center gap-1">
           {onClose && (
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onClose}
-              className="flex size-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              className="size-6 text-muted-foreground hover:text-foreground"
               title={t('window.closeSidebar')}
             >
               <X className="size-3.5" />
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -779,36 +782,44 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
             </Select>
           </div>
           <div className="flex items-center gap-1">
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setEditPanelOpen(!editPanelOpen)}
-              className={cn('flex size-7 items-center justify-center rounded transition-colors', editPanelOpen ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground')}
+              className={cn('size-7 text-muted-foreground hover:text-foreground', editPanelOpen && 'bg-primary/10 text-primary')}
               title={t('window.editDataTitle')}
             >
               <PenLine className="size-4" />
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setContextPanelOpen(!contextPanelOpen)}
-              className={cn('flex size-7 items-center justify-center rounded transition-colors', contextPanelOpen ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground')}
+              className={cn('size-7 text-muted-foreground hover:text-foreground', contextPanelOpen && 'bg-primary/10 text-primary')}
               title={t('window.contextTitle')}
             >
               <BookOpenText className="size-4" />
-            </button>
+            </Button>
             {streamingMessageId && (
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={handleStopStreaming}
-                className="flex size-7 items-center justify-center rounded text-destructive transition-colors hover:bg-destructive/10"
+                className="size-7 text-destructive hover:text-destructive"
                 title={t('window.stopStreamTitle')}
               >
                 <CircleStop className="size-4" />
-              </button>
+              </Button>
             )}
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setMessages([])}
-              className="flex size-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+              className="size-7 text-muted-foreground hover:text-destructive"
               title={t('window.clearChatTitle')}
             >
               <Trash2 className="size-4" />
-            </button>
+            </Button>
           </div>
         </div>
 

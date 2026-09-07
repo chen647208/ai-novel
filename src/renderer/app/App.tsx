@@ -37,6 +37,7 @@ import { useAppBootstrap } from './useAppBootstrap';
 import { useFeatureAvailability } from './useFeatureAvailability';
 import { useBookActions } from './useBookActions';
 import { Bot } from 'lucide-react';
+import { Button } from '@/shared/ui/Button';
 
 /** 分区快捷键顺序：Ctrl/Cmd+1..5（模块级常量，避免 effect 依赖抖动）。 */
 const SECTION_ORDER: SectionId[] = ['inspiration', 'world', 'characters', 'structure', 'writing'];
@@ -245,14 +246,15 @@ const App: React.FC = () => {
             ) : (
               assistantNode && (
                 <div className="flex w-10 shrink-0 items-start justify-center border-l border-border bg-card pt-3">
-                  <button
-                    type="button"
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => setAssistantOpenPref('open')}
-                    className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                    className="size-8 text-muted-foreground hover:text-foreground"
                     title={t('topbar.expandAssistant')}
                   >
                     <Bot className="size-4" />
-                  </button>
+                  </Button>
                 </div>
               )
             )}

@@ -17,7 +17,8 @@ import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
 import { MarkdownView } from '@/shared/ui/Markdown';
 import { cn } from '@/shared/utils/cn';
-import { AlertCircle, BookOpen, Calculator, Clock, Cpu, FileText, Flag, Keyboard, Landmark, LoaderCircle, MapPin, MessagesSquare, Paperclip, Reply, Send, Settings2, Square, User, X, Zap } from 'lucide-react';
+import { AlertCircle, BookOpen, Calculator, Clock, Cpu, FileText, Flag, Keyboard, Landmark, MapPin, MessagesSquare, Paperclip, Reply, Send, Settings2, Square, User, X, Zap } from 'lucide-react';
+import { Spinner } from '@/shared/ui/Spinner';
 
 
 interface AssistantChatWorkspaceProps {
@@ -162,7 +163,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
         {isLoading && !streamingMessageId && (
           <div className="flex justify-start">
             <div className="rounded-xl rounded-bl-sm border border-border bg-card p-3 shadow-sm">
-              <LoaderCircle className="size-3.5 animate-spin text-primary" />
+              <Spinner className="size-3.5 text-primary" />
             </div>
           </div>
         )}
@@ -174,11 +175,12 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
             <div key={index} className="flex items-center gap-1 whitespace-nowrap rounded-md border border-border bg-card px-2 py-1 text-[10px] text-foreground">
               <FileText className="size-3.5" />
               <span className="max-w-[80px] truncate">{file.name}</span>
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setPendingFiles((prev) => prev.filter((_, i) => i !== index))}
-                className="ml-1 text-muted-foreground hover:text-destructive"
-              ><X className="size-3.5" /></button>
+                className="ml-1 size-5 text-muted-foreground hover:text-destructive"
+              ><X className="size-3.5" /></Button>
             </div>
           ))}
         </div>
@@ -191,9 +193,9 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
             {quickCommands.map((item) => {
               const cmd = `${i18n.language === 'en' ? item.en : item.zh} `;
               return (
-                <button
+                <Button
                   key={cmd}
-                  type="button"
+                  variant="outline"
                   onClick={() => {
                     setInput(cmd);
                     const defaultTemplate = cardPromptTemplates.find((template) => template.category === item.category);
@@ -201,12 +203,12 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
                       setSelectedCardTemplateId(defaultTemplate.id);
                     }
                   }}
-                  className="flex items-center gap-1 rounded-md border border-border bg-muted/40 px-2 py-1 text-[10px] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                  className="h-auto gap-1 px-2 py-1 text-[10px] font-normal text-muted-foreground hover:border-primary/40 hover:text-primary"
                   title={t('chat.commandTitle', { cmd: cmd.trim() })}
                 >
                   <item.icon className="size-3" />
                   {cmd.trim()}
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -225,14 +227,15 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
                 ))}
               </Select>
               {selectedCardTemplateId && (
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setSelectedCardTemplateId(null)}
-                  className="text-muted-foreground hover:text-destructive"
+                  className="size-7 text-muted-foreground hover:text-destructive"
                   title={t('chat.resetTemplateTitle')}
                 >
                   <X className="size-4" />
-                </button>
+                </Button>
               )}
             </div>
           )}

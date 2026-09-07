@@ -12,6 +12,7 @@ import { useTranslation } from '@/i18n';
 import type { Project } from '../../../shared/types';
 import { useFeatureAvailability } from '../useFeatureAvailability';
 import { cn } from '@/shared/utils/cn';
+import { Button } from '@/shared/ui/Button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/Tooltip';
 import { Feather, Globe, Library, ListOrdered, PenLine, Settings2, Users } from 'lucide-react';
 
@@ -87,14 +88,15 @@ const WorkspaceNav: React.FC<WorkspaceNavProps> = ({
       {/* 返回书籍库 */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onOpenBookshelf}
             aria-label={t('bookshelf')}
-            className="flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="size-10 rounded-lg text-muted-foreground hover:text-foreground [&_svg]:size-5"
           >
             <Library className="size-5" />
-          </button>
+          </Button>
         </TooltipTrigger>
         <TooltipContent side="right">{t('bookshelf')}</TooltipContent>
       </Tooltip>
@@ -109,16 +111,15 @@ const WorkspaceNav: React.FC<WorkspaceNavProps> = ({
           return (
             <Tooltip key={section.id}>
               <TooltipTrigger asChild>
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => onSectionChange(section.id)}
                   aria-label={t(section.labelKey)}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'relative flex size-10 items-center justify-center rounded-lg transition-colors',
-                    active
-                      ? 'bg-accent text-foreground'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    'relative size-10 rounded-lg text-muted-foreground hover:text-foreground [&_svg]:size-5',
+                    active && 'bg-accent text-foreground'
                   )}
                 >
                   <section.icon className="size-5" />
@@ -128,7 +129,7 @@ const WorkspaceNav: React.FC<WorkspaceNavProps> = ({
                       aria-hidden
                     />
                   )}
-                </button>
+                </Button>
               </TooltipTrigger>
               <TooltipContent side="right">{t(section.labelKey)}</TooltipContent>
             </Tooltip>
@@ -139,14 +140,15 @@ const WorkspaceNav: React.FC<WorkspaceNavProps> = ({
       {/* 设置 */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onOpenSettings}
             aria-label={t('settings')}
-            className="flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="size-10 rounded-lg text-muted-foreground hover:text-foreground [&_svg]:size-5"
           >
             <Settings2 className="size-5" />
-          </button>
+          </Button>
         </TooltipTrigger>
         <TooltipContent side="right">{t('settings')}</TooltipContent>
       </Tooltip>

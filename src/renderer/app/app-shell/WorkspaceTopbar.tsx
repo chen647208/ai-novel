@@ -93,6 +93,7 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
   const suggestedLabel = suggested
     ? t(`nav:${WORKSPACE_SECTIONS.find((s) => s.id === suggested)?.labelKey ?? 'steps.writing'}`)
     : '';
+  const sectionLabel = t(`nav:${WORKSPACE_SECTIONS.find((s) => s.id === section)?.labelKey ?? 'steps.writing'}`);
 
   const hasHistory =
     !!project &&
@@ -101,15 +102,17 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-card px-4">
-      {/* 面包屑：书籍库 / 书名 */}
+      {/* 面包屑：书籍库 / 当前分区 / 书名 */}
       <div className="flex min-w-0 items-center gap-1">
-        <button
-          type="button"
+        <Button
+          variant="ghost"
           onClick={onOpenBookshelf}
-          className="shrink-0 rounded-md px-2 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="h-auto shrink-0 px-2 py-1 text-sm font-normal text-muted-foreground hover:text-foreground"
         >
           {t('nav:bookshelf')}
-        </button>
+        </Button>
+        <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/60" />
+        <span className="shrink-0 text-sm text-muted-foreground">{sectionLabel}</span>
         <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/60" />
         {editingTitle ? (
           <Input
@@ -125,50 +128,52 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
             aria-label={t('app:topbar.renameTitle')}
           />
         ) : (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
             onClick={startRename}
             disabled={!project}
             title={project ? t('app:topbar.renameTip') : undefined}
-            className="group flex min-w-0 items-center gap-1 rounded-md px-1 py-0.5 text-left transition-colors hover:bg-muted disabled:pointer-events-none"
+            className="group h-auto min-w-0 gap-1 rounded-md px-1 py-0.5 text-left font-normal"
           >
             <h2 className="truncate font-serif text-base font-medium text-foreground">
               {project?.title || t('app:topbar.noBookSelected')}
             </h2>
             {project && <Pencil className="size-3 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />}
-          </button>
+          </Button>
         )}
         {showHint && suggested && (
           <div className="ml-2 flex shrink-0 items-center gap-1 rounded-full border border-primary/30 bg-primary/5 py-0.5 pl-2 pr-0.5 text-xs">
             <Compass className="size-3 text-primary" />
-            <button
-              type="button"
+            <Button
+              variant="link"
               onClick={() => onSectionChange(suggested, suggested === 'structure' ? suggestedSub : undefined)}
-              className="text-primary hover:underline"
+              className="h-auto p-0 text-xs text-primary"
               title={t('app:topbar.guidedGoTip')}
             >
               {t('app:topbar.guidedNext', { step: suggestedLabel })}
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setHintDismissed(true)}
               aria-label={t('app:topbar.guidedDismiss')}
-              className="flex size-4 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="size-4 rounded-full text-muted-foreground hover:text-foreground"
             >
               <X className="size-3" />
-            </button>
+            </Button>
           </div>
         )}
         {project && (
           <div className="ml-1 flex shrink-0 items-center">
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onDeleteProject}
               title={t('app:topbar.deleteProjectTip')}
-              className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
+              className="size-7 text-muted-foreground hover:text-destructive"
             >
               <Trash2 className="size-3.5" />
-            </button>
+            </Button>
           </div>
         )}
       </div>

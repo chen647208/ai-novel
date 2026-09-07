@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { Select } from '@/shared/ui/Select';
-import { cn } from '@/shared/utils/cn';
+import { SegmentedControl } from '@/shared/ui/ViewModeToggle';
 import { Search, Trash, Trash2, X } from 'lucide-react';
 import type {
   AIHistoryRecordWithChapter,
@@ -191,12 +191,11 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
   };
 
   const filterLabel = 'mb-1 block text-xs font-medium uppercase tracking-wider text-muted-foreground';
-  const segmented = (active: boolean, disabled = false) =>
-    cn(
-      'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
-      active ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
-      disabled && 'cursor-not-allowed opacity-50 hover:text-muted-foreground'
-    );
+
+  const handleViewModeChange = (next: AIHistoryViewMode) => {
+    setViewMode(next);
+    if (next === 'all') setSelectedChapterId(null);
+  };
 
   if (mode === 'sidebar') {
     return (
@@ -251,24 +250,15 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
         <div className="shrink-0 space-y-3 border-b border-border p-4">
           <div>
             <Label className={filterLabel}>{t('history.viewModeLabel')}</Label>
-            <div className="flex gap-1 rounded-lg bg-muted p-1">
-              <button
-                onClick={() => {
-                  setViewMode('all');
-                  setSelectedChapterId(null);
-                }}
-                className={cn('flex-1', segmented(viewMode === 'all'))}
-              >
-                {t('history.viewAll')}
-              </button>
-              <button
-                onClick={() => setViewMode('chapter')}
-                className={cn('flex-1', segmented(viewMode === 'chapter', chapterOptions.length === 0))}
-                disabled={chapterOptions.length === 0}
-              >
-                {t('history.viewChapter')}
-              </button>
-            </div>
+            <SegmentedControl
+              size="sm"
+              value={viewMode}
+              onChange={handleViewModeChange}
+              options={[
+                { value: 'all' as const, label: t('history.viewAll') },
+                { value: 'chapter' as const, label: t('history.viewChapter'), disabled: chapterOptions.length === 0 },
+              ]}
+            />
           </div>
 
           {viewMode === 'chapter' && (
@@ -318,14 +308,15 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
             </div>
             <div>
               <Label className={filterLabel}>{t('history.orderLabel')}</Label>
-              <div className="flex gap-1 rounded-lg bg-muted p-1">
-                <button onClick={() => setSortOrder('desc')} className={cn('flex-1', segmented(sortOrder === 'desc'))}>
-                  {t('history.desc')}
-                </button>
-                <button onClick={() => setSortOrder('asc')} className={cn('flex-1', segmented(sortOrder === 'asc'))}>
-                  {t('history.asc')}
-                </button>
-              </div>
+              <SegmentedControl
+                size="sm"
+                value={sortOrder}
+                onChange={setSortOrder}
+                options={[
+                  { value: 'desc' as const, label: t('history.desc') },
+                  { value: 'asc' as const, label: t('history.asc') },
+                ]}
+              />
             </div>
           </div>
         </div>
@@ -356,20 +347,14 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
         <div className="flex shrink-0 items-center justify-between border-b border-border bg-muted/30 px-6 py-4">
           <DialogTitle className="font-serif text-lg">{t('history.modalTitle')}</DialogTitle>
           <div className="ml-4 flex gap-1">
-            <button
-              type="button"
-              onClick={() => setMainTab('records')}
-              className={cn('rounded-md px-3 py-1 text-sm', mainTab === 'records' ? 'bg-accent font-medium' : 'text-muted-foreground hover:bg-accent/60')}
-            >
-              {t('approval.tabRecords', { ns: 'assistant' })}
-            </button>
-            <button
-              type="button"
-              onClick={() => setMainTab('sessions')}
-              className={cn('rounded-md px-3 py-1 text-sm', mainTab === 'sessions' ? 'bg-accent font-medium' : 'text-muted-foreground hover:bg-accent/60')}
-            >
-              {t('approval.tabSessions', { ns: 'assistant' })}
-            </button>
+            <SegmentedControl
+              value={mainTab}
+              onChange={setMainTab}
+              options={[
+                { value: 'records' as const, label: t('approval.tabRecords', { ns: 'assistant' }) },
+                { value: 'sessions' as const, label: t('approval.tabSessions', { ns: 'assistant' }) },
+              ]}
+            />
           </div>
         </div>
 
@@ -421,24 +406,15 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
         <div className="grid shrink-0 grid-cols-4 gap-4 border-b border-border bg-card p-4">
           <div>
             <Label className={filterLabel}>{t('history.viewModeLabel')}</Label>
-            <div className="flex gap-1 rounded-lg bg-muted p-1">
-              <button
-                onClick={() => {
-                  setViewMode('all');
-                  setSelectedChapterId(null);
-                }}
-                className={cn('flex-1', segmented(viewMode === 'all'))}
-              >
-                {t('history.viewAllFull')}
-              </button>
-              <button
-                onClick={() => setViewMode('chapter')}
-                className={cn('flex-1', segmented(viewMode === 'chapter', chapterOptions.length === 0))}
-                disabled={chapterOptions.length === 0}
-              >
-                {t('history.viewChapterFull')}
-              </button>
-            </div>
+            <SegmentedControl
+              size="sm"
+              value={viewMode}
+              onChange={handleViewModeChange}
+              options={[
+                { value: 'all' as const, label: t('history.viewAllFull') },
+                { value: 'chapter' as const, label: t('history.viewChapterFull'), disabled: chapterOptions.length === 0 },
+              ]}
+            />
           </div>
 
           {viewMode === 'chapter' && (
@@ -486,14 +462,15 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
             </div>
             <div>
               <Label className={filterLabel}>{t('history.orderLabelFull')}</Label>
-              <div className="flex gap-1 rounded-lg bg-muted p-1">
-                <button onClick={() => setSortOrder('desc')} className={cn('flex-1', segmented(sortOrder === 'desc'))}>
-                  {t('history.desc')}
-                </button>
-                <button onClick={() => setSortOrder('asc')} className={cn('flex-1', segmented(sortOrder === 'asc'))}>
-                  {t('history.asc')}
-                </button>
-              </div>
+              <SegmentedControl
+                size="sm"
+                value={sortOrder}
+                onChange={setSortOrder}
+                options={[
+                  { value: 'desc' as const, label: t('history.desc') },
+                  { value: 'asc' as const, label: t('history.asc') },
+                ]}
+              />
             </div>
           </div>
         </div>
