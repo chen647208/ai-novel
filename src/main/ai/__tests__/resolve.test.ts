@@ -16,7 +16,7 @@ import { anthropicAdapter } from '../adapters/anthropic.js';
 import { openAIResponsesAdapter } from '../adapters/openai-responses.js';
 
 const model = (provider: ModelProvider): ModelConfig =>
-  ({ id: 'm', name: 'M', provider, modelName: 'x' } as ModelConfig);
+  ({ id: 'm', name: 'M', provider, modelName: 'x' });
 
 describe('resolveAdapter 协议映射', () => {
   it('gemini 走原生适配器', () => {

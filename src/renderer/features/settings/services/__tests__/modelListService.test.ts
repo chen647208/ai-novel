@@ -12,7 +12,7 @@ import type { ModelConfig } from '../../../../../shared/types';
 import { ModelListService } from '../modelListService';
 
 const model = (over: Partial<ModelConfig>): ModelConfig =>
-  ({ id: 'm', name: 'M', provider: 'openai-chat', endpoint: 'https://api.x/v1', apiKey: 'sk-x', modelName: 'x', ...over } as ModelConfig);
+  ({ id: 'm', name: 'M', provider: 'openai-chat', endpoint: 'https://api.x/v1', apiKey: 'sk-x', modelName: 'x', ...over });
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });

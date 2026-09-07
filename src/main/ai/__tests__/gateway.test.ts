@@ -18,7 +18,7 @@ vi.mock('../resolve.js', () => ({ resolveAdapter: mockResolve }));
 import { runAdapterStream } from '../gateway.js';
 
 const model = (over: Partial<ModelConfig> = {}): ModelConfig =>
-  ({ id: 'm1', name: 'T', provider: 'openai-chat', endpoint: 'https://x/v1', modelName: 'm', ...over }) as ModelConfig;
+  ({ id: 'm1', name: 'T', provider: 'openai-chat', endpoint: 'https://x/v1', modelName: 'm', ...over });
 
 const okChunk = (content: string, extra: Partial<StreamingAIResponse> = {}): StreamingAIResponse =>
   ({ content, isComplete: false, isStreaming: true, ...extra });

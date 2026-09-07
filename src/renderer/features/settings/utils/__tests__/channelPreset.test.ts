@@ -13,7 +13,7 @@ import { channelValueFor, channelPatch, channelGroups } from '../channelPreset';
 import { modelProviders, findProviderPreset } from '../../../../constants/modelProviders';
 
 const model = (over: Partial<ModelConfig>): ModelConfig =>
-  ({ id: 'm', name: 'M', provider: 'openai-chat', modelName: 'x', ...over } as ModelConfig);
+  ({ id: 'm', name: 'M', provider: 'openai-chat', modelName: 'x', ...over });
 
 describe('channelValueFor', () => {
   it('有效 presetId 直接命中', () => {

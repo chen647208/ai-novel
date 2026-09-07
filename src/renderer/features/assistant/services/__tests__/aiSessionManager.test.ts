@@ -19,7 +19,7 @@ vi.mock('@/shared/services/ai/gatewayClient.js', () => ({
 import { AiSessionManager } from '../aiSessionManager';
 import type { ModelConfig, Project } from '../../../../../shared/types';
 
-const model: ModelConfig = { id: 'm', name: 'M', provider: 'openai-chat', modelName: 'test' } as ModelConfig;
+const model: ModelConfig = { id: 'm', name: 'M', provider: 'openai-chat', modelName: 'test' };
 const project = { title: '测试书' } as unknown as Project;
 
 describe('AiSessionManager', () => {

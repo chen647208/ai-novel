@@ -12,7 +12,7 @@ import type { ModelConfig } from '../../../../shared/types';
 import { isModelConfigured } from '../modelReadiness';
 
 const model = (over: Partial<ModelConfig>): ModelConfig =>
-  ({ id: 'm', name: 'M', provider: 'openai-chat', modelName: 'x', ...over } as ModelConfig);
+  ({ id: 'm', name: 'M', provider: 'openai-chat', modelName: 'x', ...over });
 
 describe('isModelConfigured', () => {
   it('null / undefined 视为未配置', () => {

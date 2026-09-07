@@ -16,7 +16,7 @@ import { ToolRegistry, type ToolSpec } from '../tools.js';
 import type { AgentLoopDeps } from '../agentLoop.js';
 import type { ModelConfig } from '../../../shared/types';
 
-const model: ModelConfig = { id: 'm', name: 'M', provider: 'openai-chat', modelName: 'test' } as ModelConfig;
+const model: ModelConfig = { id: 'm', name: 'M', provider: 'openai-chat', modelName: 'test' };
 
 const readTool: ToolSpec = {
   id: 'core.index.query',
