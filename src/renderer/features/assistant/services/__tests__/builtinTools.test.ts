@@ -49,15 +49,15 @@ function ctxOf(project: Project | null, services: Record<string, unknown> = {}):
 }
 
 describe('按需上下文工具', () => {
-  it('注册表包含 16 个工具且无重复', () => {
+  it('注册表包含 17 个工具且无重复', () => {
     const registry = createToolRegistry();
     for (const id of [
       'core.chapter.list', 'core.chapter.read', 'core.outline.read', 'core.character.list',
-      'core.knowledge.read', 'core.text.search', 'core.text.semanticSearch',
+      'core.knowledge.read', 'core.text.search', 'core.text.semanticSearch', 'core.skill.load',
     ]) {
       expect(registry.has(id), id).toBe(true);
     }
-    expect(registry.list()).toHaveLength(16);
+    expect(registry.list()).toHaveLength(17);
   });
 
   it('chapter.list 按 order 排序并标注正文状态', async () => {
@@ -146,6 +146,19 @@ describe('按需上下文工具', () => {
     const out = await registry.execute('core.text.semanticSearch', { query: '法术体系' }, ctxOf(stubProject()));
     expect(out.ok).toBe(false);
     expect(out.error).toContain('core.text.search');
+  });
+
+  it('skill.load 经宿主服务按名激活；缺服务或无此技能报错', async () => {
+    const registry = createToolRegistry();
+    const skillLoad = vi.fn((name: string) => name === 'snowflake');
+    const ok = await registry.execute('core.skill.load', { name: 'snowflake' }, ctxOf(stubProject(), { skillLoad }));
+    expect(ok).toEqual({ ok: true, data: { activated: 'snowflake' } });
+
+    const missing = await registry.execute('core.skill.load', { name: '不存在' }, ctxOf(stubProject(), { skillLoad }));
+    expect(missing.ok).toBe(false);
+
+    const noService = await registry.execute('core.skill.load', { name: 'snowflake' }, ctxOf(stubProject()));
+    expect(noService.ok).toBe(false);
   });
 
   it('无项目时读工具直接报错', async () => {

@@ -209,10 +209,10 @@ export class SkillCatalog {
     this.activeName = null;
   }
 
-  /** 当前激活技能（PromptContext.activeSkill 数据源）。 */
-  getActive(): { name: string; body: string } | null {
+  /** 当前激活技能（PromptContext.activeSkill 数据源；tools 供 Agent 循环做白名单拦截）。 */
+  getActive(): { name: string; body: string; tools: string[] } | null {
     if (!this.activeName) return null;
     const skill = this.skills.get(this.activeName);
-    return skill ? { name: skill.name, body: skill.body } : null;
+    return skill ? { name: skill.name, body: skill.body, tools: skill.tools } : null;
   }
 }

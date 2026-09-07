@@ -161,6 +161,7 @@ export class AiSessionManager {
             project: input.project,
             index: input.index,
             activeSkill: this.catalog.getActive(),
+            activeSkillTools: this.catalog.getActive()?.tools,
             // 工具执行上下文：模型配置与宿主服务在此注入（缺失则需模型的工具直接失败）
             modelConfig: input.model,
             services: {
@@ -186,8 +187,12 @@ export class AiSessionManager {
                   content: h.content.slice(0, 800),
                 }));
               },
+              // 技能按名加载（会话内状态变更，不碰数据；激活后白名单对后续轮次生效）
+              skillLoad: (name: string) => this.catalog.activate(name),
             },
             extra: {
+              // 技能清单常驻 prompt（渐进加载：清单一直可见，全文按需 core.skill.load）
+              skillManifest: this.catalog.manifest() ?? undefined,
               aiPolicies: this.events
                 .policiesFor('ai')
                 .filter((p): p is SeamPolicy & { do: 'inject'; text: string } => p.do === 'inject' && p.where === 'system')

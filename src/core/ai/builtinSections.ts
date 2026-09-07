@@ -216,6 +216,18 @@ export const activeSkillSection: PromptSection = {
   },
 };
 
+/** skillManifest：技能清单常驻（对标 OpenCode 的 skills 进 system；全文仍按需加载）。 */
+export const skillManifestSection: PromptSection = {
+  id: 'skillManifest',
+  title: '写法技能',
+  order: 45,
+  render(ctx: PromptContext): string | undefined {
+    const manifest = typeof ctx.extra?.skillManifest === 'string' ? ctx.extra.skillManifest.trim() : '';
+    if (!manifest) return undefined;
+    return `可用写法技能清单（需要方法论全文时用 core.skill.load 按名加载，同一时间只生效一个）：\n${truncateText(manifest, 1600)}`;
+  },
+};
+
 /** agentProtocol：工具调用的 JSON 协议与多步策略（order 介于技能与工具清单之间：先讲怎么调，再列有什么）。 */
 export const agentProtocolSection: PromptSection = {
   id: 'agentProtocol',
@@ -261,6 +273,7 @@ export function registerBuiltinSections(assembler: PromptAssembler): void {
     worldDigestSection,
     indexDigestSection,
     activeSkillSection,
+    skillManifestSection,
     agentProtocolSection,
     toolSchemasSection,
     userTaskSection,

@@ -445,6 +445,31 @@ export const textSemanticSearchTool: ToolSpec = {
   },
 };
 
+/** core.skill.load：按名加载写法技能全文（会话内生效，同一时间只生效一个）。 */
+export const skillLoadTool: ToolSpec = {
+  id: 'core.skill.load',
+  description: '按名称加载写法技能的方法论全文（如雪片法、去 AI 味）。先看写法技能清单再点名；加载后其工具白名单开始生效。',
+  parameters: {
+    type: 'object',
+    properties: {
+      name: { type: 'string', description: '技能名称（清单中的名称）' },
+    },
+    required: ['name'],
+  },
+  permission: 'read',
+  async execute(req, ctx) {
+    const name = str((req.args as { name?: unknown }).name, 'name');
+    const load = ctx.services?.skillLoad as ((skillName: string) => boolean) | undefined;
+    if (typeof load !== 'function') {
+      return { ok: false, error: '技能加载服务不可用（宿主未注入）' };
+    }
+    if (!load(name)) {
+      return { ok: false, error: `没有名为“${name}”的技能，请核对写法技能清单中的名称` };
+    }
+    return { ok: true, data: { activated: name } };
+  },
+};
+
 // ── 生成类工具（write:proposal：产出提案文本，经审批后由用户落稿）──────
 
 async function generateProposal(ctx: ToolContext, prompt: string): Promise<{ ok: boolean; data?: unknown; error?: string }> {
@@ -575,6 +600,7 @@ export function createBuiltinTools(): ToolSpec[] {
     knowledgeReadTool,
     textSearchTool,
     textSemanticSearchTool,
+    skillLoadTool,
     textContinueTool,
     textRewriteTool,
     outlineGenerateTool,

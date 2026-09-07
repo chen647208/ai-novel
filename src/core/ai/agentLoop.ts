@@ -54,6 +54,8 @@ export interface AgentLoopDeps {
     extra?: Record<string, unknown>;
     modelConfig?: unknown;
     services?: Record<string, unknown>;
+    /** 激活技能的工具白名单（空/缺席 = 不限制）；每轮重取，mid-session 激活即生效 */
+    activeSkillTools?: string[];
   };
   maxTurns?: number;
   signal?: AbortSignal;
@@ -116,12 +118,14 @@ export function parseAgentReply(content: string): AgentModelReply {
 /** 运行一次完整会话（可含多轮工具循环）。事件全部落 session。 */
 export async function runAgentSession(deps: AgentLoopDeps, task: string): Promise<AgentTurnResult> {
   const maxTurns = deps.maxTurns ?? DEFAULT_MAX_TURNS;
-  const ctx = deps.context();
+  // 装配只做一次（prompt 前缀稳定，缓存可复用）；执行上下文每轮重取
+  // （索引快照新鲜 + 会话内技能激活对后续轮次生效）
+  const firstCtx = deps.context();
   const assembled = deps.assembler.assemble({
-    project: ctx.project,
-    index: ctx.index,
-    activeSkill: ctx.activeSkill,
-    extra: ctx.extra,
+    project: firstCtx.project,
+    index: firstCtx.index,
+    activeSkill: firstCtx.activeSkill,
+    extra: firstCtx.extra,
     userTask: task,
     toolSchemas: deps.registry.resolveSchemas(),
     charBudget: deps.charBudget,
@@ -183,7 +187,8 @@ export async function runAgentSession(deps: AgentLoopDeps, task: string): Promis
         break;
       }
 
-      // 工具结果以结构化文本回填，驱动下一轮
+      // 工具结果以结构化文本回填，驱动下一轮（执行上下文每轮重取：索引新鲜 + 技能激活即生效）
+      const ctx = deps.context();
       const observations: string[] = [];
       for (const call of calls) {
         await deps.session.emit({ t: 'tool.call', turn, callId: call.callId, toolId: call.toolId, args: call.args, at: Date.now() });
@@ -192,6 +197,16 @@ export async function runAgentSession(deps: AgentLoopDeps, task: string): Promis
         if (!spec) {
           await deps.session.emit({ t: 'tool.result', turn, callId: call.callId, ok: false, error: `未知工具：${call.toolId}`, at: Date.now() });
           observations.push(`[工具 ${call.toolId}] 失败：未知工具`);
+          continue;
+        }
+
+        // 技能白名单：激活技能限定工具集时，非白名单调用直接拦截（不执行、不审批）
+        const whitelist = ctx.activeSkillTools ?? [];
+        if (whitelist.length > 0 && !whitelist.includes(call.toolId)) {
+          await deps.session.emit({ t: 'tool.result', turn, callId: call.callId, ok: false, error: '技能白名单拦截', at: Date.now() });
+          observations.push(
+            `[工具 ${call.toolId}] 被拦截：当前技能「${ctx.activeSkill?.name ?? ''}」只允许调用 ${whitelist.join('、')}，如需其他能力先用 core.skill.load 切换技能。`,
+          );
           continue;
         }
 

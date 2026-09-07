@@ -190,6 +190,30 @@ describe('runAgentSession', () => {
     expect(seen.services).toEqual({ textSearch: 'fn' });
   });
 
+  it('激活技能白名单：非白名单工具直接拦截不执行', async () => {
+    const { deps, session } = makeDeps(
+      [
+        '{"reply":"","toolCalls":[{"callId":"c1","toolId":"core.text.rewrite","args":{"text":"x","instruction":"改"}}]}',
+        '{"reply":"已拦截"}',
+      ],
+      {
+        maxTurns: 4,
+      },
+    );
+    const baseContext = deps.context;
+    deps.context = () => ({
+      ...baseContext(),
+      activeSkill: { name: 'ai-flavor-removal', body: '去 AI 味' },
+      activeSkillTools: ['core.index.query'],
+    });
+    const result = await runAgentSession(deps, '改写');
+    expect(result.ok).toBe(true);
+    expect(result.reply).toBe('已拦截');
+    // 拦截只记 tool.result（失败），不产生 tool.approval
+    expect(session.events.some((e) => e.t === 'tool.approval')).toBe(false);
+    expect(session.events.filter((e) => e.t === 'tool.result')).toHaveLength(1);
+  });
+
   it('llm 错误：会话失败收尾并带错误', async () => {
     const assembler = new PromptAssembler();
     const registry = new ToolRegistry();
