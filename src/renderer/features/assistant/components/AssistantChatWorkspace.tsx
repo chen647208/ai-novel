@@ -32,6 +32,7 @@ interface AssistantChatWorkspaceProps {
   setPendingFiles: React.Dispatch<React.SetStateAction<KnowledgeItem[]>>;
   input: string;
   setInput: React.Dispatch<React.SetStateAction<string>>;
+  hasModel: boolean;
   handleSendMessage: () => void;
   onStopGeneration: () => void;
   handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -78,6 +79,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
   setPendingFiles,
   input,
   setInput,
+  hasModel,
   handleSendMessage,
   onStopGeneration,
   handleFileUpload,
@@ -291,8 +293,8 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
               <Button
                 size="icon"
                 onClick={handleSendMessage}
-                disabled={isLoading || (!input.trim() && pendingFiles.length === 0)}
-                title={t('chat.sendTitle')}
+                disabled={isLoading || !hasModel || (!input.trim() && pendingFiles.length === 0)}
+                title={!hasModel ? t('dialog.noModel') : t('chat.sendTitle')}
                 className="shrink-0"
               >
                 <Send className="size-4" />

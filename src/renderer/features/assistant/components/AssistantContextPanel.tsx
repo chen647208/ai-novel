@@ -26,6 +26,7 @@ interface AssistantContextPanelProps {
   prompts: PromptTemplate[];
   contextContent: string;
   isLoading: boolean;
+  hasModel: boolean;
   onCategoryChange: (category: AssistantCategory) => void;
   onSubSelectionChange: (value: string) => void;
   onPromptChange: (value: string) => void;
@@ -48,6 +49,7 @@ const AssistantContextPanel: React.FC<AssistantContextPanelProps> = ({
   prompts,
   contextContent,
   isLoading,
+  hasModel,
   onCategoryChange,
   onSubSelectionChange,
   onPromptChange,
@@ -115,7 +117,7 @@ const AssistantContextPanel: React.FC<AssistantContextPanelProps> = ({
             <option key={prompt.id} value={prompt.id}>[{prompt.category}] {templateDisplayName(prompt)}</option>
           ))}
         </Select>
-        <Button className="w-full" size="sm" onClick={onAnalyze} disabled={isLoading || !project || !contextContent.trim()}>
+        <Button className="w-full" size="sm" onClick={onAnalyze} disabled={isLoading || !hasModel || !project || !contextContent.trim()} title={!hasModel ? t('dialog.noModel') : undefined}>
           <WandSparkles className="size-4" /> {t('context.analyzeBtn')}
         </Button>
       </div>

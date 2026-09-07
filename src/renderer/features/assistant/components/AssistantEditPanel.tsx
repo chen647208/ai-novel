@@ -51,6 +51,7 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
   syncStatus,
   characterGenerationPrompt,
   isGeneratingCharacter,
+  hasModel,
   setEditingData,
   setEditCategory,
   setSyncStatus,
@@ -186,7 +187,8 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
                   <Button
                     className="w-full"
                     onClick={handleGenerateCharacter}
-                    disabled={isGeneratingCharacter || !characterGenerationPrompt.trim()}
+                    disabled={isGeneratingCharacter || !hasModel || !characterGenerationPrompt.trim()}
+                    title={!hasModel ? t('dialog.noModel') : undefined}
                   >
                     {isGeneratingCharacter ? (
                       <>

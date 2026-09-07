@@ -62,6 +62,7 @@ export interface AssistantEditPanelProps {
   syncStatus: SyncStatus;
   characterGenerationPrompt: string;
   isGeneratingCharacter: boolean;
+  hasModel: boolean;
   setEditingData: React.Dispatch<React.SetStateAction<EditingData>>;
   setEditCategory: React.Dispatch<React.SetStateAction<AssistantEditCategory>>;
   setSyncStatus: React.Dispatch<React.SetStateAction<SyncStatus>>;

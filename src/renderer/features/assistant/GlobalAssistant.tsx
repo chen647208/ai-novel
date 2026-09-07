@@ -41,6 +41,11 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const firstEnabledModel = models.find((m) => m.isEnabled !== false) ?? models[0];
+  // 单源可用模型：三处 AI 入口共用，isEnabled 过滤一致
+  const usableModel = models.find((m) => m.id === currentModelId && m.isEnabled !== false)
+    ?? models.find((m) => m.isEnabled !== false)
+    ?? models[0];
+  const hasModel = Boolean(usableModel);
   const updateActiveProject = useProjectStore((s) => s.updateActiveProject);
   // AI 产物归因：助手生成的卡片/角色标注来源，用户手改走 onUpdate 默认 user
   const commitAICard = (updates: Partial<Project>) =>
@@ -161,7 +166,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       };
       setMessages(prev => [...prev, userMsg]);
       
-      const activeModel = models.find((m) => m.id === currentModelId && m.isEnabled !== false) ?? models.find((m) => m.isEnabled !== false) ?? models[0];
+      const activeModel = usableModel;
 
       if (!activeModel) {
         const errorMsg: ChatMessage = {
@@ -233,7 +238,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     // ── Agent 循环：装配 → 网关 → 工具（三档审批）→ 答复 ──
     setIsLoading(true);
 
-    const activeModel = models.find(m => m.id === currentModelId) || models[0];
+    const activeModel = usableModel;
     if (!activeModel) {
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
@@ -309,6 +314,10 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
 
   const handleContextAnalyze = () => {
      if (!project) return;
+     if (!usableModel) {
+       dialogService.alert(t('dialog.noModel'));
+       return;
+     }
      const content = getContextContent;
      // 空上下文不发送（该分区暂无内容时保持静默，由空态引导用户先填）
      if (!content.trim()) return;
@@ -575,7 +584,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     
     setIsGeneratingCharacter(true);
     try {
-      const activeModel = models.find(m => m.id === currentModelId) || models[0];
+      const activeModel = usableModel;
       if (!activeModel) {
         dialogService.alert(t('dialog.noModel'));
         return;
@@ -794,9 +803,10 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
           <div className="flex items-center gap-2">
             <Select
               className="h-7 w-auto max-w-[140px] text-xs"
-              value={currentModelId}
+              value={usableModel?.id ?? ''}
               onChange={(e) => handleModelChange(e.target.value)}
             >
+              {!hasModel && <option value="">{t('model.noModelOption')}</option>}
               {models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
             </Select>
             <Select
@@ -858,6 +868,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
               syncStatus={syncStatus}
               characterGenerationPrompt={characterGenerationPrompt}
               isGeneratingCharacter={isGeneratingCharacter}
+              hasModel={hasModel}
               setEditingData={setEditingData}
               setEditCategory={setEditCategory}
               setSyncStatus={setSyncStatus}
@@ -879,6 +890,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
               prompts={prompts}
               contextContent={getContextContent}
               isLoading={isLoading}
+              hasModel={hasModel}
               onCategoryChange={setActiveCategory}
               onSubSelectionChange={setSubSelectionId}
               onPromptChange={setAnalysisPromptId}
@@ -897,6 +909,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
             setPendingFiles={setPendingFiles}
             input={input}
             setInput={setInput}
+            hasModel={hasModel}
             handleSendMessage={handleSendMessage}
             onStopGeneration={handleStopStreaming}
             handleFileUpload={handleFileUpload}

@@ -11,6 +11,9 @@
     "streaming": "Streaming",
     "traditional": "Traditional"
   },
+  "model": {
+    "noModelOption": "No model configured"
+  },
   "window": {
     "title": "AI Assistant",
     "closeSidebar": "Close AI sidebar",

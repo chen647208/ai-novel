@@ -11,6 +11,9 @@
     "streaming": "流式输出",
     "traditional": "传统输出"
   },
+  "model": {
+    "noModelOption": "未配置模型"
+  },
   "window": {
     "title": "AI 助手",
     "closeSidebar": "关闭 AI 侧边栏",
