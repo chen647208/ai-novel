@@ -1,6 +1,6 @@
 # @ai-novel/plugin-sdk
 
-红月（Hongyue）插件 SDK（MIT 独立发行）。
+红月创作（Hongyue Creation）插件 SDK（MIT 独立发行）。
 
 宿主为 AGPL-3.0；插件经本 SDK 的公开类型/协议与宿主交互，属于独立作品，
 不构成宿主衍生作品（见 docs/guides/licensing.md 与 design/04 §9）。

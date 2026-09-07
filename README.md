@@ -1,4 +1,4 @@
-# 红月（Hongyue）
+# 红月创作（Hongyue Creation）
 
 以本地优先为核心的 Electron + React + TypeScript 桌面小说创作工具——
 **既要 AI，也要纯写作**：AI 工具/审批/技能体系与完整的离线写作能力并存，
