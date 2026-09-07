@@ -1164,6 +1164,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
         onExportFormatChange={setExportFormat}
         onConfirmExport={handleExecuteExport}
         menuPos={menuPos}
+        hasModel={Boolean(activeModel)}
         onOpenEditModal={openEditModal}
         onClearSelection={clearSelectionMenu}
         isHistoryViewerOpen={isHistoryViewerOpen}
@@ -1187,6 +1188,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           summaryPrompts={summaryPrompts}
           selectedSummaryPromptId={selectedSummaryPromptId}
           isExtractingSummary={isExtractingSummary}
+          hasModel={Boolean(activeModel)}
           onClose={() => setIsSidebarOpen(false)}
           onChapterSummaryChange={updateChapterSummary}
           onOpenSummaryPromptManager={handleOpenSummaryPromptManager}

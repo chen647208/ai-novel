@@ -163,6 +163,7 @@ export interface WritingEditorToolbarProps {
 export interface WritingSelectionMenuProps {
   menuPos: MenuPosition | null;
   isEditModalOpen: boolean;
+  hasModel: boolean;
   onOpenEditModal: () => void;
   onClearSelection: () => void;
 }
@@ -184,6 +185,7 @@ export interface ChapterSummarySectionProps {
   summaryPrompts: PromptTemplate[];
   selectedSummaryPromptId: string;
   isExtractingSummary: boolean;
+  hasModel: boolean;
   onOpenSummaryPromptManager: () => void;
   onContentSummaryChange: (contentSummary: string) => void;
   onSummaryPromptChange: (promptId: string) => void;
@@ -204,6 +206,7 @@ export interface WritingSidebarProps {
   summaryPrompts: PromptTemplate[];
   selectedSummaryPromptId: string;
   isExtractingSummary: boolean;
+  hasModel: boolean;
   onClose: () => void;
   onChapterSummaryChange: (summary: string) => void;
   onOpenSummaryPromptManager: () => void;
@@ -313,6 +316,7 @@ export interface WritingEditorOverlayLayerProps {
   onExportFormatChange: (format: ExportFormat) => void;
   onConfirmExport: () => void;
   menuPos: MenuPosition | null;
+  hasModel: boolean;
   onOpenEditModal: () => void;
   onClearSelection: () => void;
   isHistoryViewerOpen: boolean;

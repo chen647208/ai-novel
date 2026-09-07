@@ -25,6 +25,7 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
   summaryPrompts,
   selectedSummaryPromptId,
   isExtractingSummary,
+  hasModel,
   onClose,
   onChapterSummaryChange,
   onOpenSummaryPromptManager,
@@ -79,6 +80,7 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
           summaryPrompts={summaryPrompts}
           selectedSummaryPromptId={selectedSummaryPromptId}
           isExtractingSummary={isExtractingSummary}
+          hasModel={hasModel}
           onOpenSummaryPromptManager={onOpenSummaryPromptManager}
           onContentSummaryChange={onContentSummaryChange}
           onSummaryPromptChange={onSummaryPromptChange}

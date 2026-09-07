@@ -74,6 +74,7 @@ const WritingEditorOverlayLayer: React.FC<WritingEditorOverlayLayerProps> = ({
   onExportFormatChange,
   onConfirmExport,
   menuPos,
+  hasModel,
   onOpenEditModal,
   onClearSelection,
   isHistoryViewerOpen,
@@ -165,6 +166,7 @@ const WritingEditorOverlayLayer: React.FC<WritingEditorOverlayLayerProps> = ({
       <WritingSelectionMenu
         menuPos={menuPos}
         isEditModalOpen={editModalOpen}
+        hasModel={hasModel}
         onOpenEditModal={onOpenEditModal}
         onClearSelection={onClearSelection}
       />

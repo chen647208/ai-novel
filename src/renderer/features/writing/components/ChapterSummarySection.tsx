@@ -22,6 +22,7 @@ const ChapterSummarySection: React.FC<ChapterSummarySectionProps> = ({
   summaryPrompts,
   selectedSummaryPromptId,
   isExtractingSummary,
+  hasModel,
   onOpenSummaryPromptManager,
   onContentSummaryChange,
   onSummaryPromptChange,
@@ -66,7 +67,8 @@ const ChapterSummarySection: React.FC<ChapterSummarySectionProps> = ({
           className="w-full"
           size="sm"
           onClick={onExtractSummary}
-          disabled={isExtractingSummary || !activeChapter?.content || activeChapter.content.trim().length === 0}
+          disabled={isExtractingSummary || !hasModel || !activeChapter?.content || activeChapter.content.trim().length === 0}
+          title={!hasModel ? t('output.noModelHint') : undefined}
         >
           {isExtractingSummary ? (
             <>

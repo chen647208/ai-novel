@@ -16,6 +16,7 @@ import { WandSparkles, X } from 'lucide-react';
 const WritingSelectionMenu: React.FC<WritingSelectionMenuProps> = ({
   menuPos,
   isEditModalOpen,
+  hasModel,
   onOpenEditModal,
   onClearSelection,
 }) => {
@@ -29,7 +30,7 @@ const WritingSelectionMenu: React.FC<WritingSelectionMenuProps> = ({
       className="fixed z-[100] flex items-center gap-1 rounded-lg border border-border bg-popover p-1 shadow-md"
       style={{ left: menuPos.x, top: menuPos.y }}
     >
-      <Button size="sm" onClick={onOpenEditModal}>
+      <Button size="sm" onClick={onOpenEditModal} disabled={!hasModel} title={!hasModel ? t('output.noModelHint') : undefined}>
         <WandSparkles className="size-3.5" /> {t('selectionMenu.polishExpand')}
       </Button>
       <div className="mx-0.5 h-5 w-px bg-border" />
