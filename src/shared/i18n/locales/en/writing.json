@@ -196,6 +196,7 @@
   },
   "toolbar": {
     "back": "Back to Structure",
+    "backFocus": "Back to Structure (focus mode, Esc exits focus)",
     "fullscreen": "Fullscreen",
     "typewriterOn": "Enable typewriter mode (cursor stays centered)",
     "typewriterOff": "Disable typewriter mode",

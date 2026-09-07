@@ -196,6 +196,7 @@
   },
   "toolbar": {
     "back": "返回结构页",
+    "backFocus": "返回结构页（专注模式，Esc 退出专注）",
     "fullscreen": "全屏",
     "typewriterOn": "开启打字机模式（光标居中跟随）",
     "typewriterOff": "关闭打字机模式",

@@ -67,8 +67,18 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
       className={cn(isFocusMode && 'bg-background/80 backdrop-blur-sm')}
       left={
         <>
-          {!isFocusMode && (
+          {!isFocusMode ? (
             <Button variant="ghost" size="icon" className="size-8 shrink-0" onClick={onBack} title={t('toolbar.back')}>
+              <ArrowLeft className="size-4" />
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 shrink-0 opacity-40 hover:opacity-100"
+              onClick={onBack}
+              title={t('toolbar.backFocus')}
+            >
               <ArrowLeft className="size-4" />
             </Button>
           )}
