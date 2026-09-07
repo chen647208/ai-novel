@@ -201,7 +201,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
         </div>
       )}
 
-      {/* 输入区常驻：上下文面板打开时只收起快捷命令与模板行，输入框不消失 */}
+      {/* 输入区：上下文/编辑面板打开时被其全屏遮层盖住（鼠标不可达），此处不再重复隐藏 */}
       {
         <div className="shrink-0 border-t border-border bg-card p-3">
           {!contextPanelOpen && (
@@ -273,6 +273,9 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
               value={input}
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={(event) => {
+                // 上下文/编辑面板打开时输入区被全屏遮层盖住：鼠标点不到，
+                // 键盘同样拦截，避免 Tab 聚焦后回车误发
+                if (contextPanelOpen || editPanelOpen) return;
                 if (event.key === 'Enter' && !event.shiftKey) {
                   event.preventDefault();
                   handleSendMessage();

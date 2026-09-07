@@ -86,6 +86,7 @@
       "motivation": "动机目标"
     },
     "charGenPlaceholder": "描述你想要生成的角色特点（例如：一个神秘的反派，拥有强大的魔法能力）...",
+    "concurrentConfirm": "以下内容在编辑期间被改过：{{fields}}。用面板版本覆盖吗？",
     "generating": "生成中...",
     "generateCharacter": "智能生成角色",
     "charListTitle": "角色列表",

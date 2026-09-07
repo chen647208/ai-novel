@@ -86,6 +86,7 @@
       "motivation": "Motivation"
     },
     "charGenPlaceholder": "Describe the character you want to generate (e.g. a mysterious villain with powerful magic)...",
+    "concurrentConfirm": "The following changed while editing: {{fields}}. Overwrite with the panel version?",
     "generating": "Generating...",
     "generateCharacter": "Generate character",
     "charListTitle": "Character list",

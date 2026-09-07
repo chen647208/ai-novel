@@ -467,6 +467,8 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
   const handleOpenEditPanel = (category: AssistantEditCategory) => {
     setEditCategory(category);
     setEditPanelOpen(true);
+    // 打开瞬间快照：保存时比对，面板外并发修改先确认再覆盖，防静默丢数据
+    editSnapshotRef.current = project ? JSON.stringify(project) : null;
     
     if (project) {
       switch (category) {
@@ -493,6 +495,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
   };
 
   const syncResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const editSnapshotRef = useRef<string | null>(null);
   useEffect(() => () => {
     if (syncResetTimer.current) clearTimeout(syncResetTimer.current);
   }, []);
@@ -502,9 +505,29 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     
     setSyncStatus('saving');
     try {
-      onUpdate(editingData);
-      setSyncStatus('saved');
-      setEditingData({});
+      // 并发保护：只比对本次回写的字段；面板打开后这些字段在外被改过，先确认再覆盖
+      void (async () => {
+        const snap = editSnapshotRef.current ? (JSON.parse(editSnapshotRef.current) as Partial<Project>) : null;
+        const conflicted = snap && project
+          ? (Object.keys(editingData) as Array<keyof Project>).filter(
+              (k) => JSON.stringify(snap[k]) !== JSON.stringify(project[k]),
+            )
+          : [];
+        if (conflicted.length > 0) {
+          const ok = await dialogService.confirm({
+            message: t('edit.concurrentConfirm', { fields: conflicted.join('、') }),
+            danger: true,
+          });
+          if (!ok) {
+            setSyncStatus('idle');
+            return;
+          }
+        }
+        onUpdate(editingData);
+        setSyncStatus('saved');
+        setEditingData({});
+        editSnapshotRef.current = null;
+      })();
       
       if (syncResetTimer.current) clearTimeout(syncResetTimer.current);
       syncResetTimer.current = setTimeout(() => setSyncStatus('idle'), 3000);
