@@ -15,6 +15,7 @@ import { Button } from '@/shared/ui/Button';
 import { Dialog, DialogContent } from '@/shared/ui/Dialog';
 import { Input } from '@/shared/ui/Input';
 import { Select } from '@/shared/ui/Select';
+import { SegmentedControl } from '@/shared/ui/ViewModeToggle';
 import { Textarea } from '@/shared/ui/Textarea';
 import { cn } from '@/shared/utils/cn';
 import { Loader2, Plus, Sprout, WandSparkles } from 'lucide-react';
@@ -155,18 +156,15 @@ const ForeshadowPanel: React.FC<ForeshadowPanelProps> = ({
 
         {/* 过滤 + AI 检测 */}
         <div className="flex shrink-0 items-center justify-between border-b border-border px-5 py-3">
-          <div className="flex gap-1 rounded-lg bg-muted p-1">
-            <button
-              type="button"
-              onClick={() => setFilter('open')}
-              className={cn('rounded-md px-3 py-1 text-xs transition-colors', filter === 'open' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
-            >{t('foreshadow:filterOpen')}</button>
-            <button
-              type="button"
-              onClick={() => setFilter('all')}
-              className={cn('rounded-md px-3 py-1 text-xs transition-colors', filter === 'all' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
-            >{t('foreshadow:filterAll')}</button>
-          </div>
+          <SegmentedControl
+            size="sm"
+            value={filter}
+            onChange={setFilter}
+            options={[
+              { value: 'open' as const, label: t('foreshadow:filterOpen') },
+              { value: 'all' as const, label: t('foreshadow:filterAll') },
+            ]}
+          />
           <Button variant="secondary" size="sm" onClick={handleDetect} disabled={detecting} title={t('foreshadow:detectTitle')}>
             {detecting ? <Loader2 className="size-3.5 animate-spin" /> : <WandSparkles className="size-3.5" />}
             {detecting ? t('foreshadow:detecting') : t('foreshadow:detectBtn')}

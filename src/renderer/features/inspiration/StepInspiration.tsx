@@ -438,14 +438,15 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project }) => {
                 <div className="max-h-48 overflow-y-auto pr-2">
                    <div className="flex flex-wrap gap-2">
                       {inspirationKnowledge.map(k => k && (
-                         <button
+                         <Button
                            key={k.id}
+                           variant="outline"
                            onClick={() => toggleKnowledge(k.id)}
                            className={cn(
-                             'flex items-center gap-2 rounded-md border px-2.5 py-1 text-xs transition-colors',
+                             'h-auto gap-2 px-2.5 py-1 text-xs font-normal',
                              selectedKnowledgeIds.has(k.id)
                                ? 'border-primary/40 bg-primary/5 text-foreground'
-                               : 'border-border text-muted-foreground hover:bg-muted'
+                               : 'text-muted-foreground'
                            )}
                          >
                             <span className={cn(
@@ -455,7 +456,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project }) => {
                                {selectedKnowledgeIds.has(k.id) && <Check className="size-2.5" />}
                             </span>
                             {k.name || t('steps:common.unnamedFile')}
-                         </button>
+                         </Button>
                       ))}
                    </div>
                 </div>
@@ -582,7 +583,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project }) => {
 
       {results ? (
         <Card className="overflow-hidden">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-3">
+          <div className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border px-4">
              <div className="flex items-center gap-2">
                 <Bot className="size-4 text-muted-foreground" />
                 <h3 className="text-sm font-semibold">{t('steps:inspiration.aiPlan')}</h3>

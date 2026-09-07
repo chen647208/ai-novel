@@ -565,17 +565,18 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
                       onClick={() => handleOpenModal(char.id)}
                     />
                     {/* 删除按钮 - 悬浮在卡片右上角 */}
-                    <button
-                      type="button"
+                    <Button
+                      variant={deleteConfirmId === char.id ? 'destructive' : 'ghost'}
+                      size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteClick(char.id);
                       }}
                       className={cn(
-                        'absolute right-3 top-3 z-10 flex h-8 items-center justify-center rounded-md px-2 text-xs transition-all',
+                        'absolute right-3 top-3 z-10 h-8',
                         deleteConfirmId === char.id
-                          ? 'w-20 bg-destructive font-medium text-white'
-                          : 'w-8 bg-card/80 text-muted-foreground opacity-0 backdrop-blur-sm hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100'
+                          ? 'w-20 text-xs font-medium'
+                          : 'w-8 bg-card/80 text-muted-foreground opacity-0 backdrop-blur-sm hover:text-destructive group-hover:opacity-100'
                       )}
                     >
                       {deleteConfirmId === char.id ? (
@@ -583,7 +584,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
                       ) : (
                         <Trash2 className="size-4" />
                       )}
-                    </button>
+                    </Button>
                   </div>
                 ))}
               </div>

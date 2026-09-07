@@ -299,12 +299,14 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
                   />
                 </div>
               ))}
-              <button
+              <Button
+                variant="outline"
+                block
                 onClick={addMagicLevel}
-                className="w-full rounded-lg border-2 border-dashed border-border py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                className="border-dashed py-2 text-sm font-medium text-muted-foreground hover:border-primary/40 hover:text-primary"
               >
                 <Plus className="mr-1 inline size-4" /> {t('worldview.magic.addLevel')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -513,12 +515,14 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
                   />
                 </div>
               ))}
-              <button
+              <Button
+                variant="outline"
+                block
                 onClick={addHistoryEvent}
-                className="w-full rounded-lg border-2 border-dashed border-border py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                className="border-dashed py-2 text-sm font-medium text-muted-foreground hover:border-primary/40 hover:text-primary"
               >
                 <Plus className="mr-1 inline size-4" /> {t('worldview.history.addEvent')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
