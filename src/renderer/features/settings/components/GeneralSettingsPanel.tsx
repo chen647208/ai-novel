@@ -180,14 +180,15 @@ const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({
                 {customFonts.map((c) => (
                   <span key={c.id} className="flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-xs">
                     <span className="max-w-40 truncate" style={{ fontFamily: `"${c.name}", serif` }}>{c.name}</span>
-                    <button
-                      type="button"
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => void removeCustomFont(c.id)}
                       title={t('general.removeFontTitle')}
-                      className="text-muted-foreground hover:text-destructive"
+                      className="size-5 text-muted-foreground hover:text-destructive"
                     >
                       <Trash2 className="size-3.5" />
-                    </button>
+                    </Button>
                   </span>
                 ))}
               </div>

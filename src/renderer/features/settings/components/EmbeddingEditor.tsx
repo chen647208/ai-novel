@@ -157,14 +157,15 @@ export const EmbeddingEditor: React.FC<EmbeddingEditorProps> = ({
                 placeholder={provider?.apiKeyRequired ? '••••••••••••••••' : t('embedding.localCanLeaveBlank')}
                 className="pr-9 font-mono"
               />
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setShowKey((v) => !v)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-1 top-1/2 size-7 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 title={showKey ? t('models.hideKey', '隐藏') : t('models.showKey', '显示')}
               >
                 {showKey ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-              </button>
+              </Button>
             </div>
             {provider?.apiApplyUrl && (
               <p className="mt-1.5 text-xs">

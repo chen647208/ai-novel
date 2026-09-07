@@ -211,10 +211,10 @@ export const TimelineEditor: React.FC<TimelineEditorProps> = ({
   // 获取事件类型颜色（语义色，双主题安全）
   const getEventTypeColor = (type: TimelineEvent['type']) => {
     const colors: Record<TimelineEvent['type'], string> = {
-      plot: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-      character: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-      world: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
-      faction: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+      plot: 'bg-chart-1/10 text-chart-1',
+      character: 'bg-chart-5/10 text-chart-5',
+      world: 'bg-chart-4/10 text-chart-4',
+      faction: 'bg-chart-2/10 text-chart-2',
       battle: 'bg-destructive/10 text-destructive',
       discovery: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
       other: 'bg-muted text-muted-foreground'

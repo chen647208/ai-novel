@@ -25,13 +25,13 @@ const CompactCharacterCard: React.FC<CompactCharacterCardProps> = ({ character, 
   const getRoleConfig = (role: string): { color: string; icon: LucideIcon } => {
     const roleLower = role.toLowerCase();
     if (roleLower.includes('主')) {
-      return { color: 'border-amber-500/25 bg-amber-500/10 text-amber-600 dark:text-amber-400', icon: Crown };
+      return { color: 'border-chart-2/25 bg-chart-2/10 text-chart-2', icon: Crown };
     }
     if (roleLower.includes('反')) {
       return { color: 'border-destructive/25 bg-destructive/10 text-destructive', icon: Skull };
     }
     if (roleLower.includes('配')) {
-      return { color: 'border-sky-500/25 bg-sky-500/10 text-sky-600 dark:text-sky-400', icon: Users };
+      return { color: 'border-chart-1/25 bg-chart-1/10 text-chart-1', icon: Users };
     }
     return { color: 'border-border bg-muted text-muted-foreground', icon: User };
   };

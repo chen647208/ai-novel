@@ -84,12 +84,12 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
   const getRuleTypeColor = (type: RuleSystemType): string => {
     const colors: Record<RuleSystemType, string> = {
       cultivation: 'bg-rose-500/10 text-rose-600 dark:text-rose-400',
-      magic: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+      magic: 'bg-chart-4/10 text-chart-4',
       tech: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
-      currency: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-      organization: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-      profession: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-      title: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400',
+      currency: 'bg-chart-2/10 text-chart-2',
+      organization: 'bg-chart-1/10 text-chart-1',
+      profession: 'bg-chart-5/10 text-chart-5',
+      title: 'bg-chart-2/10 text-chart-2',
       custom: 'bg-muted text-muted-foreground'
     };
     return colors[type];

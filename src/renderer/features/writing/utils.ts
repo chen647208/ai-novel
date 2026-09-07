@@ -260,17 +260,17 @@ export const formatTokenUsage = (tokens?: TokenUsage) => {
 export const getProviderIcon = (provider: string): { icon: LucideIcon; cls: string } => {
   switch (provider) {
     case 'gemini':
-      return { icon: Bot, cls: 'text-blue-500' };
+      return { icon: Bot, cls: 'text-chart-1' };
     case 'ollama':
-      return { icon: Server, cls: 'text-green-500' };
+      return { icon: Server, cls: 'text-chart-5' };
     case 'anthropic':
-      return { icon: Feather, cls: 'text-orange-500' };
+      return { icon: Feather, cls: 'text-chart-6' };
     case 'openai-responses':
-      return { icon: Brain, cls: 'text-indigo-500' };
+      return { icon: Brain, cls: 'text-chart-4' };
     case 'openai-chat':
-      return { icon: Brain, cls: 'text-purple-500' };
+      return { icon: Brain, cls: 'text-chart-4' };
     default:
-      return { icon: Cpu, cls: 'text-gray-500' };
+      return { icon: Cpu, cls: 'text-chart-gray' };
   }
 };
 

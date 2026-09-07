@@ -31,7 +31,7 @@ interface ChapterHistoryModalProps {
 }
 
 const DEFAULT_SOURCE_CLS = 'bg-muted text-muted-foreground';
-const MANUAL_SOURCE_CLS = 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
+const MANUAL_SOURCE_CLS = 'bg-chart-2/10 text-chart-2';
 const BEFORE_CLEAR_SOURCE_CLS = 'bg-destructive/10 text-destructive';
 
 const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({

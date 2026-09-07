@@ -452,17 +452,17 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
                           <p className="mt-0.5 font-mono text-xs text-muted-foreground">{issue.details}</p>
                         </div>
                       )}
-                      <button
-                        type="button"
+                      <Button
+                        variant="link"
                         onClick={(e) => {
                           e.stopPropagation();
                           onNavigateToItem?.(issue.category, issue.targetId);
                         }}
-                        className="mt-1 flex items-center gap-1 text-xs text-primary hover:underline"
+                        className="mt-1 h-auto gap-1 p-0 text-xs text-primary"
                       >
                         <ExternalLink className="size-3.5" />
                         {t('consistency:goToEdit')}
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
