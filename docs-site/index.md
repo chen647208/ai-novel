@@ -1,7 +1,7 @@
 ---
 layout: home
 hero:
-  name: AI小说家 (ai-novel)
+  name: 织梦 (DreamWeave)
   tagline: 本地优先的 AI 小说创作助手——既要 AI，也要纯写作；数据主权在你。
   actions:
     - theme: brand

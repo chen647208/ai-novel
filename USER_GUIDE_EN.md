@@ -1,4 +1,4 @@
-# NovaLocal AI Novelist User Guide
+# DreamWeave User Guide
 
 ## Write your novel from scratch
 
@@ -20,7 +20,7 @@
 
 ### Overview
 
-**NovaLocal AI Novelist** is a desktop app for fiction writers. It supports DeepSeek, Kimi, GLM, Qwen, MiniMax, Gemini, Claude, GPT, and local Ollama models, covering the full flow from inspiration to finished novel.
+**DreamWeave** is a desktop app for fiction writers. It supports DeepSeek, Kimi, GLM, Qwen, MiniMax, Gemini, Claude, GPT, and local Ollama models, covering the full flow from inspiration to finished novel.
 
 #### Highlights:
 - **AI-assisted creation**: full flow from inspiration, characters, and outline to chapters
@@ -47,7 +47,7 @@
 #### Installation
 
 1. Download the installer for your OS from the releases page
-2. Double-click `NovaLocal AI Novelist.exe` (Windows) to install and launch
+2. Double-click `DreamWeave.exe` (Windows) to install and launch
 
 #### First launch
 
@@ -98,7 +98,7 @@
 
 ### Creation flow in detail
 
-NovaLocal AI Novelist uses five sections guiding you through a complete novel (switch freely via the left icon rail; `Ctrl+1..5` works inside the workspace, top-right shows a next-step suggestion):
+DreamWeave uses five sections guiding you through a complete novel (switch freely via the left icon rail; `Ctrl+1..5` works inside the workspace, top-right shows a next-step suggestion):
 
 #### Section 1: Inspiration
 
@@ -527,6 +527,6 @@ Version of record is `package.json`; changes are in `CHANGELOG.md`, not duplicat
 
 ## Closing
 
-NovaLocal AI Novelist pairs AI capability with human creativity to help you finish novels faster. Experienced or just starting, it has something for you.
+DreamWeave pairs AI capability with human creativity to help you finish novels faster. Experienced or just starting, it has something for you.
 
 Remember: AI assists, the soul of the work is yours. Use the tool to spark ideas and work faster.
