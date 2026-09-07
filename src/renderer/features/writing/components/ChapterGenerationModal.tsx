@@ -102,6 +102,7 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
   isGenerating,
   handleEnterEditor,
   handleModalGenerate,
+  onOpenSettings,
 }) => {
   const { t } = useTranslation('writing');
   const prevTitlePart = modalContextInfo.prevChapter ? `《${modalContextInfo.prevChapter.title}》` : '';
@@ -386,11 +387,18 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
 
             {/* 生成模板选择区域 */}
             <GenSection label={t('genModal.sectionTemplate')}>
-              <Select value={selectedGenPromptId} onChange={(e) => setSelectedGenPromptId(e.target.value)}>
-                {writingPrompts.map((p) => (
-                  <option key={p.id} value={p.id}>{templateDisplayName(p)}</option>
-                ))}
-              </Select>
+              <div className="flex items-center gap-2">
+                <Select value={selectedGenPromptId} onChange={(e) => setSelectedGenPromptId(e.target.value)} className="flex-1">
+                  {writingPrompts.map((p) => (
+                    <option key={p.id} value={p.id}>{templateDisplayName(p)}</option>
+                  ))}
+                </Select>
+                {onOpenSettings && (
+                  <Button variant="ghost" size="sm" className="shrink-0 text-xs text-muted-foreground" onClick={onOpenSettings}>
+                    {t('genModal.manageTemplates')}
+                  </Button>
+                )}
+              </div>
             </GenSection>
 
             {/* 字数目标选择区域 */}

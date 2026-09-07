@@ -41,6 +41,7 @@
     "noKnowledge": "No writing knowledge yet. Add knowledge files first.",
     "knowledgeHint": "* The AI will reference the selected setting materials while writing.",
     "sectionTemplate": "Generation Template",
+    "manageTemplates": "Manage templates",
     "sectionWordTarget": "Word Count Target",
     "wordTargetPlaceholder": "Enter word count...",
     "wordUnit": "words",
@@ -225,6 +226,8 @@
     "focus": "Focus",
     "undoTitle": "Undo (Ctrl+Z)",
     "redoTitle": "Redo (Ctrl+Shift+Z)",
+    "retryTitle": "Regenerate with the last settings",
+    "spellTitle": "Spellcheck toggle (built-in)",
     "exitFocus": "Exit focus",
     "enterFocusTitle": "Enter focus mode",
     "exitFocusTitle": "Exit focus mode",
@@ -254,7 +257,11 @@
     "batchInProgress": "Batch generation in progress...",
     "batchProgress": "Generating: chapter {{current}} / {{total}}",
     "currentChapter": "Current chapter",
-    "stopBatch": "Stop batch generation"
+    "stopBatch": "Stop batch generation",
+    "stoppedTitle": "Generation stopped",
+    "stoppedHint": "Kept {{count}} interrupted characters. Merge into the chapter or discard.",
+    "keepPartial": "Keep partial",
+    "discardPartial": "Discard"
   },
   "export": {
     "title": "Export Novel Content",
@@ -302,7 +309,9 @@
   },
   "navigation": {
     "title": "Chapter Navigation",
-    "chapterEntry": "Chapter {{num}}: {{title}}"
+    "chapterEntry": "Chapter {{num}}: {{title}}",
+    "searchPlaceholder": "Search chapter titles...",
+    "deleteTitle": "Delete {{title}}"
   },
   "canvas": {
     "placeholderReady": "Start writing; select text to summon the AI polish tools...",
@@ -311,7 +320,8 @@
     "emptyBookTitle": "No chapters yet",
     "emptyBookHint": "Create the first chapter, or go back to Structure to generate chapter plans with AI first.",
     "createFirstChapter": "Create first chapter",
-    "backToStructure": "Back to Structure"
+    "backToStructure": "Back to Structure",
+    "deleteChapterConfirm": "Delete {{title}}? Content, history and snapshots are removed and cannot be recovered."
   },
   "utils": {
     "tokenUsage": "Input: {{input}} | Output: {{output}} | Total: {{total}}",

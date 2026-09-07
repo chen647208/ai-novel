@@ -7,26 +7,40 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ChapterNavigationSectionProps } from '../types';
 import { cn } from '@/shared/utils/cn';
-import { ChevronRight } from 'lucide-react';
+import { Button } from '@/shared/ui/Button';
+import { Input } from '@/shared/ui/Input';
+import { ChevronRight, Trash2 } from 'lucide-react';
 
 const ChapterNavigationSection: React.FC<ChapterNavigationSectionProps> = ({
   chapters,
   activeChapterId,
   onChapterClick,
+  onDeleteChapter,
 }) => {
   const { t } = useTranslation('writing');
+  const [query, setQuery] = useState('');
+  const q = query.trim().toLowerCase();
+  const visible = chapters
+    .slice()
+    .sort((firstChapter, secondChapter) => firstChapter.order - secondChapter.order)
+    .filter((chapter) => !q || chapter.title.toLowerCase().includes(q));
   return (
     <section>
       <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('navigation.title')}</h4>
+      {chapters.length > 5 && (
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t('navigation.searchPlaceholder')}
+          className="mb-2 h-8 text-xs"
+        />
+      )}
       <div className="space-y-1">
-        {chapters
-          .slice()
-          .sort((firstChapter, secondChapter) => firstChapter.order - secondChapter.order)
-          .map((chapter) => (
+        {visible.map((chapter) => (
             <div
               key={chapter.id}
               onClick={() => onChapterClick(chapter)}
@@ -38,6 +52,18 @@ const ChapterNavigationSection: React.FC<ChapterNavigationSectionProps> = ({
               )}
             >
               <span className="flex-1 truncate">{t('navigation.chapterEntry', { num: chapter.order + 1, title: chapter.title })}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-6 shrink-0 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteChapter(chapter.id);
+                }}
+                title={t('navigation.deleteTitle', { title: chapter.title })}
+              >
+                <Trash2 className="size-3.5" />
+              </Button>
               {activeChapterId !== chapter.id && <ChevronRight className="size-3 opacity-0 transition-opacity group-hover:opacity-50" />}
             </div>
           ))}

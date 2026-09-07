@@ -55,6 +55,7 @@ const WritingEditorOverlayLayer: React.FC<WritingEditorOverlayLayerProps> = ({
   isGenerating,
   handleEnterEditor,
   handleModalGenerate,
+  onOpenSettings,
   stopBatchGeneration,
   editModalOpen,
   selectedText,
@@ -129,6 +130,7 @@ const WritingEditorOverlayLayer: React.FC<WritingEditorOverlayLayerProps> = ({
         handleEnterEditor={handleEnterEditor}
         handleModalGenerate={handleModalGenerate}
         stopBatchGeneration={stopBatchGeneration}
+        onOpenSettings={onOpenSettings}
       />
 
       <WritingEditModal

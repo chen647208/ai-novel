@@ -33,6 +33,7 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
   onExtractSummary,
   onChapterClick,
   onNavigateToCharacters,
+  onDeleteChapter,
 }) => {
   const { t } = useTranslation('writing');
   return (
@@ -97,6 +98,7 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
           chapters={chapters}
           activeChapterId={activeChapterId}
           onChapterClick={onChapterClick}
+          onDeleteChapter={onDeleteChapter}
         />
       </div>
     </div>

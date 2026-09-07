@@ -41,6 +41,7 @@
     "noKnowledge": "暂无写作知识库，请先添加知识库。",
     "knowledgeHint": "* 选择知识库后，AI将参考这些设定资料进行创作。",
     "sectionTemplate": "生成模板",
+    "manageTemplates": "管理模板",
     "sectionWordTarget": "字数目标",
     "wordTargetPlaceholder": "输入字数...",
     "wordUnit": "字",
@@ -225,6 +226,8 @@
     "focus": "专注",
     "undoTitle": "撤销（Ctrl+Z）",
     "redoTitle": "重做（Ctrl+Shift+Z）",
+    "retryTitle": "按上次参数重新生成",
+    "spellTitle": "拼写检查开关（浏览器内置）",
     "exitFocus": "退出专注",
     "enterFocusTitle": "进入专注模式",
     "exitFocusTitle": "退出专注模式",
@@ -254,7 +257,11 @@
     "batchInProgress": "批量生成进行中...",
     "batchProgress": "正在生成：第 {{current}} / {{total}} 章",
     "currentChapter": "当前章节",
-    "stopBatch": "停止批量生成"
+    "stopBatch": "停止批量生成",
+    "stoppedTitle": "生成已中断",
+    "stoppedHint": "保留了中断前的 {{count}} 字，可并入正文或丢弃。",
+    "keepPartial": "保留半截",
+    "discardPartial": "丢弃"
   },
   "export": {
     "title": "导出小说正文",
@@ -302,7 +309,9 @@
   },
   "navigation": {
     "title": "章节导航",
-    "chapterEntry": "第{{num}}章: {{title}}"
+    "chapterEntry": "第{{num}}章 {{title}}",
+    "searchPlaceholder": "搜索章节标题...",
+    "deleteTitle": "删除《{{title}}》"
   },
   "canvas": {
     "placeholderReady": "泼墨挥毫，选中文字可唤出 AI 润色工具...",
@@ -311,7 +320,8 @@
     "emptyBookTitle": "还没有章节",
     "emptyBookHint": "先建第一章，或回结构页用 AI 生成章节细纲后再来写作。",
     "createFirstChapter": "新建第一章",
-    "backToStructure": "回结构页"
+    "backToStructure": "回结构页",
+    "deleteChapterConfirm": "确定要删除《{{title}}》吗？正文、历史与快照一并移除，不可恢复。"
   },
   "utils": {
     "tokenUsage": "输入: {{input}} | 输出: {{output}} | 总计: {{total}}",

@@ -705,6 +705,8 @@ export interface Project {
   ruleSystems?: RuleSystem[];
   // ===== 伏笔追踪 =====
   foreshadows?: Foreshadow[];
+  /** 本书目标字数（写作进度条分母；缺席用默认）。 */
+  wordTarget?: number;
 }
 
 /** 自定义字体元数据（字形文件另存用户数据目录 fonts/ 下，不进状态 JSON）。 */

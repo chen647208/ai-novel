@@ -17,6 +17,7 @@ export interface WritingEditorProps {
   initialChapterId?: string | null;
   onBack: () => void;
   onNavigateToCharacters?: () => void;
+  onOpenSettings?: () => void;
 }
 
 export type BatchMode = 'single' | 'batch5' | 'batch10';
@@ -125,6 +126,7 @@ export interface ChapterGenerationModalProps {
   handleEnterEditor: () => void;
   handleModalGenerate: () => void;
   stopBatchGeneration: () => void;
+  onOpenSettings?: () => void;
 }
 
 export interface WritingEditorToolbarProps {
@@ -159,6 +161,10 @@ export interface WritingEditorToolbarProps {
   onToggleFocusMode: () => void;
   onToggleTypewriter: () => void;
   onManualSnapshot: () => void;
+  canRetryAI: boolean;
+  onRetryAI: () => void;
+  spellcheckOn: boolean;
+  onToggleSpellcheck: () => void;
 }
 
 export interface WritingSelectionMenuProps {
@@ -177,8 +183,13 @@ export interface WritingEditorStatusOverlayProps {
   selectedKnowledgeCount: number;
   streamingContentLength: number;
   batchProgress: BatchProgress;
+  streamingTokens: TokenUsage;
+  traditionalTokens: TokenUsage;
+  stoppedPartialLength: number;
   onStopStreaming: () => void;
   onStopBatchGeneration: () => void;
+  onKeepStoppedPartial: () => void;
+  onDiscardStoppedPartial: () => void;
 }
 
 export interface ChapterSummarySectionProps {
@@ -196,6 +207,7 @@ export interface ChapterNavigationSectionProps {
   chapters: Chapter[];
   activeChapterId: string | null;
   onChapterClick: (chapter: Chapter) => void;
+  onDeleteChapter: (chapterId: string) => void;
 }
 
 export interface WritingSidebarProps {
@@ -214,6 +226,7 @@ export interface WritingSidebarProps {
   onExtractSummary: () => void;
   onChapterClick: (chapter: Chapter) => void;
   onNavigateToCharacters?: () => void;
+  onDeleteChapter: (chapterId: string) => void;
 }
 
 export interface WritingEditorCanvasProps {
@@ -237,6 +250,11 @@ export interface WritingEditorCanvasProps {
   onNewChapter?: () => void;
   onStopStreaming: () => void;
   onStopBatchGeneration: () => void;
+  streamingTokens: TokenUsage;
+  traditionalTokens: TokenUsage;
+  stoppedPartialLength: number;
+  onKeepStoppedPartial: () => void;
+  onDiscardStoppedPartial: () => void;
 }
 
 export interface WritingEditModalProps {
@@ -328,6 +346,7 @@ export interface WritingEditorOverlayLayerProps {
   onCloseGlobalHistorySidebar: () => void;
   onUpdate: (updates: Partial<Project>) => void;
   onUpdateChapter: (chapter: Chapter) => void;
+  onOpenSettings?: () => void;
 }
 export type AIHistoryViewerMode = 'modal' | 'sidebar';
 export type AIHistoryViewMode = 'all' | 'chapter';

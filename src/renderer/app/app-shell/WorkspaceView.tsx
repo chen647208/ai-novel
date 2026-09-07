@@ -144,6 +144,7 @@ const WorkspaceSection: React.FC<WorkspaceViewProps> = ({
           initialChapterId={editingChapterId}
           onBack={() => onSectionChange('structure', 'chapters')}
           onNavigateToCharacters={() => onSectionChange('characters')}
+          onOpenSettings={onOpenSettings}
         />
       );
       break;

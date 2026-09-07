@@ -14,7 +14,7 @@ import { formatCharCount } from '../services/writingStatsService';
 import { Button } from '@/shared/ui/Button';
 import { PageHeader, PageHeaderDivider } from '@/shared/ui/PageHeader';
 import { cn } from '@/shared/utils/cn';
-import { ArrowLeft, AlignCenterVertical, Camera, ChevronsRight, Eraser, Expand, FileOutput, FileText, History, Maximize2, Minimize2, Redo2, Sprout, Undo2 } from 'lucide-react';
+import { ArrowLeft, AlignCenterVertical, Camera, ChevronsRight, Eraser, Expand, FileOutput, FileText, History, Maximize2, Minimize2, Redo2, RotateCcw, SpellCheck, Sprout, Undo2 } from 'lucide-react';
 
 const iconBtn = 'size-8 text-muted-foreground';
 const textBtn = 'h-8 gap-1.5 px-2 text-xs text-muted-foreground';
@@ -51,6 +51,10 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
   onUndo,
   onRedo,
   onManualSnapshot,
+  canRetryAI,
+  onRetryAI,
+  spellcheckOn,
+  onToggleSpellcheck,
 }) => {
   const { t, i18n } = useTranslation('writing');
   const progress = targetWordCount > 0 ? Math.min(1, chapterStats.charCount / targetWordCount) : 0;
@@ -126,6 +130,18 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
               </Button>
               <Button variant="ghost" size="icon" className={iconBtn} onClick={onRedo} disabled={!canRedo} title={t('toolbar.redoTitle')}>
                 <Redo2 className="size-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className={iconBtn} onClick={onRetryAI} disabled={!canRetryAI} title={t('toolbar.retryTitle')}>
+                <RotateCcw className="size-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn(iconBtn, spellcheckOn && 'bg-accent text-foreground')}
+                onClick={onToggleSpellcheck}
+                title={t('toolbar.spellTitle')}
+              >
+                <SpellCheck className="size-4" />
               </Button>
               {activeChapterId && (
                 <Button variant="ghost" size="sm" className={textBtn} onClick={onManualSnapshot} title={t('toolbar.snapshotTitle', { count: snapshotCount })}>

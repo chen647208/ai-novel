@@ -33,6 +33,11 @@ const WritingEditorCanvas: React.FC<WritingEditorCanvasProps> = ({
   onNewChapter,
   onStopStreaming,
   onStopBatchGeneration,
+  streamingTokens,
+  traditionalTokens,
+  stoppedPartialLength,
+  onKeepStoppedPartial,
+  onDiscardStoppedPartial,
 }) => {
   return (
     <div className={cn('custom-scrollbar flex flex-1 justify-center overflow-y-auto p-10 transition-colors', isFocusMode ? 'bg-background' : 'bg-muted/30')}>
@@ -58,8 +63,13 @@ const WritingEditorCanvas: React.FC<WritingEditorCanvasProps> = ({
         selectedKnowledgeCount={selectedKnowledgeCount}
         streamingContentLength={streamingContentLength}
         batchProgress={batchProgress}
+        streamingTokens={streamingTokens}
+        traditionalTokens={traditionalTokens}
+        stoppedPartialLength={stoppedPartialLength}
         onStopStreaming={onStopStreaming}
         onStopBatchGeneration={onStopBatchGeneration}
+        onKeepStoppedPartial={onKeepStoppedPartial}
+        onDiscardStoppedPartial={onDiscardStoppedPartial}
       />
     </div>
   );

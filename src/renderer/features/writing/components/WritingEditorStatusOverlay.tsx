@@ -11,7 +11,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { WritingEditorStatusOverlayProps } from '../types';
 import { Button } from '@/shared/ui/Button';
-import { Square } from 'lucide-react';
+import { Square, Check, X } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
 
 const WritingEditorStatusOverlay: React.FC<WritingEditorStatusOverlayProps> = ({
@@ -22,10 +22,16 @@ const WritingEditorStatusOverlay: React.FC<WritingEditorStatusOverlayProps> = ({
   selectedKnowledgeCount,
   streamingContentLength,
   batchProgress,
+  streamingTokens,
+  traditionalTokens,
+  stoppedPartialLength,
   onStopStreaming,
   onStopBatchGeneration,
+  onKeepStoppedPartial,
+  onDiscardStoppedPartial,
 }) => {
   const { t } = useTranslation('writing');
+  const liveTokens = isStreaming ? streamingTokens : traditionalTokens;
   return (
     <>
       {isGenerating && !isStreaming && (
@@ -45,6 +51,9 @@ const WritingEditorStatusOverlay: React.FC<WritingEditorStatusOverlayProps> = ({
             <Spinner className="mb-4 size-10 text-success" strokeWidth={2} />
             <p className="text-xs font-medium uppercase tracking-widest text-foreground">{t('statusOverlay.streaming')}</p>
             <p className="mt-2 text-xs tabular-nums text-muted-foreground">{t('statusOverlay.generatedSoFar', { count: streamingContentLength })}</p>
+            <p className="mt-1 text-2xs tabular-nums text-muted-foreground/70">
+              {t('output.inputToken')} {liveTokens.prompt} · {t('output.outputToken')} {liveTokens.completion} · {t('output.total')} {liveTokens.total}
+            </p>
             <p className="mt-1 text-2xs text-muted-foreground/70">{t('statusOverlay.streamingHint')}</p>
             <Button
               variant="outline"
@@ -54,6 +63,23 @@ const WritingEditorStatusOverlay: React.FC<WritingEditorStatusOverlayProps> = ({
             >
               <Square className="size-3.5" /> {t('statusOverlay.stop')}
             </Button>
+          </div>
+        </div>
+      )}
+
+      {stoppedPartialLength > 0 && !isStreaming && !isGenerating && !isBatchGenerating && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+          <div className="flex max-w-md flex-col items-center rounded-xl border border-border bg-card p-8 shadow-lg">
+            <p className="text-xs font-medium uppercase tracking-widest text-foreground">{t('statusOverlay.stoppedTitle')}</p>
+            <p className="mt-2 text-xs tabular-nums text-muted-foreground">{t('statusOverlay.stoppedHint', { count: stoppedPartialLength })}</p>
+            <div className="mt-4 flex items-center gap-2">
+              <Button size="sm" onClick={onKeepStoppedPartial}>
+                <Check className="size-3.5" /> {t('statusOverlay.keepPartial')}
+              </Button>
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive" onClick={onDiscardStoppedPartial}>
+                <X className="size-3.5" /> {t('statusOverlay.discardPartial')}
+              </Button>
+            </div>
           </div>
         </div>
       )}

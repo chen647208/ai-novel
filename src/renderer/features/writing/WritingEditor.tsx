@@ -62,7 +62,7 @@ import { PROMPT_KNOWLEDGE_TRUNCATE, isVirtualChapter } from '../../../shared/con
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
 
-const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId, onBack, onNavigateToCharacters }) => {
+const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId, onBack, onNavigateToCharacters, onOpenSettings }) => {
   const { t } = useTranslation(['writing', 'steps']);
   // 直读 store：模型/提示词/更新动作不再经 App→View 层层透传
   const prompts = useSettingsStore((s) => s.prompts);
@@ -122,8 +122,12 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const [selectionRange, setSelectionRange] = useState<TextSelectionRange | null>(null);
 
   const [genModal, setGenModal] = useState<GenerationModalState>(INITIAL_GENERATION_MODAL_STATE);
-  const [targetWordCount, setTargetWordCount] = useState<number>(DEFAULT_TARGET_WORD_COUNT);
+  const [targetWordCount, setTargetWordCountState] = useState<number>(project.wordTarget ?? DEFAULT_TARGET_WORD_COUNT);
   const [selectedGenPromptId, setSelectedGenPromptId] = useState<string>('');
+  // 上次 AI 执行参数（重试键复用）；中断半截保留（保留/丢弃由用户决定）
+  const lastRunRef = useRef<{ template: PromptTemplate; overrideContent?: string } | null>(null);
+  const [stoppedPartial, setStoppedPartial] = useState<string | null>(null);
+  const [spellcheckOn, setSpellcheckOn] = useState(false);
   
   const [selectedKnowledgeIds, setSelectedKnowledgeIds] = useState<Set<string>>(new Set());
 
@@ -145,6 +149,18 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const [selectedChapterSummaryIds, setSelectedChapterSummaryIds] = useState<Set<string>>(new Set());
   const [useOutline, setUseOutline] = useState<boolean>(true);
   const [editableSummary, setEditableSummary] = useState<string>("");
+
+  // 字数目标持久化：随书保存（缺席旧书用默认，不迁移）
+  const setTargetWordCount = (count: number) => {
+    setTargetWordCountState(count);
+    if (project.wordTarget !== count) onUpdate({ wordTarget: count });
+  };
+
+  const toggleSpellcheck = () => {
+    const next = !spellcheckOn;
+    setSpellcheckOn(next);
+    editorRef.current?.setSpellcheck(next);
+  };
 
   const editPrompts = useMemo(() => prompts.filter(p => p.category === 'edit'), [prompts]);
   const writingPrompts = useMemo(() => prompts.filter(p => p.category === 'writing'), [prompts]);
@@ -464,6 +480,8 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
 
     // 写前快照：AI 落笔前先保一次，失败可从快照/历史找回（定时/切章快照不覆盖此路径）。
     snapshotChapterIfDue(targetChapter.id, 'manual');
+    // 记录上次执行参数：工具条重试键原样复用
+    lastRunRef.current = { template, overrideContent };
 
     setIsGenerating(true);
     setMenuPos(null);
@@ -751,12 +769,55 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const stopStreaming = () => {
     if (streamingAbortController) {
       streamingAbortController.abort();
+      // 半截保留：不直接清空，交由用户保留/丢弃（完成态合并规则复用）
+      const partial = streamingContent;
       setIsStreaming(false);
       setIsGenerating(false);
       setStreamingAbortController(null);
-      setStreamingContent("");
       setStreamingResponse(null);
       setStreamingTokens({ prompt: 0, completion: 0, total: 0 });
+      setStoppedPartial(partial.trim() ? partial : null);
+      if (!partial.trim()) {
+        setStreamingContent("");
+      }
+    }
+  };
+
+  const keepStoppedPartial = () => {
+    if (!stoppedPartial || !activeChapter) {
+      setStoppedPartial(null);
+      return;
+    }
+    const currentContent = activeChapter.content || "";
+    const merged = currentContent.length < 50 ? stoppedPartial : (currentContent + "\n\n" + stoppedPartial);
+    updateChapterContent(merged);
+    setStoppedPartial(null);
+    setStreamingContent("");
+  };
+
+  const discardStoppedPartial = () => {
+    setStoppedPartial(null);
+    setStreamingContent("");
+  };
+
+  const handleRetryAI = () => {
+    const last = lastRunRef.current;
+    if (!last || isGenerating || isStreaming || isBatchGenerating) return;
+    void runAITemplate(last.template, last.overrideContent);
+  };
+
+  const handleDeleteChapter = async (chapterId: string) => {
+    const target = project.chapters.find((c) => c.id === chapterId);
+    if (!target) return;
+    const ok = await dialogService.confirm({
+      message: t('canvas.deleteChapterConfirm', { title: target.title }),
+      danger: true,
+    });
+    if (!ok) return;
+    const remaining = project.chapters.filter((c) => c.id !== chapterId);
+    onUpdate({ chapters: remaining });
+    if (activeChapterId === chapterId) {
+      setActiveChapterId(remaining[0]?.id ?? null);
     }
   };
 
@@ -1173,6 +1234,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
         onCloseGlobalHistorySidebar={() => setIsGlobalHistorySidebarOpen(false)}
         onUpdate={onUpdate}
         onUpdateChapter={handleUpdateChapter}
+        onOpenSettings={onOpenSettings}
       />
 
       {/* Sidebar & Editor Areas */}
@@ -1193,6 +1255,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           onExtractSummary={handleExtractSummary}
           onChapterClick={handleChapterClick}
           onNavigateToCharacters={onNavigateToCharacters}
+          onDeleteChapter={handleDeleteChapter}
         />
       )}
 
@@ -1229,6 +1292,10 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           onUndo={() => editorRef.current?.undo()}
           onRedo={() => editorRef.current?.redo()}
           onManualSnapshot={handleManualSnapshot}
+          canRetryAI={Boolean(lastRunRef.current) && !isGenerating && !isStreaming && !isBatchGenerating}
+          onRetryAI={handleRetryAI}
+          spellcheckOn={spellcheckOn}
+          onToggleSpellcheck={toggleSpellcheck}
         />
 
         {project.chapters.length === 0 ? (
@@ -1265,6 +1332,11 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           onNewChapter={handleNewChapter}
           onStopStreaming={stopStreaming}
           onStopBatchGeneration={stopBatchGeneration}
+          streamingTokens={streamingTokens}
+          traditionalTokens={traditionalTokens}
+          stoppedPartialLength={stoppedPartial?.length ?? 0}
+          onKeepStoppedPartial={keepStoppedPartial}
+          onDiscardStoppedPartial={discardStoppedPartial}
         />
         )}
       </div>
