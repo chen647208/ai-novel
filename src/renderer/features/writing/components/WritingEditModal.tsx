@@ -38,7 +38,7 @@ const WritingEditModal: React.FC<WritingEditModalProps> = ({
   onSubmit,
 }) => {
   const { t } = useTranslation('writing');
-  const streamingSupported = activeModel.supportsStreaming !== false;
+  const streamingSupported = activeModel ? activeModel.supportsStreaming !== false : false;
   return (
     <Dialog
       open={isOpen}
@@ -115,9 +115,11 @@ const WritingEditModal: React.FC<WritingEditModalProps> = ({
                 </span>
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                {streamingSupported
-                  ? t('output.onHint', { name: activeModel.name })
-                  : t('output.offHint', { name: activeModel.name })}
+                {!activeModel
+                  ? t('output.noModelHint')
+                  : streamingSupported
+                    ? t('output.onHint', { name: activeModel.name })
+                    : t('output.offHint', { name: activeModel.name })}
               </p>
             </div>
           </div>
@@ -150,7 +152,7 @@ const WritingEditModal: React.FC<WritingEditModalProps> = ({
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <Button variant="ghost" onClick={onClose}>{t('editModal.cancel')}</Button>
-            <Button onClick={onSubmit}>
+            <Button onClick={onSubmit} disabled={!activeModel} title={!activeModel ? t('output.noModelHint') : undefined}>
               <WandSparkles className="size-4" /> {t('editModal.runNow')}
             </Button>
           </div>

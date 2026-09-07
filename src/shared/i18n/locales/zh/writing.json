@@ -52,7 +52,8 @@
     "batchHint": "* 选择批量模式可一次性生成多章内容。",
     "sectionOutputMode": "输出模式",
     "editorOnly": "仅进入编辑器",
-    "confirmGenerate": "确认生成正文"
+    "confirmGenerate": "确认生成正文",
+    "noModelOption": "未配置模型"
   },
   "output": {
     "streaming": "流式输出",
@@ -62,6 +63,7 @@
     "off": "未开启",
     "onHint": "\"{{name}}\" 模型已配置为支持流式输出，选择流式输出模式时将实时显示生成内容。",
     "offHint": "\"{{name}}\" 模型未配置流式输出支持，将自动使用传统输出模式。",
+    "noModelHint": "尚未配置可用 AI 模型，请先去设置中配置后再生成。",
     "inputToken": "输入Token",
     "outputToken": "输出Token",
     "total": "总计",

@@ -52,7 +52,8 @@
     "batchHint": "* Batch mode generates multiple chapters in one go.",
     "sectionOutputMode": "Output Mode",
     "editorOnly": "Enter editor only",
-    "confirmGenerate": "Generate content"
+    "confirmGenerate": "Generate content",
+    "noModelOption": "No model configured"
   },
   "output": {
     "streaming": "Streaming",
@@ -62,6 +63,7 @@
     "off": "Disabled",
     "onHint": "Model \"{{name}}\" is configured for streaming; generated content will appear in real time in streaming mode.",
     "offHint": "Model \"{{name}}\" is not configured for streaming; traditional output mode will be used instead.",
+    "noModelHint": "No usable AI model configured. Configure one in Settings before generating.",
     "inputToken": "Input Tokens",
     "outputToken": "Output Tokens",
     "total": "Total",

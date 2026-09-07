@@ -35,7 +35,7 @@ import {
 interface ForeshadowPanelProps {
   isOpen: boolean;
   project: Project;
-  activeModel: ModelConfig;
+  activeModel: ModelConfig | undefined;
   /** 当前编辑章节（用于"标记回收"与 AI 检测的目标章节） */
   activeChapter: { id: string; title: string; order: number; content: string } | null;
   onUpdate: (updates: Partial<Project>) => void;
@@ -88,6 +88,10 @@ const ForeshadowPanel: React.FC<ForeshadowPanelProps> = ({
   };
 
   const handleDetect = async () => {
+    if (!activeModel) {
+      dialogService.alert(t('foreshadow:detectNoModel'));
+      return;
+    }
     if (!activeChapter || !activeChapter.content.trim()) {
       dialogService.alert(t('foreshadow:detectNoContent'));
       return;
@@ -166,7 +170,7 @@ const ForeshadowPanel: React.FC<ForeshadowPanelProps> = ({
               { value: 'all' as const, label: t('foreshadow:filterAll') },
             ]}
           />
-          <Button variant="secondary" size="sm" onClick={handleDetect} disabled={detecting} title={t('foreshadow:detectTitle')}>
+          <Button variant="secondary" size="sm" onClick={handleDetect} disabled={detecting || !activeModel} title={!activeModel ? t('foreshadow:detectNoModel') : t('foreshadow:detectTitle')}>
             {detecting ? <Spinner className="size-3.5" /> : <WandSparkles className="size-3.5" />}
             {detecting ? t('foreshadow:detecting') : t('foreshadow:detectBtn')}
           </Button>

@@ -114,7 +114,7 @@ export interface ChapterGenerationModalProps {
   setBatchMode: (mode: BatchMode) => void;
   isBatchGenerating: boolean;
   batchProgress: BatchProgress;
-  activeModel: ModelConfig;
+  activeModel: ModelConfig | undefined;
   outputMode: OutputMode;
   setOutputMode: (mode: OutputMode) => void;
   isStreaming: boolean;
@@ -243,7 +243,7 @@ export interface WritingEditModalProps {
   selectedEditPromptId: string;
   customEditPrompt: string;
   outputMode: OutputMode;
-  activeModel: ModelConfig;
+  activeModel: ModelConfig | undefined;
   isStreaming: boolean;
   isGenerating: boolean;
   streamingTokens: TokenUsage;
@@ -285,7 +285,7 @@ export interface WritingEditorOverlayLayerProps {
   setBatchMode: (mode: BatchMode) => void;
   isBatchGenerating: boolean;
   batchProgress: BatchProgress;
-  activeModel: ModelConfig;
+  activeModel: ModelConfig | undefined;
   outputMode: OutputMode;
   setOutputMode: (mode: OutputMode) => void;
   isStreaming: boolean;

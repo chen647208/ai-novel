@@ -62,11 +62,11 @@ import { PROMPT_KNOWLEDGE_TRUNCATE, isVirtualChapter } from '../../../shared/con
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
 
 const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId, onBack }) => {
-  const { t } = useTranslation('writing');
+  const { t } = useTranslation(['writing', 'steps']);
   // 直读 store：模型/提示词/更新动作不再经 App→View 层层透传
   const prompts = useSettingsStore((s) => s.prompts);
-  // 手写 bypass 下可能为 undefined：与旧 effectiveModel 透传语义一致
-  const activeModel = useUsableModel() as ModelConfig;
+  // 手写 bypass 下可能为 undefined：AI 入口各自守卫，调用前收窄
+  const activeModel = useUsableModel();
   const updateActiveProject = useProjectStore((s) => s.updateActiveProject);
   const onUpdate = useCallback(
     (updates: Partial<Project>, opts?: CommitOptions) => updateActiveProject(updates, opts),
@@ -456,6 +456,10 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const runAITemplate = async (template: PromptTemplate, overrideContent?: string) => {
     const targetChapter = genModal.chapter || activeChapter;
     if (!targetChapter) return;
+    if (!activeModel) {
+      dialogService.alert(t('steps:common.noModel'));
+      return;
+    }
 
     // 写前快照：AI 落笔前先保一次，失败可从快照/历史找回（定时/切章快照不覆盖此路径）。
     snapshotChapterIfDue(targetChapter.id, 'manual');
@@ -755,7 +759,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     }
   };
 
-  const generateSingleChapter = async (chapter: Chapter, template: PromptTemplate, externalSignal?: AbortSignal): Promise<{content: string, historyRecord?: AIHistoryRecord}> => {
+  const generateSingleChapter = async (chapter: Chapter, template: PromptTemplate, model: ModelConfig, externalSignal?: AbortSignal): Promise<{content: string, historyRecord?: AIHistoryRecord}> => {
     try {
       setActiveChapterId(chapter.id);
       
@@ -842,7 +846,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
 
       finalPrompt += WRITING_OUTPUT_FORMAT_DIRECTIVE;
 
-      const shouldUseStreaming = outputMode === 'streaming' && activeModel.supportsStreaming !== false;
+      const shouldUseStreaming = outputMode === 'streaming' && model.supportsStreaming !== false;
 
       if (shouldUseStreaming) {
         setIsStreaming(true);
@@ -858,7 +862,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
         }
 
         return new Promise<{content: string, historyRecord?: AIHistoryRecord}>((resolve, reject) => {
-          AIService.callStreaming(activeModel, finalPrompt, (response) => {
+          AIService.callStreaming(model, finalPrompt, (response) => {
             setStreamingContent(response.content);
             setStreamingResponse(response);
             
@@ -883,7 +887,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
                 chapter.id,
                 finalPrompt,
                 result,
-                activeModel,
+                model,
                 response,
                 {
                   templateName: templateDisplayName(template),
@@ -897,7 +901,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           }, { signal: abortController.signal }).catch(reject);
         });
       } else {
-        const result = await AIService.call(activeModel, finalPrompt, { signal: externalSignal });
+        const result = await AIService.call(model, finalPrompt, { signal: externalSignal });
         
         if (result.tokens) {
           setTraditionalTokens(result.tokens);
@@ -910,7 +914,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           chapter.id,
           finalPrompt,
           result.content,
-          activeModel,
+          model,
           result,
           {
             templateName: templateDisplayName(template),
@@ -930,6 +934,10 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const runBatchGeneration = async () => {
     const template = prompts.find(p => p.id === selectedGenPromptId);
     if (!template || !genModal.chapter) return;
+    if (!activeModel) {
+      dialogService.alert(t('steps:common.noModel'));
+      return;
+    }
 
     const targetChapter = genModal.chapter;
 
@@ -966,7 +974,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
         });
 
         try {
-          const result = await generateSingleChapter(chapter, template, abortController.signal);
+          const result = await generateSingleChapter(chapter, template, activeModel, abortController.signal);
           
           chapterUpdates.push({
             id: chapter.id,
@@ -1067,6 +1075,10 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   };
 
   const handleExtractSummary = async () => {
+    if (!activeModel) {
+      dialogService.alert(t('steps:common.noModel'));
+      return;
+    }
     setIsExtractingSummary(true);
     try {
       await extractChapterSummary({

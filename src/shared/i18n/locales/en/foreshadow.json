@@ -17,6 +17,7 @@
   "detecting": "Detecting…",
   "detectBtn": "AI Detect Payoffs",
   "detectNoContent": "Write the current chapter's content before running AI payoff detection",
+  "detectNoModel": "No usable AI model configured. Configure one in Settings before detecting",
   "detectFailed": "Detection failed: {{error}}",
   "detectNone": "No foreshadow payoffs detected in this chapter",
   "detectMarked": "Auto-marked {{count}} foreshadows as paid off",

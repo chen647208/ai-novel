@@ -105,7 +105,7 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
   const { t } = useTranslation('writing');
   const prevTitlePart = modalContextInfo.prevChapter ? `《${modalContextInfo.prevChapter.title}》` : '';
   const nextTitlePart = modalContextInfo.nextChapter ? `《${modalContextInfo.nextChapter.title}》` : '';
-  const streamingSupported = activeModel.supportsStreaming !== false;
+  const streamingSupported = activeModel ? activeModel.supportsStreaming !== false : false;
   const summaryChapters = [...project.chapters]
     .sort((a, b) => a.order - b.order)
     .filter((chapter) => chapter.contentSummary && chapter.contentSummary.trim().length > 0);
@@ -429,10 +429,11 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
             {/* 输出模式选择区域 */}
             <GenSection label={t('genModal.sectionOutputMode')} alignStart>
               <Select
-                value={activeModel.id}
+                value={activeModel?.id ?? ''}
                 onChange={(e) => useSettingsStore.getState().setActiveModelId(e.target.value)}
                 className="mb-2 font-medium"
               >
+                {!activeModel && <option value="">{t('genModal.noModelOption')}</option>}
                 {useSettingsStore.getState().models.filter((m) => m.isEnabled !== false).map((m) => (
                   <option key={m.id} value={m.id}>{m.name}</option>
                 ))}
@@ -458,9 +459,11 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
                   </span>
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  {streamingSupported
-                    ? t('output.onHint', { name: activeModel.name })
-                    : t('output.offHint', { name: activeModel.name })}
+                  {!activeModel
+                    ? t('output.noModelHint')
+                    : streamingSupported
+                      ? t('output.onHint', { name: activeModel.name })
+                      : t('output.offHint', { name: activeModel.name })}
                 </p>
               </div>
             </GenSection>
@@ -494,7 +497,7 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
             </div>
             <div className="flex shrink-0 items-center gap-2">
               <Button variant="ghost" onClick={handleEnterEditor}>{t('genModal.editorOnly')}</Button>
-              <Button onClick={handleModalGenerate}>
+              <Button onClick={handleModalGenerate} disabled={!activeModel} title={!activeModel ? t('output.noModelHint') : undefined}>
                 <WandSparkles className="size-4" /> {t('genModal.confirmGenerate')}
               </Button>
             </div>

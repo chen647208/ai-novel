@@ -17,6 +17,7 @@
   "detecting": "检测中…",
   "detectBtn": "AI 检测本章回收",
   "detectNoContent": "请先在当前章节写入正文，再进行 AI 回收检测",
+  "detectNoModel": "尚未配置可用 AI 模型，请先去设置中配置后再检测",
   "detectFailed": "检测失败：{{error}}",
   "detectNone": "未在本章检测到伏笔回收",
   "detectMarked": "已自动标记 {{count}} 条伏笔为已回收",
