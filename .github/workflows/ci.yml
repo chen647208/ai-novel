@@ -68,10 +68,6 @@ jobs:
         run: |
           ! git grep -nE 'sk-[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{35}|-----BEGIN [A-Z ]*PRIVATE KEY|xox[bap]-' -- . ':!package-lock.json'
 
-      - name: 文档变迁叙事检查（只写现在）
-        run: |
-          ! grep -rnE '已重构为|换代后|此前是' docs/ src/ --include='*.md' --include='*.ts' --include='*.tsx'
-
   build:
     name: 构建校验（Electron）
     runs-on: ubuntu-latest

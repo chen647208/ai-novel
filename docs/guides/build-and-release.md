@@ -5,9 +5,9 @@
 - 渲染进程构建输出到 `build/renderer`
 - Electron 主进程编译输出到 `build/main`（含 `build/main/preload/` 预加载产物）
 - 安装包与发布产物输出到 `build/release`
-- Windows 安装包：`AI小说家-<版本号>-setup.exe`
-- macOS 镜像：`AI小说家-<版本号>-<arch>.dmg`（x64 与 arm64）
-- Linux：`AI小说家-<版本号>.AppImage` 与 `.deb`
+- Windows 安装包：`红月创作-<版本号>-setup.exe`
+- macOS 镜像：`红月创作-<版本号>-<arch>.dmg`（x64 与 arm64）
+- Linux：`红月创作-<版本号>.AppImage` 与 `.deb`
 
 ## 常用命令
 

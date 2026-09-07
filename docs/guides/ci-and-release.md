@@ -18,7 +18,7 @@
   3. `npm run test:coverage`：vitest 全量单元测试 + 覆盖率分层锁线（与本地 `verify` 一致）。
   4. `npm run headers:check`：许可证声明头。
   5. 密钥扫描：密钥模式零命中门禁。
-  6. 文档变迁叙事检查（只写现在）：零命中门禁。
+- 文风（只写现在、直述句、中性简洁）不进 CI，由维护者在 review 时按 `CONTRIBUTING.md` 把关：语气与修辞需要人工判断，机械匹配误报率高。
 - `build` 作业（重型）：仅非文档改动时跑，`npm run electron:build` + `npm run check:icons`。纯文档 PR 跳过构建。
 
 ## Release（发布）

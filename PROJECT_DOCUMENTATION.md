@@ -5,7 +5,7 @@
 
 ## 项目定位
 
-NovaLocal AI Novelist（AI小说家）是一个本地优先的 Electron + React + TypeScript 桌面应用，面向小说创作全流程：书籍管理、灵感生成、人物构建、大纲设计、章节规划、伏笔追踪、知识库检索与正文写作。AI 能力支持 Gemini、OpenAI 兼容接口与 Ollama。
+红月创作（Hongyue Creation）是一个本地优先的 Electron + React + TypeScript 桌面应用，面向小说创作全流程：书籍管理、灵感生成、人物构建、大纲设计、章节规划、伏笔追踪、知识库检索与正文写作。AI 能力支持 Gemini、OpenAI 兼容接口与 Ollama。
 
 ## 权威文档入口
 
