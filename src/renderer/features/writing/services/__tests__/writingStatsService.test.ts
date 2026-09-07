@@ -9,6 +9,8 @@
 
 import { describe, it, expect } from 'vitest';
 import type { Project } from '../../../../../shared/types';
+import { DEFAULT_BUILD_PROFILE, runBuild } from '@core/build';
+import { projectToBuildEntities } from '../../utils';
 import { computeChapterStats, computeBookStats, formatCharCount } from '../writingStatsService';
 
 describe('computeChapterStats', () => {
@@ -70,5 +72,19 @@ describe('formatCharCount', () => {
   it('大于一万转万', () => {
     expect(formatCharCount(12345)).toBe('1.2万');
     expect(formatCharCount(100000)).toBe('10.0万');
+  });
+});
+
+describe('成稿字数同源（design/07 §5.4）', () => {
+  it('builtCharCount 与默认构建管线产出文本的计数一致', () => {
+    const p: Project = {
+      title: '书',
+      chapters: [
+        { id: 'c1', title: '首章', summary: '', content: '一二三四五', order: 0 },
+        { id: 'c2', title: '次章', summary: '', content: '六七八', order: 1 },
+      ],
+    } as Project;
+    const { text } = runBuild(DEFAULT_BUILD_PROFILE, projectToBuildEntities(p));
+    expect(computeBookStats(p).builtCharCount).toBe(computeChapterStats(text).charCount);
   });
 });
