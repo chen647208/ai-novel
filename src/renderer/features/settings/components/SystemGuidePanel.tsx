@@ -41,7 +41,7 @@ const SystemGuidePanel: React.FC<SystemGuidePanelProps> = ({ onQuickAddProviderM
                 <h4 className="flex items-center gap-2 font-serif text-base font-medium text-foreground">
                   {dt(provider.nameKey)}
                   {provider.isChinese && (
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-primary">
+                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-2xs font-medium uppercase tracking-wide text-primary">
                       {t('guide.domestic')}
                     </span>
                   )}

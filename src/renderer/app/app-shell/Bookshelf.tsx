@@ -219,10 +219,10 @@ const Bookshelf: React.FC<BookshelfProps> = ({
                 }}
                 className={`group flex cursor-pointer items-center gap-4 px-4 py-3 transition-colors hover:bg-accent/40 ${idx > 0 ? 'border-t border-border' : ''}`}
               >
-                <h3 className="w-48 shrink-0 truncate font-serif text-[15px] font-medium text-foreground">
+                <h3 className="w-48 shrink-0 truncate font-serif text-base font-medium text-foreground">
                   {book.title}
                 </h3>
-                <p className="min-w-0 flex-1 truncate text-[13px] text-muted-foreground">
+                <p className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
                   {book.intro || book.inspiration || t('app:bookshelf.noContent')}
                 </p>
                 <span className="hidden shrink-0 items-center gap-1 text-xs tabular-nums text-muted-foreground sm:flex" title={t('app:bookshelf.words')}>

@@ -225,7 +225,7 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
 
                     <div className="text-right">
                       <div className="text-xs font-medium text-foreground">{formatHistoryTimestamp(record.timestamp)}</div>
-                      <div className="mt-0.5 text-[10px] tabular-nums text-muted-foreground">
+                      <div className="mt-0.5 text-2xs tabular-nums text-muted-foreground">
                         {record.tokens ? `${record.tokens.total} tokens` : 'N/A tokens'}
                       </div>
                     </div>

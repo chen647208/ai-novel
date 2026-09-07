@@ -65,10 +65,10 @@ export const EmbeddingSidebar: React.FC<EmbeddingSidebarProps> = ({
             >
               {statusDot(config, testResults[config.id])}
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-medium text-foreground">
+                <span className="block truncate text-sm font-medium text-foreground">
                   {config.name || t('models.namePlaceholder')}
                 </span>
-                <span className="block truncate text-[11px] text-muted-foreground">
+                <span className="block truncate text-xs text-muted-foreground">
                   {provider ? dt(provider.nameKey) : config.provider}
                   {provider?.type === 'local' ? ' · 本地' : ' · 云端'}
                   {config.id === activeId && ` · ${t('models.activeBadge')}`}

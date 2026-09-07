@@ -347,19 +347,19 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
         <div className="mb-5 grid grid-cols-4 gap-3">
           <div className="rounded-lg border border-border bg-muted/30 p-3 text-center">
             <div className="font-serif text-2xl font-medium tabular-nums text-foreground">{checkResult.summary.total}</div>
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('consistency:summary.found')}</div>
+            <div className="text-2xs uppercase tracking-wider text-muted-foreground">{t('consistency:summary.found')}</div>
           </div>
           <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-center">
             <div className="font-serif text-2xl font-medium tabular-nums text-destructive">{checkResult.summary.errors}</div>
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('consistency:summary.errors')}</div>
+            <div className="text-2xs uppercase tracking-wider text-muted-foreground">{t('consistency:summary.errors')}</div>
           </div>
           <div className="rounded-lg border border-warning/20 bg-warning/5 p-3 text-center">
             <div className="font-serif text-2xl font-medium tabular-nums text-warning">{checkResult.summary.warnings}</div>
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('consistency:summary.warnings')}</div>
+            <div className="text-2xs uppercase tracking-wider text-muted-foreground">{t('consistency:summary.warnings')}</div>
           </div>
           <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-center">
             <div className="font-serif text-2xl font-medium tabular-nums text-primary">{checkResult.summary.infos}</div>
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('consistency:summary.infos')}</div>
+            <div className="text-2xs uppercase tracking-wider text-muted-foreground">{t('consistency:summary.infos')}</div>
           </div>
         </div>
       )}
@@ -424,10 +424,10 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
                 <TypeIcon type={issue.type} className="mt-0.5 size-4 shrink-0" />
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex flex-wrap items-center gap-2">
-                    <span className={cn('rounded border px-1.5 py-0.5 text-[10px]', typeBadgeCls(issue.type))}>
+                    <span className={cn('rounded border px-1.5 py-0.5 text-2xs', typeBadgeCls(issue.type))}>
                       {getTypeLabel(issue.type)}
                     </span>
-                    <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                    <span className="flex items-center gap-1 text-2xs text-muted-foreground">
                       {(() => { const CatIcon = getCategoryIcon(issue.category); return <CatIcon className="size-3.5" />; })()}
                       {getCategoryLabel(issue.category)}
                     </span>
@@ -441,13 +441,13 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
                     <div className="mt-3 space-y-2 border-t border-border/60 pt-3">
                       {issue.suggestion && (
                         <div>
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('consistency:suggestionLabel')}</span>
+                          <span className="text-2xs uppercase tracking-wider text-muted-foreground">{t('consistency:suggestionLabel')}</span>
                           <p className="mt-0.5 text-sm text-foreground">{issue.suggestion}</p>
                         </div>
                       )}
                       {issue.details && (
                         <div>
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('consistency:detailsLabel')}</span>
+                          <span className="text-2xs uppercase tracking-wider text-muted-foreground">{t('consistency:detailsLabel')}</span>
                           <p className="mt-0.5 font-mono text-xs text-muted-foreground">{issue.details}</p>
                         </div>
                       )}

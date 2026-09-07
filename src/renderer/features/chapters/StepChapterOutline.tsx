@@ -327,7 +327,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
               >
                  <BookOpenText className="size-4" />
                  {selectedKnowledgeIds.size > 0 && (
-                   <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-primary text-[9px] font-medium text-primary-foreground">
+                   <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-primary text-2xs font-medium text-primary-foreground">
                      {selectedKnowledgeIds.size}
                    </span>
                  )}
@@ -569,7 +569,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
                   </div>
 
                   <div className="mb-1">
-                    <Label className="mb-1.5 block text-[10px] uppercase tracking-wider text-muted-foreground">{t('steps:chapters.summaryLabel')}</Label>
+                    <Label className="mb-1.5 block text-2xs uppercase tracking-wider text-muted-foreground">{t('steps:chapters.summaryLabel')}</Label>
                     <Textarea
                       className="min-h-24 resize-none bg-muted/40 leading-relaxed"
                       value={chap.summary}
@@ -726,7 +726,7 @@ const ChapterWorldRelationEditor: React.FC<ChapterWorldRelationEditorProps> = ({
               <div className="space-y-2">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Label className="mb-1 block text-[10px] text-muted-foreground">{t('steps:chapters.yearLabel')}</Label>
+                    <Label className="mb-1 block text-2xs text-muted-foreground">{t('steps:chapters.yearLabel')}</Label>
                     <Input
                       type="number"
                       className="h-8 text-xs"
@@ -741,7 +741,7 @@ const ChapterWorldRelationEditor: React.FC<ChapterWorldRelationEditorProps> = ({
                     />
                   </div>
                   <div>
-                    <Label className="mb-1 block text-[10px] text-muted-foreground">{t('steps:chapters.displayLabel')}</Label>
+                    <Label className="mb-1 block text-2xs text-muted-foreground">{t('steps:chapters.displayLabel')}</Label>
                     <Input
                       type="text"
                       className="h-8 text-xs"
@@ -761,7 +761,7 @@ const ChapterWorldRelationEditor: React.FC<ChapterWorldRelationEditorProps> = ({
                 {/* 关联时间线事件 */}
                 {timeline.events?.length > 0 && (
                   <div>
-                    <Label className="mb-1 block text-[10px] text-muted-foreground">{t('steps:chapters.linkedEvent')}</Label>
+                    <Label className="mb-1 block text-2xs text-muted-foreground">{t('steps:chapters.linkedEvent')}</Label>
                     <Select
                       value={chapter.timelineEventId || ''}
                       onChange={(e) => onUpdate({ timelineEventId: e.target.value || undefined })}

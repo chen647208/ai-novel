@@ -53,7 +53,7 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
                 <div key={character.id} className="rounded-lg border border-border bg-muted/30 p-3 text-sm">
                   <div className="flex items-center justify-between gap-2">
                     <span className="truncate font-serif font-medium">{character.name}</span>
-                    <span className="shrink-0 rounded border border-border bg-background px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">{roleLabel(character.role)}</span>
+                    <span className="shrink-0 rounded border border-border bg-background px-1.5 py-0.5 text-2xs uppercase text-muted-foreground">{roleLabel(character.role)}</span>
                   </div>
                   <div className="mt-1.5 line-clamp-3 text-xs leading-relaxed text-muted-foreground">
                     {character.personality || character.background}

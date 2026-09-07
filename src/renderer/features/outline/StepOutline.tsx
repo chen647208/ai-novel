@@ -315,11 +315,11 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project }) => {
             <h4 className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('steps:outline.contextTitle')}</h4>
             <div className="space-y-3">
               <div className="rounded-md border border-border bg-muted/40 p-3">
-                <span className="mb-0.5 block text-[10px] uppercase tracking-wider text-muted-foreground">{t('steps:outline.workTitle')}</span>
+                <span className="mb-0.5 block text-2xs uppercase tracking-wider text-muted-foreground">{t('steps:outline.workTitle')}</span>
                 <p className="font-serif text-sm font-medium">{project.title}</p>
               </div>
               <div className="rounded-md border border-border bg-muted/40 p-3">
-                <span className="mb-0.5 block text-[10px] uppercase tracking-wider text-muted-foreground">{t('steps:outline.storyCore')}</span>
+                <span className="mb-0.5 block text-2xs uppercase tracking-wider text-muted-foreground">{t('steps:outline.storyCore')}</span>
                 <p className="line-clamp-6 text-xs leading-relaxed text-muted-foreground">{project.intro}</p>
               </div>
             </div>

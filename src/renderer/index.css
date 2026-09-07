@@ -59,6 +59,12 @@
   --radius-lg: 0.5rem;
   --radius-xl: calc(0.5rem + 4px);
 
+  /* 字号刻度：标准 Tailwind 档位 + 稠密档 2xs（10px）。
+   * 全库禁用 text-[Npx] 任意值：8/9/10px→text-2xs，11px→text-xs，
+   * 13px→text-sm，15px→text-base。 */
+  --text-2xs: 0.625rem;
+  --text-2xs--line-height: 0.875rem;
+
   --animate-fade-in: fade-in 0.15s ease-out;
   --animate-fade-out: fade-out 0.12s ease-in;
   --animate-zoom-in: zoom-in 0.15s ease-out;

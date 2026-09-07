@@ -162,7 +162,7 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
               >
                 <TypeIcon type={rec.type} className="size-4" />
                 <span className="flex-1 truncate text-sm text-foreground">{getDisplayName(rec.item)}</span>
-                <span className={cn('text-[10px] tabular-nums', getRelevanceColor(rec.relevanceScore))}>
+                <span className={cn('text-2xs tabular-nums', getRelevanceColor(rec.relevanceScore))}>
                   {Math.round(rec.relevanceScore)}
                 </span>
               </div>
@@ -233,15 +233,15 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex flex-wrap items-center gap-1.5">
-                    <span className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                    <span className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-2xs text-muted-foreground">
                       {getTypeLabel(rec.type)}
                     </span>
                     {rec.suggestedAction && (
-                      <span className="rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] text-primary">
+                      <span className="rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-2xs text-primary">
                         {t('rec.suggested', { action: getActionLabel(rec.suggestedAction) })}
                       </span>
                     )}
-                    <span className={cn('ml-auto text-[10px] tabular-nums', getRelevanceColor(rec.relevanceScore))}>
+                    <span className={cn('ml-auto text-2xs tabular-nums', getRelevanceColor(rec.relevanceScore))}>
                       {t('rec.relevance', { score: Math.round(rec.relevanceScore) })}
                     </span>
                   </div>

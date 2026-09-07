@@ -149,7 +149,7 @@ const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({
           </div>
 
           <p
-            className="rounded-lg border border-border bg-muted/30 p-4 text-[15px] leading-relaxed"
+            className="rounded-lg border border-border bg-muted/30 p-4 text-base leading-relaxed"
             style={{ fontFamily: resolveFontStack(editorFont, DEFAULT_EDITOR_FONT, customFonts) }}
           >
             {t('general.previewText')}

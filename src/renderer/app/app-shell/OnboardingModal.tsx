@@ -62,7 +62,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ open, onDone, 
               >
                 <p.icon className={cn('mb-2 size-5', persona === p.id ? 'text-primary' : 'text-muted-foreground')} />
                 <div className="text-sm font-medium text-foreground">{personaText[p.id].title}</div>
-                <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">{personaText[p.id].desc}</div>
+                <div className="mt-1 text-xs leading-relaxed text-muted-foreground">{personaText[p.id].desc}</div>
               </button>
             ))}
           </div>

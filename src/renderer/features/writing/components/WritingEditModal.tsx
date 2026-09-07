@@ -128,15 +128,15 @@ const WritingEditModal: React.FC<WritingEditModalProps> = ({
             {(isStreaming || isGenerating || streamingTokens.total >= 0 || traditionalTokens.total >= 0) && (
               <div className="flex items-center gap-4 rounded-lg border border-border bg-background px-3 py-2">
                 <div className="text-center">
-                  <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t('output.inputToken')}</div>
+                  <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">{t('output.inputToken')}</div>
                   <div className="text-sm tabular-nums text-foreground">{isStreaming ? streamingTokens.prompt : traditionalTokens.prompt}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t('output.outputToken')}</div>
+                  <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">{t('output.outputToken')}</div>
                   <div className="text-sm tabular-nums text-foreground">{isStreaming ? streamingTokens.completion : traditionalTokens.completion}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t('output.total')}</div>
+                  <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">{t('output.total')}</div>
                   <div className="text-sm font-medium tabular-nums text-foreground">{isStreaming ? streamingTokens.total : traditionalTokens.total}</div>
                 </div>
                 {isStreaming && (

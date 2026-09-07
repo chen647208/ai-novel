@@ -63,7 +63,7 @@ export const EmbeddingEditor: React.FC<EmbeddingEditorProps> = ({
             placeholder={t('models.namePlaceholder')}
           />
           {active && (
-            <span className="shrink-0 rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-primary">
+            <span className="shrink-0 rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-2xs font-medium uppercase tracking-wide text-primary">
               {t('models.activeBadge')}
             </span>
           )}

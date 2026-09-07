@@ -278,7 +278,7 @@ const EnhancedTimeline: React.FC<EnhancedTimelineProps> = ({
                           {/* 标签 */}
                           <div className="mb-1 flex flex-wrap items-center gap-1.5">
                             <span className={cn(
-                              'rounded border px-1.5 py-0.5 text-[10px]',
+                              'rounded border px-1.5 py-0.5 text-2xs',
                               item.type === 'event'
                                 ? 'border-primary/30 bg-primary/10 text-primary'
                                 : 'border-border bg-muted/40 text-muted-foreground'
@@ -286,12 +286,12 @@ const EnhancedTimeline: React.FC<EnhancedTimelineProps> = ({
                               {item.type === 'event' ? t('enhanced.typeEvent') : t('enhanced.typeChapter')}
                             </span>
                             {item.type === 'event' && (
-                              <span className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                              <span className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-2xs text-muted-foreground">
                                 {getEventImportanceLabel(item.data as TimelineEvent)}
                               </span>
                             )}
                             {item.type === 'chapter' && (
-                              <span className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] tabular-nums text-muted-foreground">
+                              <span className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-2xs tabular-nums text-muted-foreground">
                                 {t('enhanced.chapterNumber', { num: (item.data as Chapter).order + 1 })}
                               </span>
                             )}
@@ -309,19 +309,19 @@ const EnhancedTimeline: React.FC<EnhancedTimelineProps> = ({
                           {item.type === 'event' && (
                             <div className="mt-2 flex flex-wrap gap-2">
                               {(item.data as TimelineEvent).relatedCharacterIds?.length && (
-                                <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                <span className="flex items-center gap-1 text-2xs text-muted-foreground">
                                   <User className="size-3" />
                                   {t('enhanced.relatedCharacters', { count: (item.data as TimelineEvent).relatedCharacterIds?.length })}
                                 </span>
                               )}
                               {(item.data as TimelineEvent).relatedLocationIds?.length && (
-                                <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                <span className="flex items-center gap-1 text-2xs text-muted-foreground">
                                   <MapPin className="size-3" />
                                   {t('enhanced.hasLocation')}
                                 </span>
                               )}
                               {(item.data as TimelineEvent).relatedChapterId && (
-                                <span className="flex items-center gap-1 text-[10px] text-primary">
+                                <span className="flex items-center gap-1 text-2xs text-primary">
                                   <BookOpen className="size-3" />
                                   {t('enhanced.linkedChapter')}
                                 </span>
@@ -332,19 +332,19 @@ const EnhancedTimeline: React.FC<EnhancedTimelineProps> = ({
                           {item.type === 'chapter' && (
                             <div className="mt-2 flex flex-wrap gap-2">
                               {(item.data as Chapter).mainLocationId && (
-                                <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                <span className="flex items-center gap-1 text-2xs text-muted-foreground">
                                   <MapPin className="size-3" />
                                   {t('enhanced.hasMainScene')}
                                 </span>
                               )}
                               {(item.data as Chapter).involvedFactionIds?.length && (
-                                <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                <span className="flex items-center gap-1 text-2xs text-muted-foreground">
                                   <Users className="size-3" />
                                   {t('enhanced.relatedFactions', { count: (item.data as Chapter).involvedFactionIds?.length })}
                                 </span>
                               )}
                               {(item.data as Chapter).timelineEventId && (
-                                <span className="flex items-center gap-1 text-[10px] text-primary">
+                                <span className="flex items-center gap-1 text-2xs text-primary">
                                   <Calendar className="size-3" />
                                   {t('enhanced.linkedEvent')}
                                 </span>
@@ -368,25 +368,25 @@ const EnhancedTimeline: React.FC<EnhancedTimelineProps> = ({
           <div className="font-serif text-lg font-medium tabular-nums text-foreground">
             {project.timeline?.events?.filter(e => e.type === 'battle').length || 0}
           </div>
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('enhanced.statBattle')}</div>
+          <div className="text-2xs uppercase tracking-wider text-muted-foreground">{t('enhanced.statBattle')}</div>
         </div>
         <div className="text-center">
           <div className="font-serif text-lg font-medium tabular-nums text-foreground">
             {project.timeline?.events?.filter(e => e.type === 'plot').length || 0}
           </div>
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('enhanced.statPlot')}</div>
+          <div className="text-2xs uppercase tracking-wider text-muted-foreground">{t('enhanced.statPlot')}</div>
         </div>
         <div className="text-center">
           <div className="font-serif text-lg font-medium tabular-nums text-foreground">
             {project.chapters?.filter(c => c.storyDate).length || 0}
           </div>
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('enhanced.statLinkedChapters')}</div>
+          <div className="text-2xs uppercase tracking-wider text-muted-foreground">{t('enhanced.statLinkedChapters')}</div>
         </div>
         <div className="text-center">
           <div className="font-serif text-lg font-medium tabular-nums text-foreground">
             {groupedItems.length}
           </div>
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('enhanced.statSpan')}</div>
+          <div className="text-2xs uppercase tracking-wider text-muted-foreground">{t('enhanced.statSpan')}</div>
         </div>
       </div>
     </div>

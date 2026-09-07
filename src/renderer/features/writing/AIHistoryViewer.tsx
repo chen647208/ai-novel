@@ -210,15 +210,15 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
         <div className="flex shrink-0 items-center justify-between border-b border-border bg-muted/20 px-4 py-2">
           <div className="flex items-center gap-4">
             <div>
-              <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t('history.statTotal')}</div>
+              <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">{t('history.statTotal')}</div>
               <div className="text-sm font-medium tabular-nums text-foreground">{allHistoryRecords.length}</div>
             </div>
             <div>
-              <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t('history.statChapters')}</div>
+              <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">{t('history.statChapters')}</div>
               <div className="text-sm font-medium tabular-nums text-foreground">{chapterOptions.length}</div>
             </div>
             <div>
-              <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t('history.statSelected')}</div>
+              <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">{t('history.statSelected')}</div>
               <div className="text-sm font-medium tabular-nums text-foreground">{selectedHistoryIds.size}</div>
             </div>
           </div>

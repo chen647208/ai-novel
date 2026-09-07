@@ -222,7 +222,7 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-2">
                   {template.isDefault && (
-                    <span className="shrink-0 rounded border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">{t('consistency:pm.defaultBadge')}</span>
+                    <span className="shrink-0 rounded border border-border bg-muted/40 px-1.5 py-0.5 text-2xs uppercase tracking-wider text-muted-foreground">{t('consistency:pm.defaultBadge')}</span>
                   )}
                   <input
                     className="w-48 border-none bg-transparent p-0 font-serif text-base font-medium text-foreground outline-none placeholder:text-muted-foreground disabled:cursor-default"

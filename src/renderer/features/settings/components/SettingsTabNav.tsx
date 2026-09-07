@@ -61,7 +61,7 @@ const SettingsTabNav: React.FC<SettingsTabNavProps> = ({ activeTab, onChange }) 
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
       {TAB_GROUPS.map((group) => (
         <div key={group.id} className="flex items-center gap-2">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
+          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground/70">
             {t(group.labelKey, group.fallback)}
           </span>
           <div className="flex flex-wrap gap-1.5">
@@ -70,7 +70,7 @@ const SettingsTabNav: React.FC<SettingsTabNavProps> = ({ activeTab, onChange }) 
                 key={item.id}
                 onClick={() => onChange(item.id)}
                 className={cn(
-                  'flex items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors whitespace-nowrap',
+                  'flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap',
                   activeTab === item.id
                     ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'

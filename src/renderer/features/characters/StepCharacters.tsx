@@ -388,7 +388,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
 
             <div className="space-y-3">
               <div>
-                <span className="mb-1 block text-[10px] uppercase tracking-wider text-muted-foreground">{t('strategy.templateLabel')}</span>
+                <span className="mb-1 block text-2xs uppercase tracking-wider text-muted-foreground">{t('strategy.templateLabel')}</span>
                 <Select value={selectedPromptId} onChange={(e) => setSelectedPromptId(e.target.value)}>
                   {characterPrompts.map(p => <option key={p.id} value={p.id}>{templateDisplayName(p)}</option>)}
                 </Select>
@@ -405,15 +405,15 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
                 <div className="rounded-md border border-border bg-muted/40 p-3">
                   <div className="flex items-center justify-between text-center">
                     <div>
-                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('tokens.input')}</div>
+                      <div className="text-2xs uppercase tracking-wider text-muted-foreground">{t('tokens.input')}</div>
                       <div className="text-sm font-medium tabular-nums">{traditionalTokens.prompt}</div>
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('tokens.output')}</div>
+                      <div className="text-2xs uppercase tracking-wider text-muted-foreground">{t('tokens.output')}</div>
                       <div className="text-sm font-medium tabular-nums">{traditionalTokens.completion}</div>
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('tokens.total')}</div>
+                      <div className="text-2xs uppercase tracking-wider text-muted-foreground">{t('tokens.total')}</div>
                       <div className="text-sm font-medium tabular-nums">{traditionalTokens.total}</div>
                     </div>
                   </div>

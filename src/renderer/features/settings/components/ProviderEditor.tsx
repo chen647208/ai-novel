@@ -72,7 +72,7 @@ export const ProviderEditor: React.FC<ProviderEditorProps> = ({
             placeholder={t('models.namePlaceholder')}
           />
           {active && (
-            <span className="shrink-0 rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-primary">
+            <span className="shrink-0 rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-2xs font-medium uppercase tracking-wide text-primary">
               {t('models.activeBadge')}
             </span>
           )}
@@ -221,7 +221,7 @@ export const ProviderEditor: React.FC<ProviderEditorProps> = ({
 
       {testResult && (
         <div className={cn(
-          'custom-scrollbar mt-5 max-h-40 overflow-y-auto whitespace-pre-wrap rounded-lg border p-4 font-mono text-[11px] leading-relaxed',
+          'custom-scrollbar mt-5 max-h-40 overflow-y-auto whitespace-pre-wrap rounded-lg border p-4 font-mono text-xs leading-relaxed',
           isErrorResult(testResult) ? 'border-destructive/20 bg-destructive/5 text-destructive' : 'border-success/20 bg-success/5 text-success'
         )}>
           <div className="mb-2 flex items-center gap-2 font-medium uppercase tracking-wider">

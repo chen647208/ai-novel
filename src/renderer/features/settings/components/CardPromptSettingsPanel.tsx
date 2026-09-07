@@ -103,7 +103,7 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
             <div className="mb-4 flex items-start justify-between">
               <div className="flex items-center gap-3">
                 {template.isDefault && (
-                  <span className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                  <span className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-2xs font-medium uppercase tracking-wide text-muted-foreground">
                     {t('cardPrompts.defaultBadge')}
                   </span>
                 )}

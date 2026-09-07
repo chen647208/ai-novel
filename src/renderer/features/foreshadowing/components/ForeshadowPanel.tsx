@@ -184,13 +184,13 @@ const ForeshadowPanel: React.FC<ForeshadowPanelProps> = ({
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <span className={cn('rounded border px-1.5 py-0.5 text-[10px]', IMPORTANCE_STYLE[f.importance])}>{t(`foreshadow:importance.${f.importance}`)}</span>
-                      <span className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] text-muted-foreground">{t(`foreshadow:status.${f.status}`)}</span>
-                      {overdueIds.has(f.id) && <span className="rounded border border-destructive/30 bg-destructive/10 px-1.5 py-0.5 text-[10px] text-destructive">{t('foreshadow:overdueBadge')}</span>}
+                      <span className={cn('rounded border px-1.5 py-0.5 text-2xs', IMPORTANCE_STYLE[f.importance])}>{t(`foreshadow:importance.${f.importance}`)}</span>
+                      <span className="rounded border border-border bg-muted/40 px-1.5 py-0.5 text-2xs text-muted-foreground">{t(`foreshadow:status.${f.status}`)}</span>
+                      {overdueIds.has(f.id) && <span className="rounded border border-destructive/30 bg-destructive/10 px-1.5 py-0.5 text-2xs text-destructive">{t('foreshadow:overdueBadge')}</span>}
                       <span className="truncate font-serif text-sm font-medium text-foreground">{f.title}</span>
                     </div>
                     <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{f.detail}</p>
-                    <div className="mt-1.5 text-[10px] text-muted-foreground">
+                    <div className="mt-1.5 text-2xs text-muted-foreground">
                       {f.plantedChapterOrder !== undefined && t('foreshadow:plantedAt', { num: f.plantedChapterOrder + 1 })}
                       {f.payoffChapterOrder !== undefined && t('foreshadow:payoffAt', { num: f.payoffChapterOrder + 1 })}
                     </div>

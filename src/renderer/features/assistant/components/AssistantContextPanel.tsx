@@ -66,7 +66,7 @@ const AssistantContextPanel: React.FC<AssistantContextPanelProps> = ({
               onSubSelectionChange('all');
             }}
             className={cn(
-              'flex min-w-[60px] flex-1 flex-col items-center gap-1 border-b-2 py-3 text-[10px] transition-colors',
+              'flex min-w-[60px] flex-1 flex-col items-center gap-1 border-b-2 py-3 text-2xs transition-colors',
               activeCategory === category.id
                 ? 'border-primary text-foreground'
                 : 'border-transparent text-muted-foreground hover:text-foreground'

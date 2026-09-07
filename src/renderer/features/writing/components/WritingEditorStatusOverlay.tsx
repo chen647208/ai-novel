@@ -33,7 +33,7 @@ const WritingEditorStatusOverlay: React.FC<WritingEditorStatusOverlayProps> = ({
             <Loader2 className="mb-4 size-10 animate-spin text-primary" strokeWidth={2} />
             <p className="text-xs font-medium uppercase tracking-widest text-foreground">{t('statusOverlay.generating')}</p>
             <p className="mt-2 text-xs text-muted-foreground">{t('statusOverlay.targetWords', { count: targetWordCount })}</p>
-            <p className="mt-1 text-[10px] text-muted-foreground/70">{t('statusOverlay.contextInjected', { count: selectedKnowledgeCount })}</p>
+            <p className="mt-1 text-2xs text-muted-foreground/70">{t('statusOverlay.contextInjected', { count: selectedKnowledgeCount })}</p>
           </div>
         </div>
       )}
@@ -44,7 +44,7 @@ const WritingEditorStatusOverlay: React.FC<WritingEditorStatusOverlayProps> = ({
             <Loader2 className="mb-4 size-10 animate-spin text-success" strokeWidth={2} />
             <p className="text-xs font-medium uppercase tracking-widest text-foreground">{t('statusOverlay.streaming')}</p>
             <p className="mt-2 text-xs tabular-nums text-muted-foreground">{t('statusOverlay.generatedSoFar', { count: streamingContentLength })}</p>
-            <p className="mt-1 text-[10px] text-muted-foreground/70">{t('statusOverlay.streamingHint')}</p>
+            <p className="mt-1 text-2xs text-muted-foreground/70">{t('statusOverlay.streamingHint')}</p>
             <Button
               variant="outline"
               size="sm"
@@ -83,7 +83,7 @@ const WritingEditorStatusOverlay: React.FC<WritingEditorStatusOverlayProps> = ({
             <p className="mt-3 mb-1 truncate text-sm font-medium">
               {batchProgress.currentChapterTitle}
             </p>
-            <p className="text-[10px] text-muted-foreground">{t('statusOverlay.currentChapter')}</p>
+            <p className="text-2xs text-muted-foreground">{t('statusOverlay.currentChapter')}</p>
 
             <Button
               variant="outline"

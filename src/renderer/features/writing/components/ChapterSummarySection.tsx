@@ -80,7 +80,7 @@ const ChapterSummarySection: React.FC<ChapterSummarySectionProps> = ({
           )}
         </Button>
 
-        <p className="text-center text-[10px] text-muted-foreground">
+        <p className="text-center text-2xs text-muted-foreground">
           {t('summarySection.hint')}
         </p>
       </div>

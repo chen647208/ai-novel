@@ -50,14 +50,14 @@ const CompactCharacterCard: React.FC<CompactCharacterCardProps> = ({ character, 
         <div className="min-w-0 flex-1">
           <h3 className="truncate font-serif text-lg font-medium">{character.name}</h3>
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
-            <span className={cn('flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium', roleConfig.color)}>
+            <span className={cn('flex items-center gap-1 rounded-full border px-2 py-0.5 text-2xs font-medium', roleConfig.color)}>
               <roleConfig.icon className="size-2.5" />
               {roleText}
             </span>
-            <span className="text-[10px] text-muted-foreground">
+            <span className="text-2xs text-muted-foreground">
               {genderText}
             </span>
-            <span className="text-[10px] text-muted-foreground">
+            <span className="text-2xs text-muted-foreground">
               {character.age ? t('card.ageSuffix', { age: character.age }) : t('card.ageUnknown')}
             </span>
           </div>
@@ -69,7 +69,7 @@ const CompactCharacterCard: React.FC<CompactCharacterCardProps> = ({ character, 
       <div className="mb-3 flex-1">
         <div className="mb-1.5 flex items-center gap-1.5">
           <Eye className="size-3 text-muted-foreground" />
-          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t('card.appearanceTitle')}</span>
+          <span className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">{t('card.appearanceTitle')}</span>
         </div>
         <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
           {character.appearance || t('card.noAppearance')}
@@ -80,7 +80,7 @@ const CompactCharacterCard: React.FC<CompactCharacterCardProps> = ({ character, 
       <div className="border-t border-border pt-3">
         <div className="mb-1.5 flex items-center gap-1.5">
           <Star className="size-3 text-muted-foreground" />
-          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t('card.featuresTitle')}</span>
+          <span className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">{t('card.featuresTitle')}</span>
         </div>
         <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
           {character.distinctiveFeatures || t('card.noFeatures')}
@@ -88,7 +88,7 @@ const CompactCharacterCard: React.FC<CompactCharacterCardProps> = ({ character, 
       </div>
 
       {/* 底部提示 */}
-      <div className="mt-3 flex items-center justify-between border-t border-border pt-2.5 text-[10px] text-muted-foreground">
+      <div className="mt-3 flex items-center justify-between border-t border-border pt-2.5 text-2xs text-muted-foreground">
         <span>{t('card.clickHint')}</span>
         <span className="flex items-center gap-1 opacity-70">
           <Info className="size-3" />

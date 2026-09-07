@@ -327,7 +327,7 @@ const BirthInfoEditor: React.FC<BirthInfoEditorProps> = ({ character, onUpdate }
             <Label className="mb-2 block text-xs font-medium">{t('birth.date')}</Label>
             <div className="grid grid-cols-4 gap-2">
               <div>
-                <Label className="mb-1 block text-[10px] text-muted-foreground">{t('birth.year')}</Label>
+                <Label className="mb-1 block text-2xs text-muted-foreground">{t('birth.year')}</Label>
                 <Input
                   type="number"
                   className="h-7 text-xs"
@@ -338,7 +338,7 @@ const BirthInfoEditor: React.FC<BirthInfoEditorProps> = ({ character, onUpdate }
                 />
               </div>
               <div>
-                <Label className="mb-1 block text-[10px] text-muted-foreground">{t('birth.month')}</Label>
+                <Label className="mb-1 block text-2xs text-muted-foreground">{t('birth.month')}</Label>
                 <Input
                   type="number"
                   className="h-7 text-xs"
@@ -349,7 +349,7 @@ const BirthInfoEditor: React.FC<BirthInfoEditorProps> = ({ character, onUpdate }
                 />
               </div>
               <div>
-                <Label className="mb-1 block text-[10px] text-muted-foreground">{t('birth.day')}</Label>
+                <Label className="mb-1 block text-2xs text-muted-foreground">{t('birth.day')}</Label>
                 <Input
                   type="number"
                   className="h-7 text-xs"
@@ -360,7 +360,7 @@ const BirthInfoEditor: React.FC<BirthInfoEditorProps> = ({ character, onUpdate }
                 />
               </div>
               <div>
-                <Label className="mb-1 block text-[10px] text-muted-foreground">{t('birth.display')}</Label>
+                <Label className="mb-1 block text-2xs text-muted-foreground">{t('birth.display')}</Label>
                 <Input
                   type="text"
                   className="h-7 text-xs"
@@ -589,7 +589,7 @@ const WorldRelationEditor: React.FC<WorldRelationEditorProps> = ({ character, pr
               </Label>
               <div className="grid grid-cols-4 gap-2">
                 <div>
-                  <Label className="mb-1 block text-[10px] text-muted-foreground">{t('birth.year')}</Label>
+                  <Label className="mb-1 block text-2xs text-muted-foreground">{t('birth.year')}</Label>
                   <Input
                     type="number"
                     className="h-7 text-xs"
@@ -604,7 +604,7 @@ const WorldRelationEditor: React.FC<WorldRelationEditorProps> = ({ character, pr
                   />
                 </div>
                 <div>
-                  <Label className="mb-1 block text-[10px] text-muted-foreground">{t('birth.month')}</Label>
+                  <Label className="mb-1 block text-2xs text-muted-foreground">{t('birth.month')}</Label>
                   <Input
                     type="number"
                     className="h-7 text-xs"
@@ -620,7 +620,7 @@ const WorldRelationEditor: React.FC<WorldRelationEditorProps> = ({ character, pr
                   />
                 </div>
                 <div>
-                  <Label className="mb-1 block text-[10px] text-muted-foreground">{t('birth.day')}</Label>
+                  <Label className="mb-1 block text-2xs text-muted-foreground">{t('birth.day')}</Label>
                   <Input
                     type="number"
                     className="h-7 text-xs"
@@ -636,7 +636,7 @@ const WorldRelationEditor: React.FC<WorldRelationEditorProps> = ({ character, pr
                   />
                 </div>
                 <div>
-                  <Label className="mb-1 block text-[10px] text-muted-foreground">{t('birth.display')}</Label>
+                  <Label className="mb-1 block text-2xs text-muted-foreground">{t('birth.display')}</Label>
                   <Input
                     type="text"
                     className="h-7 text-xs"

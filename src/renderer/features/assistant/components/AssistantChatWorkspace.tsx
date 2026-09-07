@@ -172,7 +172,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
       {!contextPanelOpen && pendingFiles.length > 0 && (
         <div className="flex shrink-0 gap-2 overflow-x-auto border-t border-border bg-primary/5 px-4 py-2 custom-scrollbar">
           {pendingFiles.map((file, index) => (
-            <div key={index} className="flex items-center gap-1 whitespace-nowrap rounded-md border border-border bg-card px-2 py-1 text-[10px] text-foreground">
+            <div key={index} className="flex items-center gap-1 whitespace-nowrap rounded-md border border-border bg-card px-2 py-1 text-2xs text-foreground">
               <FileText className="size-3.5" />
               <span className="max-w-[80px] truncate">{file.name}</span>
               <Button
@@ -189,7 +189,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
       {!contextPanelOpen && (
         <div className="shrink-0 border-t border-border bg-card p-3">
           <div className="mb-2 flex flex-wrap items-center gap-1.5">
-            <span className="py-1 text-[10px] uppercase tracking-wider text-muted-foreground">{t('chat.quickCreateLabel')}</span>
+            <span className="py-1 text-2xs uppercase tracking-wider text-muted-foreground">{t('chat.quickCreateLabel')}</span>
             {quickCommands.map((item) => {
               const cmd = `${i18n.language === 'en' ? item.en : item.zh} `;
               return (
@@ -203,7 +203,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
                       setSelectedCardTemplateId(defaultTemplate.id);
                     }
                   }}
-                  className="h-auto gap-1 px-2 py-1 text-[10px] font-normal text-muted-foreground hover:border-primary/40 hover:text-primary"
+                  className="h-auto gap-1 px-2 py-1 text-2xs font-normal text-muted-foreground hover:border-primary/40 hover:text-primary"
                   title={t('chat.commandTitle', { cmd: cmd.trim() })}
                 >
                   <item.icon className="size-3" />
@@ -215,7 +215,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
 
           {input.startsWith('/') && cardPromptTemplates.length > 0 && (
             <div className="mb-2 flex items-center gap-2 px-1">
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('chat.templateLabel')}</span>
+              <span className="text-2xs uppercase tracking-wider text-muted-foreground">{t('chat.templateLabel')}</span>
               <Select
                 className="h-7 flex-1 text-xs"
                 value={selectedCardTemplateId || ''}

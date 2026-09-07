@@ -226,7 +226,7 @@ const RelationshipDiagram: React.FC<RelationshipDiagramProps> = ({ characters, o
               dy=".3em"
               textAnchor="middle"
               fill="var(--foreground)"
-              className="select-none text-[10px] font-medium pointer-events-none"
+              className="select-none text-2xs font-medium pointer-events-none"
             >
               {node.name}
             </text>
@@ -234,7 +234,7 @@ const RelationshipDiagram: React.FC<RelationshipDiagramProps> = ({ characters, o
               y="50"
               textAnchor="middle"
               fill={getRoleColor(node.role)}
-              className="select-none text-[8px] uppercase opacity-70 pointer-events-none"
+              className="select-none text-2xs uppercase opacity-70 pointer-events-none"
             >
               {roleLabel(node.role)}
             </text>
@@ -247,7 +247,7 @@ const RelationshipDiagram: React.FC<RelationshipDiagramProps> = ({ characters, o
         <div className="absolute bottom-8 right-8 top-28 flex w-80 flex-col rounded-lg border border-border bg-card p-6 text-card-foreground shadow-lg">
           <div className="mb-5">
             <span
-              className="mb-2 inline-block rounded px-2 py-0.5 text-[10px] font-medium uppercase"
+              className="mb-2 inline-block rounded px-2 py-0.5 text-2xs font-medium uppercase"
               style={{ backgroundColor: getRoleColor(selectedChar.role) + '26', color: getRoleColor(selectedChar.role) }}
             >
               {roleLabel(selectedChar.role)}

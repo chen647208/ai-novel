@@ -72,7 +72,7 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
               type="button"
               onClick={() => handleOpenEditPanel(cat.id)}
               className={cn(
-                'flex min-w-[60px] flex-1 flex-col items-center gap-1 border-b-2 py-3 text-[10px] transition-colors',
+                'flex min-w-[60px] flex-1 flex-col items-center gap-1 border-b-2 py-3 text-2xs transition-colors',
                 editCategory === cat.id
                   ? 'border-primary text-foreground'
                   : 'border-transparent text-muted-foreground hover:text-foreground'

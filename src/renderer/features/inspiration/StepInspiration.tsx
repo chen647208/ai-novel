@@ -432,7 +432,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project }) => {
              {inspirationKnowledge.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border py-4 text-center text-xs text-muted-foreground">
                    {t('steps:inspiration.noKnowledge')}<br/>
-                   <span className="text-[10px] opacity-70">{t('steps:inspiration.noKnowledgeHint')}</span>
+                   <span className="text-2xs opacity-70">{t('steps:inspiration.noKnowledgeHint')}</span>
                 </div>
              ) : (
                 <div className="max-h-48 overflow-y-auto pr-2">

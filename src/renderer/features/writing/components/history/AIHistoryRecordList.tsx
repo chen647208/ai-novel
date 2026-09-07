@@ -157,7 +157,7 @@ const AIHistoryRecordCard: React.FC<{
             <div className={cn('text-xs font-medium text-foreground', !compact && 'text-sm')}>
               {formatHistoryTimestamp(item.record.timestamp)}
             </div>
-            <div className="mt-0.5 text-[10px] tabular-nums text-muted-foreground">
+            <div className="mt-0.5 text-2xs tabular-nums text-muted-foreground">
               {item.record.tokens ? `${item.record.tokens.total} tokens` : 'N/A tokens'}
             </div>
           </div>

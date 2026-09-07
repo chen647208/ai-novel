@@ -138,7 +138,7 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
                 {openForeshadowCount > 0 && (
                   <span
                     className={cn(
-                      'rounded-full px-1.5 py-0.5 text-[10px] font-medium tabular-nums',
+                      'rounded-full px-1.5 py-0.5 text-2xs font-medium tabular-nums',
                       overdueForeshadowCount > 0 ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'
                     )}
                   >

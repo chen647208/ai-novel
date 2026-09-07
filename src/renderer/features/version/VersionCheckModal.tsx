@@ -218,18 +218,18 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
                     <div className="mt-4 space-y-3">
                       <div className="grid grid-cols-2 gap-3">
                         <div className="rounded-lg border border-border bg-background px-3 py-2">
-                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('modal.currentVersion')}</div>
+                          <div className="text-2xs uppercase tracking-wider text-muted-foreground">{t('modal.currentVersion')}</div>
                           <div className="font-serif text-lg font-medium tabular-nums text-foreground">{formatVersion(updateResult.versionInfo.current)}</div>
                         </div>
                         <div className="rounded-lg border border-border bg-background px-3 py-2">
-                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('modal.latestVersion')}</div>
+                          <div className="text-2xs uppercase tracking-wider text-muted-foreground">{t('modal.latestVersion')}</div>
                           <div className="font-serif text-lg font-medium tabular-nums text-success">{formatVersion(updateResult.versionInfo.latest)}</div>
                         </div>
                       </div>
 
                       {updateResult.versionInfo.releaseNotes && (
                         <div className="rounded-lg border border-border bg-background px-3 py-2">
-                          <div className="mb-1 text-[10px] uppercase tracking-wider text-muted-foreground">{t('modal.releaseNotes')}</div>
+                          <div className="mb-1 text-2xs uppercase tracking-wider text-muted-foreground">{t('modal.releaseNotes')}</div>
                           <div className="whitespace-pre-line text-sm text-foreground">
                             {updateResult.versionInfo.releaseNotes}
                           </div>
