@@ -12,7 +12,9 @@
     "traditional": "Traditional"
   },
   "model": {
-    "noModelOption": "No model configured"
+    "noModelOption": "No model configured",
+    "disabledSuffix": " (disabled)",
+    "unconfiguredSuffix": " (unconfigured)"
   },
   "window": {
     "title": "AI Assistant",

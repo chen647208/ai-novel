@@ -72,8 +72,12 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project }) => {
 
   // 流式回调处理函数
   const handleStreamingChunk = (response: StreamingAIResponse, finalPrompt?: string) => {
-    // 无模型时不该进到这里（generateOutline 已拦截）：防御性直接返回
-    if (!isModelUsable(activeModel)) return;
+    // 无模型时不该进到这里（generateOutline 已拦截）：中途停用则复位转圈态，避免常亮卡死
+    if (!isModelUsable(activeModel)) {
+      setIsStreaming(false);
+      setLoading(false);
+      return;
+    }
     // 契约：response.content 为累计全文，直接替换（旧实现按增量累加导致内容重复）
     if (response.content) {
       setStreamingContent(response.content);

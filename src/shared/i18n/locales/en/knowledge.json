@@ -21,6 +21,7 @@
   "dropTitle": "Drop files here",
   "dropHint": "Supports .txt, .md, .json (under 2MB recommended)",
   "selectFiles": "Select Files",
+  "goStructure": "Draft the outline first",
   "emptyAll": "No knowledge base files yet",
   "emptyCategory": "No files in the {{category}} category",
   "confirmDeleteTitle": "Click to confirm deletion",

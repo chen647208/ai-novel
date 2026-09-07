@@ -62,7 +62,7 @@ import { PROMPT_KNOWLEDGE_TRUNCATE, isVirtualChapter } from '../../../shared/con
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
 
-const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId, onBack }) => {
+const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId, onBack, onNavigateToCharacters }) => {
   const { t } = useTranslation(['writing', 'steps']);
   // 直读 store：模型/提示词/更新动作不再经 App→View 层层透传
   const prompts = useSettingsStore((s) => s.prompts);
@@ -1197,6 +1197,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           onSummaryPromptChange={setSelectedSummaryPromptId}
           onExtractSummary={handleExtractSummary}
           onChapterClick={handleChapterClick}
+          onNavigateToCharacters={onNavigateToCharacters}
         />
       )}
 

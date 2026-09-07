@@ -37,7 +37,7 @@ interface StepCharactersProps {
   /** 聚焦已消费的通知，父组件据此清除 focusCharacterId，避免重复弹出 */
   onFocusHandled?: () => void;
   /** 跨页接力：缺简介时回灵感页补充，由工作台注入 */
-  onGoSection?: (next: 'inspiration') => void;
+  onGoSection?: (next: 'inspiration' | 'world') => void;
 }
 
 const StepCharacters: React.FC<StepCharactersProps> = ({
@@ -572,6 +572,13 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
                 icon={UserRound}
                 title={t('archive.emptyTitle')}
                 description={t('archive.emptyHint')}
+                action={
+                  onGoSection ? (
+                    <Button variant="outline" onClick={() => onGoSection('world')}>
+                      {t('archive.goWorld')}
+                    </Button>
+                  ) : undefined
+                }
               />
             ) : (
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

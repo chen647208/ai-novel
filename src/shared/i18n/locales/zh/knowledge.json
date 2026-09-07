@@ -21,6 +21,7 @@
   "dropTitle": "拖拽文件到这里",
   "dropHint": "支持 .txt, .md, .json (建议 < 2MB)",
   "selectFiles": "选择文件",
+  "goStructure": "先去搭大纲",
   "emptyAll": "暂无知识库文件",
   "emptyCategory": "暂无{{category}}分类的文件",
   "confirmDeleteTitle": "点击确认删除",

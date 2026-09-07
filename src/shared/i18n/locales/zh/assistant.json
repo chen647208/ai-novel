@@ -12,7 +12,9 @@
     "traditional": "传统输出"
   },
   "model": {
-    "noModelOption": "未配置模型"
+    "noModelOption": "未配置模型",
+    "disabledSuffix": "（已停用）",
+    "unconfiguredSuffix": "（未配置）"
   },
   "window": {
     "title": "AI 助手",

@@ -33,8 +33,8 @@ import { MarkdownView } from '@/shared/ui/Markdown';
 
 interface StepInspirationProps {
   project: Project | null;
-  /** 跨页接力：空态下一步跳转（如去角色页），由工作台注入 */
-  onGoSection?: (next: 'characters') => void;
+  /** 跨页接力：空态下一步跳转（如去世界页），由工作台注入 */
+  onGoSection?: (next: 'characters' | 'world') => void;
 }
 
 const StepInspiration: React.FC<StepInspirationProps> = ({ project, onGoSection }) => {
@@ -91,8 +91,12 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, onGoSection 
 
   // 流式回调处理函数
   const handleStreamingChunk = (response: StreamingAIResponse, finalPrompt?: string) => {
-    // 无模型时不该进到这里（generate 已拦截）：防御性直接返回
-    if (!isModelUsable(activeModel)) return;
+    // 无模型时不该进到这里（generate 已拦截）：中途停用则复位转圈态，避免常亮卡死
+    if (!isModelUsable(activeModel)) {
+      setIsStreaming(false);
+      setLoading(false);
+      return;
+    }
     // 契约：response.content 为累计全文，直接替换（旧实现按增量累加导致内容重复）
     if (response.content) {
       setStreamingContent(response.content);
@@ -643,8 +647,8 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, onGoSection 
           className="py-16"
           action={
             onGoSection ? (
-              <Button variant="outline" onClick={() => onGoSection('characters')}>
-                {t('steps:inspiration.goCharacters')}
+              <Button variant="outline" onClick={() => onGoSection('world')}>
+                {t('steps:inspiration.goWorld')}
               </Button>
             ) : undefined
           }

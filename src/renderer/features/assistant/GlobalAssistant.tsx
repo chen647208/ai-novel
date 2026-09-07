@@ -847,7 +847,11 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
               onChange={(e) => handleModelChange(e.target.value)}
             >
               {!hasModel && <option value="">{t('model.noModelOption')}</option>}
-              {models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+              {models.map(m => (
+                <option key={m.id} value={m.id}>
+                  {m.name}{m.isEnabled === false ? t('model.disabledSuffix') : !isModelUsable(m) ? t('model.unconfiguredSuffix') : ''}
+                </option>
+              ))}
             </Select>
             <Select
               className="h-7 w-auto max-w-[120px] text-xs"

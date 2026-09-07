@@ -43,7 +43,7 @@
     "bookNamePlaceholder": "Edit the book title here...",
     "resultPlaceholder": "The AI-generated concept will appear here; feel free to edit...",
     "emptyHint": "Enter inspiration or upload material, then click generate to begin your creative journey",
-    "goCharacters": "Go to Characters",
+    "goWorld": "Go to World",
     "defaultTemplateName": "Inspiration Template",
     "chapterTitle": "Inspiration",
     "historySummary": "Inspiration history",

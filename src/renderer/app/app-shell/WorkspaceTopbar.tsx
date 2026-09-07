@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import { useTranslation } from '@/i18n';
 import type { AppTheme, ModelConfig, Project } from '../../../shared/types';
 import { resolveTheme } from '@/shared/services/themeService';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { WORKSPACE_SECTIONS, type SectionId } from './WorkspaceNav';
@@ -225,9 +226,15 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
           </Button>
         )}
 
-        <Button variant="secondary" size="sm" onClick={onOpenSettings}>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={onOpenSettings}
+          title={!isModelUsable(activeModel) ? t('app:model.bannerHandwrite') : undefined}
+          className={!isModelUsable(activeModel) ? 'border-warning/40 text-warning hover:text-warning' : undefined}
+        >
           <Cpu className="size-3.5" />
-          <span className="max-w-32 truncate">{activeModel?.name || t('app:model.noneSelected')}</span>
+          <span className="max-w-32 truncate">{isModelUsable(activeModel) ? activeModel.name : t('app:model.noneSelected')}</span>
         </Button>
       </div>
     </header>

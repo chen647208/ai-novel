@@ -112,6 +112,7 @@ const WorkspaceSection: React.FC<WorkspaceViewProps> = ({
           project={activeProject}
           onNavigateToCharacter={onNavigateToCharacter}
           onNavigateToChapter={onNavigateToChapter}
+          onGoSection={onSectionChange}
         />
       );
       break;
@@ -142,6 +143,7 @@ const WorkspaceSection: React.FC<WorkspaceViewProps> = ({
           project={activeProject}
           initialChapterId={editingChapterId}
           onBack={() => onSectionChange('structure', 'chapters')}
+          onNavigateToCharacters={() => onSectionChange('characters')}
         />
       );
       break;

@@ -294,6 +294,7 @@
     "title": "Writing Reference Panel",
     "charactersTitle": "Key Characters",
     "noCharacters": "No characters yet",
+    "goCharacters": "Open Characters",
     "outlineTitle": "Chapter Detail Outline",
     "outlinePlaceholder": "Enter or edit the chapter detail outline..."
   },

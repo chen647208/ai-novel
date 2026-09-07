@@ -35,6 +35,7 @@
     "addManually": "Add Manually",
     "emptyTitle": "No profiles yet",
     "emptyHint": "Generate from the left, or click \"Add Manually\" at the top right",
+    "goWorld": "Prepare material in World first",
     "deleteConfirm": "Delete?",
     "defaultName": "New Character"
   },

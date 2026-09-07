@@ -16,6 +16,7 @@ export interface WritingEditorProps {
   project: Project;
   initialChapterId?: string | null;
   onBack: () => void;
+  onNavigateToCharacters?: () => void;
 }
 
 export type BatchMode = 'single' | 'batch5' | 'batch10';
@@ -214,6 +215,7 @@ export interface WritingSidebarProps {
   onSummaryPromptChange: (promptId: string) => void;
   onExtractSummary: () => void;
   onChapterClick: (chapter: Chapter) => void;
+  onNavigateToCharacters?: () => void;
 }
 
 export interface WritingEditorCanvasProps {

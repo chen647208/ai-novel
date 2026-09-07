@@ -43,7 +43,7 @@
     "bookNamePlaceholder": "可在此修改书名...",
     "resultPlaceholder": "AI 生成的方案将显示在这里，您可以自由修改...",
     "emptyHint": "输入灵感或上传资料后，点击生成按钮开始创作旅程",
-    "goCharacters": "去角色页",
+    "goWorld": "去世界页",
     "defaultTemplateName": "灵感生成模板",
     "chapterTitle": "灵感生成",
     "historySummary": "灵感生成历史记录",

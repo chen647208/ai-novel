@@ -33,6 +33,7 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
   onSummaryPromptChange,
   onExtractSummary,
   onChapterClick,
+  onNavigateToCharacters,
 }) => {
   const { t } = useTranslation('writing');
   return (
@@ -47,7 +48,14 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
         <section>
           <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('sidebar.charactersTitle')}</h4>
           {characters.length === 0 ? (
-            <p className="text-xs italic text-muted-foreground">{t('sidebar.noCharacters')}</p>
+            <div className="space-y-2">
+              <p className="text-xs italic text-muted-foreground">{t('sidebar.noCharacters')}</p>
+              {onNavigateToCharacters && (
+                <Button variant="outline" size="sm" className="w-full" onClick={onNavigateToCharacters}>
+                  {t('sidebar.goCharacters')}
+                </Button>
+              )}
+            </div>
           ) : (
             <div className="space-y-2">
               {characters.map((character) => (

@@ -43,12 +43,15 @@ interface StepKnowledgeEnhancedProps {
   onNavigateToCharacter?: (id: string) => void;
   /** 跳转到写作区并打开指定章节（跨分区导航由 App 提供） */
   onNavigateToChapter?: (id: string) => void;
+  /** 空态接力：去结构页（跨分区导航由 App 提供） */
+  onGoSection?: (next: 'structure') => void;
 }
 
 const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
   project,
   onNavigateToCharacter,
   onNavigateToChapter,
+  onGoSection,
 }) => {
   const { t, i18n } = useTranslation('knowledge');
   const [dragActive, setDragActive] = useState(false);
@@ -789,9 +792,16 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
                 description={t('center.emptyContentHint')}
                 className="py-8"
                 action={
-                  <Button onClick={() => document.getElementById('file-upload')?.click()}>
-                    {t('selectFiles')}
-                  </Button>
+                  <div className="flex flex-col gap-2">
+                    <Button onClick={() => document.getElementById('file-upload')?.click()}>
+                      {t('selectFiles')}
+                    </Button>
+                    {onGoSection && (
+                      <Button variant="outline" onClick={() => onGoSection('structure')}>
+                        {t('goStructure')}
+                      </Button>
+                    )}
+                  </div>
                 }
               />
             ) : (

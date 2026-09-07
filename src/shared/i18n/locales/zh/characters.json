@@ -35,6 +35,7 @@
     "addManually": "手动添加",
     "emptyTitle": "目前没有任何档案",
     "emptyHint": "请从左侧一键生成或手动点击右上角“手动添加”",
+    "goWorld": "先去世界页备资料",
     "deleteConfirm": "删除?",
     "defaultName": "新角色"
   },
