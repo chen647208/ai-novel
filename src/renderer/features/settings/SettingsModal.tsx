@@ -104,12 +104,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   // 一致性检查提示词配置状态
   const [localConsistencyPrompts, setLocalConsistencyPrompts] = useState<ConsistencyCheckPromptTemplate[]>(consistencyPrompts);
 
+  // 异步加载的基线：加载完成才确立，避免加载过程误判为脏
+  const storageBaseline = useRef<StorageConfig | null>(null);
+  const embeddingBaseline = useRef<{ configs: EmbeddingModelConfig[]; activeId: string | null } | null>(null);
+
   // 加载存储配置
   useEffect(() => {
     const loadStorageConfig = async () => {
       try {
         const config = await repository.getStorageConfig();
         setStorageConfig(config);
+        if (!storageBaseline.current) storageBaseline.current = config;
       } catch (error) {
         logger.error('Failed to load storage config:', error);
       }
@@ -127,6 +132,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         const activeConfig = await embeddingModelService.getActiveConfig();
         if (activeConfig) {
           setActiveEmbeddingId(activeConfig.id);
+        }
+        if (!embeddingBaseline.current) {
+          embeddingBaseline.current = { configs, activeId: activeConfig?.id ?? null };
         }
       } catch (error) {
         logger.error('Failed to load embedding configs:', error);
@@ -373,6 +381,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       logger.error('Failed to save embedding configs:', error);
     }
     
+    savedRef.current = true;
     onClose();
   };
 
@@ -466,18 +475,44 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     setActiveTab('models');
   };
 
+  // 未保存拦截：暂存区与打开时基线比对，语言/主题直写即时生效故不纳入
+  // 保存后本轮不再判脏（弹窗关闭即卸载，下次打开重建基线）
+  const savedRef = useRef(false);
+  const isDirty = (): boolean => {
+    if (savedRef.current) return false;
+    const cardsBaseline = cardPrompts.length > 0 ? cardPrompts : getDefaultCardPrompts();
+    if (JSON.stringify(localModels) !== JSON.stringify(models)) return true;
+    if (activeId !== activeModelId) return true;
+    if (JSON.stringify(localPrompts) !== JSON.stringify(prompts)) return true;
+    if (JSON.stringify(localCardPrompts) !== JSON.stringify(cardsBaseline)) return true;
+    if (JSON.stringify(localConsistencyPrompts) !== JSON.stringify(consistencyPrompts)) return true;
+    if (storageBaseline.current && JSON.stringify(storageConfig) !== JSON.stringify(storageBaseline.current)) return true;
+    if (embeddingBaseline.current) {
+      if (JSON.stringify(embeddingConfigs) !== JSON.stringify(embeddingBaseline.current.configs)) return true;
+      if (activeEmbeddingId !== embeddingBaseline.current.activeId) return true;
+    }
+    return false;
+  };
+
+  const handleRequestClose = async (): Promise<void> => {
+    if (isDirty() && !(await dialogService.confirm({ message: i18n.t('settings:footer.unsavedConfirm'), danger: true }))) {
+      return;
+    }
+    onClose();
+  };
+
   return (
     <Dialog
       open
       onOpenChange={(open) => {
-        if (!open) onClose();
+        if (!open) void handleRequestClose();
       }}
     >
       <DialogContent hideClose className="flex h-[90vh] w-[94vw] max-w-6xl flex-col gap-0 overflow-hidden p-0">
         <SettingsModalHeader
           activeTab={activeTab}
           onChange={setActiveTab}
-          onClose={onClose}
+          onClose={() => void handleRequestClose()}
         />
         <div className="custom-scrollbar flex-1 overflow-y-auto bg-background p-6">
           <SettingsTabContent
@@ -545,7 +580,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         <SettingsModalFooter
-          onClose={onClose}
+          onClose={() => void handleRequestClose()}
           onSave={handleGlobalSave}
         />
       </DialogContent>

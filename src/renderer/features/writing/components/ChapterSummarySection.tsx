@@ -14,7 +14,7 @@ import type { ChapterSummarySectionProps } from '../types';
 import { Button } from '@/shared/ui/Button';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
-import { Bot, Settings } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
 
 const ChapterSummarySection: React.FC<ChapterSummarySectionProps> = ({
@@ -23,7 +23,6 @@ const ChapterSummarySection: React.FC<ChapterSummarySectionProps> = ({
   selectedSummaryPromptId,
   isExtractingSummary,
   hasModel,
-  onOpenSummaryPromptManager,
   onContentSummaryChange,
   onSummaryPromptChange,
   onExtractSummary,
@@ -33,15 +32,6 @@ const ChapterSummarySection: React.FC<ChapterSummarySectionProps> = ({
     <section>
       <div className="mb-2 flex items-center justify-between">
         <h4 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('summarySection.title')}</h4>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-7 text-muted-foreground"
-          onClick={onOpenSummaryPromptManager}
-          title={t('summarySection.manageTitle')}
-        >
-          <Settings className="size-4" />
-        </Button>
       </div>
 
       <Textarea

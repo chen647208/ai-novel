@@ -80,7 +80,6 @@
     "customPromptName": "自定义提示词",
     "clearHistoryConfirm": "确定要删除本章所有AI生成历史记录吗？",
     "extractSummaryFailed": "AI 提取摘要失败，请检查网络或模型配置。",
-    "summaryManagerTodo": "摘要提示词管理器功能待实现。当前使用默认摘要提示词模板。",
     "batchDone": "批量生成完成！成功生成 {{count}} 章内容。",
     "batchFailed": "批量生成失败：{{error}}"
   },
@@ -283,7 +282,6 @@
   },
   "summarySection": {
     "title": "章节正文摘要",
-    "manageTitle": "管理摘要提示词",
     "placeholder": "输入或编辑章节正文摘要...",
     "selectTemplate": "选择摘要模板",
     "extracting": "提取中...",

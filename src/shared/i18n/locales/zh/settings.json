@@ -47,7 +47,8 @@
   },
   "footer": {
     "persistNote": "本地数据持久化已开启，配置将自动保存到本机应用数据目录。",
-    "save": "应用并保存配置"
+    "save": "应用并保存配置",
+    "unsavedConfirm": "有未保存的修改，直接关闭将丢弃，确定吗？"
   },
   "prompts": {
     "namePlaceholder": "模板名称，如：毒舌润色",

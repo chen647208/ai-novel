@@ -80,7 +80,6 @@
     "customPromptName": "Custom Prompt",
     "clearHistoryConfirm": "Delete all AI generation history of this chapter?",
     "extractSummaryFailed": "AI summary extraction failed. Check your network or model configuration.",
-    "summaryManagerTodo": "The summary prompt manager is not implemented yet. The default summary prompt template is used.",
     "batchDone": "Batch generation complete! {{count}} chapters generated.",
     "batchFailed": "Batch generation failed: {{error}}"
   },
@@ -283,7 +282,6 @@
   },
   "summarySection": {
     "title": "Chapter Content Summary",
-    "manageTitle": "Manage summary prompts",
     "placeholder": "Enter or edit the chapter content summary...",
     "selectTemplate": "Select a summary template",
     "extracting": "Extracting...",

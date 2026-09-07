@@ -187,7 +187,6 @@ export interface ChapterSummarySectionProps {
   selectedSummaryPromptId: string;
   isExtractingSummary: boolean;
   hasModel: boolean;
-  onOpenSummaryPromptManager: () => void;
   onContentSummaryChange: (contentSummary: string) => void;
   onSummaryPromptChange: (promptId: string) => void;
   onExtractSummary: () => void;
@@ -210,7 +209,6 @@ export interface WritingSidebarProps {
   hasModel: boolean;
   onClose: () => void;
   onChapterSummaryChange: (summary: string) => void;
-  onOpenSummaryPromptManager: () => void;
   onContentSummaryChange: (contentSummary: string) => void;
   onSummaryPromptChange: (promptId: string) => void;
   onExtractSummary: () => void;

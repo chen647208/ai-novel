@@ -14,12 +14,23 @@ import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
 import { pluginHostPromise, saveDisabledList, eventBus } from '@/features/assistant/services/aiRuntime';
-import { PROFILE_CHANGED_EVENT, assemblyTree, type AssemblyRow, type Disposable as PluginDisposable, type PluginStatus } from '@core/plugin';
+import { PROFILE_CHANGED_EVENT, assemblyTree, profileByName, type AssemblyRow, type Disposable as PluginDisposable, type PluginStatus } from '@core/plugin';
+
+/** 装配树实时视图：行随当前发行档即时重算，切换档位不用开关重看。 */
+const AssemblyTreeView: React.FC<{ rows: AssemblyRow[] }> = ({ rows }) => (
+  <div className="mt-2 overflow-x-auto rounded-lg border border-border p-3 font-mono text-xs">
+    {rows.map((row) => (
+      <div key={row.feature} className={row.enabled ? 'text-foreground' : 'text-muted-foreground'}>
+        {row.enabled ? '✓' : '✗'} {row.feature} <span className="text-muted-foreground">← {row.source}{row.reason ? `（${row.reason}）` : ''}</span>
+      </div>
+    ))}
+  </div>
+);
 
 const PluginSettingsPanel: React.FC = () => {
   const { t } = useTranslation('settings');
   const [statuses, setStatuses] = useState<PluginStatus[] | null>(null);
-  const [tree, setTree] = useState<AssemblyRow[] | null>(null);
+  const [showTree, setShowTree] = useState(false);
   const [profile, setProfile] = useState<string>(() => localStorage.getItem('profile.current') ?? 'full');
   const profileVeto = useRef<PluginDisposable | null>(null);
 
@@ -28,6 +39,13 @@ const PluginSettingsPanel: React.FC = () => {
     void pluginHostPromise.then((host) => {
       if (alive) setStatuses(host.list());
     });
+    // minimal 档拦截只活内存：重载后按持久化的档位重装，否则回显 minimal 却不拦截
+    if (localStorage.getItem('profile.current') === 'minimal' && !profileVeto.current) {
+      profileVeto.current = eventBus.intercept('ai.request', () => ({
+        allowed: false,
+        reason: 'minimal 发行档已禁用全部 AI 请求',
+      }));
+    }
     return () => {
       alive = false;
     };
@@ -100,18 +118,10 @@ const PluginSettingsPanel: React.FC = () => {
       </div>
 
       <div>
-        <Button size="sm" variant="outline" onClick={() => setTree((v) => (v ? null : assemblyTree({ name: 'current', plugins: ['com.novalocal.bundle.core', 'com.novalocal.bundle.world', 'com.novalocal.bundle.ai'], policies: {} })))}>
-          {tree ? t('plugins.tree.hide') : t('plugins.tree.show')}
-        </Button>
-        {tree && (
-          <div className="mt-2 overflow-x-auto rounded-lg border border-border p-3 font-mono text-xs">
-            {tree.map((row) => (
-              <div key={row.feature} className={row.enabled ? 'text-foreground' : 'text-muted-foreground'}>
-                {row.enabled ? '✓' : '✗'} {row.feature} <span className="text-muted-foreground">← {row.source}{row.reason ? `（${row.reason}）` : ''}</span>
-              </div>
-            ))}
-          </div>
-        )}
+          <Button size="sm" variant="outline" onClick={() => setShowTree((v) => !v)}>
+            {showTree ? t('plugins.tree.hide') : t('plugins.tree.show')}
+          </Button>
+          {showTree && <AssemblyTreeView rows={assemblyTree(profileByName(profile))} />}
       </div>
 
       {!statuses.length && <div className="rounded-lg border border-border p-6 text-center text-sm text-muted-foreground">{t('plugins.empty')}</div>}

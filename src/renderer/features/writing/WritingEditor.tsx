@@ -1098,10 +1098,6 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
       setIsExtractingSummary(false);
     }
   };
-  const handleOpenSummaryPromptManager = () => {
-    dialogService.alert(t('editor.summaryManagerTodo'));
-  };
-
   const modalContextInfo = genModal.chapter ? getChapterContext(project.chapters, genModal.chapter) : { prevChapter: null, prevContextText: "", nextChapter: null, nextSummary: "" };
 
   return (
@@ -1192,7 +1188,6 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           hasModel={isModelUsable(activeModel)}
           onClose={() => setIsSidebarOpen(false)}
           onChapterSummaryChange={updateChapterSummary}
-          onOpenSummaryPromptManager={handleOpenSummaryPromptManager}
           onContentSummaryChange={updateChapterContentSummary}
           onSummaryPromptChange={setSelectedSummaryPromptId}
           onExtractSummary={handleExtractSummary}

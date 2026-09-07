@@ -47,7 +47,8 @@
   },
   "footer": {
     "persistNote": "Local data persistence is enabled; settings are saved automatically to the app data directory on this machine.",
-    "save": "Apply & Save"
+    "save": "Apply & Save",
+    "unsavedConfirm": "You have unsaved changes. Closing now will discard them. Continue?"
   },
   "prompts": {
     "namePlaceholder": "Template name, e.g. Sharp Polish",
