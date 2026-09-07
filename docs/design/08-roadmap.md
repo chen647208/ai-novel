@@ -3,7 +3,7 @@
 > 本篇是**可执行总方案**，取代 11 篇的迁移粗排。每个里程碑结束都发可发布版本（公理 4）。工作量标注 S/M/L（相对值，非承诺工期）。
 > 版本策略：v1.5→v1.9 小步快跑（内部架构换代，功能不减），v2.0 = 插件化公开。
 
-## M0 数据地基（→ v1.5）｜ 设计依据：03 篇 ｜ ✅ 已完成（verify 全绿，386 测试）
+## M0 数据地基（→ v1.5）｜ 设计依据：03 篇 ｜ ✅ 已完成（verify 全绿）
 
 | WP | 内容 | 尺寸 | 落点 | 状态 |
 |---|---|---|---|---|
@@ -31,19 +31,19 @@
 | 1.6 | UI 宪法落地：NewBookModal 先建后改；引导模式与自由工作区并存 | S | ✅ **已完成并交互冒烟**：`useBookActions.createQuickBook()` 一键建空白书（默认名「新小说」，重名自动加序号）直接进工作区、不开模态（宪法 §3.2「给默认值不逼决定」）；Bookshelf 主按钮「新建书籍」= 快速建，次按钮「从模板新建」= 保留 NewBookModal（空白/复制/示例）非阻塞入口；`WorkspaceTopbar` 书名就地改名（点标题→Input→Enter/blur 提交 `renameBook`，Esc 取消）；`guidedFlow.suggestNextSection()` 纯函数按完成度（灵感→角色→大纲→章节→写作）给「建议下一步」，顶栏可点跳转、可关闭、当前步不提示——引导是可选轨道不是牢笼（§3.3 无模式，nav 本就无门禁自由切换）。8 测（guidedFlow）；浏览器冒烟：快速建书无模态直接进区、顶栏改名持久化、填灵感后出现「建议下一步：角色与势力」并可跳转、「从模板新建」仍开模态均通过 |
 
 **退出标准**：06 篇 §6 全部 5 条；textarea 出依赖树；编辑延迟基准达标。
-**本轮边界说明**：M1 的 schema/序列化/修订管线/画布替换/状态收编/写作原语/CM6 novelDsl 大纲编辑器/UI 宪法（先建后改 + 引导并存）均已完成并验证，`npm run verify` 全绿（473 测试）。CM6 触及运行中 App 的编辑器扩展层，已配交互回归验证（挂载即校验、着色、波浪线、声明豁免）。1.3 的 Store.apply/UI 接线仍随后续里程碑推进（🟡）。
+**本轮边界说明**：M1 的 schema/序列化/修订管线/画布替换/状态收编/写作原语/CM6 novelDsl 大纲编辑器/UI 宪法（先建后改 + 引导并存）均已完成并验证，`npm run verify` 全绿（641 测试）。CM6 触及运行中 App 的编辑器扩展层，已配交互回归验证（挂载即校验、着色、波浪线、声明豁免）。1.3 的 Store.apply/UI 接线仍随后续里程碑推进（🟡）。
 
-## M2 AI 换代（→ v1.7）｜ 设计依据：05 篇
+## M2 AI 换代（→ v1.7）｜ 设计依据：05 篇 ｜ ✅ 已完成（verify 全绿）
 
-| WP | 内容 | 尺寸 |
-|---|---|---|
-| 2.1 | AiGatewayProvider：适配器上移主进程 + 类型化事件流 IPC | M |
-| 2.2 | ToolRegistry + 首批 10 内置工具（4 个 prompt 服务工具化转写） | L |
-| 2.3 | PromptAssembler（section 装配器，拆 aiContextBuilder） | M |
-| 2.4 | 技能引擎：SKILL.md 加载 + 渐进注入 + 首批 5 内置写法技能 | M |
-| 2.5 | 审批三档 + diff 预览 + 待审箱 + 超时降级；三级审计链闭合 | L |
-| 2.6 | 会话事件流（jsonl）+ AIHistoryViewer 升级事件浏览器 | M |
-| 2.7 | MCP server 出口 + GlobalAssistant 自举吃 MCP | M |
+| WP | 内容 | 尺寸 | 状态 |
+|---|---|---|---|
+| 2.1 | AiGatewayProvider：适配器上移主进程 + 类型化事件流 IPC | M | ✅ `src/main/ai/gateway.ts`（适配器+事件流 IPC，单测覆盖） |
+| 2.2 | ToolRegistry + 首批 10 内置工具（4 个 prompt 服务工具化转写） | L | ✅ `src/core/ai/tools.ts`（注册表+内置工具，单测覆盖） |
+| 2.3 | PromptAssembler（section 装配器，拆 aiContextBuilder） | M | ✅ `src/core/ai/promptAssembler.ts` + `builtinSections.ts` |
+| 2.4 | 技能引擎：SKILL.md 加载 + 渐进注入 + 首批 5 内置写法技能 | M | ✅ `src/core/ai/skills.ts` + `skills/builtin/`（每轮重取 context，白名单拦截） |
+| 2.5 | 审批三档 + diff 预览 + 待审箱 + 超时降级；三级审计链闭合 | L | ✅ `src/core/ai/approval.ts`（三档+待审箱 `pending-proposals.jsonl`），斜杠建卡与 MCP 落库同标准走审批 |
+| 2.6 | 会话事件流（jsonl）+ AIHistoryViewer 升级事件浏览器 | M | ✅ `SessionEventBrowser.tsx`（用量汇总含缓存读写 Token） |
+| 2.7 | MCP server 出口 + GlobalAssistant 自举吃 MCP | M | ✅ `src/main/mcp/server.ts`（stdio 可发现，提案执行器落库，`ai:mcp` 归因） |
 
 **退出标准**：05 篇 §8 全部 5 条；旧 prompt service 删除（无双轨）。
 
@@ -77,7 +77,7 @@
 
 ## 横切策略
 
-**测试**：28 → M0 末 ≥60（实体/DSL 往返/索引增量/迁移）→ M3 末 ≥120（隔离/unwind/权限/管线 E2E）。CI 新增：core 边界 lint、DSL 往返、插件隔离冒烟三 job。
+**测试**：28 → M0 末 ≥60（实体/DSL 往返/索引增量/迁移）→ M3 末 ≥120（隔离/unwind/权限/管线 E2E）。现全库 641 测试，覆盖率分层锁线见 `vitest.config.ts`。CI 新增：core 边界 lint、DSL 往返、插件隔离冒烟三 job。
 **回归门**：每 WP 合入跑 `npm run verify`；每里程碑加手工冒烟清单（建书→写作→AI→导出→重启恢复）。
 **不做清单**：多用户/协作（M5 后议）；移动端；云同步服务；WASM 插件（观察 Zed 后再议）；保留 v1 双写兼容（用户规则：直接替换）。
 **依赖顺序**：M0→M1→M2→M3 严格串行（数据层→管线→AI→插件）；M3.4 dogfooding 可与 3.5/3.6 并行。
