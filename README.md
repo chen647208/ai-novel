@@ -24,7 +24,7 @@
 **AI**
 - 网关在主进程：API Key 不进渲染端；四 Provider 适配器 + 流式（requestId
   多路推送）+ 取消 + 重试 + 结构化 JSON
-- Agent 循环：PromptAssembler 分区装配 → 工具调用（首批 9 内置工具，
+- Agent 循环：PromptAssembler 分区装配 → 工具调用（17 个 `core.*` 内置工具，
   插件可贡献）→ 三档审批（建议/改写/直接；超时降级待审箱，绝不静默应用）
 - 写法技能：SKILL.md 渐进注入（黄金三章/雪片法/POV/伏笔回收/AI 味消除，
   内置 5 个，社区可分发）

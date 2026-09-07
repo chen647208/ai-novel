@@ -7,12 +7,11 @@
 
 ## 核心文件
 
-- `StepKnowledgeEnhanced.tsx`：增强版知识库主编排器
-- `StepKnowledge.tsx`：旧版知识库界面保留文件
-- `components/KnowledgeFeaturePanels.tsx`：世界构建能力入口面板
+- `StepKnowledgeEnhanced.tsx`：知识库主编排器（唯一入口）
+- `components/KnowledgeFeaturePanels.tsx`：`knowledge/components/` 下的世界构建能力入口面板
 - `services/vectorIntegrationService.ts`：知识索引与检索接入层
 - `services/vectorService.ts`：底层向量搜索能力
-- `services/simpleVectorStore.ts`：向量存储封装
+- `services/embeddingProvider.ts`：Embedding 提供方（api/local 选择 + 自动降级 + 刷新）
 - `services/embeddingService.ts`：Embedding 生成服务
 - `services/apiEmbeddingService.ts`：Embedding API 接入服务
 
@@ -32,4 +31,4 @@
 
 - 新增世界构建入口优先接到 `KnowledgeFeaturePanels.tsx`
 - 向量索引、Embedding 与搜索实现继续集中在 `services`
-- `StepKnowledgeEnhanced.tsx` 已压到 1000 行以内，后续优先继续拆列表区和编辑区
+- `StepKnowledgeEnhanced.tsx` 954 行，后续优先继续拆列表区和编辑区

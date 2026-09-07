@@ -11,7 +11,7 @@
 - **资源型贡献点（v0）**：
   - `skills`：SKILL.md 写法技能，进入技能目录（渐进注入、可卸载）
   - `types`：类型模板（强制 `短id.` 命名空间前缀，防抢占内置类型）
-  - `buildProfiles`：导出构建档（JSON，构建管线消费）
+  - `buildProfiles`：导出构建档（JSON/YAML 双序列化，`.yml` 可 diff 分享；构建管线消费）
   - `hooks`：声明式策略（JSON，v0 支持 ai 接缝的 inject/filter）
 - **运行时**：逐插件 try-catch 故障隔离；一切注册返回 `Disposable`，
   禁用/卸载时逆序释放（unwind 不变量）；权限 deny-by-default。

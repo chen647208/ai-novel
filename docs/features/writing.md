@@ -44,8 +44,8 @@
 ## 与其他模块的关系
 
 - 写作过程会读取主流程生成的章节、人物、知识条目和提示词
-- AI 调用经网关客户端（`shared/services/ai/gatewayClient`）走主进程网关
-- 历史记录（含会话事件流浏览器）与正文内容通过共享存储服务持久化
+- AI 调用经网关客户端（`src/renderer/shared/services/ai/gatewayClient`）走主进程网关
+- 历史记录（含会话事件流浏览器）与正文内容经双 store + `persistenceBridge` 差分落盘持久化
 
 ## 维护建议
 

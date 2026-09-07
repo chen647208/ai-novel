@@ -27,18 +27,18 @@
 | 1.2 | CM6 novelDsl language（大纲/卡片/prompt 区）+ @tag 校验波浪线 | M | ✅ **已完成并交互冒烟**：装 CM6（`@uiw/react-codemirror` + language/state/view/commands/lint/autocomplete + `@lezer/highlight`）；`editor/cm6/novelDsl.ts` StreamLanguage 与 `@core/dsl/keywords` 同源语法（`# @kw:` 关键字行、`[[链接]]`、`{占位符}`、`***` 场景分隔、顶部 frontmatter、行内 `@tag`），HighlightStyle 映射到 CSS 变量随明暗主题自适应（注：StreamLanguage 只为合法 `@lezer/highlight` 标签名建节点，占位符用 `monospace`）；`tagValidation.ts` 纯函数 `collectTagDiagnostics`（引用行目标/wiki 链接/行内软标签三类，`@tag:` 声明行豁免）+ linter 扩展（300ms 延迟 + 挂载即跑一次 `forceLinting`，受控 value 初始写入不触发 docChanged）；`DslEditor.tsx` 受控组件（语言+校验+`[[`/`@` 自动补全 override，标签集来自 `collectProjectTags`）；`StepOutline` 大纲 textarea 换 DslEditor。21 测（10 语言着色 + 11 校验）；浏览器冒烟：textarea 出依赖树、关键字/标题/链接/值段着色、3 处未定义引用波浪线挂载即现且声明行豁免 |
 | 1.3 | 单一变更管线：transaction → Store.apply → entity_changes + Revision | M | ✅ **已完成并验证**：`saveProject(project, {agentId, cause})` → 正文实质变化才追加 `revisions`（seq 续号、author=agentId、cause 留底），`loadRevisions(nodeId)` 读取；entity_changes 贯穿 agentId（双引擎 6 测）。**归因透传已接通**：`PersistOp.saveProject.opts` → `projectStore.updateActiveProject(updates, opts)`（WeakMap 绑新引用）→ 桥消费 → 6 Step + 写作 + 助手 17 处 AI 落笔点标注 `ai:<来源>`；修订页第三 tab 直连 `loadRevisions`。**修订回写闭环**：`ChapterHistoryModal` 修订 tab 的恢复按钮走 `onApplyContent(rev.body)` → `updateChapterContent` → `saveProject`，恢复本身追加一条新修订。持久化侧 `persistDiff` 已做哈希差分（仅真实变化实体写盘）。PM 级细粒度 Store.apply（实体级引用保持）无实测性能问题，转为非阻塞优化，不再列为里程碑退出条件 |
 | 1.4 | 8 个写作原语扩展（enterFlow/placeholder/darlings/ghostOutline/…） | L | ✅ **已完成并交互冒烟**：`primitives.ts` 八件套全部做成 TipTap 行为扩展（节点类型复用 schema.ts，不重复定义）——`enterFlow`（Enter×1 新段/×2 空段→sceneBreak/×3 回调新章，连按计数实例级闭包，走 `chain()` 单事务）、`InsertPlaceholder`（Mod-Shift-X 插占位符）、`Darlings`（`harvestDarling`/`restoreDarling` 命令，选区↔darlingSlot 锚点）、`GhostOutline`（`insertGhostOutline` 命令 + appendTransaction「打字即覆盖」仅转换被输入触及的 ghostNote）、`NovelTypography`（---/.../\" 三条 InputRule）、`SpellOnDemand`（默认关，`setSpellcheck` 命令主动开）、`TagDecorate`（PM Decoration 软高亮 @tag，不碰正文）、`ChapterRenumber`（`renumberChapters` 命令重写「第N章」前缀交还宿主）；`createWritingPrimitives()` 装配，`TipTapCanvas` 挂载 + `NovelEditorHandle` 暴露 harvest/ghost/spellcheck，`WritingEditor` 接 Enter×3 新章。17 个 PM 事务级测试（jsdom）；浏览器冒烟：@tag 装饰实时渲染、占位符快捷键、Enter×2 场景分隔均通过 |
-| 1.5 | Zustand 双 store；App.tsx 收编（<150 行）；persistDiff 做一致性哨兵 | M | ✅ **已完成并交互回归**：`stores/settingsStore.ts`（模型/提示词/一致性/外观切片，setLanguage/setTheme 即时生效）+ `stores/projectStore.ts`（书籍 CRUD 动作，写路径收敛 updateActiveProject/upsertProject/removeProject/renameProject，11 测）；`stores/persistenceBridge.ts` 订阅双 store → persistDiff 差分落盘 + 自动备份（首启基线不整体重写）；`App.tsx` 148 行纯装配，引导在 `useAppBootstrap`，书籍/导入动作在 `useBookActions`，工作台路由在 `app-shell/WorkspaceView`，设置宿主 `SettingsModalHost`，重置弹窗 `ResetAlertDialog`。浏览器回归：建书/进书/编辑/灵感回写/全量重载持久化均通过 |
+| 1.5 | Zustand 双 store；App.tsx 收编（<150 行）；persistDiff 做一致性哨兵 | M | ✅ **已完成并交互回归**：`stores/settingsStore.ts`（模型/提示词/一致性/外观切片，setLanguage/setTheme 即时生效）+ `stores/projectStore.ts`（书籍 CRUD 动作，写路径收敛 updateActiveProject/upsertProject/removeProject/renameProject，11 测）；`stores/persistenceBridge.ts` 订阅双 store → persistDiff 差分落盘 + 自动备份（首启基线不整体重写）；`App.tsx` 纯装配（引导在 `useAppBootstrap`，书籍/导入动作在 `useBookActions`，工作台路由在 `app-shell/WorkspaceView`，设置宿主 `SettingsModalHost`，重置弹窗 `ResetAlertDialog`）。浏览器回归：建书/进书/编辑/灵感回写/全量重载持久化均通过 |
 | 1.6 | UI 宪法落地：NewBookModal 先建后改；引导模式与自由工作区并存 | S | ✅ **已完成并交互冒烟**：`useBookActions.createQuickBook()` 一键建空白书（默认名「新小说」，重名自动加序号）直接进工作区、不开模态（宪法 §3.2「给默认值不逼决定」）；Bookshelf 主按钮「新建书籍」= 快速建，次按钮「从模板新建」= 保留 NewBookModal（空白/复制/示例）非阻塞入口；`WorkspaceTopbar` 书名就地改名（点标题→Input→Enter/blur 提交 `renameBook`，Esc 取消）；`guidedFlow.suggestNextSection()` 纯函数按完成度（灵感→角色→大纲→章节→写作）给「建议下一步」，顶栏可点跳转、可关闭、当前步不提示——引导是可选轨道不是牢笼（§3.3 无模式，nav 本就无门禁自由切换）。8 测（guidedFlow）；浏览器冒烟：快速建书无模态直接进区、顶栏改名持久化、填灵感后出现「建议下一步：角色与势力」并可跳转、「从模板新建」仍开模态均通过 |
 
 **退出标准**：06 篇 §6 全部 5 条；textarea 出依赖树；编辑延迟基准达标。
-**本轮边界说明**：M1 的 schema/序列化/修订管线/画布替换/状态收编/写作原语/CM6 novelDsl 大纲编辑器/UI 宪法（先建后改 + 引导并存）均已完成并验证，`npm run verify` 全绿（641 测试）。CM6 触及运行中 App 的编辑器扩展层，已配交互回归验证（挂载即校验、着色、波浪线、声明豁免）。M1 退出标准达成。
+**本轮边界说明**：M1 的 schema/序列化/修订管线/画布替换/状态收编/写作原语/CM6 novelDsl 大纲编辑器/UI 宪法（先建后改 + 引导并存）均已完成并验证，`npm run verify` 全绿。CM6 触及运行中 App 的编辑器扩展层，已配交互回归验证（挂载即校验、着色、波浪线、声明豁免）。M1 退出标准达成。
 
 ## M2 AI 换代（→ v1.7）｜ 设计依据：05 篇 ｜ ✅ 已完成（verify 全绿）
 
 | WP | 内容 | 尺寸 | 状态 |
 |---|---|---|---|
 | 2.1 | AiGatewayProvider：适配器上移主进程 + 类型化事件流 IPC | M | ✅ `src/main/ai/gateway.ts`（适配器+事件流 IPC，单测覆盖） |
-| 2.2 | ToolRegistry + 首批 10 内置工具（4 个 prompt 服务工具化转写） | L | ✅ `src/core/ai/tools.ts`（注册表+内置工具，单测覆盖） |
+| 2.2 | ToolRegistry + 17 个 `core.*` 内置工具（4 个 prompt 服务工具化转写） | L | ✅ `src/core/ai/tools.ts`（注册表+内置工具，单测覆盖） |
 | 2.3 | PromptAssembler（section 装配器，拆 aiContextBuilder） | M | ✅ `src/core/ai/promptAssembler.ts` + `builtinSections.ts` |
 | 2.4 | 技能引擎：SKILL.md 加载 + 渐进注入 + 首批 5 内置写法技能 | M | ✅ `src/core/ai/skills.ts` + `skills/builtin/`（每轮重取 context，白名单拦截） |
 | 2.5 | 审批三档 + diff 预览 + 待审箱 + 超时降级；三级审计链闭合 | L | ✅ `src/core/ai/approval.ts`（三档+待审箱 `pending-proposals.jsonl`），斜杠建卡与 MCP 落库同标准走审批 |
@@ -47,17 +47,17 @@
 
 **退出标准**：05 篇 §8 全部 5 条；旧 prompt service 删除（无双轨）。
 
-## M3 插件化（→ v2.0 公开）｜ 设计依据：04 篇
+## M3 插件化（→ v2.0 公开）｜ 设计依据：04 篇 ｜ ✅ 已完成（verify 全绿）
 
-| WP | 内容 | 尺寸 |
-|---|---|---|
-| 3.1 | manifest schema 校验器 + 加载器（逐插件隔离 + 状态面板 + 一键禁用） | L |
-| 3.2 | 生命周期/unwind/命名空间/错误契约/权限代理 | L |
-| 3.3 | 贡献点 v0 三类：类型模板/技能/Build 渲染器 | M |
-| 3.4 | Dogfooding：15 个 feature → 内置 bundle（先 cards/world/timeline，再 outline/foreshadowing，最后 AI bundle） | XL |
-| 3.5 | profile/bundle/patch 装配 + 装配树查看器；minimal/webnovel/literary 三预设 | M |
-| 3.6 | 导出 Build Profile 全管线（07 篇，含预览与字数统一） | L |
-| 3.7 | 插件 SDK 包（MIT）+ 示例插件（"魔法体系"模板 + "rtf 渲染器"） | M |
+| WP | 内容 | 尺寸 | 状态 |
+|---|---|---|---|
+| 3.1 | manifest schema 校验器 + 加载器（逐插件隔离 + 状态面板 + 一键禁用） | L | ✅ `src/core/plugin/manifest.ts`（版本区间满足判定）+ `pluginService.ts` 磁盘发现 + `PluginSettingsPanel` 状态面板 |
+| 3.2 | 生命周期/unwind/命名空间/错误契约/权限代理 | L | ✅ `runtime.ts`（拓扑激活/unwind 逆序释放）+ `context.ts`（deny-by-default 权限代理） |
+| 3.3 | 贡献点 v0 三类：类型模板/技能/Build 渲染器 | M | ✅ skills/types/buildProfiles/hooks 全接线进注册表（`createContributionInstaller`） |
+| 3.4 | Dogfooding：15 个 feature → 内置 bundle（先 cards/world/timeline，再 outline/foreshadowing，最后 AI bundle） | XL | ✅ core/world/ai 三内置 bundle（`builtin/manifests.ts`），官方功能与社区插件同路径 |
+| 3.5 | profile/bundle/patch 装配 + 装配树查看器；minimal/webnovel/literary 三预设 | M | ✅ `bundles.ts` + `availability.ts`（三预设 + 装配树 + minimal 禁 AI 策略） |
+| 3.6 | 导出 Build Profile 全管线（07 篇，含预览与字数统一） | L | ✅ `src/core/build/`（select/transform/render + rtf 渲染器 + YAML 往返）；导出弹窗与统计面板同源（07 §5.4 断言测试） |
+| 3.7 | 插件 SDK 包（MIT）+ 示例插件（"魔法体系"模板 + "rtf 渲染器"） | M | ✅ `sdk/`（MIT 独立发行）+ `examples/plugins/magic-system`（磁盘实测：manifest 校验 + 类型命名空间 + 技能解析） |
 
 **退出标准**：04 篇 §10 全部 5 条 + 07 篇 §5；示例插件不改内核通过；`/core:*` 命令全部走命名空间。
 
@@ -77,7 +77,7 @@
 
 ## 横切策略
 
-**测试**：28 → M0 末 ≥60（实体/DSL 往返/索引增量/迁移）→ M3 末 ≥120（隔离/unwind/权限/管线 E2E）。现全库 641 测试，覆盖率分层锁线见 `vitest.config.ts`。CI 新增：core 边界 lint、DSL 往返、插件隔离冒烟三 job。
+**测试**：28 → M0 末 ≥60（实体/DSL 往返/索引增量/迁移）→ M3 末 ≥120（隔离/unwind/权限/管线 E2E）。覆盖率分层锁线见 `vitest.config.ts`（以当前全绿为准，时点计数不进正文）。CI 新增：core 边界 lint、DSL 往返、插件隔离冒烟三 job。
 **回归门**：每 WP 合入跑 `npm run verify`；每里程碑加手工冒烟清单（建书→写作→AI→导出→重启恢复）。
 **不做清单**：多用户/协作（M5 后议）；移动端；云同步服务；WASM 插件（观察 Zed 后再议）；保留 v1 双写兼容（用户规则：直接替换）。
 **依赖顺序**：M0→M1→M2→M3 严格串行（数据层→管线→AI→插件）；M3.4 dogfooding 可与 3.5/3.6 并行。

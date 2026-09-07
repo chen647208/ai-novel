@@ -5,7 +5,7 @@
 
 ## 项目定位
 
-红月创作（Hongyue Creation）是一个本地优先的 Electron + React + TypeScript 桌面应用，面向小说创作全流程：书籍管理、灵感生成、人物构建、大纲设计、章节规划、伏笔追踪、知识库检索与正文写作。AI 能力支持 Gemini、OpenAI 兼容接口与 Ollama。
+红月创作（Hongyue Creation）是一个本地优先的 Electron + React + TypeScript 桌面应用，面向小说创作全流程：书籍管理、灵感生成、人物构建、大纲设计、章节规划、伏笔追踪、知识库检索与正文写作。AI 能力支持 DeepSeek、Kimi、GLM、通义千问、MiniMax、Gemini、Claude、GPT 与 Ollama 本地模型。
 
 ## 权威文档入口
 
@@ -28,7 +28,7 @@
 ```bash
 npm install            # 安装依赖（中国大陆可用 --registry=https://registry.npmmirror.com）
 npm run electron:dev   # 开发模式（Vite + Electron）
-npm run verify         # 类型检查 + 测试 + 构建（与 CI 一致）
+npm run verify         # 单链全门禁：lock 预检 + lint + typecheck + 覆盖率测试 + 许可头 + 密钥扫描 + 构建（与 CI 同一条链）
 npm run dist:win       # 生成 Windows 安装包（另有 dist:mac / dist:linux）
 ```
 

@@ -59,7 +59,7 @@
 2. **Create your first book**:
    - On first launch a wizard pops up; click "Skip" to create a blank book (stay in the library, click the card to enter; picking a persona also opens model settings)
    - Afterwards, click "New Book" in the library (creates a blank book straight into the workspace)
-   - Or "New from template" (blank / duplicate / sample)
+   - Or "From Template" (blank / duplicate / sample)
    - Type your initial idea in the inspiration section, click "Generate Title & Synopsis"
    - Start your journey
 
@@ -92,7 +92,7 @@
    - Confirm; the project data is restored
 
 #### Backup & reset
-- Data location: `%APPDATA%/novalocal-ai-novelist/`
+- Data location: Windows `%APPDATA%/novalocal-ai-novelist/`, macOS `~/Library/Application Support/novalocal-ai-novelist/`, Linux `~/.config/novalocal-ai-novelist/`
 - Backup advice: use export for important projects regularly
 - Factory reset: available in settings
 
@@ -110,7 +110,7 @@ Hongyue Creation uses five sections guiding you through a complete novel (switch
    - Example: "An ordinary student at a magic academy suddenly discovers a special power"
 
 2. **Cite the knowledge base** (optional):
-   - Click "Upload references" for reference documents
+   - Click "Upload material" for reference documents
    - Pick knowledge entries to cite
    - Supported formats: .txt, .md, .json, .csv
 
@@ -200,7 +200,7 @@ Hongyue Creation uses five sections guiding you through a complete novel (switch
    - Bulk generation keeps existing prose and only updates titles and synopses
 
 4. **Enter writing**:
-   - Click "Write this chapter" on a chapter: a dialog pops up — "Generate content" writes the chapter from its synopsis (or batch mode writes 5/10 chapters at once); "Enter editor only" skips generation for handwriting
+   - Click "Write Chapter" on a chapter: a dialog pops up — "Generate content" writes the chapter from its synopsis (or batch mode writes 5/10 chapters at once); "Enter editor only" skips generation for handwriting
    - Start writing the prose
 
 **Tips**:

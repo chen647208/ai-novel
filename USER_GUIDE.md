@@ -92,7 +92,7 @@
    - 确认导入，项目数据将恢复
 
 #### 项目备份与恢复
-- 数据存储位置：`%APPDATA%/novalocal-ai-novelist/`
+- 数据存储位置：Windows `%APPDATA%/novalocal-ai-novelist/`、macOS `~/Library/Application Support/novalocal-ai-novelist/`、Linux `~/.config/novalocal-ai-novelist/`
 - 定期备份建议：使用导出功能备份重要项目
 - 恢复出厂设置：在设置中可进行数据重置
 

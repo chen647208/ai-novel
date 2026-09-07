@@ -14,16 +14,16 @@
 
 ## 主流程入口
 
-- `src/renderer/app/App.tsx`：主状态编排、步骤切换和各功能域接线
-- `src/renderer/app/app-shell/WorkspaceNav.tsx`：工作台左侧导航、步骤切换与完成状态点
-- `src/renderer/features/books/BookManager.tsx`：书籍列表与切换入口
+- `src/renderer/app/App.tsx`：装配层（书籍动作、引导、路由、设置宿主），状态收敛到双 store
+- `src/renderer/app/app-shell/WorkspaceNav.tsx`：工作台左侧导航（可见性单源在 `sectionFeatures.ts`，导航只消费）、步骤切换与完成状态点
+- `src/renderer/app/app-shell/Bookshelf.tsx`：书籍库（列表/搜索/新建/导入），卡片点进工作台
+- `src/renderer/features/books/NewBookModal.tsx`：新建、复制模板等创建方式
 
 ## 流程分段
 
 ### 1. 书籍管理
 
-- `BookManager.tsx`：管理书籍列表、切换当前项目、触发新建入口
-- `BookItem.tsx`：单本书籍卡片展示与交互
+- `Bookshelf.tsx`：书籍列表展示、切换当前项目、触发新建/导入入口
 - `NewBookModal.tsx`：新建、复制模板等创建方式
 
 ### 2. 灵感生成
@@ -54,9 +54,9 @@
 
 ## 数据流说明
 
-- 当前项目主状态由 `App.tsx` 统一持有
+- 当前项目主状态由双 store 持有（`app/stores/projectStore.ts` + `settingsStore.ts`）
 - 各步骤组件通过 `project` 和 `onUpdate` 接收数据与回写修改
-- 书籍切换、本地持久化和初始化加载由 `src/renderer/shared/services/storage.ts` 配合完成
+- 书籍切换、本地持久化和初始化加载由 `persistenceBridge.ts` 差分落盘配合完成
 
 ## 维护建议
 

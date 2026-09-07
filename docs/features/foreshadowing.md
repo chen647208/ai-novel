@@ -4,7 +4,7 @@
 
 ## 数据模型
 
-`src/shared/types.ts` 中的 `Foreshadow`，挂在 `Project.foreshadows` 上：
+`src/shared/types/world.ts` 一系（`types.ts` 仅剩再导出）中的 `Foreshadow`，挂在 `Project.foreshadows` 上：
 
 - `title` / `detail`：伏笔简述与具体内容
 - `status`：`planted`（未回收）/ `paid-off`（已回收）/ `abandoned`（已废弃）

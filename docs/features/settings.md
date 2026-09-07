@@ -8,12 +8,16 @@
 ## 核心文件
 
 - `SettingsModal.tsx`：设置弹窗主编排器
-- `ModelSettings.tsx`：模型设置入口组件
-- `components/ModelSettingsPanel.tsx`：模型配置面板
-- `components/EmbeddingSettingsPanel.tsx`：Embedding 模型与参数配置面板
+- `components/SettingsTabNav.tsx` + `SettingsTabContent.tsx`：标签导航与内容分发
+- `components/SettingsModalHeader.tsx` + `SettingsModalFooter.tsx`：头尾（含暂存保存按钮）
+- `components/GeneralSettingsPanel.tsx`：语言/主题/字体（直写 store 即时生效）
+- `components/ModelSettingsPanel.tsx`：模型配置面板（`ModelSettings.tsx` 为入口组件）
+- `components/ProviderSidebar.tsx` + `ProviderEditor.tsx`：渠道侧栏与参数编辑
+- `components/EmbeddingSettingsPanel.tsx` + `EmbeddingSidebar.tsx` + `EmbeddingEditor.tsx`：Embedding 配置
 - `components/PromptTemplatesPanel.tsx`：提示词模板管理
 - `components/CardPromptSettingsPanel.tsx`：卡牌命令模板管理
 - `components/ConsistencyPromptSettingsPanel.tsx`：一致性检查模板管理
+- `components/PluginSettingsPanel.tsx`：插件状态面板（发行档/装配树入口）
 - `components/StorageSettingsPanel.tsx`：存储设置面板
 - `components/SystemGuidePanel.tsx`：系统说明和使用引导
 - `services/modelListService.ts`：模型列表拉取服务
@@ -30,7 +34,8 @@
 ## 关联模块
 
 - 写作、助手、知识库和一致性检查都会依赖设置中的模型或模板配置
-- 本地持久化依赖 `src/renderer/shared/services/storage.ts`
+- 设置持久化走 `app/stores/settingsStore.ts` + `persistenceBridge.ts` 差分落盘
+- 保存语义：语言/主题/字体直写即时生效；模型与密钥类暂存按保存落盘（防半配置生效），关闭直接丢弃
 
 ## 维护建议
 

@@ -16,7 +16,7 @@
 - `services/aiRuntime.ts`：应用级 AI 运行时单例（assembler/registry/catalog/broker/sessionManager）
 - `services/aiSessionManager.ts`：会话管理器——jsonl 落盘、技能渐进注入、工具编排
 - `services/builtinTools.ts`：内置工具（卡片生成/命令解析/一致性扫描/推荐/索引查询/章节目录与正文/大纲/人物清单/知识读写/全文与语义检索/续写/重写/大纲/章节细纲）
-- `services/skillCatalogSetup.ts`：内置 5 写法技能装载（黄金三章/雪片法/POV/伏笔回收/AI 味消除）
+- `services/skillCatalogSetup.ts`：内置 5 写法技能装载（黄金三章/雪片法/POV/伏笔回收/AI 味消除；SKILL.md 以 `?raw` 打包进渲染端，离线可用；触发词命中会话内自动激活全文，会话结束即卸载）
 - `services/smartRecommendationService.ts` / `aiSemanticCheckService.ts`：推荐与语义检查（经工具注册表暴露）
 
 ## 运行链路
@@ -50,7 +50,7 @@ write 请求挂起，顶栏待审箱角标可逐条决定，绝不静默应用�
 
 ## 外部 agent 平权
 
-MCP server（`node build/main/main/mcp/server.js`）暴露读工具与写提案；
+MCP server（`node build/main/main/mcp/server.js`，在仓库根目录执行）暴露读工具与写提案；
 外部 agent 的写提案经 `pending-proposals.jsonl` 进入同一待审箱，
 用户批准后由执行器真实落库（章节写先补快照，卡片写走命令管线、
 失败回落知识库），标注 `ai:mcp`——与内置助手同权同源。
