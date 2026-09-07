@@ -10,9 +10,11 @@ import { logger } from '@/shared/utils/logger';
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { type KnowledgeItem, type OutputMode, type Character, type Location, type Faction, type RuleSystem, type TimelineEvent, type AICardCommand, type CreatedCard, type Timeline, type WorldView, type MagicSystem, type TechnologyLevel, type WorldHistory, type CardPromptTemplate, type Project } from '../../../shared/types';
+import { type KnowledgeItem, type OutputMode, type Character, type Location, type Faction, type RuleSystem, type TimelineEvent, type AICardCommand, type CreatedCard, type Timeline, type WorldView, type MagicSystem, type TechnologyLevel, type WorldHistory, type CardPromptTemplate, type ModelConfig, type Project } from '../../../shared/types';
 import { useProjectStore } from '@/app/stores/projectStore';
 import { ATTACHMENT_TRUNCATE } from '../../../shared/constants/chapters';
+import { SUMMARY_MAX_CHARS } from '../../../shared/constants/chat';
+import { needsCompaction, splitForCompaction, type ChatTurn } from './services/chatHistory';
 import { type GlobalAssistantProps, type ChatMessage, type AssistantCategory, type AssistantEditCategory, type SyncStatus, type EditingData } from './types';
 import { type LooseRecord, asRecord, asStr } from '../../shared/utils/loose';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
@@ -32,15 +34,18 @@ import { Button } from '@/shared/ui/Button';
 import { cn } from '@/shared/utils/cn';
 import { dialogService } from '@/shared/services/dialogService';
 import { useSettingsStore } from '../../app/stores/settingsStore';
-import { BookOpenText, Bot, CircleStop, PenLine, Trash2, X } from 'lucide-react';
+import { BookOpenText, Bot, CircleStop, PenLine, RotateCcw, Trash2, X } from 'lucide-react';
 
 const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId, project, prompts, onUpdate, width = 380, onClose, onWidthChange }) => {
-  const { t } = useTranslation('assistant');
+  const { t, i18n } = useTranslation('assistant');
   const resizeRef = useRef<HTMLDivElement>(null);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  // 会话记忆（docs/design/11）：超长压缩后的摘要存这里，后续发送拼在历史最前
+  const [historySummary, setHistorySummary] = useState('');
+  const lastUserText = useRef('');
   const firstEnabledModel = models.find((m) => m.isEnabled !== false) ?? models[0];
   const updateActiveProject = useProjectStore((s) => s.updateActiveProject);
   // AI 产物归因：助手生成的卡片/角色标注来源，用户手改走 onUpdate 默认 user
@@ -156,6 +161,44 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     setAnalysisPromptId(relevant?.id || prompts[0]?.id || '');
   }, [activeCategory, prompts]);
 
+  /**
+   * 组装本轮携带的历史：报错消息剔除（噪声）→ 摘要置顶 → 旧轮在前。
+   * 超阈值时先调模型压缩最旧一半；压缩失败降级为硬截断，不断流。
+   */
+  const buildHistoryTurns = async (model: ModelConfig): Promise<ChatTurn[]> => {
+    const turns: ChatTurn[] = [];
+    if (historySummary.trim()) {
+      turns.push({ role: 'assistant', content: `[此前对话摘要]${historySummary.trim()}` });
+    }
+    for (const m of messages) {
+      if (m.error || !m.content?.trim()) continue;
+      turns.push({ role: m.role, content: m.content });
+    }
+    const raw = turns.map((t) => t.content).join('\n');
+    if (!needsCompaction(raw) || turns.length === 0) return turns;
+    const { old, recent } = splitForCompaction(turns);
+    try {
+      const prompt = i18n.language.startsWith('en')
+        ? `Summarize the following earlier conversation in under 400 words: topics discussed, confirmed facts (names/settings/decisions), open questions. Summary only, no pleasantries.\n\n${old.map((t) => `${t.role}: ${t.content}`).join('\n')}`
+        : `把以下此前对话压缩成400字以内摘要：谈了哪几个话题、已确认的关键事实（人名/设定/决定）、未解决的问题。只要摘要，不要寒暄。\n\n${old.map((t) => `${t.role}: ${t.content}`).join('\n')}`;
+      const res = await AIService.call(model, prompt);
+      const summary = (res.content ?? '').trim().slice(0, SUMMARY_MAX_CHARS);
+      if (summary) {
+        setHistorySummary(summary);
+        return [{ role: 'assistant', content: `[此前对话摘要]${summary}` }, ...recent];
+      }
+    } catch {
+      // 摘要失败走降级：buildHistoryText 的三档截断兜底
+    }
+    return turns;
+  };
+
+  const handleRetry = () => {
+    // 重新生成：旧答案保留在历史流，按上轮原文重跑（与发送键同口径守卫）
+    if (isLoading || !lastUserText.current.trim() || !hasModel) return;
+    sendMessageInternal(lastUserText.current, []);
+  };
+
   const sendMessageInternal = async (text: string, attachments: KnowledgeItem[]) => {
     if (project && AICardCommandService.isValidCommand(text)) {
       setIsLoading(true);
@@ -246,6 +289,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     
     // ── Agent 循环：装配 → 网关 → 工具（三档审批）→ 答复 ──
     setIsLoading(true);
+    lastUserText.current = text;
 
     const activeModel = usableModel;
     if (!isModelUsable(activeModel)) {
@@ -260,6 +304,14 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       return;
     }
 
+    // 用户消息进历史流（Agent 分支此前漏推，聊天区只见答复不见问）
+    setMessages(prev => [...prev, {
+      id: Date.now().toString(),
+      role: 'user' as const,
+      content: attachments.length > 0 ? `${text}\n${attachments.map((f) => `[附件：${f.name}]`).join(' ')}` : text,
+      timestamp: Date.now(),
+    }]);
+
     const controller = new AbortController();
     streamAbortRef.current = controller;
     // Agent 整轮可停止：停止键靠该 id 显示，中止经 signal 传入循环
@@ -271,12 +323,16 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       taskText += `\n\n### 附带参考资料:\n${fileContent}`;
     }
 
+    // 会话记忆：本次发送前已落盘的消息（不含刚推入的本轮） + 摘要
+    const history = await buildHistoryTurns(activeModel);
+
     const result = await sessionManager.run({
       bookId: project?.id,
       task: taskText,
       project,
       index: (project && indexService.snapshot(project.id)) || undefined,
       model: activeModel,
+      history,
       cardTemplate: selectedCardTemplateId
         ? cardPromptTemplates.find((tpl) => tpl.id === selectedCardTemplateId)
         : undefined,
@@ -918,7 +974,17 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setMessages([])}
+              onClick={handleRetry}
+              disabled={isLoading || !hasModel || !lastUserText.current.trim()}
+              className="size-7 text-muted-foreground hover:text-foreground disabled:opacity-40"
+              title={t('chat.retryTitle')}
+            >
+              <RotateCcw className="size-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => { setMessages([]); setHistorySummary(''); lastUserText.current = ''; }}
               className="size-7 text-muted-foreground hover:text-destructive"
               title={t('window.clearChatTitle')}
             >

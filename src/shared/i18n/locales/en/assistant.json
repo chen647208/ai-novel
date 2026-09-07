@@ -57,7 +57,8 @@
     "resetTemplateTitle": "Reset to default template",
     "inputPlaceholder": "Type a question, or use /character /location /faction commands to create quickly... (Shift+Enter for a new line)",
     "stopTitle": "Stop generating",
-    "sendTitle": "Send"
+    "sendTitle": "Send",
+    "retryTitle": "Regenerate from the last message (keeps the old answer)"
   },
   "dialog": {
     "noModel": "Please configure an AI model first",

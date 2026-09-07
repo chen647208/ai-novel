@@ -57,7 +57,8 @@
     "resetTemplateTitle": "重置为默认模板",
     "inputPlaceholder": "输入问题，或使用 /角色 /地点 /势力 等命令快速创建... (Shift+Enter 换行)",
     "stopTitle": "停止生成",
-    "sendTitle": "发送"
+    "sendTitle": "发送",
+    "retryTitle": "按上轮原文重新生成（旧答案保留）"
   },
   "dialog": {
     "noModel": "请先配置AI模型",

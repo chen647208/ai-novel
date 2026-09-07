@@ -96,4 +96,54 @@ describe('AiSessionManager', () => {
     const result = await manager.run({ task: '普通任务', project, model });
     expect(result.ok).toBe(true);
   });
+
+  it('历史轮次经 history section 注入装配', async () => {
+    const { PromptAssembler, historySection } = await import('@core/ai');
+    const assembler = new PromptAssembler();
+    assembler.register({ id: 'identity', title: '身份', order: 10, render: () => '身份' });
+    assembler.register(historySection);
+    const manager = new AiSessionManager({
+      assembler,
+      registry: new ToolRegistry(),
+      catalog: new SkillCatalog(),
+      broker: new ApprovalBroker(),
+      events: new EventBus(),
+    });
+    let seenPrompt = '';
+    mockComplete.mockImplementation(async (_model: unknown, prompt: string) => {
+      seenPrompt = prompt;
+      return { content: '{"reply":"r"}', model: 'test' };
+    });
+    await manager.run({
+      task: '改一下',
+      project,
+      model,
+      history: [
+        { role: 'user', content: '主角叫什么' },
+        { role: 'assistant', content: '叫林渊' },
+      ],
+    });
+    expect(seenPrompt).toContain('林渊');
+  });
+
+  it('无历史时 history section 缺席', async () => {
+    const { PromptAssembler, historySection } = await import('@core/ai');
+    const assembler = new PromptAssembler();
+    assembler.register({ id: 'identity', title: '身份', order: 10, render: () => '身份' });
+    assembler.register(historySection);
+    const manager = new AiSessionManager({
+      assembler,
+      registry: new ToolRegistry(),
+      catalog: new SkillCatalog(),
+      broker: new ApprovalBroker(),
+      events: new EventBus(),
+    });
+    let seenPrompt = '';
+    mockComplete.mockImplementation(async (_model: unknown, prompt: string) => {
+      seenPrompt = prompt;
+      return { content: '{"reply":"r"}', model: 'test' };
+    });
+    await manager.run({ task: '普通任务', project, model });
+    expect(seenPrompt).not.toContain('会话历史');
+  });
 });

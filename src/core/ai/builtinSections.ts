@@ -254,6 +254,17 @@ export const toolSchemasSection: PromptSection = {
   },
 };
 
+/** history：本轮之前的对话（order 90，紧贴 userTask 之前；文本由宿主截断后经 extra.historyText 传入）。 */
+export const historySection: PromptSection = {
+  id: 'history',
+  title: '会话历史',
+  order: 90,
+  render(ctx: PromptContext): string | undefined {
+    const text = typeof ctx.extra?.historyText === 'string' ? ctx.extra.historyText.trim() : '';
+    return text || undefined;
+  },
+};
+
 /** userTask：用户本轮任务原文（order 最大，永远紧贴对话末尾）。 */
 export const userTaskSection: PromptSection = {
   id: 'userTask',
@@ -276,6 +287,7 @@ export function registerBuiltinSections(assembler: PromptAssembler): void {
     skillManifestSection,
     agentProtocolSection,
     toolSchemasSection,
+    historySection,
     userTaskSection,
   ];
   for (const section of sections) {

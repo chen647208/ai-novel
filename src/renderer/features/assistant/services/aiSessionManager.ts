@@ -30,6 +30,7 @@ import type {
 } from '@core/ai';
 import type { EventBus, SeamPolicy } from '@core/plugin';
 import type { CardPromptTemplate, ConsistencyCheckPromptTemplate, ModelConfig, Project } from '@shared/types';
+import { buildHistoryText } from './chatHistory.js';
 import { aiGatewayClient } from '@/shared/services/ai/gatewayClient.js';
 import { useSettingsStore } from '@/app/stores/settingsStore';
 
@@ -88,6 +89,8 @@ export interface RunSessionInput {
   model: ModelConfig;
   maxTurns?: number;
   signal?: AbortSignal;
+  /** 调用方传入的近期对话（已由宿主压缩/截断到阈值内，此处只做最终文本拼装） */
+  history?: Array<{ role: 'user' | 'assistant'; content: string }>;
   /** 用户在助手中选中的卡片模板（Agent 卡片生成沿用，不再回退默认） */
   cardTemplate?: CardPromptTemplate;
 }
@@ -191,6 +194,8 @@ export class AiSessionManager {
               skillLoad: (name: string) => this.catalog.activate(name),
             },
             extra: {
+              // 会话历史：宿主截断后的最近 N 轮，经 history section 注入（空即跳过）
+              historyText: buildHistoryText(input.history ?? []) || undefined,
               // 技能清单常驻 prompt（渐进加载：清单一直可见，全文按需 core.skill.load）
               skillManifest: this.catalog.manifest() ?? undefined,
               aiPolicies: this.events

@@ -68,6 +68,7 @@ export {
   indexDigestSection,
   activeSkillSection,
   toolSchemasSection,
+  historySection,
   userTaskSection,
   type WorldDigestOptions,
 } from './builtinSections.js';

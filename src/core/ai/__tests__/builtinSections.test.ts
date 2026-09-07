@@ -9,7 +9,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { PromptAssembler } from '../promptAssembler.js';
-import { agentProtocolSection, registerBuiltinSections } from '../builtinSections.js';
+import { agentProtocolSection, historySection, registerBuiltinSections } from '../builtinSections.js';
 
 describe('agentProtocolSection', () => {
   it('讲清 JSON 调用协议与多步策略', () => {
@@ -35,5 +35,25 @@ describe('agentProtocolSection', () => {
     expect(toolsAt).toBeGreaterThan(protocolAt);
     // 无激活技能时技能段缺席：协议仍在工具清单之前
     expect(skillAt === -1 || skillAt < protocolAt).toBe(true);
+  });
+});
+
+describe('historySection', () => {
+  it('空历史缺席，有历史紧贴 userTask 之前', () => {
+    expect(historySection.render({})).toBeUndefined();
+    expect(historySection.render({ extra: { historyText: '  ' } })).toBeUndefined();
+    expect(historySection.render({ extra: { historyText: '用户：主角叫什么' } })).toContain('主角');
+
+    const asm = new PromptAssembler();
+    registerBuiltinSections(asm);
+    expect(asm.list()).toContain('history');
+    const result = asm.assemble({
+      userTask: '改一下',
+      extra: { historyText: '用户：主角叫什么\n助手：叫林渊' },
+    } as never);
+    const historyAt = result.prompt.indexOf('会话历史');
+    const taskAt = result.prompt.indexOf('本轮任务');
+    expect(historyAt).toBeGreaterThan(-1);
+    expect(taskAt).toBeGreaterThan(historyAt);
   });
 });
