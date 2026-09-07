@@ -6,6 +6,10 @@
     "count_one": "{{count}} book",
     "count_other": "{{count}} books"
   },
+  "view": {
+    "grid": "Grid",
+    "list": "List"
+  },
   "item": {
     "deleteConfirm": "Delete \"{{title}}\"? This cannot be undone.",
     "moreActions": "More actions",
@@ -32,6 +36,6 @@
     "selectToDuplicate": "Select a book to duplicate",
     "example": "Example Template",
     "exampleDesc": "Use a preset story structure and samples",
-    "create": "Create Book"
+    "create": "New Book"
   }
 }

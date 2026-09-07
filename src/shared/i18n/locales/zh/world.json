@@ -41,9 +41,9 @@
     "relationWith": "与",
     "relationDescPlaceholder": "关系描述",
     "territoryLabel": "控制领地",
-    "noLocations": "暂无地点，请先创建地点",
+    "noLocations": "暂无地点，点击添加",
     "membersLabel": "势力成员",
-    "noCharacters": "暂无角色，请先创建角色",
+    "noCharacters": "暂无角色，点击添加",
     "selectHint": "选择左侧势力进行编辑",
     "save": "保存势力设定",
     "type": {

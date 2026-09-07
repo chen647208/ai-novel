@@ -38,6 +38,9 @@ import { useFeatureAvailability } from './useFeatureAvailability';
 import { useBookActions } from './useBookActions';
 import { Bot } from 'lucide-react';
 
+/** 分区快捷键顺序：Ctrl/Cmd+1..5（模块级常量，避免 effect 依赖抖动）。 */
+const SECTION_ORDER: SectionId[] = ['inspiration', 'world', 'characters', 'structure', 'writing'];
+
 const App: React.FC = () => {
   useAppBootstrap();
   const { t } = useTranslation('app');
@@ -118,6 +121,22 @@ const App: React.FC = () => {
     if (next === 'structure' && sub) setStructureSub(sub);
     if (next !== 'writing') setEditingChapterId(null);
   }, []);
+
+  // 分区快捷键：Ctrl/Cmd+1..5（工作台内有效，与 USER_GUIDE 对齐）
+  useEffect(() => {
+    const onSectionKey = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || view !== 'workspace') return;
+      const idx = ['1', '2', '3', '4', '5'].indexOf(e.key);
+      if (idx < 0) return;
+      const next = SECTION_ORDER[idx];
+      if (next) {
+        e.preventDefault();
+        handleSectionChange(next);
+      }
+    };
+    window.addEventListener('keydown', onSectionKey);
+    return () => window.removeEventListener('keydown', onSectionKey);
+  }, [view, handleSectionChange]);
 
   // 当前分区不可用（minimal 档禁 AI 功能）时回退写作编辑器
   useEffect(() => {

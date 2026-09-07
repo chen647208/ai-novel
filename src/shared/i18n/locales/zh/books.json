@@ -6,6 +6,10 @@
     "count_one": "{{count}} 本",
     "count_other": "{{count}} 本"
   },
+  "view": {
+    "grid": "网格",
+    "list": "列表"
+  },
   "item": {
     "deleteConfirm": "确定要删除《{{title}}》吗？此操作不可撤销。",
     "moreActions": "更多操作",
@@ -32,6 +36,6 @@
     "selectToDuplicate": "选择要复制的书籍",
     "example": "示例模板",
     "exampleDesc": "使用预设的故事结构和示例",
-    "create": "创建书籍"
+    "create": "新建书籍"
   }
 }

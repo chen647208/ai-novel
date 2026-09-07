@@ -24,7 +24,7 @@ import {
 } from '@/shared/ui/DropdownMenu';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { Input } from '@/shared/ui/Input';
-import { PageHeader } from '@/shared/ui/PageHeader';
+import { PageIntro } from '@/shared/ui/PageHeader';
 import NewBookModal from '@/features/books/NewBookModal';
 import {
   BookHeart,
@@ -95,7 +95,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({
   onImportBook,
   onImportAll,
 }) => {
-  const { t, i18n } = useTranslation(['app', 'common']);
+  const { t, i18n } = useTranslation(['app', 'books', 'common']);
   const [query, setQuery] = useState('');
   const [isNewBookOpen, setIsNewBookOpen] = useState(false);
   const [view, setView] = useViewPreference<'grid' | 'list'>('bookshelf.view', 'grid');
@@ -128,7 +128,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({
   return (
     <div className="h-full overflow-y-auto bg-background">
       <div className="mx-auto max-w-6xl px-8 py-10">
-        <PageHeader
+        <PageIntro
           className="mb-6"
           title={<span className="font-serif">{t('app:bookshelf.title')}</span>}
           description={t('app:bookshelf.subtitle')}
@@ -175,8 +175,8 @@ const Bookshelf: React.FC<BookshelfProps> = ({
               value={view}
               onChange={setView}
               options={[
-                { value: 'grid', icon: LayoutGrid, title: '卡片' },
-                { value: 'list', icon: List, title: '横栏' },
+                { value: 'grid', icon: LayoutGrid, title: t('books:view.grid') },
+                { value: 'list', icon: List, title: t('books:view.list') },
               ]}
             />
           </div>

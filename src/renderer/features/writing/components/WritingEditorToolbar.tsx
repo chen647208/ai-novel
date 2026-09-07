@@ -12,8 +12,12 @@ import { useTranslation } from 'react-i18next';
 import type { WritingEditorToolbarProps } from '../types';
 import { formatCharCount } from '../services/writingStatsService';
 import { Button } from '@/shared/ui/Button';
+import { PageHeader, PageHeaderDivider } from '@/shared/ui/PageHeader';
 import { cn } from '@/shared/utils/cn';
 import { ArrowLeft, AlignCenterVertical, Camera, ChevronsRight, Eraser, Expand, FileOutput, FileText, History, Maximize2, Minimize2, Redo2, Sprout, Undo2 } from 'lucide-react';
+
+const iconBtn = 'size-8 text-muted-foreground';
+const textBtn = 'h-8 gap-1.5 px-2 text-xs text-muted-foreground';
 
 const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
   activeChapterId,
@@ -49,7 +53,6 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
   onManualSnapshot,
 }) => {
   const { t, i18n } = useTranslation('writing');
-  const actionButton = 'text-muted-foreground';
   const progress = targetWordCount > 0 ? Math.min(1, chapterStats.charCount / targetWordCount) : 0;
   const toggleFullscreen = () => {
     try {
@@ -60,165 +63,161 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
     }
   };
   return (
-    <div
-      className={cn(
-        'sticky top-0 z-10 flex flex-wrap items-center justify-between gap-y-2 border-b border-border px-10 py-4 transition-colors',
-        isFocusMode ? 'bg-background/80 backdrop-blur-sm' : 'bg-card'
-      )}
-    >
-      <div className="flex min-w-[240px] flex-1 items-center gap-5">
-        {!isFocusMode && (
-          <Button variant="ghost" size="icon" className="size-9 shrink-0" onClick={onBack} title={t('toolbar.back')}>
-            <ArrowLeft className="size-4" />
-          </Button>
-        )}
-        <div className="flex min-w-0 flex-col">
-          <span className="text-xs font-medium uppercase tracking-wider text-primary">{t('toolbar.writingLabel')}</span>
+    <PageHeader
+      className={cn(isFocusMode && 'bg-background/80 backdrop-blur-sm')}
+      left={
+        <>
+          {!isFocusMode && (
+            <Button variant="ghost" size="icon" className="size-8 shrink-0" onClick={onBack} title={t('toolbar.back')}>
+              <ArrowLeft className="size-4" />
+            </Button>
+          )}
           {activeChapterId ? (
             <input
-              className={cn(
-                'w-full min-w-0 border-none bg-transparent p-0 font-serif text-2xl font-medium text-foreground outline-none placeholder:text-muted-foreground/40',
-                isFocusMode ? 'max-w-[60ch]' : 'max-w-96'
-              )}
+              className="min-w-0 flex-1 basis-40 border-none bg-transparent p-0 font-serif text-lg font-medium text-foreground outline-none placeholder:text-muted-foreground/40"
               value={activeChapterTitle}
               onChange={(event) => onTitleChange(event.target.value)}
               placeholder={t('toolbar.titlePlaceholder')}
             />
           ) : (
-            <span className="font-serif text-2xl font-medium text-muted-foreground/50">{t('toolbar.selectChapter')}</span>
+            <span className="font-serif text-lg font-medium text-muted-foreground/50">{t('toolbar.selectChapter')}</span>
           )}
-        </div>
-      </div>
-      <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-3">
-        {/* 统计信息：本章 + 全书 + 今日 */}
-        <div
-          className="mr-1 hidden items-center gap-3 text-xs text-muted-foreground lg:flex"
-          title={t('toolbar.statsTitle', { paragraphs: chapterStats.paragraphs, sentences: chapterStats.sentences, minutes: chapterStats.readingMinutes })}
-        >
-          <span>
-            {t('toolbar.thisChapter')}
-            <span className="font-medium tabular-nums text-foreground">{formatCharCount(chapterStats.charCount)}</span>
-          </span>
-          <span className="text-border">|</span>
-          <span>
-            {t('toolbar.wholeBook')}
-            <span className="font-medium tabular-nums text-foreground">{formatCharCount(bookStats.totalCharCount)}</span>
-          </span>
-          {bookStats.todayCharCount > 0 && (
+        </>
+      }
+      right={
+        <>
+          {/* 统计组：本章 / 全书 / 今日增量（按工具条实际宽度折叠，容器查询） */}
+          <div
+            className="hidden items-center gap-2.5 text-xs text-muted-foreground @2xl:flex"
+            title={t('toolbar.statsTitle', { paragraphs: chapterStats.paragraphs, sentences: chapterStats.sentences, minutes: chapterStats.readingMinutes })}
+          >
+            <span>
+              {t('toolbar.thisChapter')}
+              <span className="ml-0.5 font-medium tabular-nums text-foreground">{formatCharCount(chapterStats.charCount)}</span>
+            </span>
+            <span className="text-border">|</span>
+            <span>
+              {t('toolbar.wholeBook')}
+              <span className="ml-0.5 font-medium tabular-nums text-foreground">{formatCharCount(bookStats.totalCharCount)}</span>
+            </span>
+            {bookStats.todayCharCount > 0 && (
+              <>
+                <span className="text-border">|</span>
+                <span className="text-success">{t('toolbar.todayAdded', { count: formatCharCount(bookStats.todayCharCount) })}</span>
+              </>
+            )}
+          </div>
+          <PageHeaderDivider className="hidden @2xl:block" />
+
+          {!isFocusMode && (
             <>
-              <span className="text-border">|</span>
-              <span className="text-success">{t('toolbar.todayAdded', { count: formatCharCount(bookStats.todayCharCount) })}</span>
+              <Button variant="ghost" size="icon" className={iconBtn} onClick={onUndo} disabled={!canUndo} title={t('toolbar.undoTitle')}>
+                <Undo2 className="size-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className={iconBtn} onClick={onRedo} disabled={!canRedo} title={t('toolbar.redoTitle')}>
+                <Redo2 className="size-4" />
+              </Button>
+              {activeChapterId && (
+                <Button variant="ghost" size="sm" className={textBtn} onClick={onManualSnapshot} title={t('toolbar.snapshotTitle', { count: snapshotCount })}>
+                  <Camera className="size-4" /> <span className="hidden @3xl:inline">{t('toolbar.snapshot')}</span>
+                </Button>
+              )}
+              {hasProjectChapters && (
+                <Button variant="ghost" size="sm" className={textBtn} onClick={onOpenExport} title={t('toolbar.exportTitle')}>
+                  <FileOutput className="size-4" /> <span className="hidden @3xl:inline">{t('toolbar.export')}</span>
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(textBtn, overdueForeshadowCount > 0 ? 'text-destructive hover:text-destructive' : 'hover:text-foreground')}
+                onClick={onOpenForeshadow}
+                title={overdueForeshadowCount > 0 ? t('toolbar.foreshadowTitleOverdue', { open: openForeshadowCount, overdue: overdueForeshadowCount }) : t('toolbar.foreshadowTitle', { open: openForeshadowCount })}
+              >
+                <Sprout className="size-4" /> <span className="hidden @3xl:inline">{t('toolbar.foreshadow')}</span>
+                {openForeshadowCount > 0 && (
+                  <span
+                    className={cn(
+                      'rounded-full px-1.5 py-0.5 text-[10px] font-medium tabular-nums',
+                      overdueForeshadowCount > 0 ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'
+                    )}
+                  >
+                    {openForeshadowCount}
+                  </span>
+                )}
+              </Button>
+              {activeChapterId && (
+                <Button variant="ghost" size="icon" className={cn(iconBtn, 'hover:text-destructive')} onClick={onClearContent} title={t('toolbar.clearTitle')}>
+                  <Eraser className="size-4" />
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(textBtn, isGlobalHistorySidebarOpen && 'bg-accent text-foreground')}
+                onClick={onToggleGlobalHistory}
+                title={t('toolbar.globalHistoryTitle')}
+              >
+                <History className="size-4" /> <span className="hidden @3xl:inline">{t('toolbar.globalHistory')}</span>
+              </Button>
+              {activeChapterId && hasActiveChapterHistory && (
+                <Button variant="ghost" size="icon" className={iconBtn} onClick={onOpenChapterHistory} title={t('toolbar.chapterHistoryTitle')}>
+                  <FileText className="size-4" />
+                </Button>
+              )}
+              <PageHeaderDivider />
             </>
           )}
-        </div>
 
-        {!isFocusMode && (
-          <>
-            <Button variant="ghost" size="icon" className={cn('size-9 shrink-0', actionButton)} onClick={onUndo} disabled={!canUndo} title={t('toolbar.undoTitle')}>
-              <Undo2 className="size-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className={cn('size-9 shrink-0', actionButton)} onClick={onRedo} disabled={!canRedo} title={t('toolbar.redoTitle')}>
-              <Redo2 className="size-4" />
-            </Button>
-            {activeChapterId && (
-              <Button variant="ghost" size="sm" className={cn(actionButton, 'hover:text-foreground')} onClick={onManualSnapshot} title={t('toolbar.snapshotTitle', { count: snapshotCount })}>
-                <Camera className="size-4" /> {t('toolbar.snapshot')}
-              </Button>
-            )}
-            {hasProjectChapters && (
-              <Button variant="ghost" size="sm" className={cn(actionButton, 'hover:text-foreground')} onClick={onOpenExport} title={t('toolbar.exportTitle')}>
-                <FileOutput className="size-4" /> {t('toolbar.export')}
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn(actionButton, 'gap-1.5', overdueForeshadowCount > 0 ? 'text-destructive hover:text-destructive' : 'hover:text-foreground')}
-              onClick={onOpenForeshadow}
-              title={overdueForeshadowCount > 0 ? t('toolbar.foreshadowTitleOverdue', { open: openForeshadowCount, overdue: overdueForeshadowCount }) : t('toolbar.foreshadowTitle', { open: openForeshadowCount })}
-            >
-              <Sprout className="size-4" /> {t('toolbar.foreshadow')}
-              {openForeshadowCount > 0 && (
-                <span
-                  className={cn(
-                    'rounded-full px-1.5 py-0.5 text-[10px] font-medium tabular-nums',
-                    overdueForeshadowCount > 0 ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'
-                  )}
-                >
-                  {openForeshadowCount}
-                </span>
-              )}
-            </Button>
-            {activeChapterId && (
-              <Button variant="ghost" size="sm" className={cn(actionButton, 'hover:text-destructive')} onClick={onClearContent} title={t('toolbar.clearTitle')}>
-                <Eraser className="size-4" /> {t('toolbar.clear')}
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn(actionButton, isGlobalHistorySidebarOpen && 'bg-accent text-foreground')}
-              onClick={onToggleGlobalHistory}
-              title={t('toolbar.globalHistoryTitle')}
-            >
-              <History className="size-4" /> {t('toolbar.globalHistory')}
-            </Button>
-            {activeChapterId && hasActiveChapterHistory && (
-              <Button variant="ghost" size="sm" className={cn(actionButton, 'hover:text-foreground')} onClick={onOpenChapterHistory} title={t('toolbar.chapterHistoryTitle')}>
-                <FileText className="size-4" /> {t('toolbar.chapterHistory')}
-              </Button>
-            )}
-          </>
-        )}
-        <Button
-          variant="ghost"
-          size="sm"
-          className={cn(actionButton, isFocusMode && 'text-primary hover:text-primary')}
-          onClick={onToggleFocusMode}
-          title={isFocusMode ? t('toolbar.exitFocusTitle') : t('toolbar.enterFocusTitle')}
-        >
-          {isFocusMode ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />} {isFocusMode ? t('toolbar.exitFocus') : t('toolbar.focus')}
-        </Button>
-        <Button variant="ghost" size="sm" className={actionButton} onClick={toggleFullscreen} title="全屏">
-          <Expand className="size-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className={cn(actionButton, typewriter && 'bg-accent text-foreground')}
-          onClick={onToggleTypewriter}
-          title={typewriter ? '关闭打字机模式' : '开启打字机模式（光标居中跟随）'}
-        >
-          <AlignCenterVertical className="size-4" />
-        </Button>
-        {!isSidebarOpen && !isFocusMode && (
-          <Button variant="outline" size="icon" className="size-9 shrink-0" onClick={onOpenSidebar} title={t('toolbar.openSidebar')}>
-            <ChevronsRight className="size-4" />
+          {/* 视图组：专注 / 全屏 / 打字机 / 侧栏 */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(iconBtn, isFocusMode && 'text-primary hover:text-primary')}
+            onClick={onToggleFocusMode}
+            title={isFocusMode ? t('toolbar.exitFocusTitle') : t('toolbar.enterFocusTitle')}
+          >
+            {isFocusMode ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
           </Button>
-        )}
-        <div className="ml-1 flex flex-col items-end">
-          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            {t('toolbar.charCountLabel')}
-            <span className="tabular-nums text-foreground">{chapterStats.charCount}</span>
-            {targetWordCount > 0 && (
-              <span className="tabular-nums text-muted-foreground">/{targetWordCount}</span>
-            )}
-          </span>
-          {targetWordCount > 0 && (
-            <div className="mt-1 h-1 w-28 overflow-hidden rounded-full bg-muted" title={`${chapterStats.charCount}/${targetWordCount}`}>
-              <div className="h-1 rounded-full bg-primary transition-all" style={{ width: `${Math.round(progress * 100)}%` }} />
-            </div>
+          <Button variant="ghost" size="icon" className={iconBtn} onClick={toggleFullscreen} title={t('toolbar.fullscreen')}>
+            <Expand className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(iconBtn, typewriter && 'bg-accent text-foreground')}
+            onClick={onToggleTypewriter}
+            title={typewriter ? t('toolbar.typewriterOff') : t('toolbar.typewriterOn')}
+          >
+            <AlignCenterVertical className="size-4" />
+          </Button>
+          {!isSidebarOpen && !isFocusMode && (
+            <Button variant="ghost" size="icon" className={iconBtn} onClick={onOpenSidebar} title={t('toolbar.openSidebar')}>
+              <ChevronsRight className="size-4" />
+            </Button>
           )}
-          <span className="mt-0.5 text-xs text-muted-foreground">
-            {saveDirty ? (
-              <span className="font-medium text-warning">● 未保存</span>
-            ) : (
-              t('toolbar.autoSave', { time: new Date(lastSaved).toLocaleTimeString(i18n.language) })
-            )}
+          <PageHeaderDivider />
+
+          {/* 状态组：保存状态；目标进度并入底边细条 */}
+          <span
+            className={cn('w-16 text-right text-xs tabular-nums', saveDirty ? 'font-medium text-warning' : 'text-muted-foreground')}
+            title={saveDirty ? t('toolbar.unsaved') : t('toolbar.autoSave', { time: new Date(lastSaved).toLocaleTimeString(i18n.language) })}
+          >
+            {saveDirty ? t('toolbar.unsaved') : new Date(lastSaved).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
           </span>
+        </>
+      }
+    >
+      {/* 底边目标进度细条：替代原先悬空的字数竖块 */}
+      {targetWordCount > 0 && (
+        <div
+          className="absolute inset-x-0 bottom-0 h-0.5 bg-muted"
+          title={`${chapterStats.charCount}/${targetWordCount}`}
+        >
+          <div className="h-full bg-primary transition-all" style={{ width: `${Math.round(progress * 100)}%` }} />
         </div>
-      </div>
-    </div>
+      )}
+    </PageHeader>
   );
 };
 

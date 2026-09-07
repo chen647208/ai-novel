@@ -41,9 +41,9 @@
     "relationWith": "with",
     "relationDescPlaceholder": "Relation description",
     "territoryLabel": "Controlled Territories",
-    "noLocations": "No locations yet, create locations first",
+    "noLocations": "No locations yet. Click add",
     "membersLabel": "Members",
-    "noCharacters": "No characters yet, create characters first",
+    "noCharacters": "No characters yet. Click add",
     "selectHint": "Select a faction on the left to edit",
     "save": "Save Factions",
     "type": {

@@ -195,7 +195,10 @@
     "close": "Close"
   },
   "toolbar": {
-    "back": "Back",
+    "back": "Back to Structure",
+    "fullscreen": "Fullscreen",
+    "typewriterOn": "Enable typewriter mode (cursor stays centered)",
+    "typewriterOff": "Disable typewriter mode",
     "openSidebar": "Open sidebar",
     "writingLabel": "Now writing",
     "titlePlaceholder": "Enter chapter title...",

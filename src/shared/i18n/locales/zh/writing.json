@@ -195,7 +195,10 @@
     "close": "关闭"
   },
   "toolbar": {
-    "back": "返回",
+    "back": "返回结构页",
+    "fullscreen": "全屏",
+    "typewriterOn": "开启打字机模式（光标居中跟随）",
+    "typewriterOff": "关闭打字机模式",
     "openSidebar": "展开侧栏",
     "writingLabel": "正在撰写",
     "titlePlaceholder": "输入章节标题...",

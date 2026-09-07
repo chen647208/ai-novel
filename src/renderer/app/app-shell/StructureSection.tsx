@@ -44,8 +44,8 @@ const StructureSection: React.FC<StructureSectionProps> = ({ project, onEnterWri
             value={sub}
             onChange={setSub}
             options={[
-              { value: 'chapters', label: t('structureTabs.chapters') },
               { value: 'outline', label: t('structureTabs.outline') },
+              { value: 'chapters', label: t('structureTabs.chapters') },
             ]}
           />
         }
