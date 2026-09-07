@@ -64,7 +64,6 @@ export interface TokenUsage {
 
 /**
  * 未显式设置 temperature 时的统一默认值。
- * 此前仅 openai-compatible 走 0.7、gemini 走 provider 默认，跨提供方不一致；
- * 现由两个适配器共用此常量，保证“未配置即同一默认”的可预期行为。
+ * 两个适配器共用此常量，保证“未配置即同一默认”的可预期行为。
  */
 export const DEFAULT_TEMPERATURE = 0.7;
