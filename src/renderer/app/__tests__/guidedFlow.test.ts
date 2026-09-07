@@ -20,16 +20,16 @@ describe('suggestNextSection', () => {
   it('空灵感 → inspiration', () => {
     expect(suggestNextSection(project())).toBe('inspiration');
   });
-  it('有灵感无角色 → characters', () => {
-    expect(suggestNextSection(project({ inspiration: '赛博朋克' }))).toBe('characters');
+  it('有灵感无世界 → world', () => {
+    expect(suggestNextSection(project({ inspiration: '赛博朋克' }))).toBe('world');
   });
   it('仅 intro 也算灵感已填', () => {
-    expect(suggestNextSection(project({ intro: '简介' }))).toBe('characters');
+    expect(suggestNextSection(project({ intro: '简介' }))).toBe('world');
   });
-  it('有角色无世界 → world', () => {
-    expect(suggestNextSection(project({ inspiration: 'x', characters: [{ id: 'c', name: '林渊' } as never] }))).toBe('world');
+  it('有世界无角色 → characters', () => {
+    expect(suggestNextSection(project({ inspiration: 'x', knowledge: [{ id: 'k' } as never] }))).toBe('characters');
   });
-  it('有知识库跳过世界 → structure', () => {
+  it('有世界有角色 → structure', () => {
     expect(
       suggestNextSection(project({ inspiration: 'x', characters: [{ id: 'c' } as never], knowledge: [{ id: 'k' } as never] })),
     ).toBe('structure');

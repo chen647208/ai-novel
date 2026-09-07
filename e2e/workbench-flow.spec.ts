@@ -73,6 +73,8 @@ test('填灵感后出现下一步建议；Ctrl+J 开关助手，Ctrl+2 切世界
     await createBook(page);
     await page.getByPlaceholder(/输入你的初始灵感|Enter your initial inspiration/).fill('魔法学院的普通学生发现特殊能力');
     await expect(page.getByText(/建议下一步|Suggested next/).first()).toBeVisible({ timeout: 15_000 });
+    // 建议顺序与左侧导航同序：灵感之后是世界
+    await expect(page.getByText(/世界构建|World Building/).first()).toBeVisible({ timeout: 15_000 });
 
     // Ctrl+J 显隐 AI 助手栏（默认展开：先关再开）
     await page.keyboard.press('Control+j');

@@ -14,12 +14,12 @@
 import type { Project } from '../../shared/types';
 import type { SectionId } from './app-shell/WorkspaceNav';
 
-/** 灵感→角色→世界→结构（大纲/细纲一页）→写作：返回第一个尚未填充的分区；全部就绪则进写作。 */
+/** 灵感→世界→角色→结构（大纲/细纲一页）→写作：与左侧导航同序，返回第一个尚未填充的分区；全部就绪则进写作。 */
 export function suggestNextSection(project: Project | null): SectionId {
   if (!project) return 'inspiration';
   if (!project.inspiration?.trim() && !project.intro?.trim()) return 'inspiration';
-  if (!project.characters?.length) return 'characters';
   if (!(project.knowledge?.length ?? 0) && !project.worldView) return 'world';
+  if (!project.characters?.length) return 'characters';
   if (!project.outline?.trim() || !project.chapters?.length) return 'structure';
   return 'writing';
 }
