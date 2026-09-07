@@ -15,7 +15,7 @@ import { dialogService } from '@/shared/services/dialogService';
 import { autoBackupService } from '@/shared/services/autoBackupService';
 import { composeAppState, seedPersistBaseline } from '@/app/stores/persistenceBridge';
 import { hydrateStoresFromState } from '@/app/useAppBootstrap';
-import { normalizeImportedState } from '@/app/initialState';
+import { normalizeImportedState, checkImportVersion } from '@/app/initialState';
 import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
 import { Input } from '@/shared/ui/Input';
@@ -83,6 +83,10 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
     const snapshot = await autoBackupService.readBackup(filePath);
     if (!snapshot) {
       dialogService.alert(t('storage.restoreFailed'));
+      return;
+    }
+    if (checkImportVersion(snapshot) === 'too-new') {
+      dialogService.alert(t('storage.restoreTooNew'));
       return;
     }
     hydrateStoresFromState(normalizeImportedState(snapshot));

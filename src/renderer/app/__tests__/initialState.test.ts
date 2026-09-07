@@ -9,7 +9,8 @@
 
 import { describe, it, expect } from 'vitest';
 import type { AppState, Project } from '../../../shared/types';
-import { INITIAL_APP_STATE, normalizeImportedState } from '../initialState';
+import { INITIAL_APP_STATE, normalizeImportedState, checkImportVersion } from '../initialState';
+import { APP_STATE_VERSION } from '../../../shared/constants/versions';
 
 const project = (id: string): Project =>
   ({ id, title: `书-${id}`, chapters: [] } as unknown as Project);
@@ -120,5 +121,19 @@ describe('INITIAL_APP_STATE 内置模型种子', () => {
     for (const cn of ['deepseek', 'kimi', 'zhipu', 'qwen', 'minimax']) {
       expect(presetIds.has(cn)).toBe(true);
     }
+  });
+});
+
+describe('checkImportVersion', () => {
+  it('缺号/旧版/同版可读，新版拒绝', () => {
+    expect(checkImportVersion(null)).toBe('ok');
+    expect(checkImportVersion({})).toBe('ok');
+    expect(checkImportVersion({ schemaVersion: APP_STATE_VERSION })).toBe('ok');
+    expect(checkImportVersion({ schemaVersion: APP_STATE_VERSION + 1 })).toBe('too-new');
+    expect(checkImportVersion({ schemaVersion: 'x' })).toBe('ok');
+  });
+
+  it('normalize 输出携带当前版本号', () => {
+    expect(normalizeImportedState({}).schemaVersion).toBe(APP_STATE_VERSION);
   });
 });

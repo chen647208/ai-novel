@@ -11,12 +11,14 @@ import { storage } from '../storage';
 import type { AppState, Project, StorageConfig, ConsistencyCheckConfig, ConsistencyCheckPromptTemplate } from '../../../../shared/types';
 import type { StorageRepository, SearchHit, SearchOptions, CommitOptions } from './types';
 import type { RevisionEntity } from '@core/entities';
+import { APP_STATE_VERSION } from '../../../../shared/constants/versions';
 
 /** 内存子串检索的片段窗口长度 */
 const SNIPPET_WINDOW = 80;
 
 // saveProject/saveSettings 在空存储上首次写入时的最小骨架，随后由调用方补全字段。
 const INITIAL_FALLBACK: AppState = {
+  schemaVersion: APP_STATE_VERSION,
   projects: [],
   activeProjectId: null,
   models: [],

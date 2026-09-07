@@ -20,6 +20,7 @@ import { repository } from '../../shared/services/repository';
 import { autoBackupService } from '../../shared/services/autoBackupService';
 import { logger } from '../../shared/utils/logger';
 import { persistDiff } from '../persistDiff';
+import { APP_STATE_VERSION } from '../../../shared/constants/versions';
 import { useProjectStore, commitMetaOf } from './projectStore';
 import { useSettingsStore } from './settingsStore';
 
@@ -28,6 +29,7 @@ export function composeAppState(): AppState {
   const p = useProjectStore.getState();
   const s = useSettingsStore.getState();
   return {
+    schemaVersion: APP_STATE_VERSION,
     projects: p.projects,
     activeProjectId: p.activeProjectId,
     models: s.models,

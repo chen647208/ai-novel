@@ -78,6 +78,7 @@
     "indexing": "向量化处理中...",
     "indexFailed": "索引失败: {{error}}",
     "indexError": "索引出错: {{error}}",
+    "duplicateSkipped": "跳过 {{count}} 个内容重复的文件：{{names}}",
     "editTitle": "编辑内容",
     "selectToEdit": "选择知识库条目进行编辑",
     "saveChanges": "保存更改",

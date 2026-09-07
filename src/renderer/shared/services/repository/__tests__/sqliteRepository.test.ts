@@ -13,6 +13,7 @@ import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
 import type { AppState, Project, KnowledgeItem, Chapter } from '../../../../../shared/types';
 import type { SqlDriver, SqlRunResult, SqlValue } from '../types';
 import { SCHEMA_VERSION } from '../schema';
+import { APP_STATE_VERSION } from '../../../../../shared/constants/versions';
 import { SqliteRepository } from '../sqliteRepository';
 import { indexService } from '@core/index';
 import { jsonRepository } from '../jsonRepository';
@@ -128,6 +129,7 @@ const project = (id: string, over: Partial<Project> = {}): Project =>
   } as unknown as Project);
 
 const baseState = (projects: Project[]): AppState => ({
+  schemaVersion: APP_STATE_VERSION,
   projects,
   activeProjectId: projects[0]?.id ?? null,
   models: [{ id: 'm1', name: '模型1' } as never],

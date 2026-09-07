@@ -7,8 +7,8 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-export * from './prompts.js';
-export * from './models.js';
-export * from './chapters.js';
-export * from './chat.js';
-export * from './versions.js';
+/**
+ * AppState 结构版本单源：只增不改。
+ * 导入方版本号高于此即拒绝（不可降级读）；旧版缺号按可读处理。
+ */
+export const APP_STATE_VERSION = 1;

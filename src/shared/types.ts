@@ -717,6 +717,8 @@ export interface CustomFontMeta {
 }
 
 export interface AppState {
+  /** 状态结构版本：导入时高于当前即拒绝（旧版可读，新版不可降级读）。 */
+  schemaVersion: number;
   projects: Project[];
   activeProjectId: string | null;
   models: ModelConfig[];

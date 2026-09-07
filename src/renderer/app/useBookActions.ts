@@ -23,6 +23,7 @@ import { deleteTrash, moveToTrash, readTrash } from '../shared/services/trashSer
 import { composeAppState, seedPersistBaseline } from './stores/persistenceBridge';
 import { hydrateStoresFromState } from './useAppBootstrap';
 import { normalizeImportedState } from './initialState';
+import { checkImportVersion } from './initialState';
 
 export interface BookActions {
   openBook: (bookId: string) => void;
@@ -218,6 +219,11 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
   const importAllData = useCallback(async () => {
     const imported = await repository.importAll();
     if (!imported) throw new Error('导入的数据为空');
+    // 版本门：新版数据不可降级读，旧版缺字段由 normalize 回退
+    if (checkImportVersion(imported) === 'too-new') {
+      dialogService.alert(i18n.t('app:importAll.tooNew'));
+      return;
+    }
     hydrateStoresFromState(normalizeImportedState(imported));
     seedPersistBaseline(composeAppState());
     dialogService.alert(i18n.t('app:importAll.success'));

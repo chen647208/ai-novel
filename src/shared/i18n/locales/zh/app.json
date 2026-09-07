@@ -92,7 +92,8 @@
   },
   "importAll": {
     "success": "全部数据导入成功！",
-    "failed": "导入失败或已取消。"
+    "failed": "导入失败或已取消。",
+    "tooNew": "该数据来自更新的版本，当前版本无法读取，请先升级应用。"
   },
   "storage": {
     "exportAllTitle": "导出项目数据",

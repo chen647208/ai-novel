@@ -10,8 +10,10 @@
 import { type AppState } from '../../shared/types';
 import { DEFAULT_PROMPTS, INITIAL_MODELS } from '../../shared/constants';
 import { getDefaultConsistencyPrompts } from '../constants/consistencyCheck';
+import { APP_STATE_VERSION } from '../../shared/constants/versions';
 
 export const INITIAL_APP_STATE: AppState = {
+  schemaVersion: APP_STATE_VERSION,
   projects: [],
   activeProjectId: null,
   models: INITIAL_MODELS,
@@ -31,6 +33,16 @@ export type ResetModalState = {
   isOpen: boolean;
   type: 'clear_projects' | 'factory_reset' | null;
 };
+
+/**
+ * 导入版本门：高于当前返回 'too-new'（调用方弹提示并中止），其余 'ok'。
+ * 旧版（缺失版本号）一律按可读处理，缺字段由 normalize 回退补齐。
+ */
+export function checkImportVersion(imported: { schemaVersion?: unknown } | null | undefined): 'ok' | 'too-new' {
+  const v = imported?.schemaVersion;
+  if (typeof v === 'number' && v > APP_STATE_VERSION) return 'too-new';
+  return 'ok';
+}
 
 /**
  * 将外部导入的原始状态规范化为一个结构完整、可安全使用的 AppState。
@@ -54,6 +66,7 @@ export const normalizeImportedState = (imported: Partial<AppState> | null | unde
   }
 
   return {
+    schemaVersion: APP_STATE_VERSION,
     projects,
     activeProjectId,
     models: Array.isArray(src.models) ? src.models : INITIAL_APP_STATE.models,

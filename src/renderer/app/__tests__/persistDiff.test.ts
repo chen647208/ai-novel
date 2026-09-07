@@ -9,6 +9,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import type { AppState, Project } from '../../../shared/types';
+import { APP_STATE_VERSION } from '../../../shared/constants/versions';
 import type { StorageRepository } from '../../shared/services/repository';
 import { computePersistDiff, persistDiff } from '../persistDiff';
 
@@ -18,6 +19,7 @@ const project = (id: string, over: Partial<Project> = {}): Project =>
 // 一个规范基线；测试通过 { ...base, X } 派生“只改 X”的下一帧，
 // 未改动的切片保留同一引用 —— 与 App 内不可变更新的真实语义一致。
 const base: AppState = {
+  schemaVersion: APP_STATE_VERSION,
   projects: [project('a')],
   activeProjectId: 'a',
   models: [{ id: 'm1' } as never],

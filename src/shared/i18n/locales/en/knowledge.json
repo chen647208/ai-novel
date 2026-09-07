@@ -78,6 +78,7 @@
     "indexing": "Vectorizing...",
     "indexFailed": "Indexing failed: {{error}}",
     "indexError": "Indexing error: {{error}}",
+    "duplicateSkipped": "Skipped {{count}} duplicate file(s): {{names}}",
     "editTitle": "Edit Content",
     "selectToEdit": "Select a knowledge base entry to edit",
     "saveChanges": "Save Changes",

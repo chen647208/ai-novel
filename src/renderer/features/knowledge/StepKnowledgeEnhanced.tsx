@@ -15,6 +15,7 @@ import { vectorIntegrationService } from './services/vectorIntegrationService';
 import { repository } from '../../shared/services/repository';
 import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
 import { useUsableModel } from '@/app/stores/settingsStore';
+import { sha256Hex } from '@core/entities';
 import { DEFAULT_SEMANTIC_WEIGHT, DEFAULT_KEYWORD_WEIGHT } from '../../../shared/constants/chapters';
 import { embeddingModelService } from '../settings/services/embeddingModelService';
 import LocationEditor from '../world/LocationEditor';
@@ -213,6 +214,11 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
 
   const handleFiles = async (files: FileList) => {
     const newItems: KnowledgeItem[] = [];
+    const skipped: string[] = [];
+    // 内容哈希去重：已有条目与本批文件统一比对，同内容只留一份
+    const seenHashes = new Set(
+      await Promise.all((project.knowledge || []).map((k) => sha256Hex(k.content ?? ''))),
+    );
     
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -220,6 +226,12 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
       if (file.type.startsWith('text/') || file.name.endsWith('.md') || file.name.endsWith('.json') || file.name.endsWith('.txt') || file.name.endsWith('.csv')) {
         try {
           const text = await file.text();
+          const hash = await sha256Hex(text);
+          if (seenHashes.has(hash)) {
+            skipped.push(file.name);
+            continue;
+          }
+          seenHashes.add(hash);
           const uniqueId = Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9) + '_' + i;
           newItems.push({
             id: uniqueId,
@@ -237,6 +249,10 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
       } else {
         dialogService.alert(t('formatUnsupported', { name: file.name }));
       }
+    }
+
+    if (skipped.length > 0) {
+      dialogService.alert(t('center.duplicateSkipped', { count: skipped.length, names: skipped.slice(0, 5).join('、') }));
     }
 
     if (newItems.length > 0) {

@@ -16,6 +16,7 @@ import type {
 } from '../../../../shared/types';
 import type { StorageRepository, SqlDriver, SqlValue, SearchHit, SearchOptions, CommitOptions } from './types';
 import { migrate, SETTING_KEYS, META_KEYS } from './schema';
+import { APP_STATE_VERSION } from '../../../../shared/constants/versions';
 import { jsonRepository } from './jsonRepository';
 import { logger } from '../../utils/logger';
 import { projectToEntities, entitiesToProject } from '@core/project';
@@ -146,6 +147,7 @@ export class SqliteRepository implements StorageRepository {
     };
 
     const state: AppState = {
+      schemaVersion: APP_STATE_VERSION,
       projects,
       activeProjectId: meta.get('activeProjectId') ?? null,
       models: parse('models') ?? [],

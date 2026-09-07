@@ -92,7 +92,8 @@
   },
   "importAll": {
     "success": "All data imported successfully!",
-    "failed": "Import failed or was cancelled."
+    "failed": "Import failed or was cancelled.",
+    "tooNew": "This data is from a newer version and cannot be read. Please upgrade the app first."
   },
   "storage": {
     "exportAllTitle": "Export Project Data",

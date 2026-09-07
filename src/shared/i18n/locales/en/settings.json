@@ -206,6 +206,7 @@
     "restoreConfirm": "Restoring overwrites all current data with this backup. Continue?",
     "restoreDone": "Restored to the selected backup.",
     "restoreFailed": "Restore failed: backup file is corrupted or invalid.",
+    "restoreTooNew": "This backup is from a newer version and cannot be read. Please upgrade the app first.",
     "policyLabel": "Backup Policy",
     "policyLine1": "• Auto backup checks the interval on every data save",
     "policyLine2": "• Backup files are stored in the \"backups\" folder of the data directory",
