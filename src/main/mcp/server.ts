@@ -1,5 +1,5 @@
 /*
- * 本文件属于 织梦 (dreamweave) 项目。
+ * 本文件属于 红月 (RedMoon) 项目。
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
@@ -268,7 +268,7 @@ function dispatch(method: string, params: Record<string, unknown>): Record<strin
         case 'propose_card_write':
         case 'propose_chapter_write': {
           const r = appendProposal(name, args);
-          return textResult(`提案 ${r.proposalId} 已进入应用待审箱，等待用户在织梦中批准。`);
+          return textResult(`提案 ${r.proposalId} 已进入应用待审箱，等待用户在红月中批准。`);
         }
         default:
           return textResult(`未知工具：${name}`, true);
