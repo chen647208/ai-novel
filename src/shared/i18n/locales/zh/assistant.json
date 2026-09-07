@@ -58,6 +58,10 @@
     "inputPlaceholder": "输入问题，或使用 /角色 /地点 /势力 等命令快速创建... (Shift+Enter 换行)",
     "stopTitle": "停止生成",
     "sendTitle": "发送",
+    "copyTitle": "复制本条",
+    "deleteTitle": "删除本条",
+    "editResendTitle": "回填到输入框改后重发",
+    "toolChainTitle": "本轮调用链（{{count}}）",
     "retryTitle": "按上轮原文重新生成（旧答案保留）"
   },
   "dialog": {
@@ -215,6 +219,8 @@
     "permProposal": "改写提案",
     "permDirect": "直接写入",
     "eventNoSessions": "还没有会话记录",
+    "eventSearchPlaceholder": "按任务内容搜索会话...",
+    "eventExportMd": "导出 Markdown",
     "eventFailed": "失败",
     "eventDone": "完成",
     "tabRecords": "生成记录",

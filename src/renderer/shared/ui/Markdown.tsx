@@ -7,9 +7,10 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/shared/utils/cn';
 
 interface MarkdownViewProps {
@@ -75,9 +76,7 @@ const markdownComponents: Components = {
       </code>
     );
   },
-  pre: ({ children }) => (
-    <pre className="my-3 overflow-x-auto rounded-lg border border-border bg-muted/50 p-3">{children}</pre>
-  ),
+  pre: ({ children }) => <CodeBlockHeader>{children}</CodeBlockHeader>,
   table: ({ children }) => (
     <div className="my-3 overflow-x-auto">
       <table className="w-full border-collapse text-sm">{children}</table>
@@ -88,6 +87,53 @@ const markdownComponents: Components = {
     <th className="border border-border px-2.5 py-1.5 text-left font-medium text-foreground">{children}</th>
   ),
   td: ({ children }) => <td className="border border-border px-2.5 py-1.5 align-top">{children}</td>,
+};
+
+/** 代码块头：语言标签 + 复制按钮（子 code 元素的类名与纯文本）。 */
+const CodeBlockHeader: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+  const { t, i18n } = useTranslation();
+  const [copied, setCopied] = useState(false);
+  let language = '';
+  let codeText = '';
+  React.Children.forEach(children, (child) => {
+    if (React.isValidElement<{ className?: string; children?: React.ReactNode }>(child)) {
+      const cls = String(child.props.className ?? '');
+      const m = cls.match(/language-([\w+-]+)/);
+      if (m?.[1]) language = m[1];
+      const collect = (node: React.ReactNode): void => {
+        if (typeof node === 'string' || typeof node === 'number') codeText += String(node);
+        else if (Array.isArray(node)) node.forEach(collect);
+        else if (React.isValidElement<{ children?: React.ReactNode }>(node)) collect(node.props.children);
+      };
+      collect(child.props.children);
+    }
+  });
+  return (
+    <div className="my-3 overflow-hidden rounded-lg border border-border">
+      <div className="flex items-center justify-between bg-muted/60 px-3 py-1.5">
+        <span className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">
+          {language || (i18n.language.startsWith('en') ? 'code' : '代码')}
+        </span>
+        <button
+          type="button"
+          className="text-2xs text-muted-foreground transition-colors hover:text-foreground"
+          title={t('common:copy', '复制')}
+          onClick={() => {
+            void navigator.clipboard?.writeText(codeText).then(
+              () => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 1500);
+              },
+              () => {},
+            );
+          }}
+        >
+          {copied ? t('common:copied', '已复制') : t('common:copy', '复制')}
+        </button>
+      </div>
+      <pre className="overflow-x-auto bg-muted/50 p-3">{children}</pre>
+    </div>
+  );
 };
 
 export const MarkdownView: React.FC<MarkdownViewProps> = ({ content, className }) => (

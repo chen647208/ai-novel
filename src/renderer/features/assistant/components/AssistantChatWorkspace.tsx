@@ -17,7 +17,7 @@ import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
 import { MarkdownView } from '@/shared/ui/Markdown';
 import { cn } from '@/shared/utils/cn';
-import { AlertCircle, BookOpen, Calculator, Clock, Cpu, FileText, Flag, Keyboard, Landmark, MapPin, MessagesSquare, Paperclip, Reply, Send, Settings2, Square, User, X, Zap } from 'lucide-react';
+import { AlertCircle, BookOpen, Calculator, Check, Clock, Copy, Cpu, FileText, Flag, Keyboard, Landmark, MapPin, MessagesSquare, Paperclip, Pencil, Reply, Send, Settings2, Square, Trash2, User, X, Zap } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
 
 
@@ -35,6 +35,8 @@ interface AssistantChatWorkspaceProps {
   hasModel: boolean;
   handleSendMessage: () => void;
   onStopGeneration: () => void;
+  onDeleteMessage: (id: string) => void;
+  lastToolChain: Array<{ toolId: string; ok: boolean }>;
   handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   cardPromptTemplates: CardPromptTemplate[];
   selectedCardTemplateId: string | null;
@@ -82,6 +84,8 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
   hasModel,
   handleSendMessage,
   onStopGeneration,
+  onDeleteMessage,
+  lastToolChain,
   handleFileUpload,
   cardPromptTemplates,
   selectedCardTemplateId,
@@ -89,6 +93,23 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
 }) => {
   const { t, i18n } = useTranslation('assistant');
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
+  const [copiedId, setCopiedId] = React.useState<string | null>(null);
+  const copyTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  React.useEffect(() => () => {
+    if (copyTimer.current) clearTimeout(copyTimer.current);
+  }, []);
+
+  const copyMessage = async (id: string, content: string): Promise<void> => {
+    try {
+      await navigator.clipboard.writeText(content);
+    } catch {
+      // 剪贴板不可用时静默：至少不抛错打断阅读
+      return;
+    }
+    setCopiedId(id);
+    if (copyTimer.current) clearTimeout(copyTimer.current);
+    copyTimer.current = setTimeout(() => setCopiedId(null), 1500);
+  };
 
   // 输入框自增高：随内容（含两行占位符）撑开，上限 max-h-32。
   React.useEffect(() => {
@@ -149,6 +170,38 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
                   : <MarkdownView content={msg.content} className="text-sm [&_p]:my-1 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0" />}
                 {msg.isStreaming && <span className="ml-1 inline-block h-4 w-2 animate-pulse bg-primary align-middle"></span>}
               </div>
+              {/* 单条操作：复制 / 删除；用户消息可回填改后重发 */}
+              <div className="mt-2 flex items-center gap-1 border-t border-border pt-1.5">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-6 text-muted-foreground hover:text-foreground"
+                  title={t('chat.copyTitle')}
+                  onClick={() => void copyMessage(msg.id, msg.content)}
+                >
+                  {copiedId === msg.id ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+                </Button>
+                {msg.role === 'user' && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-6 text-muted-foreground hover:text-foreground"
+                    title={t('chat.editResendTitle')}
+                    onClick={() => setInput(msg.content)}
+                  >
+                    <Pencil className="size-3.5" />
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-6 text-muted-foreground hover:text-destructive"
+                  title={t('chat.deleteTitle')}
+                  onClick={() => onDeleteMessage(msg.id)}
+                >
+                  <Trash2 className="size-3.5" />
+                </Button>
+              </div>
               {(msg.tokens || msg.model || msg.finishReason) && (
                 <div className="mt-2 space-y-1 border-t border-border pt-2 text-xs text-muted-foreground">
                   {msg.model && (
@@ -175,6 +228,22 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
             </div>
           </div>
         ))}
+        {lastToolChain.length > 0 && !isLoading && (
+          <div className="flex justify-start">
+            <details className="max-w-[85%] rounded-xl rounded-bl-sm border border-border bg-card px-3 py-2 text-xs text-muted-foreground shadow-sm">
+              <summary className="cursor-pointer select-none">
+                {t('chat.toolChainTitle', { count: lastToolChain.length })}
+              </summary>
+              <div className="mt-1.5 space-y-1 font-mono">
+                {lastToolChain.map((s) => (
+                  <div key={s.toolId} className={s.ok ? '' : 'text-destructive'}>
+                    {s.ok ? '✓' : '✗'} {s.toolId}
+                  </div>
+                ))}
+              </div>
+            </details>
+          </div>
+        )}
         {isLoading && !streamingMessageId && (
           <div className="flex justify-start">
             <div className="rounded-xl rounded-bl-sm border border-border bg-card p-3 shadow-sm">

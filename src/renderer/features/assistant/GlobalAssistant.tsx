@@ -43,6 +43,8 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  // 本轮工具调用链（codex 式内联折叠，免跳事件浏览器）
+  const [lastToolChain, setLastToolChain] = useState<Array<{ toolId: string; ok: boolean }>>([]);
   // 会话记忆（docs/design/11）：超长压缩后的摘要存这里，后续发送拼在历史最前
   const [historySummary, setHistorySummary] = useState('');
   const lastUserText = useRef('');
@@ -316,6 +318,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     streamAbortRef.current = controller;
     // Agent 整轮可停止：停止键靠该 id 显示，中止经 signal 传入循环
     setStreamingMessageId('agent');
+    setLastToolChain([]);
 
     let taskText = text;
     if (attachments && attachments.length > 0) {
@@ -341,6 +344,22 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
 
     streamAbortRef.current = null;
     setStreamingMessageId(null);
+    // 本轮工具链快照：callId 关联调用与结果，供聊天区折叠展示
+    try {
+      const names = new Map<string, string>();
+      const results = new Map<string, boolean>();
+      for (const e of sessionManager.getEvents()) {
+        if (e.t === 'tool.call' && typeof e.callId === 'string' && typeof e.toolId === 'string') {
+          names.set(e.callId, e.toolId);
+          if (!results.has(e.callId)) results.set(e.callId, true);
+        } else if (e.t === 'tool.result' && typeof e.callId === 'string') {
+          results.set(e.callId, e.ok !== false);
+        }
+      }
+      setLastToolChain([...results].map(([callId, ok]) => ({ toolId: names.get(callId) ?? callId, ok })));
+    } catch {
+      // 事件读取失败不影响主流程
+    }
     setMessages(prev => [...prev, {
       id: (Date.now() + 1).toString(),
       role: 'assistant' as const,
@@ -1045,6 +1064,8 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
             hasModel={hasModel}
             handleSendMessage={handleSendMessage}
             onStopGeneration={handleStopStreaming}
+            onDeleteMessage={(id) => setMessages((prev) => prev.filter((m) => m.id !== id))}
+            lastToolChain={lastToolChain}
             handleFileUpload={handleFileUpload}
             cardPromptTemplates={cardPromptTemplates}
             selectedCardTemplateId={selectedCardTemplateId}

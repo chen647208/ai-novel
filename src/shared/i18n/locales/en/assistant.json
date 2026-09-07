@@ -58,6 +58,10 @@
     "inputPlaceholder": "Type a question, or use /character /location /faction commands to create quickly... (Shift+Enter for a new line)",
     "stopTitle": "Stop generating",
     "sendTitle": "Send",
+    "copyTitle": "Copy this message",
+    "deleteTitle": "Delete this message",
+    "editResendTitle": "Load into input to edit and resend",
+    "toolChainTitle": "Tool chain ({{count}})",
     "retryTitle": "Regenerate from the last message (keeps the old answer)"
   },
   "dialog": {
@@ -215,6 +219,8 @@
     "permProposal": "write proposal",
     "permDirect": "write direct",
     "eventNoSessions": "No sessions yet",
+    "eventSearchPlaceholder": "Search sessions by task...",
+    "eventExportMd": "Export Markdown",
     "eventFailed": "Failed",
     "eventDone": "Done",
     "tabRecords": "Records",

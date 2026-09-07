@@ -12,6 +12,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
+import { Input } from '@/shared/ui/Input';
 import { Spinner } from '@/shared/ui/Spinner';
 import type { AiEvent } from '@core/ai';
 import { listSessionArchives, summarizeSessionUsage, type SessionArchiveEntry } from '../services/sessionArchive';
@@ -70,6 +71,7 @@ const SessionEventBrowser: React.FC<{ bookId: string }> = ({ bookId }) => {
   const { t } = useTranslation('assistant');
   const [sessions, setSessions] = useState<SessionArchiveEntry[] | null>(null);
   const [selected, setSelected] = useState<SessionArchiveEntry | null>(null);
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     let alive = true;
@@ -97,10 +99,39 @@ const SessionEventBrowser: React.FC<{ bookId: string }> = ({ bookId }) => {
     return <div className="py-16 text-center text-sm text-muted-foreground">{t('approval.eventNoSessions')}</div>;
   }
 
+  const q = query.trim().toLowerCase();
+  const visible = q
+    ? sessions.filter((s) => (s.task ?? '').toLowerCase().includes(q))
+    : sessions;
+
+  const exportMarkdown = () => {
+    if (!selected) return;
+    const lines = [
+      `# ${selected.task ?? selected.sessionId}`,
+      '',
+      ...selected.events.map((e) => `- ${eventLine(e).label}`),
+    ];
+    const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `session-${selected.sessionId}.md`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-3">
+      <Input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder={t('approval.eventSearchPlaceholder')}
+        className="h-8 text-xs"
+      />
       <div className="flex flex-wrap gap-2">
-        {sessions.map((s) => (
+        {visible.map((s) => (
           <Button
             key={s.sessionId}
             size="sm"
@@ -119,6 +150,9 @@ const SessionEventBrowser: React.FC<{ bookId: string }> = ({ bookId }) => {
               {selected.ok === false ? t('approval.eventFailed') : t('approval.eventDone')}
             </Badge>
             <span className="text-xs text-muted-foreground">{selected.events.length} events</span>
+            <Button variant="ghost" size="sm" className="ml-auto h-7 text-xs text-muted-foreground" onClick={exportMarkdown}>
+              {t('approval.eventExportMd')}
+            </Button>
           </div>
           <SessionUsageBar events={selected.events} />
           <div className="max-h-80 space-y-1 overflow-auto font-mono text-xs">
