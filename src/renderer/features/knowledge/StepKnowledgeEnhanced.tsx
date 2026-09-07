@@ -146,9 +146,8 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
   };
 
   useEffect(() => {
-    if (storeModel) {
-      setActiveModel(storeModel);
-    }
+    // 模型清空/全停用时同步清空本地残留，避免旧模型继续发起调用
+    setActiveModel(storeModel ?? null);
   }, [storeModel]);
 
   useEffect(() => {
