@@ -33,4 +33,4 @@ export { Progress } from './Progress';
 export { Skeleton } from './Skeleton';
 export { Spinner } from './Spinner';
 export { EmptyState, type EmptyStateProps } from './EmptyState';
-export { PageHeader, type PageHeaderProps } from './PageHeader';
+export { PageHeader, PageHeaderDivider, PageIntro, type PageHeaderProps } from './PageHeader';

@@ -70,7 +70,7 @@ export const EmbeddingSidebar: React.FC<EmbeddingSidebarProps> = ({
                 </span>
                 <span className="block truncate text-xs text-muted-foreground">
                   {provider ? dt(provider.nameKey) : config.provider}
-                  {provider?.type === 'local' ? ' · 本地' : ' · 云端'}
+                  {provider?.type === 'local' ? ` · ${t('models.deploymentLocal')}` : ` · ${t('models.deploymentCloud')}`}
                   {config.id === activeId && ` · ${t('models.activeBadge')}`}
                 </span>
               </span>
