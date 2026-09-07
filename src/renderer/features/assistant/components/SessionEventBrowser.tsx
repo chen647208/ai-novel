@@ -14,7 +14,7 @@ import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
 import type { AiEvent } from '@core/ai';
-import { listSessionArchives, type SessionArchiveEntry } from '../services/sessionArchive';
+import { listSessionArchives, summarizeSessionUsage, type SessionArchiveEntry } from '../services/sessionArchive';
 
 function eventLine(e: AiEvent): { label: string; tone: 'ok' | 'err' | 'muted' } {
   switch (e.t) {
@@ -24,8 +24,14 @@ function eventLine(e: AiEvent): { label: string; tone: 'ok' | 'err' | 'muted' } 
       return { label: `— 轮次 ${e.turn} —`, tone: 'muted' };
     case 'llm.request':
       return { label: `LLM 请求（${e.model}，${e.promptChars} 字）`, tone: 'muted' };
-    case 'llm.done':
-      return { label: 'LLM 完成', tone: 'ok' };
+    case 'llm.done': {
+      const tokens = e.tokens as
+        | { prompt?: number; completion?: number; cacheRead?: number }
+        | undefined;
+      const parts = [`输入 ${tokens?.prompt ?? 0}`, `输出 ${tokens?.completion ?? 0}`];
+      if ((tokens?.cacheRead ?? 0) > 0) parts.push(`缓存命中 ${tokens?.cacheRead ?? 0}`);
+      return { label: `LLM 完成（${parts.join(' · ')}）`, tone: 'ok' };
+    }
     case 'llm.error':
       return { label: `LLM 失败：${e.error}`, tone: 'err' };
     case 'tool.call':
@@ -42,6 +48,23 @@ function eventLine(e: AiEvent): { label: string; tone: 'ok' | 'err' | 'muted' } 
       return { label: e.t, tone: 'muted' };
   }
 }
+
+/** 单会话用量汇总条（输入/输出/缓存命中/工具次数）。 */
+const SessionUsageBar: React.FC<{ events: AiEvent[] }> = ({ events }) => {
+  const { t } = useTranslation('assistant');
+  const summary = React.useMemo(() => summarizeSessionUsage(events), [events]);
+  if (!summary.llmCalls) return null;
+  return (
+    <div className="mb-2 rounded-md bg-muted/60 px-3 py-1.5 text-xs text-muted-foreground">
+      {t('approval.usageSummary', {
+        prompt: summary.prompt,
+        completion: summary.completion,
+        cached: summary.cacheRead,
+        tools: summary.toolCalls,
+      })}
+    </div>
+  );
+};
 
 const SessionEventBrowser: React.FC<{ bookId: string }> = ({ bookId }) => {
   const { t } = useTranslation('assistant');
@@ -97,6 +120,7 @@ const SessionEventBrowser: React.FC<{ bookId: string }> = ({ bookId }) => {
             </Badge>
             <span className="text-xs text-muted-foreground">{selected.events.length} events</span>
           </div>
+          <SessionUsageBar events={selected.events} />
           <div className="max-h-80 space-y-1 overflow-auto font-mono text-xs">
             {selected.events.map((e, i) => {
               const { label, tone } = eventLine(e);

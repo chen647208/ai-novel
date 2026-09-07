@@ -59,3 +59,45 @@ export async function listSessionArchives(bookId: string): Promise<SessionArchiv
 
   return entries.sort((a, b) => (b.startedAt ?? 0) - (a.startedAt ?? 0));
 }
+
+/** 单会话用量汇总（事件浏览器消费；缺字段事件按 0 计）。 */
+export interface SessionUsageSummary {
+  turns: number;
+  llmCalls: number;
+  prompt: number;
+  completion: number;
+  total: number;
+  cacheRead: number;
+  cacheWrite: number;
+  toolCalls: number;
+}
+
+export function summarizeSessionUsage(events: AiEvent[]): SessionUsageSummary {
+  const summary: SessionUsageSummary = {
+    turns: 0,
+    llmCalls: 0,
+    prompt: 0,
+    completion: 0,
+    total: 0,
+    cacheRead: 0,
+    cacheWrite: 0,
+    toolCalls: 0,
+  };
+  for (const e of events) {
+    if (e.t === 'turn.end') summary.turns = Math.max(summary.turns, e.turns);
+    else if (e.t === 'llm.done') {
+      summary.llmCalls += 1;
+      const tokens = e.tokens as
+        | { prompt?: number; completion?: number; total?: number; cacheRead?: number; cacheWrite?: number }
+        | undefined;
+      summary.prompt += tokens?.prompt ?? 0;
+      summary.completion += tokens?.completion ?? 0;
+      summary.total += tokens?.total ?? (tokens?.prompt ?? 0) + (tokens?.completion ?? 0);
+      summary.cacheRead += tokens?.cacheRead ?? 0;
+      summary.cacheWrite += tokens?.cacheWrite ?? 0;
+    } else if (e.t === 'tool.call') {
+      summary.toolCalls += 1;
+    }
+  }
+  return summary;
+}

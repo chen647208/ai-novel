@@ -59,6 +59,10 @@ export interface AIResponse {
     prompt: number;
     completion: number;
     total: number;
+    /** 缓存命中读入（Anthropic 网关透出；无缓存则缺席） */
+    cacheRead?: number;
+    /** 缓存写入 */
+    cacheWrite?: number;
   };
   model?: string;
   finishReason?: string;
