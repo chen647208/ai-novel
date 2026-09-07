@@ -539,7 +539,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, onGoSection 
             {/* 生成按钮（无模型时禁用，手写不受影响） */}
             <Button
               onClick={generate}
-              disabled={loading || !isModelUsable(activeModel) || (!input && selectedKnowledgeIds.size === 0)}
+              disabled={loading || !isModelUsable(activeModel) || !input.trim()}
               title={!isModelUsable(activeModel) ? t('steps:common.noModel') : undefined}
             >
               {loading ? <Spinner className="size-4" /> : <WandSparkles className="size-4" />}

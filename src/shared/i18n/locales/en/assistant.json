@@ -32,6 +32,7 @@
     "callFailed": "Call failed",
     "callFailedContent": "Error: AI response failed. Please check your network or configuration.",
     "creationFailed": "Creation failed",
+    "unknownCommand": "Unrecognized command: {{text}}. Use /character /location /faction /timeline /rule /magic /technology /history to create cards.",
     "creationPending": "Pending approval",
     "cardApprovalHint": "Card generated from a slash command. Please confirm before saving.",
     "cardRejected": "Creation rejected. Nothing was written.",
@@ -59,6 +60,7 @@
   "dialog": {
     "noModel": "Please configure an AI model first",
     "characterGenerated": "Character generated and added to the character library!",
+    "characterGeneratedPartial": "Character added, but the AI response was not valid JSON. The following fields are defaults, please complete them manually: {{fields}}",
     "characterParseFailed": "The character was generated, but parsing failed.\n\nPossible causes:\n1. The AI response is not valid JSON\n2. The JSON is malformed (missing quotes, mismatched brackets, etc.)\n3. The response contains non-JSON text\n\nRaw response (first 500 characters):\n{{preview}}{{ellipsis}}\n\nPlease check the format returned by the AI model, or add the character manually.",
     "characterGenerateFailed": "Character generation failed. Please check your network connection or model configuration."
   },
@@ -74,6 +76,13 @@
     "entryContentPlaceholder": "Entry content",
     "delete": "Delete",
     "charGenTitle": "Smart character generation",
+    "charGenField": {
+      "personality": "Personality",
+      "background": "Backstory",
+      "appearance": "Appearance",
+      "occupation": "Occupation",
+      "motivation": "Motivation"
+    },
     "charGenPlaceholder": "Describe the character you want to generate (e.g. a mysterious villain with powerful magic)...",
     "generating": "Generating...",
     "generateCharacter": "Generate character",

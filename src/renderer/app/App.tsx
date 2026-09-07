@@ -261,12 +261,19 @@ const App: React.FC = () => {
           <OnboardingModal
             open
             onDone={handleOnboardingDone}
-            onOpenSettings={() => setIsSettingsOpen(true)}
+            onOpenSettings={() => {
+              // 设置接管屏幕：先收起向导避双模态层叠，设置关闭后若未完成则回来
+              setShowOnboarding(false);
+              setIsSettingsOpen(true);
+            }}
           />
         )}
 
         {isSettingsOpen && (
-          <SettingsModalHost onClose={() => setIsSettingsOpen(false)} onClearData={() => setResetOpen(true)} />
+          <SettingsModalHost onClose={() => {
+            setIsSettingsOpen(false);
+            if (!isOnboardingDone()) setShowOnboarding(true);
+          }} onClearData={() => setResetOpen(true)} />
         )}
 
         {isHistoryViewerOpen && activeProject && (

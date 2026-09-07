@@ -80,7 +80,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ open, onDone, 
           </div>
         </div>
         <div className="flex justify-between gap-2 border-t border-border bg-muted/30 px-6 py-4">
-          <Button variant="ghost" onClick={() => onDone('hand', t('defaultBookTitle'))}>{t('skip')}</Button>
+          <Button variant="ghost" onClick={() => onDone('hand', title.trim() || t('defaultBookTitle'))}>{t('skip')}</Button>
           <Button onClick={() => onDone(persona, title.trim() || t('defaultBookTitle'))}>{t('start')}</Button>
         </div>
       </DialogContent>
@@ -92,7 +92,8 @@ export function isOnboardingDone(): boolean {
   try {
     return localStorage.getItem('onboarding.done') === '1';
   } catch {
-    return true;
+    // 存储不可用时按未完成处理（fail-open）：默认显示向导，避免首启永久跳过
+    return false;
   }
 }
 

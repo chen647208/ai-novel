@@ -32,6 +32,7 @@
     "callFailed": "调用失败",
     "callFailedContent": "Error: AI 响应失败，请检查网络或配置。",
     "creationFailed": "创建失败",
+    "unknownCommand": "无法识别的命令：{{text}}，可用 /角色 /地点 /势力 /时间线 /规则 /魔法 /科技 /历史 建卡。",
     "creationPending": "待审批",
     "cardApprovalHint": "斜杠命令生成的卡片，请确认后落库。",
     "cardRejected": "已拒绝创建，项目数据未改动。",
@@ -59,6 +60,7 @@
   "dialog": {
     "noModel": "请先配置AI模型",
     "characterGenerated": "角色生成成功并已添加到角色库！",
+    "characterGeneratedPartial": "角色已添加，但 AI 返回格式不完整，以下字段为默认值，请手动补全：{{fields}}",
     "characterParseFailed": "角色生成成功，但解析失败。\n\n可能原因：\n1. AI返回的格式不是有效的JSON\n2. JSON格式有错误（如缺少引号、括号不匹配等）\n3. 响应中包含非JSON文本\n\n原始响应（前500字符）：\n{{preview}}{{ellipsis}}\n\n请检查AI模型返回的格式，或尝试手动添加角色。",
     "characterGenerateFailed": "角色生成失败，请检查网络连接或模型配置。"
   },
@@ -74,6 +76,13 @@
     "entryContentPlaceholder": "条目内容",
     "delete": "删除",
     "charGenTitle": "智能角色生成",
+    "charGenField": {
+      "personality": "性格特点",
+      "background": "背景故事",
+      "appearance": "外貌特征",
+      "occupation": "职业/身份",
+      "motivation": "动机目标"
+    },
     "charGenPlaceholder": "描述你想要生成的角色特点（例如：一个神秘的反派，拥有强大的魔法能力）...",
     "generating": "生成中...",
     "generateCharacter": "智能生成角色",

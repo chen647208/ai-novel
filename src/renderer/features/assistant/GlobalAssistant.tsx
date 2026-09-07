@@ -179,9 +179,16 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
           error: t('chat.modelMissingError'),
         };
         setMessages(prev => [...prev, errorMsg]);
-        setIsLoading(false);
-        return;
-      }
+      setMessages(prev => [...prev, {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: t('chat.unknownCommand', { text }),
+        timestamp: Date.now(),
+        error: t('chat.creationFailed'),
+      }]);
+      setIsLoading(false);
+      return;
+    }
       
       const selectedTemplate = selectedCardTemplateId
         ? cardPromptTemplates.find(tpl => tpl.id === selectedCardTemplateId)
@@ -293,6 +300,8 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     sendMessageInternal(input, [...pendingFiles]);
     setInput('');
     setPendingFiles([]);
+    // 卡片模板只跟随选定的那一次发送，下次普通问答不再携带
+    setSelectedCardTemplateId(null);
   };
 
   const handleStopStreaming = () => {
@@ -326,6 +335,12 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
      const promptTemplate = prompts.find(p => p.id === analysisPromptId);
      const instruction = promptTemplate ? promptTemplate.content : "请分析以下内容";
      
+     // 附件归类跟随当前分析分区（知识库无独立归类，回落 writing；原硬编码全标 writing）
+     const attachmentCategory = activeCategory === 'inspiration' ? 'inspiration'
+       : activeCategory === 'characters' ? 'character'
+       : activeCategory === 'outline' ? 'outline'
+       : activeCategory === 'chapters' ? 'chapter'
+       : 'writing' as const;
      const attachment: KnowledgeItem = {
         id: 'ctx-' + Date.now(),
         name: t('chat.contextAttachmentName', { category: activeCategory }),
@@ -333,7 +348,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
         type: 'context',
         size: content.length,
         addedAt: Date.now(),
-        category: 'writing' as const
+        category: attachmentCategory
      };
      
      let finalInstruction = instruction;
@@ -440,6 +455,12 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
           } as WorldView
         });
         break;
+      default:
+        // 未知命令无落库目标：记日志并让调用方感知，避免"审批通过却无事发生"的假闭环
+        logger.warn('addCardToProject: 未知卡片命令', command);
+        // as string：模板字面量类型会干扰 i18next 插值参数推断， widen 后再传
+        dialogService.alert(t('chat.unknownCommand', { text: `/${command}` as string }));
+        break;
     }
   };
 
@@ -471,6 +492,11 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     }
   };
 
+  const syncResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (syncResetTimer.current) clearTimeout(syncResetTimer.current);
+  }, []);
+
   const handleSaveEdit = () => {
     if (Object.keys(editingData).length === 0 || !onUpdate) return;
     
@@ -480,7 +506,8 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       setSyncStatus('saved');
       setEditingData({});
       
-      setTimeout(() => setSyncStatus('idle'), 3000);
+      if (syncResetTimer.current) clearTimeout(syncResetTimer.current);
+      syncResetTimer.current = setTimeout(() => setSyncStatus('idle'), 3000);
     } catch (error) {
       logger.error('Failed to save data:', error);
       setSyncStatus('error');
@@ -643,6 +670,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       
       let characterData: LooseRecord | null = null;
       let parseError: unknown = null;
+      let degradedFromRegex = false;
       let extractedJSON = '';
       
       try {
@@ -677,6 +705,8 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
         const ageMatch = response.content.match(/(?:年龄)[:：\s]*([^\n,，。]+)/i);
         
         if (nameMatch) {
+          // 降级路径：仅姓名可辨，其余字段记空，落库时明确告知用户补全
+          degradedFromRegex = true;
           characterData = {
             name: nameMatch[1]?.trim() ?? '',
             gender: genderMatch ? genderMatch[1]?.trim() ?? '' : 'unknown',
@@ -720,7 +750,15 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
         }
         
         setCharacterGenerationPrompt('');
-        dialogService.alert(t('dialog.characterGenerated'));
+        if (degradedFromRegex) {
+          const missing = ['personality', 'background', 'appearance', 'occupation', 'motivation']
+            .filter((k) => !asStr(characterData[k]).trim());
+          dialogService.alert(t('dialog.characterGeneratedPartial', {
+            fields: missing.map((k) => t(`edit.charGenField.${k}`, k)).join('、'),
+          }));
+        } else {
+          dialogService.alert(t('dialog.characterGenerated'));
+        }
       } else {
         logger.error('Failed to parse character response:', parseError);
         logger.error('Original response:', response.content);

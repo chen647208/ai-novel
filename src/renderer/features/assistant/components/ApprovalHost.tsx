@@ -71,6 +71,12 @@ const ApprovalHost: React.FC = () => {
     setPending(approvalBroker.listPending().map((p) => p.request));
   }, []);
 
+  // 待审箱自刷新：审批解决/超时后 broker 侧状态已变但无推送事件，
+  // 队列长度变化或打开待审箱时重读一次，避免列表 stale
+  useEffect(() => {
+    refreshPending();
+  }, [queue.length, pendingOpen, refreshPending]);
+
   // MCP 出口桥：外部 agent 的写提案落盘于 pending-proposals.jsonl，轮询入待审箱
   useEffect(() => {
     if (!window.electronAPI) return;
@@ -85,16 +91,22 @@ const ApprovalHost: React.FC = () => {
           const base = await api.getAppDataPath();
           const file = `${base}/ai-sessions/pending-proposals.jsonl`;
           const content = await api.readFile(file);
+          const seen = new Set<string>();
           for (const line of content.split('\n')) {
             if (!line.trim()) continue;
             try {
               const req = JSON.parse(line) as ApprovalRequest;
+              if (req.id) seen.add(req.id);
               if (consumed.has(req.id) || !req.id || !req.proposal) continue;
               consumed.add(req.id);
               approvalBroker.addPending(req);
             } catch {
               // 单行损坏跳过
             }
+          }
+          // 已消费但文件里不再出现的 id 剪掉，consumed 不无限增长
+          for (const id of [...consumed]) {
+            if (!seen.has(id)) consumed.delete(id);
           }
           localStorage.setItem('approval.mcp-consumed', JSON.stringify([...consumed]));
           refreshPending();
