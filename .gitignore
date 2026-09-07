@@ -1,5 +1,5 @@
-# 本地项目规范（不入库，只活本地）
-/AGENTS.LOCAL.md
+# 项目规范随仓库版本化（OpenCode 自动加载根目录 AGENTS.md）
+
 
 # Logs
 /logs/
