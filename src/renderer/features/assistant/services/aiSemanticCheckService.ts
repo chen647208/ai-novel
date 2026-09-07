@@ -18,6 +18,7 @@ import { type LooseRecord, asRecord, asRecords, asStr, asNum, asStrArr } from '.
 import { i18n } from '@/i18n';
 import { AIService } from './aiService';
 import { ConsistencyCheckPromptService } from '../../consistency/services/consistencyCheckPromptService';
+import { genderLabel, roleLabel } from '../../characters/displayLabels';
 import { renderWorldDigest } from '@core/ai';
 
 export interface SemanticIssue {
@@ -68,9 +69,9 @@ const DEFAULT_CONFIG: SemanticCheckConfig = {
 function formatCharacterForCheck(char: Character): string {
   return `
 角色名: ${char.name}
-性别: ${char.gender || '未知'}
+性别: ${genderLabel(char.gender)}
 年龄: ${char.age || '未知'}
-身份: ${char.role || '未知'}
+身份: ${roleLabel(char.role)}
 性格: ${char.personality || '未知'}
 外貌: ${char.appearance || '未知'}
 背景: ${char.background || '未知'}

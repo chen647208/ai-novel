@@ -11,6 +11,7 @@ import React from 'react';
 import { useTranslation } from '@/i18n';
 import { type Character } from '../../../shared/types';
 import { roleLabel, genderLabel } from './displayLabels';
+import { normalizeRoleId } from './characterKinds';
 import { cn } from '@/shared/utils/cn';
 import { ChevronRight, Crown, Eye, Info, Skull, Star, User, Users, type LucideIcon } from 'lucide-react';
 
@@ -21,19 +22,18 @@ interface CompactCharacterCardProps {
 
 const CompactCharacterCard: React.FC<CompactCharacterCardProps> = ({ character, onClick }) => {
   const { t } = useTranslation('characters');
-  // 根据角色类型获取颜色和图标（数据值匹配，显示名走 displayLabels 助手）
+  // 根据角色类型获取颜色和图标（枚举比较，与语言无关）
   const getRoleConfig = (role: string): { color: string; icon: LucideIcon } => {
-    const roleLower = role.toLowerCase();
-    if (roleLower.includes('主')) {
-      return { color: 'border-chart-2/25 bg-chart-2/10 text-chart-2', icon: Crown };
+    switch (normalizeRoleId(role, 'other')) {
+      case 'protagonist':
+        return { color: 'border-chart-2/25 bg-chart-2/10 text-chart-2', icon: Crown };
+      case 'antagonist':
+        return { color: 'border-destructive/25 bg-destructive/10 text-destructive', icon: Skull };
+      case 'supporting':
+        return { color: 'border-chart-1/25 bg-chart-1/10 text-chart-1', icon: Users };
+      default:
+        return { color: 'border-border bg-muted text-muted-foreground', icon: User };
     }
-    if (roleLower.includes('反')) {
-      return { color: 'border-destructive/25 bg-destructive/10 text-destructive', icon: Skull };
-    }
-    if (roleLower.includes('配')) {
-      return { color: 'border-chart-1/25 bg-chart-1/10 text-chart-1', icon: Users };
-    }
-    return { color: 'border-border bg-muted text-muted-foreground', icon: User };
   };
 
   const roleConfig = getRoleConfig(character.role);

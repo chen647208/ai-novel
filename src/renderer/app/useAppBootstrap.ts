@@ -20,13 +20,16 @@ import { vectorIntegrationService } from '../features/knowledge/services/vectorI
 import { applyTheme, watchSystemTheme } from '../shared/services/themeService';
 import { logger } from '../shared/utils/logger';
 import { useProjectStore } from './stores/projectStore';
+import { normalizeProjectKinds } from '../features/characters/characterKinds';
 import { useSettingsStore } from './stores/settingsStore';
 import { bootCustomFonts } from '../features/settings/services/customFontService';
 import { composeAppState, seedPersistBaseline, startPersistenceBridge } from './stores/persistenceBridge';
 
 /** 把规范化 AppState 灌入双 store（首启动与全量导入共用）。 */
 export function hydrateStoresFromState(state: typeof INITIAL_APP_STATE): void {
-  useProjectStore.getState().hydrate(state.projects, state.activeProjectId);
+  // D4 入库迁移：人物定位/性别、时间线重要度归一化为枚举 id（幂等，老数据一次归一）
+  const projects = (state.projects ?? []).map(normalizeProjectKinds);
+  useProjectStore.getState().hydrate(projects, state.activeProjectId);
   useSettingsStore.getState().hydrate({
     models: state.models,
     activeModelId: state.activeModelId,

@@ -56,6 +56,7 @@ import {
 import { applySelectionReplacement } from '../../editor/commands';
 import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
+import { roleLabel } from '../characters/displayLabels';
 import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
 import { PROMPT_KNOWLEDGE_TRUNCATE, isVirtualChapter } from '../../../shared/constants/chapters';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
@@ -508,7 +509,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
         if (selectedCharacters.length > 0) {
             const characterInfo = selectedCharacters.map(c => {
                 let info = `【角色：${c.name}】`;
-                if (c.role) info += `\n- 身份/角色：${c.role}`;
+                if (c.role) info += `\n- 身份/角色：${roleLabel(c.role)}`;
                 if (c.personality) info += `\n- 性格特点：${c.personality}`;
                 if (c.background) info += `\n- 背景故事：${c.background}`;
                 if (c.appearance) info += `\n- 外貌特征：${c.appearance}`;
@@ -790,7 +791,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           if (selectedCharacters.length > 0) {
               const characterInfo = selectedCharacters.map(c => {
                   let info = `【角色：${c.name}】`;
-                  if (c.role) info += `\n- 身份/角色：${c.role}`;
+                  if (c.role) info += `\n- 身份/角色：${roleLabel(c.role)}`;
                   if (c.personality) info += `\n- 性格特点：${c.personality}`;
                   if (c.background) info += `\n- 背景故事：${c.background}`;
                   if (c.appearance) info += `\n- 外貌特征：${c.appearance}`;

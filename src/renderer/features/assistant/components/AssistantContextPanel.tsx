@@ -115,7 +115,7 @@ const AssistantContextPanel: React.FC<AssistantContextPanelProps> = ({
             <option key={prompt.id} value={prompt.id}>[{prompt.category}] {templateDisplayName(prompt)}</option>
           ))}
         </Select>
-        <Button className="w-full" size="sm" onClick={onAnalyze} disabled={isLoading || !project}>
+        <Button className="w-full" size="sm" onClick={onAnalyze} disabled={isLoading || !project || !contextContent.trim()}>
           <WandSparkles className="size-4" /> {t('context.analyzeBtn')}
         </Button>
       </div>

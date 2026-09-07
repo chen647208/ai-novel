@@ -26,6 +26,7 @@ import {
 import { vectorIntegrationService } from '../../knowledge/services/vectorIntegrationService';
 import { AIService } from '../../assistant/services/aiService';
 import { ConsistencyCheckPromptService } from './consistencyCheckPromptService';
+import { genderLabel, roleLabel } from '../../characters/displayLabels';
 import { i18n } from '@/i18n';
 
 export interface SimilarityIssue {
@@ -93,9 +94,9 @@ const DEFAULT_CONFIG: VectorCheckConfig = {
 function formatCharacterAsDocument(char: Character): string {
   return `
 角色: ${char.name}
-性别: ${char.gender || '未知'}
+性别: ${genderLabel(char.gender)}
 年龄: ${char.age || '未知'}
-身份: ${char.role || '未知'}
+身份: ${roleLabel(char.role)}
 性格: ${char.personality || '未知'}
 外貌: ${char.appearance || '未知'}
 背景: ${char.background || '无'}

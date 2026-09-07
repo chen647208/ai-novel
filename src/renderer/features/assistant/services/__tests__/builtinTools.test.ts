@@ -25,7 +25,7 @@ function stubProject(): Project {
     intro: '简介',
     characters: [
       {
-        id: 'char1', name: '阿星', gender: '男', age: '20', role: '主角',
+        id: 'char1', name: '阿星', gender: 'male', age: '20', role: 'protagonist',
         personality: '勇敢无畏，遇事冷静', background: '', relationships: '',
         appearance: '', distinctiveFeatures: '', occupation: '', motivation: '',
         strengths: '', weaknesses: '', characterArc: '',

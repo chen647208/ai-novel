@@ -20,6 +20,7 @@ import {
 } from '../../../../shared/types';
 import { asRecord, asRecords, asStr } from '../../../shared/utils/loose';
 import { i18n } from '@/i18n';
+import { roleLabel } from '../../characters/displayLabels';
 import { renderWorldDigest } from '@core/ai';
 import { AIService } from './aiService';
 
@@ -98,9 +99,10 @@ function calculateKeywordRelevance(
     });
   }
   
-  // 角色特殊检查
+  // 角色特殊检查：定位是枚举 id，用显示名与正文匹配（与内容同语言）
   if ('role' in item && item.role) {
-    if (contentLower.includes(item.role.toLowerCase())) {
+    const roleText = roleLabel(String(item.role)).toLowerCase();
+    if (roleText && contentLower.includes(roleText)) {
       score += 3;
     }
   }

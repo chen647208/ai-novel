@@ -10,6 +10,7 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from '@/i18n';
 import { roleLabel } from '../characters/displayLabels';
+import { normalizeRoleId } from '../characters/characterKinds';
 import { Button } from '@/shared/ui/Button';
 import { Dialog, DialogContent } from '@/shared/ui/Dialog';
 import { cn } from '@/shared/utils/cn';
@@ -44,12 +45,14 @@ const NODE_COLORS = {
   worldview: 'var(--color-chart-8)',    // Cyan
 };
 
-// 角色类型映射
+// 角色类型映射（枚举比较，与语言无关）
 const getCharacterColor = (role: string): string => {
-  if (role.includes('主')) return NODE_COLORS.character_main;
-  if (role.includes('反')) return NODE_COLORS.character_villain;
-  if (role.includes('配')) return NODE_COLORS.character;
-  return 'var(--color-chart-gray)'; // Gray for others
+  switch (normalizeRoleId(role, 'other')) {
+    case 'protagonist': return NODE_COLORS.character_main;
+    case 'antagonist': return NODE_COLORS.character_villain;
+    case 'supporting': return NODE_COLORS.character;
+    default: return 'var(--color-chart-gray)'; // Gray for others
+  }
 };
 
 /** 侧栏分组小标题 */
@@ -133,7 +136,7 @@ const WorldViewGraph: React.FC<WorldViewGraphProps> = ({
           x: nodePositions[`char-${char.id}`]?.x ?? (centerX + radius * Math.cos(angle)),
           y: nodePositions[`char-${char.id}`]?.y ?? (centerY + radius * Math.sin(angle)),
           color: getCharacterColor(char.role),
-          size: char.role.includes('主') ? 40 : 30,
+          size: normalizeRoleId(char.role, 'other') === 'protagonist' ? 40 : 30,
           icon: 'user',
           data: char
         });

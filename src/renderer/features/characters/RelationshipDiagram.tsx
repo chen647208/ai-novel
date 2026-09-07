@@ -11,6 +11,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from '@/i18n';
 import { type Character } from '../../../shared/types';
 import { roleLabel } from './displayLabels';
+import { normalizeRoleId } from './characterKinds';
 import { Button } from '@/shared/ui/Button';
 import { Heart, RefreshCw, X } from 'lucide-react';
 
@@ -130,10 +131,12 @@ const RelationshipDiagram: React.FC<RelationshipDiagramProps> = ({ characters, o
   const selectedChar = nodes.find(n => n.id === selectedId);
 
   const getRoleColor = (role: string) => {
-    if (role.includes('主')) return 'var(--color-chart-2)'; // Amber
-    if (role.includes('反')) return 'var(--color-chart-3)'; // Red
-    if (role.includes('配')) return 'var(--color-chart-1)'; // Blue
-    return 'var(--color-chart-gray)'; // Gray
+    switch (normalizeRoleId(role, 'other')) {
+      case 'protagonist': return 'var(--color-chart-2)'; // Amber
+      case 'antagonist': return 'var(--color-chart-3)'; // Red
+      case 'supporting': return 'var(--color-chart-1)'; // Blue
+      default: return 'var(--color-chart-gray)'; // Gray
+    }
   };
 
   return (

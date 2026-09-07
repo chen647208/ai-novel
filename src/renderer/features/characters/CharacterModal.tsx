@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from '@/i18n';
 import { type Character, type Project } from '../../../shared/types';
+import { normalizeGenderId, normalizeRoleId } from './characterKinds';
 import { Button } from '@/shared/ui/Button';
 import {
   Dialog,
@@ -69,25 +70,25 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ character, project, isO
                   <Label className="mb-1 text-xs text-muted-foreground">{t('modal.roleLabel')}</Label>
                   <Select
                     value={character.role}
-                    onChange={(e) => onUpdate({ role: e.target.value })}
+                    onChange={(e) => onUpdate({ role: normalizeRoleId(e.target.value) })}
                   >
-                    {/* value 是存入角色档案的数据值（中文），保持字面；仅展示文案走 i18n */}
-                    <option value="主角">{t('modal.roleOptions.protagonist')}</option>
-                    <option value="反派">{t('modal.roleOptions.antagonist')}</option>
-                    <option value="配角">{t('modal.roleOptions.supporting')}</option>
-                    <option value="其他">{t('modal.roleOptions.other')}</option>
+                    {/* value 存枚举 id，仅展示文案走 i18n */}
+                    <option value="protagonist">{t('modal.roleOptions.protagonist')}</option>
+                    <option value="antagonist">{t('modal.roleOptions.antagonist')}</option>
+                    <option value="supporting">{t('modal.roleOptions.supporting')}</option>
+                    <option value="other">{t('modal.roleOptions.other')}</option>
                   </Select>
                 </div>
                 <div>
                   <Label className="mb-1 text-xs text-muted-foreground">{t('modal.genderLabel')}</Label>
                   <Select
                     value={character.gender}
-                    onChange={(e) => onUpdate({ gender: e.target.value })}
+                    onChange={(e) => onUpdate({ gender: normalizeGenderId(e.target.value) })}
                   >
-                    <option value="男">{t('modal.genderOptions.male')}</option>
-                    <option value="女">{t('modal.genderOptions.female')}</option>
-                    <option value="其他">{t('modal.genderOptions.other')}</option>
-                    <option value="未知">{t('modal.genderOptions.unknown')}</option>
+                    <option value="male">{t('modal.genderOptions.male')}</option>
+                    <option value="female">{t('modal.genderOptions.female')}</option>
+                    <option value="other">{t('modal.genderOptions.other')}</option>
+                    <option value="unknown">{t('modal.genderOptions.unknown')}</option>
                   </Select>
                 </div>
                 <div>

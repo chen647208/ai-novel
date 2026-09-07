@@ -171,8 +171,8 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project }) => {
     const template = prompts.find(p => p.id === selectedPromptId)?.content || '';
     
     // Build a richer character context
-    const charDetails = project.characters.map(c => 
-      `【${c.name}】(${c.role})\n- 性格：${c.personality}\n- 背景：${c.background}\n- 关系：${c.relationships}`
+    const charDetails = project.characters.map(c =>
+      `【${c.name}】(${roleLabel(c.role)})\n- 性格：${c.personality}\n- 背景：${c.background}\n- 关系：${c.relationships}`
     ).join('\n\n');
     
     let finalPrompt = template

@@ -21,6 +21,7 @@ import type { ModelConfig, Project } from '@shared/types';
 import type { IndexSnapshot } from '@core/index';
 import { AICardCreationService } from '@/features/cards/services/aiCardCreationService';
 import { AICardCommandService } from '@/features/cards/services/aiCardCommandService';
+import { roleLabel } from '@/features/characters/displayLabels';
 import {
   performSemanticCheck,
   performQuickSemanticCheck,
@@ -353,6 +354,7 @@ export const characterListTool: ToolSpec = {
           id: c.id,
           name: c.name,
           role: c.role,
+          roleLabel: roleLabel(c.role),
           brief: (c.personality ?? '').slice(0, 120),
         })),
       },

@@ -19,7 +19,9 @@ import { AIService } from './services/aiService';
 import { approvalBroker, sessionManager } from './services/aiRuntime';
 import { indexService } from '@core/index';
 import { AICardCreationService } from '../cards/services/aiCardCreationService';
+import { normalizeGenderId, normalizeRoleId, type CharacterDraft, type CharacterDraftField } from '../characters/characterKinds';
 import { AICardCommandService } from '../cards/services/aiCardCommandService';
+import { genderLabel, roleLabel } from '../characters/displayLabels';
 import { getDefaultCardPrompts } from '../cards/services/cardPromptService';
 import AssistantContextPanel from './components/AssistantContextPanel';
 import AssistantEditPanel from './components/AssistantEditPanel';
@@ -94,19 +96,19 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       
       case 'knowledge': {
         if (subSelectionId === 'all') {
-           return (project.knowledge || []).map(k => `- ${k.name} (${k.type})`).join('\n') || "知识库为空";
+           return (project.knowledge || []).map(k => `- ${k.name} (${k.type})`).join('\n');
         }
         const kItem = project.knowledge?.find(k => k.id === subSelectionId);
-        return kItem ? `【资料：${kItem.name}】\n${kItem.content}` : "未找到资料";
+        return kItem ? `【资料：${kItem.name}】\n${kItem.content}` : '';
       }
-      
+
       case 'characters':
-        if ((project.characters || []).length === 0) return "暂无角色档案";
-        return (project.characters || []).map(c => 
+        if ((project.characters || []).length === 0) return '';
+        return (project.characters || []).map(c =>
           `角色名：${c.name || '未命名'}\n` +
-          `性别：${c.gender || '未知'}\n` +
+          `性别：${genderLabel(c.gender)}\n` +
           `年龄：${c.age || '未知'}\n` +
-          `角色类型：${c.role || '未知'}\n` +
+          `角色类型：${roleLabel(c.role)}\n` +
           `性格：${c.personality || '暂无描述'}\n` +
           `背景：${c.background || '暂无背景'}\n` +
           `关系：${c.relationships || '暂无关系'}\n` +
@@ -120,15 +122,15 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
         ).join('\n\n----------------\n\n');
       
       case 'outline':
-        return project.outline || "暂无大纲内容";
-      
+        return project.outline || '';
+
       case 'chapters': {
         if (subSelectionId === 'all') {
            return [...(project.chapters || [])].sort((a, b) => a.order - b.order)
-             .map(c => `第${c.order + 1}章：${c.title}`).join('\n') || "暂无章节";
+             .map(c => `第${c.order + 1}章：${c.title}`).join('\n');
         }
         const chap = project.chapters?.find(c => c.id === subSelectionId);
-        return chap ? `【第${chap.order + 1}章：${chap.title}】\n\n细纲：\n${chap.summary}` : "未找到章节";
+        return chap ? `【第${chap.order + 1}章：${chap.title}】\n\n细纲：\n${chap.summary}` : '';
       }
         
       default:
@@ -308,6 +310,8 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
   const handleContextAnalyze = () => {
      if (!project) return;
      const content = getContextContent;
+     // 空上下文不发送（该分区暂无内容时保持静默，由空态引导用户先填）
+     if (!content.trim()) return;
      const promptTemplate = prompts.find(p => p.id === analysisPromptId);
      const instruction = promptTemplate ? promptTemplate.content : "请分析以下内容";
      
@@ -476,8 +480,9 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     if (!text) return null;
     
     const cleanLines = text.replace(/[*#_]/g, '').split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    let activeChar: Partial<Character> | null = null;
-    let currentField: keyof Omit<Character, 'birthInfo' | 'ruleSystemLevel' | 'birthDate'> | null = null;
+    // 解析草稿：role/gender 先收原始文本，落库前归一化为枚举 id
+    let activeChar: CharacterDraft | null = null;
+    let currentField: CharacterDraftField | null = null;
 
     cleanLines.forEach(line => {
       const nameMatch = line.match(/^(?:角色名|姓名|名字|名称|身份)[:：\s]*(.*)/i);
@@ -485,12 +490,12 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
         if (activeChar && activeChar.name) {
           return;
         }
-        activeChar = { 
-          id: Math.random().toString(36).substr(2, 9), 
-          name: nameMatch[1]?.trim() ?? '', 
-          gender: '未知',
-          age: '未知', 
-          role: '配角', 
+        activeChar = {
+          id: Math.random().toString(36).substr(2, 9),
+          name: nameMatch[1]?.trim() ?? '',
+          gender: 'unknown',
+          age: '未知',
+          role: 'supporting',
           personality: '', 
           background: '', 
           relationships: '',
@@ -540,14 +545,15 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       }
     });
     
-    const char = activeChar as Partial<Character> | null;
+    // forEach 闭包内的赋值对外层 CFA 不可见：此处断言回完整并集（勿删，否则收窄为 null）
+    const char = activeChar as CharacterDraft | null;
     if (char && char.name) {
       const completeChar: Character = {
         id: char.id || Math.random().toString(36).substr(2, 9),
         name: char.name || '',
-        gender: char.gender || '未知',
+        gender: normalizeGenderId(char.gender),
         age: char.age || '未知',
-        role: char.role || '配角',
+        role: normalizeRoleId(char.role, 'supporting'),
         personality: char.personality || '',
         background: char.background || '',
         relationships: char.relationships || '',
@@ -581,8 +587,8 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
 用户要求：${characterGenerationPrompt}
 
 请生成包含以下字段的完整角色设定：
-- 姓名、性别、年龄
-- 角色定位（主角/配角/反派等）
+- 姓名、性别（male/female/other/unknown）、年龄
+- 角色定位（protagonist/antagonist/supporting/other）
 - 性格特点
 - 背景故事
 - 外貌特征
@@ -662,9 +668,9 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
         if (nameMatch) {
           characterData = {
             name: nameMatch[1]?.trim() ?? '',
-            gender: genderMatch ? genderMatch[1]?.trim() ?? '' : '未知',
+            gender: genderMatch ? genderMatch[1]?.trim() ?? '' : 'unknown',
             age: ageMatch ? ageMatch[1]?.trim() ?? '' : '未知',
-            role: '配角',
+            role: 'supporting',
             personality: '',
             background: '',
             appearance: '',
@@ -682,9 +688,9 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
         const newCharacter: Character = {
           id: Date.now().toString(),
           name: asStr(characterData.name, '未命名角色'),
-          gender: asStr(characterData.gender, '未知'),
+          gender: normalizeGenderId(asStr(characterData.gender)),
           age: asStr(characterData.age, '未知'),
-          role: asStr(characterData.role, '配角'),
+          role: normalizeRoleId(asStr(characterData.role), 'supporting'),
           personality: asStr(characterData.personality, '暂无描述'),
           background: asStr(characterData.background, '暂无背景'),
           relationships: asStr(characterData.relationships),

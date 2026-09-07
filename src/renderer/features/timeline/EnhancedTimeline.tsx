@@ -107,8 +107,8 @@ const EnhancedTimeline: React.FC<EnhancedTimelineProps> = ({
     if (filterType === 'major') {
       items = items.filter(item => {
         if (item.type === 'event') {
-          const eventImpact = (item.data as TimelineEvent).impact;
-          return eventImpact && (eventImpact.includes('重大') || eventImpact.includes('关键') || eventImpact.includes('重要'));
+          // 重要度只读 significance 枚举（老数据入库时已归一化一次）
+          return (item.data as TimelineEvent).significance === 'major';
         }
         return true;
       });
@@ -116,8 +116,7 @@ const EnhancedTimeline: React.FC<EnhancedTimelineProps> = ({
     if (filterType === 'minor') {
       items = items.filter(item => {
         if (item.type === 'event') {
-          const eventImpact = (item.data as TimelineEvent).impact;
-          return !eventImpact || eventImpact.includes(' minor') || eventImpact.includes('次要') || eventImpact.includes('普通');
+          return (item.data as TimelineEvent).significance !== 'major';
         }
         return false;
       });

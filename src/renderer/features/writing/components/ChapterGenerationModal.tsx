@@ -10,6 +10,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { templateDisplayName } from '@/i18n';
+import { roleLabel } from '../../characters/displayLabels';
 import { type OutputMode } from '../../../../shared/types';
 import type { ChapterGenerationModalProps } from '../types';
 import { useSettingsStore } from '../../../app/stores/settingsStore';
@@ -224,7 +225,7 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
                               isSelected ? 'border-primary/30 bg-primary/10 text-primary' : 'border-border bg-muted/40 text-muted-foreground'
                             )}
                           >
-                            {character.role || t('genModal.roleUnspecified')}
+                            {character.role ? roleLabel(character.role) : t('genModal.roleUnspecified')}
                           </span>
                         </div>
                         <div className="mt-1 line-clamp-2 text-xs text-muted-foreground">

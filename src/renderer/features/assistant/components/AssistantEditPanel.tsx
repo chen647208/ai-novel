@@ -13,6 +13,7 @@ import type { AssistantEditPanelProps, AssistantEditCategory } from '../types';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
+import { normalizeGenderId } from '../../characters/characterKinds';
 import { Select } from '@/shared/ui/Select';
 import { Spinner } from '@/shared/ui/Spinner';
 import { Textarea } from '@/shared/ui/Textarea';
@@ -213,9 +214,9 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
                       newCharacters.push({
                         id: `character-${Date.now()}`,
                         name: t('edit.newCharacterName'),
-                        gender: '未知',
+                        gender: 'unknown',
                         age: '未知',
-                        role: '配角',
+                        role: 'supporting',
                         personality: '',
                         background: '',
                         relationships: '',
@@ -253,7 +254,7 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
                           value={character.gender}
                           onChange={(e) => {
                             const newCharacters = [...(editingData.characters || project.characters || [])];
-                            newCharacters[index] = { ...character, gender: e.target.value };
+                            newCharacters[index] = { ...character, gender: normalizeGenderId(e.target.value) };
                             setEditingData(prev => ({ ...prev, characters: newCharacters }));
                           }}
                         />

@@ -19,6 +19,7 @@ import RelationshipDiagram from './RelationshipDiagram';
 import CompactCharacterCard from './CompactCharacterCard';
 import CharacterModal from './CharacterModal';
 import { dialogService } from '@/shared/services/dialogService';
+import { normalizeGenderId, normalizeRoleId, type CharacterDraft, type CharacterDraftField } from './characterKinds';
 import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
@@ -121,8 +122,9 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
   const parseCharactersFromText = (text: string): Character[] => {
     const chars: Character[] = [];
     const cleanLines = text.replace(/[*#_]/g, '').split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    let activeChar: Partial<Character> | null = null;
-    let currentField: keyof Omit<Character, 'birthInfo' | 'ruleSystemLevel' | 'birthDate'> | null = null;
+    // 解析草稿：role/gender 先收原始文本，落库前经 normalizeRoleId/normalizeGenderId 归一化
+    let activeChar: CharacterDraft | null = null;
+    let currentField: CharacterDraftField | null = null;
 
     cleanLines.forEach(line => {
       const nameMatch = line.match(/^(?:角色名|姓名|名字|名称|身份)[:：\s]*(.*)/i);
@@ -132,9 +134,9 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
           const completeChar: Character = {
             id: Math.random().toString(36).substr(2, 9),
             name: activeChar.name || '',
-            gender: activeChar.gender || '未知',
+            gender: normalizeGenderId(activeChar.gender),
             age: activeChar.age || '未知',
-            role: activeChar.role || '主角',
+            role: normalizeRoleId(activeChar.role, 'protagonist'),
             personality: activeChar.personality || '',
             background: activeChar.background || '',
             relationships: activeChar.relationships || '',
@@ -148,12 +150,12 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
           };
           chars.push(completeChar);
         }
-        activeChar = { 
-          id: Math.random().toString(36).substr(2, 9), 
-          name: nameMatch[1]?.trim() ?? '', 
-          gender: '未知',
-          age: '未知', 
-          role: '主角', 
+        activeChar = {
+          id: Math.random().toString(36).substr(2, 9),
+          name: nameMatch[1]?.trim() ?? '',
+          gender: 'unknown',
+          age: '未知',
+          role: 'protagonist',
           personality: '', 
           background: '', 
           relationships: '',
@@ -203,15 +205,16 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
       }
     });
     
-    const char = activeChar as Partial<Character> | null;
+    // forEach 闭包内的赋值对外层 CFA 不可见：此处断言回完整并集（勿删，否则收窄为 null）
+    const char = activeChar as CharacterDraft | null;
     if (char && char.name) {
-      // 为新字段提供默认值
+      // 为新字段提供默认值（定位/性别归一化为枚举 id）
       const completeChar: Character = {
         id: char.id || Math.random().toString(36).substr(2, 9),
         name: char.name || '',
-        gender: char.gender || '未知',
+        gender: normalizeGenderId(char.gender),
         age: char.age || '未知',
-        role: char.role || '主角',
+        role: normalizeRoleId(char.role, 'protagonist'),
         personality: char.personality || '',
         background: char.background || '',
         relationships: char.relationships || '',
@@ -540,9 +543,9 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
                   characters: [...(project.characters || []), {
                     id: Date.now().toString(),
                     name: t('archive.defaultName'),
-                    gender: '未知',
+                    gender: 'unknown' as const,
                     age: '未知',
-                    role: '主角',
+                    role: 'protagonist' as const,
                     personality: '',
                     background: '',
                     relationships: '',

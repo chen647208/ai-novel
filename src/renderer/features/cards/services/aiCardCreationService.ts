@@ -28,6 +28,7 @@ import {
   type CardPromptTemplate
 } from '../../../../shared/types';
 import { type LooseRecord, asRecord, asStr, asNum, asStrArr, asRecords } from '../../../shared/utils/loose';
+import { normalizeGenderId, normalizeImpactId, normalizeRoleId } from '../../characters/characterKinds';
 import { i18n } from '@/i18n';
 import { AICardCommandService } from './aiCardCommandService';
 import { AICardPromptService } from './aiCardPromptService';
@@ -253,8 +254,8 @@ export class AICardCreationService {
     const character: Character = {
       id,
       name: asStr(data.name, '未命名角色'),
-      role: this.normalizeRole(asStr(data.role)),
-      gender: asStr(data.gender, '未知'),
+      role: normalizeRoleId(asStr(data.role)),
+      gender: normalizeGenderId(asStr(data.gender)),
       age: asStr(data.age, '未知'),
       personality: asStr(data.personality),
       appearance: asStr(data.appearance),
@@ -269,18 +270,6 @@ export class AICardCreationService {
     };
     
     return character;
-  }
-
-  /**
-   * 标准化角色类型
-   */
-  private static normalizeRole(role: string): string {
-    if (!role) return '配角';
-    const normalized = role.trim();
-    if (normalized.includes('主')) return '主角';
-    if (normalized.includes('反')) return '反派';
-    if (normalized.includes('配')) return '配角';
-    return normalized || '配角';
   }
 
   /**
@@ -379,13 +368,15 @@ export class AICardCreationService {
       display: asStr(rawDate.display) || `${year}`,
     };
     
+    const impact = asStr(data.impact);
     const event: TimelineEvent = {
       id,
       title: asStr(data.title, '未命名事件'),
       description: asStr(data.description),
       date,
       type: this.normalizeEventType(asStr(data.type)),
-      impact: asStr(data.impact),
+      impact,
+      significance: normalizeImpactId(impact),
       relatedCharacterIds: asStrArr(data.relatedCharacters),
       relatedLocationIds: asStrArr(data.relatedLocations),
     };

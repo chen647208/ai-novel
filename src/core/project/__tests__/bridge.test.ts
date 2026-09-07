@@ -21,7 +21,7 @@ function richProject(): Project {
     outline: '三幕大纲',
     characters: [
       {
-        id: 'c1', name: '林渊', gender: '男', age: '25', role: '主角',
+        id: 'c1', name: '林渊', gender: 'male', age: '25', role: 'protagonist',
         personality: '冷静', background: '', relationships: '与苏雪敌对',
         appearance: '', distinctiveFeatures: '', occupation: '剑客',
         motivation: '复仇', strengths: '', weaknesses: '', characterArc: '',

@@ -494,6 +494,19 @@ export const TimelineEditor: React.FC<TimelineEditorProps> = ({
                 />
               </div>
 
+              {/* 重要度（过滤用枚举，与语言无关） */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">{t('editor.significanceLabel')}</Label>
+                <Select
+                  value={selectedEvent.significance ?? ''}
+                  onChange={(e) => updateEvent(selectedEvent.id, { significance: (e.target.value || undefined) as TimelineEvent['significance'] })}
+                >
+                  <option value="">{t('editor.noLink')}</option>
+                  <option value="major">{t('editor.significanceMajor')}</option>
+                  <option value="minor">{t('editor.significanceMinor')}</option>
+                </Select>
+              </div>
+
               {/* 关联章节 */}
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">{t('editor.relatedChapterLabel')}</Label>

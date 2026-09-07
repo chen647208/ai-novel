@@ -127,9 +127,9 @@ export type AiStreamEvent =
 export interface Character {
   id: string;
   name: string;
-  gender: string;          // 新增：性别
+  gender: CharacterGenderId;
   age: string;
-  role: string; // 角色类型（主角、反派、配角等）
+  role: CharacterRoleId; // 角色类型（枚举 id，显示经 displayLabels + 字典）
   personality: string;
   background: string;
   relationships: string;
@@ -480,6 +480,8 @@ export interface TimelineEvent {
   type: 'plot' | 'character' | 'world' | 'faction' | 'battle' | 'discovery' | 'other';
   /** 事件影响 */
   impact?: string;
+  /** 事件重要度（过滤用枚举；缺席的老数据由迁移按关键词归一化一次） */
+  significance?: TimelineImpactId;
   /** 关联角色ID列表 */
   relatedCharacterIds?: string[];
   /** 关联地点ID列表 */
@@ -669,6 +671,15 @@ export interface Foreshadow {
   createdAt: number;
   updatedAt: number;
 }
+
+// ========== 人物/时间线枚举 id（存储与比较只用枚举，显示经字典） ==========
+
+/** 角色定位：主角 / 反派 / 配角 / 其他 */
+export type CharacterRoleId = 'protagonist' | 'antagonist' | 'supporting' | 'other';
+/** 性别：男 / 女 / 其他 / 未知 */
+export type CharacterGenderId = 'male' | 'female' | 'other' | 'unknown';
+/** 时间线事件重要度：重大 / 次要（过滤用；impact 自由文本保留） */
+export type TimelineImpactId = 'major' | 'minor';
 
 // ========== 项目数据模型 ==========
 

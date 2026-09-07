@@ -29,6 +29,7 @@ import { Textarea } from '@/shared/ui/Textarea';
 import { BookOpen, BookOpenText, Check, CheckCheck, ChevronDown, ChevronRight, ChevronUp, Clock, FastForward, FileOutput, Flag, Globe2, Layers, LayoutGrid, LayoutList, ListOrdered, MapPin, PenTool, Trash2, WandSparkles, XCircle } from 'lucide-react';
 import { useViewPreference } from '@/shared/hooks/useViewPreference';
 import { ViewModeToggle } from '@/shared/ui/ViewModeToggle';
+import { roleLabel } from '../characters/displayLabels';
 
 interface StepChapterOutlineProps {
   project: Project;
@@ -165,7 +166,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
   const buildChapterContextBlock = (p: Project): string => {
     const charDetails = (p.characters ?? [])
       .slice(0, 12)
-      .map((c) => `【${c.name}】(${c.role})：${c.personality ?? ''}`)
+      .map((c) => `【${c.name}】(${roleLabel(c.role)})：${c.personality ?? ''}`)
       .join('\n');
     const parts = ['', '### 本书设定（规划细纲必须服从）', `书名：《${p.title}》`];
     if (p.intro?.trim()) parts.push(`简介：${p.intro}`);

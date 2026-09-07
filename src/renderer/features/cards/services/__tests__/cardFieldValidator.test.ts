@@ -19,9 +19,9 @@ describe('validateAndCompleteCardData', () => {
   it('完整数据应通过校验并保留原值', () => {
     const data = {
       name: '林晚',
-      gender: '女',
+      gender: 'female',
       age: '24',
-      role: '主角',
+      role: 'protagonist',
       personality: '冷静',
       appearance: '黑发',
       background: '孤儿',
@@ -41,12 +41,12 @@ describe('validateAndCompleteCardData', () => {
     expect(result.completedData.projectId).toBe('proj-1');
   });
 
-  it('缺失必填字段应使用默认值补全并标记无效', () => {
+  it('缺失必填字段应使用枚举默认值补全并标记无效', () => {
     const result = validateAndCompleteCardData('character', { name: '甲' }, 'proj-2');
     expect(result.isValid).toBe(false);
     expect(result.missingFields).toContain('gender');
-    expect(result.completedData.gender).toBe('未知');
-    expect(result.completedData.role).toBe('配角');
+    expect(result.completedData.gender).toBe('unknown');
+    expect(result.completedData.role).toBe('supporting');
   });
 
   it('空字符串视为缺失', () => {

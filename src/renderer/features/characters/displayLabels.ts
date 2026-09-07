@@ -11,22 +11,22 @@ import { dt } from '@/i18n';
 
 /**
  * 角色/性别显示名助手。
- * 角色档案中 role/gender 存储的是中文数据值（与 CharacterModal 的 option value 一致，
- * 且由 AI 解析生成），显示时把已知枚举值映射到 characters 命名空间译文，
- * 自由文本（如 AI 给出的「亦正亦邪」）原样展示。
+ * 存储与比较只用枚举 id（normalizeRoleId/normalizeGenderId 归一化），
+ * 显示时把枚举映射到 characters 命名空间译文；未知字符串原样展示
+ * （过渡期兜底，不做中文匹配）。
  */
 const ROLE_KEYS: Record<string, string> = {
-  '主角': 'characters:modal.roleOptions.protagonist',
-  '反派': 'characters:modal.roleOptions.antagonist',
-  '配角': 'characters:modal.roleOptions.supporting',
-  '其他': 'characters:modal.roleOptions.other',
+  protagonist: 'characters:modal.roleOptions.protagonist',
+  antagonist: 'characters:modal.roleOptions.antagonist',
+  supporting: 'characters:modal.roleOptions.supporting',
+  other: 'characters:modal.roleOptions.other',
 };
 
 const GENDER_KEYS: Record<string, string> = {
-  '男': 'characters:modal.genderOptions.male',
-  '女': 'characters:modal.genderOptions.female',
-  '其他': 'characters:modal.genderOptions.other',
-  '未知': 'characters:modal.genderOptions.unknown',
+  male: 'characters:modal.genderOptions.male',
+  female: 'characters:modal.genderOptions.female',
+  other: 'characters:modal.genderOptions.other',
+  unknown: 'characters:modal.genderOptions.unknown',
 };
 
 /** 角色类型显示名（按调用时语言）。 */

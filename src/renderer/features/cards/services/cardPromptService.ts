@@ -40,9 +40,9 @@ export function getDefaultCardPrompts(): CardPromptTemplate[] {
 请生成JSON格式数据（**必须包含所有字段**）：
 {
   "name": "角色姓名（必填）",
-  "gender": "性别：男/女/未知",
+  "gender": "性别枚举：male/female/other/unknown",
   "age": "年龄描述（如'25岁'、'看上去20岁实际300岁'）",
-  "role": "角色类型：主角/反派/配角/其他",
+  "role": "角色类型枚举：protagonist/antagonist/supporting/other",
   "personality": "性格特征详细描述（不能为空字符串）",
   "appearance": "外貌描述：身高、体型、发色、眼睛颜色等（不能为空字符串）",
   "background": "背景故事（不能为空字符串）",
@@ -71,9 +71,9 @@ export function getDefaultCardPrompts(): CardPromptTemplate[] {
       ],
       fieldDescriptions: {
         name: '角色姓名（必填）',
-        gender: '性别：男/女/未知',
+        gender: '性别枚举：male/female/other/unknown',
         age: '年龄描述',
-        role: '角色类型：主角/反派/配角',
+        role: '角色类型枚举：protagonist/antagonist/supporting/other',
         personality: '性格特征详细描述',
         appearance: '外貌描述：身高、体型、发色等',
         background: '背景故事',

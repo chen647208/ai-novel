@@ -38,9 +38,9 @@ export interface FieldDefinition {
 export const CardFieldDefinitions: Record<AICardCommand, FieldDefinition[]> = {
   'character': [
     { name: 'name', type: 'string', required: true, defaultValue: '未命名角色', description: '角色姓名' },
-    { name: 'gender', type: 'string', required: true, defaultValue: '未知', description: '性别' },
+    { name: 'gender', type: 'string', required: true, defaultValue: 'unknown', description: '性别（male/female/other/unknown）' },
     { name: 'age', type: 'string', required: true, defaultValue: '未知', description: '年龄' },
-    { name: 'role', type: 'string', required: true, defaultValue: '配角', description: '角色类型' },
+    { name: 'role', type: 'string', required: true, defaultValue: 'supporting', description: '角色类型（protagonist/antagonist/supporting/other）' },
     { name: 'personality', type: 'string', required: true, defaultValue: '', description: '性格特征' },
     { name: 'appearance', type: 'string', required: true, defaultValue: '', description: '外貌描述' },
     { name: 'background', type: 'string', required: true, defaultValue: '', description: '背景故事' },
