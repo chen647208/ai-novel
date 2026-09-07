@@ -12,16 +12,13 @@
 ## CI（持续集成）
 
 - 在 `ubuntu-latest` 上执行，安装依赖用 `npm ci`（锁定 `package-lock.json`），Node 依赖缓存 + 同分支新提交取消旧任务，不浪费分钟数。
-- `verify` 作业（每次必跑）：
-  1. `npm run lint`：ESLint 严格模式。
-  2. `npm run typecheck:all`：渲染层与主进程 strict 类型检查（含 `noUnusedLocals`，拦截死代码）。
-  3. `npm run test:coverage`：vitest 全量单元测试 + 覆盖率分层锁线（与本地 `verify` 一致）。
-  4. `npm run headers:check`：许可证声明头。
-  5. 密钥扫描：密钥模式零命中门禁。
+- `verify` 作业（每次必跑）：`npm ci` 后跑同一条 `npm run verify` 链
+  （预检 lock 同步 → lint → typecheck:all → test:coverage → headers:check → scan:secrets → electron:build），
+  与本地完全一致，不再逐项手写步骤。
 - 文风不进 CI：只写现在、直述句、中性简洁三条标准只在 review 时人工把关
   （标准与正反例见 `CONTRIBUTING.md`）。原因：语气修辞机器判不准，
   机械匹配曾经误杀过引用规则自身的文档。
-- `build` 作业（重型）：仅非文档改动时跑，`npm run electron:build` + `npm run check:icons`。纯文档 PR 跳过构建。
+- `build` 作业（重型）：仅非文档改动时跑，图标校验 + E2E。纯文档 PR 跳过本作业（`verify` 链内构建仍跑，约 10 秒）。
 
 ## Release（发布）
 

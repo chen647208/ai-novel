@@ -30,7 +30,7 @@ npm run electron:dev        # 开发模式（Vite + Electron）
 请在本地跑与 CI 一致的完整校验：
 
 ```bash
-npm run verify              # = typecheck:all + test + headers:check + electron:build
+npm run verify              # 单链全门禁：lock 预检 + lint + typecheck:all + test:coverage + headers + secrets + electron:build
 ```
 
 - 类型检查为 strict 且开启 `noUnusedLocals`（不要引入未使用的导入/变量）。

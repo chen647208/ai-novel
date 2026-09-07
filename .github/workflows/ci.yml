@@ -52,21 +52,8 @@ jobs:
       - name: 安装依赖
         run: npm ci
 
-      - name: 代码规范检查（ESLint 严格模式）
-        run: npm run lint
-
-      - name: 类型检查（渲染层 + 主进程，strict）
-        run: npm run typecheck:all
-
-      - name: 单元测试（含覆盖率分层锁线，与本地 verify 一致）
-        run: npm run test:coverage
-
-      - name: 校验许可证声明头（AGPL-3.0 / SPDX）
-        run: npm run headers:check
-
-      - name: 密钥扫描（零命中门禁）
-        run: |
-          ! git grep -nE 'sk-[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{35}|-----BEGIN [A-Z ]*PRIVATE KEY|xox[bap]-' -- . ':!package-lock.json'
+      - name: 全部门禁（与本地同一条 npm run verify 链）
+        run: npm run verify
 
   build:
     name: 构建校验（Electron）
