@@ -17,6 +17,7 @@ import { Label } from '@/shared/ui/Label';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
 import { cn } from '@/shared/utils/cn';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
 import { WandSparkles } from 'lucide-react';
 
 const WritingEditModal: React.FC<WritingEditModalProps> = ({
@@ -38,7 +39,8 @@ const WritingEditModal: React.FC<WritingEditModalProps> = ({
   onSubmit,
 }) => {
   const { t } = useTranslation('writing');
-  const streamingSupported = activeModel ? activeModel.supportsStreaming !== false : false;
+  const streamingSupported = isModelUsable(activeModel) ? activeModel.supportsStreaming !== false : false;
+  const hasModel = isModelUsable(activeModel);
   return (
     <Dialog
       open={isOpen}
@@ -115,7 +117,7 @@ const WritingEditModal: React.FC<WritingEditModalProps> = ({
                 </span>
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                {!activeModel
+                {!hasModel
                   ? t('output.noModelHint')
                   : streamingSupported
                     ? t('output.onHint', { name: activeModel.name })
@@ -152,7 +154,7 @@ const WritingEditModal: React.FC<WritingEditModalProps> = ({
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <Button variant="ghost" onClick={onClose}>{t('editModal.cancel')}</Button>
-            <Button onClick={onSubmit} disabled={!activeModel} title={!activeModel ? t('output.noModelHint') : undefined}>
+            <Button onClick={onSubmit} disabled={!hasModel} title={!hasModel ? t('output.noModelHint') : undefined}>
               <WandSparkles className="size-4" /> {t('editModal.runNow')}
             </Button>
           </div>

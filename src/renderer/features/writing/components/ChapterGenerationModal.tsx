@@ -14,6 +14,7 @@ import { roleLabel } from '../../characters/displayLabels';
 import { type OutputMode } from '../../../../shared/types';
 import type { ChapterGenerationModalProps } from '../types';
 import { useSettingsStore } from '../../../app/stores/settingsStore';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
 import { Button } from '@/shared/ui/Button';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
 import { Input } from '@/shared/ui/Input';
@@ -105,7 +106,8 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
   const { t } = useTranslation('writing');
   const prevTitlePart = modalContextInfo.prevChapter ? `《${modalContextInfo.prevChapter.title}》` : '';
   const nextTitlePart = modalContextInfo.nextChapter ? `《${modalContextInfo.nextChapter.title}》` : '';
-  const streamingSupported = activeModel ? activeModel.supportsStreaming !== false : false;
+  const streamingSupported = isModelUsable(activeModel) ? activeModel.supportsStreaming !== false : false;
+  const hasModel = isModelUsable(activeModel);
   const summaryChapters = [...project.chapters]
     .sort((a, b) => a.order - b.order)
     .filter((chapter) => chapter.contentSummary && chapter.contentSummary.trim().length > 0);
@@ -433,7 +435,7 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
                 onChange={(e) => useSettingsStore.getState().setActiveModelId(e.target.value)}
                 className="mb-2 font-medium"
               >
-                {!activeModel && <option value="">{t('genModal.noModelOption')}</option>}
+                {!hasModel && <option value="">{t('genModal.noModelOption')}</option>}
                 {useSettingsStore.getState().models.filter((m) => m.isEnabled !== false).map((m) => (
                   <option key={m.id} value={m.id}>{m.name}</option>
                 ))}
@@ -459,7 +461,7 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
                   </span>
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  {!activeModel
+                  {!hasModel
                     ? t('output.noModelHint')
                     : streamingSupported
                       ? t('output.onHint', { name: activeModel.name })
@@ -497,7 +499,7 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
             </div>
             <div className="flex shrink-0 items-center gap-2">
               <Button variant="ghost" onClick={handleEnterEditor}>{t('genModal.editorOnly')}</Button>
-              <Button onClick={handleModalGenerate} disabled={!activeModel} title={!activeModel ? t('output.noModelHint') : undefined}>
+              <Button onClick={handleModalGenerate} disabled={!hasModel} title={!hasModel ? t('output.noModelHint') : undefined}>
                 <WandSparkles className="size-4" /> {t('genModal.confirmGenerate')}
               </Button>
             </div>

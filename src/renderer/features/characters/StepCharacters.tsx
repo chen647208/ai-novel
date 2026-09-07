@@ -7,6 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 import { logger } from '@/shared/utils/logger';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation, templateDisplayName } from '@/i18n';
@@ -236,7 +237,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
       dialogService.alert(t('noInspiration'));
       return;
     }
-    if (!activeModel) {
+    if (!isModelUsable(activeModel)) {
       dialogService.alert(t('steps:common.noModel'));
       return;
     }
@@ -406,7 +407,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
               </div>
 
               {/* 生成按钮（无模型时禁用，手写不受影响） */}
-              <Button className="w-full" onClick={generateCharacters} disabled={loading || !activeModel} title={!activeModel ? t('steps:common.noModel') : undefined}>
+              <Button className="w-full" onClick={generateCharacters} disabled={loading || !isModelUsable(activeModel)} title={!isModelUsable(activeModel) ? t('steps:common.noModel') : undefined}>
                 {loading ? <Spinner className="size-4" /> : <WandSparkles className="size-4" />}
                 <span>{loading ? t('generating') : t('generateBtn')}</span>
               </Button>

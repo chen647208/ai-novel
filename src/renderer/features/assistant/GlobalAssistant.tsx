@@ -15,6 +15,7 @@ import { useProjectStore } from '@/app/stores/projectStore';
 import { ATTACHMENT_TRUNCATE } from '../../../shared/constants/chapters';
 import { type GlobalAssistantProps, type ChatMessage, type AssistantCategory, type AssistantEditCategory, type SyncStatus, type EditingData } from './types';
 import { type LooseRecord, asRecord, asStr } from '../../shared/utils/loose';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
 import { AIService } from './services/aiService';
 import { approvalBroker, sessionManager } from './services/aiRuntime';
 import { indexService } from '@core/index';
@@ -41,11 +42,6 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const firstEnabledModel = models.find((m) => m.isEnabled !== false) ?? models[0];
-  // 单源可用模型：三处 AI 入口共用，isEnabled 过滤一致
-  const usableModel = models.find((m) => m.id === currentModelId && m.isEnabled !== false)
-    ?? models.find((m) => m.isEnabled !== false)
-    ?? models[0];
-  const hasModel = Boolean(usableModel);
   const updateActiveProject = useProjectStore((s) => s.updateActiveProject);
   // AI 产物归因：助手生成的卡片/角色标注来源，用户手改走 onUpdate 默认 user
   const commitAICard = (updates: Partial<Project>) =>
@@ -59,6 +55,12 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     setCurrentModelId(id);
     useSettingsStore.getState().setActiveModelId(id);
   };
+  // 单源可用模型：三处 AI 入口共用，isEnabled 过滤一致（须在 currentModelId 声明之后）
+  const usableModel = models.find((m) => m.id === currentModelId && m.isEnabled !== false)
+    ?? models.find((m) => m.isEnabled !== false)
+    ?? models[0];
+  // 可用 = 已启用 && 已配好凭证：默认模型未填 Key 时按钮禁用，与全屏拦截同口径
+  const hasModel = isModelUsable(usableModel);
   const [pendingFiles, setPendingFiles] = useState<KnowledgeItem[]>([]);
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
   const [outputMode, setOutputMode] = useState<OutputMode>('streaming');
@@ -168,7 +170,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       
       const activeModel = usableModel;
 
-      if (!activeModel) {
+      if (!isModelUsable(activeModel)) {
         const errorMsg: ChatMessage = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
@@ -239,7 +241,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     setIsLoading(true);
 
     const activeModel = usableModel;
-    if (!activeModel) {
+    if (!isModelUsable(activeModel)) {
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -314,7 +316,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
 
   const handleContextAnalyze = () => {
      if (!project) return;
-     if (!usableModel) {
+     if (!hasModel) {
        dialogService.alert(t('dialog.noModel'));
        return;
      }
@@ -585,7 +587,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     setIsGeneratingCharacter(true);
     try {
       const activeModel = usableModel;
-      if (!activeModel) {
+      if (!isModelUsable(activeModel)) {
         dialogService.alert(t('dialog.noModel'));
         return;
       }

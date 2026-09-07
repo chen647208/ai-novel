@@ -7,6 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 import { logger } from '@/shared/utils/logger';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
 
 import React, { useState, useMemo } from 'react';
 import { useTranslation, i18n, templateDisplayName } from '@/i18n';
@@ -179,7 +180,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
       dialogService.alert(t('steps:chapters.noOutline'));
       return;
     }
-    if (!activeModel) {
+    if (!isModelUsable(activeModel)) {
       dialogService.alert(t('steps:common.noModel'));
       return;
     }
@@ -409,13 +410,13 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
             {chapterPrompts.map(p => <option key={p.id} value={p.id}>{templateDisplayName(p)}</option>)}
           </Select>
           <div className="flex items-center gap-2">
-            <Button onClick={() => generateChapters(false)} disabled={loading || continueLoading || !activeModel} title={!activeModel ? t('steps:common.noModel') : undefined}>
+            <Button onClick={() => generateChapters(false)} disabled={loading || continueLoading || !isModelUsable(activeModel)} title={!isModelUsable(activeModel) ? t('steps:common.noModel') : undefined}>
               {loading ? <Spinner className="size-4" /> : <WandSparkles className="size-4" />}
               {loading ? t('steps:chapters.generating') : t('steps:chapters.regenerate')}
             </Button>
 
             {project.chapters.length > 0 && (
-              <Button variant="outline" onClick={() => generateChapters(true)} disabled={loading || continueLoading || !activeModel} title={!activeModel ? t('steps:common.noModel') : undefined}>
+              <Button variant="outline" onClick={() => generateChapters(true)} disabled={loading || continueLoading || !isModelUsable(activeModel)} title={!isModelUsable(activeModel) ? t('steps:common.noModel') : undefined}>
                 {continueLoading ? <Spinner className="size-4" /> : <FastForward className="size-4" />}
                 {continueLoading ? t('steps:chapters.continuing') : t('steps:chapters.continueBtn')}
               </Button>
@@ -502,7 +503,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
                     description={t('steps:chapters.emptyHint')}
                     action={
                       project.outline?.trim() ? (
-                        <Button onClick={() => generateChapters(false)} disabled={loading || !activeModel}>
+                        <Button onClick={() => generateChapters(false)} disabled={loading || !isModelUsable(activeModel)}>
                           {t('steps:chapters.generateNow')}
                         </Button>
                       ) : undefined

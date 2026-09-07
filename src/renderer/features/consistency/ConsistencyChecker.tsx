@@ -7,6 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 import { logger } from '@/shared/utils/logger';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
 
 /**
  * 世界观一致性检查面板
@@ -72,7 +73,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
     if (checkMode === 'vector' && !embeddingConfig) {
       dialogService.alert(t('consistency:needEmbedding'));
       configValid = false;
-    } else if ((checkMode === 'ai' || checkMode === 'hybrid') && !model) {
+    } else if ((checkMode === 'ai' || checkMode === 'hybrid') && !isModelUsable(model)) {
       dialogService.alert(t('consistency:needModel'));
       configValid = false;
     }
@@ -128,7 +129,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
         };
 
         setCheckResult(standardResult);
-      } else if ((checkMode === 'ai' || checkMode === 'hybrid') && model) {
+      } else if ((checkMode === 'ai' || checkMode === 'hybrid') && isModelUsable(model)) {
         // AI 或混合检查
         const templates: Record<string, ConsistencyCheckPromptTemplate> = {};
         consistencyPrompts.forEach(p => {
@@ -304,7 +305,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
               </span>
             </div>
           )}
-          {(checkMode === 'ai' || checkMode === 'hybrid') && !model && (
+          {(checkMode === 'ai' || checkMode === 'hybrid') && !isModelUsable(model) && (
             <div className="flex flex-1 items-center gap-2 rounded-lg border border-warning/20 bg-warning/10 px-3 py-2">
               <AlertTriangle className="size-4 shrink-0 text-warning" />
               <span className="text-sm text-warning">
@@ -313,12 +314,12 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
             </div>
           )}
           {((checkMode === 'vector' && embeddingConfig) ||
-            ((checkMode === 'ai' || checkMode === 'hybrid') && model)) && (
+            ((checkMode === 'ai' || checkMode === 'hybrid') && isModelUsable(model))) && (
             <div className="flex flex-1 items-center gap-2 rounded-lg border border-success/20 bg-success/10 px-3 py-2">
               <CheckCircle2 className="size-4 shrink-0 text-success" />
               <span className="text-sm text-success">
                 {checkMode === 'vector' && embeddingConfig && t('consistency:configured', { name: embeddingConfig.name })}
-                {(checkMode === 'ai' || checkMode === 'hybrid') && model && t('consistency:configured', { name: model.name })}
+                {(checkMode === 'ai' || checkMode === 'hybrid') && isModelUsable(model) && t('consistency:configured', { name: model.name })}
               </span>
             </div>
           )}

@@ -26,6 +26,7 @@ import { MarkdownView } from '@/shared/ui/Markdown';
 import { DslEditor } from '@/editor/cm6/DslEditor';
 import { collectProjectTags } from '@/editor/cm6/projectTags';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
 import { resolveTheme } from '@/shared/services/themeService';
 
 interface StepOutlineProps {
@@ -72,7 +73,7 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project }) => {
   // 流式回调处理函数
   const handleStreamingChunk = (response: StreamingAIResponse, finalPrompt?: string) => {
     // 无模型时不该进到这里（generateOutline 已拦截）：防御性直接返回
-    if (!activeModel) return;
+    if (!isModelUsable(activeModel)) return;
     // 契约：response.content 为累计全文，直接替换（旧实现按增量累加导致内容重复）
     if (response.content) {
       setStreamingContent(response.content);
@@ -157,7 +158,7 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project }) => {
   };
 
   const generateOutline = async () => {
-    if (!activeModel) {
+    if (!isModelUsable(activeModel)) {
       dialogService.alert(t('steps:common.noModel'));
       return;
     }
@@ -307,7 +308,7 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project }) => {
               </Button>
             </>
           ) : (
-            <Button onClick={generateOutline} disabled={loading || !activeModel} title={!activeModel ? t('steps:common.noModel') : undefined}>
+            <Button onClick={generateOutline} disabled={loading || !isModelUsable(activeModel)} title={!isModelUsable(activeModel) ? t('steps:common.noModel') : undefined}>
               {loading ? <Spinner className="size-4" /> : <ListTree className="size-4" />}
               {loading ? t('steps:outline.generating') : t('steps:outline.generateBtn')}
             </Button>

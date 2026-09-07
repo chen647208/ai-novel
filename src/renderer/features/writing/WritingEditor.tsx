@@ -60,12 +60,13 @@ import { roleLabel } from '../characters/displayLabels';
 import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
 import { PROMPT_KNOWLEDGE_TRUNCATE, isVirtualChapter } from '../../../shared/constants/chapters';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
 
 const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId, onBack }) => {
   const { t } = useTranslation(['writing', 'steps']);
   // 直读 store：模型/提示词/更新动作不再经 App→View 层层透传
   const prompts = useSettingsStore((s) => s.prompts);
-  // 手写 bypass 下可能为 undefined：AI 入口各自守卫，调用前收窄
+  // 手写 bypass 下可能为 undefined，未填凭证的默认模型也不可用：AI 入口各自守卫，调用前收窄
   const activeModel = useUsableModel();
   const updateActiveProject = useProjectStore((s) => s.updateActiveProject);
   const onUpdate = useCallback(
@@ -456,7 +457,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const runAITemplate = async (template: PromptTemplate, overrideContent?: string) => {
     const targetChapter = genModal.chapter || activeChapter;
     if (!targetChapter) return;
-    if (!activeModel) {
+    if (!isModelUsable(activeModel)) {
       dialogService.alert(t('steps:common.noModel'));
       return;
     }
@@ -934,7 +935,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const runBatchGeneration = async () => {
     const template = prompts.find(p => p.id === selectedGenPromptId);
     if (!template || !genModal.chapter) return;
-    if (!activeModel) {
+    if (!isModelUsable(activeModel)) {
       dialogService.alert(t('steps:common.noModel'));
       return;
     }
@@ -1075,7 +1076,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   };
 
   const handleExtractSummary = async () => {
-    if (!activeModel) {
+    if (!isModelUsable(activeModel)) {
       dialogService.alert(t('steps:common.noModel'));
       return;
     }
@@ -1164,7 +1165,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
         onExportFormatChange={setExportFormat}
         onConfirmExport={handleExecuteExport}
         menuPos={menuPos}
-        hasModel={Boolean(activeModel)}
+        hasModel={isModelUsable(activeModel)}
         onOpenEditModal={openEditModal}
         onClearSelection={clearSelectionMenu}
         isHistoryViewerOpen={isHistoryViewerOpen}
@@ -1188,7 +1189,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           summaryPrompts={summaryPrompts}
           selectedSummaryPromptId={selectedSummaryPromptId}
           isExtractingSummary={isExtractingSummary}
-          hasModel={Boolean(activeModel)}
+          hasModel={isModelUsable(activeModel)}
           onClose={() => setIsSidebarOpen(false)}
           onChapterSummaryChange={updateChapterSummary}
           onOpenSummaryPromptManager={handleOpenSummaryPromptManager}

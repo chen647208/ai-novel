@@ -45,8 +45,9 @@ export function isModelConfigured(model: ModelConfig | null | undefined): boolea
 /**
  * 可用 = 已启用 && 已配置。停用的渠道不参与 activeModel 兜底与生成守卫，
  * 与 Cherry Studio 的 provider.isEnabled 语义一致。
+ * 类型谓词：返回 true 时调用方可直接把模型当 ModelConfig 用。
  */
-export function isModelUsable(model: ModelConfig | null | undefined): boolean {
+export function isModelUsable(model: ModelConfig | null | undefined): model is ModelConfig {
   if (!model) return false;
   if (model.isEnabled === false) return false;
   return isModelConfigured(model);

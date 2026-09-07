@@ -18,6 +18,7 @@ import { Select } from '@/shared/ui/Select';
 import { SegmentedControl } from '@/shared/ui/ViewModeToggle';
 import { Textarea } from '@/shared/ui/Textarea';
 import { cn } from '@/shared/utils/cn';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
 import { Plus, Sprout, WandSparkles } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
 import {
@@ -88,7 +89,7 @@ const ForeshadowPanel: React.FC<ForeshadowPanelProps> = ({
   };
 
   const handleDetect = async () => {
-    if (!activeModel) {
+    if (!isModelUsable(activeModel)) {
       dialogService.alert(t('foreshadow:detectNoModel'));
       return;
     }
@@ -170,7 +171,7 @@ const ForeshadowPanel: React.FC<ForeshadowPanelProps> = ({
               { value: 'all' as const, label: t('foreshadow:filterAll') },
             ]}
           />
-          <Button variant="secondary" size="sm" onClick={handleDetect} disabled={detecting || !activeModel} title={!activeModel ? t('foreshadow:detectNoModel') : t('foreshadow:detectTitle')}>
+          <Button variant="secondary" size="sm" onClick={handleDetect} disabled={detecting || !isModelUsable(activeModel)} title={!isModelUsable(activeModel) ? t('foreshadow:detectNoModel') : t('foreshadow:detectTitle')}>
             {detecting ? <Spinner className="size-3.5" /> : <WandSparkles className="size-3.5" />}
             {detecting ? t('foreshadow:detecting') : t('foreshadow:detectBtn')}
           </Button>

@@ -8,6 +8,7 @@
  */
 
 import { logger } from '../../shared/utils/logger';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation, i18n, templateDisplayName } from '@/i18n';
 import { type Project, type KnowledgeItem, type StreamingAIResponse, type OutputMode } from '../../../shared/types';
@@ -91,7 +92,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, onGoSection 
   // 流式回调处理函数
   const handleStreamingChunk = (response: StreamingAIResponse, finalPrompt?: string) => {
     // 无模型时不该进到这里（generate 已拦截）：防御性直接返回
-    if (!activeModel) return;
+    if (!isModelUsable(activeModel)) return;
     // 契约：response.content 为累计全文，直接替换（旧实现按增量累加导致内容重复）
     if (response.content) {
       setStreamingContent(response.content);
@@ -184,7 +185,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, onGoSection 
 
   const generate = async () => {
     if (!input) return;
-    if (!activeModel) {
+    if (!isModelUsable(activeModel)) {
       dialogService.alert(t('steps:common.noModel'));
       return;
     }
@@ -538,8 +539,8 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, onGoSection 
             {/* 生成按钮（无模型时禁用，手写不受影响） */}
             <Button
               onClick={generate}
-              disabled={loading || !activeModel || (!input && selectedKnowledgeIds.size === 0)}
-              title={!activeModel ? t('steps:common.noModel') : undefined}
+              disabled={loading || !isModelUsable(activeModel) || (!input && selectedKnowledgeIds.size === 0)}
+              title={!isModelUsable(activeModel) ? t('steps:common.noModel') : undefined}
             >
               {loading ? <Spinner className="size-4" /> : <WandSparkles className="size-4" />}
               {loading ? t('steps:inspiration.generating') : t('steps:inspiration.generateBtn')}
