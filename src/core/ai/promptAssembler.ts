@@ -64,6 +64,9 @@ function renderTitle(title: string): string {
   return SECTION_TITLE_RE.test(title) ? title : `【${title}】`;
 }
 
+/** 预算紧张时永不丢弃的段：身份/调用协议/工具清单/本轮任务（丢了它们等于丢任务本身）。 */
+const PROTECTED_SECTIONS: ReadonlySet<string> = new Set(['identity', 'agentProtocol', 'toolSchemas', 'userTask']);
+
 /** PromptAssembler：section 注册表 + 装配器。 */
 export class PromptAssembler {
   private readonly sections = new Map<string, PromptSection>();
@@ -84,8 +87,8 @@ export class PromptAssembler {
   }
 
   /**
-   * 装配 prompt：按 order 渲染全部 section，超预算时从尾部开始整段丢弃
-   * （保住 identity/bookMeta 等高优段落，宁可丢低优上下文也不产出半截段落）。
+   * 装配 prompt：按 order 渲染全部 section；超预算时先丢可再生上下文段
+   * （身份/协议/工具/任务受保护），仍超才退化为尾部整段丢弃。
    */
   assemble(ctx: PromptContext): AssembleResult {
     const ordered = [...this.sections.values()].sort((a, b) => a.order - b.order);
@@ -101,8 +104,23 @@ export class PromptAssembler {
     let truncated = false;
     let kept = blocks;
     if (budget !== undefined && budget > 0) {
-      // 段间分隔符 \n\n 也计入预算
-      while (kept.length > 1 && kept.reduce((sum, b) => sum + b.text.length + 2, -2) > budget) {
+      const total = () => kept.reduce((sum, b) => sum + b.text.length + 2, -2);
+      // 先丢可再生上下文段（尾部优先）：身份/协议/工具/任务永不丢弃——
+      // 旧语义从尾部整段丢会先丢 userTask（order 最大），导致预算稍紧就丢任务本身
+      while (kept.length > 1 && total() > budget) {
+        let drop = -1;
+        for (let i = kept.length - 1; i >= 0; i--) {
+          if (!PROTECTED_SECTIONS.has(kept[i]!.id)) {
+            drop = i;
+            break;
+          }
+        }
+        if (drop < 0) break;
+        kept = [...kept.slice(0, drop), ...kept.slice(drop + 1)];
+        truncated = true;
+      }
+      // 仍超限：退化为旧语义（尾部整段丢弃，至少保留一段并截断）
+      while (kept.length > 1 && total() > budget) {
         kept = kept.slice(0, -1);
         truncated = true;
       }

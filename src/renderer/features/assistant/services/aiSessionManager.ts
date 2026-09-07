@@ -29,7 +29,7 @@ import type {
   ToolRegistry,
 } from '@core/ai';
 import type { EventBus, SeamPolicy } from '@core/plugin';
-import type { ConsistencyCheckPromptTemplate, ModelConfig, Project } from '@shared/types';
+import type { CardPromptTemplate, ConsistencyCheckPromptTemplate, ModelConfig, Project } from '@shared/types';
 import { aiGatewayClient } from '@/shared/services/ai/gatewayClient.js';
 import { useSettingsStore } from '@/app/stores/settingsStore';
 
@@ -88,6 +88,8 @@ export interface RunSessionInput {
   model: ModelConfig;
   maxTurns?: number;
   signal?: AbortSignal;
+  /** 用户在助手中选中的卡片模板（Agent 卡片生成沿用，不再回退默认） */
+  cardTemplate?: CardPromptTemplate;
 }
 
 export class AiSessionManager {
@@ -163,6 +165,7 @@ export class AiSessionManager {
             modelConfig: input.model,
             services: {
               consistencyTemplates: toConsistencyRecord(useSettingsStore.getState().consistencyPrompts),
+              cardTemplate: input.cardTemplate,
               // 全文检索（SQLite FTS5）：延迟加载仓库，测试与预览环境不预付成本
               textSearch: async (query: string, limit: number) => {
                 const { repository } = await import('@/shared/services/repository/index.js');
@@ -194,6 +197,8 @@ export class AiSessionManager {
           complete: (model, prompt, retries) => aiGatewayClient.complete(model, prompt, { retries }),
           maxTurns: input.maxTurns,
           signal: input.signal,
+          // 首轮预算 24000 字符（约 8–12k token，32k 上下文模型留足工具观察与输出空间）
+          charBudget: 24000,
         },
         input.task,
       );

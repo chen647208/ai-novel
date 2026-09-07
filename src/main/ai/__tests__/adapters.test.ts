@@ -131,6 +131,19 @@ describe('openAICompatibleAdapter.stream', () => {
     await openAICompatibleAdapter.stream(baseModel, '写', (c) => chunks.push(c), { signal: controller.signal });
     expect(chunks[chunks.length - 1]!.error).toBe('生成已取消');
   });
+
+  it('流内 error 事件以错误块收尾，不再当成功', async () => {
+    const full =
+      'data: {"choices":[{"delta":{"content":"部分"}}]}\n\n' +
+      'data: {"error":{"message":"overloaded"}}\n\n' +
+      'data: [DONE]\n\n';
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(sseResponse([full])));
+    const chunks: StreamingAIResponse[] = [];
+    await openAICompatibleAdapter.stream(baseModel, '写', (c) => chunks.push(c));
+    const final = chunks[chunks.length - 1]!;
+    expect(final.isComplete).toBe(true);
+    expect(final.error).toBe('overloaded');
+  });
 });
 
 describe('geminiAdapter', () => {

@@ -131,20 +131,29 @@ async function streamViaSDK(
   });
 
   let accumulated = '';
+  let finishReason: string | undefined;
+  let tokens: AIResponse['tokens'];
   for await (const raw of stream as AsyncIterable<{ text?: string } & GeminiResponse>) {
     if (options?.signal?.aborted) {
       onChunk({ content: accumulated, error: aiT('streamCancelled'), isComplete: true, isStreaming: false });
       return;
     }
+    // SDK 流与 REST 流对齐：逐块透出 finishReason 与用量（此前全程缺失）
+    const candidate = raw.candidates?.[0];
+    if (candidate?.finishReason) finishReason = candidate.finishReason;
+    const usage = extractGeminiTokenUsage(raw);
+    if (usage) tokens = usage;
     const delta = typeof raw.text === 'string' ? raw.text : geminiText(raw);
     if (!delta) continue;
     accumulated += delta;
-    onChunk({ content: accumulated, model: model.modelName, isComplete: false, isStreaming: true });
+    onChunk({ content: accumulated, model: model.modelName, tokens, isComplete: false, isStreaming: true });
   }
 
   onChunk({
     content: cleanModelOutput(accumulated),
     model: model.modelName,
+    finishReason,
+    tokens,
     isComplete: true,
     isStreaming: false,
     metadata: { prompt, modelConfig: model },

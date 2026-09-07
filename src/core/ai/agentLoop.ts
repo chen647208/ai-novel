@@ -57,6 +57,11 @@ export interface AgentLoopDeps {
   };
   maxTurns?: number;
   signal?: AbortSignal;
+  /**
+   * 首轮 prompt 字符预算（超限只丢可再生上下文段，任务/协议/工具受保护）。
+   * 宿主按模型上下文档位传入；缺席则不截断。
+   */
+  charBudget?: number;
 }
 
 export interface AgentTurnResult {
@@ -119,6 +124,7 @@ export async function runAgentSession(deps: AgentLoopDeps, task: string): Promis
     extra: ctx.extra,
     userTask: task,
     toolSchemas: deps.registry.resolveSchemas(),
+    charBudget: deps.charBudget,
   });
 
   await deps.session.start();

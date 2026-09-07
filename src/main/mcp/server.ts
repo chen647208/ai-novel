@@ -178,7 +178,11 @@ const TOOLS = [
   },
 ];
 
-const RESOURCES = [{ uri: 'books://index', name: '全部书籍索引', mimeType: 'text/plain' }];
+const RESOURCES = [
+  { uri: 'books://index', name: '全部书籍索引', mimeType: 'text/plain' },
+  // URI 模板：单书目录按 book://{bookId}/toc 读取（resources/read 已实现，此处宣告可发现）
+  { uriTemplate: 'book://{bookId}/toc', name: '单书目录', mimeType: 'text/plain' },
+];
 
 function tocText(bookId: string): string {
   const rows = listNodes(bookId);

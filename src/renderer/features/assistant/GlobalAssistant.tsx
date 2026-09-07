@@ -239,6 +239,9 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       project,
       index: (project && indexService.snapshot(project.id)) || undefined,
       model: activeModel,
+      cardTemplate: selectedCardTemplateId
+        ? cardPromptTemplates.find((tpl) => tpl.id === selectedCardTemplateId)
+        : undefined,
       signal: controller.signal,
     });
 

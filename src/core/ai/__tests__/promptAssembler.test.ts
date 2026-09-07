@@ -53,6 +53,21 @@ describe('PromptAssembler', () => {
     expect(result.truncated).toBe(true);
   });
 
+  it('预算紧张时先丢可再生段，任务与工具段永不丢弃', () => {
+    const asm = new PromptAssembler();
+    asm.register(section('identity', 10, 'I'.repeat(20)));
+    asm.register(section('worldDigest', 30, 'W'.repeat(80)));
+    asm.register(section('toolSchemas', 60, 'T'.repeat(20)));
+    asm.register(section('userTask', 100, '查第三章'));
+
+    const result = asm.assemble({ charBudget: 90 });
+    expect(result.sections).toContain('userTask');
+    expect(result.sections).toContain('toolSchemas');
+    expect(result.sections).not.toContain('worldDigest');
+    expect(result.prompt).toContain('查第三章');
+    expect(result.truncated).toBe(true);
+  });
+
   it('单段超预算时截断该段文本', () => {
     const asm = new PromptAssembler();
     asm.register(section('only', 10, 'x'.repeat(200)));

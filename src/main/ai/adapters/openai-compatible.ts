@@ -114,6 +114,7 @@ export const openAICompatibleAdapter: ProviderAdapter = {
     let modelName = model.modelName;
     let finishReason: string | undefined;
     let tokens: AIResponse['tokens'];
+    let streamError: string | undefined;
 
     try {
       const res = await withRetry(
@@ -139,6 +140,11 @@ export const openAICompatibleAdapter: ProviderAdapter = {
           return; // 忽略无法解析的事件
         }
         if (parsed.model) modelName = parsed.model;
+        // 流内错误块：记录并停止累积成功内容（此前直接忽略，失败会被当成功收尾）
+        if (parsed.error?.message) {
+          streamError = parsed.error.message;
+          return;
+        }
         const usage = extractOpenAITokenUsage(parsed);
         if (usage) tokens = usage;
         const choice = parsed.choices?.[0];
@@ -169,10 +175,11 @@ export const openAICompatibleAdapter: ProviderAdapter = {
       }
 
       onChunk({
-        content: cleanModelOutput(accumulated),
+        content: streamError ? accumulated : cleanModelOutput(accumulated),
         model: modelName,
         finishReason,
         tokens,
+        ...(streamError ? { error: streamError } : {}),
         isComplete: true,
         isStreaming: false,
         metadata: { prompt, modelConfig: model },
