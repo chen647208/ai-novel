@@ -13,8 +13,9 @@ import { useTranslation } from '@/i18n';
 import type { StorageSettingsPanelProps } from '../types';
 import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';
+import { Spinner } from '@/shared/ui/Spinner';
 import { Input } from '@/shared/ui/Input';
-import { AlertTriangle, ArrowLeftRight, Clock, Database, FolderOpen, History, Info, Loader2, Save, Settings, Trash2 } from 'lucide-react';
+import { AlertTriangle, ArrowLeftRight, Clock, Database, FolderOpen, History, Info, Save, Settings, Trash2 } from 'lucide-react';
 
 /** 存储设置区块的小标题 */
 const FieldLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -299,7 +300,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                 }}
                 disabled={isLoadingStorage}
               >
-                {isLoadingStorage ? <Loader2 className="size-3.5 animate-spin" /> : <ArrowLeftRight className="size-3.5" />}
+                {isLoadingStorage ? <Spinner className="size-3.5" /> : <ArrowLeftRight className="size-3.5" />}
                 {t('storage.checkMigration')}
               </Button>
               {migrationStatus && (

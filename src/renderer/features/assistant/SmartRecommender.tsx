@@ -17,8 +17,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type Project, type ModelConfig } from '../../../shared/types';
 import { Button } from '@/shared/ui/Button';
+import { Spinner } from '@/shared/ui/Spinner';
 import { cn } from '@/shared/utils/cn';
-import { CalendarDays, Circle, Eye, Gavel, Info, Lightbulb, Loader2, MapPin, Plus, RefreshCw, Search, User, Users, type LucideIcon } from 'lucide-react';
+import { CalendarDays, Circle, Eye, Gavel, Info, Lightbulb, MapPin, Plus, RefreshCw, Search, User, Users, type LucideIcon } from 'lucide-react';
 import {
   type SmartRecommendationResult,
   type RecommendationItem,
@@ -141,7 +142,7 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
             <Lightbulb className="size-4 text-primary" />
             {t('rec.title')}
           </h4>
-          {isLoading && <Loader2 className="size-3.5 animate-spin text-muted-foreground" />}
+          {isLoading && <Spinner className="size-3.5 text-muted-foreground" />}
         </div>
 
         {recommendations?.recommendations && recommendations.recommendations.length > 0 ? (
@@ -205,7 +206,7 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
             </span>
           </label>
           <Button variant="secondary" size="icon" className="size-8" onClick={fetchRecommendations} disabled={isLoading} title={t('rec.refresh')}>
-            {isLoading ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+            {isLoading ? <Spinner className="size-4" /> : <RefreshCw className="size-4" />}
           </Button>
         </div>
       </div>

@@ -130,10 +130,10 @@ const RelationshipDiagram: React.FC<RelationshipDiagramProps> = ({ characters, o
   const selectedChar = nodes.find(n => n.id === selectedId);
 
   const getRoleColor = (role: string) => {
-    if (role.includes('主')) return '#fbbf24'; // Amber
-    if (role.includes('反')) return '#ef4444'; // Red
-    if (role.includes('配')) return '#3b82f6'; // Blue
-    return '#94a3b8'; // Gray
+    if (role.includes('主')) return 'var(--color-chart-2)'; // Amber
+    if (role.includes('反')) return 'var(--color-chart-3)'; // Red
+    if (role.includes('配')) return 'var(--color-chart-1)'; // Blue
+    return 'var(--color-chart-gray)'; // Gray
   };
 
   return (
@@ -248,7 +248,10 @@ const RelationshipDiagram: React.FC<RelationshipDiagramProps> = ({ characters, o
           <div className="mb-5">
             <span
               className="mb-2 inline-block rounded px-2 py-0.5 text-2xs font-medium uppercase"
-              style={{ backgroundColor: getRoleColor(selectedChar.role) + '26', color: getRoleColor(selectedChar.role) }}
+              style={{
+                backgroundColor: `color-mix(in srgb, ${getRoleColor(selectedChar.role)} 15%, transparent)`,
+                color: getRoleColor(selectedChar.role),
+              }}
             >
               {roleLabel(selectedChar.role)}
             </span>

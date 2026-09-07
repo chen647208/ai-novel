@@ -18,7 +18,8 @@ import { Select } from '@/shared/ui/Select';
 import { SegmentedControl } from '@/shared/ui/ViewModeToggle';
 import { Textarea } from '@/shared/ui/Textarea';
 import { cn } from '@/shared/utils/cn';
-import { Loader2, Plus, Sprout, WandSparkles } from 'lucide-react';
+import { Plus, Sprout, WandSparkles } from 'lucide-react';
+import { Spinner } from '@/shared/ui/Spinner';
 import {
   addForeshadow,
   createForeshadow,
@@ -166,7 +167,7 @@ const ForeshadowPanel: React.FC<ForeshadowPanelProps> = ({
             ]}
           />
           <Button variant="secondary" size="sm" onClick={handleDetect} disabled={detecting} title={t('foreshadow:detectTitle')}>
-            {detecting ? <Loader2 className="size-3.5 animate-spin" /> : <WandSparkles className="size-3.5" />}
+            {detecting ? <Spinner className="size-3.5" /> : <WandSparkles className="size-3.5" />}
             {detecting ? t('foreshadow:detecting') : t('foreshadow:detectBtn')}
           </Button>
         </div>

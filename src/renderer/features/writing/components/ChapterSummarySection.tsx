@@ -14,7 +14,8 @@ import type { ChapterSummarySectionProps } from '../types';
 import { Button } from '@/shared/ui/Button';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
-import { Bot, Loader2, Settings } from 'lucide-react';
+import { Bot, Settings } from 'lucide-react';
+import { Spinner } from '@/shared/ui/Spinner';
 
 const ChapterSummarySection: React.FC<ChapterSummarySectionProps> = ({
   activeChapter,
@@ -69,7 +70,7 @@ const ChapterSummarySection: React.FC<ChapterSummarySectionProps> = ({
         >
           {isExtractingSummary ? (
             <>
-              <Loader2 className="size-3.5 animate-spin" />
+              <Spinner className="size-3.5" />
               {t('summarySection.extracting')}
             </>
           ) : (

@@ -24,7 +24,8 @@ import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { Select } from '@/shared/ui/Select';
-import { AlertCircle, Check, CheckCheck, Loader2, Network, Plus, Settings, Trash2, UserRound, WandSparkles, XCircle } from 'lucide-react';
+import { AlertCircle, Check, CheckCheck, Network, Plus, Settings, Trash2, UserRound, WandSparkles, XCircle } from 'lucide-react';
+import { Spinner } from '@/shared/ui/Spinner';
 
 interface StepCharactersProps {
   project: Project;
@@ -396,7 +397,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
 
               {/* 生成按钮 */}
               <Button className="w-full" onClick={generateCharacters} disabled={loading}>
-                {loading ? <Loader2 className="size-4 animate-spin" /> : <WandSparkles className="size-4" />}
+                {loading ? <Spinner className="size-4" /> : <WandSparkles className="size-4" />}
                 <span>{loading ? t('generating') : t('generateBtn')}</span>
               </Button>
 

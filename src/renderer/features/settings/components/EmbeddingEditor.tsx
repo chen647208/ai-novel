@@ -12,10 +12,11 @@ import { useTranslation, dt } from '@/i18n';
 import { embeddingProviders, getDefaultEmbeddingParams } from '../../../constants/embeddingProviders';
 import type { EmbeddingModelProvider, EmbeddingModelConfig } from '../../../../shared/types';
 import { Button } from '@/shared/ui/Button';
+import { Spinner } from '@/shared/ui/Spinner';
 import { Input } from '@/shared/ui/Input';
 import { Select } from '@/shared/ui/Select';
 import { cn } from '@/shared/utils/cn';
-import { AlertCircle, CheckCircle2, Cloud, Eye, EyeOff, FlaskConical, Home, Key, List, Loader2, SlidersHorizontal, Trash2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Cloud, Eye, EyeOff, FlaskConical, Home, Key, List, SlidersHorizontal, Trash2 } from 'lucide-react';
 
 const fieldLabel = 'mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground';
 const hintText = 'mt-1.5 text-xs text-muted-foreground';
@@ -267,11 +268,11 @@ export const EmbeddingEditor: React.FC<EmbeddingEditorProps> = ({
         </div>
         <div className="flex gap-2">
           <Button variant="secondary" size="sm" onClick={onFetchList} disabled={listLoading}>
-            {listLoading ? <Loader2 className="size-4 animate-spin" /> : <List className="size-4" />}
+            {listLoading ? <Spinner className="size-4" /> : <List className="size-4" />}
             {t('models.refreshList')}
           </Button>
           <Button variant="default" size="sm" onClick={onTest} disabled={testing}>
-            {testing ? <Loader2 className="size-4 animate-spin" /> : <FlaskConical className="size-4" />}
+            {testing ? <Spinner className="size-4" /> : <FlaskConical className="size-4" />}
             {testing ? t('embedding.testing') : t('embedding.testConn')}
           </Button>
         </div>

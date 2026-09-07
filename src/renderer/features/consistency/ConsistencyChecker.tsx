@@ -18,7 +18,8 @@ import { useTranslation, i18n } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';
 import { Select } from '@/shared/ui/Select';
-import { AlertTriangle, BookOpen, CheckCircle2, ChevronDown, ChevronUp, Circle, Clock, ExternalLink, Gavel, Info, Loader2, MapPin, RefreshCw, Stethoscope, User, Users, WandSparkles, XCircle, type LucideIcon } from 'lucide-react';
+import { AlertTriangle, BookOpen, CheckCircle2, ChevronDown, ChevronUp, Circle, Clock, ExternalLink, Gavel, Info, MapPin, RefreshCw, Stethoscope, User, Users, WandSparkles, XCircle, type LucideIcon } from 'lucide-react';
+import { Spinner } from '@/shared/ui/Spinner';
 import { cn } from '@/shared/utils/cn';
 import {
   type Project,
@@ -286,7 +287,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
             <option value="hybrid">{t('consistency:mode.hybrid')}</option>
           </Select>
           <Button size="sm" onClick={performCheck} disabled={isChecking}>
-            {isChecking ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
+            {isChecking ? <Spinner className="size-3.5" /> : <RefreshCw className="size-3.5" />}
             {isChecking ? t('consistency:checking') : t('consistency:recheck')}
           </Button>
         </div>

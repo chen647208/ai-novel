@@ -18,9 +18,10 @@ import { dialogService } from '@/shared/services/dialogService';
 import { cn } from '@/shared/utils/cn';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
+import { Spinner } from '@/shared/ui/Spinner';
 import { Card } from '@/shared/ui/Card';
 import { Select } from '@/shared/ui/Select';
-import { Check, CheckCheck, Eye, ListTree, Loader2, Pause, PenLine, Pencil, Play, Square, Users, XCircle } from 'lucide-react';
+import { Check, CheckCheck, Eye, ListTree, Pause, PenLine, Pencil, Play, Square, Users, XCircle } from 'lucide-react';
 import { MarkdownView } from '@/shared/ui/Markdown';
 import { DslEditor } from '@/editor/cm6/DslEditor';
 import { collectProjectTags } from '@/editor/cm6/projectTags';
@@ -301,7 +302,7 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project }) => {
             </>
           ) : (
             <Button onClick={generateOutline} disabled={loading}>
-              {loading ? <Loader2 className="size-4 animate-spin" /> : <ListTree className="size-4" />}
+              {loading ? <Spinner className="size-4" /> : <ListTree className="size-4" />}
               {loading ? t('steps:outline.generating') : t('steps:outline.generateBtn')}
             </Button>
           )}

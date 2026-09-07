@@ -34,7 +34,8 @@ import { EmptyState } from '@/shared/ui/EmptyState';
 import { Input } from '@/shared/ui/Input';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
-import { BookOpen, Bot, Brain, Calendar, Clock, CloudUpload, FileText, Flag, Globe, Loader2, MapPinned, PenLine, Search, Settings2, Tag, X } from 'lucide-react';
+import { BookOpen, Bot, Brain, Calendar, Clock, CloudUpload, FileText, Flag, Globe, MapPinned, PenLine, Search, Settings2, Tag, X } from 'lucide-react';
+import { Spinner } from '@/shared/ui/Spinner';
 
 interface StepKnowledgeEnhancedProps {
   project: Project;
@@ -496,7 +497,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
                 disabled={isSearching || !searchQuery.trim()}
                 className="absolute right-1.5 top-1/2 -translate-y-1/2"
               >
-                {isSearching ? <Loader2 className="size-3.5 animate-spin" /> : <Search className="size-3.5" />}
+                {isSearching ? <Spinner className="size-3.5" /> : <Search className="size-3.5" />}
                 {isSearching ? t('center.searching') : t('center.search')}
               </Button>
             </div>
@@ -889,7 +890,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
               <div className="mt-4 rounded-md border border-border bg-muted/40 p-3">
                 <div className="mb-1.5 flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-xs font-medium">
-                    <Loader2 className="size-3.5 animate-spin" />
+                    <Spinner className="size-3.5" />
                     {t('center.indexing')}
                   </span>
                   <span className="text-xs tabular-nums text-muted-foreground">{indexProgress}%</span>

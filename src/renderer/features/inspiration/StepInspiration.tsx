@@ -26,7 +26,8 @@ import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
-import { BookOpenText, Bot, Check, CheckCheck, ChevronDown, ChevronUp, CloudUpload, Eye, Globe, Lightbulb, Loader2, Pause, PenLine, Pencil, Play, Square, Trash2, WandSparkles, XCircle } from 'lucide-react';
+import { BookOpenText, Bot, Check, CheckCheck, ChevronDown, ChevronUp, CloudUpload, Eye, Globe, Lightbulb, Pause, PenLine, Pencil, Play, Square, Trash2, WandSparkles, XCircle } from 'lucide-react';
+import { Spinner } from '@/shared/ui/Spinner';
 import { MarkdownView } from '@/shared/ui/Markdown';
 
 interface StepInspirationProps {
@@ -531,7 +532,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project }) => {
               onClick={generate}
               disabled={loading || (!input && selectedKnowledgeIds.size === 0)}
             >
-              {loading ? <Loader2 className="size-4 animate-spin" /> : <WandSparkles className="size-4" />}
+              {loading ? <Spinner className="size-4" /> : <WandSparkles className="size-4" />}
               {loading ? t('steps:inspiration.generating') : t('steps:inspiration.generateBtn')}
             </Button>
           </div>

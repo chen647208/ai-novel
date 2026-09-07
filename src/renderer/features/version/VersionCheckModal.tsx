@@ -13,9 +13,10 @@ import { useTranslation, i18n } from '@/i18n';
 import { checkForUpdates, getCurrentVersionInfo, getVersionHistory, formatVersion, type UpdateCheckResult } from './services/versionService';
 import { dialogService } from '@/shared/services/dialogService';
 import { Button, buttonVariants } from '@/shared/ui/Button';
+import { Spinner } from '@/shared/ui/Spinner';
 import { Dialog, DialogContent } from '@/shared/ui/Dialog';
 import { cn } from '@/shared/utils/cn';
-import { AlertCircle, AlertTriangle, CheckCircle2, Download, ExternalLink, Loader2, RefreshCw, Rocket, Tag } from 'lucide-react';
+import { AlertCircle, AlertTriangle, CheckCircle2, Download, ExternalLink, RefreshCw, Rocket, Tag } from 'lucide-react';
 
 
 interface VersionCheckModalProps {
@@ -177,7 +178,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
                     <span className="h-6 w-11 rounded-full bg-muted transition-colors after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:bg-background after:shadow after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-5" />
                   </label>
                   <Button size="sm" onClick={handleCheckForUpdates} disabled={isChecking}>
-                    {isChecking ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
+                    {isChecking ? <Spinner className="size-3.5" /> : <RefreshCw className="size-3.5" />}
                     {isChecking ? t('modal.checking') : t('modal.checkNow')}
                   </Button>
                 </div>

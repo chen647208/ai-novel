@@ -10,7 +10,8 @@
 /** 同步对话框：导出/导入同步包 + 冲突副本报告。 */
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeftRight, Loader2 } from 'lucide-react';
+import { ArrowLeftRight } from 'lucide-react';
+import { Spinner } from '@/shared/ui/Spinner';
 import { Button } from '@/shared/ui/Button';
 import {
   Dialog,
@@ -108,11 +109,11 @@ export const SyncDialog: React.FC<{ project: Project | null }> = ({ project }) =
 
             <DialogFooter>
               <Button variant="outline" onClick={handleImport} disabled={busy} aria-busy={busy}>
-                {busy && <Loader2 className="size-4 animate-spin" />}
+                {busy && <Spinner className="size-4" />}
                 {t('sync.import')}
               </Button>
               <Button onClick={handleExport} disabled={busy} aria-busy={busy}>
-                {busy && <Loader2 className="size-4 animate-spin" />}
+                {busy && <Spinner className="size-4" />}
                 {t('sync.export')}
               </Button>
             </DialogFooter>

@@ -32,16 +32,16 @@ interface WorldViewGraphProps {
   onSelectNode?: (node: GraphNode) => void;
 }
 
-// 节点颜色映射（数据可视化配色，独立于主题令牌）
+// 节点颜色映射：经主题 chart 令牌引用（深色自动切换，禁十六进制硬编码）
 const NODE_COLORS = {
-  character: '#3b82f6',    // Blue
-  character_main: '#fbbf24', // Amber for main characters
-  character_villain: '#ef4444', // Red for villains
-  faction: '#8b5cf6',      // Purple
-  location: '#10b981',     // Emerald
-  event: '#f97316',        // Orange
-  rule: '#ec4899',         // Pink
-  worldview: '#06b6d4',    // Cyan
+  character: 'var(--color-chart-1)',    // Blue
+  character_main: 'var(--color-chart-2)', // Amber for main characters
+  character_villain: 'var(--color-chart-3)', // Red for villains
+  faction: 'var(--color-chart-4)',      // Purple
+  location: 'var(--color-chart-5)',     // Emerald
+  event: 'var(--color-chart-6)',        // Orange
+  rule: 'var(--color-chart-7)',         // Pink
+  worldview: 'var(--color-chart-8)',    // Cyan
 };
 
 // 角色类型映射
@@ -49,7 +49,7 @@ const getCharacterColor = (role: string): string => {
   if (role.includes('主')) return NODE_COLORS.character_main;
   if (role.includes('反')) return NODE_COLORS.character_villain;
   if (role.includes('配')) return NODE_COLORS.character;
-  return '#94a3b8'; // Gray for others
+  return 'var(--color-chart-gray)'; // Gray for others
 };
 
 /** 侧栏分组小标题 */

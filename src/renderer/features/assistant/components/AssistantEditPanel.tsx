@@ -14,9 +14,10 @@ import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { Select } from '@/shared/ui/Select';
+import { Spinner } from '@/shared/ui/Spinner';
 import { Textarea } from '@/shared/ui/Textarea';
 import { cn } from '@/shared/utils/cn';
-import { AlertCircle, BookOpenText, CheckCircle2, FileText, Info, Lightbulb, ListOrdered, ListTree, LoaderCircle, Save, Users, WandSparkles, type LucideIcon } from 'lucide-react';
+import { AlertCircle, BookOpenText, CheckCircle2, FileText, Info, Lightbulb, ListOrdered, ListTree, Save, Users, WandSparkles, type LucideIcon } from 'lucide-react';
 
 const EDIT_CATEGORIES: Array<{ id: AssistantEditCategory; icon: LucideIcon }> = [
   { id: 'inspiration', icon: Lightbulb },
@@ -188,7 +189,7 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
                   >
                     {isGeneratingCharacter ? (
                       <>
-                        <LoaderCircle className="size-4 animate-spin" />
+                        <Spinner className="size-4" />
                         {t('edit.generating')}
                       </>
                     ) : (
@@ -456,7 +457,7 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
           <div className="flex items-center gap-2">
             {syncStatus === 'saving' && (
               <div className="flex items-center gap-1 text-xs text-primary">
-                <LoaderCircle className="size-4 animate-spin" />
+                <Spinner className="size-4" />
                 {t('edit.saving')}
               </div>
             )}
@@ -492,7 +493,7 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
             >
               {syncStatus === 'saving' ? (
                 <>
-                  <LoaderCircle className="size-4 animate-spin" />
+                  <Spinner className="size-4" />
                   {t('edit.saving')}
                 </>
               ) : (

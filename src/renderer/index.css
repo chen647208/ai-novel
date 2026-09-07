@@ -65,6 +65,18 @@
   --text-2xs: 0.625rem;
   --text-2xs--line-height: 0.875rem;
 
+  /* 数据可视化配色（关系图/世界图谱节点）：light-dark 双模式可读，
+   * 经 var(--color-chart-*) 引用，禁止十六进制硬编码。 */
+  --color-chart-1: light-dark(#2563eb, #60a5fa);
+  --color-chart-2: light-dark(#d97706, #fbbf24);
+  --color-chart-3: light-dark(#dc2626, #f87171);
+  --color-chart-4: light-dark(#7c3aed, #a78bfa);
+  --color-chart-5: light-dark(#059669, #34d399);
+  --color-chart-6: light-dark(#ea580c, #fb923c);
+  --color-chart-7: light-dark(#db2777, #f472b6);
+  --color-chart-8: light-dark(#0891b2, #22d3ee);
+  --color-chart-gray: light-dark(#64748b, #94a3b8);
+
   --animate-fade-in: fade-in 0.15s ease-out;
   --animate-fade-out: fade-out 0.12s ease-in;
   --animate-zoom-in: zoom-in 0.15s ease-out;

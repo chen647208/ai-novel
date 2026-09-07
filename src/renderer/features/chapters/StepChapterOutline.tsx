@@ -18,6 +18,7 @@ import { AIService } from '../assistant/services/aiService';
 import { dialogService } from '@/shared/services/dialogService';
 import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
+import { Spinner } from '@/shared/ui/Spinner';
 import { Card } from '@/shared/ui/Card';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { Input } from '@/shared/ui/Input';
@@ -25,7 +26,7 @@ import { Label } from '@/shared/ui/Label';
 import { MarkdownView } from '@/shared/ui/Markdown';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
-import { BookOpen, BookOpenText, Check, CheckCheck, ChevronDown, ChevronRight, ChevronUp, Clock, FastForward, FileOutput, Flag, Globe2, Layers, LayoutGrid, LayoutList, ListOrdered, Loader2, MapPin, PenTool, Trash2, WandSparkles, XCircle } from 'lucide-react';
+import { BookOpen, BookOpenText, Check, CheckCheck, ChevronDown, ChevronRight, ChevronUp, Clock, FastForward, FileOutput, Flag, Globe2, Layers, LayoutGrid, LayoutList, ListOrdered, MapPin, PenTool, Trash2, WandSparkles, XCircle } from 'lucide-react';
 import { useViewPreference } from '@/shared/hooks/useViewPreference';
 import { ViewModeToggle } from '@/shared/ui/ViewModeToggle';
 
@@ -402,13 +403,13 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
           </Select>
           <div className="flex items-center gap-2">
             <Button onClick={() => generateChapters(false)} disabled={loading || continueLoading}>
-              {loading ? <Loader2 className="size-4 animate-spin" /> : <WandSparkles className="size-4" />}
+              {loading ? <Spinner className="size-4" /> : <WandSparkles className="size-4" />}
               {loading ? t('steps:chapters.generating') : t('steps:chapters.regenerate')}
             </Button>
 
             {project.chapters.length > 0 && (
               <Button variant="outline" onClick={() => generateChapters(true)} disabled={loading || continueLoading}>
-                {continueLoading ? <Loader2 className="size-4 animate-spin" /> : <FastForward className="size-4" />}
+                {continueLoading ? <Spinner className="size-4" /> : <FastForward className="size-4" />}
                 {continueLoading ? t('steps:chapters.continuing') : t('steps:chapters.continueBtn')}
               </Button>
             )}

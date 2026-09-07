@@ -64,27 +64,27 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     }
 
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-neutral-900 text-neutral-100">
-        <div className="max-w-lg rounded-xl border border-neutral-700 bg-neutral-800 p-8 shadow-2xl">
-          <h1 className="mb-2 text-xl font-bold text-red-400">{i18n.t('errorBoundary.title')}</h1>
-          <p className="mb-4 text-sm text-neutral-400">
+      <div className="flex h-screen w-screen items-center justify-center bg-background text-foreground">
+        <div className="max-w-lg rounded-xl border border-border bg-card p-8 shadow-2xl">
+          <h1 className="mb-2 text-xl font-bold text-destructive">{i18n.t('errorBoundary.title')}</h1>
+          <p className="mb-4 text-sm text-muted-foreground">
             {this.props.scope
               ? i18n.t('errorBoundary.regionError', { scope: this.props.scope })
               : i18n.t('errorBoundary.appError')}
           </p>
-          <pre className="mb-6 max-h-32 overflow-auto rounded bg-neutral-900 p-3 text-xs text-neutral-500">
+          <pre className="mb-6 max-h-32 overflow-auto rounded bg-muted p-3 text-xs text-muted-foreground">
             {this.state.error?.message ?? i18n.t('errorBoundary.unknown')}
           </pre>
           <div className="flex gap-3">
             <button
               onClick={this.handleRetry}
-              className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium hover:bg-blue-500"
+              className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
               {i18n.t('errorBoundary.retry')}
             </button>
             <button
               onClick={this.handleReload}
-              className="flex-1 rounded-lg border border-neutral-600 px-4 py-2 text-sm font-medium hover:bg-neutral-700"
+              className="flex-1 rounded-lg border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent"
             >
               {i18n.t('errorBoundary.reload')}
             </button>

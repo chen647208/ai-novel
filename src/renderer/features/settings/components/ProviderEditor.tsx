@@ -15,11 +15,12 @@ import { channelValueFor, channelPatch, channelGroups } from '../utils/channelPr
 import { isModelConfigured } from '../../../shared/utils/modelReadiness';
 import { classifyProviderError, isErrorResult, isProviderEnabled, maskApiKey } from '../utils/providerHealth';
 import { Button } from '@/shared/ui/Button';
+import { Spinner } from '@/shared/ui/Spinner';
 import { Input } from '@/shared/ui/Input';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
 import { cn } from '@/shared/utils/cn';
-import { AlertCircle, AlertTriangle, CheckCircle2, Clock, Eye, EyeOff, FlaskConical, List, Loader2, RefreshCw, SlidersHorizontal, Trash2 } from 'lucide-react';
+import { AlertCircle, AlertTriangle, CheckCircle2, Clock, Eye, EyeOff, FlaskConical, List, RefreshCw, SlidersHorizontal, Trash2 } from 'lucide-react';
 
 const CHANNEL_GROUPS = channelGroups(modelProviders);
 const fieldLabel = 'mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground';
@@ -123,14 +124,14 @@ export const ProviderEditor: React.FC<ProviderEditorProps> = ({
             </Select>
             <div className="mt-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                {listLoading && <div className="flex items-center gap-1 text-xs text-primary"><Loader2 className="size-4 animate-spin" /><span>{t('models.fetchingList')}</span></div>}
+                {listLoading && <div className="flex items-center gap-1 text-xs text-primary"><Spinner className="size-4" /><span>{t('models.fetchingList')}</span></div>}
                 {model.modelsFetchError && !listLoading && <div className="flex items-center gap-1 text-xs text-destructive"><AlertCircle className="size-4" /><span>{model.modelsFetchError}</span></div>}
                 {model.availableModels && model.availableModels.length > 0 && !listLoading && (
                   <div className="flex items-center gap-1 text-xs text-success"><CheckCircle2 className="size-4" /><span>{t('models.loadedCount', { count: model.availableModels.length })}</span></div>
                 )}
               </div>
               <Button type="button" variant="ghost" size="sm" className="h-7 text-xs" onClick={onFetchList} disabled={listLoading || !isModelConfigured(model)}>
-                {listLoading ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
+                {listLoading ? <Spinner className="size-3.5" /> : <RefreshCw className="size-3.5" />}
                 {t('models.refreshList')}
               </Button>
             </div>
@@ -248,11 +249,11 @@ export const ProviderEditor: React.FC<ProviderEditorProps> = ({
         </div>
         <div className="flex gap-2">
           <Button variant="secondary" size="sm" onClick={onFetchList} disabled={listLoading || !isModelConfigured(model)}>
-            {listLoading ? <Loader2 className="size-4 animate-spin" /> : <List className="size-4" />}
+            {listLoading ? <Spinner className="size-4" /> : <List className="size-4" />}
             {t('models.fetchList')}
           </Button>
           <Button variant="default" size="sm" onClick={onTest} disabled={testing}>
-            {testing ? <Loader2 className="size-4 animate-spin" /> : <FlaskConical className="size-4" />}
+            {testing ? <Spinner className="size-4" /> : <FlaskConical className="size-4" />}
             {testing ? t('models.testing') : t('models.testNow')}
           </Button>
         </div>
