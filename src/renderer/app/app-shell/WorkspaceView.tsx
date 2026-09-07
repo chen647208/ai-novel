@@ -13,7 +13,7 @@
  * Step 页直读双 store，WorkspaceSection 只做守卫与路由，不再透传模型/提示词。
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { type AppTheme, type ModelConfig, type Project, type PromptTemplate } from '../../../shared/types';
 import { isModelUsable } from '../../shared/utils/modelReadiness';
@@ -51,16 +51,19 @@ export interface WorkspaceViewProps {
   onRenameBook: (bookId: string, newTitle: string) => void;
   onNavigateToCharacter: (id: string) => void;
   onNavigateToChapter: (id: string) => void;
+  handwriteBypass: boolean;
+  onHandwriteBypass: () => void;
 }
 
 const WorkspaceSection: React.FC<WorkspaceViewProps> = ({
   section, structureSub, activeProject, activeModel, focusCharacterId, editingChapterId,
   onSectionChange, onOpenBookshelf, onOpenSettings,
   onNavigateToCharacter, onNavigateToChapter,
+  handwriteBypass, onHandwriteBypass,
 }) => {
   const { t } = useTranslation(['app', 'common']);
-  // 手写党 bypass：没模型也允许进工作台手写，AI 按钮会各自报未配置；默认仍全屏引导去设置
-  const [handwriteBypass, setHandwriteBypass] = useState(false);
+  // 手写党 bypass（状态在 App 层：重挂、切分区不丢失，仅重置时清除）：
+  // 没模型也允许进工作台手写，AI 按钮会各自报未配置；默认仍全屏引导去设置
 
   if (!activeProject) {
     return (
@@ -84,7 +87,7 @@ const WorkspaceSection: React.FC<WorkspaceViewProps> = ({
         action={
           <div className="flex items-center gap-2">
             <Button onClick={onOpenSettings}>{t('model.goSettings')}</Button>
-            <Button variant="ghost" onClick={() => setHandwriteBypass(true)}>
+            <Button variant="ghost" onClick={onHandwriteBypass}>
               {t('model.handwriteFirst', '先手写看看')}
             </Button>
           </div>

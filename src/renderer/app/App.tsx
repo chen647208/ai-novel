@@ -51,6 +51,8 @@ const App: React.FC = () => {
   const [view, setView] = useState<'bookshelf' | 'workspace'>('bookshelf');
   const [section, setSection] = useState<SectionId>('inspiration');
   const [structureSub, setStructureSub] = useState<'outline' | 'chapters' | undefined>(undefined);
+  // 手写豁免（D1）：App 层持有，重挂切分区不丢；仅重置/删书时清除
+  const [handwriteBypass, setHandwriteBypass] = useState(false);
   const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
   const [focusCharacterId, setFocusCharacterId] = useState<string | null>(null);
   const [resetKey, setResetKey] = useState(0);
@@ -112,7 +114,7 @@ const App: React.FC = () => {
     setSection('inspiration'); setEditingChapterId(null); setView('workspace');
   }, []);
   const bumpReset = useCallback(() => {
-    setSection('inspiration'); setEditingChapterId(null); setResetKey(k => k + 1);
+    setSection('inspiration'); setEditingChapterId(null); setHandwriteBypass(false); setResetKey(k => k + 1);
   }, []);
   const actions = useBookActions(enterWorkspace);
   const updateProject = useCallback((updates: Partial<Project>) => {
@@ -209,6 +211,8 @@ const App: React.FC = () => {
               <WorkspaceView
             section={section}
             structureSub={structureSub}
+            handwriteBypass={handwriteBypass}
+            onHandwriteBypass={() => setHandwriteBypass(true)}
             activeProject={activeProject}
             activeModel={activeModel}
             prompts={prompts}
