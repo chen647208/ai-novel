@@ -19,6 +19,7 @@ import { repository } from '../shared/services/repository';
 import { dialogService } from '@/shared/services/dialogService';
 import { i18n } from '../i18n';
 import { useProjectStore } from './stores/projectStore';
+import { deleteTrash, moveToTrash, readTrash } from '../shared/services/trashService';
 import { composeAppState, seedPersistBaseline } from './stores/persistenceBridge';
 import { hydrateStoresFromState } from './useAppBootstrap';
 import { normalizeImportedState } from './initialState';
@@ -30,6 +31,10 @@ export interface BookActions {
   createQuickBook: () => void;
   renameBook: (bookId: string, newTitle: string) => void;
   deleteBook: (bookId: string) => Promise<void>;
+  /** 从回收站恢复（重名自动加序号，ID 冲突时换新 ID）。 */
+  restoreTrashBook: (bookId: string) => Promise<void>;
+  /** 彻底删除回收站条目（不可恢复）。 */
+  purgeTrashBook: (bookId: string) => Promise<void>;
   duplicateBook: (bookId: string) => void;
   exportBook: (book: Project) => void;
   importBook: () => Promise<void>;
@@ -93,6 +98,16 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
 
   const deleteBook = useCallback(async (bookId: string) => {
     if (!(await dialogService.confirm({ message: i18n.t('app:book.deleteConfirm'), danger: true }))) return;
+    const book = useProjectStore.getState().projects.find(p => p.id === bookId);
+    if (!book) return;
+    // 先进站再删库：进站失败则中止，绝不丢数据
+    try {
+      await moveToTrash(book);
+    } catch (error) {
+      logger.error('Failed to move book to trash:', error);
+      dialogService.alert(i18n.t('app:book.trashFailed'));
+      return;
+    }
     const wasActive = useProjectStore.getState().activeProjectId === bookId;
     useProjectStore.getState().removeProject(bookId);
     if (wasActive && useProjectStore.getState().projects.length === 0) {
@@ -166,8 +181,38 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
       danger: true,
     });
     if (!ok) return;
+    try {
+      await moveToTrash(active);
+    } catch (error) {
+      logger.error('Failed to move book to trash:', error);
+      dialogService.alert(i18n.t('app:book.trashFailed'));
+      return;
+    }
     useProjectStore.getState().removeProject(active.id);
     afterReset();
+  }, []);
+
+  const restoreTrashBook = useCallback(async (bookId: string) => {
+    const book = await readTrash(bookId);
+    if (!book) {
+      dialogService.alert(i18n.t('app:book.trashReadFailed'));
+      return;
+    }
+    const state = useProjectStore.getState();
+    if (state.projects.some(p => p.id === book.id)) {
+      book.id = Date.now().toString();
+    }
+    if (state.projects.some(p => p.title === book.title)) {
+      book.title = i18n.t('app:book.duplicateTitle', { title: book.title });
+    }
+    state.upsertProject(book);
+    await deleteTrash(bookId).catch(() => {});
+  }, []);
+
+  const purgeTrashBook = useCallback(async (bookId: string) => {
+    const ok = await dialogService.confirm({ message: i18n.t('app:book.purgeConfirm'), danger: true });
+    if (!ok) return;
+    await deleteTrash(bookId);
   }, []);
 
   const importAllData = useCallback(async () => {
@@ -178,5 +223,5 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
     dialogService.alert(i18n.t('app:importAll.success'));
   }, []);
 
-  return { openBook, createBook, createQuickBook, renameBook, deleteBook, duplicateBook, exportBook, importBook, clearCurrentProject, deleteCurrentProject, importAllData };
+  return { openBook, createBook, createQuickBook, renameBook, deleteBook, restoreTrashBook, purgeTrashBook, duplicateBook, exportBook, importBook, clearCurrentProject, deleteCurrentProject, importAllData };
 }

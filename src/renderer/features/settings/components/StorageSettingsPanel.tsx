@@ -8,10 +8,14 @@
  */
 import { logger } from '@/shared/utils/logger';
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from '@/i18n';
 import type { StorageSettingsPanelProps } from '../types';
 import { dialogService } from '@/shared/services/dialogService';
+import { autoBackupService } from '@/shared/services/autoBackupService';
+import { composeAppState, seedPersistBaseline } from '@/app/stores/persistenceBridge';
+import { hydrateStoresFromState } from '@/app/useAppBootstrap';
+import { normalizeImportedState } from '@/app/initialState';
 import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
 import { Input } from '@/shared/ui/Input';
@@ -49,6 +53,42 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
   onClearData,
 }) => {
   const { t, i18n } = useTranslation('settings');
+  const [backups, setBackups] = useState<Array<{ fileName: string; filePath: string; size: number; timestamp: number }>>([]);
+  const [backupBusy, setBackupBusy] = useState(false);
+
+  const reloadBackups = useCallback(() => {
+    void autoBackupService.getBackupHistory(storageConfig).then(setBackups).catch(() => setBackups([]));
+  }, [storageConfig]);
+  useEffect(() => {
+    reloadBackups();
+  }, [reloadBackups]);
+
+  const handleManualBackup = async (): Promise<void> => {
+    setBackupBusy(true);
+    try {
+      const ok = await autoBackupService.performBackup(storageConfig, () => composeAppState());
+      dialogService.alert(t(ok ? 'storage.backupDone' : 'storage.backupFailed'));
+      reloadBackups();
+    } catch (error) {
+      logger.error('手动备份失败:', error);
+      dialogService.alert(t('storage.backupFailed'));
+    } finally {
+      setBackupBusy(false);
+    }
+  };
+
+  const handleRestoreBackup = async (filePath: string): Promise<void> => {
+    const ok = await dialogService.confirm({ message: t('storage.restoreConfirm'), danger: true });
+    if (!ok) return;
+    const snapshot = await autoBackupService.readBackup(filePath);
+    if (!snapshot) {
+      dialogService.alert(t('storage.restoreFailed'));
+      return;
+    }
+    hydrateStoresFromState(normalizeImportedState(snapshot));
+    seedPersistBaseline(composeAppState());
+    dialogService.alert(t('storage.restoreDone'));
+  };
   return (
     <div className="space-y-6">
       {/* 页头 */}
@@ -236,17 +276,8 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                       <Button
                         variant="secondary"
                         size="sm"
-                        onClick={async () => {
-                          // 手动触发备份
-                          try {
-                            // 这里需要调用storage.ts中的triggerManualBackup方法
-                            // 由于我们是在React组件中，需要通过props或其他方式传递
-                            // 暂时先显示提示
-                            dialogService.alert(t('storage.manualBackupNote'));
-                          } catch (error) {
-                            logger.error('手动备份失败:', error);
-                          }
-                        }}
+                        onClick={() => void handleManualBackup()}
+                        disabled={backupBusy}
                       >
                         <Save className="size-3.5" />
                         {t('storage.backupNow')}
@@ -262,6 +293,29 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                       {t('storage.policyLine3')}<br />
                       {t('storage.policyLine4')}
                     </p>
+                  </div>
+
+                  <div>
+                    <FieldLabel>{t('storage.historyTitle')}</FieldLabel>
+                    {backups.length === 0 ? (
+                      <p className="text-xs italic text-muted-foreground">{t('storage.historyEmpty')}</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {backups.map((b) => (
+                          <div key={b.filePath} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 px-3 py-2">
+                            <div className="min-w-0">
+                              <div className="truncate font-mono text-xs text-foreground">{b.fileName}</div>
+                              <div className="text-2xs tabular-nums text-muted-foreground">
+                                {new Date(b.timestamp).toLocaleString(i18n.language)} · {(b.size / 1024).toFixed(1)} KB
+                              </div>
+                            </div>
+                            <Button size="sm" variant="outline" className="shrink-0" onClick={() => void handleRestoreBackup(b.filePath)}>
+                              {t('storage.restore')}
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

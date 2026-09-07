@@ -120,19 +120,19 @@ export class AutoBackupService {
     }
   }
 
-  // 清理旧备份文件
+  // 清理旧备份文件（按文件名时间倒序保留 maxBackupFiles 个）
   private async cleanupOldBackups(backupDir: string, maxBackupFiles: number): Promise<void> {
     try {
       if (!window.electronAPI) return;
-
-      // 获取备份目录中的所有文件
-      // 注意：Electron API没有直接的readdir方法，我们需要通过其他方式获取文件列表
-      // 这里我们简化处理，假设备份文件命名规范
-      
-      // 在实际应用中，可能需要实现更复杂的文件列表获取逻辑
-      // 这里我们只记录日志，不实际删除文件
-      logger.debug(`备份清理策略: 最多保留 ${maxBackupFiles} 个备份文件`);
-      
+      const entries = await window.electronAPI.listDirectory(backupDir).catch(() => []);
+      const backups = entries
+        .filter((e) => e.type === 'file' && e.name.startsWith('novalist-backup-') && e.name.endsWith('.json'))
+        .map((e) => e.name)
+        .sort()
+        .reverse();
+      for (const name of backups.slice(Math.max(1, maxBackupFiles))) {
+        await window.electronAPI.unlink(`${backupDir}/${name}`).catch(() => {});
+      }
     } catch (error) {
       logger.error('清理旧备份失败:', error);
     }
@@ -198,17 +198,63 @@ export class AutoBackupService {
     return (now - lastBackup) >= intervalMs;
   }
 
-  // 获取备份历史
-  public async getBackupHistory(): Promise<Array<{
+  // 获取备份历史（文件名时间倒序；损坏文件跳过）
+  public async getBackupHistory(config?: StorageConfig | null): Promise<Array<{
     fileName: string;
     filePath: string;
     size: number;
     timestamp: number;
   }>> {
-    // 简化实现，返回空数组
-    // 在实际应用中，可以扫描备份目录并返回文件信息
-    return [];
+    try {
+      if (!window.electronAPI) return [];
+      const cfg = config ?? this.currentConfig;
+      if (!cfg) return [];
+      const backupDir = `${await this.getStoragePath(cfg)}/backups`;
+      const entries = await window.electronAPI.listDirectory(backupDir).catch(() => []);
+      const out: Array<{ fileName: string; filePath: string; size: number; timestamp: number }> = [];
+      for (const e of entries) {
+        if (e.type !== 'file' || !e.name.startsWith('novalist-backup-') || !e.name.endsWith('.json')) continue;
+        try {
+          const content = await window.electronAPI.readFile(`${backupDir}/${e.name}`);
+          out.push({
+            fileName: e.name,
+            filePath: `${backupDir}/${e.name}`,
+            size: content.length,
+            timestamp: parseBackupTimestamp(e.name),
+          });
+        } catch {
+          // 损坏文件跳过
+        }
+      }
+      return out.sort((a, b) => b.timestamp - a.timestamp);
+    } catch (error) {
+      logger.error('读取备份历史失败:', error);
+      return [];
+    }
   }
+
+  /** 从备份文件恢复整库快照（调用方负责 hydrate + 重建差分基线）。 */
+  public async readBackup(filePath: string): Promise<AppState | null> {
+    try {
+      if (!window.electronAPI) return null;
+      const content = await window.electronAPI.readFile(filePath);
+      const parsed = JSON.parse(content) as AppState;
+      if (!parsed || !Array.isArray(parsed.projects)) return null;
+      return parsed;
+    } catch (error) {
+      logger.error('读取备份文件失败:', error);
+      return null;
+    }
+  }
+}
+
+/** 备份文件名时间解析（novalist-backup-<ISO 变体>.json），失败回 0。 */
+function parseBackupTimestamp(fileName: string): number {
+  const m = fileName.match(/^novalist-backup-(.+)\.json$/);
+  if (!m?.[1]) return 0;
+  const iso = m[1].replace(/T(\d{2})-(\d{2})-(\d{2})-(\d+)(Z?)$/, 'T$1:$2:$3.$4$5');
+  const ts = Date.parse(iso);
+  return Number.isNaN(ts) ? 0 : ts;
 }
 
 // 导出单例实例

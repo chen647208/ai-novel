@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '@/i18n';
 import type { Project } from '../../../shared/types';
 import { dialogService } from '@/shared/services/dialogService';
@@ -46,6 +46,7 @@ import {
 } from 'lucide-react';
 import { ViewModeToggle } from '@/shared/ui/ViewModeToggle';
 import { useViewPreference } from '@/shared/hooks/useViewPreference';
+import { listTrash, type TrashEntry } from '@/shared/services/trashService';
 
 interface BookshelfProps {
   books: Project[];
@@ -60,6 +61,8 @@ interface BookshelfProps {
   onExportBook: (book: Project) => void;
   onImportBook: () => void;
   onImportAll: () => Promise<void>;
+  onRestoreTrash: (bookId: string) => Promise<void>;
+  onPurgeTrash: (bookId: string) => Promise<void>;
 }
 
 /** 统计全书正文字数（CJK 按字符计）。 */
@@ -94,16 +97,35 @@ const Bookshelf: React.FC<BookshelfProps> = ({
   onExportBook,
   onImportBook,
   onImportAll,
+  onRestoreTrash,
+  onPurgeTrash,
 }) => {
   const { t, i18n } = useTranslation(['app', 'books', 'common']);
   const [query, setQuery] = useState('');
   const [isNewBookOpen, setIsNewBookOpen] = useState(false);
   const [view, setView] = useViewPreference<'grid' | 'list'>('bookshelf.view', 'grid');
+  const [trash, setTrash] = useState<TrashEntry[]>([]);
+  const [trashOpen, setTrashOpen] = useState(false);
+
+  const reloadTrash = useCallback(() => {
+    void listTrash().then(setTrash).catch(() => setTrash([]));
+  }, []);
+  // 书籍增删与挂载时刷新回收站
+  useEffect(() => {
+    reloadTrash();
+  }, [books.length, reloadTrash]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     const sorted = [...books].sort((a, b) => b.lastModified - a.lastModified);
-    return q ? sorted.filter(b => b.title.toLowerCase().includes(q)) : sorted;
+    // 全文搜索：标题 + 简介/灵感 + 章节标题
+    if (!q) return sorted;
+    return sorted.filter((b) =>
+      b.title.toLowerCase().includes(q) ||
+      (b.intro || '').toLowerCase().includes(q) ||
+      (b.inspiration || '').toLowerCase().includes(q) ||
+      (b.chapters || []).some((c) => (c.title || '').toLowerCase().includes(q)),
+    );
   }, [books, query]);
 
   const handleRename = async (book: Project) => {
@@ -350,6 +372,43 @@ const Bookshelf: React.FC<BookshelfProps> = ({
         }}
         existingBooks={books.map(b => ({ id: b.id, title: b.title }))}
       />
+
+      {/* 回收站：删除的书 30 天内可恢复 */}
+      <div className="mx-auto max-w-6xl px-8 pb-10">
+        <button
+          type="button"
+          onClick={() => setTrashOpen((v) => !v)}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <Trash2 className="size-4" />
+          {t('app:book.trashTitle')} ({trash.length})
+        </button>
+        {trashOpen && (
+          <div className="mt-3 space-y-2">
+            {trash.length === 0 && (
+              <p className="text-xs italic text-muted-foreground">{t('app:book.trashEmpty')}</p>
+            )}
+            {trash.map((entry) => (
+              <div key={entry.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-2.5">
+                <div className="min-w-0">
+                  <div className="truncate font-serif text-sm font-medium text-foreground">{entry.title}</div>
+                  <div className="text-2xs tabular-nums text-muted-foreground">
+                    {formatLastEdited(entry.deletedAt, i18n.language)}
+                  </div>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Button size="sm" variant="outline" onClick={() => onRestoreTrash(entry.id).then(reloadTrash)}>
+                    {t('app:book.trashRestore')}
+                  </Button>
+                  <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-destructive" onClick={() => onPurgeTrash(entry.id).then(reloadTrash)}>
+                    {t('app:book.trashDelete')}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

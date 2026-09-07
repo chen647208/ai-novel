@@ -203,6 +203,8 @@ const App: React.FC = () => {
               onExportBook={actions.exportBook}
               onImportBook={actions.importBook}
               onImportAll={actions.importAllData}
+              onRestoreTrash={actions.restoreTrashBook}
+              onPurgeTrash={actions.purgeTrashBook}
             />
           </div>
         ) : (
