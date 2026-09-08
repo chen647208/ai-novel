@@ -28,7 +28,7 @@ function resolveVersion(): string {
 
 export const APP_VERSION: string = resolveVersion();
 
-export const GITHUB_REPO = 'chen647208/ai-novel';
+export const GITHUB_REPO = 'chen647208/hongyue-creation';
 export const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 export const GITHUB_REPO_URL = `https://github.com/${GITHUB_REPO}`;
 

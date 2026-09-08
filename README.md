@@ -4,7 +4,7 @@
 **既要 AI，也要纯写作**：AI 工具/审批/技能体系与完整的离线写作能力并存，
 数据主权在用户（SQLite 单一事务管线 + 开放格式导出）。
 
-![CI](https://github.com/chen647208/ai-novel/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/chen647208/hongyue-creation/actions/workflows/ci.yml/badge.svg)
 
 ## 技术栈
 

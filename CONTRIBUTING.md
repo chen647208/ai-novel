@@ -19,8 +19,8 @@
 要求：Node.js 24+、npm 11+（与 CI 一致）。
 
 ```bash
-git clone https://github.com/chen647208/ai-novel.git
-cd ai-novel
+git clone https://github.com/chen647208/hongyue-creation.git
+cd hongyue-creation
 npm install                 # 中国大陆可加 --registry=https://registry.npmmirror.com
 npm run electron:dev        # 开发模式（Vite + Electron）
 ```

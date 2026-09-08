@@ -80,7 +80,7 @@ npmRebuild: false
 publish:
   provider: github
   owner: chen647208
-  repo: ai-novel
+  repo: hongyue-creation
   releaseType: release
 
 extraResources:

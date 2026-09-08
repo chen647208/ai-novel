@@ -33,7 +33,7 @@
 
 ### 启用 cla-assistant（一次性，需仓库管理员操作）
 
-1. 安装 GitHub App：访问 https://cla-assistant.io ，用仓库管理员账号登录并授权 `chen647208/ai-novel` 仓库。
+1. 安装 GitHub App：访问 https://cla-assistant.io ，用仓库管理员账号登录并授权 `chen647208/hongyue-creation` 仓库。
 2. cla-assistant 会读取仓库根的 `.cla-assistant.json`，其中 `path` 指向 `docs/CLA.md`。
 3. 在仓库 Settings → Branches 对 `main` 开启分支保护，并把 cla-assistant 的 `license/cla` 状态检查设为必需（Required check），未签署 CLA 的 PR 即无法合并。
 4. 建议创建两个标签 `cla: yes` / `cla: no`（配置已引用）。
