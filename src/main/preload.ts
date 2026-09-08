@@ -80,4 +80,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
     get: (id: string) => ipcRenderer.invoke(IPC.vault.get, id),
     remove: (id: string) => ipcRenderer.invoke(IPC.vault.remove, id),
   },
+  // 系统壳（托盘/自启设置下发）
+  shell: {
+    sync: (settings: { minimizeToTray?: boolean; autoLaunch?: boolean }) =>
+      ipcRenderer.invoke(IPC.shell.sync, settings),
+  },
+  // 网络代理（地址下发 + 连通测试）
+  net: {
+    setProxy: (url: string) => ipcRenderer.invoke(IPC.net.setProxy, url),
+    testProxy: (url: string) => ipcRenderer.invoke(IPC.net.testProxy, url),
+  },
 });

@@ -443,7 +443,7 @@ Hongyue Creation uses five sections guiding you through a complete novel (switch
 #### "Network failed"
 - Check connectivity
 - Check firewall settings
-- Try a proxy or VPN
+- Settings → General → Proxy: enter a proxy address (blank = direct), use "Test connection"
 
 #### "Generation too long"
 - Shorten the input

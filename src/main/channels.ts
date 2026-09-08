@@ -67,4 +67,15 @@ export const IPC = {
     get: 'vault:get',
     remove: 'vault:remove',
   },
+
+  // 系统壳（托盘/自启设置下发；关闭拦截在主进程按设置执行）
+  shell: {
+    sync: 'shell:sync',
+  },
+
+  // 网络代理（地址下发 + 连通测试；网关与 Chromium 双覆盖）
+  net: {
+    setProxy: 'net:set-proxy',
+    testProxy: 'net:test-proxy',
+  },
 } as const;

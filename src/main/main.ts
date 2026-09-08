@@ -18,7 +18,10 @@ import {
   vectorProvider,
   sqliteProvider,
   mcpClientProvider,
+  netProvider,
+  shellProvider,
 } from './app/providers.js';
+import { setQuitting } from './app/tray.js';
 import { secureStoreProvider } from './app/secureStore.js';
 import { aiGatewayProvider } from './ai/gateway.js';
 
@@ -34,6 +37,8 @@ const container = new AppContainer()
   .register(secureStoreProvider)
   .register(aiGatewayProvider)
   .register(mcpClientProvider)
+  .register(netProvider)
+  .register(shellProvider)
   .register(windowProvider);
 
 const ctx: ProviderContext = { getMainWindow };
@@ -50,5 +55,6 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
+  setQuitting();
   void container.shutdown(ctx);
 });

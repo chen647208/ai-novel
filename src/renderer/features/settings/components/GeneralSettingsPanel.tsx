@@ -21,6 +21,8 @@ import { DEFAULT_EDITOR_FONT, DEFAULT_UI_FONT, fontPresets, resolveFontStack } f
 import { importCustomFont, removeCustomFont } from '../services/customFontService';
 import { useSettingsStore } from '@/app/stores/settingsStore';
 import ShortcutRecorder from './ShortcutRecorder';
+import SystemPanel from './SystemPanel';
+import ProxyPanel from './ProxyPanel';
 
 const THEME_OPTIONS: {
   value: AppTheme;
@@ -263,6 +265,10 @@ const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({
           <ShortcutRecorder />
         </CardContent>
       </Card>
+
+      <SystemPanel />
+
+      <ProxyPanel />
     </div>
   );
 };

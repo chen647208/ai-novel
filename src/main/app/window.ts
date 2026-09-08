@@ -11,6 +11,7 @@ import { app, BrowserWindow } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { logger } from '../logger.js';
+import { interceptClose } from './tray.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -124,11 +125,17 @@ export async function createWindow(): Promise<void> {
   applyWindowSecurity(mainWindow);
   if (saved.maximized) mainWindow.maximize();
 
-  // 关闭/退出前落盘几何，下次原样恢复
+  // 关闭/退出前落盘几何，下次原样恢复；最小化到托盘开启时关闭即隐藏
   const persist = (): void => {
     if (mainWindow && !mainWindow.isDestroyed()) void saveBounds(mainWindow);
   };
-  mainWindow.on('close', persist);
+  mainWindow.on('close', (event) => {
+    persist();
+    if (interceptClose() && mainWindow && !mainWindow.isDestroyed()) {
+      event.preventDefault();
+      mainWindow.hide();
+    }
+  });
 
   if (app.isPackaged) {
     const indexPath = path.join(__dirname, '../../../renderer/index.html');

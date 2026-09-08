@@ -1134,6 +1134,15 @@ export interface ElectronAPI {
     get: (id: string) => Promise<string | null>;
     remove: (id: string) => Promise<boolean>;
   };
+  // 系统壳（托盘/自启设置下发；关闭拦截在主进程按设置执行）
+  shell: {
+    sync: (settings: { minimizeToTray?: boolean; autoLaunch?: boolean }) => Promise<{ ok: boolean }>;
+  };
+  // 网络代理（地址下发 + 连通测试）
+  net: {
+    setProxy: (url: string) => Promise<{ ok: boolean }>;
+    testProxy: (url: string) => Promise<{ ok: boolean; status?: number; error?: string }>;
+  };
 }
 
 // Embedding模型配置接口

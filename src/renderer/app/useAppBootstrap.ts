@@ -24,6 +24,7 @@ import { normalizeProjectKinds } from '../features/characters/characterKinds';
 import { useSettingsStore } from './stores/settingsStore';
 import { bootCustomFonts } from '../features/settings/services/customFontService';
 import { composeAppState, seedPersistBaseline, startPersistenceBridge } from './stores/persistenceBridge';
+import { startShellSync } from '../shared/services/shellSync';
 
 /** 把规范化 AppState 灌入双 store（首启动与全量导入共用）。 */
 export function hydrateStoresFromState(state: typeof INITIAL_APP_STATE): void {
@@ -83,6 +84,8 @@ export function useAppBootstrap(): void {
         void bootCustomFonts().catch((error) => logger.error('自定义字体加载失败:', error));
         await vectorIntegrationService.initialize();
         startPersistenceBridge();
+        // 托盘/自启/代理下发主进程（hydrate 之后，读到用户真实配置）
+        startShellSync();
       } catch (error) {
         logger.error('Failed to load initial state:', error);
       }

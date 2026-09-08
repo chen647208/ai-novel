@@ -14,6 +14,8 @@ import { IPC } from '../channels.js';
 import { registerVectorIpc } from '../vector-ipc.js';
 import { registerSqliteIpc, closeSqlite } from '../sqlite-ipc.js';
 import { registerMcpClientIpc, closeMcpClients } from '../mcp/clientIpc.js';
+import { registerProxyIpc } from '../net/proxyIpc.js';
+import { destroyTray, registerShellIpc } from './tray.js';
 import type { Provider, ProviderContext } from './container.js';
 import { createWindow } from './window.js';
 
@@ -226,5 +228,24 @@ export const mcpClientProvider: Provider = {
   },
   shutdown() {
     void closeMcpClients();
+  },
+};
+
+/** 网络代理 Provider：代理下发与连通测试（网关 + Chromium 双覆盖）。 */
+export const netProvider: Provider = {
+  name: 'net',
+  boot() {
+    registerProxyIpc();
+  },
+};
+
+/** 系统壳 Provider：托盘常驻 + 开机自启/最小化设置；退出时销毁托盘。 */
+export const shellProvider: Provider = {
+  name: 'shell',
+  boot(ctx: ProviderContext) {
+    registerShellIpc(ctx.getMainWindow);
+  },
+  shutdown() {
+    destroyTray();
   },
 };

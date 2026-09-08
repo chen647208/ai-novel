@@ -10,7 +10,9 @@
 - `SettingsModal.tsx`：设置弹窗主编排器
 - `components/SettingsTabNav.tsx` + `SettingsTabContent.tsx`：标签导航与内容分发
 - `components/SettingsModalHeader.tsx` + `SettingsModalFooter.tsx`：头尾（含暂存保存按钮）
-- `components/GeneralSettingsPanel.tsx`：语言/主题/字体/快捷键（直写 store 即时生效）
+- `components/GeneralSettingsPanel.tsx`：语言/主题/字体/快捷键/系统/代理（直写 store 即时生效）
+- `components/SystemPanel.tsx`：最小化到托盘 + 开机自启（经 `shellSync.ts` 下发主进程）
+- `components/ProxyPanel.tsx`：代理地址 + 连通测试（经 `shellSync.ts` 下发，网关与 Chromium 双覆盖）
 - `components/ModelSettingsPanel.tsx`：模型配置面板（`ModelSettings.tsx` 为入口组件）
 - `components/ProviderSidebar.tsx` + `ProviderEditor.tsx`：渠道侧栏与参数编辑
 - `components/EmbeddingSettingsPanel.tsx` + `EmbeddingSidebar.tsx` + `EmbeddingEditor.tsx`：Embedding 配置
@@ -36,6 +38,7 @@
 
 - 写作、助手、知识库和一致性检查都会依赖设置中的模型或模板配置
 - 设置持久化走 `app/stores/settingsStore.ts` + `persistenceBridge.ts` 差分落盘
+- 主进程侧：`main/app/tray.ts`（托盘/自启/关闭拦截）+ `main/net/proxy.ts`（地址校验/豁免/dispatcher）+ `proxyIpc.ts`
 - 保存语义：语言/主题/字体直写即时生效；模型与密钥类暂存按保存落盘（防半配置生效），关闭直接丢弃
 
 ## 维护建议
