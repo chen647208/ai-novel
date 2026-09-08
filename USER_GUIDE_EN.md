@@ -307,8 +307,8 @@ Hongyue Creation uses five sections guiding you through a complete novel (switch
 **How**:
 1. Click the refresh button next to the top version number
 2. The app checks automatically
-3. Update info shows when available
-4. Follow the upgrade guidance
+3. Update info shows when available; go to the download page to install manually (no background auto-update)
+4. Skip versions you don't want; they won't nag again
 
 ### Data management
 

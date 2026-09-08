@@ -45,6 +45,9 @@ export function composeAppState(): AppState {
     uiFont: s.uiFont,
     editorFont: s.editorFont,
     customFonts: s.customFonts,
+    uiFontSize: s.uiFontSize,
+    editorFontSize: s.editorFontSize,
+    editorLineHeight: s.editorLineHeight,
   };
 }
 

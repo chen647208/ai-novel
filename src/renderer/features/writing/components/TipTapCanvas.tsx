@@ -205,7 +205,7 @@ const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function T
         'selection:bg-primary/15',
         isFocusMode ? 'max-w-3xl text-xl leading-loose' : 'max-w-4xl',
       )}
-      style={{ fontFamily: 'var(--font-reading, inherit)' }}
+      style={{ fontFamily: 'var(--font-reading, inherit)', fontSize: 'var(--font-reading-size, 1.125rem)', lineHeight: 'var(--font-reading-lh, 1.9)' }}
       onMouseUp={onMouseUp}
       onKeyUp={onKeyUp}
       onMouseMove={onMouseMove}

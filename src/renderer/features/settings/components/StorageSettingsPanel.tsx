@@ -19,7 +19,7 @@ import { normalizeImportedState, checkImportVersion } from '@/app/initialState';
 import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
 import { Input } from '@/shared/ui/Input';
-import { AlertTriangle, ArrowLeftRight, Clock, Database, FolderOpen, History, Info, Save, Settings, Trash2 } from 'lucide-react';
+import { AlertTriangle, ArrowLeftRight, Clock, Database, FileText, FolderOpen, History, Info, Save, Settings, Trash2 } from 'lucide-react';
 
 /** 存储设置区块的小标题 */
 const FieldLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -119,6 +119,40 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
               <FieldLabel>{t('storage.pathLabel')}</FieldLabel>
               <div className="truncate rounded-md border border-border bg-muted/30 px-3 py-2 font-mono text-xs text-foreground">
                 {storageConfig.dataPath || t('storage.defaultPath')}
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const api = window.electronAPI;
+                    if (!api) {
+                      dialogService.alert(t('storage.electronUnavailable'));
+                      return;
+                    }
+                    void api.getAppDataPath()
+                      .then((dir) => api.openPath(storageConfig.dataPath || dir))
+                      .catch(() => dialogService.alert(t('storage.openPathFailed')));
+                  }}
+                >
+                  <FolderOpen className="size-3.5" /> {t('storage.openDataDir')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const api = window.electronAPI;
+                    if (!api) {
+                      dialogService.alert(t('storage.electronUnavailable'));
+                      return;
+                    }
+                    void api.getAppDataPath()
+                      .then((dir) => api.openPath(`${dir}/logs`))
+                      .catch(() => dialogService.alert(t('storage.openPathFailed')));
+                  }}
+                >
+                  <FileText className="size-3.5" /> {t('storage.openLogDir')}
+                </Button>
               </div>
             </div>
 

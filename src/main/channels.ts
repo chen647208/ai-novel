@@ -22,6 +22,8 @@ export const IPC = {
   printPdf: 'print-pdf',
   openDirectoryDialog: 'open-directory-dialog',
   listDirectory: 'list-directory',
+  openPath: 'open-path',
+  openExternal: 'open-external',
   vector: {
     initialize: 'vector:initialize',
     addDocuments: 'vector:add-documents',

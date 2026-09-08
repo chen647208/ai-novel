@@ -12,11 +12,11 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation, i18n } from '@/i18n';
 import { checkForUpdates, getCurrentVersionInfo, getVersionHistory, formatVersion, type UpdateCheckResult } from './services/versionService';
 import { dialogService } from '@/shared/services/dialogService';
-import { Button, buttonVariants } from '@/shared/ui/Button';
+import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
 import { Dialog, DialogContent } from '@/shared/ui/Dialog';
 import { cn } from '@/shared/utils/cn';
-import { AlertCircle, AlertTriangle, CheckCircle2, Download, ExternalLink, RefreshCw, Rocket, Tag } from 'lucide-react';
+import { AlertCircle, AlertTriangle, CheckCircle2, ExternalLink, RefreshCw, Rocket, Tag } from 'lucide-react';
 
 
 interface VersionCheckModalProps {
@@ -32,12 +32,24 @@ const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }) => {
   const { t } = useTranslation('version');
   const [isChecking, setIsChecking] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [downloadProgress, setDownloadProgress] = useState(0);
   const [updateResult, setUpdateResult] = useState<UpdateCheckResult | null>(null);
   const [currentVersionInfo, setCurrentVersionInfo] = useState(getCurrentVersionInfo());
   const [versionHistory, setVersionHistory] = useState(getVersionHistory());
-  const [autoCheckEnabled, setAutoCheckEnabled] = useState(true);
+  const [autoCheckEnabled, setAutoCheckEnabled] = useState(() => {
+    try {
+      return localStorage.getItem('version.autoCheck') !== '0';
+    } catch {
+      return true;
+    }
+  });
+  // 跳过的版本：下次检查到同一版不再打扰（localStorage，换机不跟随）
+  const [skippedVersion, setSkippedVersion] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem('version.skipped') || null;
+    } catch {
+      return null;
+    }
+  });
 
   const handleAutoCheck = useCallback(async () => {
     try {
@@ -82,44 +94,36 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
   };
 
   const handleDownloadUpdate = async () => {
-    if (!updateResult?.success || !updateResult.versionInfo.releaseUrl) return;
-
-    setIsDownloading(true);
-    setDownloadProgress(0);
-
+    const url = updateResult?.versionInfo.releaseUrl;
+    if (!updateResult?.success || !url) return;
+    // 诚实更新：本应用无后台自动更新，走外部浏览器下载页手动安装
     try {
-      // 模拟下载进度
-      const interval = setInterval(() => {
-        setDownloadProgress(prev => {
-          if (prev >= 95) {
-            clearInterval(interval);
-            return 95;
-          }
-          return prev + 5;
-        });
-      }, 200);
-
-      // 在实际应用中，这里会调用Electron的自动更新API
-      // 暂时使用模拟下载
-      await new Promise(resolve => setTimeout(resolve, 3000));
-
-      clearInterval(interval);
-      setDownloadProgress(100);
-
-      // 显示安装提示
-      setTimeout(() => {
-        dialogService.alert(t('downloadComplete'));
-        setIsDownloading(false);
-      }, 1000);
-
+      if (window.electronAPI?.openExternal) {
+        await window.electronAPI.openExternal(url);
+      } else {
+        window.open(url, '_blank', 'noopener');
+      }
     } catch (error) {
-      logger.error('下载更新失败:', error);
-      setIsDownloading(false);
-      setUpdateResult({
-        ...updateResult,
-        success: false,
-        error: t('downloadError')
-      });
+      logger.error('打开下载页失败:', error);
+      dialogService.alert(t('openUrlFailed'));
+    }
+  };
+
+  const handleSkipVersion = (version: string) => {
+    try {
+      localStorage.setItem('version.skipped', version);
+    } catch {
+      // 存储不可用则本次生效
+    }
+    setSkippedVersion(version);
+  };
+
+  const handleToggleAutoCheck = (enabled: boolean) => {
+    setAutoCheckEnabled(enabled);
+    try {
+      localStorage.setItem('version.autoCheck', enabled ? '1' : '0');
+    } catch {
+      // 存储不可用则本次生效
     }
   };
 
@@ -173,7 +177,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
                       type="checkbox"
                       className="peer sr-only"
                       checked={autoCheckEnabled}
-                      onChange={(e) => setAutoCheckEnabled(e.target.checked)}
+                      onChange={(e) => handleToggleAutoCheck(e.target.checked)}
                     />
                     <span className="h-6 w-11 rounded-full bg-muted transition-colors after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:bg-background after:shadow after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-5" />
                   </label>
@@ -237,41 +241,27 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
                         </div>
                       )}
 
-                      {updateResult.versionInfo.hasUpdate && (
-                        <div>
-                          {isDownloading ? (
-                            <div className="space-y-2">
-                              <div className="flex justify-between text-xs">
-                                <span className="text-muted-foreground">{t('modal.downloading')}</span>
-                                <span className="font-medium tabular-nums text-primary">{downloadProgress}%</span>
+                      {(() => {
+                        const latest = updateResult.versionInfo.latest;
+                        if (!updateResult.versionInfo.hasUpdate || !latest) return null;
+                        return (
+                          <div>
+                            {skippedVersion === latest ? (
+                              <p className="text-xs text-muted-foreground">{t('modal.skippedHint', { version: formatVersion(latest) })}</p>
+                            ) : (
+                              <div className="flex gap-2">
+                                <Button className="flex-1" size="sm" onClick={handleDownloadUpdate}>
+                                  <ExternalLink className="size-3.5" />
+                                  {t('modal.goDownloadPage')}
+                                </Button>
+                                <Button variant="ghost" size="sm" className="shrink-0 text-muted-foreground" onClick={() => handleSkipVersion(latest)}>
+                                  {t('modal.skipThisVersion')}
+                                </Button>
                               </div>
-                              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                                <div
-                                  className="h-1.5 rounded-full bg-primary transition-all duration-300"
-                                  style={{ width: `${downloadProgress}%` }}
-                                ></div>
-                              </div>
-                              <div className="text-xs text-muted-foreground">{t('modal.downloadHint')}</div>
-                            </div>
-                          ) : (
-                            <div className="flex gap-2">
-                              <Button className="flex-1" size="sm" onClick={handleDownloadUpdate}>
-                                <Download className="size-3.5" />
-                                {t('modal.autoInstall')}
-                              </Button>
-                              <a
-                                href={updateResult.versionInfo.releaseUrl || '#'}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'flex-1')}
-                              >
-                                <ExternalLink className="size-3.5" />
-                                {t('modal.manualDownload')}
-                              </a>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
 

@@ -36,6 +36,9 @@ interface SettingsState {
   uiFont: string | undefined;
   editorFont: string | undefined;
   customFonts: CustomFontMeta[];
+  uiFontSize: number | undefined;
+  editorFontSize: number | undefined;
+  editorLineHeight: number | undefined;
   /** 从 repository 载入的初始状态整体灌入（首启动/全量导入）。 */
   hydrate: (patch: Partial<SettingsState>) => void;
   setModels: (models: ModelConfig[], activeModelId: string | null) => void;
@@ -49,6 +52,9 @@ interface SettingsState {
   setTheme: (theme: AppTheme) => void;
   setUiFont: (uiFont: string) => void;
   setEditorFont: (editorFont: string) => void;
+  setUiFontSize: (size: number) => void;
+  setEditorFontSize: (size: number) => void;
+  setEditorLineHeight: (height: number) => void;
   addCustomFont: (meta: CustomFontMeta) => void;
   removeCustomFont: (id: string) => void;
 }
@@ -76,6 +82,9 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   uiFont: undefined,
   editorFont: undefined,
   customFonts: [],
+  uiFontSize: undefined,
+  editorFontSize: undefined,
+  editorLineHeight: undefined,
   hydrate: (patch) => set(patch),
   setModels: (models, activeModelId) => set({ models, activeModelId }),
   setActiveModelId: (activeModelId) => set({ activeModelId }),
@@ -97,6 +106,9 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   // 字体切换即时生效（App 订阅后写 body/--font-reading），持久化走差分桥
   setUiFont: (uiFont) => set({ uiFont }),
   setEditorFont: (editorFont) => set({ editorFont }),
+  setUiFontSize: (uiFontSize) => set({ uiFontSize }),
+  setEditorFontSize: (editorFontSize) => set({ editorFontSize }),
+  setEditorLineHeight: (editorLineHeight) => set({ editorLineHeight }),
 }));
 
 /**

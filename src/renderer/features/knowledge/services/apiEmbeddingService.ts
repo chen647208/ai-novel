@@ -179,8 +179,12 @@ export class APIEmbeddingService implements EmbeddingService {
     }> = [];
 
     for (const item of knowledgeItems) {
-      // 如果内容太长，进行分块
-      const chunks = this.chunkText(item.content, this.currentConfig.maxSequenceLength * 3); // 粗略估算字符数
+      // 分块大小取配置，未配回落旧规则（maxSequenceLength*3 粗略估算字符数）
+      const maxChunkSize = this.currentConfig.chunkSize && this.currentConfig.chunkSize > 0
+        ? this.currentConfig.chunkSize
+        : this.currentConfig.maxSequenceLength * 3;
+      const overlap = Math.max(0, Math.min(this.currentConfig.chunkOverlap ?? 0, Math.floor(maxChunkSize / 2)));
+      const chunks = this.chunkText(item.content, maxChunkSize, overlap);
 
       chunks.forEach((chunk, index) => {
         textChunks.push({
@@ -234,9 +238,9 @@ export class APIEmbeddingService implements EmbeddingService {
 
   /**
    * 将长文本分块
-   * 按句子边界分割，避免截断语义
+   * 按句子边界分割，避免截断语义；overlap 在相邻块之间复用尾部字符
    */
-  private chunkText(text: string, maxChunkSize: number): string[] {
+  private chunkText(text: string, maxChunkSize: number, overlap = 0): string[] {
     if (text.length <= maxChunkSize) {
       return [text];
     }
@@ -278,6 +282,16 @@ export class APIEmbeddingService implements EmbeddingService {
 
     if (currentChunk.trim().length > 0) {
       chunks.push(currentChunk.trim());
+    }
+
+    // 重叠：相邻块复用上块尾部字符（防切断语义）；首块不受影响
+    if (overlap > 0 && chunks.length > 1) {
+      const overlapped: string[] = [chunks[0]!];
+      for (let i = 1; i < chunks.length; i++) {
+        const prevTail = overlapped[i - 1]!.slice(-overlap);
+        overlapped.push(prevTail + chunks[i]);
+      }
+      return overlapped;
     }
 
     return chunks;

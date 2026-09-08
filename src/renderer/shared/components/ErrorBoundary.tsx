@@ -88,6 +88,19 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             >
               {i18n.t('errorBoundary.reload')}
             </button>
+            <button
+              onClick={() => {
+                const info = [
+                  `scope: ${this.props.scope ?? 'app'}`,
+                  `message: ${this.state.error?.message ?? 'unknown'}`,
+                  `time: ${new Date().toISOString()}`,
+                ].join('\n');
+                void navigator.clipboard?.writeText(info).catch(() => {});
+              }}
+              className="flex-1 rounded-lg border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent"
+            >
+              {i18n.t('errorBoundary.copyInfo')}
+            </button>
           </div>
         </div>
       </div>

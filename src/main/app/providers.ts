@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { app, BrowserWindow, dialog, ipcMain } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { IPC } from '../channels.js';
@@ -32,9 +32,9 @@ function assertString(value: unknown, label: string): asserts value is string {
 export const windowProvider: Provider = {
   name: 'window',
   boot() {
-    createWindow();
+    void createWindow();
     app.on('activate', () => {
-      if (BrowserWindow.getAllWindows().length === 0) createWindow();
+      if (BrowserWindow.getAllWindows().length === 0) void createWindow();
     });
   },
 };
@@ -84,6 +84,29 @@ export const fileProvider: Provider = {
       } catch {
         return [];
       }
+    });
+
+    // 系统文件管理器打开路径（日志/数据目录入口；只允许 userData 内路径）
+    ipcMain.handle(IPC.openPath, async (_event, targetPath: string) => {
+      assertString(targetPath, 'targetPath');
+      const base = path.resolve(app.getPath('userData'));
+      const resolved = path.resolve(targetPath);
+      if (resolved !== base && !resolved.startsWith(base + path.sep)) {
+        throw new Error('拒绝打开应用数据目录外的路径');
+      }
+      const err = await shell.openPath(resolved);
+      if (err) throw new Error(err);
+      return true;
+    });
+
+    // 外部浏览器打开链接（仅 https；渲染层 window.open 被安全策略拒绝，走这里）
+    ipcMain.handle(IPC.openExternal, async (_event, url: string) => {
+      assertString(url, 'url');
+      if (!/^https:\/\/[^/]+\//.test(url)) {
+        throw new Error('只允许打开 https 链接');
+      }
+      await shell.openExternal(url);
+      return true;
     });
 
     ipcMain.handle(IPC.deleteFile, async (_event, filePath: string) => {

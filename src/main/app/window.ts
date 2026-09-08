@@ -26,6 +26,42 @@ const LOAD_ERROR_HTML = [
 
 let mainWindow: BrowserWindow | null = null;
 
+/** 窗口几何记忆：userData/window-state.json，损坏回退默认尺寸。 */
+const WINDOW_STATE_FILE = 'window-state.json';
+const DEFAULT_BOUNDS = { width: 1400, height: 900 };
+
+function stateFile(): string {
+  return path.join(app.getPath('userData'), WINDOW_STATE_FILE);
+}
+
+async function loadBounds(): Promise<{ width: number; height: number; x?: number; y?: number; maximized: boolean }> {
+  try {
+    const raw = await import('node:fs/promises').then((fs) => fs.readFile(stateFile(), 'utf-8'));
+    const parsed = JSON.parse(raw) as { width?: number; height?: number; x?: number; y?: number; maximized?: boolean };
+    const width = Math.max(1200, Math.min(3840, Number(parsed.width) || DEFAULT_BOUNDS.width));
+    const height = Math.max(800, Math.min(2160, Number(parsed.height) || DEFAULT_BOUNDS.height));
+    return {
+      width, height,
+      x: typeof parsed.x === 'number' ? parsed.x : undefined,
+      y: typeof parsed.y === 'number' ? parsed.y : undefined,
+      maximized: parsed.maximized === true,
+    };
+  } catch {
+    return { ...DEFAULT_BOUNDS, maximized: false };
+  }
+}
+
+async function saveBounds(win: BrowserWindow): Promise<void> {
+  try {
+    const { default: fs } = await import('node:fs/promises');
+    const maximized = win.isMaximized();
+    const b = win.getBounds();
+    await fs.writeFile(stateFile(), JSON.stringify(maximized ? { ...DEFAULT_BOUNDS, maximized: true } : { ...b, maximized: false }));
+  } catch (err: unknown) {
+    logger.warn('window', 'Failed to save window bounds', err);
+  }
+}
+
 export function getMainWindow(): BrowserWindow | null {
   return mainWindow;
 }
@@ -64,10 +100,13 @@ function tryDevelopmentServer(win: BrowserWindow, portIndex = 0): void {
   });
 }
 
-export function createWindow(): void {
+export async function createWindow(): Promise<void> {
+  const saved = await loadBounds();
   mainWindow = new BrowserWindow({
-    width: 1400,
-    height: 900,
+    width: saved.width,
+    height: saved.height,
+    x: saved.x,
+    y: saved.y,
     minWidth: 1200,
     minHeight: 800,
     webPreferences: {
@@ -83,6 +122,13 @@ export function createWindow(): void {
   });
 
   applyWindowSecurity(mainWindow);
+  if (saved.maximized) mainWindow.maximize();
+
+  // 关闭/退出前落盘几何，下次原样恢复
+  const persist = (): void => {
+    if (mainWindow && !mainWindow.isDestroyed()) void saveBounds(mainWindow);
+  };
+  mainWindow.on('close', persist);
 
   if (app.isPackaged) {
     const indexPath = path.join(__dirname, '../../../renderer/index.html');

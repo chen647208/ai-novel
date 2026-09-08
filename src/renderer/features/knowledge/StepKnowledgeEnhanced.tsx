@@ -475,6 +475,27 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
     return (score * 100).toFixed(1) + '%';
   };
 
+  // 一键重建索引：先清本项目向量，再全量重索（换嵌入模型/维度后修复不一致）
+  const handleRebuildIndex = async (): Promise<void> => {
+    const items = project.knowledge || [];
+    if (items.length === 0) {
+      dialogService.alert(t('center.rebuildEmpty'));
+      return;
+    }
+    const ok = await dialogService.confirm({ message: t('center.rebuildConfirm', { count: items.length }), danger: false });
+    if (!ok) return;
+    setIsIndexing(true);
+    try {
+      await vectorIntegrationService.cleanupProject(project.id);
+      await indexKnowledgeItems(items);
+    } catch (error) {
+      logger.error('重建索引失败:', error);
+      dialogService.alert(t('center.indexError', { error: error instanceof Error ? error.message : String(error) }));
+    } finally {
+      setIsIndexing(false);
+    }
+  };
+
   return (
     <div className="mx-auto flex h-full max-w-7xl flex-col">
       <div className="flex-none p-8 pb-4">
@@ -492,6 +513,16 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
               <span className="rounded-md border border-border bg-muted/40 px-3 py-1.5 text-xs tabular-nums text-muted-foreground">
                 <span className="font-medium text-foreground">{vectorStats.dimensions}</span> {t('center.dimUnit')}
               </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs"
+                disabled={isIndexing}
+                title={t('center.rebuildTitle')}
+                onClick={() => void handleRebuildIndex()}
+              >
+                {t('center.rebuildIndex')}
+              </Button>
             </div>
           )}
         </div>

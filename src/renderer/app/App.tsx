@@ -83,17 +83,24 @@ const App: React.FC = () => {
   const uiFont = useSettingsStore(s => s.uiFont);
   const editorFont = useSettingsStore(s => s.editorFont);
   const customFonts = useSettingsStore(s => s.customFonts);
+  const uiFontSize = useSettingsStore(s => s.uiFontSize) ?? 14;
+  const editorFontSize = useSettingsStore(s => s.editorFontSize) ?? 18;
+  const editorLineHeight = useSettingsStore(s => s.editorLineHeight) ?? 1.9;
   useEffect(() => {
     try {
       document.body.style.fontFamily = resolveFontStack(uiFont, DEFAULT_UI_FONT, customFonts);
-      document.documentElement.style.setProperty(
+      document.body.style.fontSize = `${uiFontSize}px`;
+      const root = document.documentElement.style;
+      root.setProperty(
         '--font-reading',
         resolveFontStack(editorFont, DEFAULT_EDITOR_FONT, customFonts)
       );
+      root.setProperty('--font-reading-size', `${editorFontSize}px`);
+      root.setProperty('--font-reading-lh', String(editorLineHeight));
     } catch {
       // 非 DOM 环境（测试）静默
     }
-  }, [uiFont, editorFont, customFonts]);
+  }, [uiFont, editorFont, customFonts, uiFontSize, editorFontSize, editorLineHeight]);
 
   const toggleAssistant = useCallback(() => {
     setAssistantOpenPref(assistantOpen ? 'closed' : 'open');

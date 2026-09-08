@@ -43,6 +43,9 @@ const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({
   const uiFont = useSettingsStore((s) => s.uiFont ?? DEFAULT_UI_FONT);
   const editorFont = useSettingsStore((s) => s.editorFont ?? DEFAULT_EDITOR_FONT);
   const customFonts = useSettingsStore((s) => s.customFonts);
+  const uiFontSize = useSettingsStore((s) => s.uiFontSize ?? 14);
+  const editorFontSize = useSettingsStore((s) => s.editorFontSize ?? 18);
+  const editorLineHeight = useSettingsStore((s) => s.editorLineHeight ?? 1.9);
   const store = useSettingsStore.getState();
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
@@ -154,6 +157,45 @@ const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({
           >
             {t('general.previewText')}
           </p>
+
+          <div className="grid max-w-2xl grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="space-y-2">
+              <Label>{t('general.uiFontSizeLabel', { size: uiFontSize })}</Label>
+              <input
+                type="range"
+                min={11}
+                max={20}
+                step={1}
+                value={uiFontSize}
+                onChange={(e) => store.setUiFontSize(Number(e.target.value))}
+                className="w-full accent-primary"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t('general.editorFontSizeLabel', { size: editorFontSize })}</Label>
+              <input
+                type="range"
+                min={13}
+                max={26}
+                step={1}
+                value={editorFontSize}
+                onChange={(e) => store.setEditorFontSize(Number(e.target.value))}
+                className="w-full accent-primary"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t('general.lineHeightLabel', { height: editorLineHeight.toFixed(1) })}</Label>
+              <input
+                type="range"
+                min={1.4}
+                max={2.6}
+                step={0.1}
+                value={editorLineHeight}
+                onChange={(e) => store.setEditorLineHeight(Number(e.target.value))}
+                className="w-full accent-primary"
+              />
+            </div>
+          </div>
 
           <div className="space-y-2">
             <div className="flex items-center gap-2">

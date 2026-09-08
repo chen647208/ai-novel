@@ -229,6 +229,28 @@ export const EmbeddingEditor: React.FC<EmbeddingEditorProps> = ({
                 <option value="none">{t('embedding.truncNone')}</option>
               </Select>
             </div>
+            <div>
+              <label className={fieldLabel}>{t('embedding.chunkSizeLabel')}</label>
+              <Select
+                value={config.chunkSize ?? 0}
+                onChange={(e) => {
+                  const v = parseInt(e.target.value, 10);
+                  onUpdate({ chunkSize: v > 0 ? v : undefined });
+                }}
+              >
+                <option value={0}>{t('embedding.chunkSizeAuto')}</option>
+                {[500, 1000, 2000, 4000, 8000].map((v) => <option key={v} value={v}>{v}</option>)}
+              </Select>
+            </div>
+            <div>
+              <label className={fieldLabel}>{t('embedding.chunkOverlapLabel')}</label>
+              <Select
+                value={config.chunkOverlap ?? 0}
+                onChange={(e) => onUpdate({ chunkOverlap: parseInt(e.target.value, 10) })}
+              >
+                {[0, 50, 100, 200, 500].map((v) => <option key={v} value={v}>{v}</option>)}
+              </Select>
+            </div>
             <div className="flex items-center">
               <label className="relative inline-flex cursor-pointer items-center">
                 <input type="checkbox" className="peer sr-only" checked={config.normalizeEmbeddings} onChange={(e) => onUpdate({ normalizeEmbeddings: e.target.checked })} />

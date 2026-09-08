@@ -20,6 +20,7 @@
     "appError": "An error occurred while rendering the app. Your data is saved locally and won't be lost.",
     "unknown": "Unknown error",
     "retry": "Retry",
-    "reload": "Reload app"
+    "reload": "Reload app",
+    "copyInfo": "Copy error info"
   }
 }

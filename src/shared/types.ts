@@ -745,6 +745,12 @@ export interface AppState {
   editorFont?: string;
   /** 用户导入的自定义字体（仅元数据） */
   customFonts?: CustomFontMeta[];
+  /** 界面字号 px；undefined 表默认 14 */
+  uiFontSize?: number;
+  /** 正文字号 px；undefined 表默认 18 */
+  editorFontSize?: number;
+  /** 正文行高倍数；undefined 表默认 1.9 */
+  editorLineHeight?: number;
 }
 
 // 向量数据库相关类型
@@ -1031,6 +1037,10 @@ export interface ElectronAPI {
   printPdf: (html: string, defaultPath: string) => Promise<{ canceled: boolean }>;
   openDirectoryDialog: (options: FileDialogOptions) => Promise<{ canceled: boolean; filePaths: string[] }>;
   listDirectory: (dirPath: string) => Promise<Array<{ name: string; type: 'file' | 'directory' }>>;
+  /** 系统文件管理器打开路径（日志目录/数据目录入口）。 */
+  openPath: (targetPath: string) => Promise<boolean>;
+  /** 外部浏览器打开链接（仅 https；应用内无浏览器）。 */
+  openExternal: (url: string) => Promise<boolean>;
 
   // 向量存储操作（通过主进程代理）
   vector: {
@@ -1099,6 +1109,10 @@ export interface EmbeddingModelConfig {
   truncate: 'start' | 'end' | 'none';
   /** 是否为当前激活配置 */
   isActive: boolean;
+  /** 分块字符数（缺席用 maxSequenceLength*3 旧规则）；调大召回全、调小精度高 */
+  chunkSize?: number;
+  /** 相邻分块重叠字符数（缺席为 0）；防切断语义 */
+  chunkOverlap?: number;
   /** 上次测试时间 */
   lastTested?: number;
   /** 测试状态 */
