@@ -215,6 +215,8 @@ export interface ChapterNavigationSectionProps {
   activeChapterId: string | null;
   onChapterClick: (chapter: Chapter) => void;
   onDeleteChapter: (chapterId: string) => void;
+  onChaptersChange: (chapters: Chapter[]) => void;
+  onBatchDeleteChapter: (chapterIds: string[]) => void;
 }
 
 export interface WritingSidebarProps {
@@ -234,6 +236,8 @@ export interface WritingSidebarProps {
   onChapterClick: (chapter: Chapter) => void;
   onNavigateToCharacters?: () => void;
   onDeleteChapter: (chapterId: string) => void;
+  onChaptersChange: (chapters: Chapter[]) => void;
+  onBatchDeleteChapter: (chapterIds: string[]) => void;
 }
 
 export interface WritingEditorCanvasProps {

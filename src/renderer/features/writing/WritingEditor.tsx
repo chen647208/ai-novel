@@ -883,6 +883,19 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     }
   };
 
+  const handleChaptersChange = (chapters: Chapter[]) => {
+    onUpdate({ chapters });
+  };
+
+  const handleBatchDeleteChapter = async (chapterIds: string[]) => {
+    const ids = new Set(chapterIds);
+    const remaining = project.chapters.filter((c) => !ids.has(c.id));
+    onUpdate({ chapters: remaining });
+    if (activeChapterId && ids.has(activeChapterId)) {
+      setActiveChapterId(remaining[0]?.id ?? null);
+    }
+  };
+
   const generateSingleChapter = async (chapter: Chapter, template: PromptTemplate, model: ModelConfig, externalSignal?: AbortSignal): Promise<{content: string, historyRecord?: AIHistoryRecord}> => {
     try {
       setActiveChapterId(chapter.id);
@@ -1318,6 +1331,8 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           onChapterClick={handleChapterClick}
           onNavigateToCharacters={onNavigateToCharacters}
           onDeleteChapter={handleDeleteChapter}
+          onChaptersChange={handleChaptersChange}
+          onBatchDeleteChapter={handleBatchDeleteChapter}
         />
       )}
 

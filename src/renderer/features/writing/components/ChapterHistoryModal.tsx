@@ -15,6 +15,7 @@ import { repository } from '@/shared/services/repository';
 import { formatHistoryTimestamp, getGenerationType, getProviderIcon } from '../utils';
 import { listSnapshots, removeSnapshot } from '../services/chapterSnapshotService';
 import { dialogService } from '@/shared/services/dialogService';
+import { diffLines } from '../services/historyDiff';
 import { Button } from '@/shared/ui/Button';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -45,6 +46,8 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
   const { t } = useTranslation('writing');
   const [tab, setTab] = useState<'ai' | 'snapshot' | 'revisions'>('ai');
   const [revisions, setRevisions] = useState<RevisionEntity[]>([]);
+  // diff 对比目标记录 id（与当前正文逐行比对，只读展示）
+  const [diffRecordId, setDiffRecordId] = useState<string | null>(null);
 
   // 修订记录按需加载：节点 id 即章节 id（bridge 平铺时原样透传）；
   // 应用走正常回写路径（onApplyContent），自然产生一条新修订，无需写回管线
@@ -249,6 +252,27 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
                       </div>
                     </div>
 
+                    {diffRecordId === record.id && (
+                      <div>
+                        <div className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('chapterHistory.diffLabel')}</div>
+                        <div className="custom-scrollbar max-h-64 space-y-0.5 overflow-y-auto rounded-lg border border-border bg-muted/30 p-3 font-mono text-xs leading-relaxed">
+                          {diffLines(record.generatedContent, chapter.content || '').map((line, i) => (
+                            <div
+                              key={i}
+                              className={cn(
+                                'whitespace-pre-wrap rounded px-1.5 py-0.5',
+                                line.type === 'add' && 'bg-success/10 text-success',
+                                line.type === 'del' && 'bg-destructive/10 text-destructive',
+                                line.type === 'same' && 'text-muted-foreground'
+                              )}
+                            >
+                              {line.type === 'add' ? '+ ' : line.type === 'del' ? '- ' : '  '}{line.text || ' '}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-2 gap-3">
                       <div className="rounded-lg border border-border bg-muted/30 p-3">
                         <div className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('chapterHistory.modelConfigLabel')}</div>
@@ -280,6 +304,13 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
                     </div>
 
                     <div className="flex justify-end gap-2 border-t border-border pt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDiffRecordId((v) => (v === record.id ? null : record.id))}
+                      >
+                        {t('chapterHistory.compare')}
+                      </Button>
                       <Button
                         variant="secondary"
                         size="sm"

@@ -34,6 +34,8 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
   onChapterClick,
   onNavigateToCharacters,
   onDeleteChapter,
+  onChaptersChange,
+  onBatchDeleteChapter,
 }) => {
   const { t } = useTranslation('writing');
   return (
@@ -99,6 +101,8 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
           activeChapterId={activeChapterId}
           onChapterClick={onChapterClick}
           onDeleteChapter={onDeleteChapter}
+          onChaptersChange={onChaptersChange}
+          onBatchDeleteChapter={onBatchDeleteChapter}
         />
       </div>
     </div>

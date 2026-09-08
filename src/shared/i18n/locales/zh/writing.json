@@ -184,6 +184,8 @@
     "outputLabel": "输出:",
     "totalLabel": "总计:",
     "reapply": "重新应用",
+    "compare": "对比当前",
+    "diffLabel": "与当前正文差异（+ 新增 / - 删除）",
     "noHistory": "暂无AI生成历史记录",
     "noHistoryHint": "使用AI生成功能后，历史记录将显示在这里",
     "noRevisions": "暂无修订记录",
@@ -324,7 +326,24 @@
     "title": "章节导航",
     "chapterEntry": "第{{num}}章 {{title}}",
     "searchPlaceholder": "搜索章节标题...",
-    "deleteTitle": "删除《{{title}}》"
+    "deleteTitle": "删除《{{title}}》",
+    "viewList": "列表视图",
+    "viewCards": "卡片视图",
+    "selectTitle": "多选",
+    "selectedCount": "已选 {{count}} 章",
+    "selectAll": "全选",
+    "markDone": "标完稿",
+    "markDraft": "标草稿",
+    "deleteSelected": "删除所选",
+    "deleteSelectedConfirm": "确定删除所选 {{count}} 章吗？正文与历史一并移除，不可恢复。",
+    "statusCycleTitle": "点击切换状态：草稿→写作中→完稿",
+    "noSummary": "暂无摘要",
+    "charsUnit": "字",
+    "status": {
+      "draft": "草稿",
+      "writing": "写作中",
+      "done": "完稿"
+    }
   },
   "canvas": {
     "placeholderReady": "泼墨挥毫，选中文字可唤出 AI 润色工具...",

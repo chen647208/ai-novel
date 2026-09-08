@@ -184,6 +184,8 @@
     "outputLabel": "Output:",
     "totalLabel": "Total:",
     "reapply": "Reapply",
+    "compare": "Compare with current",
+    "diffLabel": "Diff vs current content (+ added / - removed)",
     "noHistory": "No AI generation history",
     "noHistoryHint": "History records will appear here after you use AI generation",
     "noRevisions": "No revisions yet",
@@ -324,7 +326,24 @@
     "title": "Chapter Navigation",
     "chapterEntry": "Chapter {{num}}: {{title}}",
     "searchPlaceholder": "Search chapter titles...",
-    "deleteTitle": "Delete {{title}}"
+    "deleteTitle": "Delete {{title}}",
+    "viewList": "List view",
+    "viewCards": "Card view",
+    "selectTitle": "Multi-select",
+    "selectedCount": "{{count}} selected",
+    "selectAll": "Select all",
+    "markDone": "Mark done",
+    "markDraft": "Mark draft",
+    "deleteSelected": "Delete selected",
+    "deleteSelectedConfirm": "Delete {{count}} selected chapter(s)? Content and history are removed and cannot be recovered.",
+    "statusCycleTitle": "Click to cycle status: draft → writing → done",
+    "noSummary": "No summary yet",
+    "charsUnit": " chars",
+    "status": {
+      "draft": "Draft",
+      "writing": "Writing",
+      "done": "Done"
+    }
   },
   "canvas": {
     "placeholderReady": "Start writing; select text to summon the AI polish tools...",
