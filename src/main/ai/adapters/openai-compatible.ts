@@ -52,7 +52,7 @@ async function postChat(
     },
     body: JSON.stringify({
       model: model.modelName,
-      messages: buildMessages(model, prompt),
+      messages: buildMessages(model, prompt, options?.images),
       temperature: temperatureOf(model),
       max_tokens: model.maxTokens,
       stream,

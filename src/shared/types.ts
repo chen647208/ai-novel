@@ -41,6 +41,8 @@ export interface ModelConfig {
   
   // 流式支持标志
   supportsStreaming?: boolean;
+  /** 视觉支持：false 显式关闭；缺席按支持处理（主流对话模型均支持） */
+  supportsVision?: boolean;
   
   // 默认输出模式（新增）
   defaultOutputMode?: OutputMode;
@@ -115,6 +117,14 @@ export type StreamingCallback = (response: StreamingAIResponse) => void;
 export interface AiCallOptions {
   /** 瞬时失败（网络/429/5xx）的额外重试次数，默认 2 */
   retries?: number;
+  /** 附图（dataUrl 形态）；仅首轮携带，不进历史 */
+  images?: AIMessageImage[];
+}
+
+/** 附图（dataUrl 含 mime 前缀，如 data:image/png;base64,...）。 */
+export interface AIMessageImage {
+  mime: string;
+  dataUrl: string;
 }
 
 /** AI 网关流式事件（ai:stream:event 通道载荷，按 requestId 多路分发）。
@@ -747,6 +757,8 @@ export interface AppState {
   editorFont?: string;
   /** 用户导入的自定义字体（仅元数据） */
   customFonts?: CustomFontMeta[];
+  /** 外部 MCP server 配置（客户端直连，设置页管理） */
+  mcpServers?: McpServerConfig[];
   /** 界面字号 px；undefined 表默认 14 */
   uiFontSize?: number;
   /** 正文字号 px；undefined 表默认 18 */
@@ -756,6 +768,15 @@ export interface AppState {
 }
 
 // 向量数据库相关类型
+/** 外部 MCP server 配置（客户端直连，设置页管理）。 */
+export interface McpServerConfig {
+  id: string;
+  name: string;
+  /** 启动命令（如 node / python），数组传参禁 shell 展开 */
+  command: string;
+  args: string[];
+  enabled: boolean;
+}
 export interface VectorDocument {
   id: string;
   projectId: string;
@@ -1045,6 +1066,13 @@ export interface ElectronAPI {
   openExternal: (url: string) => Promise<boolean>;
   /** 打包文件集为 zip（STORE 无压缩）并另存为；files 为 {文件名: 文本内容}。 */
   exportPackage: (files: Record<string, string>, defaultPath: string) => Promise<{ canceled: boolean }>;
+  /** MCP 客户端：外部 server 的连接/工具/调用（主进程持 stdio）。 */
+  mcpClient: {
+    connect: (id: string, command: string, args?: string[]) => Promise<{ connected: boolean }>;
+    tools: (id: string) => Promise<{ tools: Array<{ name: string; description?: string; inputSchema?: unknown }> }>;
+    call: (id: string, tool: string, args?: unknown) => Promise<unknown>;
+    disconnect: (id: string) => Promise<{ connected: boolean }>;
+  };
 
   // 向量存储操作（通过主进程代理）
   vector: {

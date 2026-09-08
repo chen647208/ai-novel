@@ -22,3 +22,7 @@ export const HISTORY_TOTAL_CHARS = 6000;
 export const COMPACT_THRESHOLD_CHARS = 12000;
 /** 摘要本身上限（字符）。 */
 export const SUMMARY_MAX_CHARS = 800;
+/** 聊天附图单张上限（字节）；超限提示压缩后重发。 */
+export const CHAT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+/** 聊天附图允许类型。 */
+export const CHAT_IMAGE_MIMES: ReadonlyArray<string> = ['image/png', 'image/jpeg', 'image/webp'];

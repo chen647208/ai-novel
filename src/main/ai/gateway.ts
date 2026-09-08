@@ -95,6 +95,7 @@ export const aiGatewayProvider: Provider = {
         return await resolveAdapter(resolved).complete(resolved, prompt, {
           retries: options?.retries ?? 2,
           signal: controller.signal,
+          images: options?.images,
         });
       } finally {
         active.delete(requestId);

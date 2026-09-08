@@ -23,6 +23,7 @@
     "editDataTitle": "Edit project data",
     "contextTitle": "Project context analysis",
     "stopStreamTitle": "Stop streaming response",
+    "planModeTitle": "Plan mode: plan only, act after confirmation",
     "clearChatTitle": "Clear chat history"
   },
   "chat": {
@@ -58,6 +59,9 @@
     "inputPlaceholder": "Type a question, or use /character /location /faction commands to create quickly... (Shift+Enter for a new line)",
     "stopTitle": "Stop generating",
     "sendTitle": "Send",
+    "imageTypeUnsupported": "Unsupported image type: {{name}} (png/jpg/webp only).",
+    "imageTooLarge": "{{name}} exceeds {{size}}MB. Compress and retry.",
+    "noVision": "The current model has vision disabled. Enable it in model settings to send images.",
     "copyTitle": "Copy this message",
     "deleteTitle": "Delete this message",
     "editResendTitle": "Load into input to edit and resend",

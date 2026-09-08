@@ -29,8 +29,9 @@ import type {
   ToolRegistry,
 } from '@core/ai';
 import type { EventBus, SeamPolicy } from '@core/plugin';
-import type { CardPromptTemplate, ConsistencyCheckPromptTemplate, ModelConfig, Project } from '@shared/types';
+import type { AIMessageImage, CardPromptTemplate, ConsistencyCheckPromptTemplate, ModelConfig, Project } from '@shared/types';
 import { buildHistoryText } from './chatHistory.js';
+import { syncMcpTools } from './mcpClient.js';
 import { aiGatewayClient } from '@/shared/services/ai/gatewayClient.js';
 import { useSettingsStore } from '@/app/stores/settingsStore';
 
@@ -91,6 +92,8 @@ export interface RunSessionInput {
   signal?: AbortSignal;
   /** 调用方传入的近期对话（已由宿主压缩/截断到阈值内，此处只做最终文本拼装） */
   history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+  /** 附图（仅首轮携带，不进历史） */
+  images?: AIMessageImage[];
   /** 用户在助手中选中的卡片模板（Agent 卡片生成沿用，不再回退默认） */
   cardTemplate?: CardPromptTemplate;
 }
@@ -152,6 +155,19 @@ export class AiSessionManager {
     });
     this.lastSession = session;
 
+    // MCP 外部工具：每轮按设置同步（无配置时零成本；失败记事件不进聊天）
+    try {
+      const servers = useSettingsStore.getState().mcpServers ?? [];
+      if (servers.some((s) => s.enabled)) {
+        const { errors } = await syncMcpTools(this.registry, servers);
+        for (const message of errors) {
+          await session.emit({ t: 'mcp.sync', ok: false, error: message, at: Date.now() });
+        }
+      }
+    } catch (err) {
+      await session.emit({ t: 'mcp.sync', ok: false, error: err instanceof Error ? err.message : String(err), at: Date.now() });
+    }
+
     try {
       const result = await runAgentSession(
         {
@@ -160,6 +176,7 @@ export class AiSessionManager {
           router: this.router,
           session,
           model: input.model,
+          images: input.images,
           context: () => ({
             project: input.project,
             index: input.index,
@@ -204,8 +221,8 @@ export class AiSessionManager {
                 .map((p) => p.text),
             },
           }),
-          complete: (model, prompt, retries) =>
-            aiGatewayClient.complete(model, prompt, { retries, signal: input.signal }),
+      complete: (model, prompt, retries) =>
+        aiGatewayClient.complete(model, prompt, { retries, signal: input.signal, images: input.images }),
           maxTurns: input.maxTurns,
           signal: input.signal,
           // 首轮预算 24000 字符（约 8–12k token，32k 上下文模型留足工具观察与输出空间）

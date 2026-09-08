@@ -247,6 +247,7 @@ Hongyue Creation uses five sections guiding you through a complete novel (switch
 1. Click the top-bar AI icon or press `Ctrl+J` for the right sidebar
 2. Type your question (slash commands like `/character` create cards)
    - Follow-ups work (recent turns travel along); hit Regenerate to rerun the last message
+   - Images welcome (png/jpg/webp under 5MB); plan mode plans without executing
 3. Write operations enter the approval inbox and only land after approval
 4. Copy suggestions into the editor
 5. Without a usable model, send/analyze buttons disable with a hint — configure a model in settings first

@@ -45,6 +45,8 @@ function eventLine(e: AiEvent): { label: string; tone: 'ok' | 'err' | 'muted' } 
       return { label: `轮次结束（共 ${e.turns} 轮）`, tone: 'muted' };
     case 'session.end':
       return { label: e.ok ? '■ 会话完成' : `■ 会话失败：${e.error ?? ''}`, tone: e.ok ? 'ok' : 'err' };
+    case 'mcp.sync':
+      return { label: e.ok ? 'MCP 同步成功' : `MCP 同步失败：${e.error ?? ''}`, tone: e.ok ? 'ok' : 'err' };
     default:
       return { label: e.t, tone: 'muted' };
   }

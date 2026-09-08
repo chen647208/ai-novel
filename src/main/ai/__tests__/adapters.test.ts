@@ -15,6 +15,7 @@ beforeAll(async () => {
   await initAiI18n('zh');
 });
 import { openAICompatibleAdapter } from '../adapters/openai-compatible.js';
+import { anthropicAdapter } from '../adapters/anthropic.js';
 import { geminiAdapter } from '../adapters/gemini.js';
 import { DEFAULT_TEMPERATURE } from '../types.js';
 import type { ModelConfig, StreamingAIResponse } from '../../../shared/types.js';
@@ -85,6 +86,32 @@ describe('openAICompatibleAdapter.complete', () => {
     const r = await openAICompatibleAdapter.complete(baseModel, 'hi', { retries: 2 });
     expect(r.error).toContain('bad key');
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('附图走 OpenAI 内容数组形态', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ choices: [{ message: { content: 'seen' } }] }));
+    vi.stubGlobal('fetch', fetchMock);
+    const images = [{ mime: 'image/png', dataUrl: 'data:image/png;base64,AAA' }];
+    const r = await openAICompatibleAdapter.complete(baseModel, '看图', { images });
+    expect(r.error).toBeUndefined();
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    const body = JSON.parse(init.body as string);
+    expect(body.messages[0]).toEqual({
+      role: 'user',
+      content: [
+        { type: 'text', text: '看图' },
+        { type: 'image', mime: 'image/png', dataUrl: 'data:image/png;base64,AAA' },
+      ],
+    });
+  });
+
+  it('无图保持字符串形态（行为不变）', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ choices: [{ message: { content: 'x' } }] }));
+    vi.stubGlobal('fetch', fetchMock);
+    await openAICompatibleAdapter.complete(baseModel, 'hi');
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    const body = JSON.parse(init.body as string);
+    expect(body.messages[0]).toEqual({ role: 'user', content: 'hi' });
   });
 
   it('请求携带 system 消息与鉴权头', async () => {
@@ -216,5 +243,30 @@ describe('geminiAdapter', () => {
     expect(final.isComplete).toBe(true);
     expect(final.content).toBe('ok');
     expect(final.error).toBeUndefined();
+  });
+});
+
+describe('anthropicAdapter.complete', () => {
+  const claudeModel: ModelConfig = {
+    ...baseModel,
+    provider: 'anthropic',
+    endpoint: 'https://api.anthropic.com',
+    modelName: 'claude-test',
+  };
+
+  it('附图转 image block（base64 拆分）', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ content: [{ type: 'text', text: 'seen' }] }));
+    vi.stubGlobal('fetch', fetchMock);
+    const r = await anthropicAdapter.complete(claudeModel, '看图', {
+      images: [{ mime: 'image/png', dataUrl: 'data:image/png;base64,AAA' }],
+    });
+    expect(r.error).toBeUndefined();
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    const body = JSON.parse(init.body as string);
+    const userMsg = (body.messages as Array<{ role: string; content: unknown }>).find((m) => m.role === 'user');
+    expect(userMsg?.content).toEqual([
+      { type: 'text', text: '看图', cache_control: { type: 'ephemeral' } },
+      { type: 'image', source: { type: 'base64', media_type: 'image/png', data: 'AAA' } },
+    ]);
   });
 });

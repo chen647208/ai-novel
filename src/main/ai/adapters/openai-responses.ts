@@ -55,10 +55,14 @@ export function responsesUrl(endpoint: string): string {
   return `${base}/v1/responses`;
 }
 
-function responsesBody(model: ModelConfig, prompt: string, stream: boolean): Record<string, unknown> {
+function responsesBody(model: ModelConfig, prompt: string, stream: boolean, options?: CallOptions): Record<string, unknown> {
+  const images = options?.images ?? [];
   const body: Record<string, unknown> = {
     model: model.modelName,
-    input: prompt,
+    // 有图则 input 为富内容数组（input_text + input_image），无图保持字符串
+    input: images.length > 0
+      ? [{ role: 'user', content: [{ type: 'input_text', text: prompt }, ...images.map((img) => ({ type: 'input_image', image_url: img.dataUrl }))] }]
+      : prompt,
     stream,
   };
   const system = model.systemPrompt?.trim();
@@ -93,7 +97,7 @@ async function postResponses(
       ...(model.apiKey ? { Authorization: `Bearer ${model.apiKey}` } : {}),
       ...(stream ? { accept: 'text/event-stream' } : {}),
     },
-    body: JSON.stringify(responsesBody(model, prompt, stream)),
+    body: JSON.stringify(responsesBody(model, prompt, stream, options)),
   });
 
   if (!res.ok) {

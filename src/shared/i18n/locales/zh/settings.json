@@ -123,6 +123,7 @@
     "tempMid": "平衡 (1.0)",
     "tempHigh": "创意 (2.0)",
     "temperatureHint": "控制输出的随机性，值越高创意性越强",
+    "visionLabel": "视觉（可发图片）",
     "maxTokensLabel": "最大输出令牌",
     "optional": "可选",
     "maxTokensPlaceholder": "默认由模型决定",
@@ -346,6 +347,19 @@
     "tree": {
       "show": "查看装配树",
       "hide": "收起装配树"
+    },
+    "mcp": {
+      "title": "外部 MCP 服务",
+      "hint": "连接外部 MCP server（stdio 命令），其工具以 mcp.* 进入助手工具箱，调用走审批。命令数组传参，不经过 shell。",
+      "namePlaceholder": "服务名（如：文件助手）",
+      "commandPlaceholder": "启动命令（如：node / npx / python）",
+      "add": "添加",
+      "empty": "尚未添加外部 MCP 服务。",
+      "enabled": "已启用",
+      "disabled": "已停用",
+      "test": "测试连接",
+      "testOk": "连通，{{count}} 个工具。",
+      "testFailed": "连接失败：{{error}}"
     },
     "profile": {
       "title": "发行档",

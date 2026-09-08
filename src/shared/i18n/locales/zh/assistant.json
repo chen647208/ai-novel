@@ -23,6 +23,7 @@
     "editDataTitle": "编辑项目数据",
     "contextTitle": "项目上下文分析",
     "stopStreamTitle": "停止流式响应",
+    "planModeTitle": "计划模式：只出计划不执行，确认后再行动",
     "clearChatTitle": "清空聊天记录"
   },
   "chat": {
@@ -58,6 +59,9 @@
     "inputPlaceholder": "输入问题，或使用 /角色 /地点 /势力 等命令快速创建... (Shift+Enter 换行)",
     "stopTitle": "停止生成",
     "sendTitle": "发送",
+    "imageTypeUnsupported": "不支持的图片格式：{{name}}（仅 png/jpg/webp）。",
+    "imageTooLarge": "{{name}} 超过 {{size}}MB，请压缩后重发。",
+    "noVision": "当前模型未开启视觉，图片无法发送（去模型设置开启）。",
     "copyTitle": "复制本条",
     "deleteTitle": "删除本条",
     "editResendTitle": "回填到输入框改后重发",

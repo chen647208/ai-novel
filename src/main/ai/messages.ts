@@ -7,18 +7,32 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import type { ModelConfig } from '../../shared/types.js';
-import type { ChatMessage, TokenUsage } from './types.js';
+import type { AIMessageImage, ModelConfig } from '../../shared/types.js';
+import type { ChatContentPart, ChatMessage, TokenUsage } from './types.js';
 
-/** 构建消息数组（系统提示词 + 用户提示词）——全适配器共用 */
-export function buildMessages(model: ModelConfig, prompt: string): ChatMessage[] {
+/** 构建消息数组（系统提示词 + 用户提示词）——全适配器共用；附图挂在末条 user 消息后 */
+export function buildMessages(model: ModelConfig, prompt: string, images?: AIMessageImage[]): ChatMessage[] {
   const messages: ChatMessage[] = [];
   const systemPrompt = model.systemPrompt?.trim();
   if (systemPrompt) {
     messages.push({ role: 'system', content: systemPrompt });
   }
+  if (images && images.length > 0) {
+    const parts: ChatContentPart[] = [{ type: 'text', text: prompt }];
+    for (const img of images) {
+      parts.push({ type: 'image', mime: img.mime, dataUrl: img.dataUrl });
+    }
+    messages.push({ role: 'user', content: parts });
+    return messages;
+  }
   messages.push({ role: 'user', content: prompt });
   return messages;
+}
+
+/** 文本抽取：parts 形态只取 text（日志/回退路径用）。 */
+export function messageText(content: ChatMessage['content']): string {
+  if (typeof content === 'string') return content;
+  return content.filter((p) => p.type === 'text').map((p) => p.text).join('\n');
 }
 
 /**

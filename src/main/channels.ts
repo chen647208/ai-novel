@@ -52,6 +52,14 @@ export const IPC = {
     abort: 'ai:stream:abort',
   },
 
+  // MCP 客户端（连接外部 MCP server：列表/调用走主进程 stdio）
+  mcp: {
+    clientConnect: 'mcp:client-connect',
+    clientTools: 'mcp:client-tools',
+    clientCall: 'mcp:client-call',
+    clientDisconnect: 'mcp:client-disconnect',
+  },
+
   // 安全密钥库（safeStorage/OS 钥匙串；渲染端只持 vault: 引用）
   vault: {
     isAvailable: 'vault:is-available',

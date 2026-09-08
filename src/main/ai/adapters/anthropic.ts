@@ -22,14 +22,16 @@
  *  前缀命中缓存，只有尾部增量按全价计费。OpenAI/Gemini 走服务端自动前缀缓存，无需客户端标记。
  */
 import { aiT } from '../i18n.js';
-import type { ModelConfig, AIResponse, StreamingAIResponse } from '../../../shared/types.js';
+import type { AIMessageImage, ModelConfig, AIResponse, StreamingAIResponse } from '../../../shared/types.js';
 import {
   buildMessages,
   cleanModelOutput,
   extractAnthropicTokenUsage,
   isAbortError,
+  messageText,
   readErrorResponse,
 } from '../messages.js';
+import type { ChatMessage } from '../types.js';
 import { createSSEParser } from '../sse.js';
 import { AIRequestError, DEFAULT_TEMPERATURE, type CallOptions, type ProviderAdapter } from '../types.js';
 import { parseRetryAfter, requestErrorFromResponse, withRetry } from '../retry.js';
@@ -98,28 +100,48 @@ export function clampAnthropicTemperature(value: number | undefined): number {
 function anthropicPayload(
   model: ModelConfig,
   prompt: string,
+  images?: AIMessageImage[],
 ): {
   system?: AnthropicTextBlock[];
   messages: Array<{ role: 'user' | 'assistant'; content: AnthropicMessageContent }>;
 } {
-  const chat = buildMessages(model, prompt);
-  const systemText = chat.filter((m) => m.role === 'system').map((m) => m.content).join('\n\n') || undefined;
+  const chat = buildMessages(model, prompt, images);
+  const systemText = chat.filter((m) => m.role === 'system').map((m) => messageText(m.content)).join('\n\n') || undefined;
   // system 整体打一个断点：身份/世界观/工具清单是大块稳定前缀，跨轮复用
   const system = systemText ? [{ type: 'text' as const, text: systemText, cache_control: CACHE_BREAKPOINT }] : undefined;
   const rest = chat.filter((m) => m.role !== 'system');
   const messages = rest.map((m, i) => {
     const role = m.role as 'user' | 'assistant';
+    const text = messageText(m.content);
     // 最后一条 user 消息打断点：本轮新增的工具观察拼在尾部，下轮成为缓存前缀
     if (role === 'user' && i === rest.length - 1) {
-      return { role, content: [{ type: 'text' as const, text: m.content, cache_control: CACHE_BREAKPOINT }] };
+      const blocks: AnthropicMessageContent = [{ type: 'text' as const, text, cache_control: CACHE_BREAKPOINT }];
+      appendImageBlocks(blocks, m.content);
+      return { role, content: blocks };
     }
-    return { role, content: m.content };
+    if (typeof m.content === 'string') return { role, content: m.content };
+    const blocks: AnthropicMessageContent = [{ type: 'text' as const, text }];
+    appendImageBlocks(blocks, m.content);
+    return { role, content: blocks };
   });
   return { system, messages };
 }
 
-function anthropicBody(model: ModelConfig, prompt: string, stream: boolean): Record<string, unknown> {
-  const { system, messages } = anthropicPayload(model, prompt);
+/** 附图转 Anthropic image block（dataUrl 拆 base64）。 */
+function appendImageBlocks(blocks: AnthropicMessageContent, content: ChatMessage['content']): void {
+  if (typeof content === 'string') return;
+  for (const part of content) {
+    if (part.type !== 'image') continue;
+    const base64 = part.dataUrl.includes(',') ? (part.dataUrl.split(',')[1] ?? '') : part.dataUrl;
+    blocks.push({
+      type: 'image',
+      source: { type: 'base64', media_type: part.mime, data: base64 },
+    } as never);
+  }
+}
+
+function anthropicBody(model: ModelConfig, prompt: string, stream: boolean, options?: CallOptions): Record<string, unknown> {
+  const { system, messages } = anthropicPayload(model, prompt, options?.images);
   const body: Record<string, unknown> = {
     model: model.modelName,
     messages,
@@ -154,7 +176,7 @@ async function postAnthropic(
       'anthropic-version': ANTHROPIC_VERSION,
       ...(stream ? { accept: 'text/event-stream' } : {}),
     },
-    body: JSON.stringify(anthropicBody(model, prompt, stream)),
+    body: JSON.stringify(anthropicBody(model, prompt, stream, options)),
   });
 
   if (!res.ok) {

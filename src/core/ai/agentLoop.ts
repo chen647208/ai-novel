@@ -17,7 +17,7 @@
  * {"reply": string, "toolCalls": [{"callId": string, "toolId": string, "args": object}]}
  * 无工具调用即为最终答复。解析/修复复用渲染端 callJSON 的容错语义。
  */
-import type { AIResponse, ModelConfig } from '../../shared/types';
+import type { AIMessageImage, AIResponse, ModelConfig } from '../../shared/types';
 import type { ApprovalRouter } from './approval.js';
 import type { PromptAssembler } from './promptAssembler.js';
 import type { AiSession } from './session.js';
@@ -40,8 +40,10 @@ export interface AgentLoopDeps {
   router: ApprovalRouter;
   session: AiSession;
   model: ModelConfig;
+  /** 附图（仅首轮携带，不进历史与后续轮次）。 */
+  images?: AIMessageImage[];
   /** 网关一次性补全（渲染端注入 gatewayClient/callJSON 能力） */
-  complete: (model: ModelConfig, prompt: string, retries?: number) => Promise<AIResponse>;
+  complete: (model: ModelConfig, prompt: string, retries?: number, options?: { images?: AIMessageImage[] }) => Promise<AIResponse>;
   /**
    * 索引快照等装配数据的获取器（每轮重取，保证新鲜）；extra 透传给 section。
    * modelConfig/services 透传给工具执行上下文——缺失时需模型的工具会直接失败，
@@ -145,7 +147,7 @@ export async function runAgentSession(deps: AgentLoopDeps, task: string): Promis
       await deps.session.emit({ t: 'turn.start', turn, at: Date.now() });
       await deps.session.emit({ t: 'llm.request', turn, model: deps.model.modelName, promptChars: prompt.length, at: Date.now() });
 
-      const response = await deps.complete(deps.model, prompt);
+      const response = await deps.complete(deps.model, prompt, undefined, turn === 1 ? { images: deps.images } : undefined);
       if (response.error) {
         await deps.session.emit({ t: 'llm.error', turn, error: response.error, at: Date.now() });
         throw new Error(response.error);

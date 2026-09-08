@@ -30,6 +30,8 @@ interface AssistantChatWorkspaceProps {
   streamingMessageId: string | null;
   pendingFiles: KnowledgeItem[];
   setPendingFiles: React.Dispatch<React.SetStateAction<KnowledgeItem[]>>;
+  pendingImages: Array<{ id: string; name: string; mime: string; dataUrl: string }>;
+  setPendingImages: React.Dispatch<React.SetStateAction<Array<{ id: string; name: string; mime: string; dataUrl: string }>>>;
   input: string;
   setInput: React.Dispatch<React.SetStateAction<string>>;
   hasModel: boolean;
@@ -79,6 +81,8 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
   streamingMessageId,
   pendingFiles,
   setPendingFiles,
+  pendingImages,
+  setPendingImages,
   input,
   setInput,
   hasModel,
@@ -253,7 +257,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
         )}
       </div>
 
-      {pendingFiles.length > 0 && (
+      {(pendingFiles.length > 0 || pendingImages.length > 0) && (
         <div className="flex shrink-0 gap-2 overflow-x-auto border-t border-border bg-primary/5 px-4 py-2 custom-scrollbar">
           {pendingFiles.map((file, index) => (
             <div key={index} className="flex items-center gap-1 whitespace-nowrap rounded-md border border-border bg-card px-2 py-1 text-2xs text-foreground">
@@ -263,6 +267,18 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
                 variant="ghost"
                 size="icon"
                 onClick={() => setPendingFiles((prev) => prev.filter((_, i) => i !== index))}
+                className="ml-1 size-5 text-muted-foreground hover:text-destructive"
+              ><X className="size-3.5" /></Button>
+            </div>
+          ))}
+          {pendingImages.map((img) => (
+            <div key={img.id} className="flex items-center gap-1 whitespace-nowrap rounded-md border border-border bg-card px-2 py-1 text-2xs text-foreground">
+              <img src={img.dataUrl} alt={img.name} className="size-6 rounded object-cover" />
+              <span className="max-w-[80px] truncate">{img.name}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setPendingImages((prev) => prev.filter((p) => p.id !== img.id))}
                 className="ml-1 size-5 text-muted-foreground hover:text-destructive"
               ><X className="size-3.5" /></Button>
             </div>
@@ -332,7 +348,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
           <div className="flex items-end gap-2">
             <label className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
               <Paperclip className="size-5" />
-              <input type="file" multiple className="hidden" onChange={handleFileUpload} accept=".txt,.md,.json,.js,.ts,.csv" />
+              <input type="file" multiple className="hidden" onChange={handleFileUpload} accept=".txt,.md,.json,.js,.ts,.csv,.png,.jpg,.jpeg,.webp" />
             </label>
             <Textarea
               ref={inputRef}
@@ -365,7 +381,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
               <Button
                 size="icon"
                 onClick={handleSendMessage}
-                disabled={isLoading || !hasModel || (!input.trim() && pendingFiles.length === 0)}
+                disabled={isLoading || !hasModel || (!input.trim() && pendingFiles.length === 0 && pendingImages.length === 0)}
                 title={!hasModel ? t('dialog.noModel') : t('chat.sendTitle')}
                 className="shrink-0"
               >

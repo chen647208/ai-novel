@@ -123,6 +123,7 @@
     "tempMid": "Balanced (1.0)",
     "tempHigh": "Creative (2.0)",
     "temperatureHint": "Controls output randomness; higher values are more creative",
+    "visionLabel": "Vision (accepts images)",
     "maxTokensLabel": "Max Output Tokens",
     "optional": "Optional",
     "maxTokensPlaceholder": "Decided by the model by default",
@@ -346,6 +347,19 @@
     "tree": {
       "show": "Show assembly tree",
       "hide": "Hide assembly tree"
+    },
+    "mcp": {
+      "title": "External MCP Servers",
+      "hint": "Connect external MCP servers (stdio commands). Their tools join the assistant toolbox as mcp.* and go through approval.",
+      "namePlaceholder": "Name (e.g. file helper)",
+      "commandPlaceholder": "Launch command (e.g. node / npx / python)",
+      "add": "Add",
+      "empty": "No external MCP servers yet.",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "test": "Test connection",
+      "testOk": "Connected, {{count}} tool(s).",
+      "testFailed": "Connection failed: {{error}}"
     },
     "profile": {
       "title": "Profile",

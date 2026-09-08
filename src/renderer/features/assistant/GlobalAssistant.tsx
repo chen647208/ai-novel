@@ -10,10 +10,10 @@ import { logger } from '@/shared/utils/logger';
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { type KnowledgeItem, type OutputMode, type Character, type Location, type Faction, type RuleSystem, type TimelineEvent, type AICardCommand, type CreatedCard, type Timeline, type WorldView, type MagicSystem, type TechnologyLevel, type WorldHistory, type CardPromptTemplate, type ModelConfig, type Project } from '../../../shared/types';
+import { type KnowledgeItem, type OutputMode, type AIMessageImage, type Character, type Location, type Faction, type RuleSystem, type TimelineEvent, type AICardCommand, type CreatedCard, type Timeline, type WorldView, type MagicSystem, type TechnologyLevel, type WorldHistory, type CardPromptTemplate, type ModelConfig, type Project } from '../../../shared/types';
 import { useProjectStore } from '@/app/stores/projectStore';
 import { ATTACHMENT_TRUNCATE } from '../../../shared/constants/chapters';
-import { SUMMARY_MAX_CHARS } from '../../../shared/constants/chat';
+import { CHAT_IMAGE_MAX_BYTES, CHAT_IMAGE_MIMES, SUMMARY_MAX_CHARS } from '../../../shared/constants/chat';
 import { needsCompaction, splitForCompaction, type ChatTurn } from './services/chatHistory';
 import { type GlobalAssistantProps, type ChatMessage, type AssistantCategory, type AssistantEditCategory, type SyncStatus, type EditingData } from './types';
 import { type LooseRecord, asRecord, asStr } from '../../shared/utils/loose';
@@ -34,7 +34,7 @@ import { Button } from '@/shared/ui/Button';
 import { cn } from '@/shared/utils/cn';
 import { dialogService } from '@/shared/services/dialogService';
 import { useSettingsStore } from '../../app/stores/settingsStore';
-import { BookOpenText, Bot, CircleStop, PenLine, RotateCcw, Trash2, X } from 'lucide-react';
+import { BookOpenText, Bot, CircleStop, ListChecks, PenLine, RotateCcw, Trash2, X } from 'lucide-react';
 
 const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId, project, prompts, onUpdate, width = 380, onClose, onWidthChange }) => {
   const { t, i18n } = useTranslation('assistant');
@@ -43,6 +43,9 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  // 计划模式：只出计划不执行（codex /plan 同语义，指令级；批准=下一条发送执行）
+  const [planMode, setPlanMode] = useState(false);
+  const [pendingImages, setPendingImages] = useState<Array<{ id: string; name: string; mime: string; dataUrl: string }>>([]);
   // 本轮工具调用链（codex 式内联折叠，免跳事件浏览器）
   const [lastToolChain, setLastToolChain] = useState<Array<{ toolId: string; ok: boolean }>>([]);
   // 会话记忆（docs/design/11）：超长压缩后的摘要存这里，后续发送拼在历史最前
@@ -201,7 +204,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     sendMessageInternal(lastUserText.current, []);
   };
 
-  const sendMessageInternal = async (text: string, attachments: KnowledgeItem[]) => {
+  const sendMessageInternal = async (text: string, attachments: KnowledgeItem[], images: AIMessageImage[] = []) => {
     if (project && AICardCommandService.isValidCommand(text)) {
       setIsLoading(true);
       
@@ -307,10 +310,13 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     }
 
     // 用户消息进历史流（Agent 分支此前漏推，聊天区只见答复不见问）
+    // 图片名取 state（调用时刻即最新；重试路径图片已清空，不会误标）
     setMessages(prev => [...prev, {
       id: Date.now().toString(),
       role: 'user' as const,
-      content: attachments.length > 0 ? `${text}\n${attachments.map((f) => `[附件：${f.name}]`).join(' ')}` : text,
+      content: attachments.length > 0 || pendingImages.length > 0
+        ? `${text}\n${[...attachments.map((f) => `[附件：${f.name}]`), ...pendingImages.map((f) => `[图片：${f.name}]`)].join(' ')}`
+        : text,
       timestamp: Date.now(),
     }]);
 
@@ -321,6 +327,11 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     setLastToolChain([]);
 
     let taskText = text;
+    if (planMode) {
+      taskText = i18n.language.startsWith('en')
+        ? `【PLAN MODE】Output ONLY a numbered execution plan (steps, tools involved, risks). Do NOT call any tools or execute. Wait for user confirmation.\n\n${text}`
+        : `【计划模式】只输出执行计划（编号步骤清单，含涉及的工具与风险点），不要调用任何工具，不要执行。等用户确认后再行动。\n\n${text}`;
+    }
     if (attachments && attachments.length > 0) {
       const fileContent = attachments.map(f => `[参考内容: ${f.name}]\n${f.content.substring(0, ATTACHMENT_TRUNCATE)}... (内容过长已截断)`).join('\n\n');
       taskText += `\n\n### 附带参考资料:\n${fileContent}`;
@@ -336,6 +347,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       index: (project && indexService.snapshot(project.id)) || undefined,
       model: activeModel,
       history,
+      images,
       cardTemplate: selectedCardTemplateId
         ? cardPromptTemplates.find((tpl) => tpl.id === selectedCardTemplateId)
         : undefined,
@@ -371,10 +383,11 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
   };
 
   const handleSendMessage = () => {
-    if ((!input.trim() && pendingFiles.length === 0) || isLoading) return;
-    sendMessageInternal(input, [...pendingFiles]);
+    if ((!input.trim() && pendingFiles.length === 0 && pendingImages.length === 0) || isLoading) return;
+    sendMessageInternal(input, [...pendingFiles], pendingImages.map(({ mime, dataUrl }) => ({ mime, dataUrl })));
     setInput('');
     setPendingFiles([]);
+    setPendingImages([]);
     // 卡片模板只跟随选定的那一次发送，下次普通问答不再携带
     setSelectedCardTemplateId(null);
   };
@@ -448,6 +461,33 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (!file) continue;
+      // 图片附件：类型白名单 + 大小上限 + 模型视觉开关
+      if (file.type.startsWith('image/')) {
+        if (!CHAT_IMAGE_MIMES.includes(file.type)) {
+          dialogService.alert(t('chat.imageTypeUnsupported', { name: file.name }));
+          continue;
+        }
+        if (file.size > CHAT_IMAGE_MAX_BYTES) {
+          dialogService.alert(t('chat.imageTooLarge', { name: file.name, size: Math.round(CHAT_IMAGE_MAX_BYTES / 1024 / 1024) }));
+          continue;
+        }
+        if (usableModel?.supportsVision === false) {
+          dialogService.alert(t('chat.noVision'));
+          continue;
+        }
+        try {
+          const dataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result ?? ''));
+            reader.onerror = () => reject(new Error('read failed'));
+            reader.readAsDataURL(file);
+          });
+          setPendingImages((prev) => [...prev, { id: `chat-img-${Date.now()}-${i}`, name: file.name, mime: file.type, dataUrl }]);
+        } catch (err) {
+          logger.error('Failed to read image', file.name, err);
+        }
+        continue;
+      }
       if (file.type.startsWith('text/') || file.name.match(/\.(md|json|txt|csv|js|ts|tsx|jsx)$/i)) {
         try {
           const text = await file.text();
@@ -993,6 +1033,15 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
             <Button
               variant="ghost"
               size="icon"
+              onClick={() => setPlanMode((v) => !v)}
+              className={cn('size-7 text-muted-foreground hover:text-foreground', planMode && 'bg-primary/10 text-primary')}
+              title={t('window.planModeTitle')}
+            >
+              <ListChecks className="size-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={handleRetry}
               disabled={isLoading || !hasModel || !lastUserText.current.trim()}
               className="size-7 text-muted-foreground hover:text-foreground disabled:opacity-40"
@@ -1059,6 +1108,8 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
             streamingMessageId={streamingMessageId}
             pendingFiles={pendingFiles}
             setPendingFiles={setPendingFiles}
+            pendingImages={pendingImages}
+            setPendingImages={setPendingImages}
             input={input}
             setInput={setInput}
             hasModel={hasModel}

@@ -26,7 +26,8 @@ export type AiEvent =
   | { t: 'tool.approval'; turn: number; callId: string; verdict: 'approved' | 'rejected' | 'timeout' | 'skipped'; by: string; at: number }
   | { t: 'tool.result'; turn: number; callId: string; ok: boolean; error?: string; at: number }
   | { t: 'turn.end'; turn: number; turns: number; at: number }
-  | { t: 'session.end'; ok: boolean; error?: string; at: number };
+  | { t: 'session.end'; ok: boolean; error?: string; at: number }
+  | { t: 'mcp.sync'; ok: boolean; error?: string; at: number };
 
 /** 事件持久化接口：渲染端实现为 electronAPI 文件追加写。 */
 export interface SessionSink {

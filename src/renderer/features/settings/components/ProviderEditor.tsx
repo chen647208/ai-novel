@@ -202,6 +202,15 @@ export const ProviderEditor: React.FC<ProviderEditorProps> = ({
             </div>
             <input type="range" min="0.0" max="2.0" step="0.1" className="w-full accent-primary" value={model.temperature ?? 0.7} onChange={(e) => onUpdate({ temperature: parseFloat(e.target.value) })} />
             <p className="text-xs text-muted-foreground">{t('models.temperatureHint')}</p>
+            <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={model.supportsVision !== false}
+                onChange={(e) => onUpdate({ supportsVision: e.target.checked })}
+                className="size-3.5 accent-primary"
+              />
+              {t('models.visionLabel')}
+            </label>
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">

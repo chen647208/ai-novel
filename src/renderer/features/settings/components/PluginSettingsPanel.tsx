@@ -9,12 +9,16 @@
 
 /** 插件状态面板（docs/design/04 §2）：状态汇总 + 错误详情 + 一键禁用/启用。 */
 import React, { useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '@/i18n';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
 import { pluginHostPromise, saveDisabledList, eventBus } from '@/features/assistant/services/aiRuntime';
 import { PROFILE_CHANGED_EVENT, assemblyTree, profileByName, type AssemblyRow, type Disposable as PluginDisposable, type PluginStatus } from '@core/plugin';
+import type { McpServerConfig } from '../../../../shared/types';
+import { useSettingsStore } from '@/app/stores/settingsStore';
+import { connectServer, disconnectServer, fetchServerTools } from '@/features/assistant/services/mcpClient';
+import { Input } from '@/shared/ui/Input';
 
 /** 装配树实时视图：行随当前发行档即时重算，切换档位不用开关重看。 */
 const AssemblyTreeView: React.FC<{ rows: AssemblyRow[] }> = ({ rows }) => (
@@ -28,7 +32,7 @@ const AssemblyTreeView: React.FC<{ rows: AssemblyRow[] }> = ({ rows }) => (
 );
 
 const PluginSettingsPanel: React.FC = () => {
-  const { t } = useTranslation('settings');
+  const { t } = useTranslation(['settings', 'common']);
   const [statuses, setStatuses] = useState<PluginStatus[] | null>(null);
   const [showTree, setShowTree] = useState(false);
   const [profile, setProfile] = useState<string>(() => localStorage.getItem('profile.current') ?? 'full');
@@ -155,6 +159,118 @@ const PluginSettingsPanel: React.FC = () => {
           </div>
         ))}
       </div>
+
+      <McpServersSection />
+    </div>
+  );
+};
+
+/** MCP 外部服务：stdio 命令管理 + 连通测试 + 启用开关（工具以 mcp.* 进注册表）。 */
+const McpServersSection: React.FC = () => {
+  const { t } = useTranslation(['settings', 'common']);
+  const servers = useSettingsStore((s) => s.mcpServers ?? []);
+  const setMcpServers = useSettingsStore((s) => s.setMcpServers);
+  const [name, setName] = useState('');
+  const [command, setCommand] = useState('');
+  const [testingId, setTestingId] = useState<string | null>(null);
+  const [testResult, setTestResult] = useState<string | null>(null);
+
+  const save = (next: McpServerConfig[]): void => {
+    setMcpServers(next);
+  };
+
+  const addServer = (): void => {
+    const cleanName = name.trim();
+    const cleanCommand = command.trim();
+    if (!cleanName || !cleanCommand) return;
+    const id = `mcp-${Date.now().toString(36)}`;
+    save([...servers, { id, name: cleanName, command: cleanCommand, args: [], enabled: false }]);
+    setName('');
+    setCommand('');
+  };
+
+  const testServer = async (server: McpServerConfig): Promise<void> => {
+    setTestingId(server.id);
+    setTestResult(null);
+    try {
+      await connectServer(server);
+      const tools = await fetchServerTools(server);
+      setTestResult(t('plugins.mcp.testOk', { count: tools.length }));
+    } catch (err) {
+      setTestResult(t('plugins.mcp.testFailed', { error: err instanceof Error ? err.message : String(err) }));
+    } finally {
+      setTestingId(null);
+    }
+  };
+
+  return (
+    <div className="rounded-lg border border-border p-4">
+      <h3 className="text-base font-medium">{t('plugins.mcp.title')}</h3>
+      <p className="mt-1 text-xs text-muted-foreground">{t('plugins.mcp.hint')}</p>
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder={t('plugins.mcp.namePlaceholder')}
+          className="h-8 flex-1 text-xs"
+        />
+        <Input
+          value={command}
+          onChange={(e) => setCommand(e.target.value)}
+          placeholder={t('plugins.mcp.commandPlaceholder')}
+          className="h-8 flex-[2] font-mono text-xs"
+        />
+        <Button size="sm" onClick={addServer} disabled={!name.trim() || !command.trim()}>
+          {t('plugins.mcp.add')}
+        </Button>
+      </div>
+      <div className="mt-3 space-y-2">
+        {servers.length === 0 && (
+          <p className="text-xs italic text-muted-foreground">{t('plugins.mcp.empty')}</p>
+        )}
+        {servers.map((server) => (
+          <div key={server.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/20 px-3 py-2">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="truncate text-sm font-medium text-foreground">{server.name}</span>
+                <Badge variant={server.enabled ? 'default' : 'secondary'}>
+                  {server.enabled ? t('plugins.mcp.enabled') : t('plugins.mcp.disabled')}
+                </Badge>
+              </div>
+              <div className="mt-0.5 truncate font-mono text-2xs text-muted-foreground">{server.command}</div>
+            </div>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={testingId === server.id}
+                onClick={() => void testServer(server)}
+              >
+                {testingId === server.id ? <Spinner className="size-3.5" /> : t('plugins.mcp.test')}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => save(servers.map((s) => (s.id === server.id ? { ...s, enabled: !s.enabled } : s)))}
+              >
+                {server.enabled ? t('plugins.disable') : t('plugins.enable')}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-destructive"
+                onClick={() => {
+                  void disconnectServer(server.id).catch(() => {});
+                  save(servers.filter((s) => s.id !== server.id));
+                }}
+              >
+                {t('common:delete')}
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+      {testResult && <p className="mt-2 text-xs text-muted-foreground">{testResult}</p>}
     </div>
   );
 };

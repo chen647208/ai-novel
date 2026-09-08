@@ -31,6 +31,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openPath: (targetPath: string) => ipcRenderer.invoke(IPC.openPath, targetPath),
   openExternal: (url: string) => ipcRenderer.invoke(IPC.openExternal, url),
   exportPackage: (files: Record<string, string>, defaultPath: string) => ipcRenderer.invoke(IPC.exportPackage, files, defaultPath),
+  mcpClient: {
+    connect: (id: string, command: string, args?: string[]) => ipcRenderer.invoke(IPC.mcp.clientConnect, id, command, args),
+    tools: (id: string) => ipcRenderer.invoke(IPC.mcp.clientTools, id),
+    call: (id: string, tool: string, args?: unknown) => ipcRenderer.invoke(IPC.mcp.clientCall, id, tool, args),
+    disconnect: (id: string) => ipcRenderer.invoke(IPC.mcp.clientDisconnect, id),
+  },
   printPdf: (html: string, defaultPath: string) => ipcRenderer.invoke(IPC.printPdf, html, defaultPath),
 
   // 向量存储操作（主进程托管 Vectra 索引）

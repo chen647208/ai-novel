@@ -82,6 +82,7 @@ export const normalizeImportedState = (imported: Partial<AppState> | null | unde
     uiFont: typeof src.uiFont === 'string' ? src.uiFont : INITIAL_APP_STATE.uiFont,
     editorFont: typeof src.editorFont === 'string' ? src.editorFont : INITIAL_APP_STATE.editorFont,
     customFonts: Array.isArray(src.customFonts) ? src.customFonts : [],
+    mcpServers: Array.isArray(src.mcpServers) ? src.mcpServers : [],
     uiFontSize: typeof src.uiFontSize === 'number' ? src.uiFontSize : INITIAL_APP_STATE.uiFontSize,
     editorFontSize: typeof src.editorFontSize === 'number' ? src.editorFontSize : INITIAL_APP_STATE.editorFontSize,
     editorLineHeight: typeof src.editorLineHeight === 'number' ? src.editorLineHeight : INITIAL_APP_STATE.editorLineHeight,

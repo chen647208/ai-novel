@@ -7,13 +7,18 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import type { ModelConfig, AIResponse, StreamingAIResponse } from '../../shared/types.js';
+import type { AIMessageImage, ModelConfig, AIResponse, StreamingAIResponse } from '../../shared/types.js';
 
 /** 统一的对话消息结构（适配器内部使用） */
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
-  content: string;
+  content: string | ChatContentPart[];
 }
+
+/** 内容块：文本或附图（dataUrl 自带 mime 前缀）。 */
+export type ChatContentPart =
+  | { type: 'text'; text: string }
+  | { type: 'image'; mime: string; dataUrl: string };
 
 /** 单次调用选项 */
 export interface CallOptions {
@@ -21,6 +26,8 @@ export interface CallOptions {
   signal?: AbortSignal;
   /** 瞬时失败（网络/429/5xx）的额外重试次数，默认 2 */
   retries?: number;
+  /** 附图（dataUrl 形态）；仅首轮携带，不进历史 */
+  images?: AIMessageImage[];
 }
 
 /** Provider 适配器接口：每个上游协议实现一份 */

@@ -15,7 +15,7 @@
  */
 
 import { create } from 'zustand';
-import { type AppState, type AppLanguage, type AppTheme, type CardPromptTemplate, type ConsistencyCheckPromptTemplate, type CustomFontMeta, type EmbeddingModelConfig, type ModelConfig, type PromptTemplate } from '../../../shared/types';
+import { type AppState, type AppLanguage, type AppTheme, type CardPromptTemplate, type ConsistencyCheckPromptTemplate, type CustomFontMeta, type EmbeddingModelConfig, type McpServerConfig, type ModelConfig, type PromptTemplate } from '../../../shared/types';
 import { INITIAL_APP_STATE } from '../initialState';
 import { changeLanguage } from '../../i18n';
 import { applyTheme } from '../../shared/services/themeService';
@@ -36,6 +36,7 @@ interface SettingsState {
   uiFont: string | undefined;
   editorFont: string | undefined;
   customFonts: CustomFontMeta[];
+  mcpServers: McpServerConfig[];
   uiFontSize: number | undefined;
   editorFontSize: number | undefined;
   editorLineHeight: number | undefined;
@@ -57,6 +58,7 @@ interface SettingsState {
   setEditorLineHeight: (height: number) => void;
   addCustomFont: (meta: CustomFontMeta) => void;
   removeCustomFont: (id: string) => void;
+  setMcpServers: (servers: McpServerConfig[]) => void;
 }
 
 const {
@@ -82,6 +84,7 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   uiFont: undefined,
   editorFont: undefined,
   customFonts: [],
+  mcpServers: [],
   uiFontSize: undefined,
   editorFontSize: undefined,
   editorLineHeight: undefined,
@@ -90,6 +93,7 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   setActiveModelId: (activeModelId) => set({ activeModelId }),
   addCustomFont: (meta) => set((s) => ({ customFonts: [...s.customFonts, meta] })),
   removeCustomFont: (id) => set((s) => ({ customFonts: s.customFonts.filter((c) => c.id !== id) })),
+  setMcpServers: (mcpServers) => set({ mcpServers }),
   setPrompts: (prompts) => set({ prompts }),
   setCardPrompts: (cardPrompts) => set({ cardPrompts }),
   setConsistencyPrompts: (consistencyPrompts) => set({ consistencyPrompts }),

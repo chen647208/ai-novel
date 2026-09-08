@@ -13,6 +13,7 @@ import path from 'node:path';
 import { IPC } from '../channels.js';
 import { registerVectorIpc } from '../vector-ipc.js';
 import { registerSqliteIpc, closeSqlite } from '../sqlite-ipc.js';
+import { registerMcpClientIpc, closeMcpClients } from '../mcp/clientIpc.js';
 import type { Provider, ProviderContext } from './container.js';
 import { createWindow } from './window.js';
 
@@ -214,5 +215,16 @@ export const sqliteProvider: Provider = {
   },
   shutdown() {
     closeSqlite();
+  },
+};
+
+/** MCP 客户端 Provider：外部 server 的 stdio 连接，退出时关闭子进程。 */
+export const mcpClientProvider: Provider = {
+  name: 'mcp-client',
+  boot() {
+    registerMcpClientIpc();
+  },
+  shutdown() {
+    void closeMcpClients();
   },
 };

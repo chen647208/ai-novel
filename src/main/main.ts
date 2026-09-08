@@ -17,6 +17,7 @@ import {
   dialogProvider,
   vectorProvider,
   sqliteProvider,
+  mcpClientProvider,
 } from './app/providers.js';
 import { secureStoreProvider } from './app/secureStore.js';
 import { aiGatewayProvider } from './ai/gateway.js';
@@ -32,6 +33,7 @@ const container = new AppContainer()
   .register(dialogProvider)
   .register(secureStoreProvider)
   .register(aiGatewayProvider)
+  .register(mcpClientProvider)
   .register(windowProvider);
 
 const ctx: ProviderContext = { getMainWindow };

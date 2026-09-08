@@ -40,9 +40,15 @@ function isOpenAICompatibleEndpoint(model: ModelConfig): boolean {
   return Boolean(model.endpoint?.includes('/v1beta/openai/'));
 }
 
-function geminiRequestBody(model: ModelConfig, prompt: string): Record<string, unknown> {
+function geminiRequestBody(model: ModelConfig, prompt: string, options?: CallOptions): Record<string, unknown> {
+  // 附图走 inlineData（官方形态）；无图保持纯文本 parts
+  const parts: Array<Record<string, unknown>> = [{ text: prompt }];
+  for (const img of options?.images ?? []) {
+    const base64 = img.dataUrl.includes(',') ? (img.dataUrl.split(',')[1] ?? '') : img.dataUrl;
+    parts.push({ inlineData: { mimeType: img.mime, data: base64 } });
+  }
   const body: Record<string, unknown> = {
-    contents: [{ parts: [{ text: prompt }] }],
+    contents: [{ parts }],
   };
   const systemPrompt = model.systemPrompt?.trim();
   if (systemPrompt) {
@@ -74,7 +80,7 @@ async function postGeminiRest(
     method: 'POST',
     signal: options?.signal,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(geminiRequestBody(model, prompt)),
+    body: JSON.stringify(geminiRequestBody(model, prompt, options)),
   });
 
   if (!res.ok) {
@@ -98,11 +104,21 @@ function sdkConfig(model: ModelConfig): Record<string, unknown> {
 
 async function completeViaSDK(model: ModelConfig, prompt: string, options?: CallOptions): Promise<AIResponse> {
   const ai = new GoogleGenAI({ apiKey: model.apiKey ?? '' });
+  const images = options?.images ?? [];
+  // SDK contents 支持富 parts：有图则文本 + inlineData 数组，无图保持字符串（行为不变）
+  const contents = images.length > 0
+    ? [{ text: prompt }, ...images.map((img) => ({
+        inlineData: {
+          mimeType: img.mime,
+          data: img.dataUrl.includes(',') ? (img.dataUrl.split(',')[1] ?? '') : img.dataUrl,
+        },
+      }))]
+    : prompt;
   const response = (await withRetry(
     () =>
       ai.models.generateContent({
         model: model.modelName,
-        contents: prompt,
+        contents,
         config: sdkConfig(model) as never,
       }),
     { retries: options?.retries ?? 2, signal: options?.signal },

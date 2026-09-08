@@ -45,6 +45,7 @@ export function composeAppState(): AppState {
     uiFont: s.uiFont,
     editorFont: s.editorFont,
     customFonts: s.customFonts,
+    mcpServers: s.mcpServers,
     uiFontSize: s.uiFontSize,
     editorFontSize: s.editorFontSize,
     editorLineHeight: s.editorLineHeight,
