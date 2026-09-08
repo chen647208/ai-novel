@@ -18,6 +18,7 @@ import { buildMessages, cleanModelOutput, extractOpenAITokenUsage, isAbortError,
 import { createSSEParser } from '../sse.js';
 import { AIRequestError, DEFAULT_TEMPERATURE, type CallOptions, type ProviderAdapter } from '../types.js';
 import { parseRetryAfter, requestErrorFromResponse, withRetry } from '../retry.js';
+import { proxiedFetch } from '../../net/proxy.js';
 
 interface OpenAIChoice {
   message?: { content?: string };
@@ -43,7 +44,7 @@ async function postChat(
   stream: boolean,
   options?: CallOptions,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  const res = await proxiedFetch(url, {
     method: 'POST',
     signal: options?.signal,
     headers: {

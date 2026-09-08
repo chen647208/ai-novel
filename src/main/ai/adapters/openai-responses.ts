@@ -24,6 +24,7 @@ import { cleanModelOutput, extractResponsesTokenUsage, isAbortError, readErrorRe
 import { createSSEParser } from '../sse.js';
 import { AIRequestError, type CallOptions, type ProviderAdapter } from '../types.js';
 import { parseRetryAfter, requestErrorFromResponse, withRetry } from '../retry.js';
+import { proxiedFetch } from '../../net/proxy.js';
 
 interface ResponsesContentPart {
   type?: string;
@@ -89,7 +90,7 @@ async function postResponses(
   stream: boolean,
   options?: CallOptions,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  const res = await proxiedFetch(url, {
     method: 'POST',
     signal: options?.signal,
     headers: {

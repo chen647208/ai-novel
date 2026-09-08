@@ -26,6 +26,7 @@ import { cleanModelOutput, extractGeminiTokenUsage, isAbortError, readErrorRespo
 import { createSSEParser } from '../sse.js';
 import { AIRequestError, DEFAULT_TEMPERATURE, type CallOptions, type ProviderAdapter } from '../types.js';
 import { parseRetryAfter, requestErrorFromResponse, withRetry } from '../retry.js';
+import { proxiedFetch } from '../../net/proxy.js';
 import { openAICompatibleAdapter } from './openai-compatible.js';
 
 interface GeminiPart {
@@ -76,7 +77,7 @@ async function postGeminiRest(
   const query = method === 'streamGenerateContent' ? '?alt=sse' : '';
   const url = `${base}/models/${encodeURIComponent(model.modelName)}:${method}${query}&key=${encodeURIComponent(model.apiKey ?? '')}`;
 
-  const res = await fetch(url, {
+  const res = await proxiedFetch(url, {
     method: 'POST',
     signal: options?.signal,
     headers: { 'Content-Type': 'application/json' },

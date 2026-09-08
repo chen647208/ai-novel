@@ -35,6 +35,7 @@ import type { ChatMessage } from '../types.js';
 import { createSSEParser } from '../sse.js';
 import { AIRequestError, DEFAULT_TEMPERATURE, type CallOptions, type ProviderAdapter } from '../types.js';
 import { parseRetryAfter, requestErrorFromResponse, withRetry } from '../retry.js';
+import { proxiedFetch } from '../../net/proxy.js';
 
 const ANTHROPIC_VERSION = '2023-06-01';
 const ANTHROPIC_DEFAULT_MAX_TOKENS = 8192;
@@ -167,7 +168,7 @@ async function postAnthropic(
   stream: boolean,
   options?: CallOptions,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  const res = await proxiedFetch(url, {
     method: 'POST',
     signal: options?.signal,
     headers: {
