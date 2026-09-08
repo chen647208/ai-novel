@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 import { describe, it, expect } from 'vitest';
-import { buildChromiumProxyRules, buildDispatcher, parseProxyUrl, shouldBypassProxy } from '../proxy';
+import { buildChromiumProxyRules, buildDispatcher, parseProxyUrl, shouldBypassProxy } from '../proxy.js';
 
 describe('parseProxyUrl', () => {
   it('空串合法（直连）', () => {

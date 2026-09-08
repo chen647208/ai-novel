@@ -15,6 +15,7 @@
  */
 
 import { Agent, ProxyAgent, Socks5ProxyAgent, fetch as undiciFetch, setGlobalDispatcher } from 'undici';
+import type { RequestInit as UndiciRequestInit } from 'undici';
 import { logger } from '../logger.js';
 
 /** 代理测试超时毫秒（改值只改一处）。 */
@@ -104,7 +105,8 @@ export function buildChromiumProxyRules(proxyUrl: string): ChromiumProxyRules {
 /** 网关 fetch 单出口：loopback 目标强制直连（Ollama 豁免），其余走全局 dispatcher。 */
 export async function proxiedFetch(url: string, init?: RequestInit): Promise<Response> {
   if (shouldBypassProxy(url)) {
-    return undiciFetch(url, { ...init, dispatcher: new Agent() });
+    const res = await undiciFetch(url, { ...(init as UndiciRequestInit | undefined), dispatcher: new Agent() });
+    return res as unknown as Response;
   }
   return fetch(url, init);
 }

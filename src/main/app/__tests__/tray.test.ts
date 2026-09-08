@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 import { describe, it, expect } from 'vitest';
-import { shouldHideOnClose } from '../tray';
+import { shouldHideOnClose } from '../tray.js';
 
 describe('shouldHideOnClose', () => {
   it('缺席即最小化到托盘，显式关闭则真关，退出流程一律放行', () => {

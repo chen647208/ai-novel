@@ -76,7 +76,14 @@ interface AnthropicTextBlock {
   cache_control?: typeof CACHE_BREAKPOINT;
 }
 
-type AnthropicMessageContent = string | AnthropicTextBlock[];
+interface AnthropicImageBlock {
+  type: 'image';
+  source: { type: 'base64'; media_type: string; data: string };
+}
+
+type AnthropicContentBlocks = Array<AnthropicTextBlock | AnthropicImageBlock>;
+
+type AnthropicMessageContent = string | AnthropicContentBlocks;
 
 /**
  * 规范化 Messages 端点：兼容两种 base 形态。
@@ -116,12 +123,12 @@ function anthropicPayload(
     const text = messageText(m.content);
     // 最后一条 user 消息打断点：本轮新增的工具观察拼在尾部，下轮成为缓存前缀
     if (role === 'user' && i === rest.length - 1) {
-      const blocks: AnthropicMessageContent = [{ type: 'text' as const, text, cache_control: CACHE_BREAKPOINT }];
+      const blocks: AnthropicContentBlocks = [{ type: 'text' as const, text, cache_control: CACHE_BREAKPOINT }];
       appendImageBlocks(blocks, m.content);
       return { role, content: blocks };
     }
     if (typeof m.content === 'string') return { role, content: m.content };
-    const blocks: AnthropicMessageContent = [{ type: 'text' as const, text }];
+    const blocks: AnthropicContentBlocks = [{ type: 'text' as const, text }];
     appendImageBlocks(blocks, m.content);
     return { role, content: blocks };
   });
@@ -129,7 +136,7 @@ function anthropicPayload(
 }
 
 /** 附图转 Anthropic image block（dataUrl 拆 base64）。 */
-function appendImageBlocks(blocks: AnthropicMessageContent, content: ChatMessage['content']): void {
+function appendImageBlocks(blocks: AnthropicContentBlocks, content: ChatMessage['content']): void {
   if (typeof content === 'string') return;
   for (const part of content) {
     if (part.type !== 'image') continue;
@@ -137,7 +144,7 @@ function appendImageBlocks(blocks: AnthropicMessageContent, content: ChatMessage
     blocks.push({
       type: 'image',
       source: { type: 'base64', media_type: part.mime, data: base64 },
-    } as never);
+    });
   }
 }
 

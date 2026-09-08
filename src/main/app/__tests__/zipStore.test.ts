@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 import { describe, it, expect } from 'vitest';
-import { crc32Hex, zipStore } from '../zipStore';
+import { crc32Hex, zipStore } from '../zipStore.js';
 
 const text = (bytes: Uint8Array): string => new TextDecoder().decode(bytes);
 

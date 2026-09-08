@@ -45,7 +45,7 @@ export const windowProvider: Provider = {
 /** 文件系统 Provider：本地优先工具，导入/导出允许用户选任意路径，仅校验入参类型。 */
 export const fileProvider: Provider = {
   name: 'file',
-  boot() {
+  boot(ctx: ProviderContext) {
     ipcMain.handle(IPC.getAppDataPath, () => app.getPath('userData'));
 
     ipcMain.handle(IPC.readFile, async (_event, filePath: string) => {
@@ -133,11 +133,15 @@ export const fileProvider: Provider = {
       }
       const { zipStore } = await import('./zipStore.js');
       const zip = zipStore(clean);
-      const target = await dialog.showSaveDialog(ctx.getMainWindow() ?? undefined, {
+      const saveOptions = {
         title: '导出文件',
         defaultPath,
         filters: [{ name: 'Package', extensions: [defaultPath.split('.').pop() ?? 'zip'] }],
-      });
+      };
+      const parent = ctx.getMainWindow();
+      const target = parent
+        ? await dialog.showSaveDialog(parent, saveOptions)
+        : await dialog.showSaveDialog(saveOptions);
       if (target.canceled || !target.filePath) return { canceled: true };
       await fs.mkdir(path.dirname(target.filePath), { recursive: true });
       await fs.writeFile(target.filePath, zip);
