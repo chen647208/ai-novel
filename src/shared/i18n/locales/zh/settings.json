@@ -46,7 +46,22 @@
     "removeFontTitle": "删除该字体",
     "previewText": "永字八法，横竖撇捺。雾港来信，第一章：潮水漫过石阶，灯火一盏盏亮起来。The quick brown fox jumps over the lazy dog. 0123456789。",
     "getFont": "获取",
-    "customBadge": "自定"
+    "customBadge": "自定",
+    "shortcutsTitle": "快捷键",
+    "shortcutsHint": "点击动作后按下组合键即录入；与其它动作冲突时拒绝保存。",
+    "shortcutRecord": "点击录入",
+    "shortcutRecording": "按下组合键…（Esc 取消）",
+    "shortcutReset": "恢复默认",
+    "shortcutConflict": "与「{{action}}」冲突，未保存",
+    "shortcutActions": {
+      "toggleAssistant": "显隐 AI 侧边栏",
+      "section1": "分区 1",
+      "section2": "分区 2",
+      "section3": "分区 3",
+      "section4": "分区 4",
+      "section5": "分区 5",
+      "find": "编辑器查找"
+    }
   },
   "footer": {
     "persistNote": "本地数据持久化已开启，配置将自动保存到本机应用数据目录。",

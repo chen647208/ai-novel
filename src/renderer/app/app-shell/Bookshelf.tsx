@@ -40,11 +40,13 @@ import {
   Pencil,
   Plus,
   Search,
+  Tag,
   Trash2,
   Upload,
   Users,
 } from 'lucide-react';
 import { ViewModeToggle } from '@/shared/ui/ViewModeToggle';
+import { collectAllTags, filterBooksByTags, normalizeTagInput } from '@/features/books/bookTags';
 import { useViewPreference } from '@/shared/hooks/useViewPreference';
 import { listTrash, type TrashEntry } from '@/shared/services/trashService';
 
@@ -56,6 +58,7 @@ interface BookshelfProps {
   /** 先建后改：一键建空白书直接进工作区（默认路径，不开模态）。 */
   onCreateQuickBook: () => void;
   onRenameBook: (bookId: string, newTitle: string) => void;
+  onTagBook: (bookId: string, tags: string[]) => void;
   onDeleteBook: (bookId: string) => void;
   onDuplicateBook: (bookId: string) => void;
   onExportBook: (book: Project) => void;
@@ -92,6 +95,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({
   onCreateBook,
   onCreateQuickBook,
   onRenameBook,
+  onTagBook,
   onDeleteBook,
   onDuplicateBook,
   onExportBook,
@@ -102,6 +106,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({
 }) => {
   const { t, i18n } = useTranslation(['app', 'books', 'common']);
   const [query, setQuery] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isNewBookOpen, setIsNewBookOpen] = useState(false);
   const [view, setView] = useViewPreference<'grid' | 'list'>('bookshelf.view', 'grid');
   const [trash, setTrash] = useState<TrashEntry[]>([]);
@@ -115,18 +120,24 @@ const Bookshelf: React.FC<BookshelfProps> = ({
     reloadTrash();
   }, [books.length, reloadTrash]);
 
+  const allTags = useMemo(() => collectAllTags(books), [books]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     const sorted = [...books].sort((a, b) => b.lastModified - a.lastModified);
-    // 全文搜索：标题 + 简介/灵感 + 章节标题
-    if (!q) return sorted;
-    return sorted.filter((b) =>
+    // 全文搜索：标题 + 简介/灵感 + 章节标题，再按标签过滤
+    const matched = !q ? sorted : sorted.filter((b) =>
       b.title.toLowerCase().includes(q) ||
       (b.intro || '').toLowerCase().includes(q) ||
       (b.inspiration || '').toLowerCase().includes(q) ||
       (b.chapters || []).some((c) => (c.title || '').toLowerCase().includes(q)),
     );
-  }, [books, query]);
+    return filterBooksByTags(matched, selectedTags);
+  }, [books, query, selectedTags]);
+
+  const toggleTag = useCallback((tag: string) => {
+    setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((x) => x !== tag) : [...prev, tag]));
+  }, []);
 
   const handleRename = async (book: Project) => {
     const newTitle = await dialogService.prompt({
@@ -137,6 +148,16 @@ const Bookshelf: React.FC<BookshelfProps> = ({
     if (newTitle && newTitle.trim() && newTitle.trim() !== book.title) {
       onRenameBook(book.id, newTitle.trim());
     }
+  };
+
+  const handleTag = async (book: Project) => {
+    const input = await dialogService.prompt({
+      title: t('app:bookshelf.tagTitle'),
+      message: t('app:bookshelf.tagMessage'),
+      defaultValue: (book.tags ?? []).join('，'),
+    });
+    if (input === null) return;
+    onTagBook(book.id, normalizeTagInput(input));
   };
 
   const handleImportAll = async () => {
@@ -201,6 +222,42 @@ const Bookshelf: React.FC<BookshelfProps> = ({
                 { value: 'list', icon: List, title: t('books:view.list') },
               ]}
             />
+          </div>
+        )}
+
+        {allTags.length > 0 && (
+          <div className="mb-6 flex flex-wrap items-center gap-2">
+            <Tag className="size-3.5 text-muted-foreground" />
+            <button
+              type="button"
+              onClick={() => setSelectedTags([])}
+              className={`rounded-full border px-2.5 py-0.5 text-xs transition-colors ${selectedTags.length === 0 ? 'border-primary bg-accent text-foreground' : 'border-input text-muted-foreground hover:bg-accent/60'}`}
+            >
+              {t('app:bookshelf.tagAll')}
+            </button>
+            {allTags.map((tag) => {
+              const active = selectedTags.includes(tag);
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => toggleTag(tag)}
+                  aria-pressed={active}
+                  className={`rounded-full border px-2.5 py-0.5 text-xs transition-colors ${active ? 'border-primary bg-accent text-foreground' : 'border-input text-muted-foreground hover:bg-accent/60'}`}
+                >
+                  {tag}
+                </button>
+              );
+            })}
+            {selectedTags.length > 0 && (
+              <button
+                type="button"
+                onClick={() => { setSelectedTags([]); setQuery(''); }}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                {t('app:bookshelf.clearFilter')}
+              </button>
+            )}
           </div>
         )}
 
@@ -303,6 +360,16 @@ const Bookshelf: React.FC<BookshelfProps> = ({
                   {book.intro || book.inspiration || t('app:bookshelf.noContent')}
                 </p>
 
+                {(book.tags ?? []).length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {(book.tags ?? []).map((tag) => (
+                      <Badge key={tag} variant="outline" className="text-2xs font-normal">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+
                 <div className="mt-auto flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground">
                   <div className="flex items-center gap-3">
                     <span className="flex items-center gap-1" title={t('app:bookshelf.words')}>
@@ -339,6 +406,10 @@ const Bookshelf: React.FC<BookshelfProps> = ({
                         <DropdownMenuItem onSelect={() => handleRename(book)}>
                           <Pencil className="size-4" />
                           {t('common:rename')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => handleTag(book)}>
+                          <Tag className="size-4" />
+                          {t('app:bookshelf.tagBook')}
                         </DropdownMenuItem>
                         <DropdownMenuItem onSelect={() => onDuplicateBook(book.id)}>
                           <Copy className="size-4" />

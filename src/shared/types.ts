@@ -719,6 +719,8 @@ export interface Project {
   foreshadows?: Foreshadow[];
   /** 本书目标字数（写作进度条分母；缺席用默认）。 */
   wordTarget?: number;
+  /** 书籍标签（书籍库过滤分组；缺席=[]，免迁移）。 */
+  tags?: string[];
 }
 
 /** 自定义字体元数据（字形文件另存用户数据目录 fonts/ 下，不进状态 JSON）。 */
@@ -728,6 +730,21 @@ export interface CustomFontMeta {
   name: string;
   fileName: string;
   format: 'ttf' | 'otf' | 'woff' | 'woff2';
+}
+
+/** 可自定义快捷键动作 id（固定集合；加动作同步改 keybindings 服务与设置页）。 */
+export type KeybindingActionId =
+  | 'toggleAssistant'
+  | 'section1'
+  | 'section2'
+  | 'section3'
+  | 'section4'
+  | 'section5'
+  | 'find';
+
+/** 代理配置（空 url 即直连；Ollama 本地地址豁免）。 */
+export interface ProxyConfig {
+  url: string;
 }
 
 export interface AppState {
@@ -765,6 +782,14 @@ export interface AppState {
   editorFontSize?: number;
   /** 正文行高倍数；undefined 表默认 1.9 */
   editorLineHeight?: number;
+  /** 自定义快捷键（动作 id → ctrl+键串；缺席回退默认）。 */
+  keybindings?: Partial<Record<KeybindingActionId, string>>;
+  /** 代理配置；缺席即直连。 */
+  proxy?: ProxyConfig;
+  /** 关闭窗口最小化到托盘；缺席表开启。 */
+  minimizeToTray?: boolean;
+  /** 开机自启；缺席表关闭。 */
+  autoLaunch?: boolean;
 }
 
 // 向量数据库相关类型

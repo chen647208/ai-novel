@@ -10,7 +10,7 @@
 - `SettingsModal.tsx`：设置弹窗主编排器
 - `components/SettingsTabNav.tsx` + `SettingsTabContent.tsx`：标签导航与内容分发
 - `components/SettingsModalHeader.tsx` + `SettingsModalFooter.tsx`：头尾（含暂存保存按钮）
-- `components/GeneralSettingsPanel.tsx`：语言/主题/字体（直写 store 即时生效）
+- `components/GeneralSettingsPanel.tsx`：语言/主题/字体/快捷键（直写 store 即时生效）
 - `components/ModelSettingsPanel.tsx`：模型配置面板（`ModelSettings.tsx` 为入口组件）
 - `components/ProviderSidebar.tsx` + `ProviderEditor.tsx`：渠道侧栏与参数编辑
 - `components/EmbeddingSettingsPanel.tsx` + `EmbeddingSidebar.tsx` + `EmbeddingEditor.tsx`：Embedding 配置
@@ -20,6 +20,7 @@
 - `components/PluginSettingsPanel.tsx`：插件状态面板（发行档/装配树入口）
 - `components/StorageSettingsPanel.tsx`：存储设置面板
 - `components/SystemGuidePanel.tsx`：系统说明和使用引导
+- `components/ShortcutRecorder.tsx` + `services/keybindings.ts`：快捷键录制/冲突检测/默认回退（`App.tsx` 开关与分区跳转、`WritingEditor.tsx` 查找条只读合并态）
 - `services/modelListService.ts`：模型列表拉取服务
 - `services/embeddingModelService.ts`：Embedding 模型配置服务
 - `factories.ts`：设置项构造与默认值生成

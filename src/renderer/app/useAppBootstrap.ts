@@ -45,6 +45,14 @@ export function hydrateStoresFromState(state: typeof INITIAL_APP_STATE): void {
     uiFont: state.uiFont,
     editorFont: state.editorFont,
     customFonts: state.customFonts ?? [],
+    mcpServers: state.mcpServers ?? [],
+    uiFontSize: state.uiFontSize,
+    editorFontSize: state.editorFontSize,
+    editorLineHeight: state.editorLineHeight,
+    keybindings: state.keybindings ?? {},
+    proxy: state.proxy,
+    minimizeToTray: state.minimizeToTray,
+    autoLaunch: state.autoLaunch,
   });
 }
 

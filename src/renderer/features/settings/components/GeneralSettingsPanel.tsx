@@ -8,7 +8,7 @@
  */
 
 import React, { useRef, useState } from 'react';
-import { Download, Languages, Monitor, Moon, Sun, Trash2, Type, Upload } from 'lucide-react';
+import { Download, Keyboard, Languages, Monitor, Moon, Sun, Trash2, Type, Upload } from 'lucide-react';
 import { useTranslation, SUPPORTED_LANGUAGES } from '@/i18n';
 import type { AppLanguage, AppTheme } from '@shared/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/Card';
@@ -20,6 +20,7 @@ import type { GeneralSettingsPanelProps } from '../types';
 import { DEFAULT_EDITOR_FONT, DEFAULT_UI_FONT, fontPresets, resolveFontStack } from '../../../constants/fonts';
 import { importCustomFont, removeCustomFont } from '../services/customFontService';
 import { useSettingsStore } from '@/app/stores/settingsStore';
+import ShortcutRecorder from './ShortcutRecorder';
 
 const THEME_OPTIONS: {
   value: AppTheme;
@@ -248,6 +249,18 @@ const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({
               ))}
             </div>
           </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Keyboard className="size-4 text-muted-foreground" />
+            {t('general.shortcutsTitle')}
+          </CardTitle>
+          <CardDescription>{t('general.shortcutsHint')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ShortcutRecorder />
         </CardContent>
       </Card>
     </div>

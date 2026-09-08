@@ -21,6 +21,11 @@
     "renameTitle": "Rename Book",
     "renameMessage": "Enter a new title:",
     "duplicate": "Duplicate",
+    "tagBook": "Tag",
+    "tagTitle": "Book tags",
+    "tagMessage": "Separate multiple tags with commas or spaces:",
+    "tagAll": "All",
+    "clearFilter": "Clear filter",
     "words": "Words",
     "chapters": "Chapters",
     "characters": "Characters"

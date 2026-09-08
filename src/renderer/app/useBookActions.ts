@@ -31,6 +31,8 @@ export interface BookActions {
   /** 先建后改：一键建空白书（默认名，不开模态），直接进工作区。 */
   createQuickBook: () => void;
   renameBook: (bookId: string, newTitle: string) => void;
+  /** 打标：标签数组整体替换（空数组即清除）。 */
+  tagBook: (bookId: string, tags: string[]) => void;
   deleteBook: (bookId: string) => Promise<void>;
   /** 从回收站恢复（重名自动加序号，ID 冲突时换新 ID）。 */
   restoreTrashBook: (bookId: string) => Promise<void>;
@@ -94,7 +96,11 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
   }, [enterWorkspace]);
 
   const renameBook = useCallback((bookId: string, newTitle: string) => {
-    useProjectStore.getState().renameProject(bookId, newTitle);
+    useProjectStore.getState().updateProject(bookId, { title: newTitle });
+  }, []);
+
+  const tagBook = useCallback((bookId: string, tags: string[]) => {
+    useProjectStore.getState().updateProject(bookId, { tags });
   }, []);
 
   const deleteBook = useCallback(async (bookId: string) => {
@@ -229,5 +235,5 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
     dialogService.alert(i18n.t('app:importAll.success'));
   }, []);
 
-  return { openBook, createBook, createQuickBook, renameBook, deleteBook, restoreTrashBook, purgeTrashBook, duplicateBook, exportBook, importBook, clearCurrentProject, deleteCurrentProject, importAllData };
+  return { openBook, createBook, createQuickBook, renameBook, tagBook, deleteBook, restoreTrashBook, purgeTrashBook, duplicateBook, exportBook, importBook, clearCurrentProject, deleteCurrentProject, importAllData };
 }

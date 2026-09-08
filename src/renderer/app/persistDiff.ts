@@ -15,7 +15,9 @@ import type { AppState, Project } from '../../shared/types';
 const NON_PROJECT_KEYS = [
   'models', 'prompts', 'cardPrompts', 'consistencyPrompts', 'consistencyCheckConfig',
   'embeddingModels', 'activeProjectId', 'activeModelId', 'activeEmbeddingModelId', 'language', 'theme',
-  'uiFont', 'editorFont', 'customFonts',
+  'uiFont', 'editorFont', 'customFonts', 'mcpServers',
+  'uiFontSize', 'editorFontSize', 'editorLineHeight',
+  'keybindings', 'proxy', 'minimizeToTray', 'autoLaunch',
 ] as const;
 
 export type PersistOp =

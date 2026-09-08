@@ -49,6 +49,10 @@ export function composeAppState(): AppState {
     uiFontSize: s.uiFontSize,
     editorFontSize: s.editorFontSize,
     editorLineHeight: s.editorLineHeight,
+    keybindings: s.keybindings,
+    proxy: s.proxy,
+    minimizeToTray: s.minimizeToTray,
+    autoLaunch: s.autoLaunch,
   };
 }
 

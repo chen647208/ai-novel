@@ -25,6 +25,7 @@ import SettingsModalHost from './app-shell/SettingsModalHost';
 import WorkspaceView from './app-shell/WorkspaceView';
 import type { SectionId } from './app-shell/WorkspaceNav';
 import GlobalAssistant from '../features/assistant/GlobalAssistant';
+import { eventToKeybinding, resolveKeybindings } from '../features/settings/services/keybindings';
 import ApprovalHost from '../features/assistant/components/ApprovalHost';
 import AIHistoryViewer from '../features/writing/AIHistoryViewer';
 import VersionCheckModal from '../features/version/VersionCheckModal';
@@ -106,17 +107,19 @@ const App: React.FC = () => {
     setAssistantOpenPref(assistantOpen ? 'closed' : 'open');
   }, [assistantOpen, setAssistantOpenPref]);
 
-  // IDE 式开关：Ctrl/Cmd+J 随时显隐 AI 侧边栏
+  // IDE 式开关：默认 Ctrl/Cmd+J 随时显隐 AI 侧边栏（设置页可改键）
+  const keybindingOverrides = useSettingsStore(s => s.keybindings);
+  const bindings = resolveKeybindings(keybindingOverrides);
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'j') {
+      if (eventToKeybinding(e) === bindings.toggleAssistant) {
         e.preventDefault();
         toggleAssistant();
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [toggleAssistant]);
+  }, [toggleAssistant, bindings.toggleAssistant]);
   const enterWorkspace = useCallback(() => {
     setSection('inspiration'); setEditingChapterId(null); setView('workspace');
   }, []);
@@ -133,11 +136,13 @@ const App: React.FC = () => {
     // 切离写作不清空活动章节：往返保留上下文，进书/重置时才清
   }, []);
 
-  // 分区快捷键：Ctrl/Cmd+1..5（工作台内有效，与 USER_GUIDE 对齐）
+  // 分区快捷键：默认 Ctrl/Cmd+1..5（工作台内有效，设置页可改键，与 USER_GUIDE 对齐）
   useEffect(() => {
     const onSectionKey = (e: KeyboardEvent) => {
-      if (!(e.ctrlKey || e.metaKey) || view !== 'workspace') return;
-      const idx = ['1', '2', '3', '4', '5'].indexOf(e.key);
+      if (view !== 'workspace') return;
+      const pressed = eventToKeybinding(e);
+      if (!pressed) return;
+      const idx = [bindings.section1, bindings.section2, bindings.section3, bindings.section4, bindings.section5].indexOf(pressed);
       if (idx < 0) return;
       const next = SECTION_ORDER[idx];
       if (next) {
@@ -147,7 +152,7 @@ const App: React.FC = () => {
     };
     window.addEventListener('keydown', onSectionKey);
     return () => window.removeEventListener('keydown', onSectionKey);
-  }, [view, handleSectionChange]);
+  }, [view, handleSectionChange, bindings.section1, bindings.section2, bindings.section3, bindings.section4, bindings.section5]);
 
   // 当前分区不可用（minimal 档禁 AI 功能）时回退写作编辑器（映射单源见 sectionFeatures）
   useEffect(() => {
@@ -205,6 +210,7 @@ const App: React.FC = () => {
               onCreateBook={actions.createBook}
               onCreateQuickBook={actions.createQuickBook}
               onRenameBook={actions.renameBook}
+              onTagBook={actions.tagBook}
               onDeleteBook={actions.deleteBook}
               onDuplicateBook={actions.duplicateBook}
               onExportBook={actions.exportBook}

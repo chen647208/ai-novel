@@ -79,6 +79,7 @@
 - **Autosave**: every change is saved locally automatically
 - **Manual save**: not needed, the system handles it
 - **Load**: after restart, your last project loads automatically
+- **Tags**: tag books from the card menu (comma/space separated), filter by the tag chips on top
 
 #### Import / export
 1. **Export**:
@@ -477,7 +478,7 @@ Hongyue Creation uses five sections guiding you through a complete novel (switch
 
 ### Shortcuts
 
-The app only provides these shortcuts (`Ctrl`, `Cmd` on macOS):
+Default shortcuts (`Ctrl`, `Cmd` on macOS); remap in Settings → General → Shortcuts:
 
 #### Section navigation (inside the workspace)
 - `Ctrl+1`: Inspiration
@@ -488,7 +489,8 @@ The app only provides these shortcuts (`Ctrl`, `Cmd` on macOS):
 
 #### Assistant & editor
 - `Ctrl+J`: show / hide the AI assistant sidebar
-- `Ctrl+Shift+X`: insert placeholder atom in prompt-template editing
+- `Ctrl+F`: toggle the writing-editor find bar
+- `Ctrl+Shift+X`: insert placeholder atom in prompt-template editing (not remappable)
 
 ### Glossary
 

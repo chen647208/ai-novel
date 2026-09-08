@@ -18,6 +18,7 @@ import WritingEditorToolbar from './components/WritingEditorToolbar';
 import WritingSidebar from './components/WritingSidebar';
 import WritingEditorOverlayLayer from './components/WritingEditorOverlayLayer';
 import FindBar from './components/FindBar';
+import { eventToKeybinding, resolveKeybindings } from '../settings/services/keybindings';
 import WritingEditorCanvas from './components/WritingEditorCanvas';
 import ForeshadowPanel from '../foreshadowing/components/ForeshadowPanel';
 import { extractChapterSummary } from './services/summaryExtractionService';
@@ -306,18 +307,18 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     setFindIndex(0);
   };
 
-  // Ctrl/Cmd+F 开关查找条（弹窗打开时不抢键）
+  // 查找条开关：默认 Ctrl/Cmd+F（弹窗打开时不抢键，设置页可改键）
+  const findBinding = resolveKeybindings(useSettingsStore(s => s.keybindings)).find;
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      const mod = e.ctrlKey || e.metaKey;
-      if (mod && e.key.toLowerCase() === 'f' && activeChapterId && !genModal.isOpen && !editModalOpen && !exportModalOpen && !isHistoryViewerOpen && !isForeshadowOpen) {
+      if (eventToKeybinding(e) === findBinding && activeChapterId && !genModal.isOpen && !editModalOpen && !exportModalOpen && !isHistoryViewerOpen && !isForeshadowOpen) {
         e.preventDefault();
         setFindOpen((v) => !v);
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [activeChapterId, genModal.isOpen, editModalOpen, exportModalOpen, isHistoryViewerOpen, isForeshadowOpen]);
+  }, [findBinding, activeChapterId, genModal.isOpen, editModalOpen, exportModalOpen, isHistoryViewerOpen, isForeshadowOpen]);
 
   // 查询变化回到首个匹配
   useEffect(() => {

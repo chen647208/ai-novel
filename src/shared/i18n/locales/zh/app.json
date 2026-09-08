@@ -21,6 +21,11 @@
     "renameTitle": "重命名书籍",
     "renameMessage": "请输入新的书名：",
     "duplicate": "创建副本",
+    "tagBook": "打标",
+    "tagTitle": "书籍标签",
+    "tagMessage": "逗号或空格分隔多个标签：",
+    "tagAll": "全部",
+    "clearFilter": "清除筛选",
     "words": "字数",
     "chapters": "章节",
     "characters": "角色"

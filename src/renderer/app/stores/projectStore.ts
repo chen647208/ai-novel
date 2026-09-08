@@ -46,8 +46,8 @@ interface ProjectState {
   upsertProject: (book: Project) => void;
   /** 删除书；若删除的是活动书则活动指针落到剩余首本或 null。 */
   removeProject: (bookId: string) => void;
-  /** 重命名书。 */
-  renameProject: (bookId: string, title: string) => void;
+  /** 按 id 更新任意书（重命名/打标共用；不存在 id 静默跳过）。 */
+  updateProject: (bookId: string, updates: Partial<Project>) => void;
 }
 
 export const useProjectStore = create<ProjectState>()((set, get) => ({
@@ -107,10 +107,10 @@ export const useProjectStore = create<ProjectState>()((set, get) => ({
       };
     }),
 
-  renameProject: (bookId, title) =>
+  updateProject: (bookId, updates) =>
     set((state) => ({
       projects: state.projects.map((p) =>
-        p.id === bookId ? { ...p, title, lastModified: Date.now() } : p,
+        p.id === bookId ? { ...p, ...updates, lastModified: Date.now() } : p,
       ),
     })),
 }));

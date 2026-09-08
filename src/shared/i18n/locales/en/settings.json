@@ -46,7 +46,22 @@
     "removeFontTitle": "Remove this font",
     "previewText": "The quick brown fox jumps over the lazy dog. 0123456789. Tide over stone steps, lamps lit one by one.",
     "getFont": "Get",
-    "customBadge": "Custom"
+    "customBadge": "Custom",
+    "shortcutsTitle": "Keyboard shortcuts",
+    "shortcutsHint": "Click an action, then press a combo to record. Conflicting combos are rejected.",
+    "shortcutRecord": "Click to record",
+    "shortcutRecording": "Press a combo… (Esc cancels)",
+    "shortcutReset": "Reset to defaults",
+    "shortcutConflict": "Conflicts with \"{{action}}\", not saved",
+    "shortcutActions": {
+      "toggleAssistant": "Toggle AI sidebar",
+      "section1": "Section 1",
+      "section2": "Section 2",
+      "section3": "Section 3",
+      "section4": "Section 4",
+      "section5": "Section 5",
+      "find": "Editor find"
+    }
   },
   "footer": {
     "persistNote": "Local data persistence is enabled; settings are saved automatically to the app data directory on this machine.",

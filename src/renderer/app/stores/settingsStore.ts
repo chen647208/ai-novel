@@ -15,7 +15,7 @@
  */
 
 import { create } from 'zustand';
-import { type AppState, type AppLanguage, type AppTheme, type CardPromptTemplate, type ConsistencyCheckPromptTemplate, type CustomFontMeta, type EmbeddingModelConfig, type McpServerConfig, type ModelConfig, type PromptTemplate } from '../../../shared/types';
+import { type AppState, type AppLanguage, type AppTheme, type CardPromptTemplate, type ConsistencyCheckPromptTemplate, type CustomFontMeta, type EmbeddingModelConfig, type KeybindingActionId, type McpServerConfig, type ModelConfig, type PromptTemplate, type ProxyConfig } from '../../../shared/types';
 import { INITIAL_APP_STATE } from '../initialState';
 import { changeLanguage } from '../../i18n';
 import { applyTheme } from '../../shared/services/themeService';
@@ -40,6 +40,10 @@ interface SettingsState {
   uiFontSize: number | undefined;
   editorFontSize: number | undefined;
   editorLineHeight: number | undefined;
+  keybindings: Partial<Record<KeybindingActionId, string>>;
+  proxy: ProxyConfig | undefined;
+  minimizeToTray: boolean | undefined;
+  autoLaunch: boolean | undefined;
   /** 从 repository 载入的初始状态整体灌入（首启动/全量导入）。 */
   hydrate: (patch: Partial<SettingsState>) => void;
   setModels: (models: ModelConfig[], activeModelId: string | null) => void;
@@ -59,6 +63,11 @@ interface SettingsState {
   addCustomFont: (meta: CustomFontMeta) => void;
   removeCustomFont: (id: string) => void;
   setMcpServers: (servers: McpServerConfig[]) => void;
+  setKeybinding: (action: KeybindingActionId, binding: string) => void;
+  resetKeybindings: () => void;
+  setProxy: (proxy: ProxyConfig | undefined) => void;
+  setMinimizeToTray: (minimizeToTray: boolean) => void;
+  setAutoLaunch: (autoLaunch: boolean) => void;
 }
 
 const {
@@ -88,12 +97,21 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
   uiFontSize: undefined,
   editorFontSize: undefined,
   editorLineHeight: undefined,
+  keybindings: {},
+  proxy: undefined,
+  minimizeToTray: undefined,
+  autoLaunch: undefined,
   hydrate: (patch) => set(patch),
   setModels: (models, activeModelId) => set({ models, activeModelId }),
   setActiveModelId: (activeModelId) => set({ activeModelId }),
   addCustomFont: (meta) => set((s) => ({ customFonts: [...s.customFonts, meta] })),
   removeCustomFont: (id) => set((s) => ({ customFonts: s.customFonts.filter((c) => c.id !== id) })),
   setMcpServers: (mcpServers) => set({ mcpServers }),
+  setKeybinding: (action, binding) => set((s) => ({ keybindings: { ...s.keybindings, [action]: binding } })),
+  resetKeybindings: () => set({ keybindings: {} }),
+  setProxy: (proxy) => set({ proxy }),
+  setMinimizeToTray: (minimizeToTray) => set({ minimizeToTray }),
+  setAutoLaunch: (autoLaunch) => set({ autoLaunch }),
   setPrompts: (prompts) => set({ prompts }),
   setCardPrompts: (cardPrompts) => set({ cardPrompts }),
   setConsistencyPrompts: (consistencyPrompts) => set({ consistencyPrompts }),
