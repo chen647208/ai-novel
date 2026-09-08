@@ -22,6 +22,7 @@ import {
   shellProvider,
 } from './app/providers.js';
 import { setQuitting } from './app/tray.js';
+import { legacyDataDir, migrateLegacyDataDir, shouldRunMigration, standardDataDir } from './app/dataDir.js';
 import { secureStoreProvider } from './app/secureStore.js';
 import { aiGatewayProvider } from './ai/gateway.js';
 
@@ -45,6 +46,14 @@ const ctx: ProviderContext = { getMainWindow };
 
 app.whenReady().then(async () => {
   logger.info('app', `User data path: ${app.getPath('userData')}`);
+  // 更名迁移：仅标准路径跑（--user-data-dir 隔离的测试/调试实例不碰真实数据）
+  if (shouldRunMigration(app.getPath('userData'), standardDataDir())) {
+    try {
+      await migrateLegacyDataDir(legacyDataDir(), app.getPath('userData'));
+    } catch (err) {
+      logger.warn('datadir', '旧数据目录迁移失败（下次启动重试，不挡启动）', err);
+    }
+  }
   await container.boot(ctx);
 });
 

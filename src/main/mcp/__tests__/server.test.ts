@@ -17,14 +17,14 @@ let dir = '';
 let prevEnv: string | undefined;
 
 beforeEach(() => {
-  dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ainovel-mcp-'));
-  prevEnv = process.env.AINOVEL_DATA_DIR;
-  process.env.AINOVEL_DATA_DIR = dir;
+  dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hongyue-mcp-'));
+  prevEnv = process.env.HONGYUE_DATA_DIR;
+  process.env.HONGYUE_DATA_DIR = dir;
 });
 
 afterEach(() => {
-  if (prevEnv === undefined) delete process.env.AINOVEL_DATA_DIR;
-  else process.env.AINOVEL_DATA_DIR = prevEnv;
+  if (prevEnv === undefined) delete process.env.HONGYUE_DATA_DIR;
+  else process.env.HONGYUE_DATA_DIR = prevEnv;
   fs.rmSync(dir, { recursive: true, force: true });
 });
 

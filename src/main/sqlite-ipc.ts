@@ -19,8 +19,7 @@ import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
 import path from 'node:path';
 import { IPC } from './channels.js';
 import { logger } from './logger.js';
-
-const DB_FILE_NAME = 'ainovel.db';
+import { DB_FILE_NAME } from './app/dataDir.js';
 
 let db: DatabaseSync | null = null;
 

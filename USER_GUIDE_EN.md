@@ -93,7 +93,8 @@
    - Confirm; the project data is restored
 
 #### Backup & reset
-- Data location: Windows `%APPDATA%/novalocal-ai-novelist/`, macOS `~/Library/Application Support/novalocal-ai-novelist/`, Linux `~/.config/novalocal-ai-novelist/`
+- Data location: Windows `%APPDATA%/hongyue-creation/`, macOS `~/Library/Application Support/hongyue-creation/`, Linux `~/.config/hongyue-creation/`
+- Upgrading from older versions: first launch auto-migrates the old folder (`novalocal-ai-novelist`) to the new location; the old folder is kept as `.legacy` backup
 - Backup advice: use export for important projects regularly
 - Factory reset: available in settings
 

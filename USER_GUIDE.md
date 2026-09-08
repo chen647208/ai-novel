@@ -93,7 +93,8 @@
    - 确认导入，项目数据将恢复
 
 #### 项目备份与恢复
-- 数据存储位置：Windows `%APPDATA%/novalocal-ai-novelist/`、macOS `~/Library/Application Support/novalocal-ai-novelist/`、Linux `~/.config/novalocal-ai-novelist/`
+- 数据存储位置：Windows `%APPDATA%/hongyue-creation/`、macOS `~/Library/Application Support/hongyue-creation/`、Linux `~/.config/hongyue-creation/`
+- 老版本升级：首次启动自动把旧目录（`novalocal-ai-novelist`）搬到新位置，旧目录改名 `.legacy` 保留，双重保险
 - 定期备份建议：使用导出功能备份重要项目
 - 恢复出厂设置：在设置中可进行数据重置
 

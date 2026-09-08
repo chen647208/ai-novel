@@ -12,7 +12,7 @@
  *
  * 由外部 MCP 客户端（codex/Claude 等）作为独立进程拉起：
  *   node build/main/main/mcp/server.js
- * 数据目录默认取 Electron userData（可用 AINOVEL_DATA_DIR 覆盖），直接读 SQLite。
+ * 数据目录默认取 Electron userData（可用 HONGYUE_DATA_DIR 覆盖），直接读 SQLite。
  * 读工具实时查询；写工具产出「提案」进入应用内待审箱（跨表面 fan-out：
  * 渲染端 ApprovalHost 轮询 pending-proposals.jsonl 后由用户决定），
  * 绝不静默写库——与内置 agent 的审批管线同权同源。
@@ -24,23 +24,33 @@ import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import {
+  APP_DATA_DIR_NAME,
+  DB_FILE_NAME,
+  dataDirOverride,
+  legacyDataDir,
+  migrateLegacyDataDirSync,
+  standardDataDir,
+} from '../app/dataDir.js';
 
 const PROTOCOL_VERSION = '2025-03-26';
 
+/** 独立 server 的数据目录：覆盖键 → 新默认 → 旧默认（过渡读，应用启动即迁走）。 */
 function dataDir(): string {
-  if (process.env.AINOVEL_DATA_DIR) return process.env.AINOVEL_DATA_DIR;
+  const override = dataDirOverride();
+  if (override) return override;
   switch (process.platform) {
     case 'darwin':
-      return path.join(os.homedir(), 'Library', 'Application Support', 'novalocal-ai-novelist');
+      return path.join(os.homedir(), 'Library', 'Application Support', APP_DATA_DIR_NAME);
     case 'win32':
-      return path.join(process.env.APPDATA ?? path.join(os.homedir(), 'AppData', 'Roaming'), 'novalocal-ai-novelist');
+      return path.join(process.env.APPDATA ?? path.join(os.homedir(), 'AppData', 'Roaming'), APP_DATA_DIR_NAME);
     default:
-      return path.join(process.env.XDG_CONFIG_HOME ?? path.join(os.homedir(), '.config'), 'novalocal-ai-novelist');
+      return path.join(process.env.XDG_CONFIG_HOME ?? path.join(os.homedir(), '.config'), APP_DATA_DIR_NAME);
   }
 }
 
 function dbPath(): string {
-  return path.join(dataDir(), 'ainovel.db');
+  return path.join(dataDir(), DB_FILE_NAME);
 }
 
 let db: DatabaseSync | null = null;
@@ -301,6 +311,14 @@ function handleLine(line: string): void {
 }
 
 function main(): void {
+  // 独立拉起也先迁一次（幂等）：仅标准路径跑，覆盖键指向的调试目录不动
+  if (path.resolve(dataDir()) === path.resolve(standardDataDir())) {
+    try {
+      migrateLegacyDataDirSync(legacyDataDir(), dataDir());
+    } catch (err) {
+      process.stderr.write(`数据目录迁移失败（稍后重试）：${err instanceof Error ? err.message : String(err)}\n`);
+    }
+  }
   // 长驻行式读取：MCP 客户端保持 stdio 打开并逐条发送请求
   let buffer = '';
   process.stdin.setEncoding('utf-8');

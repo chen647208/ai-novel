@@ -30,9 +30,9 @@ const ctx = self as unknown as {
   postMessage: (message: unknown) => void;
 };
 
-const DB_FILE = '/ainovel.db';
+const DB_FILE = '/hongyue.db';
 // OPFS 目录名必须是合法的单段名称：不能带路径分隔符或 "." 前缀（否则 getDirectoryHandle 报 "Name is not allowed"）。
-const POOL_DIR = 'ainovel-opfs';
+const POOL_DIR = 'hongyue-opfs';
 
 let ready: Promise<{ db: Database; capi: CAPI }> | null = null;
 
