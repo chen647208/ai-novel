@@ -24,6 +24,7 @@ export const IPC = {
   listDirectory: 'list-directory',
   openPath: 'open-path',
   openExternal: 'open-external',
+  exportPackage: 'export-package',
   vector: {
     initialize: 'vector:initialize',
     addDocuments: 'vector:add-documents',

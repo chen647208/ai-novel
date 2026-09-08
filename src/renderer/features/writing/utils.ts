@@ -8,7 +8,7 @@
  */
 
 import type { AIHistoryRecord, Chapter, Project } from '../../../shared/types';
-import { runBuild, type BuildProfile } from '@core/build';
+import { runBuild, buildEpubFiles, buildDocxFiles, type BuildProfile } from '@core/build';
 import type { NodeEntity, AttributeEntity, EdgeEntity } from '@core/entities';
 import { i18n } from '@/i18n';
 import { Bot, Brain, Cpu, Feather, Server, type LucideIcon } from 'lucide-react';
@@ -76,7 +76,7 @@ export const getPreviousChapterSummaryIds = (chapters: Chapter[], currentChapter
   );
 };
 
-export type ExportFormat = 'txt' | 'md' | 'html' | 'rtf' | 'pdf';
+export type ExportFormat = 'txt' | 'md' | 'html' | 'rtf' | 'pdf' | 'epub' | 'docx';
 
 /** Project.chapters → 构建管线实体视图（导出与统计共用，单一口径）。 */
 export function projectToBuildEntities(project: Project): { nodes: NodeEntity[]; attrs: AttributeEntity[]; edges: EdgeEntity[] } {
@@ -182,8 +182,8 @@ export const buildExportContent = (project: Project, selectedChapterIds: Set<str
   return `${header}${text}\n\n`;
 };
 
-const EXPORT_EXT: Record<ExportFormat, string> = { txt: 'txt', md: 'md', html: 'html', rtf: 'rtf', pdf: 'pdf' };
-const EXPORT_MIME: Record<ExportFormat, string> = { txt: 'text/plain', md: 'text/markdown', html: 'text/html', rtf: 'application/rtf', pdf: 'application/pdf' };
+const EXPORT_EXT: Record<ExportFormat, string> = { txt: 'txt', md: 'md', html: 'html', rtf: 'rtf', pdf: 'pdf', epub: 'epub', docx: 'docx' };
+const EXPORT_MIME: Record<ExportFormat, string> = { txt: 'text/plain', md: 'text/markdown', html: 'text/html', rtf: 'application/rtf', pdf: 'application/pdf', epub: 'application/epub+zip', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' };
 
 export const buildExportFilename = (projectTitle: string, format: ExportFormat = 'txt', now: Date = new Date()) => {
   const safeTitle = projectTitle.replace(/[\\/:*?"<>|]/g, '_');
@@ -210,6 +210,10 @@ export const saveExportFile = async (filename: string, content: string, format: 
     printWindow.print();
     return;
   }
+  // ePub/DOCX：调用方传文件集（buildExportPackage），此处只负责保存
+  if (format === 'epub' || format === 'docx') {
+    throw new Error('ePub/DOCX 请走 savePackageFile（需文件集）');
+  }
   if (api?.saveFileDialog && api?.writeFile) {
     const result = await api.saveFileDialog({
       title: i18n.t('writing:export.fileDialogTitle'),
@@ -221,6 +225,43 @@ export const saveExportFile = async (filename: string, content: string, format: 
     return;
   }
   downloadTextFile(filename, content, EXPORT_MIME[format]);
+};
+
+/**
+ * 出版文件集：HTML 管线产出 → ePub / DOCX 文件映射（主进程 STORE 打包）。
+ */
+export const buildExportPackage = (
+  project: Project,
+  selectedChapterIds: Set<string>,
+  format: 'epub' | 'docx',
+): Record<string, string> => {
+  const fullHtml = buildExportContent(project, selectedChapterIds, 'html');
+  // 取 body 内层，避免 html/head/body 嵌套进出版文件；
+  // 再剥掉管线自带的书名 h1 与简介 intro（打包器按 project 统一重加）
+  const bodyMatch = fullHtml.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+  const chaptersOnly = (bodyMatch?.[1] ?? fullHtml)
+    .replace(/<h1[^>]*>[\s\S]*?<\/h1>/i, '')
+    .replace(/<p class="intro">[\s\S]*?<\/p>/i, '')
+    .trim();
+  const input = { title: project.title, intro: project.intro, htmlBody: chaptersOnly };
+  return format === 'epub' ? buildEpubFiles(input) : buildDocxFiles(input);
+};
+
+/**
+ * 保存出版包：Electron 走主进程打包另存；Web 回退下载同名 HTML 源。
+ */
+export const savePackageFile = async (
+  filename: string,
+  files: Record<string, string>,
+  format: 'epub' | 'docx',
+  fallbackHtml: string,
+): Promise<void> => {
+  const api = typeof window !== 'undefined' ? window.electronAPI : undefined;
+  if (api?.exportPackage) {
+    await api.exportPackage(files, filename);
+    return;
+  }
+  downloadTextFile(filename.replace(/\.(epub|docx)$/, '.html'), fallbackHtml, 'text/html');
 };
 
 export const downloadTextFile = (filename: string, content: string, mime = 'text/plain') => {

@@ -109,6 +109,38 @@ export const fileProvider: Provider = {
       return true;
     });
 
+    // 打包导出：文件集 → STORE zip → 原生另存为（ePub/DOCX 复用 HTML 管线产出）
+    ipcMain.handle(IPC.exportPackage, async (_event, files: unknown, defaultPath: string) => {
+      if (typeof files !== 'object' || files === null || typeof defaultPath !== 'string') {
+        throw new TypeError('Invalid exportPackage args');
+      }
+      const entries = Object.entries(files as Record<string, unknown>);
+      if (entries.length === 0 || entries.length > 500) {
+        throw new Error('文件集为空或过大');
+      }
+      const clean: Record<string, string> = {};
+      for (const [name, content] of entries) {
+        if (typeof content !== 'string' || content.length > 20_000_000) {
+          throw new Error(`非法文件内容：${name}`);
+        }
+        if (name.includes('..') || name.startsWith('/')) {
+          throw new Error(`非法文件名：${name}`);
+        }
+        clean[name] = content;
+      }
+      const { zipStore } = await import('./zipStore.js');
+      const zip = zipStore(clean);
+      const target = await dialog.showSaveDialog(ctx.getMainWindow() ?? undefined, {
+        title: '导出文件',
+        defaultPath,
+        filters: [{ name: 'Package', extensions: [defaultPath.split('.').pop() ?? 'zip'] }],
+      });
+      if (target.canceled || !target.filePath) return { canceled: true };
+      await fs.mkdir(path.dirname(target.filePath), { recursive: true });
+      await fs.writeFile(target.filePath, zip);
+      return { canceled: false };
+    });
+
     ipcMain.handle(IPC.deleteFile, async (_event, filePath: string) => {
       assertString(filePath, 'filePath');
       await fs.unlink(filePath);

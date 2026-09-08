@@ -1043,6 +1043,8 @@ export interface ElectronAPI {
   openPath: (targetPath: string) => Promise<boolean>;
   /** 外部浏览器打开链接（仅 https；应用内无浏览器）。 */
   openExternal: (url: string) => Promise<boolean>;
+  /** 打包文件集为 zip（STORE 无压缩）并另存为；files 为 {文件名: 文本内容}。 */
+  exportPackage: (files: Record<string, string>, defaultPath: string) => Promise<{ canceled: boolean }>;
 
   // 向量存储操作（通过主进程代理）
   vector: {

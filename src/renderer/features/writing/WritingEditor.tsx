@@ -46,6 +46,8 @@ import type {
 import {
   buildExportContent,
   buildExportFilename,
+  buildExportPackage,
+  savePackageFile,
   debounce,
   getChapterContext,
   getPreviousChapterSummaryIds,
@@ -432,10 +434,16 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
       dialogService.alert(t('editor.selectAtLeastOne'));
       return;
     }
-    const fileContent = buildExportContent(project, selectedExportChapterIds, exportFormat);
     const filename = buildExportFilename(project.title, exportFormat);
     try {
-      await saveExportFile(filename, fileContent, exportFormat);
+      if (exportFormat === 'epub' || exportFormat === 'docx') {
+        const files = buildExportPackage(project, selectedExportChapterIds, exportFormat);
+        const fallbackHtml = buildExportContent(project, selectedExportChapterIds, 'html');
+        await savePackageFile(filename, files, exportFormat, fallbackHtml);
+      } else {
+        const fileContent = buildExportContent(project, selectedExportChapterIds, exportFormat);
+        await saveExportFile(filename, fileContent, exportFormat);
+      }
       setExportModalOpen(false);
     } catch (err) {
       dialogService.alert(t('editor.exportFailed', { error: err instanceof Error ? err.message : t('editor.unknownError') }));

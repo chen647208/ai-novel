@@ -34,3 +34,8 @@ export {
   type Transformer,
   type Renderer,
 } from './pipeline.js';
+export {
+  buildEpubFiles,
+  buildDocxFiles,
+  htmlToDocxParagraphs,
+} from './package.js';
