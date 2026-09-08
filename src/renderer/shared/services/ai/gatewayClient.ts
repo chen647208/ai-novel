@@ -67,7 +67,7 @@ export async function gatewayComplete(model: ModelConfig, prompt: string, option
   options?.signal?.addEventListener('abort', onAbort, { once: true });
   try {
     if (options?.signal?.aborted) return cancelledResponse();
-    return await gateway.complete(requestId, model, prompt, { retries: options?.retries });
+    return await gateway.complete(requestId, model, prompt, { retries: options?.retries, images: options?.images });
   } catch (error) {
     return failureResponse(error);
   } finally {

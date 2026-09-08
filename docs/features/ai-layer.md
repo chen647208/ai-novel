@@ -47,7 +47,7 @@ AI 调用采用「主进程网关 + 渲染端客户端 + 工具/审批/会话」
 
 - `agentLoop.ts`：assemble（PromptAssembler）→ llm → 解析
   `{reply, toolCalls}` JSON 协议 → 审批（三档）→ execute → 观察回填 → 循环。
-- `tools.ts`：ToolRegistry（首批 9 内置工具 + 插件贡献）；permission 三档。
+- `tools.ts`：ToolRegistry（17 个 `core.*` 内置工具 + 插件贡献）；permission 三档。
 - `approval.ts`：ApprovalBroker（超时降级待审箱）+ ApprovalRouter。
 - `session.ts`：AiEvent 事件流落 `ai-sessions/<bookId>/*.jsonl`。
 - `skills.ts`：SKILL.md 渐进注入（清单预算、激活/卸载、触发词匹配）。
