@@ -1,6 +1,6 @@
 {
   "name": "webnovel",
   "description": "网文创作档：在核心之上启用黄金三章、断章钩子、追读分析、番茄导出等 bundle",
-  "plugins": ["com.novalocal.bundle.webnovel"],
+  "plugins": ["com.hongyue.bundle.webnovel"],
   "policies": {}
 }

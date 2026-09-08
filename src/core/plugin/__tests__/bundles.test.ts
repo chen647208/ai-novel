@@ -13,18 +13,18 @@ import { BUILTIN_FEATURES, BUILTIN_BUNDLES, assemblyTree } from '../bundles.js';
 describe('bundle 装配树（design/04 §7）', () => {
   it('全 bundle 启用：15 个内置功能全部装配', () => {
     const rows = assemblyTree(
-      { name: 'full', plugins: ['com.novalocal.bundle.core', 'com.novalocal.bundle.world', 'com.novalocal.bundle.ai'] },
+      { name: 'full', plugins: ['com.hongyue.bundle.core', 'com.hongyue.bundle.world', 'com.hongyue.bundle.ai'] },
       BUILTIN_BUNDLES,
     );
     expect(rows).toHaveLength(BUILTIN_FEATURES.length);
     expect(rows.every((r) => r.enabled)).toBe(true);
-    expect(rows.find((r) => r.feature === 'core.writing')?.source).toBe('com.novalocal.bundle.core');
-    expect(rows.find((r) => r.feature === 'core.assistant')?.source).toBe('com.novalocal.bundle.ai');
+    expect(rows.find((r) => r.feature === 'core.writing')?.source).toBe('com.hongyue.bundle.core');
+    expect(rows.find((r) => r.feature === 'core.assistant')?.source).toBe('com.hongyue.bundle.ai');
   });
 
   it('minimal 档：ai.request deny 关闭全部 AI 触点，纯写作保留', () => {
     const rows = assemblyTree(
-      { name: 'minimal', plugins: ['com.novalocal.bundle.core'], policies: { 'ai.request': 'deny' } },
+      { name: 'minimal', plugins: ['com.hongyue.bundle.core'], policies: { 'ai.request': 'deny' } },
       BUILTIN_BUNDLES,
     );
     const writing = rows.find((r) => r.feature === 'core.writing')!;
@@ -36,7 +36,7 @@ describe('bundle 装配树（design/04 §7）', () => {
 
   it('依赖传递：世界 bundle 未启用时角色功能连带禁用', () => {
     const rows = assemblyTree(
-      { name: 'partial', plugins: ['com.novalocal.bundle.core', 'com.novalocal.bundle.ai'] },
+      { name: 'partial', plugins: ['com.hongyue.bundle.core', 'com.hongyue.bundle.ai'] },
       BUILTIN_BUNDLES,
     );
     const characters = rows.find((r) => r.feature === 'core.characters')!;

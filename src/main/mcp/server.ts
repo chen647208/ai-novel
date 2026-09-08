@@ -231,7 +231,7 @@ function dispatch(method: string, params: Record<string, unknown>): Record<strin
       return {
         protocolVersion: PROTOCOL_VERSION,
         capabilities: { tools: {}, resources: {} },
-        serverInfo: { name: 'ai-novel-mcp', version: '1.0.0' },
+        serverInfo: { name: 'hongyue-mcp', version: '1.0.0' },
       };
     case 'tools/list':
       return { tools: TOOLS };

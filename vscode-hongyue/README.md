@@ -1,6 +1,6 @@
 # AI Novel DSL（VS Code 扩展）
 
-AI小说家 (ai-novel) 的 **VS Code 线**起点（docs/design/08 M5）：为 novelDsl
+红月创作（Hongyue Creation）的 **VS Code 线**起点（docs/design/08 M5）：为 novelDsl
 提供编辑器级语法支持，让熟悉 VS Code 的作者可以在外部编辑书籍 DSL 文件。
 
 ## 功能（v0.1）
@@ -20,9 +20,9 @@ AI小说家 (ai-novel) 的 **VS Code 线**起点（docs/design/08 M5）：为 no
 ## 安装（开发期）
 
 ```
-cd vscode-ai-novel
+cd vscode-hongyue
 npx vsce package
-code --install-extension ai-novel-dsl-0.1.0.vsix
+code --install-extension hongyue-dsl-0.1.0.vsix
 ```
 
 ## 后续（design/08 M5）

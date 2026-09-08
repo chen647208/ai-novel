@@ -52,7 +52,7 @@ const createBook = async (page: Page): Promise<void> => {
 };
 
 test('建书进工作台：无模型时生成按钮禁用，手写不受影响', async () => {
-  const userDataDir = mkdtempSync(join(tmpdir(), 'ainovel-e2e-flow-'));
+  const userDataDir = mkdtempSync(join(tmpdir(), 'hongyue-e2e-flow-'));
   const { app, page } = await launchApp(userDataDir);
   try {
     await createBook(page);
@@ -67,7 +67,7 @@ test('建书进工作台：无模型时生成按钮禁用，手写不受影响',
 });
 
 test('填灵感后出现下一步建议；Ctrl+J 开关助手，Ctrl+2 切世界分区', async () => {
-  const userDataDir = mkdtempSync(join(tmpdir(), 'ainovel-e2e-flow-'));
+  const userDataDir = mkdtempSync(join(tmpdir(), 'hongyue-e2e-flow-'));
   const { app, page } = await launchApp(userDataDir);
   try {
     await createBook(page);
@@ -91,7 +91,7 @@ test('填灵感后出现下一步建议；Ctrl+J 开关助手，Ctrl+2 切世界
 });
 
 test('同一数据目录重启后书籍仍在（持久化回归）', async () => {
-  const userDataDir = mkdtempSync(join(tmpdir(), 'ainovel-e2e-flow-'));
+  const userDataDir = mkdtempSync(join(tmpdir(), 'hongyue-e2e-flow-'));
   const first = await launchApp(userDataDir);
   try {
     await createBook(first.page);

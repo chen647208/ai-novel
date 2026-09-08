@@ -4,7 +4,7 @@
 
 ## 内容
 
-- `plugin.json`：manifest v0（`com.novalocal.example-magic`）。
+- `plugin.json`：manifest v0（`com.hongyue.example-magic`）。
 - `types/magic-system.json`：`magic-system`（体系）与 `magic-spell`（法术）模板。
 - `skills/magic-design/SKILL.md`：魔法设计三件套方法论。
 

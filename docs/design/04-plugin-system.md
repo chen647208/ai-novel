@@ -7,7 +7,7 @@
 
 ```jsonc
 {
-  "$schema": "https://ai-novel.dev/schema/plugin-v0.json",
+  "$schema": "https://hongyue.dev/schema/plugin-v0.json",
   "id": "com.example.golden-three-chapters",   // 反向域名，全局唯一，命名空间根
   "name": "golden-three-chapters",
   "version": "1.0.0",
@@ -161,7 +161,7 @@ interface Event Bus {
 
 ## 9. 许可证与生态边界
 
-- 宿主 AGPL-3.0 不变。**插件 SDK（`@ai-novel/plugin-sdk`，类型+运行时垫片）单独 MIT 发布**——避免许可证传染吓退生态，同时 AGPL 对"改宿主"仍然有效。
+- 宿主 AGPL-3.0 不变。**插件 SDK（`@hongyue/plugin-sdk`，类型+运行时垫片）单独 MIT 发布**——避免许可证传染吓退生态，同时 AGPL 对"改宿主"仍然有效。
 - 插件是独立作品：经公开 API/协议交互，不链接宿主内部——这条写进插件规范 FAQ。
 
 ## 10. 验收标准

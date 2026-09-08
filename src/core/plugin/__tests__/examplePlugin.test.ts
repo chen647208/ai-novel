@@ -24,7 +24,7 @@ import { PluginHost } from '../runtime.js';
  */
 const ROOT = join(process.cwd(), 'examples', 'plugins', 'magic-system');
 const HOST_VERSION = '1.0.0';
-const PLUGIN_ID = 'com.novalocal.example-magic';
+const PLUGIN_ID = 'com.hongyue.example-magic';
 
 const FIELD_TYPES = [
   'text',

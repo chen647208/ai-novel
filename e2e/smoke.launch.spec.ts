@@ -9,7 +9,7 @@ import { test, expect, _electron as electron, type Page } from '@playwright/test
  * DevTools 会自动弹出（开发模式行为）：只认非 devtools:// 的应用窗。
  */
 test('dev app launches with a visible app window', async () => {
-  const userDataDir = mkdtempSync(join(tmpdir(), 'ainovel-e2e-'));
+  const userDataDir = mkdtempSync(join(tmpdir(), 'hongyue-e2e-'));
   const app = await electron.launch({
     args: ['.', `--user-data-dir=${userDataDir}`],
     env: { ...process.env, ELECTRON_ENABLE_LOGGING: '0' } as Record<string, string>,

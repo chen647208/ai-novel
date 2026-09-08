@@ -1,9 +1,9 @@
 {
-  "name": "ai-novel-dsl",
+  "name": "hongyue-dsl",
   "displayName": "AI Novel DSL",
-  "description": "AI小说家 (ai-novel) 的 novelDsl 大纲/正文 DSL 语法高亮与语言支持（VS Code 线，design/08 M5）。",
+  "description": "红月创作（Hongyue Creation）的 novelDsl 大纲/正文 DSL 语法高亮与语言支持（VS Code 线，design/08 M5）。",
   "version": "0.1.0",
-  "publisher": "novalocal",
+  "publisher": "hongyue",
   "license": "AGPL-3.0-only",
   "engines": { "vscode": "^1.85.0" },
   "categories": ["Programming Languages"],

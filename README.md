@@ -52,10 +52,10 @@ src/
     editor/                # TipTap schema/commands/serialization
   core/                    # 领域层：entities/dsl/index/build/sync/plugin/ai（纯 TS，双端可用）
   shared/                  # 跨进程类型与 i18n 目录（catalog + locales）
-sdk/                       # @ai-novel/plugin-sdk（MIT 独立发行）
+sdk/                       # @hongyue/plugin-sdk（MIT 独立发行）
 docs/                      # 中文文档（design/ 蓝图、features/ 说明、guides/ 指南）
 docs-site/                 # VitePress 文档站（npm run docs:dev）
-vscode-ai-novel/           # VS Code 线：novelDsl 语法扩展
+vscode-hongyue/          # VS Code 线：novelDsl 语法扩展
 ```
 
 ## 核心文档

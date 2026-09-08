@@ -1,6 +1,6 @@
-appId: com.novalocal.ainovelist
+appId: com.hongyue.creation
 productName: 红月创作
-copyright: Copyright © 2025 NovaLocal
+copyright: Copyright © 2025 Hongyue
 
 directories:
   output: build/release
@@ -50,7 +50,7 @@ linux:
   artifactName: ${productName}-${version}-${arch}.${ext}
   icon: src/assets/icon.png
   category: Utility
-  maintainer: NovaLocal
+  maintainer: Hongyue
   synopsis: 本地优先的 AI 小说创作助手
   description: 支持书籍管理、灵感生成、人物构建、大纲设计、章节规划、知识库与正文写作的本地优先桌面应用。
 

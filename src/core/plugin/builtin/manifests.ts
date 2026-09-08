@@ -15,7 +15,7 @@
 import type { PluginManifest } from '../manifest.js';
 
 export const CORE_BUNDLE_MANIFEST: PluginManifest = {
-  id: 'com.novalocal.bundle.core',
+  id: 'com.hongyue.bundle.core',
   name: 'core',
   version: '2.0.0',
   host: '^2.0.0',
@@ -27,24 +27,24 @@ export const CORE_BUNDLE_MANIFEST: PluginManifest = {
 };
 
 export const WORLD_BUNDLE_MANIFEST: PluginManifest = {
-  id: 'com.novalocal.bundle.world',
+  id: 'com.hongyue.bundle.world',
   name: 'world',
   version: '2.0.0',
   host: '^2.0.0',
   license: 'AGPL-3.0-only',
   description: '世界与角色：世界构建/角色势力/时间线/知识库',
-  dependencies: { 'com.novalocal.bundle.core': '^2.0.0' },
+  dependencies: { 'com.hongyue.bundle.core': '^2.0.0' },
   activation: 'onStartup',
 };
 
 export const AI_BUNDLE_MANIFEST: PluginManifest = {
-  id: 'com.novalocal.bundle.ai',
+  id: 'com.hongyue.bundle.ai',
   name: 'ai',
   version: '2.0.0',
   host: '^2.0.0',
   license: 'AGPL-3.0-only',
   description: 'AI 创作套件：助手/卡片/一致性/伏笔（依赖 AI 网关与索引）',
-  dependencies: { 'com.novalocal.bundle.core': '^2.0.0', 'com.novalocal.bundle.world': '^2.0.0' },
+  dependencies: { 'com.hongyue.bundle.core': '^2.0.0', 'com.hongyue.bundle.world': '^2.0.0' },
   activation: 'onDemand',
 };
 

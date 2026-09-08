@@ -1,4 +1,4 @@
-# ai-novel v2 设计文档索引
+# 红月创作 v2 设计文档索引
 
 > 生成于 2026-08-31 ｜ 依据：当前代码实测（01 篇）+ 九项目调研拆解（novelWriter/Zettlr/Trilium/Twine/Manuskript/bibisco/codex/deepseek-harness/编辑器内核与插件规范；调研归档于 git 历史 research/ 目录）。
 > **性质声明**：本目录是目标设计（前瞻性），与 `docs/features/`（现状描述）分工不同；功能落地后应把对应设计回写进 features 文档。

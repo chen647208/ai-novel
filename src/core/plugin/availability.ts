@@ -18,13 +18,13 @@ import { assemblyTree, BUILTIN_BUNDLES, type Profile } from './bundles.js';
 export function profileByName(name: string): Profile {
   switch (name) {
     case 'minimal':
-      return { name: 'minimal', plugins: ['com.novalocal.bundle.core'], policies: { 'ai.request': 'deny' } };
+      return { name: 'minimal', plugins: ['com.hongyue.bundle.core'], policies: { 'ai.request': 'deny' } };
     case 'webnovel':
     case 'literary':
     case 'full':
     default:
       // v2.x 的 webnovel/literary 专属 bundle 落地前，与 full 等效
-      return { name, plugins: ['com.novalocal.bundle.core', 'com.novalocal.bundle.world', 'com.novalocal.bundle.ai'], policies: {} };
+      return { name, plugins: ['com.hongyue.bundle.core', 'com.hongyue.bundle.world', 'com.hongyue.bundle.ai'], policies: {} };
   }
 }
 
@@ -40,4 +40,4 @@ export function isFeatureEnabled(profileName: string, featureId: string): boolea
 }
 
 /** 发行档切换事件名（设置面板派发，UI 订阅刷新）。 */
-export const PROFILE_CHANGED_EVENT = 'ai-novel:profile.changed';
+export const PROFILE_CHANGED_EVENT = 'hongyue:profile.changed';

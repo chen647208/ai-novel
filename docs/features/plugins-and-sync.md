@@ -19,7 +19,7 @@
   （配置级，持久化于 localStorage）。
 - **发行档**：完整 / 网文 / 严肃文学 / 纯写作（minimal）。minimal 经
   `ai.request` 拦截器即时禁用全部 AI 请求（会话与工具），切回即恢复。
-- **SDK**：`sdk/`（`@ai-novel/plugin-sdk`，MIT 独立发行，与宿主 AGPL 解耦）。
+- **SDK**：`sdk/`（`@hongyue/plugin-sdk`，MIT 独立发行，与宿主 AGPL 解耦）。
 
 ## 同步
 

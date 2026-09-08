@@ -1,6 +1,6 @@
 {
   "name": "literary",
   "description": "严肃文学档：雪片法大纲、人物弧线分析、EPUB 精装导出等 bundle",
-  "plugins": ["com.novalocal.bundle.literary"],
+  "plugins": ["com.hongyue.bundle.literary"],
   "policies": {}
 }

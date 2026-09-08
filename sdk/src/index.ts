@@ -1,5 +1,5 @@
 /*
- * 本文件属于 @ai-novel/plugin-sdk，以 MIT 许可证单独发布（见 ../README.md）。
+ * 本文件属于 @hongyue/plugin-sdk，以 MIT 许可证单独发布（见 ../README.md）。
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: MIT
  */

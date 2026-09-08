@@ -1,4 +1,4 @@
-# @ai-novel/plugin-sdk
+# @hongyue/plugin-sdk
 
 红月创作（Hongyue Creation）插件 SDK（MIT 独立发行）。
 

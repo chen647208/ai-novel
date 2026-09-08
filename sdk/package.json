@@ -1,5 +1,5 @@
 {
-  "name": "@ai-novel/plugin-sdk",
+  "name": "@hongyue/plugin-sdk",
   "version": "0.1.0",
   "description": "红月创作（Hongyue Creation）插件 SDK：类型契约与运行时垫片（MIT 独立发行，与宿主 AGPL 解耦）。",
   "license": "MIT",
@@ -7,5 +7,5 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "files": ["src"],
-  "keywords": ["ai-novel", "plugin", "sdk", "novel", "writing"]
+  "keywords": ["hongyue-creation", "plugin", "sdk", "novel", "writing"]
 }

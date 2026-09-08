@@ -1,9 +1,9 @@
 {
-  "name": "novalocal-ai-novelist",
+  "name": "hongyue-creation",
   "private": true,
   "version": "1.0.0",
   "description": "本地优先的 AI 小说创作助手：书籍管理、灵感生成、人物构建、大纲设计、章节规划、知识库与正文写作。",
-  "author": "NovaLocal",
+  "author": "Hongyue",
   "license": "AGPL-3.0-only",
   "homepage": "https://github.com/chen647208/hongyue-creation#readme",
   "repository": {

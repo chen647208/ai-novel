@@ -8,8 +8,8 @@
 - `src/renderer/features`：按业务能力拆分的 15 个功能域
 - `src/renderer/shared`：渲染层共享基础设施（网关客户端、仓库、UI 组件）
 - `src/shared`：跨进程共享类型与 i18n 目录（catalog + locales）
-- `sdk`：`@ai-novel/plugin-sdk`（MIT 独立发行）
-- `vscode-ai-novel`：VS Code 线（novelDsl 语法扩展）
+- `sdk`：`@hongyue/plugin-sdk`（MIT 独立发行）
+- `vscode-hongyue`：VS Code 线（novelDsl 语法扩展）
 - `docs` / `docs-site`：中文文档与 VitePress 文档站
 - `profiles`：发行档（minimal / webnovel / literary）
 - `.github/workflows`：CI 与发布工作流

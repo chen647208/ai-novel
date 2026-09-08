@@ -110,9 +110,9 @@ describe('依赖激活顺序（PluginHost 拓扑）', () => {
     }
     host.activateAll();
     expect(order).toEqual([
-      'com.novalocal.bundle.core',
-      'com.novalocal.bundle.world',
-      'com.novalocal.bundle.ai',
+      'com.hongyue.bundle.core',
+      'com.hongyue.bundle.world',
+      'com.hongyue.bundle.ai',
     ]);
   });
 });
