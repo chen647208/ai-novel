@@ -20,6 +20,7 @@ import {
   mcpClientProvider,
   netProvider,
   shellProvider,
+  updaterProvider,
 } from './app/providers.js';
 import { setQuitting } from './app/tray.js';
 import { applySecurityHeaders } from './app/security.js';
@@ -41,6 +42,7 @@ const container = new AppContainer()
   .register(mcpClientProvider)
   .register(netProvider)
   .register(shellProvider)
+  .register(updaterProvider)
   .register(windowProvider);
 
 const ctx: ProviderContext = { getMainWindow };

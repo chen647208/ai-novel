@@ -17,4 +17,7 @@ export const DEFAULT_STORAGE_CONFIG: StorageConfig = {
   dataPath: '',
   useCustomPath: false,
   lastMigration: undefined,
+  autoBackupEnabled: true,
+  autoBackupInterval: 30,
+  maxBackupFiles: 5,
 };

@@ -78,4 +78,12 @@ export const IPC = {
     setProxy: 'net:set-proxy',
     testProxy: 'net:test-proxy',
   },
+
+  // 自动更新（打包版原生链路：检查/下载/安装 + 进度事件推送）
+  updater: {
+    check: 'updater:check',
+    download: 'updater:download',
+    install: 'updater:install',
+    event: 'updater:event',
+  },
 } as const;

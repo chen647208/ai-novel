@@ -90,4 +90,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
     setProxy: (url: string) => ipcRenderer.invoke(IPC.net.setProxy, url),
     testProxy: (url: string) => ipcRenderer.invoke(IPC.net.testProxy, url),
   },
+  // 自动更新（打包版原生链路；开发版无 updater 字段，渲染层退回 GitHub 查询）
+  updater: {
+    check: () => ipcRenderer.invoke(IPC.updater.check),
+    download: () => ipcRenderer.invoke(IPC.updater.download),
+    install: () => ipcRenderer.invoke(IPC.updater.install),
+    onStatus: (listener: (status: unknown) => void) => {
+      const handler = (_event: unknown, payload: unknown): void => listener(payload);
+      ipcRenderer.on(IPC.updater.event, handler);
+      return () => ipcRenderer.removeListener(IPC.updater.event, handler);
+    },
+  },
 });

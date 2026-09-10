@@ -14,6 +14,7 @@ import type { StorageSettingsPanelProps } from '../types';
 import { dialogService } from '@/shared/services/dialogService';
 import { autoBackupService } from '@/shared/services/autoBackupService';
 import { composeAppState, seedPersistBaseline } from '@/app/stores/persistenceBridge';
+import { repository } from '@/shared/services/repository';
 import { hydrateStoresFromState } from '@/app/useAppBootstrap';
 import { normalizeImportedState, checkImportVersion } from '@/app/initialState';
 import { Button } from '@/shared/ui/Button';
@@ -90,6 +91,8 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
       return;
     }
     hydrateStoresFromState(normalizeImportedState(snapshot));
+    // 全量落盘：恢复后的状态可能远超差分增量，必须整库写入，否则磁盘仍是恢复前数据
+    await repository.saveAll(composeAppState());
     seedPersistBaseline(composeAppState());
     dialogService.alert(t('storage.restoreDone'));
   };

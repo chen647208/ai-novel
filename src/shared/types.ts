@@ -1143,7 +1143,23 @@ export interface ElectronAPI {
     setProxy: (url: string) => Promise<{ ok: boolean }>;
     testProxy: (url: string) => Promise<{ ok: boolean; status?: number; error?: string }>;
   };
+  /** 自动更新（仅打包版存在；开发/网页预览无此字段）。 */
+  updater?: {
+    check: () => Promise<{ ok: boolean; version: string | null }>;
+    download: () => Promise<{ ok: boolean }>;
+    install: () => Promise<{ ok: boolean }>;
+    onStatus: (listener: (status: UpdaterStatus) => void) => () => void;
+  };
 }
+
+/** 自动更新状态事件（主进程推送）。 */
+export type UpdaterStatus =
+  | { t: 'checking' }
+  | { t: 'available'; version: string }
+  | { t: 'not-available' }
+  | { t: 'progress'; percent: number }
+  | { t: 'downloaded'; version: string }
+  | { t: 'error'; message: string };
 
 // Embedding模型配置接口
 export interface EmbeddingModelConfig {

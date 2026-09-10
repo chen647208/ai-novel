@@ -210,6 +210,8 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
       return;
     }
     hydrateStoresFromState(normalizeImportedState(imported));
+    // 全量落盘：导入是非增量覆盖，必须整库写入后再重建差分基线
+    await repository.saveAll(composeAppState());
     seedPersistBaseline(composeAppState());
     dialogService.alert(i18n.t('app:importAll.success'));
   }, []);

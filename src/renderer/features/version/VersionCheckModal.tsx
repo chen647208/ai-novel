@@ -11,6 +11,8 @@ import { logger } from '@/shared/utils/logger';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation, i18n } from '@/i18n';
 import { checkForUpdates, getCurrentVersionInfo, getVersionHistory, formatVersion, type UpdateCheckResult } from './services/versionService';
+import { hasNativeUpdater, nativeCheckForUpdate, nativeDownloadUpdate, nativeInstallUpdate, onUpdaterStatus } from './services/updateService';
+import type { UpdaterStatus } from '@shared/types';
 import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
@@ -33,6 +35,11 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
   const { t } = useTranslation('version');
   const [isChecking, setIsChecking] = useState(false);
   const [updateResult, setUpdateResult] = useState<UpdateCheckResult | null>(null);
+  // 原生更新（打包版）：下载进度、已下载版本、错误
+  const native = hasNativeUpdater();
+  const [downloadPercent, setDownloadPercent] = useState<number | null>(null);
+  const [downloadedVersion, setDownloadedVersion] = useState<string | null>(null);
+  const [nativeError, setNativeError] = useState<string | null>(null);
   const [currentVersionInfo, setCurrentVersionInfo] = useState(getCurrentVersionInfo());
   const [versionHistory, setVersionHistory] = useState(getVersionHistory());
   const [autoCheckEnabled, setAutoCheckEnabled] = useState(() => {
@@ -76,6 +83,22 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
     }
   }, [isOpen, handleAutoCheck]);
 
+  // 打包版：订阅主进程更新状态（进度/已下载/错误）
+  useEffect(() => {
+    if (!isOpen || !native) return;
+    return onUpdaterStatus((status: UpdaterStatus) => {
+      if (status.t === 'progress') {
+        setDownloadPercent(status.percent);
+      } else if (status.t === 'downloaded') {
+        setDownloadedVersion(status.version);
+        setDownloadPercent(null);
+      } else if (status.t === 'error') {
+        setNativeError(status.message);
+        setDownloadPercent(null);
+      }
+    });
+  }, [isOpen, native]);
+
   const handleCheckForUpdates = async () => {
     setIsChecking(true);
     try {
@@ -94,9 +117,22 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
   };
 
   const handleDownloadUpdate = async () => {
+    // 打包版走原生：先检查（拿到 updateInfo）再下载；进度经状态事件回填
+    if (native) {
+      setNativeError(null);
+      setDownloadPercent(0);
+      try {
+        await nativeCheckForUpdate();
+        await nativeDownloadUpdate();
+      } catch (error) {
+        setNativeError(error instanceof Error ? error.message : String(error));
+        setDownloadPercent(null);
+      }
+      return;
+    }
     const url = updateResult?.versionInfo.releaseUrl;
     if (!updateResult?.success || !url) return;
-    // 诚实更新：本应用无后台自动更新，走外部浏览器下载页手动安装
+    // 无桌面原生更新：走外部浏览器下载页手动安装
     try {
       if (window.electronAPI?.openExternal) {
         await window.electronAPI.openExternal(url);
@@ -248,16 +284,31 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
                           <div>
                             {skippedVersion === latest ? (
                               <p className="text-xs text-muted-foreground">{t('modal.skippedHint', { version: formatVersion(latest) })}</p>
+                            ) : native && downloadedVersion ? (
+                              <Button className="w-full" size="sm" onClick={() => void nativeInstallUpdate()}>
+                                <Rocket className="size-3.5" />
+                                {t('modal.restartInstall')}
+                              </Button>
                             ) : (
                               <div className="flex gap-2">
-                                <Button className="flex-1" size="sm" onClick={handleDownloadUpdate}>
-                                  <ExternalLink className="size-3.5" />
-                                  {t('modal.goDownloadPage')}
+                                <Button className="flex-1" size="sm" onClick={handleDownloadUpdate} disabled={downloadPercent !== null}>
+                                  {native ? <RefreshCw className="size-3.5" /> : <ExternalLink className="size-3.5" />}
+                                  {native
+                                    ? (downloadPercent !== null
+                                        ? t('modal.downloading', { percent: Math.round(downloadPercent) })
+                                        : t('modal.downloadInstall'))
+                                    : t('modal.goDownloadPage')}
                                 </Button>
                                 <Button variant="ghost" size="sm" className="shrink-0 text-muted-foreground" onClick={() => handleSkipVersion(latest)}>
                                   {t('modal.skipThisVersion')}
                                 </Button>
                               </div>
+                            )}
+                            {native && downloadedVersion && (
+                              <p className="mt-2 text-xs text-success">{t('modal.updateReady')}</p>
+                            )}
+                            {nativeError && (
+                              <p className="mt-2 text-xs text-destructive">{t('modal.nativeFailed', { message: nativeError })}</p>
                             )}
                           </div>
                         );

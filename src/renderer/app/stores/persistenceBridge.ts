@@ -79,8 +79,12 @@ async function flush(): Promise<void> {
       await persistDiff(repository, prev, next, commitMetaOf);
     }
     const config = await repository.getStorageConfig();
-    if (config.autoBackupEnabled) {
-      await autoBackupService.performBackup(config, () => composeAppState());
+    // 自动备份：按间隔判定（每次落盘后检查，避免高频覆盖），成功后回写上次备份时间
+    if (config.autoBackupEnabled && autoBackupService.shouldPerformBackup(config)) {
+      const backedUp = await autoBackupService.performBackup(config, () => composeAppState());
+      if (backedUp) {
+        await repository.updateStorageConfig({ ...config, lastAutoBackup: Date.now() });
+      }
     }
   } catch (error) {
     logger.error('持久化或自动备份失败:', error);

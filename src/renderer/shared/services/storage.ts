@@ -156,11 +156,14 @@ const migrateVirtualChapters = (state: AppState): AppState => {
   };
 };
 
-// 默认存储配置
+// 默认存储配置（备份默认开启：每 30 秒一次，保留最近 5 份）
 const DEFAULT_STORAGE_CONFIG: StorageConfig = {
   dataPath: '',
   useCustomPath: false,
-  lastMigration: undefined
+  lastMigration: undefined,
+  autoBackupEnabled: true,
+  autoBackupInterval: 30,
+  maxBackupFiles: 5,
 };
 
 // 获取存储配置
@@ -441,33 +444,9 @@ export const storage = {
     return await getStorageConfig();
   },
 
-  // 新增：更新存储配置
+  // 新增：更新存储配置（自动备份由持久化桥按间隔触发，此处只落盘配置）
   updateStorageConfig: async (config: StorageConfig): Promise<boolean> => {
-    const success = await saveStorageConfig(config);
-    
-    // 如果配置更新成功，更新自动备份服务
-    if (success && window.electronAPI) {
-      try {
-        // 获取当前应用状态（通过回调函数）
-        const getCurrentState = () => {
-          // 这里需要从应用中获取当前状态
-          // 由于storage.ts是独立模块，我们需要应用在调用updateStorageConfig时提供状态获取函数
-          // 暂时返回null，应用层需要处理自动备份的启动/停止
-          return null;
-        };
-        
-        // 启动或停止自动备份
-        if (config.autoBackupEnabled && config.autoBackupInterval) {
-          await autoBackupService.startAutoBackup(config, getCurrentState);
-        } else {
-          autoBackupService.stopAutoBackup();
-        }
-      } catch (error) {
-        logger.error('更新自动备份服务失败:', error);
-      }
-    }
-    
-    return success;
+    return await saveStorageConfig(config);
   },
 
   // 新增：迁移数据到新路径
@@ -669,30 +648,6 @@ export const storage = {
       logger.error('手动备份失败:', error);
       return false;
     }
-  },
-
-  // 新增：获取备份状态
-  getBackupStatus: () => {
-    return autoBackupService.getBackupStatus();
-  },
-
-  // 新增：初始化自动备份服务（应用启动时调用）
-  initializeAutoBackup: async (getCurrentState: () => AppState | null) => {
-    try {
-      const config = await getStorageConfig();
-      if (config.autoBackupEnabled && config.autoBackupInterval) {
-        await autoBackupService.startAutoBackup(config, getCurrentState);
-        logger.debug('自动备份服务已启动');
-      }
-    } catch (error) {
-      logger.error('初始化自动备份服务失败:', error);
-    }
-  },
-
-  // 新增：停止自动备份服务（应用关闭时调用）
-  stopAutoBackup: () => {
-    autoBackupService.stopAutoBackup();
-    logger.debug('自动备份服务已停止');
   },
 
   // ========== 一致性检查配置相关方法 ==========

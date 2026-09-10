@@ -10,12 +10,9 @@
 import { logger } from '../utils/logger';
 import { type AppState, type StorageConfig } from '../../../shared/types';
 
-// 自动备份服务类
+// 自动备份服务：按间隔判定 + 落盘备份（调度由持久化桥在每次落盘后触发）
 export class AutoBackupService {
   private static instance: AutoBackupService;
-  private backupTimer: NodeJS.Timeout | null = null;
-  private isRunning = false;
-  private currentConfig: StorageConfig | null = null;
 
   // 单例模式
   public static getInstance(): AutoBackupService {
@@ -23,44 +20,6 @@ export class AutoBackupService {
       AutoBackupService.instance = new AutoBackupService();
     }
     return AutoBackupService.instance;
-  }
-
-  // 启动自动备份
-  public async startAutoBackup(config: StorageConfig, getCurrentState: () => AppState | null): Promise<boolean> {
-    // 检查是否已启用自动备份
-    if (!config.autoBackupEnabled || !config.autoBackupInterval) {
-      logger.debug('自动备份未启用或未配置间隔时间');
-      return false;
-    }
-
-    // 停止现有的定时器
-    this.stopAutoBackup();
-
-    // 保存配置
-    this.currentConfig = config;
-
-    // 立即执行一次备份
-    await this.performBackup(config, getCurrentState);
-
-    // 设置定时器
-    const intervalMs = config.autoBackupInterval * 1000;
-    this.backupTimer = setInterval(async () => {
-      await this.performBackup(config, getCurrentState);
-    }, intervalMs);
-
-    this.isRunning = true;
-    logger.debug(`自动备份已启动，间隔: ${config.autoBackupInterval}秒`);
-    return true;
-  }
-
-  // 停止自动备份
-  public stopAutoBackup(): void {
-    if (this.backupTimer) {
-      clearInterval(this.backupTimer);
-      this.backupTimer = null;
-    }
-    this.isRunning = false;
-    logger.debug('自动备份已停止');
   }
 
   // 执行单次备份
@@ -109,7 +68,7 @@ export class AutoBackupService {
       // 更新上次备份时间
       config.lastAutoBackup = Date.now();
       
-      // 清理旧备份文件（只保留最新的1个）
+      // 清理旧备份文件（按文件名时间倒序保留 maxBackupFiles 个）
       await this.cleanupOldBackups(backupDir, config.maxBackupFiles || 1);
 
       logger.debug(`备份成功: ${backupFileName}`);
@@ -152,40 +111,7 @@ export class AutoBackupService {
     }
   }
 
-  // 获取备份状态
-  public getBackupStatus(): {
-    isRunning: boolean;
-    interval?: number;
-    lastBackup?: number;
-    nextBackup?: number;
-  } {
-    if (!this.isRunning || !this.currentConfig) {
-      return { isRunning: false };
-    }
-
-    const lastBackup = this.currentConfig.lastAutoBackup;
-    const interval = this.currentConfig.autoBackupInterval || 0;
-    const nextBackup = lastBackup ? lastBackup + (interval * 1000) : undefined;
-
-    return {
-      isRunning: true,
-      interval,
-      lastBackup,
-      nextBackup
-    };
-  }
-
-  // 立即执行备份（手动触发）
-  public async triggerManualBackup(getCurrentState: () => AppState | null): Promise<boolean> {
-    if (!this.currentConfig) {
-      logger.warn('没有可用的备份配置');
-      return false;
-    }
-
-    return await this.performBackup(this.currentConfig, getCurrentState);
-  }
-
-  // 检查是否应该执行备份
+  // 检查是否应该执行备份（距上次备份已超过间隔；调度由持久化桥调用）
   public shouldPerformBackup(config: StorageConfig): boolean {
     if (!config.autoBackupEnabled || !config.autoBackupInterval) {
       return false;
@@ -199,7 +125,7 @@ export class AutoBackupService {
   }
 
   // 获取备份历史（文件名时间倒序；损坏文件跳过）
-  public async getBackupHistory(config?: StorageConfig | null): Promise<Array<{
+  public async getBackupHistory(config: StorageConfig): Promise<Array<{
     fileName: string;
     filePath: string;
     size: number;
@@ -207,9 +133,7 @@ export class AutoBackupService {
   }>> {
     try {
       if (!window.electronAPI) return [];
-      const cfg = config ?? this.currentConfig;
-      if (!cfg) return [];
-      const backupDir = `${await this.getStoragePath(cfg)}/backups`;
+      const backupDir = `${await this.getStoragePath(config)}/backups`;
       const entries = await window.electronAPI.listDirectory(backupDir).catch(() => []);
       const out: Array<{ fileName: string; filePath: string; size: number; timestamp: number }> = [];
       for (const e of entries) {

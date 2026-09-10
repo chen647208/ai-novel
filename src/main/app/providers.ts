@@ -15,6 +15,7 @@ import { registerVectorIpc } from '../vector-ipc.js';
 import { registerSqliteIpc, closeSqlite } from '../sqlite-ipc.js';
 import { registerMcpClientIpc, closeMcpClients } from '../mcp/clientIpc.js';
 import { registerProxyIpc } from '../net/proxyIpc.js';
+import { registerUpdaterIpc } from '../updater.js';
 import { destroyTray, registerShellIpc } from './tray.js';
 import type { Provider, ProviderContext } from './container.js';
 import { createWindow } from './window.js';
@@ -251,5 +252,13 @@ export const shellProvider: Provider = {
   },
   shutdown() {
     destroyTray();
+  },
+};
+
+/** 自动更新 Provider：打包版注册原生更新 IPC（开发版空操作）。 */
+export const updaterProvider: Provider = {
+  name: 'updater',
+  boot() {
+    registerUpdaterIpc();
   },
 };
