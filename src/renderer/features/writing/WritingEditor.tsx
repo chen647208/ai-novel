@@ -23,7 +23,8 @@ import { eventToKeybinding, resolveKeybindings } from '../settings/services/keyb
 import WritingEditorCanvas from './components/WritingEditorCanvas';
 import ForeshadowPanel from '../foreshadowing/components/ForeshadowPanel';
 import { extractChapterSummary } from './services/summaryExtractionService';
-import { appendSnapshot, createSnapshot, shouldAutoSnapshot } from './services/chapterSnapshotService';
+import { appendSnapshot, createSnapshot } from './services/chapterSnapshotService';
+import { useChapterSnapshots } from './hooks/useChapterSnapshots';
 import { computeBookStats, computeChapterStats } from './services/writingStatsService';
 import { buildForeshadowContextForPrompt, openForeshadows, overdueForeshadows } from '../foreshadowing/services/foreshadowService';
 import {
@@ -229,46 +230,15 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     return () => clearInterval(timer);
   }, []);
 
-  // ===== 手动编辑快照：定时捕获，防误删/误覆盖 =====
+  // ===== 手动编辑快照：定时捕获，防误删/误覆盖（调度见 useChapterSnapshots） =====
   const projectRef = useRef(project);
   projectRef.current = project;
 
-  const snapshotChapterIfDue = (chapterId: string, source: 'auto' | 'manual' | 'before-clear'): void => {
-    const chapters = projectRef.current.chapters;
-    const target = chapters.find((c) => c.id === chapterId);
-    if (!target) return;
-    if (source === 'auto' && !shouldAutoSnapshot(target)) return;
-    if ((target.content ?? '').trim().length === 0) return;
-    if (target.snapshots?.some((s) => s.content === target.content)) return; // 内容未变
-    const updated = chapters.map((c) =>
-      c.id === chapterId ? appendSnapshot(c, createSnapshot(c.content, source)) : c,
-    );
-    onUpdateRef.current({ chapters: updated });
-  };
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      // 每 30 秒扫描一次，单轮最多处理一章，避免高频写盘
-      const due = projectRef.current.chapters.find((c) => shouldAutoSnapshot(c));
-      if (due) snapshotChapterIfDue(due.id, 'auto');
-    }, 30_000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // 切换章节时为刚离开的章节补一次快照
-  const prevChapterIdRef = useRef<string | null>(activeChapterId);
-  useEffect(() => {
-    const prev = prevChapterIdRef.current;
-    if (prev && prev !== activeChapterId) {
-      snapshotChapterIfDue(prev, 'auto');
-    }
-    prevChapterIdRef.current = activeChapterId;
-  }, [activeChapterId]);
-
-  const handleManualSnapshot = () => {
-    if (!activeChapterId) return;
-    snapshotChapterIfDue(activeChapterId, 'manual');
-  };
+  const { handleManualSnapshot, snapshotChapterIfDue } = useChapterSnapshots({
+    project,
+    activeChapterId,
+    onUpdate: (updates) => onUpdateRef.current(updates),
+  });
 
   // 用新的 chapter 对象（如删除快照后）替换 chapters 中同 ID 项
   const handleUpdateChapter = (updated: Chapter) => {
