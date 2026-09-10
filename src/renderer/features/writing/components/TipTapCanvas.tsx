@@ -77,7 +77,7 @@ const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function T
     if (content === lastEmitted.current) return;
     lastEmitted.current = content;
     setIsEmpty(content.trim().length === 0);
-    editor.commands.setContent(dslToPmDoc(content), false);
+    editor.commands.setContent(dslToPmDoc(content), { emitUpdate: false });
   }, [content, editor]);
 
   // 可编辑态：无章节或生成中（非流式）时锁定。
