@@ -46,6 +46,13 @@
     "exportSaved": "Cover exported to: {{path}}",
     "exportFailed": "Failed to export cover."
   },
+  "persist": {
+    "saveFailed": "Saving failed; retrying automatically. Check disk space or permissions.",
+    "saveRecovered": "Saving recovered."
+  },
+  "storage": {
+    "corrupt": "Database integrity check failed ({{result}}). Restore from a backup in Settings → Storage before continuing, to avoid overwriting data."
+  },
   "model": {
     "notConfiguredKey": "The current model has no API Key / endpoint configured",
     "noneConfigured": "No AI model configured yet",

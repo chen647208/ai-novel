@@ -82,4 +82,12 @@ export class IpcSqlDriver implements SqlDriver {
     // 连接由主进程持有并在退出时关闭，这里无需处理。
     return Promise.resolve();
   }
+
+  integrityCheck(): Promise<{ ok: boolean; result: string }> {
+    return this.enqueue(() => this.api.integrityCheck());
+  }
+
+  maintenance(): Promise<void> {
+    return this.enqueue(() => this.api.maintenance());
+  }
 }

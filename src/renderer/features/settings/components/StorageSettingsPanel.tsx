@@ -20,7 +20,7 @@ import { normalizeImportedState, checkImportVersion } from '@/app/initialState';
 import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
 import { Input } from '@/shared/ui/Input';
-import { AlertTriangle, ArrowLeftRight, Clock, Database, FileText, FolderOpen, History, Info, Save, Settings, Trash2 } from 'lucide-react';
+import { AlertTriangle, ArrowLeftRight, Clock, Database, FileText, FolderOpen, History, Info, Save, Settings, ShieldCheck, Trash2, Wrench } from 'lucide-react';
 
 /** 存储设置区块的小标题 */
 const FieldLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -173,6 +173,29 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                   }}
                 >
                   <FileText className="size-3.5" /> {t('storage.exportDiagnostics')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    void repository.checkIntegrity?.().then((r) => {
+                      if (!r) { dialogService.alert(t('storage.integrityUnsupported')); return; }
+                      dialogService.alert(r.ok ? t('storage.integrityOk') : t('storage.integrityFailed', { result: r.result }));
+                    }).catch(() => dialogService.alert(t('storage.integrityFailed', { result: '' })));
+                  }}
+                >
+                  <ShieldCheck className="size-3.5" /> {t('storage.integrityCheck')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    void repository.runMaintenance?.()
+                      .then(() => dialogService.alert(t('storage.maintenanceDone')))
+                      .catch(() => dialogService.alert(t('storage.maintenanceFailed')));
+                  }}
+                >
+                  <Wrench className="size-3.5" /> {t('storage.maintenance')}
                 </Button>
               </div>
             </div>

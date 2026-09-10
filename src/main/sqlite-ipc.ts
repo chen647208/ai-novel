@@ -81,6 +81,28 @@ export function registerSqliteIpc(): void {
     assertString(sql, 'sql');
     return getDb().prepare(sql).get(...assertParams(params));
   });
+
+  ipcMain.handle(IPC.db.integrityCheck, () => checkIntegrity());
+  ipcMain.handle(IPC.db.maintenance, () => runMaintenance());
+}
+
+/** 快速完整性检查：返回 quick_check 结果（正常为 "ok"）。 */
+export function checkIntegrity(): { ok: boolean; result: string } {
+  try {
+    const row = getDb().prepare('PRAGMA quick_check').get() as Record<string, unknown> | undefined;
+    const result = row ? String(Object.values(row)[0] ?? '') : '';
+    return { ok: result.toLowerCase() === 'ok', result: result || 'unknown' };
+  } catch (error) {
+    logger.warn('db', '完整性检查失败', error);
+    return { ok: false, result: error instanceof Error ? error.message : String(error) };
+  }
+}
+
+/** 维护：VACUUM 压缩 + REINDEX 重建索引。 */
+export function runMaintenance(): void {
+  const connection = getDb();
+  connection.exec('VACUUM');
+  connection.exec('REINDEX');
 }
 
 /** 应用退出前关闭连接（best-effort）。 */

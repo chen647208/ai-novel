@@ -289,6 +289,19 @@ export class SqliteRepository implements StorageRepository {
     indexService.clear();
   }
 
+  /** 快速完整性检查；后端不支持时返回 null。 */
+  async checkIntegrity(): Promise<{ ok: boolean; result: string } | null> {
+    await this.ready;
+    if (!this.driver.integrityCheck) return null;
+    return this.driver.integrityCheck();
+  }
+
+  /** 压缩 + 重建索引；后端不支持时静默跳过。 */
+  async runMaintenance(): Promise<void> {
+    await this.ready;
+    await this.driver.maintenance?.();
+  }
+
   // ========== 检索 ==========
 
   async search(query: string, options?: SearchOptions): Promise<SearchHit[]> {

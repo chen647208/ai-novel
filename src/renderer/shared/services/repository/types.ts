@@ -48,6 +48,10 @@ export interface SqlDriver {
   get<T = Record<string, SqlValue>>(sql: string, params?: SqlValue[]): Promise<T | undefined>;
   /** 事务：回调内的所有写操作原子提交，抛错则回滚 */
   transaction<T>(fn: (tx: SqlDriver) => Promise<T>): Promise<T>;
+  /** 快速完整性检查（桌面 node:sqlite 支持；无此能力的后端可省略） */
+  integrityCheck?(): Promise<{ ok: boolean; result: string }>;
+  /** 维护：压缩 + 重建索引 */
+  maintenance?(): Promise<void>;
   /** 关闭连接 */
   close(): Promise<void>;
 }
@@ -96,6 +100,11 @@ export interface StorageRepository {
   saveAll(state: AppState): Promise<void>;
   /** 清空全部数据 */
   clear(): Promise<void>;
+
+  /** 快速完整性检查；后端不提供时返回 null。 */
+  checkIntegrity?(): Promise<{ ok: boolean; result: string } | null>;
+  /** 压缩 + 重建索引。 */
+  runMaintenance?(): Promise<void>;
 
   /**
    * 增量写入/更新单个项目（含其 FTS 索引刷新）。

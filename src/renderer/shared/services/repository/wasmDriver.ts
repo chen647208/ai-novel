@@ -109,6 +109,17 @@ export class WasmSqliteDriver implements SqlDriver {
     });
   }
 
+  async integrityCheck(): Promise<{ ok: boolean; result: string }> {
+    const rows = await this.all<Record<string, unknown>>('PRAGMA quick_check');
+    const result = rows[0] ? String(Object.values(rows[0])[0] ?? '') : '';
+    return { ok: result.toLowerCase() === 'ok', result: result || 'unknown' };
+  }
+
+  async maintenance(): Promise<void> {
+    await this.exec('VACUUM');
+    await this.exec('REINDEX');
+  }
+
   close(): Promise<void> {
     this.worker?.terminate();
     this.worker = null;

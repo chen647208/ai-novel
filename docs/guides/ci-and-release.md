@@ -14,7 +14,8 @@
 - 在 `ubuntu-latest` 上执行，安装依赖用 `npm ci`（锁定 `package-lock.json`），Node 依赖缓存 + 同分支新提交取消旧任务，不浪费分钟数。
 - `verify` 作业（每次必跑）：`npm ci` 后跑同一条 `npm run verify` 链
   （预检 lock 同步 → lint → typecheck:all → test:coverage → headers:check → scan:secrets → electron:build），
-  与本地完全一致，不再逐项手写步骤。
+  与本地完全一致，不再逐项手写步骤。测试命令统一设 `NODE_OPTIONS=--max-old-space-size=2048`
+  （`cross-env`）；超上限视为回归，先定位根因（必要占用 vs 可优化），禁止只调大上限。
 - 文风不进 CI：只写现在、直述句、中性简洁三条标准只在 review 时人工把关
   （标准与正反例见 `CONTRIBUTING.md`）。原因：语气修辞机器判不准，
   机械匹配曾经误杀过引用规则自身的文档。

@@ -16,6 +16,8 @@ import { useEffect } from 'react';
 import { INITIAL_APP_STATE } from './initialState';
 import { repository } from '../shared/services/repository';
 import { changeLanguage } from '../i18n';
+import { dt } from '../i18n';
+import { dialogService } from '../shared/services/dialogService';
 import { vectorIntegrationService } from '../features/knowledge/services/vectorIntegrationService';
 import { applyTheme, watchSystemTheme } from '../shared/services/themeService';
 import { logger } from '../shared/utils/logger';
@@ -65,6 +67,11 @@ export function useAppBootstrap(): void {
       try {
         // 后端初始化（SQLite 建表迁移 + 首启从旧 JSON 导入）；JSON 后端无此步
         await repository.init?.();
+        // 启动完整性检查：损坏时提示从备份恢复，避免继续写入覆盖数据
+        const integrity = await repository.checkIntegrity?.().catch(() => null);
+        if (integrity && !integrity.ok) {
+          void dialogService.alert(dt('app:storage.corrupt', { result: integrity.result }));
+        }
         const saved = await repository.loadAll();
         if (saved) {
           logger.debug('成功加载应用状态，应用数据迁移');

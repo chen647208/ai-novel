@@ -32,7 +32,7 @@ class ToastService {
     const id = this.nextId++;
     this.toasts = [...this.toasts, { id, kind, message }];
     this.emit();
-    if (duration > 0) {
+    if (duration > 0 && typeof window !== 'undefined') {
       window.setTimeout(() => this.dismiss(id), duration);
     }
     return id;

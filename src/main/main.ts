@@ -23,6 +23,7 @@ import {
   updaterProvider,
 } from './app/providers.js';
 import { setQuitting } from './app/tray.js';
+import { requestRendererFlush } from './app/flushHandshake.js';
 import { applySecurityHeaders } from './app/security.js';
 import { legacyDataDir, migrateLegacyDataDir, shouldRunMigration, standardDataDir } from './app/dataDir.js';
 import { secureStoreProvider } from './app/secureStore.js';
@@ -47,6 +48,23 @@ const container = new AppContainer()
 
 const ctx: ProviderContext = { getMainWindow };
 
+// 单实例锁：第二个实例不再启动，只把已有窗口还原并聚焦（避免多进程写同一 db/vault）。
+const hasSingleInstanceLock = app.requestSingleInstanceLock();
+if (!hasSingleInstanceLock) {
+  app.quit();
+}
+
+app.on('second-instance', () => {
+  const win = getMainWindow();
+  if (!win) return;
+  if (win.isMinimized()) win.restore();
+  if (!win.isVisible()) win.show();
+  win.focus();
+});
+
+let booted = false;
+let shuttingDown = false;
+
 // 主进程兜底：未捕获异常与未处理 Promise 一律记日志，不让进程静默崩溃
 process.on('uncaughtException', (error) => {
   logger.error('main', 'Uncaught exception in main process', error);
@@ -56,6 +74,7 @@ process.on('unhandledRejection', (reason) => {
 });
 
 app.whenReady().then(async () => {
+  if (!hasSingleInstanceLock) return;
   // 崩溃转储本地留存（不上传服务器），崩溃后可在转储目录手动取用
   crashReporter.start({ productName: '红月创作', uploadToServer: false, compress: true });
   applySecurityHeaders();
@@ -69,6 +88,7 @@ app.whenReady().then(async () => {
     }
   }
   await container.boot(ctx);
+  booted = true;
 });
 
 app.on('window-all-closed', () => {
@@ -77,7 +97,24 @@ app.on('window-all-closed', () => {
   }
 });
 
-app.on('before-quit', () => {
+// 退出时串行等待资源释放（关 SQLite、回收 MCP 子进程、中止 AI 流）后再真正退出，
+// 超时兜底避免清理挂起导致进程无法结束。
+app.on('before-quit', (event) => {
   setQuitting();
-  void container.shutdown(ctx);
+  if (!booted || shuttingDown) return;
+  shuttingDown = true;
+  event.preventDefault();
+  const timer = setTimeout(() => {
+    logger.warn('app', 'shutdown timed out, forcing exit');
+    app.exit(0);
+  }, 5000);
+  // 先让渲染层把未落库的差分写回，再释放主进程资源
+  void requestRendererFlush(getMainWindow)
+    .then(() => container.shutdown(ctx))
+    .catch((err) => logger.error('app', 'shutdown failed', err))
+    .finally(() => {
+      clearTimeout(timer);
+      booted = false;
+      app.quit();
+    });
 });

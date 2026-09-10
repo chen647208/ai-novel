@@ -19,6 +19,8 @@ import { type AppState } from '../../../shared/types';
 import { repository } from '../../shared/services/repository';
 import { autoBackupService } from '../../shared/services/autoBackupService';
 import { logger } from '../../shared/utils/logger';
+import { toast } from '../../shared/services/toastService';
+import { dt } from '@/i18n';
 import { persistDiff } from '../persistDiff';
 import { APP_STATE_VERSION } from '../../../shared/constants/versions';
 import { useProjectStore, commitMetaOf } from './projectStore';
@@ -58,25 +60,38 @@ export function composeAppState(): AppState {
 
 let lastPersisted: AppState | null = null;
 let started = false;
-let flushing = false;
+let inflight: Promise<void> | null = null;
+let dirty = false;
+let failing = false;
+let retryTimer: ReturnType<typeof setTimeout> | null = null;
+let retryDelayMs = 0;
 
 /** 建立差分基线（首启动 hydrate 后调用；base 即磁盘现状的组合态）。 */
 export function seedPersistBaseline(base: AppState | null): void {
   lastPersisted = base;
 }
 
-async function flush(): Promise<void> {
-  if (flushing) return; // 上一次差分未落盘前不再叠加（同一事件循环内的合并更新只会触发一次）
-  flushing = true;
+async function doFlush(): Promise<void> {
   try {
     const next = composeAppState();
     const prev = lastPersisted;
-    lastPersisted = next;
     if (prev === null) {
       await repository.saveAll(next);
     } else {
       // 归因随新引用绑定传入（WeakMap）：AI 落笔帧带 agentId/cause，手写帧无绑定即 user
       await persistDiff(repository, prev, next, commitMetaOf);
+    }
+    // 仅在成功后才推进基线：失败时保持旧基线，重试会重算同一份差分
+    lastPersisted = next;
+    dirty = false;
+    if (retryTimer) {
+      clearTimeout(retryTimer);
+      retryTimer = null;
+    }
+    retryDelayMs = 0;
+    if (failing) {
+      failing = false;
+      toast.success(dt('app:persist.saveRecovered'));
     }
     const config = await repository.getStorageConfig();
     // 自动备份：按间隔判定（每次落盘后检查，避免高频覆盖），成功后回写上次备份时间
@@ -88,9 +103,59 @@ async function flush(): Promise<void> {
     }
   } catch (error) {
     logger.error('持久化或自动备份失败:', error);
-  } finally {
-    flushing = false;
+    dirty = true; // 保持待写，交给退避重试
+    if (!failing) {
+      failing = true;
+      toast.error(dt('app:persist.saveFailed'));
+    }
+    scheduleRetry();
   }
+}
+
+function scheduleRetry(): void {
+  if (retryTimer || typeof window === 'undefined') return;
+  retryDelayMs = retryDelayMs ? Math.min(retryDelayMs * 2, 30_000) : 1_000;
+  retryTimer = setTimeout(() => {
+    retryTimer = null;
+    dirty = true;
+    void flush();
+  }, retryDelayMs);
+}
+
+/** 触发一次差分落盘；已有在途写入时复用同一 Promise（同循环内的合并更新只跑一次）。 */
+function flush(): Promise<void> {
+  if (inflight) return inflight;
+  if (!dirty && lastPersisted !== null) return Promise.resolve();
+  inflight = doFlush().finally(() => {
+    inflight = null;
+    // 在途期间又有变更：立即再跑一轮；失败则交给退避重试，避免无延迟热循环
+    if (dirty && !failing) void flush();
+  });
+  return inflight;
+}
+
+/** 强制刷盘（退出/隐藏前调用）：等待在途写入，再补一次，保证退出时差分已落库。 */
+export async function flushNow(): Promise<void> {
+  if (inflight) await inflight;
+  dirty = true;
+  await flush();
+}
+
+let flushHandlersBound = false;
+
+/** 绑定退出前刷盘：主进程 flush-request → 刷盘 → flush-done；并加 beforeunload 兜底。 */
+function bindFlushHandlers(): void {
+  if (flushHandlersBound || typeof window === 'undefined') return;
+  flushHandlersBound = true;
+  const api = window.electronAPI;
+  if (api?.onFlushRequest) {
+    api.onFlushRequest(() => {
+      void flushNow().finally(() => api.notifyFlushDone());
+    });
+  }
+  window.addEventListener('beforeunload', () => {
+    void flushNow();
+  });
 }
 
 /**
@@ -100,9 +165,14 @@ async function flush(): Promise<void> {
 export function startPersistenceBridge(): () => void {
   if (started) return () => undefined;
   started = true;
+  bindFlushHandlers();
+  const schedule = () => {
+    dirty = true;
+    void flush();
+  };
   const unsubs = [
-    useProjectStore.subscribe(() => void flush()),
-    useSettingsStore.subscribe(() => void flush()),
+    useProjectStore.subscribe(schedule),
+    useSettingsStore.subscribe(schedule),
   ];
   return () => {
     unsubs.forEach((u) => u());

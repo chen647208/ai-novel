@@ -33,7 +33,7 @@ export class AutoBackupService {
       }
 
       // 检查是否在Electron环境中
-      if (!window.electronAPI) {
+      if (typeof window === 'undefined' || !window.electronAPI) {
         logger.warn('不在Electron环境中，跳过备份');
         return false;
       }
@@ -82,7 +82,7 @@ export class AutoBackupService {
   // 清理旧备份文件（按文件名时间倒序保留 maxBackupFiles 个）
   private async cleanupOldBackups(backupDir: string, maxBackupFiles: number): Promise<void> {
     try {
-      if (!window.electronAPI) return;
+      if (typeof window === 'undefined' || !window.electronAPI) return;
       const entries = await window.electronAPI.listDirectory(backupDir).catch(() => []);
       const backups = entries
         .filter((e) => e.type === 'file' && e.name.startsWith('novalist-backup-') && e.name.endsWith('.json'))
@@ -99,7 +99,7 @@ export class AutoBackupService {
 
   // 获取存储路径
   private async getStoragePath(config: StorageConfig): Promise<string> {
-    if (!window.electronAPI) {
+    if (typeof window === 'undefined' || !window.electronAPI) {
       throw new Error('不在Electron环境中');
     }
 
@@ -132,7 +132,7 @@ export class AutoBackupService {
     timestamp: number;
   }>> {
     try {
-      if (!window.electronAPI) return [];
+      if (typeof window === 'undefined' || !window.electronAPI) return [];
       const backupDir = `${await this.getStoragePath(config)}/backups`;
       const entries = await window.electronAPI.listDirectory(backupDir).catch(() => []);
       const out: Array<{ fileName: string; filePath: string; size: number; timestamp: number }> = [];
@@ -160,7 +160,7 @@ export class AutoBackupService {
   /** 从备份文件恢复整库快照（调用方负责 hydrate + 重建差分基线）。 */
   public async readBackup(filePath: string): Promise<AppState | null> {
     try {
-      if (!window.electronAPI) return null;
+      if (typeof window === 'undefined' || !window.electronAPI) return null;
       const content = await window.electronAPI.readFile(filePath);
       const parsed = JSON.parse(content) as AppState;
       if (!parsed || !Array.isArray(parsed.projects)) return null;

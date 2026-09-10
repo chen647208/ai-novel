@@ -19,6 +19,7 @@ import { registerUpdaterIpc } from '../updater.js';
 import { registerDiagnosticsIpc } from './diagnostics.js';
 import { extractPdfText } from './documents.js';
 import { destroyTray, registerShellIpc } from './tray.js';
+import { getMainWindow } from './window.js';
 import type { Provider, ProviderContext } from './container.js';
 import { createWindow } from './window.js';
 
@@ -40,7 +41,14 @@ export const windowProvider: Provider = {
   boot() {
     void createWindow();
     app.on('activate', () => {
-      if (BrowserWindow.getAllWindows().length === 0) void createWindow();
+      const win = getMainWindow();
+      if (!win) {
+        void createWindow();
+        return;
+      }
+      if (win.isMinimized()) win.restore();
+      if (!win.isVisible()) win.show();
+      win.focus();
     });
   },
 };

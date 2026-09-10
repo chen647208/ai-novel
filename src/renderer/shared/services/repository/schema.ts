@@ -20,7 +20,7 @@ import type { SqlDriver } from './types';
  * 每个实体表带 hash 列：变更检测缓存，saveProject 时与旧行比对，仅真实变化才写 entity_changes。
  */
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 /** settings 表里以 JSON 存储的非项目配置切片键 */
 export const SETTING_KEYS = [
@@ -129,6 +129,15 @@ export const MIGRATIONS: ReadonlyArray<{ version: number; up: readonly string[] 
          content,
          tokenize = 'trigram'
        )`,
+    ],
+  },
+  {
+    version: 3,
+    up: [
+      // 反向遍历边：补 to_id 索引（v2 只建了 from_id）。
+      // 注：不引入外键约束——设计不变量 #3 允许乱序写入骨架实体（边可先于节点存在），
+      // 外键会破坏该能力；参照完整性由 Repository 层保证。
+      `CREATE INDEX IF NOT EXISTS idx_edges_to ON edges(to_id)`,
     ],
   },
 ];

@@ -1079,6 +1079,10 @@ export interface ElectronAPI {
   writeBinaryFile: (filePath: string, base64: string) => Promise<boolean>;
   /** 主进程解析 PDF 为纯文本（助手文档附件）。 */
   extractPdfText: (base64: string) => Promise<{ text: string; pages: number }>;
+  /** 退出前主进程请求渲染层刷盘；返回解绑函数。 */
+  onFlushRequest: (listener: () => void) => () => void;
+  /** 渲染层刷盘完成后通知主进程。 */
+  notifyFlushDone: () => void;
   exists: (filePath: string) => Promise<boolean>;
   unlink: (filePath: string) => Promise<boolean>;
 
@@ -1123,6 +1127,8 @@ export interface ElectronAPI {
     run: (sql: string, params?: unknown[]) => Promise<{ changes: number; lastInsertRowid: number }>;
     all: (sql: string, params?: unknown[]) => Promise<Record<string, unknown>[]>;
     get: (sql: string, params?: unknown[]) => Promise<Record<string, unknown> | undefined>;
+    integrityCheck: () => Promise<{ ok: boolean; result: string }>;
+    maintenance: () => Promise<void>;
   };
 
   // AI 网关（适配器在主进程执行；流式经 ai:stream:event 按 requestId 推送）

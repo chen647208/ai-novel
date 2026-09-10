@@ -22,6 +22,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   writeFile: (filePath: string, data: string) => ipcRenderer.invoke(IPC.writeFile, filePath, data),
   writeBinaryFile: (filePath: string, base64: string) => ipcRenderer.invoke(IPC.writeBinaryFile, filePath, base64),
   extractPdfText: (base64: string) => ipcRenderer.invoke(IPC.extractPdfText, base64),
+  onFlushRequest: (listener: () => void) => {
+    const handler = (): void => listener();
+    ipcRenderer.on(IPC.flushRequest, handler);
+    return () => ipcRenderer.removeListener(IPC.flushRequest, handler);
+  },
+  notifyFlushDone: () => ipcRenderer.send(IPC.flushDone),
   exists: (filePath: string) => ipcRenderer.invoke(IPC.fileExists, filePath),
   unlink: (filePath: string) => ipcRenderer.invoke(IPC.deleteFile, filePath),
 
@@ -61,6 +67,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     run: (sql: string, params?: unknown[]) => ipcRenderer.invoke(IPC.db.run, sql, params),
     all: (sql: string, params?: unknown[]) => ipcRenderer.invoke(IPC.db.all, sql, params),
     get: (sql: string, params?: unknown[]) => ipcRenderer.invoke(IPC.db.get, sql, params),
+    integrityCheck: () => ipcRenderer.invoke(IPC.db.integrityCheck),
+    maintenance: () => ipcRenderer.invoke(IPC.db.maintenance),
   },
 
   // AI 网关（适配器在主进程执行；流式事件经 streamEvent 通道按 requestId 推送）

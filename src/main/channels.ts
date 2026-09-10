@@ -17,6 +17,8 @@ export const IPC = {
   writeFile: 'write-file',
   writeBinaryFile: 'write-binary-file',
   extractPdfText: 'extract-pdf-text',
+  flushRequest: 'app:flush-request',
+  flushDone: 'app:flush-done',
   fileExists: 'file-exists',
   deleteFile: 'delete-file',
   openFileDialog: 'open-file-dialog',
@@ -45,6 +47,8 @@ export const IPC = {
     run: 'db:run',
     all: 'db:all',
     get: 'db:get',
+    integrityCheck: 'db:integrity-check',
+    maintenance: 'db:maintenance',
   },
 
   // AI 网关（适配器在主进程执行；流式事件按 requestId 多路推送）
