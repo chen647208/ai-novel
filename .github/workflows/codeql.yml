@@ -1,0 +1,32 @@
+name: CodeQL
+
+# 安全数据流分析（SAST）：push/PR 到 main 时扫描，另每周定时全量扫。
+# 与 npm audit（依赖漏洞）互补，覆盖自研代码的注入/路径遍历等模式。
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 3 * * 1'
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: 分析 JavaScript/TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v7
+
+      - name: 初始化 CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+          queries: security-and-quality
+
+      - name: 执行分析
+        uses: github/codeql-action/analyze@v4

@@ -18,7 +18,7 @@ files:
   - "!**/node_modules/**/{test,__tests__,tests,powered-test,example,examples,docs,documentation,benchmark,benchmarks}/**"
   - "!**/node_modules/**/.{cache,nyc_output,babel-cache,eslint-cache}/**"
   - "!**/node_modules/**/{.github,.vscode}/**"
-  - "!**/node_modules/**/{CHANGELOG*,readme*,README*,license*,LICENSE*}"
+  - "!**/node_modules/**/{CHANGELOG*,readme*,README*}"
   - "!**/node_modules/**/{package-lock.json,yarn.lock,pnpm-lock.yaml}"
 
 # 跨平台目标：Windows NSIS 安装包、macOS DMG、Linux AppImage + deb
@@ -74,6 +74,15 @@ compression: normal
 asar: true
 asarUnpack:
   - "**/*.node"
+
+# Electron fuses 加固：关闭 RunAsNode、启用 Cookie 加密、仅从 asar 加载并校验完整性。
+# 不关 EnableNodeOptionsEnvironmentVariable / EnableNodeCliInspectArguments：
+# 这两条会阻断 Playwright 的 Electron 驱动注入（打包冒烟 E2E 依赖 --inspect/NODE_OPTIONS）。
+electronFuses:
+  runAsNode: false
+  enableCookieEncryption: true
+  enableEmbeddedAsarIntegrityValidation: true
+  onlyLoadAppFromAsar: true
 
 removePackageScripts: true
 npmRebuild: false
