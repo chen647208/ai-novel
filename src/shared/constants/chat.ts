@@ -26,3 +26,5 @@ export const SUMMARY_MAX_CHARS = 800;
 export const CHAT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 /** 聊天附图允许类型。 */
 export const CHAT_IMAGE_MIMES: ReadonlyArray<string> = ['image/png', 'image/jpeg', 'image/webp'];
+/** 聊天 PDF 附件上限（字节）；超限提示拆分后重发。 */
+export const CHAT_PDF_MAX_BYTES = 20 * 1024 * 1024;

@@ -7,8 +7,8 @@
    构建纯函数 `features/characters/characterCard.ts`，标签随界面语言。
 2. **封面导出**（已实现）：`core/build/cover.ts` 由书名/简介生成竖版 SVG，
    渲染端 `shared/services/coverService.ts` 光栅化为 PNG 另存（无 canvas 时退回 SVG）；
-3. **文档附件**（规划）：助手聊天除图片外支持 PDF/纯文本文档，
-   主进程提取文本后作为上下文并入首轮提示词（不直接塞二进制给模型）。
+3. **文档附件**（已实现）：助手聊天除图片外支持 PDF/纯文本文档，
+   主进程 `main/app/documents.ts`（unpdf）提取文本后并入提示词参考资料（不直接塞二进制给模型）。
    适配器已支持图片形态（`AIMessageImage`），文档走文本提取路径。
 4. **语音**（规划）：助手输入框语音听写（Web Speech API）与回复朗读
    （speechSynthesis）；权限不可用时隐藏入口。

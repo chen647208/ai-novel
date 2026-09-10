@@ -16,6 +16,7 @@ export const IPC = {
   readFile: 'read-file',
   writeFile: 'write-file',
   writeBinaryFile: 'write-binary-file',
+  extractPdfText: 'extract-pdf-text',
   fileExists: 'file-exists',
   deleteFile: 'delete-file',
   openFileDialog: 'open-file-dialog',

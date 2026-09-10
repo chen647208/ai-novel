@@ -78,6 +78,7 @@
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "undici": "^8.10.2",
+    "unpdf": "^1.8.1",
     "vectra": "^0.15.0",
     "zustand": "^5.0.15"
   },

@@ -348,7 +348,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
           <div className="flex items-end gap-2">
             <label className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
               <Paperclip className="size-5" />
-              <input type="file" multiple className="hidden" onChange={handleFileUpload} accept=".txt,.md,.json,.js,.ts,.csv,.png,.jpg,.jpeg,.webp" />
+              <input type="file" multiple className="hidden" onChange={handleFileUpload} accept=".txt,.md,.json,.js,.ts,.csv,.pdf,.png,.jpg,.jpeg,.webp" />
             </label>
             <Textarea
               ref={inputRef}

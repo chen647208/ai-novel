@@ -1077,6 +1077,8 @@ export interface ElectronAPI {
   writeFile: (filePath: string, data: string) => Promise<boolean>;
   /** 写入二进制文件（base64 解码后落盘；封面 PNG 等）。 */
   writeBinaryFile: (filePath: string, base64: string) => Promise<boolean>;
+  /** 主进程解析 PDF 为纯文本（助手文档附件）。 */
+  extractPdfText: (base64: string) => Promise<{ text: string; pages: number }>;
   exists: (filePath: string) => Promise<boolean>;
   unlink: (filePath: string) => Promise<boolean>;
 

@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { type KnowledgeItem, type OutputMode, type AIMessageImage, type Character, type Location, type Faction, type RuleSystem, type TimelineEvent, type AICardCommand, type CreatedCard, type Timeline, type WorldView, type MagicSystem, type TechnologyLevel, type WorldHistory, type CardPromptTemplate, type ModelConfig, type Project } from '../../../shared/types';
 import { useProjectStore } from '@/app/stores/projectStore';
 import { ATTACHMENT_TRUNCATE } from '../../../shared/constants/chapters';
-import { CHAT_IMAGE_MAX_BYTES, CHAT_IMAGE_MIMES, SUMMARY_MAX_CHARS } from '../../../shared/constants/chat';
+import { CHAT_IMAGE_MAX_BYTES, CHAT_IMAGE_MIMES, CHAT_PDF_MAX_BYTES, SUMMARY_MAX_CHARS } from '../../../shared/constants/chat';
 import { needsCompaction, splitForCompaction, type ChatTurn } from './services/chatHistory';
 import { type GlobalAssistantProps, type ChatMessage, type AssistantCategory, type AssistantEditCategory, type SyncStatus, type EditingData } from './types';
 import { type LooseRecord, asRecord, asStr } from '../../shared/utils/loose';
@@ -485,6 +485,44 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
           setPendingImages((prev) => [...prev, { id: `chat-img-${Date.now()}-${i}`, name: file.name, mime: file.type, dataUrl }]);
         } catch (err) {
           logger.error('Failed to read image', file.name, err);
+        }
+        continue;
+      }
+      if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name)) {
+        if (file.size > CHAT_PDF_MAX_BYTES) {
+          dialogService.alert(t('chat.pdfTooLarge', { name: file.name, size: Math.round(CHAT_PDF_MAX_BYTES / 1024 / 1024) }));
+          continue;
+        }
+        try {
+          const dataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result ?? ''));
+            reader.onerror = () => reject(new Error('read failed'));
+            reader.readAsDataURL(file);
+          });
+          const base64 = dataUrl.split(',')[1] ?? '';
+          const api = window.electronAPI;
+          if (!api?.extractPdfText || !base64) {
+            dialogService.alert(t('chat.pdfFailed', { name: file.name }));
+            continue;
+          }
+          const { text } = await api.extractPdfText(base64);
+          if (!text.trim()) {
+            dialogService.alert(t('chat.pdfEmpty', { name: file.name }));
+            continue;
+          }
+          newItems.push({
+            id: `chat-pdf-${Date.now()}-${i}`,
+            name: file.name,
+            content: text,
+            type: 'pdf',
+            size: file.size,
+            addedAt: Date.now(),
+            category: 'writing' as const,
+          });
+        } catch (err) {
+          logger.error('Failed to extract PDF', file.name, err);
+          dialogService.alert(t('chat.pdfFailed', { name: file.name }));
         }
         continue;
       }

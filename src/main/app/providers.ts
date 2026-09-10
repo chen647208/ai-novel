@@ -17,6 +17,7 @@ import { registerMcpClientIpc, closeMcpClients } from '../mcp/clientIpc.js';
 import { registerProxyIpc } from '../net/proxyIpc.js';
 import { registerUpdaterIpc } from '../updater.js';
 import { registerDiagnosticsIpc } from './diagnostics.js';
+import { extractPdfText } from './documents.js';
 import { destroyTray, registerShellIpc } from './tray.js';
 import type { Provider, ProviderContext } from './container.js';
 import { createWindow } from './window.js';
@@ -81,6 +82,11 @@ export const fileProvider: Provider = {
       await fs.mkdir(path.dirname(filePath), { recursive: true });
       await fs.writeFile(filePath, Buffer.from(base64, 'base64'));
       return true;
+    });
+
+    ipcMain.handle(IPC.extractPdfText, async (_event, base64: string) => {
+      assertString(base64, 'base64');
+      return extractPdfText(base64);
     });
 
     ipcMain.handle(IPC.fileExists, async (_event, filePath: string) => {
