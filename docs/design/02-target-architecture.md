@@ -43,9 +43,9 @@ app-shell/* ─┘         ✗ Electron/React/DOM  （core 的禁区）
 ```
 
 新增 ESLint `no-restricted-imports` 规则组：
-1. `src/core/**` 禁止 import `electron`、`react`、`@renderer/*`。
-2. `src/renderer/features/**` 禁止 import `repository` 内部实现，只准 import `@core/*` 与注入的 API 对象。
-3. 跨 feature 引用只准走 `core` 契约或事件总线，禁止 import 对方 services（现状：writing 直接 import foreshadowing 的服务——要切断）。
+1. `src/core/**` 禁止 import `electron`、`react`、`@renderer/*`。（已落地为 error）
+2. `src/renderer/features/**` 禁止 import `repository` 内部实现，只准 import `@core/*` 与注入的 API 对象。（待 StoreProvider 收编）
+3. 跨 feature 引用只准走 `core` 契约或事件总线，禁止 import 对方实现。（已落地为 warn；存量 7 处：assistant→knowledge/cards/characters、settings→assistant，收编后升级 error）
 
 ## 3. 目标目录树
 
