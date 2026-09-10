@@ -85,3 +85,11 @@
 
 清除一条即从 `KNOWN` 集合删除，规则不放宽。
 
+## 五、类型分叉债务
+
+- `BuildProfile` 存在两套不同模型：`core/build/profile.ts`（name/format/selection/transform/render，
+  导出管线消费）与 `core/plugin/contributions.ts`（id/name/steps，插件注册表登记）。
+  二者不可互换，插件贡献的构建档目前无法进入导出管线。统一需先定单一模型与迁移，
+  在此之前不要在两者之间互相注册。
+
+
