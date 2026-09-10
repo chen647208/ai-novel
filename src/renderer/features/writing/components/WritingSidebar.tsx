@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { roleLabel } from '../../characters/displayLabels';
+import { roleLabel } from '@/shared/utils/displayLabels';
 import ChapterNavigationSection from './ChapterNavigationSection';
 import ChapterSummarySection from './ChapterSummarySection';
 import type { WritingSidebarProps } from '../types';

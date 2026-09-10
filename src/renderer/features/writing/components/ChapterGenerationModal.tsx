@@ -10,7 +10,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { templateDisplayName } from '@/i18n';
-import { roleLabel } from '../../characters/displayLabels';
+import { roleLabel } from '@/shared/utils/displayLabels';
 import { type OutputMode } from '../../../../shared/types';
 import type { ChapterGenerationModalProps } from '../types';
 import { useSettingsStore } from '../../../app/stores/settingsStore';

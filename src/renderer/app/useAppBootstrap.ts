@@ -20,7 +20,7 @@ import { vectorIntegrationService } from '../features/knowledge/services/vectorI
 import { applyTheme, watchSystemTheme } from '../shared/services/themeService';
 import { logger } from '../shared/utils/logger';
 import { useProjectStore } from './stores/projectStore';
-import { normalizeProjectKinds } from '../features/characters/characterKinds';
+import { normalizeProjectKinds } from '@/shared/utils/characterKinds';
 import { useSettingsStore } from './stores/settingsStore';
 import { bootCustomFonts } from '../features/settings/services/customFontService';
 import { composeAppState, seedPersistBaseline, startPersistenceBridge } from './stores/persistenceBridge';

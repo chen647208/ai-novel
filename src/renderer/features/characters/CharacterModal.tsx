@@ -10,7 +10,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from '@/i18n';
 import { type Character, type Project } from '../../../shared/types';
-import { normalizeGenderId, normalizeRoleId } from './characterKinds';
+import { normalizeGenderId, normalizeRoleId } from '@/shared/utils/characterKinds';
 import { exportCharacterCard } from './characterCard';
 import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';

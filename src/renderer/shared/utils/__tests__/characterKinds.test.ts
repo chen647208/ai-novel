@@ -14,7 +14,7 @@ import {
   normalizeImpactId,
   normalizeProjectKinds,
   normalizeRoleId,
-} from '../characterKinds';
+} from '@/shared/utils/characterKinds';
 
 describe('normalizeRoleId', () => {
   it('中英映射到枚举', () => {

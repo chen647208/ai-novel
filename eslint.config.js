@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
+import localPlugin from './eslint-rules/no-cross-feature.js';
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const featuresDir = path.join(rootDir, 'src/renderer/features');
@@ -14,24 +15,36 @@ const featureNames = fs.existsSync(featuresDir)
 
 /**
  * 跨 feature 边界（design/02 §2）：只准走 core 契约或事件总线，禁止直接 import 对方实现。
- * 现状为 warn（存量 7 处待收编），收编完成后升为 error。
+ * 规则 error 生效；存量边按「源->目标」冻结为债务（allow 清单），只拦新增边。
+ * 债务清单归 docs/design/02-target-architecture.md §2，清完一条删一条，不放宽规则。
  */
+const CROSS_FEATURE_DEBT = [
+  'assistant->cards',
+  'assistant->consistency',
+  'assistant->knowledge',
+  'assistant->writing',
+  'consistency->knowledge',
+  'consistency->world',
+  'inspiration->world',
+  'knowledge->assistant',
+  'knowledge->consistency',
+  'knowledge->settings',
+  'knowledge->timeline',
+  'knowledge->world',
+  'settings->assistant',
+  'settings->cards',
+  'settings->consistency',
+  'world->assistant',
+  'writing->assistant',
+  'writing->foreshadowing',
+  'writing->settings',
+];
+
 const featureBoundaryRules = featureNames.map((name) => ({
   files: [`src/renderer/features/${name}/**/*.{ts,tsx}`],
+  plugins: { local: localPlugin },
   rules: {
-    'no-restricted-imports': [
-      'warn',
-      {
-        patterns: [
-          {
-            group: featureNames
-              .filter((other) => other !== name)
-              .flatMap((other) => [`@/features/${other}`, `@/features/${other}/*`, `@/features/${other}/**`]),
-            message: '跨 feature 引用请走 core 契约或事件总线，禁止直接 import 对方实现',
-          },
-        ],
-      },
-    ],
+    'local/no-cross-feature': ['error', { allow: CROSS_FEATURE_DEBT }],
   },
 }));
 
@@ -123,6 +136,37 @@ export default tseslint.config(
     },
   },
 
-  // 跨 feature 边界（warn，收编后升级 error）
+  // feature 禁直接依赖 repository 内部实现（design/02 §2），只准走 store 或注入 API。
+  // 存量 5 文件冻结在 ignores（各归设计文档），清一件删一件，不放宽规则。
+  {
+    files: ['src/renderer/features/**/*.{ts,tsx}'],
+    ignores: [
+      'src/renderer/features/knowledge/StepKnowledgeEnhanced.tsx',
+      'src/renderer/features/settings/components/StorageSettingsPanel.tsx',
+      'src/renderer/features/settings/SettingsModal.tsx',
+      'src/renderer/features/writing/components/ChapterHistoryModal.tsx',
+      'src/renderer/features/writing/services/summaryExtractionService.ts',
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '**/shared/services/repository',
+                '**/shared/services/repository/**',
+                '@/shared/services/repository',
+                '@/shared/services/repository/**',
+              ],
+              message: 'feature 禁止直接依赖 repository 内部实现；走 store 或注入的 API（design/02 §2）',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // 跨 feature 边界（error，存量边冻结在 CROSS_FEATURE_DEBT）
   ...featureBoundaryRules,
 );

@@ -16,9 +16,9 @@ import { logger } from '@/shared/utils/logger';
 import { type Project, type Character, type Faction, type Location, type ModelConfig, type ConsistencyCheckPromptTemplate } from '../../../../shared/types';
 import { type LooseRecord, asRecord, asRecords, asStr, asNum, asStrArr } from '../../../shared/utils/loose';
 import { i18n } from '@/i18n';
-import { AIService } from './aiService';
+import { AIService } from '@/shared/services/ai/aiService';
 import { ConsistencyCheckPromptService } from '../../consistency/services/consistencyCheckPromptService';
-import { genderLabel, roleLabel } from '../../characters/displayLabels';
+import { genderLabel, roleLabel } from '@/shared/utils/displayLabels';
 import { renderWorldDigest } from '@core/ai';
 
 export interface SemanticIssue {

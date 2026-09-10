@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { AIService } from '../../assistant/services/aiService';
+import { AIService } from '@/shared/services/ai/aiService';
 import type { Chapter, ModelConfig, Project, PromptTemplate } from '../../../../shared/types';
 import type { CommitOptions } from '@/shared/services/repository/types';
 import { dialogService } from '@/shared/services/dialogService';

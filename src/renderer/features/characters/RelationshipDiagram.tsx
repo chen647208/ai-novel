@@ -10,8 +10,8 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from '@/i18n';
 import { type Character } from '../../../shared/types';
-import { roleLabel } from './displayLabels';
-import { normalizeRoleId } from './characterKinds';
+import { roleLabel } from '@/shared/utils/displayLabels';
+import { normalizeRoleId } from '@/shared/utils/characterKinds';
 import { Button } from '@/shared/ui/Button';
 import { Heart, RefreshCw, X } from 'lucide-react';
 

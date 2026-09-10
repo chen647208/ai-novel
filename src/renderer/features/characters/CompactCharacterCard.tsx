@@ -10,8 +10,8 @@
 import React from 'react';
 import { useTranslation } from '@/i18n';
 import { type Character } from '../../../shared/types';
-import { roleLabel, genderLabel } from './displayLabels';
-import { normalizeRoleId } from './characterKinds';
+import { roleLabel, genderLabel } from '@/shared/utils/displayLabels';
+import { normalizeRoleId } from '@/shared/utils/characterKinds';
 import { cn } from '@/shared/utils/cn';
 import { ChevronRight, Crown, Eye, Info, Skull, Star, User, Users, type LucideIcon } from 'lucide-react';
 

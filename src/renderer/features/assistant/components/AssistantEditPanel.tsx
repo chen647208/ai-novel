@@ -13,7 +13,7 @@ import type { AssistantEditPanelProps, AssistantEditCategory } from '../types';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
-import { normalizeGenderId } from '../../characters/characterKinds';
+import { normalizeGenderId } from '@/shared/utils/characterKinds';
 import { Select } from '@/shared/ui/Select';
 import { Spinner } from '@/shared/ui/Spinner';
 import { Textarea } from '@/shared/ui/Textarea';

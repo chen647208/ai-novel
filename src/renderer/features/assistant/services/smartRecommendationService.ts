@@ -20,9 +20,9 @@ import {
 } from '../../../../shared/types';
 import { asRecord, asRecords, asStr } from '../../../shared/utils/loose';
 import { i18n } from '@/i18n';
-import { roleLabel } from '../../characters/displayLabels';
+import { roleLabel } from '@/shared/utils/displayLabels';
 import { renderWorldDigest } from '@core/ai';
-import { AIService } from './aiService';
+import { AIService } from '@/shared/services/ai/aiService';
 
 /** 可参与推荐的实体类型 */
 type RecommendableItem = Character | Faction | Location | KnowledgeItem | TimelineEvent | RuleSystem;

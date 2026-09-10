@@ -21,7 +21,7 @@ import type { ModelConfig, Project } from '@shared/types';
 import type { IndexSnapshot } from '@core/index';
 import { AICardCreationService } from '@/features/cards/services/aiCardCreationService';
 import { AICardCommandService } from '@/features/cards/services/aiCardCommandService';
-import { roleLabel } from '@/features/characters/displayLabels';
+import { roleLabel } from '@/shared/utils/displayLabels';
 import {
   performSemanticCheck,
   performQuickSemanticCheck,

@@ -17,7 +17,7 @@ import { pluginHostPromise, saveDisabledList, eventBus } from '@/features/assist
 import { PROFILE_CHANGED_EVENT, assemblyTree, profileByName, type AssemblyRow, type Disposable as PluginDisposable, type PluginStatus } from '@core/plugin';
 import type { McpServerConfig } from '../../../../shared/types';
 import { useSettingsStore } from '@/app/stores/settingsStore';
-import { connectServer, disconnectServer, fetchServerTools } from '@/features/assistant/services/mcpClient';
+import { connectServer, disconnectServer, fetchServerTools } from '@/shared/services/mcpClient';
 import { Input } from '@/shared/ui/Input';
 import UserSkillsCard from './UserSkillsCard';
 

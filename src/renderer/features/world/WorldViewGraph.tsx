@@ -9,8 +9,8 @@
 
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from '@/i18n';
-import { roleLabel } from '../characters/displayLabels';
-import { normalizeRoleId } from '../characters/characterKinds';
+import { roleLabel } from '@/shared/utils/displayLabels';
+import { normalizeRoleId } from '@/shared/utils/characterKinds';
 import { Button } from '@/shared/ui/Button';
 import { Dialog, DialogContent } from '@/shared/ui/Dialog';
 import { cn } from '@/shared/utils/cn';

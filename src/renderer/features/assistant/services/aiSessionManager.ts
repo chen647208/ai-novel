@@ -31,7 +31,7 @@ import type {
 import type { EventBus, SeamPolicy } from '@core/plugin';
 import type { AIMessageImage, CardPromptTemplate, ConsistencyCheckPromptTemplate, ModelConfig, Project } from '@shared/types';
 import { buildHistoryText } from './chatHistory.js';
-import { syncMcpTools } from './mcpClient.js';
+import { syncMcpTools } from '@/shared/services/mcpClient';
 import { aiGatewayClient } from '@/shared/services/ai/gatewayClient.js';
 import { useSettingsStore } from '@/app/stores/settingsStore';
 

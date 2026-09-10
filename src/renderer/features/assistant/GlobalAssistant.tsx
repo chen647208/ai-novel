@@ -18,13 +18,13 @@ import { needsCompaction, splitForCompaction, type ChatTurn } from './services/c
 import { type GlobalAssistantProps, type ChatMessage, type AssistantCategory, type AssistantEditCategory, type SyncStatus, type EditingData } from './types';
 import { type LooseRecord, asRecord, asStr } from '../../shared/utils/loose';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
-import { AIService } from './services/aiService';
+import { AIService } from '@/shared/services/ai/aiService';
 import { approvalBroker, sessionManager } from './services/aiRuntime';
 import { indexService } from '@core/index';
 import { AICardCreationService } from '../cards/services/aiCardCreationService';
-import { normalizeGenderId, normalizeRoleId, type CharacterDraft, type CharacterDraftField } from '../characters/characterKinds';
+import { normalizeGenderId, normalizeRoleId, type CharacterDraft, type CharacterDraftField } from '@/shared/utils/characterKinds';
 import { AICardCommandService } from '../cards/services/aiCardCommandService';
-import { genderLabel, roleLabel } from '../characters/displayLabels';
+import { genderLabel, roleLabel } from '@/shared/utils/displayLabels';
 import { getDefaultCardPrompts } from '../cards/services/cardPromptService';
 import AssistantContextPanel from './components/AssistantContextPanel';
 import AssistantEditPanel from './components/AssistantEditPanel';

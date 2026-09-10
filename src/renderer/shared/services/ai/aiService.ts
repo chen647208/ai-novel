@@ -9,9 +9,9 @@
 
 import { type ModelConfig, type AIResponse, type StreamingCallback, type AIHistoryRecord } from "../../../../shared/types";
 import { i18n } from "@/i18n";
-import { aiGatewayClient } from "../../../shared/services/ai/gatewayClient.js";
-import type { CallOptions } from "../../../shared/services/ai/gatewayClient.js";
-import { callJSON, type JSONCallOptions, type JSONCallResult } from "../../../shared/services/ai/json.js";
+import { aiGatewayClient } from "./gatewayClient.js";
+import type { CallOptions } from "./gatewayClient.js";
+import { callJSON, type JSONCallOptions, type JSONCallResult } from "./json.js";
 
 /**
  * AI 服务门面。

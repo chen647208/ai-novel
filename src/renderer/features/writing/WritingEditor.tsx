@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { templateDisplayName } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
 import { type AIHistoryRecord, type Chapter, type ModelConfig, type Project, type PromptTemplate, type StreamingAIResponse } from '../../../shared/types';
-import { AIService } from '../assistant/services/aiService';
+import { AIService } from '@/shared/services/ai/aiService';
 import WritingEditorToolbar from './components/WritingEditorToolbar';
 import WritingSidebar from './components/WritingSidebar';
 import WritingEditorOverlayLayer from './components/WritingEditorOverlayLayer';
@@ -60,7 +60,7 @@ import {
 import { applySelectionReplacement } from '../../editor/commands';
 import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
-import { roleLabel } from '../characters/displayLabels';
+import { roleLabel } from '@/shared/utils/displayLabels';
 import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
 import { PROMPT_KNOWLEDGE_TRUNCATE, isVirtualChapter } from '../../../shared/constants/chapters';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';

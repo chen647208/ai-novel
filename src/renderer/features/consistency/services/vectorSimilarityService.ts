@@ -24,9 +24,9 @@ import {
   type KnowledgeCategory 
 } from '../../../../shared/types';
 import { vectorIntegrationService } from '../../knowledge/services/vectorIntegrationService';
-import { AIService } from '../../assistant/services/aiService';
+import { AIService } from '@/shared/services/ai/aiService';
 import { ConsistencyCheckPromptService } from './consistencyCheckPromptService';
-import { genderLabel, roleLabel } from '../../characters/displayLabels';
+import { genderLabel, roleLabel } from '@/shared/utils/displayLabels';
 import { i18n } from '@/i18n';
 
 export interface SimilarityIssue {

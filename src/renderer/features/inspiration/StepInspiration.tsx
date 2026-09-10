@@ -15,7 +15,7 @@ import { type Project, type KnowledgeItem, type StreamingAIResponse, type Output
 import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
 import { VIRTUAL_CHAPTER_ORDER, KNOWLEDGE_SNIPPET_TRUNCATE } from '../../../shared/constants/chapters';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
-import { AIService } from '../assistant/services/aiService';
+import { AIService } from '@/shared/services/ai/aiService';
 import WorldViewEditor from '../world/WorldViewEditor';
 import { dialogService } from '@/shared/services/dialogService';
 import { cn } from '@/shared/utils/cn';

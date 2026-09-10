@@ -44,8 +44,8 @@ app-shell/* ─┘         ✗ Electron/React/DOM  （core 的禁区）
 
 新增 ESLint `no-restricted-imports` 规则组：
 1. `src/core/**` 禁止 import `electron`、`react`、`@renderer/*`。（已落地为 error）
-2. `src/renderer/features/**` 禁止 import `repository` 内部实现，只准 import `@core/*` 与注入的 API 对象。（待 StoreProvider 收编）
-3. 跨 feature 引用只准走 `core` 契约或事件总线，禁止 import 对方实现。（已落地为 warn；存量 7 处：assistant→knowledge/cards/characters、settings→assistant，收编后升级 error）
+2. `src/renderer/features/**` 禁止 import `repository` 内部实现，只准 import `@core/*` 与注入的 API 对象。（已落地为 error；存量 5 文件冻结在 `eslint.config.js` 的 ignores，清一件删一件）
+3. 跨 feature 引用只准走 `core` 契约或事件总线，禁止 import 对方实现。规则 `local/no-cross-feature`（`eslint-rules/no-cross-feature.js`）把相对路径与 `@/features` 别名都解析为绝对路径后判断，已落地为 error；存量边按「源->目标」冻结在 `eslint.config.js` 的 `CROSS_FEATURE_DEBT`（19 条），只拦新增边，清一条删一条。无依赖的共享模块已迁 `src/renderer/shared`（`aiService`、`mcpClient`、`displayLabels`、`characterKinds`）。
 
 ## 3. 目标目录树
 

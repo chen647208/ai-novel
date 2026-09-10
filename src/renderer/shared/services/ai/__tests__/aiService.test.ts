@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { ModelConfig, AIResponse } from '../../../../../shared/types';
+import type { ModelConfig, AIResponse } from '@shared/types';
 
 const { mockComplete, mockStream } = vi.hoisted(() => ({
   mockComplete: vi.fn(),

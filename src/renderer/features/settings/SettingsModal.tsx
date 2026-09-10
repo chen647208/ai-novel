@@ -21,7 +21,7 @@ import {
   type PromptTemplate,
   type StorageConfig,
 } from '../../../shared/types';
-import { AIService } from '../assistant/services/aiService';
+import { AIService } from '@/shared/services/ai/aiService';
 import { ModelListService } from './services/modelListService';
 import { isVaultRef, persistApiKey, removeApiKey } from './services/credentialService';
 import { repository } from '../../shared/services/repository';

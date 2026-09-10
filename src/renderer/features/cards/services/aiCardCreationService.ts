@@ -28,11 +28,11 @@ import {
   type CardPromptTemplate
 } from '../../../../shared/types';
 import { type LooseRecord, asRecord, asStr, asNum, asStrArr, asRecords } from '../../../shared/utils/loose';
-import { normalizeGenderId, normalizeImpactId, normalizeRoleId } from '../../characters/characterKinds';
+import { normalizeGenderId, normalizeImpactId, normalizeRoleId } from '@/shared/utils/characterKinds';
 import { i18n } from '@/i18n';
 import { AICardCommandService } from './aiCardCommandService';
 import { AICardPromptService } from './aiCardPromptService';
-import { AIService } from '../../assistant/services/aiService';
+import { AIService } from '@/shared/services/ai/aiService';
 import { validateAndCompleteCardData, generateFieldReport } from './cardFieldValidator';
 
 /**
