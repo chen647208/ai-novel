@@ -14,7 +14,7 @@ import { resolveTheme } from '@/shared/services/themeService';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
-import { WORKSPACE_SECTIONS, type SectionId } from './WorkspaceNav';
+import { WORKSPACE_SECTIONS, type SectionId } from '../sections';
 import { suggestNextSection } from '../guidedFlow';
 import {
   ChevronRight,

@@ -14,37 +14,11 @@ import { useFeatureAvailability } from '../useFeatureAvailability';
 import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
 import { isSectionVisible } from '../sectionFeatures';
+import { WORKSPACE_SECTIONS, type SectionId } from '../sections';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/Tooltip';
-import { Feather, Globe, Library, ListOrdered, PenLine, Settings2, Users } from 'lucide-react';
-
-/** 工作台分区标识；大纲与细纲已合并为 structure（一页两段），与旧线性向导解耦，可自由切换。 */
-export type SectionId = 'inspiration' | 'world' | 'characters' | 'structure' | 'writing';
-
-/** 分区标签的 i18n 键（字面量联合，满足 typed-i18n 校验）。 */
-type SectionLabelKey =
-  | 'steps.inspiration'
-  | 'steps.world'
-  | 'steps.characters'
-  | 'steps.structure'
-  | 'steps.writing';
-
-interface SectionDef {
-  id: SectionId;
-  icon: React.ComponentType<{ className?: string }>;
-  labelKey: SectionLabelKey;
-  /** 分区是否已有内容（驱动完成状态点）。 */
-  done: (p: Project) => boolean;
-}
+import { Feather, Library, Settings2 } from 'lucide-react';
 
 export { SECTION_FEATURE } from '../sectionFeatures';
-
-export const WORKSPACE_SECTIONS: readonly SectionDef[] = [
-  { id: 'inspiration', icon: PenLine, labelKey: 'steps.inspiration', done: p => !!(p.inspiration || p.intro) },
-  { id: 'world', icon: Globe, labelKey: 'steps.world', done: p => (p.knowledge?.length ?? 0) > 0 || !!p.worldView },
-  { id: 'characters', icon: Users, labelKey: 'steps.characters', done: p => p.characters.length > 0 },
-  { id: 'structure', icon: ListOrdered, labelKey: 'steps.structure', done: p => !!p.outline || p.chapters.length > 0 },
-  { id: 'writing', icon: Feather, labelKey: 'steps.writing', done: p => p.chapters.some(c => !!c.content) },
-];
 
 interface WorkspaceNavProps {
   activeSection: SectionId;

@@ -12,7 +12,7 @@
  * 导航可见性（WorkspaceNav）与不可用回退（App）共用，改一处即全局生效。
  * structure 取 chapters（outline 随包同进退）；structure 可见性取二者并集。
  */
-import type { SectionId } from './app-shell/WorkspaceNav';
+import type { SectionId } from './sections';
 
 export const SECTION_FEATURE: Record<SectionId, string> = {
   inspiration: 'core.inspiration',

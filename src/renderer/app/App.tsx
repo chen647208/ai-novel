@@ -26,7 +26,8 @@ import SettingsModalHost from './app-shell/SettingsModalHost';
 import { dialogService } from '../shared/services/dialogService';
 import { exportCover } from '../shared/services/coverService';
 import WorkspaceView from './app-shell/WorkspaceView';
-import type { SectionId } from './app-shell/WorkspaceNav';
+import type { SectionId } from './sections';
+import { WORKSPACE_SECTIONS } from './sections';
 import GlobalAssistant from '../features/assistant/GlobalAssistant';
 import { eventToKeybinding, resolveKeybindings } from '../features/settings/services/keybindings';
 import ApprovalHost from '../features/assistant/components/ApprovalHost';
@@ -45,7 +46,7 @@ import { Bot } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 
 /** 分区快捷键顺序：Ctrl/Cmd+1..5（模块级常量，避免 effect 依赖抖动）。 */
-const SECTION_ORDER: SectionId[] = ['inspiration', 'world', 'characters', 'structure', 'writing'];
+const SECTION_ORDER: SectionId[] = WORKSPACE_SECTIONS.map((s) => s.id);
 
 const App: React.FC = () => {
   useAppBootstrap();
