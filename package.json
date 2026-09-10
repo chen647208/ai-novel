@@ -67,7 +67,7 @@
     "@sqlite.org/sqlite-wasm": "^3.53.0-build1",
     "@tiptap/core": "^2.27.3",
     "@tiptap/pm": "^2.27.3",
-    "@tiptap/react": "^2.27.3",
+    "@tiptap/react": "^3.31.3",
     "@tiptap/starter-kit": "^2.27.3",
     "@uiw/react-codemirror": "^4.25.11",
     "electron-updater": "^6.8.9",
