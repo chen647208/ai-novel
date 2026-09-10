@@ -1,0 +1,53 @@
+name: 缺陷报告
+description: 报告可复现的缺陷
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: 感谢反馈。请先搜索是否已有同类 Issue。
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 现象
+      description: 实际发生了什么？
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望
+      description: 你期望发生什么？
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. …
+        2. …
+        3. …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 版本
+      description: 应用版本（设置 → 关于）
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: 操作系统
+      placeholder: Windows 11 / macOS 15 / Ubuntu 24.04
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志/诊断
+      description: 设置 → 存储 → 导出诊断包，或粘贴相关日志（请勿包含 API Key）
+    validations:
+      required: false

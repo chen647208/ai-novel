@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全问题
+    url: https://github.com/chen647208/hongyue-creation/security/advisories/new
+    about: 请勿公开披露漏洞，改用私密报告（见 SECURITY.md）。
+  - name: 贡献指南
+    url: https://github.com/chen647208/hongyue-creation/blob/main/CONTRIBUTING.md
+    about: 提交前请阅读贡献指南。
