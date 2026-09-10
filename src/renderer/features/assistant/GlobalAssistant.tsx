@@ -13,7 +13,8 @@ import { useTranslation } from 'react-i18next';
 import { type KnowledgeItem, type OutputMode, type AIMessageImage, type Character, type Location, type Faction, type RuleSystem, type TimelineEvent, type AICardCommand, type CreatedCard, type Timeline, type WorldView, type MagicSystem, type TechnologyLevel, type WorldHistory, type CardPromptTemplate, type ModelConfig, type Project } from '../../../shared/types';
 import { useProjectStore } from '@/app/stores/projectStore';
 import { ATTACHMENT_TRUNCATE } from '../../../shared/constants/chapters';
-import { CHAT_IMAGE_MAX_BYTES, CHAT_IMAGE_MIMES, CHAT_PDF_MAX_BYTES, SUMMARY_MAX_CHARS } from '../../../shared/constants/chat';
+import { SUMMARY_MAX_CHARS } from '../../../shared/constants/chat';
+import { collectChatAttachments } from './services/chatAttachments';
 import { needsCompaction, splitForCompaction, type ChatTurn } from './services/chatHistory';
 import { type GlobalAssistantProps, type ChatMessage, type AssistantCategory, type AssistantEditCategory, type SyncStatus, type EditingData } from './types';
 import { type LooseRecord, asRecord, asStr } from '../../shared/utils/loose';
@@ -455,100 +456,26 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
-    
-    const files = e.target.files;
-    const newItems: KnowledgeItem[] = [];
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      if (!file) continue;
-      // 图片附件：类型白名单 + 大小上限 + 模型视觉开关
-      if (file.type.startsWith('image/')) {
-        if (!CHAT_IMAGE_MIMES.includes(file.type)) {
-          dialogService.alert(t('chat.imageTypeUnsupported', { name: file.name }));
-          continue;
-        }
-        if (file.size > CHAT_IMAGE_MAX_BYTES) {
-          dialogService.alert(t('chat.imageTooLarge', { name: file.name, size: Math.round(CHAT_IMAGE_MAX_BYTES / 1024 / 1024) }));
-          continue;
-        }
-        if (usableModel?.supportsVision === false) {
-          dialogService.alert(t('chat.noVision'));
-          continue;
-        }
-        try {
-          const dataUrl = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(String(reader.result ?? ''));
-            reader.onerror = () => reject(new Error('read failed'));
-            reader.readAsDataURL(file);
-          });
-          setPendingImages((prev) => [...prev, { id: `chat-img-${Date.now()}-${i}`, name: file.name, mime: file.type, dataUrl }]);
-        } catch (err) {
-          logger.error('Failed to read image', file.name, err);
-        }
-        continue;
-      }
-      if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name)) {
-        if (file.size > CHAT_PDF_MAX_BYTES) {
-          dialogService.alert(t('chat.pdfTooLarge', { name: file.name, size: Math.round(CHAT_PDF_MAX_BYTES / 1024 / 1024) }));
-          continue;
-        }
-        try {
-          const dataUrl = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(String(reader.result ?? ''));
-            reader.onerror = () => reject(new Error('read failed'));
-            reader.readAsDataURL(file);
-          });
-          const base64 = dataUrl.split(',')[1] ?? '';
-          const api = window.electronAPI;
-          if (!api?.extractPdfText || !base64) {
-            dialogService.alert(t('chat.pdfFailed', { name: file.name }));
-            continue;
-          }
-          const { text } = await api.extractPdfText(base64);
-          if (!text.trim()) {
-            dialogService.alert(t('chat.pdfEmpty', { name: file.name }));
-            continue;
-          }
-          newItems.push({
-            id: `chat-pdf-${Date.now()}-${i}`,
-            name: file.name,
-            content: text,
-            type: 'pdf',
-            size: file.size,
-            addedAt: Date.now(),
-            category: 'writing' as const,
-          });
-        } catch (err) {
-          logger.error('Failed to extract PDF', file.name, err);
-          dialogService.alert(t('chat.pdfFailed', { name: file.name }));
-        }
-        continue;
-      }
-      if (file.type.startsWith('text/') || file.name.match(/\.(md|json|txt|csv|js|ts|tsx|jsx)$/i)) {
-        try {
-          const text = await file.text();
-          newItems.push({
-            id: `chat-file-${Date.now()}-${i}`,
-            name: file.name,
-            content: text,
-            type: file.name.split('.').pop() || 'txt',
-            size: file.size,
-            addedAt: Date.now(),
-            category: 'writing' as const
-          });
-        } catch (err) {
-          logger.error("Failed to read file", file.name, err);
-        }
-      }
-    }
-
-    if (newItems.length > 0) {
-      setPendingFiles(prev => [...prev, ...newItems]);
-    }
-    
+    const { images, items } = await collectChatAttachments(Array.from(e.target.files), {
+      visionAvailable: usableModel?.supportsVision !== false,
+      readDataUrl: (file) =>
+        new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result ?? ''));
+          reader.onerror = () => reject(new Error('read failed'));
+          reader.readAsDataURL(file);
+        }),
+      readText: (file) => file.text(),
+      extractPdfText: window.electronAPI?.extractPdfText
+        ? (base64) => window.electronAPI!.extractPdfText(base64)
+        : undefined,
+      alert: (key, params) => dialogService.alert(t(key as never, params as never) as unknown as string),
+      logError: (message, name, error) => logger.error(message, name, error),
+      now: () => Date.now(),
+      makeId: (prefix, index) => `${prefix}-${Date.now()}-${index}`,
+    });
+    if (images.length > 0) setPendingImages((prev) => [...prev, ...images]);
+    if (items.length > 0) setPendingFiles((prev) => [...prev, ...items]);
     e.target.value = '';
   };
 
