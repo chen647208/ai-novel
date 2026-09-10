@@ -24,6 +24,7 @@ import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { uuidv7 } from '../../core/entities/uuid.js';
 import {
   APP_DATA_DIR_NAME,
   DB_FILE_NAME,
@@ -121,7 +122,7 @@ function bookIdOfNode(nodeId: string): string | undefined {
 }
 
 function appendProposal(toolId: string, args: Record<string, unknown>): { accepted: boolean; proposalId: string } {
-  const proposalId = `mcp_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+  const proposalId = `mcp_${Date.now().toString(36)}_${uuidv7()}`;
   const title = String(args.title ?? toolId);
   const body = String(args.body ?? '');
   const nodeId = typeof args.nodeId === 'string' && args.nodeId ? args.nodeId : undefined;

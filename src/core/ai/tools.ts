@@ -7,6 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { uuidv7 } from '../entities/uuid';
+
+
 /**
  * 工具注册表（docs/design/05 §2）。
  *
@@ -127,7 +130,7 @@ export class ToolRegistry {
    * 执行工具：未知工具/权限缺失返回失败 ToolOutput（不抛错，调用方统一走事件流）。
    * 审批管线在 write:* 档位接入：这里只做权限检查的最后一道防线。
    */
-  async execute(id: string, args: unknown, ctx: ToolContext = {}, callId = `call_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`): Promise<ToolOutput> {
+  async execute(id: string, args: unknown, ctx: ToolContext = {}, callId = `call_${Date.now()}_${uuidv7()}`): Promise<ToolOutput> {
     const spec = this.tools.get(id);
     if (!spec) {
       return { ok: false, error: `未知工具：${id}` };

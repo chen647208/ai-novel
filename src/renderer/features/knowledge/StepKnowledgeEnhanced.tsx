@@ -37,6 +37,7 @@ import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
 import { BookOpen, Bot, Brain, Calendar, Clock, CloudUpload, FileText, Flag, Globe, MapPinned, PenLine, Search, Settings2, Tag, X } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
+import { uuidv7 } from '@core/entities';
 
 interface StepKnowledgeEnhancedProps {
   project: Project;
@@ -232,7 +233,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
             continue;
           }
           seenHashes.add(hash);
-          const uniqueId = Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9) + '_' + i;
+          const uniqueId = Date.now().toString() + '_' + uuidv7() + '_' + i;
           newItems.push({
             id: uniqueId,
             name: file.name,

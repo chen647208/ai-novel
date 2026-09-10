@@ -66,6 +66,7 @@ import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
 import { PROMPT_KNOWLEDGE_TRUNCATE, isVirtualChapter } from '../../../shared/constants/chapters';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
+import { uuidv7 } from '@core/entities';
 
 const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId, onBack, onNavigateToCharacters, onOpenSettings }) => {
   const { t } = useTranslation(['writing', 'steps']);
@@ -392,7 +393,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     const nextOrder = chapters.reduce((m, c) => Math.max(m, c.order), -1) + 1;
     const num = chapters.filter(c => !isVirtualChapter(c)).length + 1;
     const newChapter: Chapter = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      id: `${Date.now()}-${uuidv7()}`,
       title: t('canvas.newChapterTitle', { num }),
       summary: '',
       content: '',
@@ -431,7 +432,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     if (!current) return;
     const nextOrder = chapters.reduce((m, c) => Math.max(m, c.order), -1) + 1;
     const newChapter: Chapter = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      id: `${Date.now()}-${uuidv7()}`,
       title: t('editor.splitNewTitle', { title: current.title }),
       summary: '',
       content: parts.after,

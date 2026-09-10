@@ -31,6 +31,7 @@ import { BookOpen, BookOpenText, Check, CheckCheck, ChevronDown, ChevronRight, C
 import { useViewPreference } from '@/shared/hooks/useViewPreference';
 import { ViewModeToggle } from '@/shared/ui/ViewModeToggle';
 import { roleLabel } from '@/shared/utils/displayLabels';
+import { uuidv7 } from '@core/entities';
 
 interface StepChapterOutlineProps {
   project: Project;
@@ -108,7 +109,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
       summary = summary.split('---')[0]?.trim() ?? '';
 
       return {
-        id: Math.random().toString(36).substr(2, 9),
+        id: uuidv7(),
         title: title || t('steps:chapters.defaultChapterTitle', { num: startIndex + idx + 1 }),
         summary: summary || t('steps:chapters.defaultSummary'),
         content: '',

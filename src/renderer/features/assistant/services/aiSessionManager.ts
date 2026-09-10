@@ -34,6 +34,7 @@ import { buildHistoryText } from './chatHistory.js';
 import { syncMcpTools } from '@/shared/services/mcpClient';
 import { aiGatewayClient } from '@/shared/services/ai/gatewayClient.js';
 import { useSettingsStore } from '@/app/stores/settingsStore';
+import { uuidv7 } from '@core/entities';
 
 function electron(): NonNullable<Window['electronAPI']> {
   if (!window.electronAPI) {
@@ -138,7 +139,7 @@ export class AiSessionManager {
     if (!gate.allowed) {
       return { ok: false, reply: '', turns: 0, error: gate.reason ?? 'AI 请求被发行档策略拒绝' };
     }
-    const sessionId = `sess_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    const sessionId = `sess_${Date.now().toString(36)}_${uuidv7()}`;
     const sink = window.electronAPI ? new FileSessionSink(sessionId, input.bookId) : undefined;
 
     // 渐进注入：触发词命中即激活全文，会话结束在 finally 中卸载

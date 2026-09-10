@@ -30,6 +30,7 @@ import { Textarea } from '@/shared/ui/Textarea';
 import { BookOpenText, Bot, Check, CheckCheck, ChevronDown, ChevronUp, CloudUpload, Eye, Globe, Lightbulb, Pause, PenLine, Pencil, Play, Square, Trash2, WandSparkles, XCircle } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
 import { MarkdownView } from '@/shared/ui/Markdown';
+import { uuidv7 } from '@core/entities';
 
 interface StepInspirationProps {
   project: Project | null;
@@ -346,7 +347,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, onGoSection 
         try {
             const text = await file.text();
             // Consistent ID generation with StepKnowledge
-            const uniqueId = Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9) + '_' + i;
+            const uniqueId = Date.now().toString() + '_' + uuidv7() + '_' + i;
             newItems.push({
                 id: uniqueId,
                 name: file.name,

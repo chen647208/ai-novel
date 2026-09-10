@@ -35,6 +35,7 @@ import { cn } from '@/shared/utils/cn';
 import { dialogService } from '@/shared/services/dialogService';
 import { useSettingsStore } from '../../app/stores/settingsStore';
 import { BookOpenText, Bot, CircleStop, ListChecks, PenLine, RotateCcw, Trash2, X } from 'lucide-react';
+import { uuidv7 } from '@core/entities';
 
 const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId, project, prompts, onUpdate, width = 380, onClose, onWidthChange }) => {
   const { t, i18n } = useTranslation('assistant');
@@ -574,7 +575,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       case 'event':
         commitAICard({
           timeline: {
-            ...(project.timeline || { id: Math.random().toString(36).substr(2, 9), projectId: project.id, config: { calendarSystem: 'default' }, events: [], createdAt: Date.now(), updatedAt: Date.now() }),
+            ...(project.timeline || { id: uuidv7(), projectId: project.id, config: { calendarSystem: 'default' }, events: [], createdAt: Date.now(), updatedAt: Date.now() }),
             events: [...(project.timeline?.events || []), data as TimelineEvent]
           } as Timeline
         });
@@ -587,7 +588,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       case 'magic':
         commitAICard({
           worldView: {
-            ...(project.worldView || { id: Math.random().toString(36).substr(2, 9), projectId: project.id, createdAt: Date.now(), updatedAt: Date.now() }),
+            ...(project.worldView || { id: uuidv7(), projectId: project.id, createdAt: Date.now(), updatedAt: Date.now() }),
             magicSystem: data as MagicSystem
           } as WorldView
         });
@@ -595,7 +596,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       case 'tech':
         commitAICard({
           worldView: {
-            ...(project.worldView || { id: Math.random().toString(36).substr(2, 9), projectId: project.id, createdAt: Date.now(), updatedAt: Date.now() }),
+            ...(project.worldView || { id: uuidv7(), projectId: project.id, createdAt: Date.now(), updatedAt: Date.now() }),
             technologyLevel: data as TechnologyLevel
           } as WorldView
         });
@@ -603,7 +604,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       case 'history':
         commitAICard({
           worldView: {
-            ...(project.worldView || { id: Math.random().toString(36).substr(2, 9), projectId: project.id, createdAt: Date.now(), updatedAt: Date.now() }),
+            ...(project.worldView || { id: uuidv7(), projectId: project.id, createdAt: Date.now(), updatedAt: Date.now() }),
             history: data as WorldHistory
           } as WorldView
         });
@@ -705,7 +706,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
           return;
         }
         activeChar = {
-          id: Math.random().toString(36).substr(2, 9),
+          id: uuidv7(),
           name: nameMatch[1]?.trim() ?? '',
           gender: 'unknown',
           age: '未知',
@@ -763,7 +764,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     const char = activeChar as CharacterDraft | null;
     if (char && char.name) {
       const completeChar: Character = {
-        id: char.id || Math.random().toString(36).substr(2, 9),
+        id: char.id || uuidv7(),
         name: char.name || '',
         gender: normalizeGenderId(char.gender),
         age: char.age || '未知',

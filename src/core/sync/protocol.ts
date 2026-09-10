@@ -24,6 +24,7 @@
  * 纯模块，无 IO。
  */
 import type { NodeEntity, EdgeEntity, AttributeEntity } from '../entities';
+import { uuidv7 } from '../entities/uuid';
 
 export interface EntitySnapshot {
   nodes: NodeEntity[];
@@ -109,7 +110,7 @@ export function buildBundle(input: { bookId: string; instanceId: string; changes
 }
 
 function conflictedNodeCopy(node: NodeEntity, allAttrs: AttributeEntity[]): { node: NodeEntity; attrs: AttributeEntity[] } {
-  const copyId = `conflict-${node.id}-${Math.random().toString(36).slice(2, 8)}`;
+  const copyId = `conflict-${node.id}-${uuidv7()}`;
   const copy: NodeEntity = {
     ...node,
     id: copyId,
@@ -119,7 +120,7 @@ function conflictedNodeCopy(node: NodeEntity, allAttrs: AttributeEntity[]): { no
   };
   const attrs = allAttrs
     .filter((a) => a.nodeId === node.id && !a.erased)
-    .map((a) => ({ ...a, id: `conflict-${a.id}-${Math.random().toString(36).slice(2, 6)}`, nodeId: copyId }));
+    .map((a) => ({ ...a, id: `conflict-${a.id}-${uuidv7()}`, nodeId: copyId }));
   return { node: copy, attrs };
 }
 

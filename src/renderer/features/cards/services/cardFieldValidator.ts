@@ -15,6 +15,7 @@
 import { type AICardCommand } from '../../../../shared/types';
 import { type LooseRecord } from '../../../shared/utils/loose';
 import { i18n } from '@/i18n';
+import { uuidv7 } from '@core/entities';
 
 /**
  * 字段定义配置
@@ -166,7 +167,7 @@ export function validateAndCompleteCardData(
   
   // 添加系统字段
   const timestamp = Date.now();
-  result.completedData.id = data.id || `${command}_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+  result.completedData.id = data.id || `${command}_${timestamp}_${uuidv7()}`;
   result.completedData.projectId = data.projectId || projectId;
   result.completedData.createdAt = data.createdAt || timestamp;
   result.completedData.updatedAt = timestamp;

@@ -34,6 +34,7 @@ import { AICardCommandService } from './aiCardCommandService';
 import { AICardPromptService } from './aiCardPromptService';
 import { AIService } from '@/shared/services/ai/aiService';
 import { validateAndCompleteCardData, generateFieldReport } from './cardFieldValidator';
+import { uuidv7 } from '@core/entities';
 
 /**
  * AI卡片创建服务
@@ -249,7 +250,7 @@ export class AICardCreationService {
    * 创建角色卡片
    */
   private static createCharacter(data: LooseRecord, timestamp: number): Character {
-    const id = `char_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+    const id = `char_${timestamp}_${uuidv7()}`;
     
     const character: Character = {
       id,
@@ -276,7 +277,7 @@ export class AICardCreationService {
    * 创建地点卡片
    */
   private static createLocation(data: LooseRecord, project: Project, timestamp: number): Location {
-    const id = `loc_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+    const id = `loc_${timestamp}_${uuidv7()}`;
     
     // 将AI返回的字段映射到实际的Location类型
     const locationType = this.normalizeLocationType(asStr(data.type));
@@ -320,7 +321,7 @@ export class AICardCreationService {
    * 创建势力卡片
    */
   private static createFaction(data: LooseRecord, project: Project, timestamp: number): Faction {
-    const id = `faction_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+    const id = `faction_${timestamp}_${uuidv7()}`;
     
     const faction: Faction = {
       id,
@@ -357,7 +358,7 @@ export class AICardCreationService {
    * 创建时间线事件
    */
   private static createTimelineEvent(data: LooseRecord, timestamp: number): TimelineEvent {
-    const id = `event_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+    const id = `event_${timestamp}_${uuidv7()}`;
     
     const rawDate = asRecord(data.date);
     const year = asNum(rawDate.year);
@@ -400,7 +401,7 @@ export class AICardCreationService {
    * 创建规则系统
    */
   private static createRuleSystem(data: LooseRecord, project: Project, timestamp: number): RuleSystem {
-    const id = `rule_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+    const id = `rule_${timestamp}_${uuidv7()}`;
     
     const levels: RuleLevel[] = asRecords(data.levels).map((level, index) => ({
       name: asStr(level.name, `等级${index + 1}`),

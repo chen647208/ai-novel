@@ -28,6 +28,7 @@ import { EmptyState } from '@/shared/ui/EmptyState';
 import { Select } from '@/shared/ui/Select';
 import { AlertCircle, Check, CheckCheck, Network, Plus, Settings, Trash2, UserRound, WandSparkles, XCircle } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
+import { uuidv7 } from '@core/entities';
 
 interface StepCharactersProps {
   project: Project;
@@ -133,7 +134,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
         if (activeChar && activeChar.name) {
           // 为新字段提供默认值
           const completeChar: Character = {
-            id: Math.random().toString(36).substr(2, 9),
+            id: uuidv7(),
             name: activeChar.name || '',
             gender: normalizeGenderId(activeChar.gender),
             age: activeChar.age || '未知',
@@ -152,7 +153,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
           chars.push(completeChar);
         }
         activeChar = {
-          id: Math.random().toString(36).substr(2, 9),
+          id: uuidv7(),
           name: nameMatch[1]?.trim() ?? '',
           gender: 'unknown',
           age: '未知',
@@ -211,7 +212,7 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
     if (char && char.name) {
       // 为新字段提供默认值（定位/性别归一化为枚举 id）
       const completeChar: Character = {
-        id: char.id || Math.random().toString(36).substr(2, 9),
+        id: char.id || uuidv7(),
         name: char.name || '',
         gender: normalizeGenderId(char.gender),
         age: char.age || '未知',

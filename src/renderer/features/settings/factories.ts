@@ -11,6 +11,7 @@ import type { CardPromptTemplate, EmbeddingModelConfig, ModelConfig, PromptTempl
 import { i18n, dt, templateDisplayName } from '@/i18n';
 import { embeddingProviders, getDefaultEmbeddingParams } from '../../constants/embeddingProviders';
 import type { CardPromptImportResult, EmbeddingQuickAddTemplate } from './types';
+import { uuidv7 } from '@core/entities';
 
 export const createNewModelConfig = (): ModelConfig => ({
   id: Date.now().toString(),
@@ -103,7 +104,7 @@ export const importCardPromptTemplates = (
     const validPrompts = imported.filter((prompt) => validateCardPromptTemplate(prompt).isValid);
     const prompts = validPrompts.map((prompt) => ({
       ...prompt,
-      id: Date.now().toString() + Math.random().toString(36).slice(2, 11),
+      id: Date.now().toString() + uuidv7(),
       isDefault: false,
     }));
 

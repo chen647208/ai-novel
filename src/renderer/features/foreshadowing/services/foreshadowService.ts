@@ -13,6 +13,7 @@
  */
 import type { Foreshadow, ForeshadowImportance, ForeshadowStatus, ModelConfig, Project } from '../../../../shared/types';
 import { AIService } from '@/shared/services/ai/aiService';
+import { uuidv7 } from '@core/entities';
 
 const IMPORTANCE_RANK: Record<ForeshadowImportance, number> = { critical: 0, major: 1, minor: 2 };
 
@@ -21,7 +22,7 @@ export function createForeshadow(
   now: number = Date.now(),
 ): Foreshadow {
   return {
-    id: `fs_${now}_${Math.random().toString(36).slice(2, 9)}`,
+    id: `fs_${now}_${uuidv7()}`,
     title: data.title.trim(),
     detail: data.detail.trim(),
     status: data.status ?? 'planted',

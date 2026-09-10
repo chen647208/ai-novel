@@ -13,6 +13,7 @@
  * 与 AI 历史（history）互补：history 记录 AI 生成，snapshots 记录人工编辑。
  */
 import type { Chapter, ChapterSnapshot } from '../../../../shared/types';
+import { uuidv7 } from '@core/entities';
 
 /** 单章保留的最大快照数，超出按时间淘汰最旧 */
 export const MAX_SNAPSHOTS_PER_CHAPTER = 20;
@@ -23,7 +24,7 @@ export const AUTO_SNAPSHOT_LARGE_DELTA = 1000;
 
 export function createSnapshot(content: string, source: ChapterSnapshot['source'], now: number = Date.now()): ChapterSnapshot {
   return {
-    id: `snap_${now}_${Math.random().toString(36).slice(2, 9)}`,
+    id: `snap_${now}_${uuidv7()}`,
     content,
     timestamp: now,
     charCount: content.replace(/\s+/g, '').length,

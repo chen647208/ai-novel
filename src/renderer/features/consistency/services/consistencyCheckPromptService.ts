@@ -15,6 +15,7 @@
 import { type ConsistencyCheckPromptTemplate, type ConsistencyCheckPromptCategory } from '../../../../shared/types';
 import { getDefaultConsistencyPrompts } from '../../../constants/consistencyCheck';
 import { i18n } from '@/i18n';
+import { uuidv7 } from '@core/entities';
 
 export class ConsistencyCheckPromptService {
   /**
@@ -122,7 +123,7 @@ export class ConsistencyCheckPromptService {
     const variables = this.extractVariables(content);
     
     return {
-      id: `custom-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `custom-${Date.now()}-${uuidv7()}`,
       category,
       name,
       content,
@@ -174,7 +175,7 @@ export class ConsistencyCheckPromptService {
         
         if (validation.isValid && item.category && item.name && item.content) {
           validTemplates.push({
-            id: `imported-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            id: `imported-${Date.now()}-${uuidv7()}`,
             category: item.category,
             name: item.name,
             content: item.content,

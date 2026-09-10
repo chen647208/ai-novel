@@ -12,6 +12,7 @@ import { i18n } from "@/i18n";
 import { aiGatewayClient } from "./gatewayClient.js";
 import type { CallOptions } from "./gatewayClient.js";
 import { callJSON, type JSONCallOptions, type JSONCallResult } from "./json.js";
+import { uuidv7 } from '@core/entities';
 
 /**
  * AI 服务门面。
@@ -30,7 +31,7 @@ export class AIService {
     metadata?: { templateName?: string; batchGeneration?: boolean; chapterTitle?: string; generatedChapterCount?: number; operationType?: string }
   ): AIHistoryRecord {
     return {
-      id: `history_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `history_${Date.now()}_${uuidv7()}`,
       chapterId,
       timestamp: Date.now(),
       prompt,
