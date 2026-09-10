@@ -19,6 +19,9 @@ import { MarkdownView } from '@/shared/ui/Markdown';
 import { cn } from '@/shared/utils/cn';
 import { AlertCircle, BookOpen, Calculator, Check, Clock, Copy, Cpu, FileText, Flag, Keyboard, Landmark, MapPin, MessagesSquare, Paperclip, Pencil, Reply, Send, Settings2, Square, Trash2, User, X, Zap } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
+import SpeechInputButton from './SpeechInputButton';
+import SpeakButton from './SpeakButton';
+import { speechLocale } from '../services/speechService';
 
 
 interface AssistantChatWorkspaceProps {
@@ -185,6 +188,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
                 >
                   {copiedId === msg.id ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
                 </Button>
+                {msg.role !== 'user' && <SpeakButton text={msg.content} lang={speechLocale(i18n.language)} />}
                 {msg.role === 'user' && (
                   <Button
                     variant="ghost"
@@ -350,6 +354,11 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
               <Paperclip className="size-5" />
               <input type="file" multiple className="hidden" onChange={handleFileUpload} accept=".txt,.md,.json,.js,.ts,.csv,.pdf,.png,.jpg,.jpeg,.webp" />
             </label>
+            <SpeechInputButton
+              onTranscript={(text) => setInput((prev) => (prev ? `${prev} ${text}` : text))}
+              lang={speechLocale(i18n.language)}
+              disabled={contextPanelOpen || editPanelOpen}
+            />
             <Textarea
               ref={inputRef}
               className="max-h-32 min-h-[58px] flex-1"

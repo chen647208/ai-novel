@@ -10,13 +10,13 @@
 3. **文档附件**（已实现）：助手聊天除图片外支持 PDF/纯文本文档，
    主进程 `main/app/documents.ts`（unpdf）提取文本后并入提示词参考资料（不直接塞二进制给模型）。
    适配器已支持图片形态（`AIMessageImage`），文档走文本提取路径。
-4. **语音**（规划）：助手输入框语音听写（Web Speech API）与回复朗读
-   （speechSynthesis）；权限不可用时隐藏入口。
+4. **语音**（已实现）：助手输入区听写（Web Speech Recognition，定型片段入输入框）、
+   助手消息朗读（speechSynthesis，可中止）；环境不支持时不渲染入口。
 
 ## why
 
 - 对标 Scrivener（人物卡/封面）、Cherry Studio（文档附件）、
-  ChatGPT 桌面（语音）。现状：人物卡无导出、无封面、附件仅图片、无语音。
+  ChatGPT 桌面（语音）的形态：四项能力各落一处模块，均不走核心数据模型改动。
 
 ## 验收标准
 
