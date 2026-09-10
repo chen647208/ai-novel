@@ -46,6 +46,7 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:packaged": "playwright test -c playwright.packaged.config.ts",
     "check:icons": "node scripts/check-win-icon.cjs",
     "scan:secrets": "node scripts/scan-secrets.mjs",
     "preverify": "npm ci --dry-run --no-audit --no-fund --loglevel=error",

@@ -37,9 +37,12 @@ mac:
   artifactName: ${productName}-${version}-${arch}.${ext}
   icon: src/assets/icon.icns
   category: public.app-category.productivity
-  # 开源默认不做签名/公证；如需分发设置 CSC_IDENTITY_AUTO_DISCOVERY=false 跳过
-  hardenedRuntime: false
+  # 签名/公证：CI 注入 CSC_LINK / CSC_KEY_PASSWORD / APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD /
+  # APPLE_TEAM_ID 后由 electron-builder 自动完成；缺失证书时跳过，产物保持未签名。
+  hardenedRuntime: true
   gatekeeperAssess: false
+  entitlements: resources/entitlements.mac.plist
+  entitlementsInherit: resources/entitlements.mac.plist
 
 linux:
   target:

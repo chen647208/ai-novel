@@ -29,8 +29,23 @@
 1. `build` 作业用矩阵在 `windows-latest`、`macos-latest`、`ubuntu-latest` 三个 runner 上并行：
    - `npm ci` → `typecheck:all` + `test:coverage` → `electron-builder --win/--mac/--linux --publish never`。
    - 各平台产物通过 `actions/upload-artifact` 上传。
-   - macOS 默认不签名（`CSC_IDENTITY_AUTO_DISCOVERY=false`），产物带 Gatekeeper 提示，属开源未签名分发的预期行为。
+   - 代码签名按仓库 Secrets 是否存在自动生效（缺失即未签名构建，行为不变）：
+     Windows 用 `CSC_LINK` + `CSC_KEY_PASSWORD`；macOS 用 `APPLE_ID` + `APPLE_APP_SPECIFIC_PASSWORD` + `APPLE_TEAM_ID`，
+     公证所需 hardened runtime 与权限在 `electron-builder.yml`（`resources/entitlements.mac.plist`）中已配好。
+     未配置证书时 macOS 产物带 Gatekeeper 提示，属开源未签名分发的预期行为。
 2. `release` 作业汇总三端产物，用 `softprops/action-gh-release` 基于该标签创建 GitHub Release 并上传安装包，自动生成发布说明。
+
+## 打包产物冒烟
+
+`npm run test:e2e:packaged` 启动已打包应用并断言窗口出现（不依赖 vite）。用法：
+
+```bash
+npx electron-builder --dir --publish never
+# Windows 示例；macOS/Linux 换成对应产物路径
+HONGYUE_PACKAGED_EXE="$PWD/build/release/win-unpacked/红月创作.exe" npm run test:e2e:packaged
+```
+
+未设置 `HONGYUE_PACKAGED_EXE` 时该用例跳过。
 
 ## 打标签发布操作步骤
 
@@ -52,4 +67,4 @@ git push origin main --follow-tags
 ## 权限与安全
 
 - Release 工作流声明 `permissions: contents: write` 以创建 Release。
-- 未使用任何第三方发布密钥；如需代码签名/公证，另行在仓库 Secrets 配置证书并调整 `electron-builder.yml`。
+- 未使用任何第三方发布密钥；代码签名/公证在仓库 Secrets 配置证书后自动启用（见上），无需改工作流。
