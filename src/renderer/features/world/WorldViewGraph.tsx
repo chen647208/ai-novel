@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { stepForces } from './graphLayout';
 import { useTranslation } from '@/i18n';
 import { roleLabel } from '@/shared/utils/displayLabels';
 import { normalizeRoleId } from '@/shared/utils/characterKinds';
@@ -282,54 +283,7 @@ const WorldViewGraph: React.FC<WorldViewGraphProps> = ({
     const applyForces = () => {
       if (iteration >= maxIterations) return;
 
-      setNodePositions(prev => {
-        const newPositions = { ...prev };
-        const k = 0.05; // 引力常数
-        const repulsion = 5000; // 斥力常数
-
-        graphData.nodes.forEach(node => {
-          let fx = 0, fy = 0;
-          const x = newPositions[node.id]?.x ?? node.x ?? centerX;
-          const y = newPositions[node.id]?.y ?? node.y ?? centerY;
-
-          // 中心引力
-          fx += (centerX - x) * k * 0.1;
-          fy += (centerY - y) * k * 0.1;
-
-          // 节点间斥力
-          graphData.nodes.forEach(other => {
-            if (node.id === other.id) return;
-            const ox = newPositions[other.id]?.x ?? other.x ?? centerX;
-            const oy = newPositions[other.id]?.y ?? other.y ?? centerY;
-            const dx = x - ox;
-            const dy = y - oy;
-            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            const force = repulsion / (dist * dist);
-            fx += (dx / dist) * force;
-            fy += (dy / dist) * force;
-          });
-
-          // 连线引力
-          graphData.links.forEach(link => {
-            if (link.source === node.id || link.target === node.id) {
-              const otherId = link.source === node.id ? link.target : link.source;
-              const other = graphData.nodes.find(n => n.id === otherId);
-              if (other) {
-                const ox = newPositions[otherId]?.x ?? other.x ?? centerX;
-                const oy = newPositions[otherId]?.y ?? other.y ?? centerY;
-                const dx = ox - x;
-                const dy = oy - y;
-                fx += dx * k * (link.strength || 0.5);
-                fy += dy * k * (link.strength || 0.5);
-              }
-            }
-          });
-
-          newPositions[node.id] = { x: x + fx, y: y + fy };
-        });
-
-        return newPositions;
-      });
+      setNodePositions((prev) => stepForces(prev, graphData.nodes, graphData.links, centerX, centerY));
 
       iteration++;
       animationId = requestAnimationFrame(applyForces);
