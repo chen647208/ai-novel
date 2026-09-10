@@ -59,6 +59,8 @@
     "inputPlaceholder": "Type a question, or use /character /location /faction commands to create quickly... (Shift+Enter for a new line)",
     "stopTitle": "Stop generating",
     "sendTitle": "Send",
+    "modelSelect": "Select model",
+    "outputModeSelect": "Output mode",
     "imageTypeUnsupported": "Unsupported image type: {{name}} (png/jpg/webp only).",
     "imageTooLarge": "{{name}} exceeds {{size}}MB. Compress and retry.",
     "noVision": "The current model has vision disabled. Enable it in model settings to send images.",

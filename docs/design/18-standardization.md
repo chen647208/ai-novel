@@ -75,3 +75,13 @@
   同名类型无跨层分叉。
 - 插件化：禁用全部插件后纯写作可用；加载示例插件后技能/类型在 UI 可见并可往返；
   minimal 档所有 AI 入口被统一拒绝；新增 feature 不改应用壳。
+
+## 四、无障碍审计债务
+
+`e2e/a11y.spec.ts` 以 axe-core 做棘轮门禁，只拦"新出现的 serious/critical 类别"。已登记债务：
+
+- `button-name`：部分 Radix Select 触发器在当前状态无可访问名；
+- `color-contrast`：`.border-warning/30` 文本与 `.opacity-70` 文本。
+
+清除一条即从 `KNOWN` 集合删除，规则不放宽。
+

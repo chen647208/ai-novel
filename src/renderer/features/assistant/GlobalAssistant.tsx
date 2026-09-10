@@ -1020,6 +1020,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
           <div className="flex items-center gap-2">
             <Select
               className="h-7 w-auto max-w-[140px] text-xs"
+              aria-label={t('chat.modelSelect')}
               value={usableModel?.id ?? ''}
               onChange={(e) => handleModelChange(e.target.value)}
             >
@@ -1032,6 +1033,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
             </Select>
             <Select
               className="h-7 w-auto max-w-[120px] text-xs"
+              aria-label={t('chat.outputModeSelect')}
               value={outputMode}
               onChange={(e) => setOutputMode(e.target.value as OutputMode)}
             >

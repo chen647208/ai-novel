@@ -45,6 +45,7 @@ const ChapterSummarySection: React.FC<ChapterSummarySectionProps> = ({
         <Select
           value={selectedSummaryPromptId}
           onChange={(event) => onSummaryPromptChange(event.target.value)}
+          aria-label={t('summarySection.selectTemplate')}
           className="h-8 text-xs"
         >
           <option value="">{t('summarySection.selectTemplate')}</option>
