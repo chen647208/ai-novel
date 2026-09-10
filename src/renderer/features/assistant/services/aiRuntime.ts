@@ -14,6 +14,7 @@
 import { ApprovalBroker, PromptAssembler, registerBuiltinSections } from '@core/ai';
 import { BuildProfileRegistry, EventBus } from '@core/plugin';
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
+import { setAiGate } from '@/shared/services/ai/aiGate';
 import { createToolRegistry } from './builtinTools';
 import { createBuiltinSkillCatalog } from './skillCatalogSetup';
 import { AiSessionManager } from './aiSessionManager';
@@ -26,6 +27,13 @@ export const toolRegistry = createToolRegistry();
 export const skillCatalog = createBuiltinSkillCatalog();
 export const approvalBroker = new ApprovalBroker();
 export const eventBus = new EventBus();
+
+// 精简档统一 AI 门：所有经网关的 AI 调用在此按持久化档位实时拒绝（含 6 条直连路径）
+setAiGate(() => {
+  if (typeof window !== 'undefined' && localStorage.getItem(STORAGE_KEYS.profileCurrent) === 'minimal') {
+    throw new Error('minimal 发行档已禁用全部 AI 请求');
+  }
+});
 export const buildProfileRegistry = new BuildProfileRegistry();
 
 export const sessionManager = new AiSessionManager({

@@ -15,6 +15,7 @@
  * abort 通道调用（信号对象不跨进程）；流式事件按 requestId 多路分发。
  */
 import { i18n } from '@/i18n';
+import { assertAiAllowed } from './aiGate';
 import type { AiCallOptions, AiStreamEvent, AIResponse, ModelConfig, StreamingCallback } from '@shared/types';
 
 /** 渲染端调用选项：线上选项 + 本地取消信号。 */
@@ -59,6 +60,11 @@ function failureResponse(error: unknown): AIResponse {
 
 /** 一次性补全（主进程执行，含重试）。错误经 AIResponse.error 返回，不抛出。 */
 export async function gatewayComplete(model: ModelConfig, prompt: string, options?: CallOptions): Promise<AIResponse> {
+  try {
+    assertAiAllowed();
+  } catch (error) {
+    return failureResponse(error);
+  }
   const requestId = nextRequestId();
   const gateway = api();
   const onAbort = (): void => {
@@ -85,6 +91,12 @@ export async function gatewayStream(
   onChunk: StreamingCallback,
   options?: CallOptions,
 ): Promise<void> {
+  try {
+    assertAiAllowed();
+  } catch (error) {
+    onChunk({ ...failureResponse(error), isComplete: true, isStreaming: false });
+    return;
+  }
   const requestId = nextRequestId();
   let gateway: Gateway;
   try {

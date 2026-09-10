@@ -8,14 +8,14 @@
  */
 
 /** 插件状态面板（docs/design/04 §2）：状态汇总 + 错误详情 + 一键禁用/启用。 */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from '@/i18n';
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
-import { pluginHostPromise, saveDisabledList, eventBus } from '@/features/assistant/services/aiRuntime';
-import { PROFILE_CHANGED_EVENT, assemblyTree, profileByName, type AssemblyRow, type Disposable as PluginDisposable, type PluginStatus } from '@core/plugin';
+import { pluginHostPromise, saveDisabledList } from '@/features/assistant/services/aiRuntime';
+import { PROFILE_CHANGED_EVENT, assemblyTree, profileByName, type AssemblyRow, type PluginStatus } from '@core/plugin';
 import type { McpServerConfig } from '../../../../shared/types';
 import { useSettingsStore } from '@/app/stores/settingsStore';
 import { connectServer, disconnectServer, fetchServerTools } from '@/shared/services/mcpClient';
@@ -38,20 +38,12 @@ const PluginSettingsPanel: React.FC = () => {
   const [statuses, setStatuses] = useState<PluginStatus[] | null>(null);
   const [showTree, setShowTree] = useState(false);
   const [profile, setProfile] = useState<string>(() => localStorage.getItem(STORAGE_KEYS.profileCurrent) ?? 'full');
-  const profileVeto = useRef<PluginDisposable | null>(null);
 
   useEffect(() => {
     let alive = true;
     void pluginHostPromise.then((host) => {
       if (alive) setStatuses(host.list());
     });
-    // minimal 档拦截只活内存：重载后按持久化的档位重装，否则回显 minimal 却不拦截
-    if (localStorage.getItem(STORAGE_KEYS.profileCurrent) === 'minimal' && !profileVeto.current) {
-      profileVeto.current = eventBus.intercept('ai.request', () => ({
-        allowed: false,
-        reason: 'minimal 发行档已禁用全部 AI 请求',
-      }));
-    }
     return () => {
       alive = false;
     };
@@ -61,17 +53,7 @@ const PluginSettingsPanel: React.FC = () => {
     setProfile(name);
     localStorage.setItem(STORAGE_KEYS.profileCurrent, name);
     window.dispatchEvent(new CustomEvent(PROFILE_CHANGED_EVENT));
-    if (name === 'minimal') {
-      if (!profileVeto.current) {
-        profileVeto.current = eventBus.intercept('ai.request', () => ({
-          allowed: false,
-          reason: 'minimal 发行档已禁用全部 AI 请求',
-        }));
-      }
-    } else {
-      profileVeto.current?.dispose();
-      profileVeto.current = null;
-    }
+    // AI 拦截由 aiRuntime 的 aiGate 按档位实时生效（覆盖所有网关出口），此处只改档位。
   };
 
   const toggle = (id: string, disabled: boolean): void => {
