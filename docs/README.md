@@ -41,6 +41,7 @@ Trail of Bits、Cloudflare coding standards、WordPress 文档风格指南同款
 - `features/knowledge.md`：知识库、向量检索与世界构建中心
 - `features/assistant.md`：全局助手、智能推荐与上下文分析
 - `features/world.md`：世界观、时间线与一致性检查相关能力
+- `features/characters.md`：角色卡编辑、枚举归一化与人物卡导出
 - `features/settings.md`：模型、Embedding、提示词和存储设置
 - `features/plugins-and-sync.md`：插件系统、同步（冲突副本）、逐条目加密、导出构建管线
 - `features/version.md`：版本信息、更新检查与版本历史

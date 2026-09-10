@@ -11,6 +11,8 @@ import React, { useState } from 'react';
 import { useTranslation } from '@/i18n';
 import { type Character, type Project } from '../../../shared/types';
 import { normalizeGenderId, normalizeRoleId } from './characterKinds';
+import { exportCharacterCard } from './characterCard';
+import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';
 import {
   Dialog,
@@ -22,7 +24,7 @@ import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
-import { Brain, Calculator, CalendarDays, Check, ChevronDown, ChevronRight, ChevronUp, Eye, Flag, Globe2, Home, IdCard, Layers, LineChart, MapPin, ScrollText, Share2, Shield, UserRound } from 'lucide-react';
+import { Brain, Calculator, CalendarDays, Check, ChevronDown, ChevronRight, ChevronUp, Download, Eye, Flag, Globe2, Home, IdCard, Layers, LineChart, MapPin, ScrollText, Share2, Shield, UserRound } from 'lucide-react';
 
 interface CharacterModalProps {
   character: Character;
@@ -239,6 +241,19 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ character, project, isO
 
         {/* 底部 */}
         <DialogFooter className="shrink-0 border-t border-border px-6 py-4">
+          <Button
+            variant="outline"
+            onClick={() => {
+              void exportCharacterCard(character, project.title)
+                .then((r) => {
+                  if (!r.canceled) dialogService.alert(t('card.exportSaved', { path: r.path ?? '' }));
+                })
+                .catch(() => dialogService.alert(t('card.exportFailed')));
+            }}
+          >
+            <Download className="size-4" />
+            {t('card.export')}
+          </Button>
           <Button onClick={onClose}>
             <Check className="size-4" />
             {t('modal.saveAndClose')}
