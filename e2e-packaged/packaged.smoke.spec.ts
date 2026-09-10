@@ -26,6 +26,9 @@ test('打包应用可启动并显示窗口', async () => {
     }
     expect(page, '打包应用窗口未出现').toBeTruthy();
     await expect(page!.locator('body')).toBeVisible({ timeout: 60_000 });
+    // 令牌回归：浅色下背景必须是不透明实色（链条断裂会变透明 → 蒙版透出、整屏发灰）
+    const bg = await page!.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    expect(bg).toBe('rgb(250, 250, 249)');
   } finally {
     await app.close();
   }

@@ -29,6 +29,10 @@ test('dev app launches with a visible app window', async () => {
     expect(page, '应用窗口未出现（仅有 DevTools）').toBeTruthy();
     await expect(page!.locator('body')).toBeVisible({ timeout: 30_000 });
 
+    // 设计令牌回归：浅色下 body 背景必须是不透明实色（令牌链断裂会变成透明 → 蒙版透出、整屏发灰）
+    const bg = await page!.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    expect(bg).toBe('rgb(250, 250, 249)');
+
     const errors: string[] = [];
     page!.on('pageerror', (error) => errors.push(String(error)));
     page!.on('console', (message) => {
