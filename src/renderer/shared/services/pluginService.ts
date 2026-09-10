@@ -139,11 +139,13 @@ export function createContributionInstaller(deps: PluginDeps) {
   };
 }
 
-/** 创建宿主并完成一次完整发现-装载循环（预览环境无文件系统时跳过磁盘发现）。 */
+/** 创建宿主并完成一次完整发现-装载-激活循环（预览环境无文件系统时跳过磁盘发现）。 */
 export async function bootstrapPlugins(deps: PluginDeps, hostVersion: string, disabled: string[]): Promise<PluginHost> {
   const host = new PluginHost({ hostVersion, disabled }, createContributionInstaller(deps));
   try {
     await discoverAndLoad(host, createContributionInstaller(deps));
+    // 发现后立即激活全部（含依赖拓扑）：否则插件停在 discovered，贡献点永不生效
+    host.activateAll();
   } catch {
     // 无 electronAPI：运行时仍可用于内置流程
   }

@@ -60,15 +60,13 @@ describe('pluginService（磁盘发现 + 技能贡献装配）', () => {
     vi.unstubAllGlobals();
   });
 
-  it('发现→装载→技能贡献进入目录；禁用后卸载', async () => {
+  it('发现→装载→自动激活：技能贡献进入目录；禁用后卸载', async () => {
     const catalog = new SkillCatalog();
     const host = await bootstrapPlugins({ skillCatalog: catalog, buildProfiles: new BuildProfileRegistry(), events: new EventBus() }, '2.0.0', []);
 
     const status = host.list().find((s) => s.id === 'com.example.golden3');
-    expect(status?.state).toBe('discovered');
-
-    host.activate('com.example.golden3');
-    expect(status!.state).toBe('active');
+    // bootstrap 即激活（否则贡献点永不生效）
+    expect(status?.state).toBe('active');
     expect(catalog.get('golden3-extra')?.body).toContain('扩展方法论');
 
     host.disable('com.example.golden3');
