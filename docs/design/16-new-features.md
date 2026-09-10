@@ -5,9 +5,8 @@
 1. **人物卡导出**（已实现）：角色编辑弹窗「导出人物卡」→ Markdown
    （标题 + 书名 + 非空字段），桌面端另存为 `.md`，网页端回退下载。
    构建纯函数 `features/characters/characterCard.ts`，标签随界面语言。
-2. **封面导出**（规划）：从书名/作者/主题色生成封面图，导出 PNG。
-   候选实现：离屏 canvas 绘制标题页，或复用 `printPdf` 的隐藏窗口渲染
-   HTML 后截图。产出可附到 ePub 打包（`core/build/package.ts`）。
+2. **封面导出**（已实现）：`core/build/cover.ts` 由书名/简介生成竖版 SVG，
+   渲染端 `shared/services/coverService.ts` 光栅化为 PNG 另存（无 canvas 时退回 SVG）；
 3. **文档附件**（规划）：助手聊天除图片外支持 PDF/纯文本文档，
    主进程提取文本后作为上下文并入首轮提示词（不直接塞二进制给模型）。
    适配器已支持图片形态（`AIMessageImage`），文档走文本提取路径。

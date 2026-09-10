@@ -71,6 +71,18 @@ export const fileProvider: Provider = {
       return true;
     });
 
+    ipcMain.handle(IPC.writeBinaryFile, async (_event, filePath: string, base64: string) => {
+      assertString(filePath, 'filePath');
+      assertString(base64, 'base64');
+      // 只接受标准 base64，解码后落二进制（封面 PNG 等）
+      if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64)) {
+        throw new TypeError('Invalid base64 payload');
+      }
+      await fs.mkdir(path.dirname(filePath), { recursive: true });
+      await fs.writeFile(filePath, Buffer.from(base64, 'base64'));
+      return true;
+    });
+
     ipcMain.handle(IPC.fileExists, async (_event, filePath: string) => {
       assertString(filePath, 'filePath');
       try {

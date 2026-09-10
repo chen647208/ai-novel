@@ -39,3 +39,9 @@ export {
   buildDocxFiles,
   htmlToDocxParagraphs,
 } from './package.js';
+export {
+  buildCoverSvg,
+  escapeXml,
+  wrapTitle,
+  type CoverOptions,
+} from './cover.js';

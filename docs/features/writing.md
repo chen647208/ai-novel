@@ -52,6 +52,8 @@
 - 统计面板的 `builtCharCount` 与导出同源（`runBuild` 单一口径）。
 - Profile 支持 JSON/YAML 双序列化（`serializeProfileYaml`/`parseProfileYaml`），
   `.yml` 可 diff 可分享。
+- 封面导出：书架卡片菜单「导出封面」由 `core/build/cover.ts` 生成竖版 SVG，
+  经 `shared/services/coverService.ts` 光栅化为 PNG 另存；环境无 canvas 时退回 SVG。
 
 ## 无可用模型时的行为
 

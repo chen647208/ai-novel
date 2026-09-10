@@ -1075,6 +1075,8 @@ export interface ElectronAPI {
   getAppDataPath: () => Promise<string>;
   readFile: (filePath: string) => Promise<string>;
   writeFile: (filePath: string, data: string) => Promise<boolean>;
+  /** 写入二进制文件（base64 解码后落盘；封面 PNG 等）。 */
+  writeBinaryFile: (filePath: string, base64: string) => Promise<boolean>;
   exists: (filePath: string) => Promise<boolean>;
   unlink: (filePath: string) => Promise<boolean>;
 

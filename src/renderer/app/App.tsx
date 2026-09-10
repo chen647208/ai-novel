@@ -23,6 +23,8 @@ import DialogHost from './app-shell/DialogHost';
 import ToastHost from './app-shell/ToastHost';
 import ResetAlertDialog from './app-shell/ResetAlertDialog';
 import SettingsModalHost from './app-shell/SettingsModalHost';
+import { dialogService } from '../shared/services/dialogService';
+import { exportCover } from '../shared/services/coverService';
 import WorkspaceView from './app-shell/WorkspaceView';
 import type { SectionId } from './app-shell/WorkspaceNav';
 import GlobalAssistant from '../features/assistant/GlobalAssistant';
@@ -129,6 +131,11 @@ const App: React.FC = () => {
     setSection('inspiration'); setEditingChapterId(null); setHandwriteBypass(false); setResetKey(k => k + 1);
   }, []);
   const actions = useBookActions(enterWorkspace);
+  const handleExportCover = useCallback((book: Project) => {
+    void exportCover(book)
+      .then((r) => { if (!r.canceled) dialogService.alert(t('cover.exportSaved', { path: r.path ?? '' })); })
+      .catch(() => dialogService.alert(t('cover.exportFailed')));
+  }, [t]);
   const updateProject = useCallback((updates: Partial<Project>) => {
     useProjectStore.getState().updateActiveProject(updates);
   }, []);
@@ -216,6 +223,7 @@ const App: React.FC = () => {
               onDeleteBook={actions.deleteBook}
               onDuplicateBook={actions.duplicateBook}
               onExportBook={actions.exportBook}
+              onExportCover={handleExportCover}
               onImportBook={actions.importBook}
               onImportAll={actions.importAllData}
               onRestoreTrash={actions.restoreTrashBook}

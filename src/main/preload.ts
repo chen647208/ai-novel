@@ -20,6 +20,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getAppDataPath: () => ipcRenderer.invoke(IPC.getAppDataPath),
   readFile: (filePath: string) => ipcRenderer.invoke(IPC.readFile, filePath),
   writeFile: (filePath: string, data: string) => ipcRenderer.invoke(IPC.writeFile, filePath, data),
+  writeBinaryFile: (filePath: string, base64: string) => ipcRenderer.invoke(IPC.writeBinaryFile, filePath, base64),
   exists: (filePath: string) => ipcRenderer.invoke(IPC.fileExists, filePath),
   unlink: (filePath: string) => ipcRenderer.invoke(IPC.deleteFile, filePath),
 

@@ -33,6 +33,7 @@ import {
   Copy,
   Download,
   FolderOpen,
+  Image as ImageIcon,
   LayoutGrid,
   List,
   ListOrdered,
@@ -62,6 +63,8 @@ interface BookshelfProps {
   onDeleteBook: (bookId: string) => void;
   onDuplicateBook: (bookId: string) => void;
   onExportBook: (book: Project) => void;
+  /** 导出封面图（PNG，失败退回 SVG）。 */
+  onExportCover: (book: Project) => void;
   onImportBook: () => void;
   onImportAll: () => Promise<void>;
   onRestoreTrash: (bookId: string) => Promise<void>;
@@ -101,6 +104,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({
   onDeleteBook,
   onDuplicateBook,
   onExportBook,
+  onExportCover,
   onImportBook,
   onImportAll,
   onRestoreTrash,
@@ -425,6 +429,10 @@ const Bookshelf: React.FC<BookshelfProps> = ({
                         <DropdownMenuItem onSelect={() => onExportBook(book)}>
                           <Download className="size-4" />
                           {t('common:export')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => onExportCover(book)}>
+                          <ImageIcon className="size-4" />
+                          {t('app:cover.action')}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem variant="destructive" onSelect={() => onDeleteBook(book.id)}>

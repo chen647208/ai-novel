@@ -15,6 +15,7 @@ export const IPC = {
   getAppDataPath: 'get-app-data-path',
   readFile: 'read-file',
   writeFile: 'write-file',
+  writeBinaryFile: 'write-binary-file',
   fileExists: 'file-exists',
   deleteFile: 'delete-file',
   openFileDialog: 'open-file-dialog',

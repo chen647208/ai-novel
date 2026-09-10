@@ -31,14 +31,19 @@
     "characters": "角色"
   },
   "search": {
-    "title": "全文检索",
-    "placeholder": "搜索全部书籍的正文与知识库…",
+    "title": "全文检索",    "placeholder": "搜索全部书籍的正文与知识库…",
     "hint": "输入至少 {{min}} 个字开始检索。",
     "noResults": "没有匹配「{{query}}」的内容。",
     "unknownBook": "未知书籍",
     "resultChapter": "章节",
     "resultKnowledge": "知识库",
     "open": "全文检索"
+  },
+  "cover": {
+    "action": "导出封面",
+    "exportTitle": "导出封面",
+    "exportSaved": "封面已导出：{{path}}",
+    "exportFailed": "导出封面失败。"
   },
   "model": {
     "notConfiguredKey": "当前模型尚未配置 API Key / 端点",
