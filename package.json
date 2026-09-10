@@ -65,7 +65,7 @@
     "@lezer/highlight": "^1.2.3",
     "@radix-ui/react-select": "^2.2.6",
     "@sqlite.org/sqlite-wasm": "^3.53.0-build1",
-    "@tiptap/core": "^2.27.3",
+    "@tiptap/core": "^3.31.3",
     "@tiptap/pm": "^2.27.3",
     "@tiptap/react": "^2.27.3",
     "@tiptap/starter-kit": "^2.27.3",
