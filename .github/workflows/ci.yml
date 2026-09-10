@@ -21,7 +21,7 @@ jobs:
       code: ${{ steps.filter.outputs.code }}
     steps:
       - name: 检出代码（含历史，供 diff）
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 检出代码
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: 配置 Node
         uses: actions/setup-node@v7
@@ -65,7 +65,7 @@ jobs:
     if: needs.changes.outputs.code == 'true'
     steps:
       - name: 检出代码
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: 安装系统依赖（Electron 运行库，供构建校验）
         run: |
