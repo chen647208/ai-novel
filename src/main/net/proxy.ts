@@ -102,13 +102,34 @@ export function buildChromiumProxyRules(proxyUrl: string): ChromiumProxyRules {
   return { mode: 'fixed_servers', proxyRules: `http=${host};https=${host}` };
 }
 
-/** 网关 fetch 单出口：loopback 目标强制直连（Ollama 豁免），其余走全局 dispatcher。 */
+/** AI 请求首响应超时（毫秒）：仅覆盖建连到响应头，响应体/流式读取不受此限。 */
+export const AI_REQUEST_TIMEOUT_MS = 60_000;
+
+/**
+ * 网关 fetch 单出口：loopback 目标强制直连（Ollama 豁免），其余走全局 dispatcher。
+ * 统一加首响应超时：到点前未返回响应头即中止，避免上游挂起导致请求永久悬挂；
+ * 拿到响应头后清除计时器，故流式长响应不会被误杀。
+ */
 export async function proxiedFetch(url: string, init?: RequestInit): Promise<Response> {
-  if (shouldBypassProxy(url)) {
-    const res = await undiciFetch(url, { ...(init as UndiciRequestInit | undefined), dispatcher: new Agent() });
-    return res as unknown as Response;
+  const external = init?.signal ?? undefined;
+  const controller = new AbortController();
+  const onAbort = (): void => controller.abort(external?.reason);
+  if (external) {
+    if (external.aborted) controller.abort(external.reason);
+    else external.addEventListener('abort', onAbort, { once: true });
   }
-  return fetch(url, init);
+  const timer = setTimeout(() => controller.abort(new DOMException('AI request timed out', 'TimeoutError')), AI_REQUEST_TIMEOUT_MS);
+  try {
+    const withSignal: RequestInit = { ...(init ?? {}), signal: controller.signal };
+    if (shouldBypassProxy(url)) {
+      const res = await undiciFetch(url, { ...(withSignal as UndiciRequestInit), dispatcher: new Agent() });
+      return res as unknown as Response;
+    }
+    return await fetch(url, withSignal);
+  } finally {
+    clearTimeout(timer);
+    external?.removeEventListener('abort', onAbort);
+  }
 }
 
 /** 连通测试：经给定代理（空即直连）GET 探测地址，超时或异常即失败。 */
