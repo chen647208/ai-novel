@@ -416,6 +416,49 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     }
   };
 
+  // 章节拆分：按光标把本章正文切成两段，后段成为紧随其后的新章
+  const handleSplitChapter = useCallback(() => {
+    const parts = editorRef.current?.splitAtCursor();
+    if (!parts) {
+      dialogService.alert(t('editor.splitNeedCursor'));
+      return;
+    }
+    const chapters = projectRef.current.chapters;
+    const idx = chapters.findIndex((c) => c.id === activeChapterId);
+    if (idx < 0) return;
+    const current = chapters[idx];
+    if (!current) return;
+    const nextOrder = chapters.reduce((m, c) => Math.max(m, c.order), -1) + 1;
+    const newChapter: Chapter = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      title: t('editor.splitNewTitle', { title: current.title }),
+      summary: '',
+      content: parts.after,
+      order: nextOrder,
+    };
+    const updated = [...chapters];
+    updated[idx] = { ...current, content: parts.before };
+    updated.splice(idx + 1, 0, newChapter);
+    onUpdate({ chapters: updated });
+    setActiveChapterId(newChapter.id);
+  }, [activeChapterId, onUpdate, t]);
+
+  // 章节合并：把下一章正文并入本章，删除下一章（正文全程保留，不漏字）
+  const handleMergeNextChapter = useCallback(async () => {
+    const chapters = projectRef.current.chapters;
+    const idx = chapters.findIndex((c) => c.id === activeChapterId);
+    if (idx < 0 || idx >= chapters.length - 1) return;
+    const current = chapters[idx];
+    const next = chapters[idx + 1];
+    if (!current || !next) return;
+    if (!(await dialogService.confirm({ message: t('editor.mergeConfirm', { title: next.title }) }))) return;
+    const merged = [current.content, next.content].filter((s) => s && s.trim().length > 0).join('\n\n');
+    const updated = [...chapters];
+    updated[idx] = { ...current, content: merged };
+    updated.splice(idx + 1, 1);
+    onUpdate({ chapters: updated });
+  }, [activeChapterId, onUpdate, t]);
+
   const handleOpenExportModal = () => {
     const allIds = new Set(project.chapters.map(c => c.id));
     setSelectedExportChapterIds(allIds);
@@ -1400,6 +1443,10 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           spellcheckOn={spellcheckOn}
           onToggleSpellcheck={toggleSpellcheck}
           onToggleFind={() => setFindOpen((v) => !v)}
+          canSplitChapter={!!activeChapterId && (activeChapter?.content.trim().length ?? 0) > 0}
+          canMergeChapter={project.chapters.findIndex(c => c.id === activeChapterId) >= 0 && project.chapters.findIndex(c => c.id === activeChapterId) < project.chapters.length - 1}
+          onSplitChapter={handleSplitChapter}
+          onMergeChapter={() => void handleMergeNextChapter()}
         />
 
         {project.chapters.length === 0 ? (

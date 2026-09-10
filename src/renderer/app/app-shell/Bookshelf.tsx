@@ -66,6 +66,8 @@ interface BookshelfProps {
   onImportAll: () => Promise<void>;
   onRestoreTrash: (bookId: string) => Promise<void>;
   onPurgeTrash: (bookId: string) => Promise<void>;
+  /** 打开跨书全文检索弹窗。 */
+  onOpenSearch: () => void;
 }
 
 /** 统计全书正文字数（CJK 按字符计）。 */
@@ -103,6 +105,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({
   onImportAll,
   onRestoreTrash,
   onPurgeTrash,
+  onOpenSearch,
 }) => {
   const { t, i18n } = useTranslation(['app', 'books', 'common']);
   const [query, setQuery] = useState('');
@@ -177,6 +180,10 @@ const Bookshelf: React.FC<BookshelfProps> = ({
           description={t('app:bookshelf.subtitle')}
           actions={
             <>
+              <Button variant="outline" size="sm" onClick={onOpenSearch}>
+                <Search className="size-4" />
+                {t('app:search.open')}
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">

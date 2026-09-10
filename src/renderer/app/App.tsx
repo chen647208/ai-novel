@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import type { Project } from '../../shared/types';
 import { TooltipProvider } from '@/shared/ui/Tooltip';
 import Bookshelf from './app-shell/Bookshelf';
+import GlobalSearchModal from './app-shell/GlobalSearchModal';
 import DialogHost from './app-shell/DialogHost';
 import ToastHost from './app-shell/ToastHost';
 import ResetAlertDialog from './app-shell/ResetAlertDialog';
@@ -60,6 +61,7 @@ const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHistoryViewerOpen, setIsHistoryViewerOpen] = useState(false);
   const [isVersionCheckOpen, setIsVersionCheckOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [assistantOpenPref, setAssistantOpenPref] = useViewPreference<'open' | 'closed'>('assistant.open', 'open');
   const [assistantWidthPref, setAssistantWidthPref] = useViewPreference<string>('assistant.width', '380');
@@ -218,6 +220,7 @@ const App: React.FC = () => {
               onImportAll={actions.importAllData}
               onRestoreTrash={actions.restoreTrashBook}
               onPurgeTrash={actions.purgeTrashBook}
+              onOpenSearch={() => setIsSearchOpen(true)}
             />
           </div>
         ) : (
@@ -295,6 +298,17 @@ const App: React.FC = () => {
           <AIHistoryViewer project={activeProject} onUpdate={updateProject} onClose={() => setIsHistoryViewerOpen(false)} />
         )}
         <VersionCheckModal isOpen={isVersionCheckOpen} onClose={() => setIsVersionCheckOpen(false)} />
+        <GlobalSearchModal
+          isOpen={isSearchOpen}
+          onClose={() => setIsSearchOpen(false)}
+          onOpenResult={(bookId, chapterId) => {
+            actions.openBook(bookId);
+            if (chapterId) {
+              setEditingChapterId(chapterId);
+              setSection('writing');
+            }
+          }}
+        />
       </div>
     </TooltipProvider>
   );

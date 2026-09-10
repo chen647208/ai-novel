@@ -72,6 +72,9 @@
   },
   "editor": {
     "clearContentConfirm": "Clear all content of the current chapter?",
+    "splitNeedCursor": "Place the cursor where you want to split (not at the very start or end).",
+    "splitNewTitle": "{{title}} (continued)",
+    "mergeConfirm": "Merge \"{{title}}\" into this chapter and delete it?",
     "selectAtLeastOne": "Please select at least one chapter.",
     "exportFailed": "Export failed: {{error}}",
     "unknownError": "unknown error",
@@ -231,6 +234,8 @@
     "retryTitle": "Regenerate with the last settings",
     "spellTitle": "Spellcheck toggle (built-in)",
     "findTitle": "Find & replace (Ctrl+F)",
+    "splitChapterTitle": "Split into a new chapter at cursor",
+    "mergeChapterTitle": "Merge with next chapter",
     "exitFocus": "Exit focus",
     "enterFocusTitle": "Enter focus mode",
     "exitFocusTitle": "Exit focus mode",

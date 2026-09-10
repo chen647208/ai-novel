@@ -192,6 +192,24 @@ const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function T
           return false;
         }
       },
+      splitAtCursor() {
+        if (!editor) return null;
+        try {
+          const { state } = editor;
+          const pos = state.selection.from;
+          const doc = state.doc;
+          // 光标在文首/文尾无可拆内容
+          if (pos <= 0 || pos >= doc.content.size) return null;
+          const before = doc.cut(0, pos);
+          const after = doc.cut(pos, doc.content.size);
+          return {
+            before: pmDocToDsl(before.toJSON() as PmNode),
+            after: pmDocToDsl(after.toJSON() as PmNode),
+          };
+        } catch {
+          return null;
+        }
+      },
     }),
     [editor],
   );

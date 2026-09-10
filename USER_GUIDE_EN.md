@@ -231,6 +231,9 @@ Hongyue Creation uses five sections guiding you through a complete novel (switch
    - Everything autosaves
    - Browse chapter history versions
    - Export chapter content
+   - Split/merge chapters: the toolbar scissors splits at the cursor into a new chapter; merge folds the next chapter into this one
+   - Find & replace: `Ctrl+F` opens the in-chapter find bar
+   - Cross-book full-text search: "Full-text search" at the top of the bookshelf searches every book's text and knowledge base; click to jump there
 
 **Tips**:
 - Finish the draft before polishing

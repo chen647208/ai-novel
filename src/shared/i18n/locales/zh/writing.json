@@ -72,6 +72,9 @@
   },
   "editor": {
     "clearContentConfirm": "确定要清空当前章节的所有正文内容吗？",
+    "splitNeedCursor": "请把光标放在要拆分的位置（不能在文首或文尾）。",
+    "splitNewTitle": "{{title}}（续）",
+    "mergeConfirm": "将《{{title}}》的正文并入本章并删除该章，确定吗？",
     "selectAtLeastOne": "请至少选择一个章节。",
     "exportFailed": "导出失败：{{error}}",
     "unknownError": "未知错误",
@@ -231,6 +234,8 @@
     "retryTitle": "按上次参数重新生成",
     "spellTitle": "拼写检查开关（浏览器内置）",
     "findTitle": "查找替换（Ctrl+F）",
+    "splitChapterTitle": "从光标处拆分为新章",
+    "mergeChapterTitle": "与下一章合并",
     "exitFocus": "退出专注",
     "enterFocusTitle": "进入专注模式",
     "exitFocusTitle": "退出专注模式",

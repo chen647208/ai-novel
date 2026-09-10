@@ -11,6 +11,10 @@
 - `AIHistoryViewer.tsx`：AI 历史记录查看器
 - `components/`：写作域子组件目录
 - `components/history/AIHistoryRecordList.tsx`：历史记录列表展示
+- `components/WritingEditorToolbar.tsx`：工具条（撤销/重做、查找、章节拆分/合并、专注/打字机等）
+- `components/ChapterNavigationSection.tsx`：章节列表与多选批量
+- `components/FindBar.tsx`：章内查找替换
+- `app/app-shell/GlobalSearchModal.tsx`（书籍库侧）：跨书全文检索
 - `services/summaryExtractionService.ts`：摘要提取服务
 - `utils.ts`：写作域通用工具
 - `types.ts`：写作域本地类型
@@ -23,6 +27,21 @@
 - `WritingSidebar.tsx` 负责章节导航、摘要区域和辅助信息展示
 - `WritingEditorCanvas.tsx` 负责正文输入区与状态遮罩
 - `AIHistoryViewer.tsx` 与 `AIHistoryRecordList.tsx` 负责历史记录筛选、排序、展示与操作
+
+## 章节拆分与合并
+
+- 拆分（工具条剪刀）：按当前光标把本章正文切成两段，后段成为紧随其后的新章并切换过去；
+  光标在文首/文尾或空章时提示不可拆（`TipTapCanvas` 的 `splitAtCursor` 走 PM `doc.cut`，
+  段落中点拆分会保留两侧文本）。
+- 合并（工具条合并）：把下一章正文并入本章并删除该章，正文全程保留、不漏字；
+  仅当存在下一章时可用。
+
+## 全文检索（跨书）
+
+- 书籍库顶部「全文检索」打开 `GlobalSearchModal`：跨全部书籍的章节正文与知识库检索，
+  命中显示书名/章节名与高亮片段，点击直接打开对应书与章节。
+- 检索走 `repository.search`（SQLite 为 FTS5，JSON 后端为子串扫描）；
+  trigram 分词器下限 3 字，少于 3 字 SQLite 后端无结果。
 
 ## 导出与成稿字数
 

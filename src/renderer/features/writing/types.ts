@@ -77,6 +77,8 @@ export interface NovelEditorHandle {
   findAll(query: string, caseSensitive: boolean): Array<{ from: number; to: number }>;
   /** 查找替换支撑：区间替换为纯文本，返回是否成功。 */
   replaceRange(from: number, to: number, text: string): boolean;
+  /** 章节拆分：按当前光标把正文切成两段 DSL（光标在文首/文尾或空章返回 null）。 */
+  splitAtCursor(): { before: string; after: string } | null;
 }
 
 export interface GenerationModalState {
@@ -172,6 +174,11 @@ export interface WritingEditorToolbarProps {
   spellcheckOn: boolean;
   onToggleSpellcheck: () => void;
   onToggleFind: () => void;
+  /** 章节拆分/合并：拆分按光标切分，合并把下一章并入本章。 */
+  canSplitChapter: boolean;
+  canMergeChapter: boolean;
+  onSplitChapter: () => void;
+  onMergeChapter: () => void;
 }
 
 export interface WritingSelectionMenuProps {
