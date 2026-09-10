@@ -130,6 +130,9 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
       <div
         ref={chatContainerRef}
         className=" flex-1 space-y-4 overflow-y-auto bg-muted/20 p-4"
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions text"
         style={{ display: (contextPanelOpen || editPanelOpen) ? 'none' : 'block' }}
       >
         {messages.length === 0 && (

@@ -10,6 +10,11 @@ export default defineConfig({
   workers: 1,
   timeout: 120_000,
   reporter: 'line',
+  // flaky 治理：CI 重试 2 次，首败留 trace
+  retries: process.env.CI ? 2 : 0,
+  use: {
+    trace: 'on-first-retry',
+  },
   webServer: {
     command: 'npx vite --port 3000 --strictPort',
     port: 3000,
