@@ -228,6 +228,27 @@ export const ProviderEditor: React.FC<ProviderEditorProps> = ({
             </div>
             <Textarea className="min-h-[96px] text-sm" value={model.systemPrompt || ''} onChange={(e) => onUpdate({ systemPrompt: e.target.value })} placeholder={t('models.systemPromptPlaceholder')} />
           </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('models.priceLabel')}</label>
+              <span className="text-xs text-muted-foreground">{t('models.optional')}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number" min="0" step="0.01" className="font-mono text-xs"
+                value={model.priceInPerM ?? ''}
+                onChange={(e) => onUpdate({ priceInPerM: e.target.value === '' ? undefined : Number(e.target.value) })}
+                placeholder={t('models.priceInPlaceholder')}
+              />
+              <Input
+                type="number" min="0" step="0.01" className="font-mono text-xs"
+                value={model.priceOutPerM ?? ''}
+                onChange={(e) => onUpdate({ priceOutPerM: e.target.value === '' ? undefined : Number(e.target.value) })}
+                placeholder={t('models.priceOutPlaceholder')}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">{t('models.priceHint')}</p>
+          </div>
         </div>
       </div>
 

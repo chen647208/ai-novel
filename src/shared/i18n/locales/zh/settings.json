@@ -171,6 +171,10 @@
     "optional": "可选",
     "maxTokensPlaceholder": "默认由模型决定",
     "maxTokensHint": "限制AI输出的最大长度，留空使用模型默认值",
+    "priceLabel": "单价（美元 / 百万 token）",
+    "priceInPlaceholder": "输入价",
+    "priceOutPlaceholder": "输出价",
+    "priceHint": "填写后用于用量费用估算；留空则不计费。",
     "systemPromptLabel": "系统提示词",
     "systemPromptPlaceholder": "指导AI模型行为的系统级指令...",
     "systemPromptHint": "系统级指令，用于指导模型的基本行为",
@@ -425,5 +429,24 @@
       "minimal": "纯写作（禁 AI）",
       "hint": "纯写作档即时禁用全部 AI 请求（会话与工具），随时可切回。"
     }
+  },
+  "usage": {
+    "title": "用量与费用",
+    "rangeLabel": "统计范围",
+    "rangeToday": "今天",
+    "range7d": "近 7 天",
+    "range30d": "近 30 天",
+    "rangeAll": "全部",
+    "refresh": "刷新",
+    "clear": "清空",
+    "requests": "请求 {{count}} 次",
+    "input": "输入 {{count}} token",
+    "output": "输出 {{count}} token",
+    "cost": "费用约 ${{cost}}",
+    "costUnknown": "费用：未配置单价",
+    "empty": "该范围内没有用量记录。",
+    "hourlyLimitLabel": "每小时上限",
+    "hourlyLimitHint": "次（0 为不限）",
+    "unlimited": "不限"
   }
 }

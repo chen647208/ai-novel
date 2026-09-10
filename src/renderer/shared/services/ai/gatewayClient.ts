@@ -16,6 +16,7 @@
  */
 import { i18n } from '@/i18n';
 import { assertAiAllowed } from './aiGate';
+import { recordUsage } from './usageTracker';
 import type { AiCallOptions, AiStreamEvent, AIResponse, ModelConfig, StreamingCallback } from '@shared/types';
 
 /** 渲染端调用选项：线上选项 + 本地取消信号。 */
@@ -73,7 +74,19 @@ export async function gatewayComplete(model: ModelConfig, prompt: string, option
   options?.signal?.addEventListener('abort', onAbort, { once: true });
   try {
     if (options?.signal?.aborted) return cancelledResponse();
-    return await gateway.complete(requestId, model, prompt, { retries: options?.retries, images: options?.images });
+    const response = await gateway.complete(requestId, model, prompt, { retries: options?.retries, images: options?.images });
+    if (!response.error && response.tokens) {
+      recordUsage({
+        modelId: model.id,
+        modelName: model.name,
+        prompt: response.tokens.prompt ?? 0,
+        completion: response.tokens.completion ?? 0,
+        cacheRead: response.tokens.cacheRead,
+        cacheWrite: response.tokens.cacheWrite,
+        at: Date.now(),
+      });
+    }
+    return response;
   } catch (error) {
     return failureResponse(error);
   } finally {

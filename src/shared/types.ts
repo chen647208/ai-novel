@@ -43,6 +43,10 @@ export interface ModelConfig {
   supportsStreaming?: boolean;
   /** 视觉支持：false 显式关闭；缺席按支持处理（主流对话模型均支持） */
   supportsVision?: boolean;
+  /** 自定义输入单价（美元 / 100 万 token）；缺省不参与费用估算。 */
+  priceInPerM?: number;
+  /** 自定义输出单价（美元 / 100 万 token）；缺省不参与费用估算。 */
+  priceOutPerM?: number;
   
   // 默认输出模式（新增）
   defaultOutputMode?: OutputMode;

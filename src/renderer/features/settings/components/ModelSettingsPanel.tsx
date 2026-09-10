@@ -14,6 +14,7 @@ import { isModelConfigured } from '../../../shared/utils/modelReadiness';
 import { isProviderEnabled } from '../utils/providerHealth';
 import ProviderSidebar, { type ProviderFilter } from './ProviderSidebar';
 import ProviderEditor from './ProviderEditor';
+import UsageSummaryCard from './UsageSummaryCard';
 import { PlusCircle } from 'lucide-react';
 
 /**
@@ -91,6 +92,7 @@ const ModelSettingsPanel: React.FC<ModelSettingsPanelProps> = ({
           <PlusCircle className="size-5 transition-transform group-hover:scale-110" />
           <span>{t('models.addProvider')}</span>
         </button>
+        <UsageSummaryCard />
       </div>
     </div>
   );

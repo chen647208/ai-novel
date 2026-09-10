@@ -171,6 +171,10 @@
     "optional": "Optional",
     "maxTokensPlaceholder": "Decided by the model by default",
     "maxTokensHint": "Limits the maximum output length; leave blank to use the model default",
+    "priceLabel": "Price (USD / 1M tokens)",
+    "priceInPlaceholder": "Input",
+    "priceOutPlaceholder": "Output",
+    "priceHint": "Used for cost estimation. Leave blank to skip billing.",
     "systemPromptLabel": "System Prompt",
     "systemPromptPlaceholder": "System-level instructions guiding the model's behavior...",
     "systemPromptHint": "System-level instructions that guide the model's basic behavior",
@@ -425,5 +429,24 @@
       "minimal": "Minimal (no AI)",
       "hint": "minimal disables all AI requests (sessions and tools) immediately; switch back anytime."
     }
+  },
+  "usage": {
+    "title": "Usage & cost",
+    "rangeLabel": "Range",
+    "rangeToday": "Today",
+    "range7d": "Last 7 days",
+    "range30d": "Last 30 days",
+    "rangeAll": "All",
+    "refresh": "Refresh",
+    "clear": "Clear",
+    "requests": "{{count}} requests",
+    "input": "Input {{count}} tokens",
+    "output": "Output {{count}} tokens",
+    "cost": "≈ ${{cost}}",
+    "costUnknown": "Cost: no price configured",
+    "empty": "No usage in this range.",
+    "hourlyLimitLabel": "Hourly limit",
+    "hourlyLimitHint": "requests (0 = unlimited)",
+    "unlimited": "Unlimited"
   }
 }

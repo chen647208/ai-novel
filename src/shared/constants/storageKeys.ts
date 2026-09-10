@@ -22,6 +22,8 @@ export const STORAGE_KEYS = {
   editorTypewriter: 'editor.typewriter',
   pluginsDisabled: 'plugins.disabled',
   errorLogs: 'novelocal_error_logs',
+  aiUsage: 'ai.usage',
+  aiHourlyLimit: 'ai.hourlyLimit',
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

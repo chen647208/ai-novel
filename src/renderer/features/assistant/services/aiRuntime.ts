@@ -16,6 +16,7 @@ import { EventBus } from '@core/plugin';
 import { buildProfileRegistry } from '@/shared/services/buildProfiles';
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import { setAiGate } from '@/shared/services/ai/aiGate';
+import { isOverHourlyLimit } from '@/shared/services/ai/usageTracker';
 import { createToolRegistry } from './builtinTools';
 import { createBuiltinSkillCatalog } from './skillCatalogSetup';
 import { AiSessionManager } from './aiSessionManager';
@@ -29,10 +30,13 @@ export const skillCatalog = createBuiltinSkillCatalog();
 export const approvalBroker = new ApprovalBroker();
 export const eventBus = new EventBus();
 
-// 精简档统一 AI 门：所有经网关的 AI 调用在此按持久化档位实时拒绝（含 6 条直连路径）
+// 精简档 + 每小时配额统一 AI 门：所有经网关的 AI 调用在此实时校验
 setAiGate(() => {
   if (typeof window !== 'undefined' && localStorage.getItem(STORAGE_KEYS.profileCurrent) === 'minimal') {
     throw new Error('minimal 发行档已禁用全部 AI 请求');
+  }
+  if (isOverHourlyLimit()) {
+    throw new Error('已达每小时 AI 请求上限，请在设置中调整或稍后重试');
   }
 });
 
