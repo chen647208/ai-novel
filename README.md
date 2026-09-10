@@ -68,7 +68,7 @@ vscode-hongyue/          # VS Code 线：novelDsl 语法扩展
 ## 常用命令
 
 - `npm run dev` / `npm run electron:dev`：开发模式
-- `npm run verify`：本地完整校验（lint + 类型 + 测试 + 许可头 + 构建），与 CI 一致
+- `npm run verify`：本地完整校验（lock 预检 + lint + 类型 + 测试覆盖率 + 许可头 + 密钥扫描 + 双端构建），与 CI 一致
 - `npm run docs:dev` / `docs:build`：文档站本地预览 / 静态构建
 - `npm run dist:win` / `dist:mac` / `dist:linux`：平台安装包（x64 + arm64）
 

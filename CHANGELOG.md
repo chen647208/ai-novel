@@ -8,6 +8,26 @@
 ## [Unreleased]
 
 ### 新增
+- 助手进阶：图片附件（多模态）、计划模式、外部 MCP 客户端（stdio）
+- 系统：托盘常驻与开机自启、HTTP/SOCKS5 代理与连通测试、可自定义快捷键、书籍标签分组
+- 导出矩阵：ePub / DOCX 打包；写作管理（章节状态/批量/卡片视图/历史 diff）与章节拆分合并
+- 跨书全文检索（正文与知识库）；VN 线 novelDsl 语法扩展（`vscode-hongyue`）
+- 原生自动更新（electron-updater）；自动备份默认开启并按间隔执行
+
+### 变更
+- 品牌与标识统一为 hongyue：包名、appId、数据目录、插件 id、SDK、事件名；仓库名更名 hongyue-creation
+- 数据目录更名并自动迁移（旧目录保留 `.legacy`）
+- 打包版启用 CSP 与渲染沙箱；主进程异常兜底
+- CI 增加运行期依赖审计（`npm audit --omit=dev --audit-level=high`）与 Dependabot
+
+### 修复
+- 复制书籍/清空项目丢失世界观/地点/势力/时间线/规则体系/伏笔
+- 新建书籍描述未入库；示例模板返回空白书
+- 恢复备份/全量导入未整库落盘；导出对话框父窗口空值崩溃
+
+## [1.0.0] - 2026-09-05
+
+### 新增
 - CI/CD：GitHub Actions 持续集成（类型检查 + 测试 + 构建 + 图标校验）与基于 `v*` 标签的三端桌面包自动发布
 - AI 调用层重构：适配器架构（OpenAI 兼容 / Gemini 原生 / Ollama）、统一流式、可取消、指数退避重试、结构化 JSON 输出、Gemini 真流式
 - 写作体验：章节编辑快照（自动/手动/清空前）与恢复、本章+全书+今日统计、专注模式、多格式导出（TXT/Markdown/HTML，Electron 原生另存为）
@@ -22,13 +42,19 @@
 - 工具栏「自动保存时间」从不更新
 
 ### 变更
-- 打包配置统一到 `electron-builder.yml`，移除会破坏运行时的 Electron 运行时文件排除项（修复三端打包产物无法启动）
+- 打包配置统一到 `electron-builder.yml`，移除会破坏运行时的 Electron 运行时文件排除项
 - 渲染层依赖移入 devDependencies，安装包体积显著下降
 - 清理死代码：移除约 66 处未使用导入/声明、9 个 `@deprecated` 方法、失效 IPC 与孤儿脚本；永久开启 `noUnusedLocals`
 - 移除仓库垃圾：`.codex-recovery`、`.vscode`、`metadata.json` 及无用脚本；补充 `LICENSE`
 - 许可证由 MIT 改为 **AGPL-3.0 + 商业授权**双重许可；桌面包架构补充 Windows/Linux arm64，放弃 32 位
-- 升级 **Electron 39 → 44**（Chromium 152 / Node 24 / V8 15.2），electron-builder 26.0.12 → 26.15.3；CI 构建 Node 20 → 22。经全量回归与打包启动验证通过
-- 新增贡献者许可协议（CLA）：`docs/CLA.md`、`CONTRIBUTING.md`、PR 模板与 cla-assistant 配置 `.classistant.json`，支撑双重授权的再许可能力
+- 升级 **Electron 39 → 44**（Chromium 152 / Node 24 / V8 15.2），electron-builder 26.0.12 → 26.15.3；CI 构建 Node 20 → 24
+- 新增贡献者许可协议（CLA）：`docs/CLA.md`、`CONTRIBUTING.md`、PR 模板与 cla-assistant 配置，支撑双重授权的再许可能力
+
+---
+
+## 品牌重塑前的历史版本
+
+> 以下为品牌重塑与全面重构前的旧版记录，版本号与当前 1.0.0 无先后关系，仅作存档。
 
 ## [1.4.4] - 2026-01-08
 

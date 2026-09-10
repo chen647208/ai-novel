@@ -38,14 +38,24 @@ const entry = `  {\n    version: '${next}',\n    date: '${today}',\n    descript
 rel = rel.replace('export const RELEASES: ReleaseEntry[] = [\n', `export const RELEASES: ReleaseEntry[] = [\n${entry}`);
 writeFileSync(relPath, rel);
 
-// 3. CHANGELOG.md 顶部追加
+// 3. CHANGELOG.md：在 [Unreleased] 之后、最早已发布版本之前插入
 const clPath = path.join(root, 'CHANGELOG.md');
 let cl = '';
-try { cl = readFileSync(clPath, 'utf-8'); } catch { cl = '# Changelog\n'; }
-const block = `## v${next} (${today})\n\n- ${zh || en || 'release'}\n\n`;
-if (!cl.includes(`## v${next} `)) {
-  cl = cl.replace('# Changelog', `# Changelog\n\n${block}`.trimEnd());
-  if (!cl.startsWith('# Changelog')) cl = `# Changelog\n\n${block}${cl}`;
+try { cl = readFileSync(clPath, 'utf-8'); } catch { cl = '# 更新日志 (Changelog)\n'; }
+const block = `## [${next}] - ${today}\n\n### 新增\n- ${zh || en || 'release'}\n\n`;
+if (!cl.includes(`## [${next}]`)) {
+  const unreleased = cl.search(/^## \[Unreleased\]/m);
+  if (unreleased >= 0) {
+    // [Unreleased] 区块末尾：其后首个 `## [` 标题之前；没有则追加到文件末尾前
+    const afterUnreleased = cl.slice(unreleased);
+    const nextHeading = afterUnreleased.search(/\n## \[[^\]]+\]/);
+    const insertAt = nextHeading >= 0 ? unreleased + nextHeading + 1 : cl.length;
+    cl = `${cl.slice(0, insertAt)}${block}${cl.slice(insertAt)}`;
+  } else {
+    // 无 [Unreleased]：preamble 之后（首个 `## [` 之前）
+    const firstSection = cl.search(/^## \[/m);
+    cl = firstSection >= 0 ? `${cl.slice(0, firstSection)}${block}${cl.slice(firstSection)}` : `${cl}\n${block}`;
+  }
   writeFileSync(clPath, cl);
 }
 
