@@ -42,3 +42,8 @@ export const INITIAL_GENERATION_MODAL_STATE: GenerationModalState = {
   isOpen: false,
   chapter: null,
 };
+
+/** 批量生成章节之间的间隔（毫秒）：降低上游限流概率。 */
+export const BATCH_CHAPTER_INTERVAL_MS = 500;
+/** 正文选区菜单定位去抖（毫秒）。 */
+export const SELECTION_MENU_DEBOUNCE_MS = 100;

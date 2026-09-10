@@ -20,6 +20,7 @@ import { AIService } from '@/shared/services/ai/aiService';
 import { ConsistencyCheckPromptService } from '../../consistency/services/consistencyCheckPromptService';
 import { genderLabel, roleLabel } from '@/shared/utils/displayLabels';
 import { renderWorldDigest } from '@core/ai';
+import { AI_SEMANTIC_THROTTLE_MS } from '../constants';
 
 export interface SemanticIssue {
   id: string;
@@ -310,7 +311,7 @@ export async function performSemanticCheck(
         completedItems++;
         
         // 延迟避免限流
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, AI_SEMANTIC_THROTTLE_MS));
       }
     }
   }
@@ -328,7 +329,7 @@ export async function performSemanticCheck(
         allIssues.push(...issues);
         completedItems++;
         
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, AI_SEMANTIC_THROTTLE_MS));
       }
     }
   }
@@ -346,7 +347,7 @@ export async function performSemanticCheck(
         allIssues.push(...issues);
         completedItems++;
         
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, AI_SEMANTIC_THROTTLE_MS));
       }
     }
   }

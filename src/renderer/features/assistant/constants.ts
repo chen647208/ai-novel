@@ -19,3 +19,6 @@ export const DEFAULT_ASSISTANT_CATEGORY: AssistantCategory = 'inspiration';
 export const DEFAULT_ASSISTANT_EDIT_CATEGORY: AssistantEditCategory = 'inspiration';
 export const DEFAULT_ASSISTANT_SYNC_STATUS: SyncStatus = 'idle';
 export const DEFAULT_ASSISTANT_SUB_SELECTION_ID = 'all';
+
+/** 语义检查串行调用间隔（毫秒）：降低上游限流概率。 */
+export const AI_SEMANTIC_THROTTLE_MS = 300;

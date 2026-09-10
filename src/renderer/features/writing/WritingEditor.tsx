@@ -27,12 +27,14 @@ import { appendSnapshot, createSnapshot, shouldAutoSnapshot } from './services/c
 import { computeBookStats, computeChapterStats } from './services/writingStatsService';
 import { buildForeshadowContextForPrompt, openForeshadows, overdueForeshadows } from '../foreshadowing/services/foreshadowService';
 import {
+  BATCH_CHAPTER_INTERVAL_MS,
   DEFAULT_BATCH_MODE,
   DEFAULT_OUTPUT_MODE,
   DEFAULT_TARGET_WORD_COUNT,
   INITIAL_BATCH_PROGRESS,
   INITIAL_GENERATION_MODAL_STATE,
   INITIAL_TOKEN_USAGE,
+  SELECTION_MENU_DEBOUNCE_MS,
   WRITING_OUTPUT_FORMAT_DIRECTIVE,
 } from './constants';
 import type {
@@ -579,7 +581,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
       return;
     }
     applySelectionMenu(snapshot.text, snapshot.range, e.clientX, e.clientY);
-  }, 100), [selectionBlocked, menuPos]);
+    }, SELECTION_MENU_DEBOUNCE_MS), [selectionBlocked, menuPos]);
 
   const handleChapterClick = (chapter: Chapter) => { setGenModal({ isOpen: true, chapter }); };
   const handleEnterEditor = () => {
@@ -1173,7 +1175,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
             historyRecord: result.historyRecord
           });
           
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, BATCH_CHAPTER_INTERVAL_MS));
         } catch (err) {
           logger.error(`生成章节 ${chapter.title} 失败:`, err);
           continue;
@@ -1197,7 +1199,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
         
         onUpdate({ chapters: newChapters }, { agentId: 'ai:writing-batch', cause: selectedGenPromptId });
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, SELECTION_MENU_DEBOUNCE_MS));
       }
 
       dialogService.alert(t('editor.batchDone', { count: chapterUpdates.length }));
