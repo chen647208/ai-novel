@@ -348,6 +348,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       project,
       index: (project && indexService.snapshot(project.id)) || undefined,
       model: activeModel,
+      fallbackModel: models.find((m) => m.id !== activeModel?.id && m.isEnabled !== false && isModelUsable(m)),
       history,
       images,
       cardTemplate: selectedCardTemplateId

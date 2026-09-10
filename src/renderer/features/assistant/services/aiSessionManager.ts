@@ -89,6 +89,8 @@ export interface RunSessionInput {
   project: Project | null | undefined;
   index?: unknown;
   model: ModelConfig;
+  /** 备用模型：主模型调用失败（非取消）时按此重试一次。 */
+  fallbackModel?: ModelConfig;
   maxTurns?: number;
   signal?: AbortSignal;
   /** 调用方传入的近期对话（已由宿主压缩/截断到阈值内，此处只做最终文本拼装） */
@@ -222,8 +224,15 @@ export class AiSessionManager {
                 .map((p) => p.text),
             },
           }),
-      complete: (model, prompt, retries) =>
-        aiGatewayClient.complete(model, prompt, { retries, signal: input.signal, images: input.images }),
+      complete: async (model, prompt, retries) => {
+        const primary = await aiGatewayClient.complete(model, prompt, { retries, signal: input.signal, images: input.images });
+        // 主模型失败（非取消）且有备用模型且不同款时，按备用模型重试一次
+        if (primary.error && !input.signal?.aborted && input.fallbackModel && input.fallbackModel.id !== model.id) {
+          const fallback = await aiGatewayClient.complete(input.fallbackModel, prompt, { retries, signal: input.signal, images: input.images });
+          if (!fallback.error) return fallback;
+        }
+        return primary;
+      },
           maxTurns: input.maxTurns,
           signal: input.signal,
           // 首轮预算 24000 字符（约 8–12k token，32k 上下文模型留足工具观察与输出空间）
