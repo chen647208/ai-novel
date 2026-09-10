@@ -25,6 +25,7 @@ import ForeshadowPanel from '../foreshadowing/components/ForeshadowPanel';
 import { extractChapterSummary } from './services/summaryExtractionService';
 import { appendSnapshot, createSnapshot } from './services/chapterSnapshotService';
 import { useChapterSnapshots } from './hooks/useChapterSnapshots';
+import { buildProfileRegistry } from '@/shared/services/buildProfiles';
 import { computeBookStats, computeChapterStats } from './services/writingStatsService';
 import { buildForeshadowContextForPrompt, openForeshadows, overdueForeshadows } from '../foreshadowing/services/foreshadowService';
 import {
@@ -153,6 +154,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [selectedExportChapterIds, setSelectedExportChapterIds] = useState<Set<string>>(new Set());
   const [exportFormat, setExportFormat] = useState<ExportFormat>('txt');
+  const [exportProfileId, setExportProfileId] = useState<string>('');
   
   const [isHistoryViewerOpen, setIsHistoryViewerOpen] = useState(false);
   const [isGlobalHistorySidebarOpen, setIsGlobalHistorySidebarOpen] = useState(false);
@@ -453,13 +455,14 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
       return;
     }
     const filename = buildExportFilename(project.title, exportFormat);
+    const exportProfile = exportProfileId ? buildProfileRegistry.get(exportProfileId) : undefined;
     try {
       if (exportFormat === 'epub' || exportFormat === 'docx') {
-        const files = buildExportPackage(project, selectedExportChapterIds, exportFormat);
-        const fallbackHtml = buildExportContent(project, selectedExportChapterIds, 'html');
+        const files = buildExportPackage(project, selectedExportChapterIds, exportFormat, exportProfile);
+        const fallbackHtml = buildExportContent(project, selectedExportChapterIds, 'html', exportProfile);
         await savePackageFile(filename, files, exportFormat, fallbackHtml);
       } else {
-        const fileContent = buildExportContent(project, selectedExportChapterIds, exportFormat);
+        const fileContent = buildExportContent(project, selectedExportChapterIds, exportFormat, exportProfile);
         await saveExportFile(filename, fileContent, exportFormat);
       }
       setExportModalOpen(false);
@@ -1317,6 +1320,8 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
         exportModalOpen={exportModalOpen}
         selectedExportChapterIds={selectedExportChapterIds}
         exportFormat={exportFormat}
+        exportProfileId={exportProfileId}
+        onExportProfileChange={setExportProfileId}
         onCloseExportModal={() => setExportModalOpen(false)}
         onToggleAllExport={toggleAllExport}
         onToggleExportChapter={toggleExportChapter}

@@ -62,10 +62,11 @@ export {
 export {
   installHooks,
   installTypeTemplates,
+  buildProfileKey,
   BuildProfileRegistry,
-  type BuildProfile,
   type HookDeclaration,
 } from './contributions.js';
+export type { BuildProfile } from '../build/profile.js';
 export {
   PluginHost,
   type PluginState,

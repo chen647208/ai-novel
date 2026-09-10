@@ -285,6 +285,8 @@
   },
   "export": {
     "title": "导出小说正文",
+    "presetLabel": "导出预设",
+    "presetDefault": "默认（快速导出）",
     "selectedBefore": "已选择 ",
     "selectedAfter": " / {{total}} 章",
     "exportAsTitle": "导出为 {{format}} 格式",

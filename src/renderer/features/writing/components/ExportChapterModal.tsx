@@ -11,6 +11,8 @@ import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Chapter, Project } from '../../../../shared/types';
 import { buildExportContent, type ExportFormat } from '../utils';
+import { Select } from '@/shared/ui/Select';
+import { buildProfileRegistry, profileKey } from '@/shared/services/buildProfiles';
 import { computeChapterStats } from '../services/writingStatsService';
 import MarkdownView from '@/shared/ui/Markdown';
 import { Button } from '@/shared/ui/Button';
@@ -24,6 +26,8 @@ interface ExportChapterModalProps {
   chapters: Chapter[];
   selectedChapterIds: Set<string>;
   format: ExportFormat;
+  exportProfileId: string;
+  onExportProfileChange: (id: string) => void;
   onClose: () => void;
   onToggleAll: () => void;
   onToggleChapter: (chapterId: string) => void;
@@ -47,6 +51,8 @@ const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
   chapters,
   selectedChapterIds,
   format,
+  exportProfileId,
+  onExportProfileChange,
   onClose,
   onToggleAll,
   onToggleChapter,
@@ -56,10 +62,12 @@ const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
   const { t } = useTranslation('writing');
   const sortedChapters = [...chapters].sort((a, b) => a.order - b.order);
   const [showPreview, setShowPreview] = useState(false);
+  const profiles = buildProfileRegistry.list();
+  const selectedProfile = profiles.find((p) => profileKey(p) === exportProfileId);
   const previewText = useMemo(
     // PDF/ePub/DOCX 预览复用 HTML 渲染（打印即所见）
-    () => (showPreview ? buildExportContent(project, selectedChapterIds, format === 'pdf' || format === 'epub' || format === 'docx' ? 'html' : format) : ''),
-    [showPreview, project, selectedChapterIds, format],
+    () => (showPreview ? buildExportContent(project, selectedChapterIds, format === 'pdf' || format === 'epub' || format === 'docx' ? 'html' : format, selectedProfile) : ''),
+    [showPreview, project, selectedChapterIds, format, selectedProfile],
   );
   const previewStats = useMemo(() => (showPreview ? computeChapterStats(previewText) : null), [showPreview, previewText]);
 
@@ -74,6 +82,23 @@ const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
         <div className="border-b border-border bg-muted/30 px-6 py-4">
           <DialogTitle className="font-serif text-lg">{t('export.title')}</DialogTitle>
         </div>
+
+        {profiles.length > 0 && (
+          <div className="flex shrink-0 items-center gap-2 border-b border-border px-6 py-2">
+            <span className="text-xs text-muted-foreground">{t('export.presetLabel')}</span>
+            <Select
+              value={exportProfileId}
+              onChange={(e) => onExportProfileChange(e.target.value)}
+              aria-label={t('export.presetLabel')}
+              className="h-7 w-auto min-w-[160px] text-xs"
+            >
+              <option value="">{t('export.presetDefault')}</option>
+              {profiles.map((p) => (
+                <option key={profileKey(p)} value={profileKey(p)}>{p.name}</option>
+              ))}
+            </Select>
+          </div>
+        )}
 
         <div className="flex shrink-0 items-center justify-between gap-4 border-b border-border px-6 py-3">
           <div className="text-sm text-muted-foreground">

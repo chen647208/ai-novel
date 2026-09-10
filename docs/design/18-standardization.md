@@ -85,11 +85,12 @@
 
 清除一条即从 `KNOWN` 集合删除，规则不放宽。
 
-## 五、类型分叉债务
+## 五、构建档模型（已统一）
 
-- `BuildProfile` 存在两套不同模型：`core/build/profile.ts`（name/format/selection/transform/render，
-  导出管线消费）与 `core/plugin/contributions.ts`（id/name/steps，插件注册表登记）。
-  二者不可互换，插件贡献的构建档目前无法进入导出管线。统一需先定单一模型与迁移，
-  在此之前不要在两者之间互相注册。
+`BuildProfile` 单一模型：`core/build/profile.ts`（name/format/selection/transform/render，可选 id/description）。
+`core/plugin` 的 `BuildProfileRegistry` 直接引用该类型（删除其自造的 steps 版），注册 key 用 `buildProfileKey`（id 优先、缺省回落 name）。
+注册表单源在 `shared/services/buildProfiles.ts`（内置 `core.default`/`core.compendium` + 插件贡献同路径）。
+导出弹窗据此提供"导出预设"选择，选中后套用其 selection/transform/render（格式与未选章节仍由本次导出决定）。
+
 
 

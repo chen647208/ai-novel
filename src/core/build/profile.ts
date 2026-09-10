@@ -52,7 +52,11 @@ export interface BuildRender {
 }
 
 export interface BuildProfile {
+  /** 稳定标识（注册表 key）；缺省时回落 name。 */
+  id?: string;
   name: string;
+  /** 面向用户的一句话说明（导出预设列表展示）。 */
+  description?: string;
   /** 渲染器 id（md/txt/html 内置；插件可贡献） */
   format: string;
   selection: BuildSelection;
@@ -61,6 +65,7 @@ export interface BuildProfile {
 }
 
 export const DEFAULT_BUILD_PROFILE: BuildProfile = {
+  id: 'core.default',
   name: '快速导出',
   format: 'md',
   selection: {
@@ -78,6 +83,7 @@ export const DEFAULT_BUILD_PROFILE: BuildProfile = {
 
 /** 设定集示例 profile（验收 1 的另一端：同书不同 profile 产出差异）。 */
 export const COMPENDIUM_BUILD_PROFILE: BuildProfile = {
+  id: 'core.compendium',
   name: '设定集',
   format: 'html',
   selection: {

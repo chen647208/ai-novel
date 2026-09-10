@@ -69,6 +69,8 @@ const WritingEditorOverlayLayer: React.FC<WritingEditorOverlayLayerProps> = ({
   exportModalOpen,
   selectedExportChapterIds,
   exportFormat,
+  exportProfileId,
+  onExportProfileChange,
   onCloseExportModal,
   onToggleAllExport,
   onToggleExportChapter,
@@ -158,6 +160,8 @@ const WritingEditorOverlayLayer: React.FC<WritingEditorOverlayLayerProps> = ({
         chapters={project.chapters}
         selectedChapterIds={selectedExportChapterIds}
         format={exportFormat}
+        exportProfileId={exportProfileId}
+        onExportProfileChange={onExportProfileChange}
         onClose={onCloseExportModal}
         onToggleAll={onToggleAllExport}
         onToggleChapter={onToggleExportChapter}

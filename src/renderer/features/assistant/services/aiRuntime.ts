@@ -12,7 +12,8 @@
  * M3 插件宿主在此续注工具/section/技能，UI 层与 Agent 循环只消费这里的实例。
  */
 import { ApprovalBroker, PromptAssembler, registerBuiltinSections } from '@core/ai';
-import { BuildProfileRegistry, EventBus } from '@core/plugin';
+import { EventBus } from '@core/plugin';
+import { buildProfileRegistry } from '@/shared/services/buildProfiles';
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import { setAiGate } from '@/shared/services/ai/aiGate';
 import { createToolRegistry } from './builtinTools';
@@ -34,7 +35,6 @@ setAiGate(() => {
     throw new Error('minimal 发行档已禁用全部 AI 请求');
   }
 });
-export const buildProfileRegistry = new BuildProfileRegistry();
 
 export const sessionManager = new AiSessionManager({
   assembler,

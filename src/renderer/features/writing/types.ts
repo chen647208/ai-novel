@@ -346,6 +346,8 @@ export interface WritingEditorOverlayLayerProps {
   exportModalOpen: boolean;
   selectedExportChapterIds: Set<string>;
   exportFormat: ExportFormat;
+  exportProfileId: string;
+  onExportProfileChange: (id: string) => void;
   onCloseExportModal: () => void;
   onToggleAllExport: () => void;
   onToggleExportChapter: (id: string) => void;

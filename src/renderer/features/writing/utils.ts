@@ -112,7 +112,7 @@ const escapeHtml = (text: string) =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 
-export const buildExportContent = (project: Project, selectedChapterIds: Set<string>, format: ExportFormat = 'txt') => {
+export const buildExportContent = (project: Project, selectedChapterIds: Set<string>, format: ExportFormat = 'txt', profileOverride?: BuildProfile) => {
   // 导出统一走 core/build 三段式管线（选择→变换→渲染），
   // 与写作统计、插件渲染器共享同一实现（单一口径，无双轨）。
   const selected = new Set(selectedChapterIds);
@@ -122,13 +122,14 @@ export const buildExportContent = (project: Project, selectedChapterIds: Set<str
   const chapterTemplate = i18n.t('writing:export.chapterHeader', { num: '%N', title: '%T' });
   // PDF 复用 HTML 管线产出（主进程打印为 PDF），文件名与保存走 pdf 分支
   const buildFormat = format === 'pdf' ? 'html' : format;
-  const profile: BuildProfile = {
+  const unselected = project.chapters.filter((c) => !selected.has(c.id)).map((c) => `node:${c.id}`);
+  const defaultProfile: BuildProfile = {
     name: '快速导出',
     format: buildFormat,
     selection: {
       includeTypes: ['novel.chapter'],
       includeInactive: false,
-      exclude: project.chapters.filter((c) => !selected.has(c.id)).map((c) => `node:${c.id}`),
+      exclude: unselected,
       rootSwitches: { cards: false, meta: false },
     },
     transform: {
@@ -137,6 +138,14 @@ export const buildExportContent = (project: Project, selectedChapterIds: Set<str
     },
     render: { chapterPageBreak: buildFormat === 'html' || format === 'rtf', stripUnicode: false },
   };
+  // 选用注册表构建档（内置/插件）时套用其 selection/transform/render，格式与未选章节仍由本次导出决定
+  const profile: BuildProfile = profileOverride
+    ? {
+        ...profileOverride,
+        format: buildFormat,
+        selection: { ...profileOverride.selection, exclude: [...profileOverride.selection.exclude, ...unselected] },
+      }
+    : defaultProfile;
 
   const { text } = runBuild(profile, { nodes, attrs, edges: [] });
 
@@ -234,8 +243,9 @@ export const buildExportPackage = (
   project: Project,
   selectedChapterIds: Set<string>,
   format: 'epub' | 'docx',
+  profileOverride?: BuildProfile,
 ): Record<string, string> => {
-  const fullHtml = buildExportContent(project, selectedChapterIds, 'html');
+  const fullHtml = buildExportContent(project, selectedChapterIds, 'html', profileOverride);
   // 取 body 内层，避免 html/head/body 嵌套进出版文件；
   // 再剥掉管线自带的书名 h1 与简介 intro（打包器按 project 统一重加）
   const bodyMatch = fullHtml.match(/<body[^>]*>([\s\S]*)<\/body>/i);

@@ -16,21 +16,20 @@
 import type { Disposable } from './manifest.js';
 import type { TypeTemplate, TypeRegistry } from '../types-registry';
 import type { SeamPolicy } from './events.js';
+import type { BuildProfile } from '../build/profile.js';
 
-export interface BuildProfile {
-  id: string;
-  name: string;
-  description?: string;
-  /** 渲染器/变换器链（07 篇定义具体形态） */
-  steps: Array<{ renderer: string; options?: Record<string, unknown> }>;
+/** 构建档注册表 key：id 优先，缺省回落 name（与 core/build 单源类型）。 */
+export function buildProfileKey(profile: BuildProfile): string {
+  return profile.id ?? profile.name;
 }
 
 export class BuildProfileRegistry {
   private readonly profiles = new Map<string, BuildProfile>();
 
   register(profile: BuildProfile): Disposable {
-    this.profiles.set(profile.id, profile);
-    return { dispose: () => this.profiles.delete(profile.id) };
+    const key = buildProfileKey(profile);
+    this.profiles.set(key, profile);
+    return { dispose: () => this.profiles.delete(key) };
   }
 
   get(id: string): BuildProfile | undefined {

@@ -285,6 +285,8 @@
   },
   "export": {
     "title": "Export Novel Content",
+    "presetLabel": "Export preset",
+    "presetDefault": "Default (quick export)",
     "selectedBefore": "Selected ",
     "selectedAfter": " / {{total}} chapters",
     "exportAsTitle": "Export as {{format}}",
