@@ -10,12 +10,11 @@ import { logger } from '@/shared/utils/logger';
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { type KnowledgeItem, type OutputMode, type AIMessageImage, type Character, type Location, type Faction, type RuleSystem, type TimelineEvent, type AICardCommand, type CreatedCard, type Timeline, type WorldView, type MagicSystem, type TechnologyLevel, type WorldHistory, type CardPromptTemplate, type ModelConfig, type Project } from '../../../shared/types';
+import { type KnowledgeItem, type OutputMode, type AIMessageImage, type Character, type Location, type Faction, type RuleSystem, type TimelineEvent, type AICardCommand, type CreatedCard, type Timeline, type WorldView, type MagicSystem, type TechnologyLevel, type WorldHistory, type CardPromptTemplate, type Project } from '../../../shared/types';
 import { useProjectStore } from '@/app/stores/projectStore';
 import { ATTACHMENT_TRUNCATE } from '../../../shared/constants/chapters';
-import { SUMMARY_MAX_CHARS } from '../../../shared/constants/chat';
 import { collectChatAttachments } from './services/chatAttachments';
-import { needsCompaction, splitForCompaction, type ChatTurn } from './services/chatHistory';
+import { useAssistantHistory } from './hooks/useAssistantHistory';
 import { type GlobalAssistantProps, type ChatMessage, type AssistantCategory, type AssistantEditCategory, type SyncStatus, type EditingData } from './types';
 import { type LooseRecord, asRecord, asStr } from '../../shared/utils/loose';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
@@ -169,36 +168,9 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
   }, [activeCategory, prompts]);
 
   /**
-   * 组装本轮携带的历史：报错消息剔除（噪声）→ 摘要置顶 → 旧轮在前。
-   * 超阈值时先调模型压缩最旧一半；压缩失败降级为硬截断，不断流。
+   * 组装本轮携带的历史（实现见 useAssistantHistory）。
    */
-  const buildHistoryTurns = async (model: ModelConfig): Promise<ChatTurn[]> => {
-    const turns: ChatTurn[] = [];
-    if (historySummary.trim()) {
-      turns.push({ role: 'assistant', content: `[此前对话摘要]${historySummary.trim()}` });
-    }
-    for (const m of messages) {
-      if (m.error || !m.content?.trim()) continue;
-      turns.push({ role: m.role, content: m.content });
-    }
-    const raw = turns.map((t) => t.content).join('\n');
-    if (!needsCompaction(raw) || turns.length === 0) return turns;
-    const { old, recent } = splitForCompaction(turns);
-    try {
-      const prompt = i18n.language.startsWith('en')
-        ? `Summarize the following earlier conversation in under 400 words: topics discussed, confirmed facts (names/settings/decisions), open questions. Summary only, no pleasantries.\n\n${old.map((t) => `${t.role}: ${t.content}`).join('\n')}`
-        : `把以下此前对话压缩成400字以内摘要：谈了哪几个话题、已确认的关键事实（人名/设定/决定）、未解决的问题。只要摘要，不要寒暄。\n\n${old.map((t) => `${t.role}: ${t.content}`).join('\n')}`;
-      const res = await AIService.call(model, prompt);
-      const summary = (res.content ?? '').trim().slice(0, SUMMARY_MAX_CHARS);
-      if (summary) {
-        setHistorySummary(summary);
-        return [{ role: 'assistant', content: `[此前对话摘要]${summary}` }, ...recent];
-      }
-    } catch {
-      // 摘要失败走降级：buildHistoryText 的三档截断兜底
-    }
-    return turns;
-  };
+  const { buildHistoryTurns } = useAssistantHistory({ messages, historySummary, setHistorySummary });
 
   const handleRetry = () => {
     // 重新生成：旧答案保留在历史流，按上轮原文重跑（与发送键同口径守卫）
