@@ -20,6 +20,10 @@
 - **发行档**：完整 / 网文 / 严肃文学 / 纯写作（minimal）。minimal 经
   `ai.request` 拦截器即时禁用全部 AI 请求（会话与工具），切回即恢复。
 - **SDK**：`sdk/`（`@hongyue/plugin-sdk`，MIT 独立发行，与宿主 AGPL 解耦）。
+- **用户写法技能**：设置 → 插件 → 写法技能。技能是数据不是代码——导入带 frontmatter 的
+  `SKILL.md` 落到 `<userData>/skills/user/<slug>/SKILL.md`，命中触发词即注入；可删除。
+  与内置技能并列展示（内置只读）。服务层 `assistant/services/userSkillsService.ts`，
+  启动时装载进会话技能目录（`loadUserSkills`）。
 
 ## 同步
 

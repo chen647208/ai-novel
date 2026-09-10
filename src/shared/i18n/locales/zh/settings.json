@@ -80,6 +80,17 @@
       "find": "编辑器查找"
     }
   },
+  "skills": {
+    "title": "写法技能",
+    "hint": "技能是数据不是代码：写一份带 frontmatter 的 SKILL.md 导入，命中触发词即注入。",
+    "builtinTitle": "内置技能",
+    "userTitle": "我的技能",
+    "import": "导入 SKILL.md",
+    "importing": "导入中…",
+    "importFailed": "导入失败：{{reason}}",
+    "empty": "还没有导入自定义技能。",
+    "remove": "删除该技能"
+  },
   "footer": {
     "persistNote": "本地数据持久化已开启，配置将自动保存到本机应用数据目录。",
     "save": "应用并保存配置",

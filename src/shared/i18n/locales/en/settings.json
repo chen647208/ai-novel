@@ -80,6 +80,17 @@
       "find": "Editor find"
     }
   },
+  "skills": {
+    "title": "Writing skills",
+    "hint": "Skills are data, not code: import a SKILL.md with frontmatter and it is injected when its trigger matches.",
+    "builtinTitle": "Built-in skills",
+    "userTitle": "My skills",
+    "import": "Import SKILL.md",
+    "importing": "Importing…",
+    "importFailed": "Import failed: {{reason}}",
+    "empty": "No custom skills imported yet.",
+    "remove": "Remove this skill"
+  },
   "footer": {
     "persistNote": "Local data persistence is enabled; settings are saved automatically to the app data directory on this machine.",
     "save": "Apply & Save",

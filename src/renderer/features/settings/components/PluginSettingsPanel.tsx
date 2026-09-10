@@ -19,6 +19,7 @@ import type { McpServerConfig } from '../../../../shared/types';
 import { useSettingsStore } from '@/app/stores/settingsStore';
 import { connectServer, disconnectServer, fetchServerTools } from '@/features/assistant/services/mcpClient';
 import { Input } from '@/shared/ui/Input';
+import UserSkillsCard from './UserSkillsCard';
 
 /** 装配树实时视图：行随当前发行档即时重算，切换档位不用开关重看。 */
 const AssemblyTreeView: React.FC<{ rows: AssemblyRow[] }> = ({ rows }) => (
@@ -103,6 +104,8 @@ const PluginSettingsPanel: React.FC = () => {
         {failed > 0 && <Badge variant="destructive">{t('plugins.failedCount', { count: failed })}</Badge>}
       </div>
       <p className="text-sm text-muted-foreground">{t('plugins.description')}</p>
+
+      <UserSkillsCard />
 
       <div>
         <div className="mb-1 text-sm font-medium">{t('plugins.profile.title')}</div>

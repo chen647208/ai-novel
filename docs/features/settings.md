@@ -20,6 +20,7 @@
 - `components/CardPromptSettingsPanel.tsx`：卡牌命令模板管理
 - `components/ConsistencyPromptSettingsPanel.tsx`：一致性检查模板管理
 - `components/PluginSettingsPanel.tsx`：插件状态面板（发行档/装配树入口）
+- `components/UserSkillsCard.tsx`：写法技能（内置只读 + 用户 SKILL.md 导入/删除，嵌在插件面板）
 - `components/StorageSettingsPanel.tsx`：存储设置面板
 - `components/SystemGuidePanel.tsx`：系统说明和使用引导
 - `components/ShortcutRecorder.tsx` + `services/keybindings.ts`：快捷键录制/冲突检测/默认回退（`App.tsx` 开关与分区跳转、`WritingEditor.tsx` 查找条只读合并态）
