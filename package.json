@@ -21,6 +21,9 @@
   ],
   "type": "module",
   "main": "build/main/main/main.js",
+  "lint-staged": {
+    "*.{ts,tsx}": "eslint"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -53,6 +56,7 @@
     "icons:generate": "node scripts/generate-icons.mjs",
     "scan:secrets": "node scripts/scan-secrets.mjs",
     "preverify": "npm ci --dry-run --no-audit --no-fund --loglevel=error",
+    "prepare": "husky",
     "verify": "npm run lint && npm run typecheck:all && npm run test:coverage && npm run headers:check && npm run licenses:check && npm run scan:secrets && npm run electron:build",
     "dist": "npm run electron:build && electron-builder",
     "dist:win": "npm run electron:build && electron-builder --win",
@@ -88,6 +92,8 @@
   },
   "devDependencies": {
     "@chroma-core/default-embed": "^0.1.9",
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
     "@playwright/test": "^1.63.0",
     "@radix-ui/react-accordion": "^1.2.20",
     "@radix-ui/react-alert-dialog": "^1.1.23",
@@ -123,7 +129,9 @@
     "esbuild": "^0.28.2",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "husky": "^9.1.7",
     "jsdom": "^29.1.1",
+    "lint-staged": "^16.4.0",
     "lucide-react": "^1.40.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
