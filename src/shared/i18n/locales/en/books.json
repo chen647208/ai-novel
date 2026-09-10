@@ -37,5 +37,29 @@
     "example": "Example Template",
     "exampleDesc": "Use a preset story structure and samples",
     "create": "New Book"
+  },
+  "example": {
+    "intro": "Mistport is a city ringed by tides and the whispers of old gods. While charting the coastal waters, a young surveyor, Lin Yan, finds an island that should not exist—one that appears only at a certain tide.",
+    "outline": "Act One: Lin Yan discovers the phantom island's coordinates and allies with Su Wan, nightkeeper of the archive.\nAct Two: Following a tidal almanac, the two slip into an abandoned lighthouse and wake its sleeping guide.\nAct Three: The truth surfaces—the island is a prison for an old god, and its key lies in Lin Yan's bloodline.",
+    "worldName": "Tidal Aether System",
+    "worldDesc": "Aether rises and falls with the moon; casters are strongest at full moon and nearly powerless at new moon.",
+    "rule1": "Aether flows from the tide; every spell must be primed with seawater.",
+    "rule2": "A caster can hold only a limited number of true names; overreaching backlashes.",
+    "limitation": "Casting on a new-moon night causes memory loss and is outlawed by the city.",
+    "casting": "A ritual chant spoken through a shell engraved with a true name.",
+    "char1Name": "Lin Yan",
+    "char1Personality": "Calm and exacting, with an almost stubborn curiosity about the unknown.",
+    "char1Background": "An orphan raised by the survey guild, fluent in old sea charts and tidal almanacs.",
+    "char1Occupation": "City Surveyor",
+    "char1Motivation": "To learn how his parents' disappearance connects to the phantom island.",
+    "char2Name": "Su Wan",
+    "char2Personality": "Terse and watchful, hiding unease behind dry jokes.",
+    "char2Background": "Nightkeeper of the archive, secretly a descendant of exiled old-god priests.",
+    "char2Occupation": "Archive Nightkeeper",
+    "char2Motivation": "To stop the old god from waking, even at the cost of herself.",
+    "chapter1Title": "Chapter 1: Phantom Coordinates",
+    "chapter1Summary": "While charting the coastal waters, Lin Yan finds coordinates for an island that appears only at a certain tide.",
+    "chapter2Title": "Chapter 2: The Nightkeeper",
+    "chapter2Summary": "Su Wan confronts Lin Yan to warn him off the island, yet reveals she knows far too much."
   }
 }

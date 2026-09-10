@@ -24,6 +24,7 @@ import { composeAppState, seedPersistBaseline } from './stores/persistenceBridge
 import { hydrateStoresFromState } from './useAppBootstrap';
 import { normalizeImportedState } from './initialState';
 import { checkImportVersion } from './initialState';
+import { blankContents, buildExampleProject, cloneProject, emptyBook } from './bookFactory';
 
 export interface BookActions {
   openBook: (bookId: string) => void;
@@ -49,38 +50,24 @@ export interface BookActions {
   importAllData: () => Promise<void>;
 }
 
-const emptyBook = (title: string): Project => ({
-  id: Date.now().toString(),
-  title,
-  inspiration: '',
-  intro: '',
-  characters: [],
-  outline: '',
-  chapters: [],
-  virtualChapters: [],
-  knowledge: [],
-  lastModified: Date.now(),
-});
-
 export function useBookActions(enterWorkspace: () => void): BookActions {
   const openBook = useCallback((bookId: string) => {
     useProjectStore.getState().setActiveProject(bookId);
     enterWorkspace();
   }, [enterWorkspace]);
 
-  const createBook = useCallback((title: string, _description?: string, templateType?: 'blank' | 'duplicate' | 'example', sourceBookId?: string) => {
-    const newBook = emptyBook(title);
+  const createBook = useCallback((title: string, description?: string, templateType?: 'blank' | 'duplicate' | 'example', sourceBookId?: string) => {
+    const intro = description?.trim() || undefined;
+    let newBook: Project;
     if (templateType === 'duplicate' && sourceBookId) {
       const sourceBook = useProjectStore.getState().projects.find(p => p.id === sourceBookId);
-      if (sourceBook) {
-        newBook.inspiration = sourceBook.inspiration;
-        newBook.intro = sourceBook.intro;
-        newBook.characters = [...sourceBook.characters];
-        newBook.outline = sourceBook.outline;
-        newBook.chapters = [...sourceBook.chapters];
-        newBook.virtualChapters = [...sourceBook.virtualChapters];
-        newBook.knowledge = [...sourceBook.knowledge];
-      }
+      newBook = sourceBook
+        ? cloneProject(sourceBook, title, intro ?? sourceBook.intro)
+        : emptyBook(title, intro);
+    } else if (templateType === 'example') {
+      newBook = buildExampleProject(title, intro ?? i18n.t('books:example.intro'));
+    } else {
+      newBook = emptyBook(title, intro);
     }
     useProjectStore.getState().upsertProject(newBook);
     enterWorkspace();
@@ -126,15 +113,9 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
   const duplicateBook = useCallback((bookId: string) => {
     const sourceBook = useProjectStore.getState().projects.find(p => p.id === bookId);
     if (!sourceBook) return;
-    const newBook = emptyBook(i18n.t('app:book.duplicateTitle', { title: sourceBook.title }));
-    newBook.inspiration = sourceBook.inspiration;
-    newBook.intro = sourceBook.intro;
-    newBook.characters = [...sourceBook.characters];
-    newBook.outline = sourceBook.outline;
-    newBook.chapters = [...sourceBook.chapters];
-    newBook.virtualChapters = [...sourceBook.virtualChapters];
-    newBook.knowledge = [...sourceBook.knowledge];
-    useProjectStore.getState().upsertProject(newBook);
+    useProjectStore.getState().upsertProject(
+      cloneProject(sourceBook, i18n.t('app:book.duplicateTitle', { title: sourceBook.title })),
+    );
     enterWorkspace();
   }, [enterWorkspace]);
 
@@ -172,9 +153,7 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
     if (!active) return;
     const ok = await dialogService.confirm({ message: i18n.t('app:book.clearConfirm', { title: active.title }), danger: true });
     if (!ok) return;
-    useProjectStore.getState().updateActiveProject({
-      inspiration: '', intro: '', characters: [], outline: '', chapters: [], virtualChapters: [], knowledge: [],
-    });
+    useProjectStore.getState().updateActiveProject(blankContents());
     afterReset();
   }, []);
 
