@@ -53,6 +53,19 @@
   "storage": {
     "corrupt": "数据库完整性检查未通过（{{result}}）。请到「设置 → 存储」从备份恢复后再继续写作，避免覆盖数据。"
   },
+  "commandPalette": {
+    "title": "命令面板",
+    "placeholder": "输入命令…",
+    "empty": "无匹配命令"
+  },
+  "command": {
+    "settings": "打开设置",
+    "search": "全文检索",
+    "toggleAssistant": "切换 AI 助手",
+    "bookshelf": "返回书架",
+    "exportCover": "导出当前书籍封面",
+    "goSection": "前往：{{name}}"
+  },
   "model": {
     "notConfiguredKey": "当前模型尚未配置 API Key / 端点",
     "noneConfigured": "尚未配置可用的 AI 模型",

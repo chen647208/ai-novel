@@ -13,7 +13,7 @@
  * 书籍/项目动作在 useBookActions，引导在 useAppBootstrap——本文件只做装配。
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Project } from '../../shared/types';
 import { TooltipProvider } from '@/shared/ui/Tooltip';
@@ -28,6 +28,8 @@ import { exportCover } from '../shared/services/coverService';
 import WorkspaceView from './app-shell/WorkspaceView';
 import type { SectionId } from './sections';
 import { WORKSPACE_SECTIONS } from './sections';
+import CommandPalette, { type Command } from './app-shell/CommandPalette';
+import { dt } from '@/i18n';
 import GlobalAssistant from '../features/assistant/GlobalAssistant';
 import { eventToKeybinding, resolveKeybindings } from '../features/settings/services/keybindings';
 import ApprovalHost from '../features/assistant/components/ApprovalHost';
@@ -65,6 +67,7 @@ const App: React.FC = () => {
   const [isHistoryViewerOpen, setIsHistoryViewerOpen] = useState(false);
   const [isVersionCheckOpen, setIsVersionCheckOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [assistantOpenPref, setAssistantOpenPref] = useViewPreference<'open' | 'closed'>('assistant.open', 'open');
   const [assistantWidthPref, setAssistantWidthPref] = useViewPreference<string>('assistant.width', '380');
@@ -163,6 +166,41 @@ const App: React.FC = () => {
     window.addEventListener('keydown', onSectionKey);
     return () => window.removeEventListener('keydown', onSectionKey);
   }, [view, handleSectionChange, bindings.section1, bindings.section2, bindings.section3, bindings.section4, bindings.section5]);
+
+  // 命令面板：Ctrl/Cmd+K 随时开关
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((v) => !v);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  const commands = useMemo<Command[]>(() => {
+    const list: Command[] = [
+      { id: 'settings', label: t('command.settings'), keywords: 'settings', run: () => setIsSettingsOpen(true) },
+      { id: 'search', label: t('command.search'), keywords: 'search find', run: () => setIsSearchOpen(true) },
+      { id: 'assistant', label: t('command.toggleAssistant'), keywords: 'assistant ctrl+j', run: toggleAssistant },
+      { id: 'bookshelf', label: t('command.bookshelf'), keywords: 'bookshelf shelf', run: () => setView('bookshelf') },
+    ];
+    if (activeProject) {
+      list.push({ id: 'exportCover', label: t('command.exportCover'), keywords: 'cover export', run: () => handleExportCover(activeProject) });
+      for (const s of WORKSPACE_SECTIONS) {
+        if (isSectionVisible(s.id, (id) => availableFeatures.has(id))) {
+          list.push({
+            id: `section.${s.id}`,
+            label: t('command.goSection', { name: dt(`nav:${s.labelKey}`) }),
+            keywords: s.id,
+            run: () => handleSectionChange(s.id),
+          });
+        }
+      }
+    }
+    return list;
+  }, [t, toggleAssistant, activeProject, handleExportCover, handleSectionChange, availableFeatures]);
 
   // 当前分区不可用（minimal 档禁 AI 功能）时回退写作编辑器（映射单源见 sectionFeatures）
   useEffect(() => {
@@ -318,6 +356,7 @@ const App: React.FC = () => {
             }
           }}
         />
+        <CommandPalette open={isCommandPaletteOpen} onOpenChange={setIsCommandPaletteOpen} commands={commands} />
       </div>
     </TooltipProvider>
   );

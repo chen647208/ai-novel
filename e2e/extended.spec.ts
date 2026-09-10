@@ -93,3 +93,20 @@ test('主题切换后重启保持（深色持久化）', async () => {
     await second.app.close();
   }
 });
+
+test('命令面板：Ctrl+K 打开、过滤并在执行后关闭', async () => {
+  const userDataDir = mkdtempSync(join(tmpdir(), 'hongyue-e2e-cmdk-'));
+  const { app, page } = await launchApp(userDataDir);
+  try {
+    await createBook(page);
+    await page.keyboard.press('Control+k');
+    const input = page.getByPlaceholder(/输入命令|Type a command/);
+    await expect(input).toBeVisible({ timeout: 10_000 });
+    await input.fill('检索');
+    await expect(page.getByRole('button', { name: /全文检索|Full-text search/ })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(input).toBeHidden({ timeout: 10_000 });
+  } finally {
+    await app.close();
+  }
+});
