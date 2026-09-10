@@ -156,6 +156,24 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                 >
                   <FileText className="size-3.5" /> {t('storage.openLogDir')}
                 </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const api = window.electronAPI;
+                    if (!api) {
+                      dialogService.alert(t('storage.electronUnavailable'));
+                      return;
+                    }
+                    void api.exportDiagnostics()
+                      .then((r) => {
+                        if (!r.canceled) dialogService.alert(t('storage.diagnosticsDone', { path: r.path ?? '' }));
+                      })
+                      .catch(() => dialogService.alert(t('storage.diagnosticsFailed')));
+                  }}
+                >
+                  <FileText className="size-3.5" /> {t('storage.exportDiagnostics')}
+                </Button>
               </div>
             </div>
 

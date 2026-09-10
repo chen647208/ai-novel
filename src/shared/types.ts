@@ -1091,6 +1091,8 @@ export interface ElectronAPI {
   openExternal: (url: string) => Promise<boolean>;
   /** 打包文件集为 zip（STORE 无压缩）并另存为；files 为 {文件名: 文本内容}。 */
   exportPackage: (files: Record<string, string>, defaultPath: string) => Promise<{ canceled: boolean }>;
+  /** 导出诊断包（日志 + 窗口几何 + 存储配置 + 环境信息，zip）。 */
+  exportDiagnostics: () => Promise<{ canceled: boolean; path?: string }>;
   /** MCP 客户端：外部 server 的连接/工具/调用（主进程持 stdio）。 */
   mcpClient: {
     connect: (id: string, command: string, args?: string[]) => Promise<{ connected: boolean }>;

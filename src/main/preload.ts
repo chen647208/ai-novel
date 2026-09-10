@@ -31,6 +31,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openPath: (targetPath: string) => ipcRenderer.invoke(IPC.openPath, targetPath),
   openExternal: (url: string) => ipcRenderer.invoke(IPC.openExternal, url),
   exportPackage: (files: Record<string, string>, defaultPath: string) => ipcRenderer.invoke(IPC.exportPackage, files, defaultPath),
+  exportDiagnostics: () => ipcRenderer.invoke(IPC.exportDiagnostics),
   mcpClient: {
     connect: (id: string, command: string, args?: string[]) => ipcRenderer.invoke(IPC.mcp.clientConnect, id, command, args),
     tools: (id: string) => ipcRenderer.invoke(IPC.mcp.clientTools, id),

@@ -25,6 +25,7 @@ export const IPC = {
   openPath: 'open-path',
   openExternal: 'open-external',
   exportPackage: 'export-package',
+  exportDiagnostics: 'export-diagnostics',
   vector: {
     initialize: 'vector:initialize',
     addDocuments: 'vector:add-documents',

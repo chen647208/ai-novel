@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { app } from 'electron';
+import { app, crashReporter } from 'electron';
 import { logger } from './logger.js';
 import { AppContainer, type ProviderContext } from './app/container.js';
 import { getMainWindow } from './app/window.js';
@@ -56,6 +56,8 @@ process.on('unhandledRejection', (reason) => {
 });
 
 app.whenReady().then(async () => {
+  // 崩溃转储本地留存（不上传服务器），崩溃后可在转储目录手动取用
+  crashReporter.start({ productName: '红月创作', uploadToServer: false, compress: true });
   applySecurityHeaders();
   logger.info('app', `User data path: ${app.getPath('userData')}`);
   // 更名迁移：仅标准路径跑（--user-data-dir 隔离的测试/调试实例不碰真实数据）

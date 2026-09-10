@@ -16,6 +16,7 @@ import { registerSqliteIpc, closeSqlite } from '../sqlite-ipc.js';
 import { registerMcpClientIpc, closeMcpClients } from '../mcp/clientIpc.js';
 import { registerProxyIpc } from '../net/proxyIpc.js';
 import { registerUpdaterIpc } from '../updater.js';
+import { registerDiagnosticsIpc } from './diagnostics.js';
 import { destroyTray, registerShellIpc } from './tray.js';
 import type { Provider, ProviderContext } from './container.js';
 import { createWindow } from './window.js';
@@ -154,6 +155,8 @@ export const fileProvider: Provider = {
       await fs.unlink(filePath);
       return true;
     });
+
+    registerDiagnosticsIpc(ctx.getMainWindow);
   },
 };
 
