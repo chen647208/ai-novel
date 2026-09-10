@@ -98,6 +98,8 @@ publish:
 extraResources:
   - from: src/assets/icon.png
     to: icon.png
+  - from: src/assets/tray.png
+    to: tray.png
 
 # Electron 下载镜像（中国大陆网络友好；CI 与本地均可访问）
 electronDownload:

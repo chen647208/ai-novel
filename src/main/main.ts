@@ -48,6 +48,9 @@ const container = new AppContainer()
 
 const ctx: ProviderContext = { getMainWindow };
 
+// Windows 任务栏据此归组与显示应用名（缺失时会显示为 Electron 并分开归组）
+app.setAppUserModelId('com.hongyue.creation');
+
 // 单实例锁：第二个实例不再启动，只把已有窗口还原并聚焦（避免多进程写同一 db/vault）。
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
 if (!hasSingleInstanceLock) {

@@ -43,8 +43,8 @@ export function setQuitting(): void {
 
 function iconPath(): string {
   return app.isPackaged
-    ? path.join(process.resourcesPath, 'icon.png')
-    : path.join(__dirname, '../../../../src/assets/icon.png');
+    ? path.join(process.resourcesPath, 'tray.png')
+    : path.join(__dirname, '../../../../src/assets/tray.png');
 }
 
 function showWindow(getWindow: () => BrowserWindow | null): void {

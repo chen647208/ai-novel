@@ -46,9 +46,12 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ open, onDone, 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent hideClose className="w-[92vw] max-w-lg gap-0 overflow-hidden p-0">
-        <div className="border-b border-border bg-muted/30 px-6 py-4">
-          <h3 className="font-serif text-lg font-medium text-foreground">{t('title')}</h3>
-          <p className="text-xs text-muted-foreground">{t('subtitle')}</p>
+        <div className="flex items-center gap-3 border-b border-border bg-muted/30 px-6 py-4">
+          <img src="logo.svg" alt="" className="size-9 shrink-0" />
+          <div>
+            <h3 className="font-serif text-lg font-medium text-foreground">{t('title')}</h3>
+            <p className="text-xs text-muted-foreground">{t('subtitle')}</p>
+          </div>
         </div>
         <div className="space-y-5 p-6">
           <div className="grid grid-cols-3 gap-2">
