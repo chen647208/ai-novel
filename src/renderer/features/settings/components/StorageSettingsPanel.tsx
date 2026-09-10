@@ -23,11 +23,7 @@ import { Input } from '@/shared/ui/Input';
 import { AlertTriangle, ArrowLeftRight, Clock, Database, FileText, FolderOpen, History, Info, Save, Settings, ShieldCheck, Trash2, Wrench } from 'lucide-react';
 
 /** 存储设置区块的小标题 */
-const FieldLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-    {children}
-  </div>
-);
+import { FieldLabel } from '@/shared/ui/FieldLabel';
 
 /** 状态徽章 */
 const StatusBadge: React.FC<{ tone: 'primary' | 'success' | 'muted'; children: React.ReactNode }> = ({ tone, children }) => (

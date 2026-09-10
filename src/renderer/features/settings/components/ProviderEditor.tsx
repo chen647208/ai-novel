@@ -9,6 +9,7 @@
 
 import React, { useState } from 'react';
 import { useTranslation, dt } from '@/i18n';
+import { Alert } from '@/shared/ui/Alert';
 import type { ModelConfig } from '../../../../shared/types';
 import { modelProviders, findProviderPreset } from '../../../constants/modelProviders';
 import { channelValueFor, channelPatch, channelGroups } from '../utils/channelPreset';
@@ -20,7 +21,7 @@ import { Input } from '@/shared/ui/Input';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
 import { cn } from '@/shared/utils/cn';
-import { AlertCircle, AlertTriangle, CheckCircle2, Clock, Eye, EyeOff, FlaskConical, List, RefreshCw, SlidersHorizontal, Trash2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Clock, Eye, EyeOff, FlaskConical, List, RefreshCw, SlidersHorizontal, Trash2 } from 'lucide-react';
 
 const CHANNEL_GROUPS = channelGroups(modelProviders);
 const fieldLabel = 'mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground';
@@ -231,21 +232,18 @@ export const ProviderEditor: React.FC<ProviderEditorProps> = ({
       </div>
 
       {testResult && (
-        <div className={cn(
-          ' mt-5 max-h-40 overflow-y-auto whitespace-pre-wrap rounded-lg border p-4 font-mono text-xs leading-relaxed',
-          isErrorResult(testResult) ? 'border-destructive/20 bg-destructive/5 text-destructive' : 'border-success/20 bg-success/5 text-success'
-        )}>
-          <div className="mb-2 flex items-center gap-2 font-medium uppercase tracking-wider">
-            {isErrorResult(testResult) ? <AlertTriangle className="size-4" /> : <CheckCircle2 className="size-4" />}
-            <span>{t('models.connectionLog')}</span>
-          </div>
+        <Alert
+          tone={isErrorResult(testResult) ? 'error' : 'success'}
+          title={t('models.connectionLog')}
+          className="mt-5 max-h-40 overflow-y-auto whitespace-pre-wrap font-mono text-xs"
+        >
           {testResult}
           {errorDiag && (
             <div className="mt-2 border-t border-destructive/20 pt-2 font-sans text-xs">
               {t(errorDiag.hintKey, '检查 Key / 额度 / 网络后重试，也可用聚合网关单 Key 切换模型验证。')}
             </div>
           )}
-        </div>
+        </Alert>
       )}
 
       <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
