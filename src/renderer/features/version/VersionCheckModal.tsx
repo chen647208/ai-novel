@@ -210,6 +210,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
                 </div>
                 <div className="flex shrink-0 items-center gap-4">
                   <label className="relative inline-flex cursor-pointer items-center">
+                    <span className="sr-only">{t('modal.autoCheck')}</span>
                     <input
                       type="checkbox"
                       className="peer sr-only"

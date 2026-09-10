@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
 import localPlugin from './eslint-rules/no-cross-feature.js';
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
@@ -164,6 +165,20 @@ export default tseslint.config(
           ],
         },
       ],
+    },
+  },
+
+  // 无障碍静态门禁（渲染层 JSX）
+  {
+    files: ['src/renderer/**/*.tsx'],
+    plugins: { 'jsx-a11y': jsxA11y },
+    rules: {
+      ...jsxA11y.configs.recommended.rules,
+      // 自定义可点元素（role=button + tabIndex + 键盘处理）由项目约定承担，避免误报
+      'jsx-a11y/no-static-element-interactions': 'off',
+      'jsx-a11y/click-events-have-key-events': 'off',
+      // 搜索框/查找栏/重命名输入聚焦是预期交互，Radix 亦自行管理初始焦点
+      'jsx-a11y/no-autofocus': 'off',
     },
   },
 

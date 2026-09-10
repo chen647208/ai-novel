@@ -248,6 +248,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                 <p className="text-xs text-muted-foreground">{t('storage.useCustomHint')}</p>
               </div>
               <label className="relative inline-flex shrink-0 cursor-pointer items-center">
+                <span className="sr-only">{t('storage.useCustomLabel')}</span>
                 <input
                   type="checkbox"
                   className="peer sr-only"
@@ -305,6 +306,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                   <p className="text-xs text-muted-foreground">{t('storage.autoBackupHint')}</p>
                 </div>
                 <label className="relative inline-flex shrink-0 cursor-pointer items-center">
+                  <span className="sr-only">{t('storage.autoBackupLabel')}</span>
                   <input
                     type="checkbox"
                     className="peer sr-only"
