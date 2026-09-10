@@ -79,7 +79,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: AI小说家 ${{ github.ref_name }}
+          name: 红月创作 ${{ github.ref_name }}
           generate_release_notes: true
           files: artifacts/*
           fail_on_unmatched_files: false

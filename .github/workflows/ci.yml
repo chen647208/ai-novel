@@ -52,6 +52,9 @@ jobs:
       - name: 安装依赖
         run: npm ci
 
+      - name: 运行期依赖安全审计（高危/严重即失败）
+        run: npm audit --omit=dev --audit-level=high
+
       - name: 全部门禁（与本地同一条 npm run verify 链）
         run: npm run verify
 

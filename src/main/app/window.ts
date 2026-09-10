@@ -113,6 +113,7 @@ export async function createWindow(): Promise<void> {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      sandbox: true,
       preload: path.join(__dirname, '../../preload/preload.js'),
     },
     icon: app.isPackaged
