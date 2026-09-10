@@ -50,7 +50,7 @@ export const EmbeddingSidebar: React.FC<EmbeddingSidebarProps> = ({
           placeholder={t('models.searchPlaceholder', '搜索渠道 / 模型…')}
         />
       </div>
-      <div className="custom-scrollbar -mx-1 flex-1 space-y-1 overflow-y-auto px-1 pb-1">
+      <div className=" -mx-1 flex-1 space-y-1 overflow-y-auto px-1 pb-1">
         {configs.map((config) => {
           const provider = embeddingProviders.find((p) => p.id === config.provider);
           const selected = selectedId === config.id;

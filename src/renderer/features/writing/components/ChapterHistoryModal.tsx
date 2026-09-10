@@ -134,7 +134,7 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
           </button>
         </div>
 
-        <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto bg-muted/20 p-5">
+        <div className=" flex-1 space-y-3 overflow-y-auto bg-muted/20 p-5">
           {tab === 'snapshot' ? (
             snapshots.length > 0 ? (
               snapshots.map((snap) => {
@@ -237,14 +237,14 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
                   <div className="space-y-4 p-5">
                     <div>
                       <div className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('chapterHistory.promptLabel')}</div>
-                      <div className="custom-scrollbar max-h-48 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-muted/30 p-3 text-sm text-foreground/80">
+                      <div className=" max-h-48 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-muted/30 p-3 text-sm text-foreground/80">
                         {record.prompt}
                       </div>
                     </div>
 
                     <div>
                       <div className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('chapterHistory.contentLabel')}</div>
-                      <div className="custom-scrollbar max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border border-primary/20 bg-primary/5 p-3 font-serif text-sm leading-relaxed text-foreground">
+                      <div className=" max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border border-primary/20 bg-primary/5 p-3 font-serif text-sm leading-relaxed text-foreground">
                         {record.generatedContent}
                       </div>
                       <div className="mt-1.5 text-right text-xs tabular-nums text-muted-foreground">
@@ -255,7 +255,7 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
                     {diffRecordId === record.id && (
                       <div>
                         <div className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('chapterHistory.diffLabel')}</div>
-                        <div className="custom-scrollbar max-h-64 space-y-0.5 overflow-y-auto rounded-lg border border-border bg-muted/30 p-3 font-mono text-xs leading-relaxed">
+                        <div className=" max-h-64 space-y-0.5 overflow-y-auto rounded-lg border border-border bg-muted/30 p-3 font-mono text-xs leading-relaxed">
                           {diffLines(record.generatedContent, chapter.content || '').map((line, i) => (
                             <div
                               key={i}

@@ -132,7 +132,7 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
             <DialogTitle className="font-serif text-lg">{t('genModal.title')}</DialogTitle>
           </div>
 
-          <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto px-6 py-5">
+          <div className=" flex-1 space-y-4 overflow-y-auto px-6 py-5">
             {/* 信息概览卡片 */}
             <div className="overflow-hidden rounded-lg border border-border bg-card">
               <div className="grid grid-cols-12 border-b border-border">
@@ -190,7 +190,7 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
                 <Button variant="ghost" size="sm" onClick={clearAllCharacters}>{t('genModal.clearSelection')}</Button>
               </div>
 
-              <div className="custom-scrollbar max-h-48 space-y-1.5 overflow-y-auto rounded-lg border border-border bg-muted/20 p-2">
+              <div className=" max-h-48 space-y-1.5 overflow-y-auto rounded-lg border border-border bg-muted/20 p-2">
                 {project.characters.map((character) => {
                   const isSelected = selectedCharacterIds.has(character.id);
                   return (
@@ -254,7 +254,7 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
                 <Button variant="ghost" size="sm" onClick={clearAllChapterSummaries}>{t('genModal.clearSelection')}</Button>
               </div>
 
-              <div className="custom-scrollbar max-h-48 space-y-1.5 overflow-y-auto rounded-lg border border-border bg-muted/20 p-2">
+              <div className=" max-h-48 space-y-1.5 overflow-y-auto rounded-lg border border-border bg-muted/20 p-2">
                 {summaryChapters.map((chapter) => {
                   const isSelected = selectedChapterSummaryIds.has(chapter.id);
                   const isCurrentChapter = genModal.chapter?.id === chapter.id;
@@ -341,7 +341,7 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
                 <Button variant="secondary" size="sm" onClick={selectAllKnowledge}>{t('genModal.selectAll')}</Button>
                 <Button variant="ghost" size="sm" onClick={clearAllKnowledge}>{t('genModal.clear')}</Button>
               </div>
-              <div className="custom-scrollbar max-h-48 space-y-1.5 overflow-y-auto rounded-lg border border-border bg-muted/20 p-2">
+              <div className=" max-h-48 space-y-1.5 overflow-y-auto rounded-lg border border-border bg-muted/20 p-2">
                 {writingKnowledge.length > 0 ? (
                   writingKnowledge.map((k) => {
                     const isSelected = selectedKnowledgeIds.has(k.id);

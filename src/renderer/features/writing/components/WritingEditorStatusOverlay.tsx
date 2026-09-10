@@ -13,6 +13,7 @@ import type { WritingEditorStatusOverlayProps } from '../types';
 import { Button } from '@/shared/ui/Button';
 import { Square, Check, X } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
+import { Progress } from '@/shared/ui/Progress';
 
 const WritingEditorStatusOverlay: React.FC<WritingEditorStatusOverlayProps> = ({
   isGenerating,
@@ -99,12 +100,7 @@ const WritingEditorStatusOverlay: React.FC<WritingEditorStatusOverlayProps> = ({
                   {Math.round((batchProgress.current / batchProgress.total) * 100)}%
                 </span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-primary transition-all duration-300"
-                  style={{ width: `${(batchProgress.current / batchProgress.total) * 100}%` }}
-                />
-              </div>
+              <Progress value={(batchProgress.current / batchProgress.total) * 100} className="bg-muted" />
             </div>
 
             <p className="mt-3 mb-1 truncate text-sm font-medium">

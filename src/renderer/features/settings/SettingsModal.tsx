@@ -514,7 +514,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           onChange={setActiveTab}
           onClose={() => void handleRequestClose()}
         />
-        <div className="custom-scrollbar flex-1 overflow-y-auto bg-background p-6">
+        <div className=" flex-1 overflow-y-auto bg-background p-6">
           <SettingsTabContent
             activeTab={activeTab}
             localModels={localModels}

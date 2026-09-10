@@ -58,7 +58,7 @@ const AssistantContextPanel: React.FC<AssistantContextPanelProps> = ({
   const { t } = useTranslation('assistant');
   return (
     <div className="absolute inset-0 top-[88px] z-10 flex flex-1 flex-col overflow-hidden bg-background">
-      <div className="flex shrink-0 overflow-x-auto border-b border-border bg-card no-scrollbar">
+      <div className="flex shrink-0 overflow-x-auto border-b border-border bg-card ">
         {categoryItems.map((category) => (
           <button
             key={category.id}
@@ -98,7 +98,7 @@ const AssistantContextPanel: React.FC<AssistantContextPanelProps> = ({
         </div>
       )}
 
-      <div className="custom-scrollbar flex-1 overflow-y-auto p-4">
+      <div className=" flex-1 overflow-y-auto p-4">
         <Textarea
           readOnly
           className="h-full min-h-full bg-card text-xs leading-relaxed"

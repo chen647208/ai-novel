@@ -104,7 +104,7 @@ const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
           </Button>
         </div>
 
-        <div className="custom-scrollbar flex-1 space-y-2 overflow-y-auto bg-muted/20 p-4">
+        <div className=" flex-1 space-y-2 overflow-y-auto bg-muted/20 p-4">
           {sortedChapters.length === 0 ? (
             <div className="py-10 text-center text-sm text-muted-foreground">{t('export.noChapters')}</div>
           ) : (
@@ -156,7 +156,7 @@ const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
               <span>{t('export.previewTitle')}</span>
               {previewStats && <span className="tabular-nums">{t('export.previewCharCount', { count: previewStats.charCount })}</span>}
             </div>
-            <div className="custom-scrollbar min-h-0 flex-1 overflow-auto bg-background p-4">
+            <div className=" min-h-0 flex-1 overflow-auto bg-background p-4">
               {format === 'html' ? (
                 <iframe title="preview" srcDoc={previewText} className="h-80 w-full rounded-md border border-border bg-white" />
               ) : format === 'md' ? (

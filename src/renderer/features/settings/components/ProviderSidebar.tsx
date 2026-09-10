@@ -74,7 +74,7 @@ export const ProviderSidebar: React.FC<ProviderSidebarProps> = ({
           label: t(`models.filter.${f}`, f),
         }))}
       />
-      <div className="custom-scrollbar -mx-1 flex-1 space-y-1 overflow-y-auto px-1 pb-1">
+      <div className=" -mx-1 flex-1 space-y-1 overflow-y-auto px-1 pb-1">
         {models.map((model) => {
           const preset = findProviderPreset(channelValueFor(model));
           const selected = selectedId === model.id;

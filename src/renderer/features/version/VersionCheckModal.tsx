@@ -179,7 +179,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
         </div>
 
         {/* 内容区域 */}
-        <div className="custom-scrollbar flex-1 space-y-6 overflow-y-auto p-6">
+        <div className=" flex-1 space-y-6 overflow-y-auto p-6">
           {/* 当前版本信息 */}
           <div>
             <SectionLabel>{t('modal.currentVersion')}</SectionLabel>

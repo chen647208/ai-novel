@@ -109,7 +109,7 @@ export function Select({ className, children, value, defaultValue, onChange, dis
         <SelectPrimitive.Content
           position="popper"
           sideOffset={4}
-          className="z-[10002] max-h-96 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-fade-in"
+          className="z-popover max-h-96 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-fade-in"
         >
           <SelectPrimitive.Viewport className="p-1">
             {entries.map((entry, gi) => {

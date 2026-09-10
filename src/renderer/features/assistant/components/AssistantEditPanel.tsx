@@ -68,7 +68,7 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
     return (
       <div className="absolute inset-0 top-[88px] z-10 flex flex-1 flex-col overflow-hidden bg-background">
         {/* 编辑类别标签 */}
-        <div className="flex shrink-0 overflow-x-auto border-b border-border bg-card no-scrollbar">
+        <div className="flex shrink-0 overflow-x-auto border-b border-border bg-card ">
           {EDIT_CATEGORIES.map(cat => (
             <button
               key={cat.id}
@@ -90,7 +90,7 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
         {/* 编辑内容区域 */}
         <div className="flex flex-1 flex-col overflow-hidden">
           {editCategory === 'inspiration' && (
-            <div className="custom-scrollbar space-y-4 overflow-y-auto p-4">
+            <div className=" space-y-4 overflow-y-auto p-4">
               <div>
                 <FieldLabel>{t('edit.inspirationLabel')}</FieldLabel>
                 <Textarea
@@ -113,7 +113,7 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
           )}
 
           {editCategory === 'knowledge' && (
-            <div className="custom-scrollbar space-y-4 overflow-y-auto p-4">
+            <div className=" space-y-4 overflow-y-auto p-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium text-foreground">{t('edit.knowledgeTitle')}</h3>
                 <Button
@@ -206,7 +206,7 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
               </div>
 
               {/* 角色编辑列表 - 单独的可滚动部分 */}
-              <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto p-4">
+              <div className=" flex-1 space-y-4 overflow-y-auto p-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-medium text-foreground">{t('edit.charListTitle')}</h3>
                   <Button
@@ -294,7 +294,7 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
           )}
 
           {editCategory === 'outline' && (
-            <div className="custom-scrollbar overflow-y-auto p-4">
+            <div className=" overflow-y-auto p-4">
               <FieldLabel>{t('edit.outlineLabel')}</FieldLabel>
               <Textarea
                 className="min-h-[256px]"
@@ -306,7 +306,7 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
           )}
 
           {editCategory === 'chapters' && (
-            <div className="custom-scrollbar space-y-4 overflow-y-auto p-4">
+            <div className=" space-y-4 overflow-y-auto p-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium text-foreground">{t('edit.chapterListTitle')}</h3>
                 <Button
@@ -399,7 +399,7 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
           )}
 
           {editCategory === 'content' && (
-            <div className="custom-scrollbar space-y-4 overflow-y-auto p-4">
+            <div className=" space-y-4 overflow-y-auto p-4">
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-sm font-medium text-foreground">{t('edit.contentTitle')}</h3>
                 <Select

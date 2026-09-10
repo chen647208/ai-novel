@@ -15,6 +15,7 @@ import { Button } from '@/shared/ui/Button';
 import { PageHeader, PageHeaderDivider } from '@/shared/ui/PageHeader';
 import { cn } from '@/shared/utils/cn';
 import { ArrowLeft, AlignCenterVertical, Camera, ChevronsRight, Eraser, Expand, FileOutput, FileText, History, Maximize2, Merge, Minimize2, Redo2, RotateCcw, Scissors, Search, SpellCheck, Sprout, Undo2 } from 'lucide-react';
+import { Progress } from '@/shared/ui/Progress';
 
 const iconBtn = 'size-8 text-muted-foreground';
 const textBtn = 'h-8 gap-1.5 px-2 text-xs text-muted-foreground';
@@ -251,10 +252,10 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
       {/* 底边目标进度细条：替代原先悬空的字数竖块 */}
       {targetWordCount > 0 && (
         <div
-          className="absolute inset-x-0 bottom-0 h-0.5 bg-muted"
+          className="absolute inset-x-0 bottom-0"
           title={`${chapterStats.charCount}/${targetWordCount}`}
         >
-          <div className="h-full bg-primary transition-all" style={{ width: `${Math.round(progress * 100)}%` }} />
+          <Progress value={Math.round(progress * 100)} className="h-0.5 rounded-none bg-muted" />
         </div>
       )}
     </PageHeader>

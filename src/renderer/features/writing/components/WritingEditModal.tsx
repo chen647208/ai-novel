@@ -55,10 +55,10 @@ const WritingEditModal: React.FC<WritingEditModalProps> = ({
           </div>
         </div>
 
-        <div className="custom-scrollbar flex-1 space-y-5 overflow-y-auto px-6 py-5">
+        <div className=" flex-1 space-y-5 overflow-y-auto px-6 py-5">
           <div>
             <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('editModal.sectionSelected')}</Label>
-            <div className="custom-scrollbar mt-2 max-h-48 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-muted/30 p-3 text-sm italic leading-relaxed text-foreground/80">
+            <div className=" mt-2 max-h-48 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-muted/30 p-3 text-sm italic leading-relaxed text-foreground/80">
               {selectedText}
             </div>
           </div>

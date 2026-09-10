@@ -98,7 +98,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, onClose, 
           {busy && <Spinner className="size-4 shrink-0" />}
         </div>
 
-        <div className="custom-scrollbar flex-1 overflow-y-auto p-4">
+        <div className=" flex-1 overflow-y-auto p-4">
           {q.length < MIN_QUERY ? (
             <p className="px-1 py-6 text-center text-sm text-muted-foreground">{t('search.hint', { min: MIN_QUERY })}</p>
           ) : !busy && hits.length === 0 ? (

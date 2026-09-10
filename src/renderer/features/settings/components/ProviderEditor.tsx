@@ -232,7 +232,7 @@ export const ProviderEditor: React.FC<ProviderEditorProps> = ({
 
       {testResult && (
         <div className={cn(
-          'custom-scrollbar mt-5 max-h-40 overflow-y-auto whitespace-pre-wrap rounded-lg border p-4 font-mono text-xs leading-relaxed',
+          ' mt-5 max-h-40 overflow-y-auto whitespace-pre-wrap rounded-lg border p-4 font-mono text-xs leading-relaxed',
           isErrorResult(testResult) ? 'border-destructive/20 bg-destructive/5 text-destructive' : 'border-success/20 bg-success/5 text-success'
         )}>
           <div className="mb-2 flex items-center gap-2 font-medium uppercase tracking-wider">

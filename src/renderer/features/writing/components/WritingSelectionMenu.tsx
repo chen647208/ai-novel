@@ -27,7 +27,7 @@ const WritingSelectionMenu: React.FC<WritingSelectionMenuProps> = ({
 
   return (
     <div
-      className="fixed z-[100] flex items-center gap-1 rounded-lg border border-border bg-popover p-1 shadow-md"
+      className="fixed z-overlay flex items-center gap-1 rounded-lg border border-border bg-popover p-1 shadow-md"
       style={{ left: menuPos.x, top: menuPos.y }}
     >
       <Button size="sm" onClick={onOpenEditModal} disabled={!hasModel} title={!hasModel ? t('output.noModelHint') : undefined}>

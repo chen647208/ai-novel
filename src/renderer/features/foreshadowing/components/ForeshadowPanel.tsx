@@ -178,7 +178,7 @@ const ForeshadowPanel: React.FC<ForeshadowPanelProps> = ({
         </div>
 
         {/* 列表 */}
-        <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto bg-muted/20 p-5">
+        <div className=" flex-1 space-y-3 overflow-y-auto bg-muted/20 p-5">
           {visible.length === 0 ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
               <Sprout className="mx-auto mb-3 size-8" />

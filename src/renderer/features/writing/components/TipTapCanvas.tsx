@@ -97,7 +97,7 @@ const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function T
       try {
         const { from } = editor.state.selection;
         const coords = editor.view.coordsAtPos(from);
-        const container = editor.view.dom.closest('.custom-scrollbar') as HTMLElement | null;
+        const container = editor.view.dom.closest('.') as HTMLElement | null;
         if (!container) return;
         const rect = container.getBoundingClientRect();
         const delta = coords.top - rect.top - container.clientHeight * 0.4;

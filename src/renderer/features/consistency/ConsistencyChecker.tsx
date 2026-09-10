@@ -37,6 +37,7 @@ import {
   performAdvancedConsistencyCheck
 } from '../world/services/worldConsistencyService';
 import { performSimilarityCheck,} from './services/vectorSimilarityService';
+import { Progress } from '@/shared/ui/Progress';
 
 interface ConsistencyCheckerProps {
   project: Project;
@@ -335,12 +336,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
               {checkProgress.completed} / {checkProgress.total}
             </span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-1.5 rounded-full bg-primary transition-all duration-300"
-              style={{ width: `${(checkProgress.completed / checkProgress.total) * 100}%` }}
-            ></div>
-          </div>
+          <Progress value={(checkProgress.completed / checkProgress.total) * 100} className="h-1.5 bg-muted" />
         </div>
       )}
 
@@ -406,7 +402,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
       </div>
 
       {/* 问题列表 */}
-      <div className="custom-scrollbar max-h-[400px] space-y-2 overflow-y-auto">
+      <div className=" max-h-[400px] space-y-2 overflow-y-auto">
         {filteredIssues.length === 0 ? (
           <div className="py-10 text-center">
             <CheckCircle2 className="mx-auto mb-2 size-8 text-success" />

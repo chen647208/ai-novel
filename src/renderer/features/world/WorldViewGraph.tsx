@@ -723,7 +723,7 @@ const WorldViewGraph: React.FC<WorldViewGraphProps> = ({
               <p className="mt-1 text-sm text-muted-foreground">{selectedNode.description}</p>
             </div>
 
-            <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto p-5">
+            <div className=" flex-1 space-y-4 overflow-y-auto p-5">
               {/* 根据节点类型显示不同详情 */}
               {selectedNode.type === 'character' && selectedNode.data && (
                 <>

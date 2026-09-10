@@ -203,7 +203,7 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
       </div>
 
       {/* 模板列表 */}
-      <div className="custom-scrollbar max-h-[500px] space-y-3 overflow-y-auto">
+      <div className=" max-h-[500px] space-y-3 overflow-y-auto">
         {filteredTemplates.length === 0 ? (
           <EmptyState
             icon={FileText}
@@ -345,7 +345,7 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
               {importExportMode === 'import' ? t('consistency:pm.importTitle') : t('consistency:pm.exportTitle')}
             </h3>
           </div>
-          <div className="custom-scrollbar flex-1 overflow-y-auto p-6">
+          <div className=" flex-1 overflow-y-auto p-6">
             {importExportMode === 'export' ? (
               <div>
                 <p className="mb-3 text-sm text-muted-foreground">{t('consistency:pm.exportHint')}</p>

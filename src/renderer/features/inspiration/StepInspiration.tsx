@@ -636,7 +636,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, onGoSection 
               spellCheck={false}
             />
           ) : (
-            <div className="custom-scrollbar min-h-[500px] overflow-y-auto p-6">
+            <div className=" min-h-[500px] overflow-y-auto p-6">
               <MarkdownView content={results} className="font-serif text-base" />
             </div>
           )}

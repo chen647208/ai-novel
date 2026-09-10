@@ -46,7 +46,7 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
           <ChevronsLeft className="size-4" />
         </Button>
       </div>
-      <div className="custom-scrollbar flex-1 space-y-6 overflow-y-auto p-4">
+      <div className=" flex-1 space-y-6 overflow-y-auto p-4">
         <section>
           <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('sidebar.charactersTitle')}</h4>
           {characters.length === 0 ? (

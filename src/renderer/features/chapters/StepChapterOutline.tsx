@@ -432,7 +432,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
           <h4 className="mb-3 flex shrink-0 items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             <BookOpen className="size-3.5" /> {t('steps:chapters.outlineRefTitle')}
           </h4>
-          <div className="custom-scrollbar flex-1 overflow-y-auto pr-1 text-xs text-muted-foreground">
+          <div className=" flex-1 overflow-y-auto pr-1 text-xs text-muted-foreground">
             {project.outline ? (
               <MarkdownView content={project.outline} className="text-xs [&_*]:text-current" />
             ) : (

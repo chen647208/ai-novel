@@ -27,7 +27,7 @@ export default function ToastHost() {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="pointer-events-none fixed bottom-4 right-4 z-[100] flex w-80 flex-col gap-2">
+    <div className="pointer-events-none fixed bottom-4 right-4 z-overlay flex w-80 flex-col gap-2">
       {toasts.map(item => {
         const { icon: Icon, tone } = KIND_STYLE[item.kind];
         return (

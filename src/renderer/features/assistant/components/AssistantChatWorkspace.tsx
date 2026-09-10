@@ -129,7 +129,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
     <>
       <div
         ref={chatContainerRef}
-        className="custom-scrollbar flex-1 space-y-4 overflow-y-auto bg-muted/20 p-4"
+        className=" flex-1 space-y-4 overflow-y-auto bg-muted/20 p-4"
         style={{ display: (contextPanelOpen || editPanelOpen) ? 'none' : 'block' }}
       >
         {messages.length === 0 && (
@@ -262,7 +262,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
       </div>
 
       {(pendingFiles.length > 0 || pendingImages.length > 0) && (
-        <div className="flex shrink-0 gap-2 overflow-x-auto border-t border-border bg-primary/5 px-4 py-2 custom-scrollbar">
+        <div className="flex shrink-0 gap-2 overflow-x-auto border-t border-border bg-primary/5 px-4 py-2 ">
           {pendingFiles.map((file, index) => (
             <div key={index} className="flex items-center gap-1 whitespace-nowrap rounded-md border border-border bg-card px-2 py-1 text-2xs text-foreground">
               <FileText className="size-3.5" />

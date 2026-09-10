@@ -38,6 +38,7 @@ import { Textarea } from '@/shared/ui/Textarea';
 import { BookOpen, Bot, Brain, Calendar, Clock, CloudUpload, FileText, Flag, Globe, MapPinned, PenLine, Search, Settings2, Tag, X } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
 import { uuidv7 } from '@core/entities';
+import { Progress } from '@/shared/ui/Progress';
 
 interface StepKnowledgeEnhancedProps {
   project: Project;
@@ -957,12 +958,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
                   </span>
                   <span className="text-xs tabular-nums text-muted-foreground">{indexProgress}%</span>
                 </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-primary transition-all duration-300"
-                    style={{ width: `${indexProgress}%` }}
-                  />
-                </div>
+                <Progress value={indexProgress} className="h-1.5 bg-muted" />
               </div>
             )}
           </div>

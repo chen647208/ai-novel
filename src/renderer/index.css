@@ -206,6 +206,10 @@
 }
 
 @layer components {
+  /* 层级令牌：禁止再写 z-[数字]，新增浮层按语义取用 */
+  .z-overlay { z-index: 100; }
+  .z-modal { z-index: 10001; }
+  .z-popover { z-index: 10002; }
   /* 小说 DSL 富文本画布：TipTap ProseMirror 排版基线 + 语义节点样式 */
   .novel-canvas .ProseMirror {
     min-height: 100%;

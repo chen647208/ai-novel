@@ -140,7 +140,7 @@ const RelationshipDiagram: React.FC<RelationshipDiagramProps> = ({ characters, o
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-background">
+    <div className="fixed inset-0 z-overlay flex items-center justify-center overflow-hidden bg-background">
       <header className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between p-6">
         <div>
           <h2 className="font-serif text-2xl font-medium tracking-tight text-foreground">{t('diagram.title')}</h2>

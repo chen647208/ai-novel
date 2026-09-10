@@ -188,7 +188,7 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
                     <span className="ml-2 font-normal normal-case tracking-normal text-muted-foreground/70">{t('cardPrompts.mustIncludeVar')}</span>
                   </label>
                   <Textarea
-                    className="custom-scrollbar h-48 resize-none bg-muted/40 font-mono text-sm"
+                    className=" h-48 resize-none bg-muted/40 font-mono text-sm"
                     value={template.content}
                     onChange={(e) => updateCardPrompt(template.id, { content: e.target.value })}
                     placeholder={t('cardPrompts.contentPlaceholder')}
@@ -258,7 +258,7 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
               {importExportMode === 'import' ? t('cardPrompts.importTitle') : t('cardPrompts.exportTitle')}
             </DialogTitle>
           </div>
-          <div className="custom-scrollbar flex-1 overflow-y-auto px-6 py-5">
+          <div className=" flex-1 overflow-y-auto px-6 py-5">
             {importExportMode === 'export' ? (
               <div>
                 <p className="mb-3 text-sm text-muted-foreground">{t('cardPrompts.exportHint')}</p>

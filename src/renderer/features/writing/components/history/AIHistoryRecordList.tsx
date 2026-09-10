@@ -172,14 +172,14 @@ const AIHistoryRecordCard: React.FC<{
           <div className={compact ? 'space-y-4' : 'grid grid-cols-2 gap-4'}>
             <div className="rounded-lg border border-border bg-muted/30 p-4">
               <div className={sectionLabel}>{t('record.fullPromptLabel')}</div>
-              <div className={cn('custom-scrollbar overflow-y-auto whitespace-pre-wrap leading-relaxed text-foreground/80', compact ? 'max-h-40 text-xs' : 'max-h-64 text-sm')}>
+              <div className={cn(' overflow-y-auto whitespace-pre-wrap leading-relaxed text-foreground/80', compact ? 'max-h-40 text-xs' : 'max-h-64 text-sm')}>
                 {item.record.prompt}
               </div>
             </div>
 
             <div className="rounded-lg border border-border bg-muted/30 p-4">
               <div className={sectionLabel}>{t('record.generatedContentLabel')}</div>
-              <div className={cn('custom-scrollbar overflow-y-auto whitespace-pre-wrap leading-relaxed text-foreground/80', compact ? 'max-h-40 text-xs' : 'max-h-64 text-sm')}>
+              <div className={cn(' overflow-y-auto whitespace-pre-wrap leading-relaxed text-foreground/80', compact ? 'max-h-40 text-xs' : 'max-h-64 text-sm')}>
                 {item.record.generatedContent}
               </div>
             </div>
@@ -263,7 +263,7 @@ const AIHistoryRecordList: React.FC<AIHistoryRecordListProps> = ({
         </div>
       )}
 
-      <div className={cn('custom-scrollbar flex-1 overflow-y-auto bg-muted/20', compact ? 'p-4' : 'p-6')}>
+      <div className={cn(' flex-1 overflow-y-auto bg-muted/20', compact ? 'p-4' : 'p-6')}>
         {records.length === 0 ? (
           <EmptyState
             icon={History}

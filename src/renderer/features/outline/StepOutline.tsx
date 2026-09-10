@@ -474,7 +474,7 @@ const StepOutline: React.FC<StepOutlineProps> = ({ project }) => {
                 />
               </div>
             ) : (
-              <div className="custom-scrollbar flex-1 overflow-y-auto p-8">
+              <div className=" flex-1 overflow-y-auto p-8">
                 <MarkdownView content={outlineContent} className="font-serif text-base" />
               </div>
             )}
