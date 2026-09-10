@@ -48,9 +48,22 @@ export function getEffectiveLanguage(): AppLanguage {
   return normalizeLanguage(i18n.language) ?? DEFAULT_LANGUAGE;
 }
 
+/** 把语言写到 <html lang>（无障碍与浏览器行为依赖它）。 */
+function applyHtmlLang(lang: AppLanguage): void {
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  }
+}
+
 /** 切换运行时语言（不直接落盘；持久化由调用方写入 AppState 完成）。 */
 export function changeLanguage(lang: AppLanguage): void {
   void i18n.changeLanguage(lang);
+  applyHtmlLang(lang);
+}
+
+/** 首帧按检测到的语言同步 <html lang>（bootstrap 调用）。 */
+export function syncHtmlLang(): void {
+  applyHtmlLang(getEffectiveLanguage());
 }
 
 export { i18n };

@@ -13,7 +13,16 @@ import ReactDOM from 'react-dom/client';
 import App from './app/App';
 import ErrorBoundary from './shared/components/ErrorBoundary';
 import { bootstrapI18n } from './i18n';
+import { logger } from './shared/utils/logger';
 import './index.css';
+
+// 渲染进程兜底：未捕获异常与未处理 Promise 记入日志，避免静默丢失现场
+window.addEventListener('unhandledrejection', (event) => {
+  logger.error('[renderer] Unhandled rejection', event.reason);
+});
+window.addEventListener('error', (event) => {
+  logger.error('[renderer] Uncaught error', event.error ?? event.message);
+});
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { initI18n } from './config';
+import { initI18n, syncHtmlLang } from './config';
 
 /**
  * 在首次渲染前初始化 i18n。此处不传语言，交由检测器读取 navigator 得到初始语言，
@@ -15,4 +15,5 @@ import { initI18n } from './config';
  */
 export async function bootstrapI18n(): Promise<void> {
   await initI18n();
+  syncHtmlLang();
 }
