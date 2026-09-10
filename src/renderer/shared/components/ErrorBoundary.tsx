@@ -7,6 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 import { logger } from '@/shared/utils/logger';
+import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 
 import React from 'react';
 import { i18n } from '@/i18n';
@@ -40,7 +41,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     logger.error(`[ErrorBoundary:${this.props.scope ?? 'app'}]`, error, info.componentStack);
     try {
       // 保留最近 20 条崩溃记录，便于在设置面板/日志中排查
-      const KEY = 'novelocal_error_logs';
+      const KEY = STORAGE_KEYS.errorLogs;
       const raw = localStorage.getItem(KEY);
       const logs: Array<{ time: number; scope: string; message: string }> = raw ? JSON.parse(raw) : [];
       logs.push({ time: Date.now(), scope: this.props.scope ?? 'app', message: error.message });

@@ -10,12 +10,13 @@
 /** 发行档 → 功能可用性 hook：设置面板切换发行档后经 PROFILE_CHANGED_EVENT 刷新。 */
 import { useEffect, useState } from 'react';
 import { enabledFeatureIds, PROFILE_CHANGED_EVENT } from '@core/plugin';
+import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 
 export function useFeatureAvailability(): Set<string> {
-  const [enabled, setEnabled] = useState<Set<string>>(() => enabledFeatureIds(localStorage.getItem('profile.current') ?? 'full'));
+  const [enabled, setEnabled] = useState<Set<string>>(() => enabledFeatureIds(localStorage.getItem(STORAGE_KEYS.profileCurrent) ?? 'full'));
 
   useEffect(() => {
-    const refresh = (): void => setEnabled(enabledFeatureIds(localStorage.getItem('profile.current') ?? 'full'));
+    const refresh = (): void => setEnabled(enabledFeatureIds(localStorage.getItem(STORAGE_KEYS.profileCurrent) ?? 'full'));
     window.addEventListener(PROFILE_CHANGED_EVENT, refresh);
     window.addEventListener('storage', refresh);
     return () => {

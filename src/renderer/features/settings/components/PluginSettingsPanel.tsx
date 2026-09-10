@@ -10,6 +10,7 @@
 /** 插件状态面板（docs/design/04 §2）：状态汇总 + 错误详情 + 一键禁用/启用。 */
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '@/i18n';
+import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
@@ -36,7 +37,7 @@ const PluginSettingsPanel: React.FC = () => {
   const { t } = useTranslation(['settings', 'common']);
   const [statuses, setStatuses] = useState<PluginStatus[] | null>(null);
   const [showTree, setShowTree] = useState(false);
-  const [profile, setProfile] = useState<string>(() => localStorage.getItem('profile.current') ?? 'full');
+  const [profile, setProfile] = useState<string>(() => localStorage.getItem(STORAGE_KEYS.profileCurrent) ?? 'full');
   const profileVeto = useRef<PluginDisposable | null>(null);
 
   useEffect(() => {
@@ -45,7 +46,7 @@ const PluginSettingsPanel: React.FC = () => {
       if (alive) setStatuses(host.list());
     });
     // minimal 档拦截只活内存：重载后按持久化的档位重装，否则回显 minimal 却不拦截
-    if (localStorage.getItem('profile.current') === 'minimal' && !profileVeto.current) {
+    if (localStorage.getItem(STORAGE_KEYS.profileCurrent) === 'minimal' && !profileVeto.current) {
       profileVeto.current = eventBus.intercept('ai.request', () => ({
         allowed: false,
         reason: 'minimal 发行档已禁用全部 AI 请求',
@@ -58,7 +59,7 @@ const PluginSettingsPanel: React.FC = () => {
 
   const applyProfile = (name: string): void => {
     setProfile(name);
-    localStorage.setItem('profile.current', name);
+    localStorage.setItem(STORAGE_KEYS.profileCurrent, name);
     window.dispatchEvent(new CustomEvent(PROFILE_CHANGED_EVENT));
     if (name === 'minimal') {
       if (!profileVeto.current) {

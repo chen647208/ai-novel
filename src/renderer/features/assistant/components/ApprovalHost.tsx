@@ -14,6 +14,7 @@
  * 可打开列表逐条决定。多并发请求排队，先到先审。
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -81,7 +82,7 @@ const ApprovalHost: React.FC = () => {
   useEffect(() => {
     if (!window.electronAPI) return;
     const consumed = new Set<string>(
-      JSON.parse(localStorage.getItem('approval.mcp-consumed') ?? '[]') as string[],
+        JSON.parse(localStorage.getItem(STORAGE_KEYS.approvalMcpConsumed) ?? '[]') as string[],
     );
     const poll = (): void => {
       void (async () => {
@@ -108,7 +109,7 @@ const ApprovalHost: React.FC = () => {
           for (const id of [...consumed]) {
             if (!seen.has(id)) consumed.delete(id);
           }
-          localStorage.setItem('approval.mcp-consumed', JSON.stringify([...consumed]));
+          localStorage.setItem(STORAGE_KEYS.approvalMcpConsumed, JSON.stringify([...consumed]));
           refreshPending();
           mcpBridgeOk.current = true;
           setMcpBridgeError(false);

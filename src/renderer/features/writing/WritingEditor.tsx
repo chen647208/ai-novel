@@ -7,6 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 import { logger } from '@/shared/utils/logger';
+import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -90,7 +91,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const [saveDirty, setSaveDirty] = useState(false);
   const [typewriter, setTypewriter] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('editor.typewriter') === '1';
+      return localStorage.getItem(STORAGE_KEYS.editorTypewriter) === '1';
     } catch {
       return false;
     }
@@ -98,7 +99,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const toggleTypewriter = () => {
     setTypewriter((v) => {
       try {
-        localStorage.setItem('editor.typewriter', v ? '0' : '1');
+        localStorage.setItem(STORAGE_KEYS.editorTypewriter, v ? '0' : '1');
       } catch {
         // 忽略
       }

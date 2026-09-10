@@ -13,6 +13,7 @@
  */
 import { ApprovalBroker, PromptAssembler, registerBuiltinSections } from '@core/ai';
 import { BuildProfileRegistry, EventBus } from '@core/plugin';
+import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import { createToolRegistry } from './builtinTools';
 import { createBuiltinSkillCatalog } from './skillCatalogSetup';
 import { AiSessionManager } from './aiSessionManager';
@@ -37,7 +38,7 @@ export const sessionManager = new AiSessionManager({
 
 // ── 插件宿主 ───────────────────────────────────────────────────
 
-const DISABLED_KEY = 'plugins.disabled';
+const DISABLED_KEY = STORAGE_KEYS.pluginsDisabled;
 
 function readDisabledList(): string[] {
   try {

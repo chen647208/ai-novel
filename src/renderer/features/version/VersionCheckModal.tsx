@@ -7,6 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 import { logger } from '@/shared/utils/logger';
+import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation, i18n } from '@/i18n';
@@ -44,7 +45,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
   const [versionHistory, setVersionHistory] = useState(getVersionHistory());
   const [autoCheckEnabled, setAutoCheckEnabled] = useState(() => {
     try {
-      return localStorage.getItem('version.autoCheck') !== '0';
+      return localStorage.getItem(STORAGE_KEYS.versionAutoCheck) !== '0';
     } catch {
       return true;
     }
@@ -52,7 +53,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
   // 跳过的版本：下次检查到同一版不再打扰（localStorage，换机不跟随）
   const [skippedVersion, setSkippedVersion] = useState<string | null>(() => {
     try {
-      return localStorage.getItem('version.skipped') || null;
+      return localStorage.getItem(STORAGE_KEYS.versionSkipped) || null;
     } catch {
       return null;
     }
@@ -147,7 +148,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
 
   const handleSkipVersion = (version: string) => {
     try {
-      localStorage.setItem('version.skipped', version);
+      localStorage.setItem(STORAGE_KEYS.versionSkipped, version);
     } catch {
       // 存储不可用则本次生效
     }
@@ -157,7 +158,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
   const handleToggleAutoCheck = (enabled: boolean) => {
     setAutoCheckEnabled(enabled);
     try {
-      localStorage.setItem('version.autoCheck', enabled ? '1' : '0');
+      localStorage.setItem(STORAGE_KEYS.versionAutoCheck, enabled ? '1' : '0');
     } catch {
       // 存储不可用则本次生效
     }

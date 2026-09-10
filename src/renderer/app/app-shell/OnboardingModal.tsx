@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import { useTranslation } from '@/i18n';
 import { Button } from '@/shared/ui/Button';
 import { Dialog, DialogContent } from '@/shared/ui/Dialog';
+import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import { Input } from '@/shared/ui/Input';
 import { cn } from '@/shared/utils/cn';
 import { Bot, PenLine, Sparkles } from 'lucide-react';
@@ -90,7 +91,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ open, onDone, 
 
 export function isOnboardingDone(): boolean {
   try {
-    return localStorage.getItem('onboarding.done') === '1';
+    return localStorage.getItem(STORAGE_KEYS.onboardingDone) === '1';
   } catch {
     // 存储不可用时按未完成处理（fail-open）：默认显示向导，避免首启永久跳过
     return false;
@@ -99,8 +100,8 @@ export function isOnboardingDone(): boolean {
 
 export function markOnboardingDone(persona: OnboardingPersona): void {
   try {
-    localStorage.setItem('onboarding.done', '1');
-    localStorage.setItem('onboarding.persona', persona);
+    localStorage.setItem(STORAGE_KEYS.onboardingDone, '1');
+    localStorage.setItem(STORAGE_KEYS.onboardingPersona, persona);
   } catch {
     // 忽略
   }
