@@ -16,6 +16,7 @@ import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
 import { pluginHostPromise, saveDisabledList } from '@/features/assistant/services/aiRuntime';
 import { PROFILE_CHANGED_EVENT, assemblyTree, profileByName, type AssemblyRow, type PluginStatus } from '@core/plugin';
+import { builtinRegistry } from '@core/types-registry';
 import type { McpServerConfig } from '../../../../shared/types';
 import { useSettingsStore } from '@/app/stores/settingsStore';
 import { connectServer, disconnectServer, fetchServerTools } from '@/shared/services/mcpClient';
@@ -38,6 +39,7 @@ const PluginSettingsPanel: React.FC = () => {
   const [statuses, setStatuses] = useState<PluginStatus[] | null>(null);
   const [showTree, setShowTree] = useState(false);
   const [profile, setProfile] = useState<string>(() => localStorage.getItem(STORAGE_KEYS.profileCurrent) ?? 'full');
+  const registeredTypes = builtinRegistry.list();
 
   useEffect(() => {
     let alive = true;
@@ -112,6 +114,18 @@ const PluginSettingsPanel: React.FC = () => {
             {showTree ? t('plugins.tree.hide') : t('plugins.tree.show')}
           </Button>
           {showTree && <AssemblyTreeView rows={assemblyTree(profileByName(profile))} />}
+      </div>
+
+      {/* 类型注册表（只读）：内置 + 插件贡献的类型模板，供排查"新文体是否已装载" */}
+      <div className="rounded-lg border border-border p-3">
+        <div className="mb-2 text-sm font-medium">{t('plugins.types.title', { count: registeredTypes.length })}</div>
+        <div className="flex max-h-40 flex-wrap gap-1.5 overflow-y-auto">
+          {registeredTypes.map((tpl) => (
+            <span key={tpl.id} className="rounded-full border border-border px-2 py-0.5 text-2xs text-muted-foreground" title={tpl.id}>
+              {tpl.label}
+            </span>
+          ))}
+        </div>
       </div>
 
       {!statuses.length && <div className="rounded-lg border border-border p-6 text-center text-sm text-muted-foreground">{t('plugins.empty')}</div>}

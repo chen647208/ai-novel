@@ -398,8 +398,11 @@
     "state.disabled": "disabled",
     "state.uninstalled": "uninstalled",
     "tree": {
-      "show": "Show assembly tree",
+      "show": "View assembly tree",
       "hide": "Hide assembly tree"
+    },
+    "types": {
+      "title": "Registered types ({{count}})"
     },
     "mcp": {
       "title": "External MCP Servers",

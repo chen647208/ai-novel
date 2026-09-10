@@ -401,6 +401,9 @@
       "show": "查看装配树",
       "hide": "收起装配树"
     },
+    "types": {
+      "title": "已注册类型（{{count}}）"
+    },
     "mcp": {
       "title": "外部 MCP 服务",
       "hint": "连接外部 MCP server（stdio 命令），其工具以 mcp.* 进入助手工具箱，调用走审批。命令数组传参，不经过 shell。",
