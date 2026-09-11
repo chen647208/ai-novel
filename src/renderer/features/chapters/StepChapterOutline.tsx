@@ -13,9 +13,8 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation, i18n, templateDisplayName } from '@/i18n';
 import { type Project, type Chapter } from '../../../shared/types';
 import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
-import { VIRTUAL_CHAPTER_ORDER, KNOWLEDGE_SNIPPET_TRUNCATE, isVirtualChapter } from '../../../shared/constants/chapters';
+import { isVirtualChapter } from '../../../shared/constants/chapters';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
-import { AIService } from '@/shared/services/ai/aiService';
 import { dialogService } from '@/shared/services/dialogService';
 import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
@@ -31,7 +30,7 @@ import { Textarea } from '@/shared/ui/Textarea';
 import { BookOpen, BookOpenText, Check, CheckCheck, ChevronDown, ChevronRight, ChevronUp, Clock, FastForward, FileOutput, Flag, Globe2, Layers, LayoutGrid, LayoutList, ListOrdered, MapPin, PenTool, Trash2, WandSparkles, XCircle } from 'lucide-react';
 import { useViewPreference } from '@/shared/hooks/useViewPreference';
 import { ViewModeToggle } from '@/shared/ui/ViewModeToggle';
-import { parseChaptersFromAI, buildChapterContextBlock } from './services/chapterOutline';
+import { useChapterOutlineGeneration } from './hooks/useChapterOutlineGeneration';
 
 interface StepChapterOutlineProps {
   project: Project;
@@ -47,11 +46,8 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
   const activeModel = useUsableModel();
   const updateActiveProject = useProjectStore((s) => s.updateActiveProject);
   const onUpdate = (updates: Partial<Project>, opts?: CommitOptions) => updateActiveProject(updates, opts);
-  const [loading, setLoading] = useState(false);
-  const [continueLoading, setContinueLoading] = useState(false);
   
   // 传统输出token状态
-  const [traditionalTokens, setTraditionalTokens] = useState({ prompt: 0, completion: 0, total: 0 });
   
   const chapterPrompts = useMemo(() => prompts.filter(p => p.category === 'chapter'), [prompts]);
   const [selectedPromptId, setSelectedPromptId] = useState(chapterPrompts[0]?.id || '');
@@ -85,12 +81,6 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
   // Knowledge Base Selection State
   const [selectedKnowledgeIds, setSelectedKnowledgeIds] = useState<Set<string>>(new Set());
   const [showKnowledgeSelector, setShowKnowledgeSelector] = useState(false);
-
-  const parseChapters = (text: string, startIndex: number): Chapter[] =>
-    parseChaptersFromAI(text, startIndex, {
-      titleFor: (num) => t('steps:chapters.defaultChapterTitle', { num }),
-      defaultSummary: t('steps:chapters.defaultSummary'),
-    });
 
   const exportChaptersToTxt = async () => {
     if (project.chapters.length === 0) {
@@ -138,143 +128,10 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
     }
   };
 
-  const generateChapters = async (isContinue: boolean = false) => {
-    if (!project.outline) {
-      dialogService.alert(t('steps:chapters.noOutline'));
-      return;
-    }
-    if (!isModelUsable(activeModel)) {
-      dialogService.alert(t('steps:common.noModel'));
-      return;
-    }
-    
-    // 重置token状态
-    setTraditionalTokens({ prompt: 0, completion: 0, total: 0 });
-    
-    if (isContinue) setContinueLoading(true);
-    else setLoading(true);
-
-    try {
-      let finalPrompt = "";
-      const template = prompts.find(p => p.id === selectedPromptId)?.content || '';
-
-      if (isContinue && project.chapters.length > 0) {
-        // 续写模式：构建包含上下文的提示词
-        const existingInfo = project.chapters
-          .slice(-5) // 取最后5章作为上下文，防止提示词过长
-          .map(c => `第${c.order + 1}章：${c.title}\n细纲：${c.summary.substring(0, 100)}...`)
-          .join('\n\n');
-        
-        // 寻找专门的续写模板，如果没有则手动组合
-        const continueTemplate = prompts.find(p => p.id === 'p4-continue')?.content || 
-          "根据大纲：{outline}。目前已完成到第{count}章。请紧接着从'第{next_count}章'开始续写后续章节细纲。格式：\n第N章：[标题]\n剧情细纲：[描述]\n---";
-        
-        finalPrompt = continueTemplate
-          .replace('{outline}', project.outline)
-          .replace('{count}', project.chapters.length.toString())
-          .replace('{next_count}', (project.chapters.length + 1).toString())
-          .replace('{existing_chapters}', existingInfo)
-          + buildChapterContextBlock(project);
-      } else {
-        // 全量生成模式：带上人物与书名简介（与大纲页同口径），细纲不断联
-        finalPrompt = template.replace('{outline}', project.outline);
-        finalPrompt += buildChapterContextBlock(project);
-      }
-      
-      // Inject Knowledge
-      if (selectedKnowledgeIds.size > 0) {
-         const kContent = project.knowledge
-           .filter(k => selectedKnowledgeIds.has(k.id))
-           .map(k => `【参考资料：${k.name}】\n${k.content.substring(0, KNOWLEDGE_SNIPPET_TRUNCATE)}`)
-           .join('\n\n');
-         if (kContent) finalPrompt += `\n\n### 必须参考的世界观/设定资料 (Knowledge Base)\n请参考以下资料规划章节剧情：\n${kContent}`;
-      }
-
-      // 使用传统调用
-      const result = await AIService.call(activeModel, finalPrompt);
-      if (result.error) {
-        dialogService.alert(t('steps:common.generateFailed', { error: result.error }));
-        return;
-      }
-      const startIndex = isContinue ? project.chapters.length : 0;
-      const parsedChapters = parseChapters(result.content, startIndex);
-
-      if (parsedChapters.length > 0) {
-        if (isContinue) {
-          onUpdate({ chapters: [...project.chapters, ...parsedChapters] }, { agentId: 'ai:chapters', cause: selectedPromptId });
-        } else {
-          // 全量生成按 order 合并：既有章节的正文/历史/快照/摘要原位保留，只更新标题与细纲；
-          // 超出 AI 输出范围的既有章节保留（防丢手写章）
-          const prevByOrder = new Map(project.chapters.map((c) => [c.order, c]));
-          const merged = parsedChapters.map((pc) => {
-            const prev = prevByOrder.get(pc.order);
-            return prev
-              ? { ...pc, id: prev.id, content: prev.content, history: prev.history, snapshots: prev.snapshots, contentSummary: prev.contentSummary }
-              : pc;
-          });
-          const kept = project.chapters.filter((c) => !merged.some((m) => m.order === c.order));
-          onUpdate(
-            { chapters: [...merged, ...kept].sort((a, b) => a.order - b.order) },
-            { agentId: 'ai:chapters', cause: selectedPromptId },
-          );
-        }
-      } else {
-        dialogService.alert(t('steps:chapters.unrecognized'));
-      }
-      
-      // 保存传统输出模式的token信息
-      if (result.tokens) {
-        setTraditionalTokens(result.tokens);
-      }
-      
-      // 创建AI历史记录
-      const historyRecord = AIService.buildHistoryRecordData(
-        'chapter-outline-virtual-chapter', // 虚拟章节ID
-        finalPrompt,
-        result.content,
-        activeModel,
-        result,
-        {
-          templateName: templateDisplayName(prompts.find(p => p.id === selectedPromptId) ?? { name: t('steps:chapters.defaultTemplateName') }),
-          batchGeneration: false,
-          chapterTitle: isContinue ? t('steps:chapters.chapterTitleContinue') : t('steps:chapters.chapterTitleGen'),
-          generatedChapterCount: parsedChapters.length
-        }
-      );
-      
-      // 将历史记录添加到虚拟章节（使用virtualChapters数组）
-      const updatedVirtualChapters = project.virtualChapters || [];
-      const chapterOutlineChapter = updatedVirtualChapters.find(c => c.id === 'chapter-outline-virtual-chapter') || {
-        id: 'chapter-outline-virtual-chapter',
-        title: t('steps:chapters.chapterTitleGen'),
-        summary: t('steps:chapters.historySummary'),
-        content: '',
-        order: VIRTUAL_CHAPTER_ORDER, // 特殊顺序，放在最前面
-        history: []
-      };
-      
-      const existingHistory = chapterOutlineChapter.history || [];
-      const updatedChapterOutlineChapter = {
-        ...chapterOutlineChapter,
-        history: [...existingHistory, historyRecord]
-      };
-      
-      // 更新虚拟章节列表
-      const finalVirtualChapters = updatedVirtualChapters.filter(c => c.id !== 'chapter-outline-virtual-chapter');
-      finalVirtualChapters.unshift(updatedChapterOutlineChapter);
-      
-      // 更新项目数据，包含更新后的虚拟章节
-      onUpdate({
-        virtualChapters: finalVirtualChapters
-      }, { agentId: 'ai:chapters', cause: selectedPromptId });
-    } catch (err) {
-      logger.error(err);
-      dialogService.alert(t('steps:chapters.generateErrorGeneric'));
-    } finally {
-      setLoading(false);
-      setContinueLoading(false);
-    }
-  };
+  // 细纲生成：全量/续写统一见 useChapterOutlineGeneration
+  const { loading, continueLoading, traditionalTokens, generateChapters } = useChapterOutlineGeneration({
+    project, prompts, selectedPromptId, selectedKnowledgeIds, activeModel, onUpdate, t,
+  });
 
   return (
     <div className="mx-auto flex h-full w-full max-w-7xl flex-col gap-5 overflow-hidden p-8">
