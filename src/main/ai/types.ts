@@ -7,10 +7,12 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import type { AIMessageImage, ModelConfig, AIResponse, StreamingAIResponse } from '../../shared/types.js';
+import type { AIMessageImage, ModelConfig, AIResponse, StreamingAIResponse, TokenUsage } from '../../shared/types.js';
+
+export type { TokenUsage };
 
 /** 统一的对话消息结构（适配器内部使用） */
-export interface ChatMessage {
+export interface AdapterChatMessage {
   role: 'system' | 'user' | 'assistant';
   content: string | ChatContentPart[];
 }
@@ -59,15 +61,6 @@ export class AIRequestError extends Error {
 }
 
 /** token 用量 */
-export interface TokenUsage {
-  prompt: number;
-  completion: number;
-  total: number;
-  /** 缓存命中读入（Anthropic cache_read_input_tokens；OpenAI/Gemini 自动缓存不透出则缺席） */
-  cacheRead?: number;
-  /** 缓存写入（Anthropic cache_creation_input_tokens） */
-  cacheWrite?: number;
-}
 
 /**
  * 未显式设置 temperature 时的统一默认值。

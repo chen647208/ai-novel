@@ -54,7 +54,7 @@ interface VectorDocumentMetadata {
 }
 
 /** 渲染层通过 IPC 提交的文档（embedding 已在渲染层计算完成） */
-interface VectorDocument {
+interface VectorDocumentInput {
   id: string;
   projectId: string;
   knowledgeItemId?: string;
@@ -179,7 +179,7 @@ export function registerVectorIpc(): void {
     }
   });
 
-  ipcMain.handle(IPC.vector.addDocuments, async (_event, projectId: string, documents: VectorDocument[]): Promise<IpcResult> => {
+  ipcMain.handle(IPC.vector.addDocuments, async (_event, projectId: string, documents: VectorDocumentInput[]): Promise<IpcResult> => {
     try {
       const index = await service.getIndex(projectId);
       const ids: string[] = [];
@@ -208,7 +208,7 @@ export function registerVectorIpc(): void {
     }
   });
 
-  ipcMain.handle(IPC.vector.updateDocument, async (_event, projectId: string, document: VectorDocument): Promise<IpcResult> => {
+  ipcMain.handle(IPC.vector.updateDocument, async (_event, projectId: string, document: VectorDocumentInput): Promise<IpcResult> => {
     try {
       const index = await service.getIndex(projectId);
       // Vectra 无原地更新：先删后插

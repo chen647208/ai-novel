@@ -31,7 +31,7 @@ import {
   type EmbeddingModelConfig
 } from '../../../shared/types';
 import {
-  type ConsistencyCheckResult,
+  type WorldConsistencyCheckResult,
   quickCheck,
   fixDanglingReferences,
   performAdvancedConsistencyCheck
@@ -59,7 +59,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
   onNavigateToItem
 }) => {
   const { t } = useTranslation(['consistency', 'common']);
-  const [checkResult, setCheckResult] = useState<ConsistencyCheckResult | null>(null);
+  const [checkResult, setCheckResult] = useState<WorldConsistencyCheckResult | null>(null);
   const [isChecking, setIsChecking] = useState(false);
   const [checkMode, setCheckMode] = useState<ConsistencyCheckMode>(consistencyConfig?.mode || 'rule');
   const [checkProgress, setCheckProgress] = useState<{ completed: number; total: number; currentItem: string } | null>(null);
@@ -109,7 +109,7 @@ const ConsistencyChecker: React.FC<ConsistencyCheckerProps> = ({
         );
 
         // 转换为标准格式
-        const standardResult: ConsistencyCheckResult = {
+        const standardResult: WorldConsistencyCheckResult = {
           issues: vectorResult.issues.map(issue => ({
             id: issue.id,
             type: issue.similarityScore > 0.9 ? 'warning' : 'info',

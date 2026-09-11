@@ -82,9 +82,19 @@ export interface AIResponse {
   };
 }
 
+// 单次调用的 token 用量（主进程适配器与渲染层共用一份）
+export interface TokenUsage {
+  prompt: number;
+  completion: number;
+  total: number;
+  /** 缓存命中读入（Anthropic cache_read_input_tokens；OpenAI/Gemini 自动缓存不透出则缺席） */
+  cacheRead?: number;
+  /** 缓存写入（Anthropic cache_creation_input_tokens） */
+  cacheWrite?: number;
+}
+
 // AI生成历史记录类型
-export interface AIHistoryRecord {
-  id: string;
+export interface AIHistoryRecord {  id: string;
   chapterId: string;           // 关联的章节ID
   timestamp: number;           // 生成时间戳
   prompt: string;              // 使用的提示词

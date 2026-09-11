@@ -28,11 +28,8 @@ export interface BatchProgress {
   currentChapterTitle: string;
 }
 
-export interface TokenUsage {
-  prompt: number;
-  completion: number;
-  total: number;
-}
+import type { TokenUsage } from '../../../shared/types';
+export type { TokenUsage };
 
 export interface MenuPosition {
   x: number;

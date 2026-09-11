@@ -8,11 +8,11 @@
  */
 
 import type { AIMessageImage, ModelConfig } from '../../shared/types.js';
-import type { ChatContentPart, ChatMessage, TokenUsage } from './types.js';
+import type { ChatContentPart, AdapterChatMessage, TokenUsage } from './types.js';
 
 /** 构建消息数组（系统提示词 + 用户提示词）——全适配器共用；附图挂在末条 user 消息后 */
-export function buildMessages(model: ModelConfig, prompt: string, images?: AIMessageImage[]): ChatMessage[] {
-  const messages: ChatMessage[] = [];
+export function buildMessages(model: ModelConfig, prompt: string, images?: AIMessageImage[]): AdapterChatMessage[] {
+  const messages: AdapterChatMessage[] = [];
   const systemPrompt = model.systemPrompt?.trim();
   if (systemPrompt) {
     messages.push({ role: 'system', content: systemPrompt });
@@ -30,7 +30,7 @@ export function buildMessages(model: ModelConfig, prompt: string, images?: AIMes
 }
 
 /** 文本抽取：parts 形态只取 text（日志/回退路径用）。 */
-export function messageText(content: ChatMessage['content']): string {
+export function messageText(content: AdapterChatMessage['content']): string {
   if (typeof content === 'string') return content;
   return content.filter((p) => p.type === 'text').map((p) => p.text).join('\n');
 }

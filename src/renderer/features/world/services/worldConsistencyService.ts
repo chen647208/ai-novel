@@ -28,7 +28,7 @@ export interface ConsistencyIssue {
   details?: string;
 }
 
-export interface ConsistencyCheckResult {
+export interface WorldConsistencyCheckResult {
   issues: ConsistencyIssue[];
   summary: {
     total: number;
@@ -333,7 +333,7 @@ export async function checkWorldConsistency(
   project: Project,
   model?: ModelConfig,
   options: ConsistencyCheckOptions = DEFAULT_OPTIONS
-): Promise<ConsistencyCheckResult> {
+): Promise<WorldConsistencyCheckResult> {
   const allIssues: ConsistencyIssue[] = [];
   
   if (options.checkDanglingReferences) {
@@ -370,7 +370,7 @@ export async function checkWorldConsistency(
 }
 
 // 快速检查（仅本地规则，不调用AI）
-export function quickCheck(project: Project): ConsistencyCheckResult {
+export function quickCheck(project: Project): WorldConsistencyCheckResult {
   const issues: ConsistencyIssue[] = [
     ...checkDanglingReferences(project),
     ...checkTimelineConflicts(project),
@@ -480,7 +480,7 @@ export async function performAdvancedConsistencyCheck(
     templates?: Record<string, ConsistencyCheckPromptTemplate>;
     onProgress?: (completed: number, total: number, currentItem: string) => void;
   }
-): Promise<ConsistencyCheckResult> {
+): Promise<WorldConsistencyCheckResult> {
   const { mode, model, templates, onProgress } = options;
   
   // 基础规则检查（所有模式都执行）

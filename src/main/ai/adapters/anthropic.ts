@@ -31,7 +31,7 @@ import {
   messageText,
   readErrorResponse,
 } from '../messages.js';
-import type { ChatMessage } from '../types.js';
+import type { AdapterChatMessage } from '../types.js';
 import { createSSEParser } from '../sse.js';
 import { AIRequestError, DEFAULT_TEMPERATURE, type CallOptions, type ProviderAdapter } from '../types.js';
 import { parseRetryAfter, requestErrorFromResponse, withRetry } from '../retry.js';
@@ -136,7 +136,7 @@ function anthropicPayload(
 }
 
 /** 附图转 Anthropic image block（dataUrl 拆 base64）。 */
-function appendImageBlocks(blocks: AnthropicContentBlocks, content: ChatMessage['content']): void {
+function appendImageBlocks(blocks: AnthropicContentBlocks, content: AdapterChatMessage['content']): void {
   if (typeof content === 'string') return;
   for (const part of content) {
     if (part.type !== 'image') continue;
