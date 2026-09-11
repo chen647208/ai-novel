@@ -69,7 +69,11 @@ export default tseslint.config(
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
-      parserOptions: { ecmaFeatures: { jsx: true } },
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+        projectService: true,
+        tsconfigRootDir: rootDir,
+      },
     },
     plugins: { 'react-hooks': reactHooks },
     rules: {
@@ -82,6 +86,12 @@ export default tseslint.config(
       '@typescript-eslint/no-non-null-assertion': 'warn',
       '@typescript-eslint/consistent-type-imports': ['warn', { prefer: 'type-imports', fixStyle: 'inline-type-imports' }],
       '@typescript-eslint/no-empty-object-type': 'warn',
+
+      // 异步正确性（类型感知）
+      // no-floating-promises 存量较多（见 docs/design/18 §八），先 warn 暴露，清理到阈值后再升 error
+      '@typescript-eslint/no-floating-promises': 'warn',
+      '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: false }],
+      '@typescript-eslint/await-thenable': 'error',
 
       // 通用纪律（渲染层日志唯一出口是 shared/utils/logger.ts，该文件自带豁免注释）
       'no-console': 'error',

@@ -120,5 +120,15 @@ UI 槽位注册表 `shared/services/uiSlots.ts` + 渲染点 `shared/ui/Slot.tsx`
 内置与插件同路径）。内置 `plugins` 页签由 `features/settings/coreSettingsTabs.tsx` 注册；`SettingsTabNav`/`SettingsTabContent`
 按注册表渲染，插件可续注新页签。
 
+## 八、架构与类型护栏（已接入 verify）
+
+- `deps:check`：`dependency-cruiser`（`.dependency-cruiser.cjs`）——禁循环依赖、禁 `renderer/shared→app`、
+  禁 `core→renderer/main`、禁 `renderer→main`。
+- `types:escapes`：`scripts/check-type-escapes.mjs`——统计非测试代码 `as unknown as`，超上限即失败
+  （2026-09 基线 37，清理后下调）。
+- `bundle:check`：`scripts/check-bundle-size.mjs`——渲染层 JS+CSS 体积预算（2026-09 基线约 3014KB，预算 3200KB）。
+- lint 类型感知：开启 `no-misused-promises`、`await-thenable`（error）；`no-floating-promises` 存量较多先
+  置 warn（当前 168 warnings，其中悬浮 Promise 约 143），清理到阈值后升 error。
+
 
 

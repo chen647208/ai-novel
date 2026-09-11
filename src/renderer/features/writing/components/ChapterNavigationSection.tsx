@@ -80,7 +80,7 @@ const ChapterNavigationSection: React.FC<ChapterNavigationSectionProps> = ({
       danger: true,
     });
     if (!ok) return;
-    await onBatchDeleteChapter([...selectedIds]);
+    onBatchDeleteChapter([...selectedIds]);
     setSelectedIds(new Set());
   };
 
