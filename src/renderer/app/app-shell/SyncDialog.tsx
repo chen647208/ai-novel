@@ -13,14 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeftRight } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
 import { Button } from '@/shared/ui/Button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/shared/ui/Dialog';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { dialogService } from '@/shared/services/dialogService';
 import { exportSyncBundle, importSyncBundle, type SyncApplyReport } from '@/shared/services/syncService';
 import type { Project } from '../../../shared/types';
@@ -80,34 +73,13 @@ export const SyncDialog: React.FC<{ project: Project | null }> = ({ project }) =
       </Button>
 
       {open && project && (
-        <Dialog open onOpenChange={(v) => { if (!v && !busy) setOpen(v); }}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>{t('sync.title')}</DialogTitle>
-              <DialogDescription>{t('sync.description')}</DialogDescription>
-            </DialogHeader>
-
-            {report ? (
-              <div className="space-y-2 text-sm">
-                <div>{t('sync.reportApplied', { count: report.applied })}</div>
-                <div>{t('sync.reportSkipped', { count: report.skipped })}</div>
-                <div>{t('sync.reportManual', { count: report.manual })}</div>
-                {report.conflictCopies.length > 0 && (
-                  <div className="rounded-md border border-border p-2">
-                    <div className="mb-1 font-medium">{t('sync.conflictCopies')}</div>
-                    {report.conflictCopies.map((c) => (
-                      <div key={c.id} className="text-muted-foreground">
-                        {c.title}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">{t('sync.hint', { book: project.title })}</p>
-            )}
-
-            <DialogFooter>
+        <ModalShell
+          open
+          onOpenChange={(v) => { if (!v && !busy) setOpen(v); }}
+          title={t('sync.title')}
+          description={t('sync.description')}
+          footer={
+            <>
               <Button variant="outline" onClick={handleImport} disabled={busy} aria-busy={busy}>
                 {busy && <Spinner className="size-4" />}
                 {t('sync.import')}
@@ -116,9 +88,29 @@ export const SyncDialog: React.FC<{ project: Project | null }> = ({ project }) =
                 {busy && <Spinner className="size-4" />}
                 {t('sync.export')}
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </>
+          }
+        >
+          {report ? (
+            <div className="space-y-2 text-sm">
+              <div>{t('sync.reportApplied', { count: report.applied })}</div>
+              <div>{t('sync.reportSkipped', { count: report.skipped })}</div>
+              <div>{t('sync.reportManual', { count: report.manual })}</div>
+              {report.conflictCopies.length > 0 && (
+                <div className="rounded-md border border-border p-2">
+                  <div className="mb-1 font-medium">{t('sync.conflictCopies')}</div>
+                  {report.conflictCopies.map((c) => (
+                    <div key={c.id} className="text-muted-foreground">
+                      {c.title}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t('sync.hint', { book: project.title })}</p>
+          )}
+        </ModalShell>
       )}
     </>
   );
