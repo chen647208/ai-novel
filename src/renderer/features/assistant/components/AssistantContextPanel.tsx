@@ -15,7 +15,7 @@ import type { AssistantCategory } from '../types';
 import { Button } from '@/shared/ui/Button';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
-import { cn } from '@/shared/utils/cn';
+import { TabBar } from '@/shared/ui/TabBar';
 import { BookOpenText, Lightbulb, ListOrdered, ListTree, Users, WandSparkles, type LucideIcon } from 'lucide-react';
 
 interface AssistantContextPanelProps {
@@ -58,27 +58,12 @@ const AssistantContextPanel: React.FC<AssistantContextPanelProps> = ({
   const { t } = useTranslation('assistant');
   return (
     <div className="absolute inset-0 top-[88px] z-10 flex flex-1 flex-col overflow-hidden bg-background">
-      <div className="flex shrink-0 overflow-x-auto border-b border-border bg-card ">
-        {categoryItems.map((category) => (
-          <button
-            key={category.id}
-            type="button"
-            onClick={() => {
-              onCategoryChange(category.id);
-              onSubSelectionChange('all');
-            }}
-            className={cn(
-              'flex min-w-[60px] flex-1 flex-col items-center gap-1 border-b-2 py-3 text-2xs transition-colors',
-              activeCategory === category.id
-                ? 'border-primary text-foreground'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <category.icon className="size-4" />
-            <span>{t(category.labelKey)}</span>
-          </button>
-        ))}
-      </div>
+      <TabBar
+        variant="block"
+        value={activeCategory}
+        onChange={(id) => { onCategoryChange(id); onSubSelectionChange('all'); }}
+        items={categoryItems.map((c) => ({ id: c.id, icon: c.icon, label: t(c.labelKey) }))}
+      />
 
       {(activeCategory === 'knowledge' || activeCategory === 'chapters') && project && (
         <div className="shrink-0 border-b border-border bg-card px-4 py-2">

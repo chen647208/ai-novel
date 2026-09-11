@@ -21,10 +21,37 @@ export interface TabBarProps<T extends string> {
   onChange: (id: T) => void;
   items: readonly TabItem<T>[];
   className?: string;
+  /** underline：下划线横向；block：等宽图标在上（用于侧边分类）。 */
+  variant?: 'underline' | 'block';
 }
 
-/** 下划线页签条：受控、展示型；内容由调用方按 value 条件渲染。 */
-export function TabBar<T extends string>({ value, onChange, items, className }: TabBarProps<T>): React.ReactElement {
+/** 受控页签条：展示型；内容由调用方按 value 条件渲染。 */
+export function TabBar<T extends string>({ value, onChange, items, className, variant = 'underline' }: TabBarProps<T>): React.ReactElement {
+  if (variant === 'block') {
+    return (
+      <div role="tablist" className={cn('flex shrink-0 overflow-x-auto border-b border-border bg-card', className)}>
+        {items.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={value === id}
+            onClick={() => onChange(id)}
+            className={cn(
+              'flex min-w-[60px] flex-1 flex-col items-center gap-1 border-b-2 py-3 text-2xs transition-colors',
+              value === id
+                ? 'border-primary text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground',
+            )}
+          >
+            {Icon && <Icon className="size-4" />}
+            <span>{label}</span>
+          </button>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div role="tablist" className={cn('flex gap-1 border-b border-border', className)}>
       {items.map(({ id, label, icon: Icon }) => (

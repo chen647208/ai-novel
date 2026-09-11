@@ -17,7 +17,7 @@ import { normalizeGenderId } from '@/shared/utils/characterKinds';
 import { Select } from '@/shared/ui/Select';
 import { Spinner } from '@/shared/ui/Spinner';
 import { Textarea } from '@/shared/ui/Textarea';
-import { cn } from '@/shared/utils/cn';
+import { TabBar } from '@/shared/ui/TabBar';
 import { AlertCircle, BookOpenText, CheckCircle2, FileText, Info, Lightbulb, ListOrdered, ListTree, Save, Users, WandSparkles, type LucideIcon } from 'lucide-react';
 
 const EDIT_CATEGORIES: Array<{ id: AssistantEditCategory; icon: LucideIcon }> = [
@@ -68,24 +68,12 @@ const AssistantEditPanel: React.FC<AssistantEditPanelProps> = ({
     return (
       <div className="absolute inset-0 top-[88px] z-10 flex flex-1 flex-col overflow-hidden bg-background">
         {/* 编辑类别标签 */}
-        <div className="flex shrink-0 overflow-x-auto border-b border-border bg-card ">
-          {EDIT_CATEGORIES.map(cat => (
-            <button
-              key={cat.id}
-              type="button"
-              onClick={() => handleOpenEditPanel(cat.id)}
-              className={cn(
-                'flex min-w-[60px] flex-1 flex-col items-center gap-1 border-b-2 py-3 text-2xs transition-colors',
-                editCategory === cat.id
-                  ? 'border-primary text-foreground'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              )}
-            >
-              <cat.icon className="size-4" />
-              <span>{t(CATEGORY_LABEL_KEYS[cat.id])}</span>
-            </button>
-          ))}
-        </div>
+        <TabBar
+          variant="block"
+          value={editCategory}
+          onChange={handleOpenEditPanel}
+          items={EDIT_CATEGORIES.map((cat) => ({ id: cat.id, icon: cat.icon, label: t(CATEGORY_LABEL_KEYS[cat.id]) }))}
+        />
 
         {/* 编辑内容区域 */}
         <div className="flex flex-1 flex-col overflow-hidden">
