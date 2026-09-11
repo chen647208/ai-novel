@@ -11,15 +11,14 @@ import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { templateDisplayName } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
-import { type AIHistoryRecord, type Chapter, type ModelConfig, type Project, type PromptTemplate, type StreamingAIResponse } from '../../../shared/types';
-import { AIService } from '@/shared/services/ai/aiService';
+import { type Chapter, type Project, type PromptTemplate } from '../../../shared/types';
 import WritingEditorToolbar from './components/WritingEditorToolbar';
 import WritingSidebar from './components/WritingSidebar';
 import WritingEditorOverlayLayer from './components/WritingEditorOverlayLayer';
 import FindBar from './components/FindBar';
 import { useFindReplace } from './hooks/useFindReplace';
+import { useChapterGeneration } from './hooks/useChapterGeneration';
 import WritingEditorCanvas from './components/WritingEditorCanvas';
 import ForeshadowPanel from '../foreshadowing/components/ForeshadowPanel';
 import { extractChapterSummary } from './services/summaryExtractionService';
@@ -29,23 +28,16 @@ import { buildProfileRegistry } from '@/shared/services/buildProfiles';
 import { computeBookStats, computeChapterStats } from './services/writingStatsService';
 import { openForeshadows, overdueForeshadows } from '../foreshadowing/services/foreshadowService';
 import {
-  BATCH_CHAPTER_INTERVAL_MS,
-  DEFAULT_BATCH_MODE,
   DEFAULT_OUTPUT_MODE,
   DEFAULT_TARGET_WORD_COUNT,
-  INITIAL_BATCH_PROGRESS,
   INITIAL_GENERATION_MODAL_STATE,
-  INITIAL_TOKEN_USAGE,
   SELECTION_MENU_DEBOUNCE_MS,
 } from './constants';
 import type {
-  BatchMode,
-  BatchProgress,
   GenerationModalState,
   MenuPosition,
   NovelEditorHandle,
   TextSelectionRange,
-  TokenUsage,
   WritingEditorProps,
 } from './types';
 import {
@@ -61,8 +53,6 @@ import {
   toggleSetValue,
   type ExportFormat,
 } from './utils';
-import { applySelectionReplacement } from '../../editor/commands';
-import { buildChapterPrompt } from './services/chapterPrompt';
 import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
@@ -110,21 +100,8 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
       return !v;
     });
   };
-  const [isGenerating, setIsGenerating] = useState(false);
   const [outputMode, setOutputMode] = useState(DEFAULT_OUTPUT_MODE);
   
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [streamingContent, setStreamingContent] = useState("");
-  const [, setStreamingResponse] = useState<StreamingAIResponse | null>(null);
-  const [streamingAbortController, setStreamingAbortController] = useState<AbortController | null>(null);
-  
-  const [batchMode, setBatchMode] = useState<BatchMode>(DEFAULT_BATCH_MODE);
-  const [isBatchGenerating, setIsBatchGenerating] = useState(false);
-  const [batchProgress, setBatchProgress] = useState<BatchProgress>(INITIAL_BATCH_PROGRESS);
-  const [batchAbortController, setBatchAbortController] = useState<AbortController | null>(null);
-  
-  const [streamingTokens, setStreamingTokens] = useState<TokenUsage>(INITIAL_TOKEN_USAGE);
-  const [traditionalTokens, setTraditionalTokens] = useState<TokenUsage>(INITIAL_TOKEN_USAGE);
 
   const [menuPos, setMenuPos] = useState<MenuPosition | null>(null);
   const [selectedText, setSelectedText] = useState("");
@@ -133,9 +110,6 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const [genModal, setGenModal] = useState<GenerationModalState>(INITIAL_GENERATION_MODAL_STATE);
   const [targetWordCount, setTargetWordCountState] = useState<number>(project.wordTarget ?? DEFAULT_TARGET_WORD_COUNT);
   const [selectedGenPromptId, setSelectedGenPromptId] = useState<string>('');
-  // 上次 AI 执行参数（重试键复用）；中断半截保留（保留/丢弃由用户决定）
-  const lastRunRef = useRef<{ template: PromptTemplate; overrideContent?: string } | null>(null);
-  const [stoppedPartial, setStoppedPartial] = useState<string | null>(null);
   const [spellcheckOn, setSpellcheckOn] = useState(false);
 
   const [selectedKnowledgeIds, setSelectedKnowledgeIds] = useState<Set<string>>(new Set());
@@ -507,264 +481,34 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     if (genModal.chapter) { setActiveChapterId(genModal.chapter.id); setGenModal({ isOpen: false, chapter: null }); }
   };
 
-  const runAITemplate = async (template: PromptTemplate, overrideContent?: string) => {
-    const targetChapter = genModal.chapter || activeChapter;
-    if (!targetChapter) return;
-    if (!isModelUsable(activeModel)) {
-      dialogService.alert(t('steps:common.noModel'));
-      return;
-    }
-
-    // 写前快照：AI 落笔前先保一次，失败可从快照/历史找回（定时/切章快照不覆盖此路径）。
-    snapshotChapterIfDue(targetChapter.id, 'manual');
-    // 记录上次执行参数：工具条重试键原样复用
-    lastRunRef.current = { template, overrideContent };
-
-    setIsGenerating(true);
-    setMenuPos(null);
-    setEditModalOpen(false);
-    setStreamingTokens({ prompt: 0, completion: 0, total: 0 });
-    setTraditionalTokens({ prompt: 0, completion: 0, total: 0 });
-    
-    if (genModal.isOpen && genModal.chapter) {
-      setActiveChapterId(genModal.chapter.id);
-      setGenModal({ isOpen: false, chapter: null });
-    }
-
-    const finalPrompt = buildChapterPrompt({
-      template,
-      project,
-      targetChapter,
-      context: overrideContent || selectedText || targetChapter.content,
-      isModalOpen: genModal.isOpen,
-      targetWordCount,
-      editableSummary,
-      useOutline,
-      selectedKnowledgeIds,
-      selectedCharacterIds,
-      selectedChapterSummaryIds,
-    });
-
-    const shouldUseStreaming = outputMode === 'streaming' && activeModel.supportsStreaming !== false;
-
-    if (shouldUseStreaming) {
-      setIsStreaming(true);
-      setStreamingContent("");
-      setStreamingResponse(null);
-      
-      const abortController = new AbortController();
-      setStreamingAbortController(abortController);
-
-      try {
-        await AIService.callStreaming(activeModel, finalPrompt, (response) => {
-          setStreamingContent(response.content);
-          setStreamingResponse(response);
-          
-          if (response.tokens) {
-            setStreamingTokens(response.tokens);
-          }
-
-          if (response.isComplete) {
-            setIsStreaming(false);
-            setStreamingAbortController(null);
-            
-            if (response.error) {
-              // 用户主动取消不算失败，不打扰；其余错误提示并复位生成态（'生成已取消' 为适配层控制流哨兵，保持字面比对）
-              if (response.error !== '生成已取消') {
-                dialogService.alert(t('editor.aiFailed', { error: response.error }));
-              }
-              setIsGenerating(false);
-              return;
-            }
-
-            const result = response.content;
-            if (selectedText && selectionRange && !genModal.isOpen) {
-              const currentContent = activeChapter?.content || "";
-              const newContent = applySelectionReplacement(currentContent, selectionRange.start, selectionRange.end, result);
-              
-              const historyRecord = AIService.buildHistoryRecordData(
-                targetChapter.id,
-                finalPrompt,
-                result,
-                activeModel,
-                response,
-                {
-                  templateName: templateDisplayName(template),
-                  batchGeneration: false,
-                  chapterTitle: targetChapter.title
-                }
-              );
-              
-              const updatedChapters = project.chapters.map(c => {
-                if (c.id === targetChapter.id) {
-                  const existingHistory = c.history || [];
-                  return {
-                    ...c,
-                    content: newContent,
-                    history: [...existingHistory, historyRecord]
-                  };
-                }
-                return c;
-              });
-              commitAIChapters(updatedChapters, template);
-            } else {
-              const currentContent = targetChapter.content || "";
-              const newContent = currentContent.length < 50 ? result : (currentContent + "\n\n" + result);
-              const newChapters = project.chapters.map(c => {
-                if (c.id === targetChapter.id) {
-                  const historyRecord = AIService.buildHistoryRecordData(
-                    targetChapter.id,
-                    finalPrompt,
-                    result,
-                    activeModel,
-                    response,
-                    {
-                      templateName: templateDisplayName(template),
-                      batchGeneration: false,
-                      chapterTitle: targetChapter.title
-                    }
-                  );
-                  
-                  const existingHistory = c.history || [];
-                  return {
-                    ...c,
-                    content: newContent,
-                    history: [...existingHistory, historyRecord]
-                  };
-                }
-                return c;
-              });
-              commitAIChapters(newChapters, template);
-            }
-            
-            setIsGenerating(false);
-            setSelectionRange(null);
-            setSelectedText("");
-          }
-        }, { signal: abortController.signal });
-      } catch (err) {
-        logger.error(err);
-        setIsStreaming(false);
-        setIsGenerating(false);
-        setStreamingAbortController(null);
-        dialogService.alert(t('editor.streamCallFailed'));
-      }
-    } else {
-      try {
-        const result = await AIService.call(activeModel, finalPrompt);
-        
-        if (result.tokens) {
-          setTraditionalTokens(result.tokens);
-        }
-        
-        if (selectedText && selectionRange && !genModal.isOpen) {
-          const currentContent = activeChapter?.content || "";
-          const newContent = applySelectionReplacement(currentContent, selectionRange.start, selectionRange.end, result.content);
-          
-          const historyRecord = AIService.buildHistoryRecordData(
-            targetChapter.id,
-            finalPrompt,
-            result.content,
-            activeModel,
-            result,
-            {
-              templateName: templateDisplayName(template),
-              batchGeneration: false,
-              chapterTitle: targetChapter.title
-            }
-          );
-          
-          const updatedChapters = project.chapters.map(c => {
-            if (c.id === targetChapter.id) {
-              const existingHistory = c.history || [];
-              return {
-                ...c,
-                content: newContent,
-                history: [...existingHistory, historyRecord]
-              };
-            }
-            return c;
-          });
-          commitAIChapters(updatedChapters, template);
-        } else {
-          const currentContent = targetChapter.content || "";
-          const newContent = currentContent.length < 50 ? result.content : (currentContent + "\n\n" + result.content);
-          const newChapters = project.chapters.map(c => {
-            if (c.id === targetChapter.id) {
-              const historyRecord = AIService.buildHistoryRecordData(
-                targetChapter.id,
-                finalPrompt,
-                result.content,
-                activeModel,
-                result,
-                {
-                  templateName: templateDisplayName(template),
-                  batchGeneration: false,
-                  chapterTitle: targetChapter.title
-                }
-              );
-              
-              const existingHistory = c.history || [];
-              return {
-                ...c,
-                content: newContent,
-                history: [...existingHistory, historyRecord]
-              };
-            }
-            return c;
-          });
-          commitAIChapters(newChapters, template);
-        }
-      } catch (err) {
-        logger.error(err);
-        dialogService.alert(t('editor.callFailed'));
-      } finally {
-        setIsGenerating(false);
-        setSelectionRange(null);
-        setSelectedText("");
-      }
-    }
-  };
-
-  const stopStreaming = () => {
-    if (streamingAbortController) {
-      streamingAbortController.abort();
-      // 半截保留：不直接清空，交由用户保留/丢弃（完成态合并规则复用）
-      const partial = streamingContent;
-      setIsStreaming(false);
-      setIsGenerating(false);
-      setStreamingAbortController(null);
-      setStreamingResponse(null);
-      setStreamingTokens({ prompt: 0, completion: 0, total: 0 });
-      setStoppedPartial(partial.trim() ? partial : null);
-      if (!partial.trim()) {
-        setStreamingContent("");
-      }
-    }
-  };
-
-  const keepStoppedPartial = () => {
-    if (!stoppedPartial || !activeChapter) {
-      setStoppedPartial(null);
-      return;
-    }
-    const currentContent = activeChapter.content || "";
-    const merged = currentContent.length < 50 ? stoppedPartial : (currentContent + "\n\n" + stoppedPartial);
-    updateChapterContent(merged);
-    setStoppedPartial(null);
-    setStreamingContent("");
-  };
-
-  const discardStoppedPartial = () => {
-    setStoppedPartial(null);
-    setStreamingContent("");
-  };
-
-  const handleRetryAI = () => {
-    const last = lastRunRef.current;
-    if (!last || isGenerating || isStreaming || isBatchGenerating) return;
-    void runAITemplate(last.template, last.overrideContent);
-  };
+  const gen = useChapterGeneration({
+    project,
+    activeChapter,
+    genModal,
+    setGenModal,
+    setActiveChapterId,
+    setMenuPos,
+    setEditModalOpen,
+    selectedText,
+    selectionRange,
+    setSelectionRange,
+    setSelectedText,
+    selectedKnowledgeIds,
+    selectedCharacterIds,
+    selectedChapterSummaryIds,
+    useOutline,
+    editableSummary,
+    targetWordCount,
+    outputMode,
+    activeModel,
+    prompts,
+    selectedGenPromptId,
+    snapshotChapterIfDue,
+    commitAIChapters,
+    updateChapterContent,
+    onUpdate,
+    t,
+  });
 
   const handleDeleteChapter = async (chapterId: string) => {
     const target = project.chapters.find((c) => c.id === chapterId);
@@ -794,216 +538,6 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     }
   };
 
-  const generateSingleChapter = async (chapter: Chapter, template: PromptTemplate, model: ModelConfig, externalSignal?: AbortSignal): Promise<{content: string, historyRecord?: AIHistoryRecord}> => {
-    try {
-      setActiveChapterId(chapter.id);
-
-      const finalPrompt = buildChapterPrompt({
-        template,
-        project,
-        targetChapter: chapter,
-        context: chapter.content,
-        appendContextBlock: false,
-        isModalOpen: true,
-        targetWordCount,
-        editableSummary,
-        useOutline,
-        selectedKnowledgeIds,
-        selectedCharacterIds,
-        selectedChapterSummaryIds,
-      });
-
-      const shouldUseStreaming = outputMode === 'streaming' && model.supportsStreaming !== false;
-
-      if (shouldUseStreaming) {
-        setIsStreaming(true);
-        setStreamingContent("");
-        setStreamingResponse(null);
-        
-        const abortController = new AbortController();
-        setStreamingAbortController(abortController);
-        // 批量停止信号联动本次请求
-        if (externalSignal) {
-          if (externalSignal.aborted) abortController.abort();
-          else externalSignal.addEventListener('abort', () => abortController.abort(), { once: true });
-        }
-
-        return new Promise<{content: string, historyRecord?: AIHistoryRecord}>((resolve, reject) => {
-          AIService.callStreaming(model, finalPrompt, (response) => {
-            setStreamingContent(response.content);
-            setStreamingResponse(response);
-            
-            if (response.tokens) {
-              setStreamingTokens(response.tokens);
-            }
-
-            if (response.isComplete) {
-              setIsStreaming(false);
-              setStreamingAbortController(null);
-              
-              if (response.error) {
-                reject(new Error(response.error));
-                return;
-              }
-
-              const result = response.content;
-              const currentContent = chapter.content || "";
-              const newContent = currentContent.length < 50 ? result : (currentContent + "\n\n" + result);
-              
-              const historyRecord = AIService.buildHistoryRecordData(
-                chapter.id,
-                finalPrompt,
-                result,
-                model,
-                response,
-                {
-                  templateName: templateDisplayName(template),
-                  batchGeneration: true,
-                  chapterTitle: chapter.title
-                }
-              );
-              
-              resolve({ content: newContent, historyRecord });
-            }
-          }, { signal: abortController.signal }).catch(reject);
-        });
-      } else {
-        const result = await AIService.call(model, finalPrompt, { signal: externalSignal });
-        
-        if (result.tokens) {
-          setTraditionalTokens(result.tokens);
-        }
-        
-        const currentContent = chapter.content || "";
-        const newContent = currentContent.length < 50 ? result.content : (currentContent + "\n\n" + result.content);
-        
-        const historyRecord = AIService.buildHistoryRecordData(
-          chapter.id,
-          finalPrompt,
-          result.content,
-          model,
-          result,
-          {
-            templateName: templateDisplayName(template),
-            batchGeneration: true,
-            chapterTitle: chapter.title
-          }
-        );
-        
-        return { content: newContent, historyRecord };
-      }
-    } catch (err) {
-      logger.error(err);
-      throw err;
-    }
-  };
-
-  const runBatchGeneration = async () => {
-    const template = prompts.find(p => p.id === selectedGenPromptId);
-    if (!template || !genModal.chapter) return;
-    if (!isModelUsable(activeModel)) {
-      dialogService.alert(t('steps:common.noModel'));
-      return;
-    }
-
-    const targetChapter = genModal.chapter;
-
-    setIsBatchGenerating(true);
-    setGenModal({ isOpen: false, chapter: null });
-
-    const chapterCount = batchMode === 'batch5' ? 5 : 10;
-    
-    const sortedChapters = [...project.chapters].sort((a, b) => a.order - b.order);
-    
-    const startIndex = sortedChapters.findIndex(c => c.id === targetChapter.id);
-    
-    const chaptersToGenerate = sortedChapters.slice(startIndex, startIndex + chapterCount);
-    
-    const abortController = new AbortController();
-    setBatchAbortController(abortController);
-
-    try {
-      const chapterUpdates: Array<{id: string, content: string, historyRecord?: AIHistoryRecord}> = [];
-      
-      for (let i = 0; i < chaptersToGenerate.length; i++) {
-        if (abortController.signal.aborted) {
-          break;
-        }
-
-        const chapter = chaptersToGenerate[i];
-        if (!chapter) continue;
-
-        snapshotChapterIfDue(chapter.id, 'manual');
-        setBatchProgress({
-          current: i + 1,
-          total: chaptersToGenerate.length,
-          currentChapterTitle: chapter.title
-        });
-
-        try {
-          const result = await generateSingleChapter(chapter, template, activeModel, abortController.signal);
-          
-          chapterUpdates.push({
-            id: chapter.id,
-            content: result.content,
-            historyRecord: result.historyRecord
-          });
-          
-          await new Promise(resolve => setTimeout(resolve, BATCH_CHAPTER_INTERVAL_MS));
-        } catch (err) {
-          logger.error(`生成章节 ${chapter.title} 失败:`, err);
-          continue;
-        }
-      }
-
-      if (chapterUpdates.length > 0) {
-        const newChapters = project.chapters.map(c => {
-          const update = chapterUpdates.find(u => u.id === c.id);
-          if (update) {
-            const existingHistory = c.history || [];
-            const newHistory = update.historyRecord ? [...existingHistory, update.historyRecord] : existingHistory;
-            return { 
-              ...c, 
-              content: update.content,
-              history: newHistory
-            };
-          }
-          return c;
-        });
-        
-        onUpdate({ chapters: newChapters }, { agentId: 'ai:writing-batch', cause: selectedGenPromptId });
-
-        await new Promise(resolve => setTimeout(resolve, SELECTION_MENU_DEBOUNCE_MS));
-      }
-
-      dialogService.alert(t('editor.batchDone', { count: chapterUpdates.length }));
-    } catch (err) {
-      logger.error(err);
-      dialogService.alert(t('editor.batchFailed', { error: err instanceof Error ? err.message : t('editor.unknownError') }));
-    } finally {
-      setIsBatchGenerating(false);
-      setBatchAbortController(null);
-      setBatchProgress({ current: 0, total: 0, currentChapterTitle: '' });
-    }
-  };
-
-  const stopBatchGeneration = () => {
-    if (batchAbortController) {
-      batchAbortController.abort();
-      setIsBatchGenerating(false);
-      setBatchAbortController(null);
-      setBatchProgress({ current: 0, total: 0, currentChapterTitle: '' });
-    }
-  };
-
-  const handleModalGenerate = () => {
-    if (batchMode === 'single') {
-      const template = prompts.find(p => p.id === selectedGenPromptId);
-      if (template) runAITemplate(template);
-    } else {
-      runBatchGeneration();
-    }
-  };
   const handleEditGenerate = () => {
     if (customEditPrompt && customEditPrompt.trim() !== '') {
       const customTemplate: PromptTemplate = {
@@ -1012,10 +546,10 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
         name: t('editor.customPromptName'),
         content: customEditPrompt.trim()
       };
-      runAITemplate(customTemplate);
+      gen.runAITemplate(customTemplate);
     } else {
       const template = prompts.find(p => p.id === selectedEditPromptId);
-      if (template) runAITemplate(template);
+      if (template) gen.runAITemplate(template);
     }
   };
   const openEditModal = () => { 
@@ -1095,20 +629,20 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
         setSelectedGenPromptId={setSelectedGenPromptId}
         targetWordCount={targetWordCount}
         setTargetWordCount={setTargetWordCount}
-        batchMode={batchMode}
-        setBatchMode={setBatchMode}
-        isBatchGenerating={isBatchGenerating}
-        batchProgress={batchProgress}
+        batchMode={gen.batchMode}
+        setBatchMode={gen.setBatchMode}
+        isBatchGenerating={gen.isBatchGenerating}
+        batchProgress={gen.batchProgress}
         activeModel={activeModel}
         outputMode={outputMode}
         setOutputMode={setOutputMode}
-        isStreaming={isStreaming}
-        streamingTokens={streamingTokens}
-        traditionalTokens={traditionalTokens}
-        isGenerating={isGenerating}
+        isStreaming={gen.isStreaming}
+        streamingTokens={gen.streamingTokens}
+        traditionalTokens={gen.traditionalTokens}
+        isGenerating={gen.isGenerating}
         handleEnterEditor={handleEnterEditor}
-        handleModalGenerate={handleModalGenerate}
-        stopBatchGeneration={stopBatchGeneration}
+        handleModalGenerate={gen.handleModalGenerate}
+        stopBatchGeneration={gen.stopBatchGeneration}
         editModalOpen={editModalOpen}
         selectedText={selectedText}
         editPrompts={editPrompts}
@@ -1218,8 +752,8 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           onUndo={() => editorRef.current?.undo()}
           onRedo={() => editorRef.current?.redo()}
           onManualSnapshot={handleManualSnapshot}
-          canRetryAI={Boolean(lastRunRef.current) && !isGenerating && !isStreaming && !isBatchGenerating}
-          onRetryAI={handleRetryAI}
+          canRetryAI={gen.canRetryAI}
+          onRetryAI={gen.handleRetryAI}
           spellcheckOn={spellcheckOn}
           onToggleSpellcheck={toggleSpellcheck}
           onToggleFind={() => find.setOpen((v) => !v)}
@@ -1246,28 +780,28 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
         <WritingEditorCanvas
           editorRef={editorRef}
           activeChapterId={activeChapterId}
-          content={isStreaming ? streamingContent : (activeChapter?.content || "")}
+          content={gen.isStreaming ? gen.streamingContent : (activeChapter?.content || "")}
           isFocusMode={isFocusMode}
           typewriter={typewriter}
-          isGenerating={isGenerating}
-          isStreaming={isStreaming}
-          isBatchGenerating={isBatchGenerating}
+          isGenerating={gen.isGenerating}
+          isStreaming={gen.isStreaming}
+          isBatchGenerating={gen.isBatchGenerating}
           targetWordCount={targetWordCount}
           selectedKnowledgeCount={selectedKnowledgeIds.size}
-          streamingContentLength={streamingContent.length}
-          batchProgress={batchProgress}
+          streamingContentLength={gen.streamingContent.length}
+          batchProgress={gen.batchProgress}
           onMouseUp={handleMouseSelect}
           onKeyUp={handleKeySelect}
           onMouseMove={handleMouseMove}
           onContentChange={updateChapterContent}
           onNewChapter={handleNewChapter}
-          onStopStreaming={stopStreaming}
-          onStopBatchGeneration={stopBatchGeneration}
-          streamingTokens={streamingTokens}
-          traditionalTokens={traditionalTokens}
-          stoppedPartialLength={stoppedPartial?.length ?? 0}
-          onKeepStoppedPartial={keepStoppedPartial}
-          onDiscardStoppedPartial={discardStoppedPartial}
+          onStopStreaming={gen.stopStreaming}
+          onStopBatchGeneration={gen.stopBatchGeneration}
+          streamingTokens={gen.streamingTokens}
+          traditionalTokens={gen.traditionalTokens}
+          stoppedPartialLength={gen.stoppedPartial?.length ?? 0}
+          onKeepStoppedPartial={gen.keepStoppedPartial}
+          onDiscardStoppedPartial={gen.discardStoppedPartial}
         />
         )}
       </div>
