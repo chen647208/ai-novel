@@ -19,7 +19,7 @@ import WritingEditorToolbar from './components/WritingEditorToolbar';
 import WritingSidebar from './components/WritingSidebar';
 import WritingEditorOverlayLayer from './components/WritingEditorOverlayLayer';
 import FindBar from './components/FindBar';
-import { eventToKeybinding, resolveKeybindings } from '../settings/services/keybindings';
+import { useFindReplace } from './hooks/useFindReplace';
 import WritingEditorCanvas from './components/WritingEditorCanvas';
 import ForeshadowPanel from '../foreshadowing/components/ForeshadowPanel';
 import { extractChapterSummary } from './services/summaryExtractionService';
@@ -138,13 +138,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const lastRunRef = useRef<{ template: PromptTemplate; overrideContent?: string } | null>(null);
   const [stoppedPartial, setStoppedPartial] = useState<string | null>(null);
   const [spellcheckOn, setSpellcheckOn] = useState(false);
-  // 查找替换浮条状态（匹配列表按查询/正文实时重算，当前匹配即选区）
-  const [findOpen, setFindOpen] = useState(false);
-  const [findQuery, setFindQuery] = useState('');
-  const [findReplacement, setFindReplacement] = useState('');
-  const [findCaseSensitive, setFindCaseSensitive] = useState(false);
-  const [findIndex, setFindIndex] = useState(0);
-  
+
   const [selectedKnowledgeIds, setSelectedKnowledgeIds] = useState<Set<string>>(new Set());
 
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -251,60 +245,13 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [isForeshadowOpen, setIsForeshadowOpen] = useState(false);
 
-  // 查找替换：匹配经 editor doc 实时计算，当前匹配即选区（选区即高亮）
-  const findMatchesNow = useCallback((): Array<{ from: number; to: number }> => {
-    if (!findQuery.trim()) return [];
-    return editorRef.current?.findAll(findQuery, findCaseSensitive) ?? [];
-  }, [findQuery, findCaseSensitive, activeChapterId, activeChapter?.content]);
-
-  const jumpToFindMatch = useCallback((delta: number) => {
-    const matches = findMatchesNow();
-    if (matches.length === 0) return;
-    const next = (findIndex + delta + matches.length) % matches.length;
-    setFindIndex(next);
-    const m = matches[next];
-    if (m) editorRef.current?.selectRange(m.from, m.to);
-  }, [findMatchesNow, findIndex]);
-
-  const handleReplaceOne = () => {
-    const matches = findMatchesNow();
-    const m = matches[Math.min(findIndex, Math.max(0, matches.length - 1))];
-    if (!m) return;
-    editorRef.current?.replaceRange(m.from, m.to, findReplacement);
-  };
-
-  const handleReplaceAll = () => {
-    // 从后往前替换，坐标不漂移
-    const matches = findMatchesNow();
-    for (let i = matches.length - 1; i >= 0; i--) {
-      const m = matches[i];
-      if (m) editorRef.current?.replaceRange(m.from, m.to, findReplacement);
-    }
-    setFindIndex(0);
-  };
-
-  // 查找条开关：默认 Ctrl/Cmd+F（弹窗打开时不抢键，设置页可改键）
-  const findBinding = resolveKeybindings(useSettingsStore(s => s.keybindings)).find;
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (eventToKeybinding(e) === findBinding && activeChapterId && !genModal.isOpen && !editModalOpen && !exportModalOpen && !isHistoryViewerOpen && !isForeshadowOpen) {
-        e.preventDefault();
-        setFindOpen((v) => !v);
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [findBinding, activeChapterId, genModal.isOpen, editModalOpen, exportModalOpen, isHistoryViewerOpen, isForeshadowOpen]);
-
-  // 查询变化回到首个匹配
-  useEffect(() => {
-    if (!findOpen) return;
-    setFindIndex(0);
-    const matches = editorRef.current?.findAll(findQuery, findCaseSensitive) ?? [];
-    const m = matches[0];
-    if (m && findQuery.trim()) editorRef.current?.selectRange(m.from, m.to);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [findOpen, findQuery, findCaseSensitive, activeChapterId]);
+  // 查找替换：状态/快捷键/匹配跳转统一见 useFindReplace
+  const find = useFindReplace({
+    editorRef,
+    activeChapterId,
+    content: activeChapter?.content ?? '',
+    shortcutBlocked: genModal.isOpen || editModalOpen || exportModalOpen || isHistoryViewerOpen || isForeshadowOpen,
+  });
 
   // 专注模式下 Esc 退出
   useEffect(() => {
@@ -1368,21 +1315,21 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
       )}
 
       <div className="relative flex h-full min-w-0 flex-1 flex-col bg-muted/30">
-        {findOpen && project.chapters.length > 0 && (
-          <FindBar
-            query={findQuery}
-            onQueryChange={setFindQuery}
-            replacement={findReplacement}
-            onReplacementChange={setFindReplacement}
-            caseSensitive={findCaseSensitive}
-            onToggleCaseSensitive={() => setFindCaseSensitive((v) => !v)}
-            matchIndex={findIndex}
-            matchCount={findMatchesNow().length}
-            onPrev={() => jumpToFindMatch(-1)}
-            onNext={() => jumpToFindMatch(1)}
-            onReplace={handleReplaceOne}
-            onReplaceAll={handleReplaceAll}
-            onClose={() => setFindOpen(false)}
+      {find.open && project.chapters.length > 0 && (
+        <FindBar
+          query={find.query}
+          onQueryChange={find.setQuery}
+          replacement={find.replacement}
+          onReplacementChange={find.setReplacement}
+          caseSensitive={find.caseSensitive}
+          onToggleCaseSensitive={find.toggleCaseSensitive}
+          matchIndex={find.matchIndex}
+          matchCount={find.matchCount}
+          onPrev={find.prev}
+          onNext={find.next}
+          onReplace={find.replaceOne}
+          onReplaceAll={find.replaceAll}
+          onClose={() => find.setOpen(false)}
           />
         )}
         <WritingEditorToolbar
@@ -1421,7 +1368,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           onRetryAI={handleRetryAI}
           spellcheckOn={spellcheckOn}
           onToggleSpellcheck={toggleSpellcheck}
-          onToggleFind={() => setFindOpen((v) => !v)}
+          onToggleFind={() => find.setOpen((v) => !v)}
           canSplitChapter={!!activeChapterId && (activeChapter?.content.trim().length ?? 0) > 0}
           canMergeChapter={project.chapters.findIndex(c => c.id === activeChapterId) >= 0 && project.chapters.findIndex(c => c.id === activeChapterId) < project.chapters.length - 1}
           onSplitChapter={handleSplitChapter}
