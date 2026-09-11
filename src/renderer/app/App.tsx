@@ -13,7 +13,7 @@
  * 书籍/项目动作在 useBookActions，引导在 useAppBootstrap——本文件只做装配。
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Project } from '../../shared/types';
 import { TooltipProvider } from '@/shared/ui/Tooltip';
@@ -53,7 +53,7 @@ const SECTION_ORDER: SectionId[] = WORKSPACE_SECTIONS.map((s) => s.id);
 
 const App: React.FC = () => {
   useAppBootstrap();
-  const { t } = useTranslation('app');
+  const { t, i18n } = useTranslation('app');
 
   // 纯 UI 态（不落盘）
   const [view, setView] = useState<'bookshelf' | 'workspace'>('bookshelf');
@@ -203,13 +203,17 @@ const App: React.FC = () => {
     return list;
   }, [t, toggleAssistant, activeProject, handleExportCover, handleSectionChange, availableFeatures]);
 
-  // 命令面板数据来自全局命令注册表（应用壳注册内置命令，插件/功能可续注）
+  // 命令面板数据来自全局命令注册表（应用壳注册内置命令，插件/功能可续注）。
+  // 命令内容走 ref，注册 effect 只依赖稳定原始值，避免因闭包身份变化反复注册。
+  const commandRef = useRef<AppCommand[]>(builtInCommands);
+  commandRef.current = builtInCommands;
+  const commandSignature = `${i18n.language}|${activeBookId ?? ''}|${[...availableFeatures].sort().join(',')}`;
   const [registryCommands, setRegistryCommands] = useState<AppCommand[]>(() => commandRegistry.list());
   useEffect(() => commandRegistry.subscribe(setRegistryCommands), []);
   useEffect(() => {
-    const disposers = builtInCommands.map((c) => commandRegistry.register(c));
+    const disposers = commandRef.current.map((c) => commandRegistry.register(c));
     return () => disposers.forEach((dispose) => dispose());
-  }, [builtInCommands]);
+  }, [commandSignature]);
 
   // 当前分区不可用（minimal 档禁 AI 功能）时回退写作编辑器（映射单源见 sectionFeatures）
   useEffect(() => {
