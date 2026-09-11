@@ -83,8 +83,10 @@ export const DEFAULT_RELEASE_PROFILE: ReleaseProfileName = 'full';
 
 /** 按名取发行档；未知档名回退默认档。 */
 export function profileByName(name: string): Profile {
-  return RELEASE_PROFILES.find((p) => p.name === name)
-    ?? RELEASE_PROFILES.find((p) => p.name === DEFAULT_RELEASE_PROFILE)!;
+  const found = RELEASE_PROFILES.find((p) => p.name === name)
+    ?? RELEASE_PROFILES.find((p) => p.name === DEFAULT_RELEASE_PROFILE);
+  if (!found) throw new Error('RELEASE_PROFILES 缺少默认发行档');
+  return found;
 }
 
 /** 汇报每行装配的来源（bundle/patch），profile 策略拒绝的行给出原因。 */

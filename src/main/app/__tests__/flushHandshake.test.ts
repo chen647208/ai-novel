@@ -7,6 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import type { BrowserWindow } from 'electron';
 import { beforeEach,describe, expect, it, vi } from 'vitest';
 
 const ipc = vi.hoisted(() => {
@@ -29,7 +30,7 @@ function fakeWindow(destroyed = false) {
   return {
     isDestroyed: () => destroyed,
     webContents: { send: vi.fn() },
-  } as unknown as import('electron').BrowserWindow;
+  } as unknown as BrowserWindow;
 }
 
 describe('requestRendererFlush', () => {

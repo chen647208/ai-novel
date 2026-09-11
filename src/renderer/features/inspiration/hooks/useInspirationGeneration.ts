@@ -71,12 +71,13 @@ export function useInspirationGeneration({
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const writeResult = (finalPrompt: string, finalContent: string, response: StreamingAIResponse | AIResponse) => {
+    if (!activeModel) return;
     const firstLine = finalContent.split('\n')[0]?.replace(/[#*]/g, '').trim() ?? '';
     const historyRecord = AIService.buildHistoryRecordData(
       'inspiration-virtual-chapter',
       finalPrompt,
       finalContent,
-      activeModel!,
+      activeModel,
       response,
       {
         templateName: templateDisplayName(prompts.find(p => p.id === selectedPromptId) ?? { name: t('steps:inspiration.defaultTemplateName') }),
@@ -157,7 +158,7 @@ export function useInspirationGeneration({
 
   const generate = async () => {
     if (!input) return;
-    if (!isModelUsable(activeModel)) {
+    if (!activeModel || !isModelUsable(activeModel)) {
       dialogService.alert(t('steps:common.noModel'));
       return;
     }
@@ -197,7 +198,7 @@ export function useInspirationGeneration({
           { signal: abortControllerRef.current.signal },
         );
       } else {
-        const result = await AIService.call(activeModel!, finalPrompt, { signal: abortControllerRef.current.signal });
+        const result = await AIService.call(activeModel, finalPrompt, { signal: abortControllerRef.current.signal });
         if (result.error) {
           dialogService.alert(t('common.generateFailed', { error: result.error }));
           return;

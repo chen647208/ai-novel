@@ -56,7 +56,7 @@ const ChapterNavigationSection: React.FC<ChapterNavigationSectionProps> = ({
 
   const cycleStatus = (chapter: Chapter) => {
     const current = chapter.status ?? 'draft';
-    const next = STATUS_ORDER[(STATUS_ORDER.indexOf(current) + 1) % STATUS_ORDER.length]!;
+    const next = STATUS_ORDER[(STATUS_ORDER.indexOf(current) + 1) % STATUS_ORDER.length] ?? current;
     onChaptersChange(chapters.map((c) => (c.id === chapter.id ? { ...c, status: next } : c)));
   };
 

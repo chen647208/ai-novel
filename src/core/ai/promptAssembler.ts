@@ -110,7 +110,8 @@ export class PromptAssembler {
       while (kept.length > 1 && total() > budget) {
         let drop = -1;
         for (let i = kept.length - 1; i >= 0; i--) {
-          if (!PROTECTED_SECTIONS.has(kept[i]!.id)) {
+          const block = kept[i];
+          if (block && !PROTECTED_SECTIONS.has(block.id)) {
             drop = i;
             break;
           }

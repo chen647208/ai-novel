@@ -15,11 +15,13 @@ export function diffLines(oldText: string, newText: string): DiffLine[] {
   const b = newText.split('\n');
   const n = a.length;
   const m = b.length;
-  // LCS 长度表（章节行为单位：数百行内可接受）
-  const dp: number[][] = Array.from({ length: n + 1 }, () => new Array<number>(m + 1).fill(0));
+  // LCS 长度表（章节行为单位：数百行内可接受）。扁平 Int32Array 规避越界索引断言。
+  const w = m + 1;
+  const dp = new Int32Array((n + 1) * w);
+  const at = (r: number, c: number): number => dp[r * w + c] ?? 0;
   for (let i = n - 1; i >= 0; i--) {
     for (let j = m - 1; j >= 0; j--) {
-      dp[i]![j] = a[i] === b[j] ? (dp[i + 1]![j + 1] ?? 0) + 1 : Math.max(dp[i + 1]![j] ?? 0, dp[i]![j + 1] ?? 0);
+      dp[i * w + j] = a[i] === b[j] ? at(i + 1, j + 1) + 1 : Math.max(at(i + 1, j), at(i, j + 1));
     }
   }
   const out: DiffLine[] = [];
@@ -27,18 +29,18 @@ export function diffLines(oldText: string, newText: string): DiffLine[] {
   let j = 0;
   while (i < n && j < m) {
     if (a[i] === b[j]) {
-      out.push({ type: 'same', text: a[i]! });
+      out.push({ type: 'same', text: a[i] ?? '' });
       i++;
       j++;
-    } else if ((dp[i + 1]?.[j] ?? 0) >= (dp[i]?.[j + 1] ?? 0)) {
-      out.push({ type: 'del', text: a[i]! });
+    } else if (at(i + 1, j) >= at(i, j + 1)) {
+      out.push({ type: 'del', text: a[i] ?? '' });
       i++;
     } else {
-      out.push({ type: 'add', text: b[j]! });
+      out.push({ type: 'add', text: b[j] ?? '' });
       j++;
     }
   }
-  while (i < n) out.push({ type: 'del', text: a[i++]! });
-  while (j < m) out.push({ type: 'add', text: b[j++]! });
+  while (i < n) out.push({ type: 'del', text: a[i++] ?? '' });
+  while (j < m) out.push({ type: 'add', text: b[j++] ?? '' });
   return out;
 }

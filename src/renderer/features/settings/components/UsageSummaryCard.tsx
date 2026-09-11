@@ -32,6 +32,7 @@ const UsageSummaryCard: React.FC = () => {
   const [hourlyLimit, setHourlyLimitState] = useState<number>(() => getHourlyLimit());
 
   const summary = useMemo(() => {
+    void tick; // 刷新触发器：tick 变化时重算
     const range = RANGES.find((r) => r.id === rangeId) ?? RANGES[1];
     return summarize(range.ms(), (id) => models.find((m) => m.id === id));
   }, [rangeId, models, tick]);

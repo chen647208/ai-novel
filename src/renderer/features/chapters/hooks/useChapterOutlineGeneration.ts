@@ -60,7 +60,7 @@ export function useChapterOutlineGeneration({
       dialogService.alert(t('steps:chapters.noOutline'));
       return;
     }
-    if (!isModelUsable(activeModel)) {
+    if (!activeModel || !isModelUsable(activeModel)) {
       dialogService.alert(t('steps:common.noModel'));
       return;
     }
@@ -103,7 +103,7 @@ export function useChapterOutlineGeneration({
         if (kContent) finalPrompt += `\n\n### 必须参考的世界观/设定资料 (Knowledge Base)\n请参考以下资料规划章节剧情：\n${kContent}`;
       }
 
-      const result = await AIService.call(activeModel!, finalPrompt);
+      const result = await AIService.call(activeModel, finalPrompt);
       if (result.error) {
         dialogService.alert(t('steps:common.generateFailed', { error: result.error }));
         return;
@@ -145,7 +145,7 @@ export function useChapterOutlineGeneration({
         'chapter-outline-virtual-chapter',
         finalPrompt,
         result.content,
-        activeModel!,
+        activeModel,
         result,
         {
           templateName: templateDisplayName(prompts.find(p => p.id === selectedPromptId) ?? { name: t('steps:chapters.defaultTemplateName') }),

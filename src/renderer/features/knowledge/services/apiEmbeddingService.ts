@@ -286,10 +286,10 @@ export class APIEmbeddingService implements EmbeddingService {
 
     // 重叠：相邻块复用上块尾部字符（防切断语义）；首块不受影响
     if (overlap > 0 && chunks.length > 1) {
-      const overlapped: string[] = [chunks[0]!];
+      const overlapped: string[] = [chunks[0] ?? ''];
       for (let i = 1; i < chunks.length; i++) {
-        const prevTail = overlapped[i - 1]!.slice(-overlap);
-        overlapped.push(prevTail + chunks[i]);
+        const prevTail = (overlapped[i - 1] ?? '').slice(-overlap);
+        overlapped.push(prevTail + (chunks[i] ?? ''));
       }
       return overlapped;
     }

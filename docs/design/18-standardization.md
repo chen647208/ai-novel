@@ -130,6 +130,8 @@ UI 槽位注册表 `shared/services/uiSlots.ts` + 渲染点 `shared/ui/Slot.tsx`
 - lint 类型感知：`no-misused-promises`、`await-thenable`、`no-floating-promises`（均 error；悬浮 Promise 已清零）。
 - lint 风格约定：`simple-import-sort`（导入/导出排序，`--fix` 自动修复）+ `@typescript-eslint/naming-convention`
   （变量/函数/类型命名；属性名不约束）。`npm run lint:fix` 会顺带把许可证头搬回文件首位。
+- 零警告：`no-non-null-assertion`、`consistent-type-imports`、`react-hooks/exhaustive-deps` 由 warn 升为 error，
+  lint 现为 0 errors / 0 warnings。
 
 
 

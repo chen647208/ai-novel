@@ -142,6 +142,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
+    const electronApi = window.electronAPI;
     const { images, items } = await collectChatAttachments(Array.from(e.target.files), {
       visionAvailable: usableModel?.supportsVision !== false,
       readDataUrl: (file) =>
@@ -152,8 +153,8 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
           reader.readAsDataURL(file);
         }),
       readText: (file) => file.text(),
-      extractPdfText: window.electronAPI?.extractPdfText
-        ? (base64) => window.electronAPI!.extractPdfText(base64)
+      extractPdfText: electronApi
+        ? (base64) => electronApi.extractPdfText(base64)
         : undefined,
       alert: (key, params) => dialogService.alert(t(key as never, params as never) as unknown as string),
       logError: (message, name, error) => logger.error(message, name, error),

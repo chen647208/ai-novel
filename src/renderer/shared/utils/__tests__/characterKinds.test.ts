@@ -16,6 +16,7 @@ import {
   normalizeRoleId,
 } from '@/shared/utils/characterKinds';
 
+import type { Character, Timeline } from '../../../../shared/types';
 import type { Project } from '../../../../shared/types';
 
 describe('normalizeRoleId', () => {
@@ -95,7 +96,7 @@ describe('normalizeProjectKinds', () => {
             personality: '', background: '', relationships: '', appearance: '',
             distinctiveFeatures: '', occupation: '', motivation: '', strengths: '',
             weaknesses: '', characterArc: '',
-          } as unknown as import('../../../../shared/types').Character,
+          } as unknown as Character,
         ],
       }),
     );
@@ -113,7 +114,7 @@ describe('normalizeProjectKinds', () => {
             { id: 'e2', date: { year: 2 }, title: '闲笔', description: '' },
           ],
           createdAt: 1, updatedAt: 1,
-        } as unknown as import('../../../../shared/types').Timeline,
+        } as unknown as Timeline,
       }),
     );
     expect(out.timeline!.events[0]!.significance).toBe('major');
