@@ -114,3 +114,29 @@ test('命令面板：Ctrl+K 打开、过滤并在执行后关闭', async () => {
     cleanupUserDataDir(userDataDir);
   }
 });
+
+test('模态键盘契约：打开后焦点进入，Esc 关闭', async () => {
+  const userDataDir = mkdtempSync(join(tmpdir(), 'hongyue-e2e-dialog-'));
+  const { app, page } = await launchApp(userDataDir);
+  try {
+    await createBook(page);
+    // 回书籍库（经命令面板，避免依赖固定快捷键）
+    await page.keyboard.press('Control+k');
+    const palette = page.getByPlaceholder(/输入命令|Type a command/);
+    await expect(palette).toBeVisible({ timeout: 10_000 });
+    await palette.fill('书架');
+    await page.getByRole('button', { name: /返回书架|Back to bookshelf/ }).first().click();
+
+    await page.getByRole('button', { name: /新建书籍|New Book/ }).first().click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible({ timeout: 10_000 });
+    // 焦点进入模态内部（Radix Dialog 焦点陷阱）
+    expect(await page.evaluate(() => !!document.activeElement?.closest('[role="dialog"]'))).toBe(true);
+    // Esc 关闭
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden({ timeout: 10_000 });
+  } finally {
+    await app.close();
+    cleanupUserDataDir(userDataDir);
+  }
+});
