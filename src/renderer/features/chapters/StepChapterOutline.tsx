@@ -19,6 +19,7 @@ import { AIService } from '@/shared/services/ai/aiService';
 import { dialogService } from '@/shared/services/dialogService';
 import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
+import { Checkbox } from '@/shared/ui/Checkbox';
 import { Spinner } from '@/shared/ui/Spinner';
 import { Card } from '@/shared/ui/Card';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -729,8 +730,7 @@ const ChapterWorldRelationEditor: React.FC<ChapterWorldRelationEditorProps> = ({
                     key={faction.id}
                     className="flex cursor-pointer items-center gap-2 rounded p-1.5 text-xs transition-colors hover:bg-muted"
                   >
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={chapter.involvedFactionIds?.includes(faction.id) || false}
                       onChange={() => toggleFaction(faction.id)}
                       className="size-3.5 accent-primary"

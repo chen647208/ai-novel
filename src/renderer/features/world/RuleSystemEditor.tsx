@@ -13,6 +13,7 @@ import { type RuleSystem, type RuleSystemType, type RuleLevel, type Character } 
 import { dialogService } from '@/shared/services/dialogService';
 import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
+import { Checkbox } from '@/shared/ui/Checkbox';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { Textarea } from '@/shared/ui/Textarea';
@@ -409,8 +410,7 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
                                 : 'border-transparent bg-muted/30 hover:bg-muted'
                             )}
                           >
-                            <input
-                              type="checkbox"
+                            <Checkbox
                               checked={system.appliedToCharacterIds?.includes(character.id) || false}
                               onChange={() => toggleCharacter(system.id, character.id)}
                               className="size-3.5 accent-primary"

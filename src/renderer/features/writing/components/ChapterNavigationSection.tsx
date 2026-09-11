@@ -12,6 +12,7 @@ import type { ChapterNavigationSectionProps } from '../types';
 import type { Chapter } from '../../../../shared/types';
 import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
+import { Checkbox } from '@/shared/ui/Checkbox';
 import { Input } from '@/shared/ui/Input';
 import { ViewModeToggle } from '@/shared/ui/ViewModeToggle';
 import { useViewPreference } from '@/shared/hooks/useViewPreference';
@@ -160,12 +161,11 @@ const ChapterNavigationSection: React.FC<ChapterNavigationSectionProps> = ({
             >
               <div className="flex min-w-0 flex-1 items-center gap-2">
                 {selecting && (
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={selectedIds.has(chapter.id)}
                     onChange={() => toggleSelect(chapter.id)}
                     onClick={(e) => e.stopPropagation()}
-                    className="size-3.5 shrink-0 accent-primary"
+                    className="size-3.5 shrink-0"
                   />
                 )}
                 <button

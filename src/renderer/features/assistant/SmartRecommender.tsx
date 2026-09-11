@@ -17,6 +17,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type Project, type ModelConfig } from '../../../shared/types';
 import { Button } from '@/shared/ui/Button';
+import { Checkbox } from '@/shared/ui/Checkbox';
 import { Spinner } from '@/shared/ui/Spinner';
 import { cn } from '@/shared/utils/cn';
 import { CalendarDays, Circle, Eye, Gavel, Info, Lightbulb, MapPin, Plus, RefreshCw, Search, User, Users, type LucideIcon } from 'lucide-react';
@@ -194,12 +195,10 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
         </div>
         <div className="flex items-center gap-3">
           <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={useAI}
               onChange={(e) => setUseAI(e.target.checked)}
-              className="size-3.5 accent-primary"
-              disabled={!model}
+              className="size-3.5"
             />
             <span className={model ? '' : 'opacity-50'}>
               {t('rec.aiEnhanced')} {model ? '' : t('rec.aiEnhancedOff')}

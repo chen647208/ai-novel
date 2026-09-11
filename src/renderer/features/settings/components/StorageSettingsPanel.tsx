@@ -24,6 +24,7 @@ import { AlertTriangle, ArrowLeftRight, Clock, Database, FileText, FolderOpen, H
 
 /** 存储设置区块的小标题 */
 import { FieldLabel } from '@/shared/ui/FieldLabel';
+import { Switch } from '@/shared/ui/Switch';
 
 /** 状态徽章 */
 const StatusBadge: React.FC<{ tone: 'primary' | 'success' | 'muted'; children: React.ReactNode }> = ({ tone, children }) => (
@@ -247,16 +248,11 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                 <div className="mb-0.5 text-sm text-foreground">{t('storage.useCustomLabel')}</div>
                 <p className="text-xs text-muted-foreground">{t('storage.useCustomHint')}</p>
               </div>
-              <label className="relative inline-flex shrink-0 cursor-pointer items-center">
-                <span className="sr-only">{t('storage.useCustomLabel')}</span>
-                <input
-                  type="checkbox"
-                  className="peer sr-only"
-                  checked={storageConfig.useCustomPath}
-                  onChange={(e) => setStorageConfig({ ...storageConfig, useCustomPath: e.target.checked })}
-                />
-                <span className="h-6 w-11 rounded-full bg-muted transition-colors after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:bg-background after:shadow after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-5" />
-              </label>
+              <Switch
+                aria-label={t('storage.useCustomLabel')}
+                checked={storageConfig.useCustomPath}
+                onCheckedChange={(checked) => setStorageConfig({ ...storageConfig, useCustomPath: checked })}
+              />
             </div>
 
             {storageConfig.useCustomPath && (
@@ -305,20 +301,15 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                   <div className="mb-0.5 text-sm text-foreground">{t('storage.autoBackupLabel')}</div>
                   <p className="text-xs text-muted-foreground">{t('storage.autoBackupHint')}</p>
                 </div>
-                <label className="relative inline-flex shrink-0 cursor-pointer items-center">
-                  <span className="sr-only">{t('storage.autoBackupLabel')}</span>
-                  <input
-                    type="checkbox"
-                    className="peer sr-only"
-                    checked={storageConfig.autoBackupEnabled || false}
-                    onChange={(e) => setStorageConfig({
-                      ...storageConfig,
-                      autoBackupEnabled: e.target.checked,
-                      autoBackupInterval: e.target.checked ? (storageConfig.autoBackupInterval || 10) : undefined
-                    })}
-                  />
-                  <span className="h-6 w-11 rounded-full bg-muted transition-colors after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:bg-background after:shadow after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-5" />
-                </label>
+                <Switch
+                  aria-label={t('storage.autoBackupLabel')}
+                  checked={storageConfig.autoBackupEnabled || false}
+                  onCheckedChange={(checked) => setStorageConfig({
+                    ...storageConfig,
+                    autoBackupEnabled: checked,
+                    autoBackupInterval: checked ? (storageConfig.autoBackupInterval || 10) : undefined,
+                  })}
+                />
               </div>
 
               {storageConfig.autoBackupEnabled && (

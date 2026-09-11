@@ -13,6 +13,7 @@ import { useTranslation } from '@/i18n';
 import { roleLabel } from '@/shared/utils/displayLabels';
 import { normalizeRoleId } from '@/shared/utils/characterKinds';
 import { Button } from '@/shared/ui/Button';
+import { Checkbox } from '@/shared/ui/Checkbox';
 import { Dialog, DialogContent } from '@/shared/ui/Dialog';
 import { cn } from '@/shared/utils/cn';
 import { Clock, Globe, ListTree, Map, Network, RefreshCw, Users, X } from 'lucide-react';
@@ -455,8 +456,7 @@ const WorldViewGraph: React.FC<WorldViewGraphProps> = ({
             <div className="space-y-2">
               {(['showCharacters', 'showFactions', 'showLocations', 'showEvents', 'showRules'] as const).map(key => (
                 <label key={key} className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={filters[key]}
                     onChange={(e) => setFilters(prev => ({ ...prev, [key]: e.target.checked }))}
                     className="size-3.5 accent-primary"
@@ -469,8 +469,7 @@ const WorldViewGraph: React.FC<WorldViewGraphProps> = ({
             <PanelLabel className="mt-6">{t('graph.optionsLabel')}</PanelLabel>
             <div className="space-y-2">
               <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={viewOptions.showLabels}
                   onChange={(e) => setViewOptions(prev => ({ ...prev, showLabels: e.target.checked }))}
                   className="size-3.5 accent-primary"
@@ -478,8 +477,7 @@ const WorldViewGraph: React.FC<WorldViewGraphProps> = ({
                 <span>{t('graph.option.showLabels')}</span>
               </label>
               <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={viewOptions.highlightMainCharacters}
                   onChange={(e) => setViewOptions(prev => ({ ...prev, highlightMainCharacters: e.target.checked }))}
                   className="size-3.5 accent-primary"

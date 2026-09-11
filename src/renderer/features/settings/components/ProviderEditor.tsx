@@ -19,6 +19,7 @@ import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
 import { Input } from '@/shared/ui/Input';
 import { Select } from '@/shared/ui/Select';
+import { Checkbox } from '@/shared/ui/Checkbox';
 import { Textarea } from '@/shared/ui/Textarea';
 import { cn } from '@/shared/utils/cn';
 import { AlertCircle, CheckCircle2, Clock, Eye, EyeOff, FlaskConical, List, RefreshCw, SlidersHorizontal, Trash2 } from 'lucide-react';
@@ -81,9 +82,8 @@ export const ProviderEditor: React.FC<ProviderEditorProps> = ({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
-            <input
-              type="checkbox"
-              className="size-3.5 accent-primary"
+            <Checkbox
+              className="size-3.5"
               checked={isProviderEnabled(model)}
               onChange={(e) => onUpdate({ isEnabled: e.target.checked })}
             />
@@ -204,11 +204,10 @@ export const ProviderEditor: React.FC<ProviderEditorProps> = ({
             <input type="range" min="0.0" max="2.0" step="0.1" className="w-full accent-primary" value={model.temperature ?? 0.7} onChange={(e) => onUpdate({ temperature: parseFloat(e.target.value) })} />
             <p className="text-xs text-muted-foreground">{t('models.temperatureHint')}</p>
             <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={model.supportsVision !== false}
                 onChange={(e) => onUpdate({ supportsVision: e.target.checked })}
-                className="size-3.5 accent-primary"
+                className="size-3.5"
               />
               {t('models.visionLabel')}
             </label>

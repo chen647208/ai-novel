@@ -13,6 +13,7 @@ import { type Faction, type Location, type Character } from '../../../shared/typ
 import { dialogService } from '@/shared/services/dialogService';
 import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
+import { Checkbox } from '@/shared/ui/Checkbox';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { Select } from '@/shared/ui/Select';
@@ -526,8 +527,7 @@ export const FactionEditor: React.FC<FactionEditorProps> = ({
                             : 'border-transparent bg-muted/30 hover:bg-muted'
                         )}
                       >
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={selectedFaction.controlledLocationIds?.includes(location.id) || false}
                           onChange={() => toggleLocationControl(selectedFaction.id, location.id)}
                           className="size-3.5 accent-primary"
@@ -556,8 +556,7 @@ export const FactionEditor: React.FC<FactionEditorProps> = ({
                             : 'border-transparent bg-muted/30 hover:bg-muted'
                         )}
                       >
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={selectedFaction.memberCharacterIds?.includes(character.id) || false}
                           onChange={() => toggleMember(selectedFaction.id, character.id)}
                           className="size-3.5 accent-primary"
