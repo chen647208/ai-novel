@@ -78,9 +78,11 @@
 
 ## 六、视觉回归
 
-`e2e/visual.spec.ts` 截取工作台左侧导航栏，基线按平台存 `e2e/visual.spec.ts-snapshots/…-{platform}.png`
-（截图渲染跨 OS 有差异）。默认跳过，仅 `npm run test:e2e:visual` 运行；CI 不设 `VISUAL` 故不参与门禁，
-需要时在对应平台生成基线。
+`e2e/visual.spec.ts` 截取工作台左侧导航栏、命令面板、写作区空态，基线按平台存
+`e2e/visual.spec.ts-snapshots/…-{platform}.png`（截图渲染跨 OS 有差异）。
+本地用 `npm run test:e2e:visual` 运行/生成 win32 基线；Linux 基线由手动工作流
+`.github/workflows/visual-baselines.yml` 生成并提交。CI 的 build 作业跑
+`xvfb-run -a npm run test:e2e:visual` 作为门禁（apt 装 `fonts-noto-cjk` 保证与基线同字体）。
 
 ## 四、无障碍审计债务
 
