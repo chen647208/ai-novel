@@ -19,8 +19,8 @@ import { AIService } from '@/shared/services/ai/aiService';
 import RelationshipDiagram from './RelationshipDiagram';
 import CompactCharacterCard from './CompactCharacterCard';
 import CharacterModal from './CharacterModal';
+import { parseCharactersFromText } from './services/characterListParsing';
 import { dialogService } from '@/shared/services/dialogService';
-import { normalizeGenderId, normalizeRoleId, type CharacterDraft, type CharacterDraftField } from '@/shared/utils/characterKinds';
 import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
@@ -28,7 +28,6 @@ import { EmptyState } from '@/shared/ui/EmptyState';
 import { Select } from '@/shared/ui/Select';
 import { Check, CheckCheck, Network, Plus, Settings, Trash2, UserRound, WandSparkles, XCircle } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
-import { uuidv7 } from '@core/entities';
 
 interface StepCharactersProps {
   project: Project;
@@ -103,118 +102,6 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
   }, [project.intro, project.title]);
 
   const activeInspiration = inspirationOptions[selectedIndex] || { title: project.title, summary: project.intro };
-
-  const parseCharactersFromText = (text: string): Character[] => {
-    const chars: Character[] = [];
-    const cleanLines = text.replace(/[*#_]/g, '').split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    // 解析草稿：role/gender 先收原始文本，落库前经 normalizeRoleId/normalizeGenderId 归一化
-    let activeChar: CharacterDraft | null = null;
-    let currentField: CharacterDraftField | null = null;
-
-    cleanLines.forEach(line => {
-      const nameMatch = line.match(/^(?:角色名|姓名|名字|名称|身份)[:：\s]*(.*)/i);
-      if (nameMatch && nameMatch[1]?.trim()) {
-        if (activeChar && activeChar.name) {
-          // 为新字段提供默认值
-          const completeChar: Character = {
-            id: uuidv7(),
-            name: activeChar.name || '',
-            gender: normalizeGenderId(activeChar.gender),
-            age: activeChar.age || '未知',
-            role: normalizeRoleId(activeChar.role, 'protagonist'),
-            personality: activeChar.personality || '',
-            background: activeChar.background || '',
-            relationships: activeChar.relationships || '',
-            appearance: activeChar.appearance || '',
-            distinctiveFeatures: activeChar.distinctiveFeatures || '',
-            occupation: activeChar.occupation || '',
-            motivation: activeChar.motivation || '',
-            strengths: activeChar.strengths || '',
-            weaknesses: activeChar.weaknesses || '',
-            characterArc: activeChar.characterArc || ''
-          };
-          chars.push(completeChar);
-        }
-        activeChar = {
-          id: uuidv7(),
-          name: nameMatch[1]?.trim() ?? '',
-          gender: 'unknown',
-          age: '未知',
-          role: 'protagonist',
-          personality: '', 
-          background: '', 
-          relationships: '',
-          appearance: '',
-          distinctiveFeatures: '',
-          occupation: '',
-          motivation: '',
-          strengths: '',
-          weaknesses: '',
-          characterArc: ''
-        };
-        currentField = 'name';
-        return;
-      }
-      if (!activeChar) return;
-      
-      // 扩展字段匹配
-      const genderMatch = line.match(/^(?:性别|性别类型)[:：\s]*(.*)/i);
-      const ageMatch = line.match(/^(?:年龄|岁数)[:：\s]*(.*)/i);
-      const roleMatch = line.match(/^(?:类型|角色类型|定位|身份)[:：\s]*(.*)/i);
-      const personalityMatch = line.match(/^(?:性格|特质|性格特征)[:：\s]*(.*)/i);
-      const backgroundMatch = line.match(/^(?:背景|出身|生平)[:：\s]*(.*)/i);
-      const relationshipMatch = line.match(/^(?:关系|角色关系|社交)[:：\s]*(.*)/i);
-      const appearanceMatch = line.match(/^(?:外观|外貌|长相|外表)[:：\s]*(.*)/i);
-      const featuresMatch = line.match(/^(?:特征|标志性特征|特点)[:：\s]*(.*)/i);
-      const occupationMatch = line.match(/^(?:职业|身份|职位)[:：\s]*(.*)/i);
-      const motivationMatch = line.match(/^(?:动机|目标|目的)[:：\s]*(.*)/i);
-      const strengthsMatch = line.match(/^(?:优势|能力|特长)[:：\s]*(.*)/i);
-      const weaknessesMatch = line.match(/^(?:弱点|缺陷|缺点)[:：\s]*(.*)/i);
-      const arcMatch = line.match(/^(?:成长|弧线|发展)[:：\s]*(.*)/i);
-
-      if (genderMatch) { activeChar.gender = genderMatch[1]?.trim() ?? ''; currentField = 'gender'; }
-      else if (ageMatch) { activeChar.age = ageMatch[1]?.trim() ?? ''; currentField = 'age'; }
-      else if (roleMatch) { activeChar.role = roleMatch[1]?.trim() ?? ''; currentField = 'role'; }
-      else if (personalityMatch) { activeChar.personality = personalityMatch[1]?.trim() ?? ''; currentField = 'personality'; }
-      else if (backgroundMatch) { activeChar.background = backgroundMatch[1]?.trim() ?? ''; currentField = 'background'; }
-      else if (relationshipMatch) { activeChar.relationships = relationshipMatch[1]?.trim() ?? ''; currentField = 'relationships'; }
-      else if (appearanceMatch) { activeChar.appearance = appearanceMatch[1]?.trim() ?? ''; currentField = 'appearance'; }
-      else if (featuresMatch) { activeChar.distinctiveFeatures = featuresMatch[1]?.trim() ?? ''; currentField = 'distinctiveFeatures'; }
-      else if (occupationMatch) { activeChar.occupation = occupationMatch[1]?.trim() ?? ''; currentField = 'occupation'; }
-      else if (motivationMatch) { activeChar.motivation = motivationMatch[1]?.trim() ?? ''; currentField = 'motivation'; }
-      else if (strengthsMatch) { activeChar.strengths = strengthsMatch[1]?.trim() ?? ''; currentField = 'strengths'; }
-      else if (weaknessesMatch) { activeChar.weaknesses = weaknessesMatch[1]?.trim() ?? ''; currentField = 'weaknesses'; }
-      else if (arcMatch) { activeChar.characterArc = arcMatch[1]?.trim() ?? ''; currentField = 'characterArc'; }
-      else if (currentField && currentField !== 'id') {
-        activeChar[currentField] = ((activeChar[currentField] || '') + ' ' + line).trim();
-      }
-    });
-    
-    // forEach 闭包内的赋值对外层 CFA 不可见：此处断言回完整并集（勿删，否则收窄为 null）
-    const char = activeChar as CharacterDraft | null;
-    if (char && char.name) {
-      // 为新字段提供默认值（定位/性别归一化为枚举 id）
-      const completeChar: Character = {
-        id: char.id || uuidv7(),
-        name: char.name || '',
-        gender: normalizeGenderId(char.gender),
-        age: char.age || '未知',
-        role: normalizeRoleId(char.role, 'protagonist'),
-        personality: char.personality || '',
-        background: char.background || '',
-        relationships: char.relationships || '',
-        appearance: char.appearance || '',
-        distinctiveFeatures: char.distinctiveFeatures || '',
-        occupation: char.occupation || '',
-        motivation: char.motivation || '',
-        strengths: char.strengths || '',
-        weaknesses: char.weaknesses || '',
-        characterArc: char.characterArc || ''
-      };
-      chars.push(completeChar);
-    }
-    return chars;
-  };
 
   const generateCharacters = async () => {
     if (!activeInspiration.summary?.trim()) {
