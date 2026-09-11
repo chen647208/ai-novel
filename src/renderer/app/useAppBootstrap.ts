@@ -26,7 +26,7 @@ import { normalizeProjectKinds } from '@/shared/utils/characterKinds';
 import { useSettingsStore } from './stores/settingsStore';
 import { bootCustomFonts } from '../features/settings/services/customFontService';
 import { composeAppState, seedPersistBaseline, startPersistenceBridge } from './stores/persistenceBridge';
-import { startShellSync } from '../shared/services/shellSync';
+import { startShellSync } from './services/shellSync';
 
 /** 把规范化 AppState 灌入双 store（首启动与全量导入共用）。 */
 export function hydrateStoresFromState(state: typeof INITIAL_APP_STATE): void {

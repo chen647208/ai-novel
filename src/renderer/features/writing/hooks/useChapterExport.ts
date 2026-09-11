@@ -21,8 +21,8 @@ import {
   buildExportPackage,
   savePackageFile,
   saveExportFile,
-  type ExportFormat,
 } from '../utils';
+import type { ExportFormat } from '../types';
 
 interface UseChapterExportOptions {
   project: Project;

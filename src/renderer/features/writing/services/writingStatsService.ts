@@ -14,19 +14,9 @@ import type { Project } from '../../../../shared/types';
 import { i18n } from '@/i18n';
 import { DEFAULT_BUILD_PROFILE, runBuild } from '@core/build';
 import { projectToBuildEntities } from '../utils';
+import type { ChapterStats, BookStats } from '../types';
 
-export interface ChapterStats {
-  /** 总字符数（含空白） */
-  totalChars: number;
-  /** 净字符数（去空白，中文语境下≈字数） */
-  charCount: number;
-  /** 段落数（非空行） */
-  paragraphs: number;
-  /** 句子数（按中英文句末标点粗分） */
-  sentences: number;
-  /** 预估阅读分钟数（按 400 字/分钟） */
-  readingMinutes: number;
-}
+export type { ChapterStats, BookStats };
 
 const READING_CHARS_PER_MINUTE = 400;
 
@@ -42,16 +32,6 @@ export function computeChapterStats(content: string): ChapterStats {
     sentences,
     readingMinutes: Math.max(charCount > 0 ? 1 : 0, Math.round(charCount / READING_CHARS_PER_MINUTE)),
   };
-}
-
-export interface BookStats {
-  chapterCount: number;
-  writtenChapterCount: number; // 有正文的章节数
-  totalCharCount: number;
-  /** 成稿字数：与导出同源的管线文本净字符数（07 §5-4 单一口径） */
-  builtCharCount: number;
-  todayCharCount: number; // 今日新增（基于快照差值，近似值）
-  averageChapterChars: number;
 }
 
 export function computeBookStats(project: Project, now: number = Date.now()): BookStats {

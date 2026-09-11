@@ -10,7 +10,8 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Chapter, Project } from '../../../../shared/types';
-import { buildExportContent, type ExportFormat } from '../utils';
+import { buildExportContent } from '../utils';
+import type { ExportFormat } from '../types';
 import { Select } from '@/shared/ui/Select';
 import { buildProfileRegistry, profileKey } from '@/shared/services/buildProfiles';
 import { computeChapterStats } from '../services/writingStatsService';

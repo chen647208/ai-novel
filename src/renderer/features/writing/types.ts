@@ -9,8 +9,34 @@
 
 import type React from 'react';
 import type { AIHistoryRecord, Chapter, ModelConfig, OutputMode, Project, PromptTemplate } from '../../../shared/types';
-import type { ChapterStats, BookStats } from './services/writingStatsService';
-import type { ExportFormat } from './utils';
+
+/** 导出格式（单源，避免 types↔utils 循环）。 */
+export type ExportFormat = 'txt' | 'md' | 'html' | 'rtf' | 'pdf' | 'epub' | 'docx';
+
+/** 单章统计（单源，避免 types↔service 循环）。 */
+export interface ChapterStats {
+  /** 总字符数（含空白） */
+  totalChars: number;
+  /** 净字符数（去空白，中文语境下≈字数） */
+  charCount: number;
+  /** 段落数（非空行） */
+  paragraphs: number;
+  /** 句子数（按中英文句末标点粗分） */
+  sentences: number;
+  /** 预估阅读分钟数（按 400 字/分钟） */
+  readingMinutes: number;
+}
+
+/** 全书统计。 */
+export interface BookStats {
+  chapterCount: number;
+  writtenChapterCount: number;
+  totalCharCount: number;
+  /** 成稿字数：与导出同源的管线文本净字符数（07 §5-4 单一口径） */
+  builtCharCount: number;
+  todayCharCount: number;
+  averageChapterChars: number;
+}
 
 export interface WritingEditorProps {
   project: Project;

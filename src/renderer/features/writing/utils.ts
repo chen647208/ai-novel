@@ -21,7 +21,7 @@ import {
   MAX_CHAPTER_CONTEXT_LENGTH,
   MAX_PREVIOUS_CHAPTER_SUMMARIES,
 } from './constants';
-import type { TextSelectionRange, TokenUsage } from './types';
+import type { TextSelectionRange, TokenUsage, ExportFormat } from './types';
 
 export const debounce = <Args extends unknown[]>(func: (...args: Args) => void, wait: number) => {
   let timeout: ReturnType<typeof setTimeout>;
@@ -76,10 +76,7 @@ export const getPreviousChapterSummaryIds = (chapters: Chapter[], currentChapter
   );
 };
 
-export type ExportFormat = 'txt' | 'md' | 'html' | 'rtf' | 'pdf' | 'epub' | 'docx';
-
-/** Project.chapters → 构建管线实体视图（导出与统计共用，单一口径）。 */
-export function projectToBuildEntities(project: Project): { nodes: NodeEntity[]; attrs: AttributeEntity[]; edges: EdgeEntity[] } {
+/** Project.chapters → 构建管线实体视图（导出与统计共用，单一口径）。 */export function projectToBuildEntities(project: Project): { nodes: NodeEntity[]; attrs: AttributeEntity[]; edges: EdgeEntity[] } {
   return {
     nodes: project.chapters.map((c) => ({
       id: c.id,
