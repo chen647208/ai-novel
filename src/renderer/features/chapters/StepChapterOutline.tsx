@@ -31,8 +31,7 @@ import { Textarea } from '@/shared/ui/Textarea';
 import { BookOpen, BookOpenText, Check, CheckCheck, ChevronDown, ChevronRight, ChevronUp, Clock, FastForward, FileOutput, Flag, Globe2, Layers, LayoutGrid, LayoutList, ListOrdered, MapPin, PenTool, Trash2, WandSparkles, XCircle } from 'lucide-react';
 import { useViewPreference } from '@/shared/hooks/useViewPreference';
 import { ViewModeToggle } from '@/shared/ui/ViewModeToggle';
-import { roleLabel } from '@/shared/utils/displayLabels';
-import { uuidv7 } from '@core/entities';
+import { parseChaptersFromAI, buildChapterContextBlock } from './services/chapterOutline';
 
 interface StepChapterOutlineProps {
   project: Project;
@@ -87,37 +86,11 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
   const [selectedKnowledgeIds, setSelectedKnowledgeIds] = useState<Set<string>>(new Set());
   const [showKnowledgeSelector, setShowKnowledgeSelector] = useState(false);
 
-  // 解析 AI 输出的章节文本
-  const parseChapters = (text: string, startIndex: number): Chapter[] => {
-    const chapterRegex = /第\s*([0-9一二三四五六七八九十百]+)\s*章[:：]?\s*([^\n]+)([\s\S]*?)(?=第\s*[0-9一二三四五六七八九十百]+\s*章|---|$(?![\s\S]))/gi;
-    const matches = Array.from(text.matchAll(chapterRegex));
-    
-    return matches.map((match, idx) => {
-      const titleRaw = match[2]?.trim() ?? '';
-      const bodyRaw = match[3]?.trim() ?? '';
-      const title = titleRaw.replace(/[#*]/g, '').trim();
-
-      let summary = bodyRaw;
-      const summaryMarkers = ['剧情细纲[:：]', '内容[:：]', '情节[:：]', '本章细纲[:：]'];
-      for (const marker of summaryMarkers) {
-        const regex = new RegExp(marker, 'i');
-        const markerMatch = bodyRaw.match(regex);
-        if (markerMatch && markerMatch.index !== undefined) {
-          summary = bodyRaw.substring(markerMatch.index + markerMatch[0].length).trim();
-          break;
-        }
-      }
-      summary = summary.split('---')[0]?.trim() ?? '';
-
-      return {
-        id: uuidv7(),
-        title: title || t('steps:chapters.defaultChapterTitle', { num: startIndex + idx + 1 }),
-        summary: summary || t('steps:chapters.defaultSummary'),
-        content: '',
-        order: startIndex + idx
-      };
+  const parseChapters = (text: string, startIndex: number): Chapter[] =>
+    parseChaptersFromAI(text, startIndex, {
+      titleFor: (num) => t('steps:chapters.defaultChapterTitle', { num }),
+      defaultSummary: t('steps:chapters.defaultSummary'),
     });
-  };
 
   const exportChaptersToTxt = async () => {
     if (project.chapters.length === 0) {
@@ -163,18 +136,6 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
       logger.error('导出失败:', error);
       dialogService.alert(t('steps:chapters.exportFailed', { error: error instanceof Error ? error.message : t('steps:common.unknownError') }));
     }
-  };
-
-  // 章节 prompt 上下文块：人物设定 + 书名简介（模板无占位符时追加，保证不断联）
-  const buildChapterContextBlock = (p: Project): string => {
-    const charDetails = (p.characters ?? [])
-      .slice(0, 12)
-      .map((c) => `【${c.name}】(${roleLabel(c.role)})：${c.personality ?? ''}`)
-      .join('\n');
-    const parts = ['', '### 本书设定（规划细纲必须服从）', `书名：《${p.title}》`];
-    if (p.intro?.trim()) parts.push(`简介：${p.intro}`);
-    if (charDetails) parts.push(`人物：\n${charDetails}`);
-    return parts.join('\n');
   };
 
   const generateChapters = async (isContinue: boolean = false) => {
