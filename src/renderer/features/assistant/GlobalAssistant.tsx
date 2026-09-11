@@ -10,7 +10,7 @@ import { logger } from '@/shared/utils/logger';
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { type KnowledgeItem, type OutputMode, type AIMessageImage, type Character, type Location, type Faction, type RuleSystem, type TimelineEvent, type AICardCommand, type CreatedCard, type Timeline, type WorldView, type MagicSystem, type TechnologyLevel, type WorldHistory, type CardPromptTemplate, type Project } from '../../../shared/types';
+import { type KnowledgeItem, type OutputMode, type AIMessageImage, type Character, type AICardCommand, type CreatedCard, type CardPromptTemplate, type Project } from '../../../shared/types';
 import { useProjectStore } from '@/app/stores/projectStore';
 import { ATTACHMENT_TRUNCATE } from '../../../shared/constants/chapters';
 import { collectChatAttachments } from './services/chatAttachments';
@@ -22,9 +22,11 @@ import { AIService } from '@/shared/services/ai/aiService';
 import { approvalBroker, sessionManager } from './services/aiRuntime';
 import { indexService } from '@core/index';
 import { AICardCreationService } from '../cards/services/aiCardCreationService';
-import { normalizeGenderId, normalizeRoleId, type CharacterDraft, type CharacterDraftField } from '@/shared/utils/characterKinds';
+import { buildCardUpdates } from '../cards/services/cardApply';
+import { parseSingleCharacterFromText } from './services/characterParsing';
+import { buildContextContent } from './services/assistantContextContent';
+import { normalizeGenderId, normalizeRoleId } from '@/shared/utils/characterKinds';
 import { AICardCommandService } from '../cards/services/aiCardCommandService';
-import { genderLabel, roleLabel } from '@/shared/utils/displayLabels';
 import { getDefaultCardPrompts } from '../cards/services/cardPromptService';
 import AssistantContextPanel from './components/AssistantContextPanel';
 import AssistantEditPanel from './components/AssistantEditPanel';
@@ -35,7 +37,7 @@ import { cn } from '@/shared/utils/cn';
 import { dialogService } from '@/shared/services/dialogService';
 import { useSettingsStore } from '../../app/stores/settingsStore';
 import { BookOpenText, Bot, CircleStop, ListChecks, PenLine, RotateCcw, Trash2, X } from 'lucide-react';
-import { uuidv7 } from '@core/entities';
+
 
 const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId, project, prompts, onUpdate, width = 380, onClose, onWidthChange }) => {
   const { t, i18n } = useTranslation('assistant');
@@ -105,56 +107,10 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     }
   }, [messages, contextPanelOpen]);
 
-  const getContextContent = useMemo(() => {
-    if (!project) return "当前未打开任何项目。";
-    
-    switch (activeCategory) {
-      case 'inspiration':
-        return `【书名】\n${project.title}\n\n【原始灵感】\n${project.inspiration || '无'}\n\n【简介方案】\n${project.intro || '无'}`;
-      
-      case 'knowledge': {
-        if (subSelectionId === 'all') {
-           return (project.knowledge || []).map(k => `- ${k.name} (${k.type})`).join('\n');
-        }
-        const kItem = project.knowledge?.find(k => k.id === subSelectionId);
-        return kItem ? `【资料：${kItem.name}】\n${kItem.content}` : '';
-      }
-
-      case 'characters':
-        if ((project.characters || []).length === 0) return '';
-        return (project.characters || []).map(c =>
-          `角色名：${c.name || '未命名'}\n` +
-          `性别：${genderLabel(c.gender)}\n` +
-          `年龄：${c.age || '未知'}\n` +
-          `角色类型：${roleLabel(c.role)}\n` +
-          `性格：${c.personality || '暂无描述'}\n` +
-          `背景：${c.background || '暂无背景'}\n` +
-          `关系：${c.relationships || '暂无关系'}\n` +
-          `外观：${c.appearance || '暂无描述'}\n` +
-          `标志性特征：${c.distinctiveFeatures || '暂无特征'}\n` +
-          `职业：${c.occupation || '暂无'}\n` +
-          `动机：${c.motivation || '暂无'}\n` +
-          `优势：${c.strengths || '暂无'}\n` +
-          `弱点：${c.weaknesses || '暂无'}\n` +
-          `成长弧线：${c.characterArc || '暂无'}`
-        ).join('\n\n----------------\n\n');
-      
-      case 'outline':
-        return project.outline || '';
-
-      case 'chapters': {
-        if (subSelectionId === 'all') {
-           return [...(project.chapters || [])].sort((a, b) => a.order - b.order)
-             .map(c => `第${c.order + 1}章：${c.title}`).join('\n');
-        }
-        const chap = project.chapters?.find(c => c.id === subSelectionId);
-        return chap ? `【第${chap.order + 1}章：${chap.title}】\n\n细纲：\n${chap.summary}` : '';
-      }
-        
-      default:
-        return "";
-    }
-  }, [project, activeCategory, subSelectionId]);
+  const getContextContent = useMemo(
+    () => buildContextContent(project, activeCategory, subSelectionId),
+    [project, activeCategory, subSelectionId],
+  );
 
   useEffect(() => {
     const relevant = prompts.find(p => {
@@ -454,68 +410,15 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
 
   const addCardToProject = (command: AICardCommand, data: CreatedCard) => {
     if (!project || !onUpdate) return;
-    
-    switch (command) {
-      case 'character':
-        commitAICard({
-          characters: [...(project.characters || []), data as Character]
-        });
-        break;
-      case 'location':
-        commitAICard({
-          locations: [...(project.locations || []), data as Location]
-        });
-        break;
-      case 'faction':
-        commitAICard({
-          factions: [...(project.factions || []), data as Faction]
-        });
-        break;
-      case 'timeline':
-      case 'event':
-        commitAICard({
-          timeline: {
-            ...(project.timeline || { id: uuidv7(), projectId: project.id, config: { calendarSystem: 'default' }, events: [], createdAt: Date.now(), updatedAt: Date.now() }),
-            events: [...(project.timeline?.events || []), data as TimelineEvent]
-          } as Timeline
-        });
-        break;
-      case 'rule':
-        commitAICard({
-          ruleSystems: [...(project.ruleSystems || []), data as RuleSystem]
-        });
-        break;
-      case 'magic':
-        commitAICard({
-          worldView: {
-            ...(project.worldView || { id: uuidv7(), projectId: project.id, createdAt: Date.now(), updatedAt: Date.now() }),
-            magicSystem: data as MagicSystem
-          } as WorldView
-        });
-        break;
-      case 'tech':
-        commitAICard({
-          worldView: {
-            ...(project.worldView || { id: uuidv7(), projectId: project.id, createdAt: Date.now(), updatedAt: Date.now() }),
-            technologyLevel: data as TechnologyLevel
-          } as WorldView
-        });
-        break;
-      case 'history':
-        commitAICard({
-          worldView: {
-            ...(project.worldView || { id: uuidv7(), projectId: project.id, createdAt: Date.now(), updatedAt: Date.now() }),
-            history: data as WorldHistory
-          } as WorldView
-        });
-        break;
-      default:
-        // 未知命令无落库目标：记日志并让调用方感知，避免"审批通过却无事发生"的假闭环
-        logger.warn('addCardToProject: 未知卡片命令', command);
-        // as string：模板字面量类型会干扰 i18next 插值参数推断， widen 后再传
-        dialogService.alert(t('chat.unknownCommand', { text: `/${command}` as string }));
-        break;
+    const updates = buildCardUpdates(project, command, data);
+    if (!updates) {
+      // 未知命令无落库目标：记日志并让调用方感知，避免"审批通过却无事发生"的假闭环
+      logger.warn('addCardToProject: 未知卡片命令', command);
+      // as string：模板字面量类型会干扰 i18next 插值参数推断， widen 后再传
+      dialogService.alert(t('chat.unknownCommand', { text: `/${command}` as string }));
+      return;
     }
+    commitAICard(updates);
   };
 
   const handleOpenEditPanel = (category: AssistantEditCategory) => {
@@ -589,100 +492,6 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
       logger.error('Failed to save data:', error);
       setSyncStatus('error');
     }
-  };
-
-  const parseSingleCharacterFromText = (text: string): Character | null => {
-    if (!text) return null;
-    
-    const cleanLines = text.replace(/[*#_]/g, '').split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    // 解析草稿：role/gender 先收原始文本，落库前归一化为枚举 id
-    let activeChar: CharacterDraft | null = null;
-    let currentField: CharacterDraftField | null = null;
-
-    cleanLines.forEach(line => {
-      const nameMatch = line.match(/^(?:角色名|姓名|名字|名称|身份)[:：\s]*(.*)/i);
-      if (nameMatch && nameMatch[1]?.trim()) {
-        if (activeChar && activeChar.name) {
-          return;
-        }
-        activeChar = {
-          id: uuidv7(),
-          name: nameMatch[1]?.trim() ?? '',
-          gender: 'unknown',
-          age: '未知',
-          role: 'supporting',
-          personality: '', 
-          background: '', 
-          relationships: '',
-          appearance: '',
-          distinctiveFeatures: '',
-          occupation: '',
-          motivation: '',
-          strengths: '',
-          weaknesses: '',
-          characterArc: ''
-        };
-        currentField = 'name';
-        return;
-      }
-      if (!activeChar) return;
-      
-      const genderMatch = line.match(/^(?:性别|性别类型)[:：\s]*(.*)/i);
-      const ageMatch = line.match(/^(?:年龄|岁数)[:：\s]*(.*)/i);
-      const roleMatch = line.match(/^(?:类型|角色类型|定位|身份)[:：\s]*(.*)/i);
-      const personalityMatch = line.match(/^(?:性格|特质|性格特征)[:：\s]*(.*)/i);
-      const backgroundMatch = line.match(/^(?:背景|出身|生平)[:：\s]*(.*)/i);
-      const relationshipMatch = line.match(/^(?:关系|角色关系|社交)[:：\s]*(.*)/i);
-      const appearanceMatch = line.match(/^(?:外观|外貌|长相|外表)[:：\s]*(.*)/i);
-      const featuresMatch = line.match(/^(?:特征|标志性特征|特点)[:：\s]*(.*)/i);
-      const occupationMatch = line.match(/^(?:职业|身份|职位)[:：\s]*(.*)/i);
-      const motivationMatch = line.match(/^(?:动机|目标|目的)[:：\s]*(.*)/i);
-      const strengthsMatch = line.match(/^(?:优势|能力|特长)[:：\s]*(.*)/i);
-      const weaknessesMatch = line.match(/^(?:弱点|缺陷|缺点)[:：\s]*(.*)/i);
-      const arcMatch = line.match(/^(?:成长|弧线|发展)[:：\s]*(.*)/i);
-
-      if (!activeChar) return;
-      if (genderMatch) { activeChar.gender = genderMatch[1]?.trim() ?? ''; currentField = 'gender'; }
-      else if (ageMatch) { activeChar.age = ageMatch[1]?.trim() ?? ''; currentField = 'age'; }
-      else if (roleMatch) { activeChar.role = roleMatch[1]?.trim() ?? ''; currentField = 'role'; }
-      else if (personalityMatch) { activeChar.personality = personalityMatch[1]?.trim() ?? ''; currentField = 'personality'; }
-      else if (backgroundMatch) { activeChar.background = backgroundMatch[1]?.trim() ?? ''; currentField = 'background'; }
-      else if (relationshipMatch) { activeChar.relationships = relationshipMatch[1]?.trim() ?? ''; currentField = 'relationships'; }
-      else if (appearanceMatch) { activeChar.appearance = appearanceMatch[1]?.trim() ?? ''; currentField = 'appearance'; }
-      else if (featuresMatch) { activeChar.distinctiveFeatures = featuresMatch[1]?.trim() ?? ''; currentField = 'distinctiveFeatures'; }
-      else if (occupationMatch) { activeChar.occupation = occupationMatch[1]?.trim() ?? ''; currentField = 'occupation'; }
-      else if (motivationMatch) { activeChar.motivation = motivationMatch[1]?.trim() ?? ''; currentField = 'motivation'; }
-      else if (strengthsMatch) { activeChar.strengths = strengthsMatch[1]?.trim() ?? ''; currentField = 'strengths'; }
-      else if (weaknessesMatch) { activeChar.weaknesses = weaknessesMatch[1]?.trim() ?? ''; currentField = 'weaknesses'; }
-      else if (arcMatch) { activeChar.characterArc = arcMatch[1]?.trim() ?? ''; currentField = 'characterArc'; }
-      else if (currentField && currentField !== 'id') {
-        activeChar[currentField] = ((activeChar[currentField] || '') + ' ' + line).trim();
-      }
-    });
-    
-    // forEach 闭包内的赋值对外层 CFA 不可见：此处断言回完整并集（勿删，否则收窄为 null）
-    const char = activeChar as CharacterDraft | null;
-    if (char && char.name) {
-      const completeChar: Character = {
-        id: char.id || uuidv7(),
-        name: char.name || '',
-        gender: normalizeGenderId(char.gender),
-        age: char.age || '未知',
-        role: normalizeRoleId(char.role, 'supporting'),
-        personality: char.personality || '',
-        background: char.background || '',
-        relationships: char.relationships || '',
-        appearance: char.appearance || '',
-        distinctiveFeatures: char.distinctiveFeatures || '',
-        occupation: char.occupation || '',
-        motivation: char.motivation || '',
-        strengths: char.strengths || '',
-        weaknesses: char.weaknesses || '',
-        characterArc: char.characterArc || ''
-      };
-      return completeChar;
-    }
-    return null;
   };
 
   const handleGenerateCharacter = async () => {
