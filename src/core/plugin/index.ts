@@ -38,10 +38,14 @@ export {
 export {
   BUILTIN_FEATURES,
   BUILTIN_BUNDLES,
+  RELEASE_PROFILES,
+  DEFAULT_RELEASE_PROFILE,
+  profileByName,
   assemblyTree,
   type FeatureDecl,
   type Bundle,
   type Profile,
+  type ReleaseProfileName,
   type AssemblyRow,
 } from './bundles.js';
 export {
@@ -54,9 +58,9 @@ export {
 } from './context.js';
 export { BUILTIN_BUNDLE_MANIFESTS } from './builtin/manifests.js';
 export {
-  profileByName,
   enabledFeatureIds,
   isFeatureEnabled,
+  profileDeniesAi,
   PROFILE_CHANGED_EVENT,
 } from './availability.js';
 export {

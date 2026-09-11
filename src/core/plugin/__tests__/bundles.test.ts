@@ -8,7 +8,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { BUILTIN_FEATURES, BUILTIN_BUNDLES, assemblyTree } from '../bundles.js';
+import { BUILTIN_FEATURES, BUILTIN_BUNDLES, RELEASE_PROFILES, DEFAULT_RELEASE_PROFILE, profileByName, assemblyTree } from '../bundles.js';
+import { profileDeniesAi, enabledFeatureIds } from '../availability.js';
 
 describe('bundle 装配树（design/04 §7）', () => {
   it('全 bundle 启用：15 个内置功能全部装配', () => {
@@ -42,5 +43,16 @@ describe('bundle 装配树（design/04 §7）', () => {
     const characters = rows.find((r) => r.feature === 'core.characters')!;
     expect(characters.enabled).toBe(false);
     expect(characters.reason).toContain('依赖');
+  });
+
+  it('发行档单源：profileByName 取清单项，未知档名回退默认', () => {
+    expect(profileByName('minimal')).toBe(RELEASE_PROFILES.find((p) => p.name === 'minimal'));
+    expect(profileByName('nope').name).toBe(DEFAULT_RELEASE_PROFILE);
+  });
+
+  it('profileDeniesAi：仅 minimal 拒绝 AI', () => {
+    expect(profileDeniesAi('minimal')).toBe(true);
+    expect(profileDeniesAi('full')).toBe(false);
+    expect(enabledFeatureIds('minimal').has('core.assistant')).toBe(false);
   });
 });

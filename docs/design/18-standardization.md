@@ -98,5 +98,9 @@
 注册表单源在 `shared/services/buildProfiles.ts`（内置 `core.default`/`core.compendium` + 插件贡献同路径）。
 导出弹窗据此提供"导出预设"选择，选中后套用其 selection/transform/render（格式与未选章节仍由本次导出决定）。
 
+发行档（full/webnovel/literary/minimal）单源在 `core/plugin/bundles.ts` 的 `RELEASE_PROFILES`：
+设置面板选项、`profileByName` 装配树、`profileDeniesAi` 的 AI 策略判断均读它，未知档名回退
+`DEFAULT_RELEASE_PROFILE`。新增发行档只改这一处。
+
 
 

@@ -67,6 +67,26 @@ export const BUILTIN_BUNDLES: readonly Bundle[] = [
   { id: 'com.hongyue.bundle.ai', name: 'AI 创作套件', description: '助手/卡片/一致性/伏笔（依赖 AI 网关与索引）', features: ['core.assistant', 'core.cards', 'core.consistency', 'core.foreshadowing'] },
 ] as const;
 
+/** 发行档名（设置面板与 i18n 键以此为准）。 */
+export type ReleaseProfileName = 'full' | 'webnovel' | 'literary' | 'minimal';
+
+/** 发行档清单单源：设置面板选项、装配树、AI 策略判断均以此为准。 */
+export const RELEASE_PROFILES: readonly (Profile & { name: ReleaseProfileName })[] = [
+  { name: 'full', description: '完整功能', plugins: ['com.hongyue.bundle.core', 'com.hongyue.bundle.world', 'com.hongyue.bundle.ai'], policies: {} },
+  { name: 'webnovel', description: '网文（专属 bundle 落地前与 full 等效）', plugins: ['com.hongyue.bundle.core', 'com.hongyue.bundle.world', 'com.hongyue.bundle.ai'], policies: {} },
+  { name: 'literary', description: '严肃文学（专属 bundle 落地前与 full 等效）', plugins: ['com.hongyue.bundle.core', 'com.hongyue.bundle.world', 'com.hongyue.bundle.ai'], policies: {} },
+  { name: 'minimal', description: '纯写作最小集（拒绝全部 AI 请求）', plugins: ['com.hongyue.bundle.core'], policies: { 'ai.request': 'deny' } },
+];
+
+/** 默认发行档名（无本地偏好时使用）。 */
+export const DEFAULT_RELEASE_PROFILE: ReleaseProfileName = 'full';
+
+/** 按名取发行档；未知档名回退默认档。 */
+export function profileByName(name: string): Profile {
+  return RELEASE_PROFILES.find((p) => p.name === name)
+    ?? RELEASE_PROFILES.find((p) => p.name === DEFAULT_RELEASE_PROFILE)!;
+}
+
 /** 汇报每行装配的来源（bundle/patch），profile 策略拒绝的行给出原因。 */
 export interface AssemblyRow {
   feature: string;

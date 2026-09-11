@@ -12,7 +12,7 @@
  * M3 插件宿主在此续注工具/section/技能，UI 层与 Agent 循环只消费这里的实例。
  */
 import { ApprovalBroker, PromptAssembler, registerBuiltinSections } from '@core/ai';
-import { EventBus } from '@core/plugin';
+import { EventBus, profileDeniesAi } from '@core/plugin';
 import { buildProfileRegistry } from '@/shared/services/buildProfiles';
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import { setAiGate } from '@/shared/services/ai/aiGate';
@@ -32,7 +32,7 @@ export const eventBus = new EventBus();
 
 // 精简档 + 每小时配额统一 AI 门：所有经网关的 AI 调用在此实时校验
 setAiGate(() => {
-  if (typeof window !== 'undefined' && localStorage.getItem(STORAGE_KEYS.profileCurrent) === 'minimal') {
+  if (typeof window !== 'undefined' && profileDeniesAi(localStorage.getItem(STORAGE_KEYS.profileCurrent) ?? 'full')) {
     throw new Error('minimal 发行档已禁用全部 AI 请求');
   }
   if (isOverHourlyLimit()) {

@@ -12,21 +12,7 @@
  * 发行档 → assemblyTree → 当前可用的功能 id 集合；UI（导航/入口）以它为准。
  */
 
-import { assemblyTree, BUILTIN_BUNDLES, type Profile } from './bundles.js';
-
-/** 发行档名 → Profile（档名以 bundles.ts 与设置面板为准，无外部 profiles/*.json 文件）。 */
-export function profileByName(name: string): Profile {
-  switch (name) {
-    case 'minimal':
-      return { name: 'minimal', plugins: ['com.hongyue.bundle.core'], policies: { 'ai.request': 'deny' } };
-    case 'webnovel':
-    case 'literary':
-    case 'full':
-    default:
-      // v2.x 的 webnovel/literary 专属 bundle 落地前，与 full 等效
-      return { name, plugins: ['com.hongyue.bundle.core', 'com.hongyue.bundle.world', 'com.hongyue.bundle.ai'], policies: {} };
-  }
-}
+import { assemblyTree, profileByName, BUILTIN_BUNDLES } from './bundles.js';
 
 /** 当前发行档下可用的功能 id 集合（核心结论：minimal 只剩纯写作链）。 */
 export function enabledFeatureIds(profileName: string): Set<string> {
@@ -37,6 +23,11 @@ export function enabledFeatureIds(profileName: string): Set<string> {
 /** 便捷判断：某功能在当前发行档下是否可用。 */
 export function isFeatureEnabled(profileName: string, featureId: string): boolean {
   return enabledFeatureIds(profileName).has(featureId);
+}
+
+/** 当前发行档策略是否整体拒绝 AI 请求（minimal 档）。 */
+export function profileDeniesAi(profileName: string): boolean {
+  return profileByName(profileName).policies?.['ai.request'] === 'deny';
 }
 
 /** 发行档切换事件名（设置面板派发，UI 订阅刷新）。 */

@@ -15,7 +15,7 @@ import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
 import { pluginHostPromise, saveDisabledList } from '@/features/assistant/services/aiRuntime';
-import { PROFILE_CHANGED_EVENT, assemblyTree, profileByName, type AssemblyRow, type PluginStatus } from '@core/plugin';
+import { PROFILE_CHANGED_EVENT, RELEASE_PROFILES, DEFAULT_RELEASE_PROFILE, assemblyTree, profileByName, type AssemblyRow, type PluginStatus } from '@core/plugin';
 import { builtinRegistry } from '@core/types-registry';
 import type { McpServerConfig } from '../../../../shared/types';
 import { useSettingsStore } from '@/app/stores/settingsStore';
@@ -38,7 +38,7 @@ const PluginSettingsPanel: React.FC = () => {
   const { t } = useTranslation(['settings', 'common']);
   const [statuses, setStatuses] = useState<PluginStatus[] | null>(null);
   const [showTree, setShowTree] = useState(false);
-  const [profile, setProfile] = useState<string>(() => localStorage.getItem(STORAGE_KEYS.profileCurrent) ?? 'full');
+  const [profile, setProfile] = useState<string>(() => localStorage.getItem(STORAGE_KEYS.profileCurrent) ?? DEFAULT_RELEASE_PROFILE);
   const registeredTypes = builtinRegistry.list();
 
   useEffect(() => {
@@ -95,7 +95,7 @@ const PluginSettingsPanel: React.FC = () => {
       <div>
         <div className="mb-1 text-sm font-medium">{t('plugins.profile.title')}</div>
         <div className="flex flex-wrap gap-2">
-          {(['full', 'webnovel', 'literary', 'minimal'] as const).map((name) => (
+          {RELEASE_PROFILES.map(({ name }) => (
             <Button
               key={name}
               size="sm"
