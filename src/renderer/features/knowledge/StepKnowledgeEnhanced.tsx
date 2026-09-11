@@ -12,11 +12,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '@/i18n';
 import { type Project, type KnowledgeItem, type KnowledgeCategory, type HybridSearchResult, type DiagramType, type ModelConfig, type EmbeddingModelConfig, type ConsistencyCheckPromptTemplate, type ConsistencyCheckConfig } from '../../../shared/types';
 import { vectorIntegrationService } from './services/vectorIntegrationService';
+import { searchKnowledge } from './services/knowledgeSearch';
 import { repository } from '../../shared/services/repository';
 import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
 import { useUsableModel } from '@/app/stores/settingsStore';
 import { sha256Hex } from '@core/entities';
-import { DEFAULT_SEMANTIC_WEIGHT, DEFAULT_KEYWORD_WEIGHT } from '../../../shared/constants/chapters';
 import { embeddingModelService } from '../settings/services/embeddingModelService';
 import LocationEditor from '../world/LocationEditor';
 import FactionEditor from '../world/FactionEditor';
@@ -305,82 +305,14 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
 
     setIsSearching(true);
     setShowSearchResults(true);
-
     try {
-      let results: HybridSearchResult[] = [];
-      
-      switch (searchMode) {
-        case 'semantic': {
-          const semanticResults = await vectorIntegrationService.semanticSearchKnowledge(project.id, query, {
-            limit: 10,
-            threshold: 0.3
-          });
-          results = semanticResults.map(result => ({
-            ...result,
-            semanticScore: result.score,
-            keywordScore: 0,
-            combinedScore: result.score
-          }));
-          break;
-        }
-        case 'hybrid':
-          results = await vectorIntegrationService.hybridSearchKnowledge(project.id, query, {
-            limit: 10,
-            threshold: 0.3,
-            semanticWeight: DEFAULT_SEMANTIC_WEIGHT,
-            keywordWeight: DEFAULT_KEYWORD_WEIGHT
-          });
-          break;
-        case 'keyword': {
-          // 关键词检索优先走 FTS5(trigram) 索引；短查询(<3 字符)trigram 无法命中，回退内存子串匹配。
-          // 命中集合再与当前分类过滤取交集，保留原有的分类筛选语义与 FTS 排序。
-          const categoryFiltered = getFilteredKnowledge();
-          let matchedItems: KnowledgeItem[];
-          if (query.trim().length >= 3) {
-            const hits = await repository.search(query, { projectId: project.id, limit: 50 });
-            const byId = new Map(categoryFiltered.map(i => [i.id, i]));
-            matchedItems = hits
-              .filter(h => h.scope === 'knowledge')
-              .map(h => byId.get(h.id))
-              .filter((x): x is KnowledgeItem => Boolean(x));
-          } else {
-            const lower = query.toLowerCase();
-            matchedItems = categoryFiltered.filter(item =>
-              item.name.toLowerCase().includes(lower) || item.content.toLowerCase().includes(lower));
-          }
-          results = matchedItems.map(item => ({
-            document: {
-              id: item.id,
-              projectId: project.id,
-              knowledgeItemId: item.id,
-              content: item.content.substring(0, 200),
-              embedding: [],
-              metadata: {
-                category: item.category,
-                type: item.type,
-                size: item.size,
-                addedAt: item.addedAt,
-                name: item.name // 添加name属性
-              }
-            },
-            score: 1.0,
-            content: item.content.substring(0, 200),
-            metadata: {
-              category: item.category,
-              type: item.type,
-              size: item.size,
-              addedAt: item.addedAt,
-              name: item.name // 添加name属性
-            },
-            semanticScore: 0,
-            keywordScore: 1.0,
-            combinedScore: 1.0
-          }));
-          break;
-        }
-      }
-
-      setSearchResults(results);
+      setSearchResults(await searchKnowledge({
+        projectId: project.id,
+        query,
+        mode: searchMode,
+        categoryItems: getFilteredKnowledge(),
+        search: (q, o) => repository.search(q, o),
+      }));
     } catch (error) {
       logger.error('搜索失败:', error);
       setSearchResults([]);
