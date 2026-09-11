@@ -142,6 +142,8 @@ UI 槽位注册表 `shared/services/uiSlots.ts` + 渲染点 `shared/ui/Slot.tsx`
   不进 verify（core 公共面有意保留），本地 `npx knip` 全量查看。
 - 依赖卫生：清理未用依赖（`chromadb`、`@chroma-core/default-embed`、未用 Radix、`@tailwindcss/postcss`、
   `autoprefixer` 等），补齐隐式依赖（`@codemirror/autocomplete`、`axe-core`、`@eslint/js`）。
+  锁定 `@emnapi/core`/`@emnapi/runtime` 为直接 devDependency，稳定 Linux `npm ci` 的 wasm 可选依赖解析
+  （knip 的 oxc-resolver 与 sharp 的 wasm 变体共用它们）。
 
 
 

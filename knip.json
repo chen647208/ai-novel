@@ -14,5 +14,9 @@
     "scripts/**/*.mjs",
     "e2e/**/*.ts"
   ],
-  "ignoreDependencies": ["tailwindcss"]
+  "ignoreDependencies": [
+    "tailwindcss",
+    "@emnapi/core",
+    "@emnapi/runtime"
+  ]
 }
