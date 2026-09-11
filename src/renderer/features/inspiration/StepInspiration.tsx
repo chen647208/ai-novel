@@ -9,13 +9,11 @@
 
 import { logger } from '../../shared/utils/logger';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation, i18n, templateDisplayName } from '@/i18n';
-import { type Project, type KnowledgeItem, type StreamingAIResponse, type OutputMode } from '../../../shared/types';
+import { type Project, type KnowledgeItem, type OutputMode } from '../../../shared/types';
 import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
-import { VIRTUAL_CHAPTER_ORDER, KNOWLEDGE_SNIPPET_TRUNCATE } from '../../../shared/constants/chapters';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
-import { AIService } from '@/shared/services/ai/aiService';
 import WorldViewEditor from '../world/WorldViewEditor';
 import { dialogService } from '@/shared/services/dialogService';
 import { cn } from '@/shared/utils/cn';
@@ -30,6 +28,7 @@ import { Textarea } from '@/shared/ui/Textarea';
 import { BookOpenText, Bot, Check, CheckCheck, ChevronDown, ChevronUp, CloudUpload, Eye, Globe, Lightbulb, Pause, PenLine, Pencil, Play, Square, Trash2, WandSparkles, XCircle } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
 import { MarkdownView } from '@/shared/ui/Markdown';
+import { useInspirationGeneration } from './hooks/useInspirationGeneration';
 import { uuidv7 } from '@core/entities';
 
 interface StepInspirationProps {
@@ -59,7 +58,6 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, onGoSection 
   
   const [input, setInput] = useState(project?.inspiration || '');
   const [selectedPromptId, setSelectedPromptId] = useState(prompts.find(p => p.category === 'inspiration')?.id || '');
-  const [loading, setLoading] = useState(false);
   
   // 输出模式状态
   const [outputMode, setOutputMode] = useState<OutputMode>('streaming');
@@ -68,20 +66,23 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, onGoSection 
   const [showWorldView, setShowWorldView] = useState(false);
   
   // 流式输出状态
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [streamingContent, setStreamingContent] = useState('');
-  const [streamingTokens, setStreamingTokens] = useState({ prompt: 0, completion: 0, total: 0 });
-  const [, setIsComplete] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
   
   // 传统输出模式的token信息
-  const [traditionalTokens, setTraditionalTokens] = useState({ prompt: 0, completion: 0, total: 0 });
   
   // Knowledge Base Selection State
   const [selectedKnowledgeIds, setSelectedKnowledgeIds] = useState<Set<string>>(new Set());
   
   // 直接读取结果或使用流式内容
+  // 灵感生成：流式/传统/暂停/停止统一见 useInspirationGeneration
+  const inspiration = useInspirationGeneration({
+    input, project, prompts, selectedPromptId, selectedKnowledgeIds, outputMode, activeModel,
+    onUpdate: (updates, opts) => onUpdate(updates, opts),
+    onGenerateStart: () => setResultEditing(false),
+    defaultTitle: i18n.t('app:book.defaultTitle'),
+    t,
+  });
+  const { loading, isStreaming, streamingContent, streamingTokens, traditionalTokens, isPaused, generate, handlePauseResume, handleStopStreaming } = inspiration;
+
   const results = isStreaming ? streamingContent : (project?.intro || '');
   // 预览（Markdown 渲染）⇄ 编辑（textarea）切换；有内容时默认预览
   const [resultEditing, setResultEditing] = useState(false);
@@ -89,224 +90,6 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, onGoSection 
   // 安全获取知识库数据
   const safeKnowledge = Array.isArray(project?.knowledge) ? project.knowledge : [];
   const inspirationKnowledge = safeKnowledge.filter(k => k && k.category === 'inspiration');
-
-  // 流式回调处理函数
-  const handleStreamingChunk = (response: StreamingAIResponse, finalPrompt?: string) => {
-    // 无模型时不该进到这里（generate 已拦截）：中途停用则复位转圈态，避免常亮卡死
-    if (!isModelUsable(activeModel)) {
-      setIsStreaming(false);
-      setLoading(false);
-      return;
-    }
-    // 契约：response.content 为累计全文，直接替换（旧实现按增量累加导致内容重复）
-    if (response.content) {
-      setStreamingContent(response.content);
-    }
-    if (response.tokens) {
-      setStreamingTokens(response.tokens);
-    }
-    if (response.isComplete) {
-      setIsComplete(true);
-      setIsStreaming(false);
-      setLoading(false);
-
-      // 出错时不写入项目数据，避免用空/残缺内容覆盖
-      if (response.error) {
-        dialogService.alert(t('steps:common.generateFailed', { error: response.error }));
-        return;
-      }
-      
-      // 流式完成后更新项目数据
-      const finalContent = response.content || streamingContent;
-      const firstLine = finalContent.split('\n')[0]?.replace(/[#*]/g, '').trim() ?? '';
-      
-      // 创建AI历史记录
-      const historyRecord = AIService.buildHistoryRecordData(
-        'inspiration-virtual-chapter', // 虚拟章节ID
-        finalPrompt || '', // 使用传递的finalPrompt
-        finalContent,
-        activeModel,
-        response,
-        {
-          templateName: templateDisplayName(prompts.find(p => p.id === selectedPromptId) ?? { name: t('steps:inspiration.defaultTemplateName') }),
-          batchGeneration: false,
-          chapterTitle: t('steps:inspiration.chapterTitle')
-        }
-      );
-      
-      // 安全处理虚拟章节
-      const updatedVirtualChapters = Array.isArray(project?.virtualChapters) ? project.virtualChapters : [];
-      const inspirationChapter = updatedVirtualChapters.find(c => c && c.id === 'inspiration-virtual-chapter') || {
-        id: 'inspiration-virtual-chapter',
-        title: t('steps:inspiration.chapterTitle'),
-        summary: t('steps:inspiration.historySummary'),
-        content: '',
-        order: VIRTUAL_CHAPTER_ORDER, // 特殊顺序，放在最前面
-        history: []
-      };
-      
-      const existingHistory = Array.isArray(inspirationChapter.history) ? inspirationChapter.history : [];
-      const updatedInspirationChapter = {
-        ...inspirationChapter,
-        history: [...existingHistory, historyRecord]
-      };
-      
-      // 更新虚拟章节列表
-      const finalVirtualChapters = updatedVirtualChapters.filter(c => c && c.id !== 'inspiration-virtual-chapter');
-      finalVirtualChapters.unshift(updatedInspirationChapter);
-      
-      // 安全处理项目标题
-      const currentTitle = project?.title;
-      const newTitle = currentTitle && currentTitle !== i18n.t('app:book.defaultTitle') ? currentTitle : (firstLine || t('steps:inspiration.untitledNovel'));
-      
-      onUpdate({
-        inspiration: input,
-        intro: finalContent,
-        title: newTitle,
-        virtualChapters: finalVirtualChapters
-      }, { agentId: 'ai:inspiration', cause: selectedPromptId });
-    }
-  };
-
-  // 暂停/继续流式输出
-  const handlePauseResume = () => {
-    if (isPaused) {
-      setIsPaused(false);
-    } else {
-      setIsPaused(true);
-    }
-  };
-
-  // 停止流式输出
-  const handleStopStreaming = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      abortControllerRef.current = null;
-    }
-    setIsStreaming(false);
-    setLoading(false);
-    setIsPaused(false);
-  };
-
-  const generate = async () => {
-    if (!input) return;
-    if (!isModelUsable(activeModel)) {
-      dialogService.alert(t('steps:common.noModel'));
-      return;
-    }
-    
-    // 重置流式状态
-    setStreamingContent('');
-    setStreamingTokens({ prompt: 0, completion: 0, total: 0 });
-    setIsComplete(false);
-    setIsPaused(false);
-    // 生成时切回预览，流式内容以 Markdown 格式化实时呈现
-    setResultEditing(false);
-    
-    setLoading(true);
-    setIsStreaming(true);
-    
-    const promptTemplate = prompts.find(p => p.id === selectedPromptId)?.content || '{inspiration}';
-    let finalPrompt = promptTemplate.replace('{inspiration}', input);
-    
-    // Inject Knowledge
-    if (project && project.knowledge && selectedKnowledgeIds.size > 0) {
-       const kContent = project.knowledge
-         .filter(k => k && selectedKnowledgeIds.has(k.id))
-         .map(k => {
-           const name = k.name || '未命名资料';
-           const content = typeof k.content === 'string' ? k.content.substring(0, KNOWLEDGE_SNIPPET_TRUNCATE) : '';
-           return `【参考资料：${name}】\n${content}`;
-         })
-         .join('\n\n');
-       if (kContent) finalPrompt += `\n\n### 参考世界观/设定资料 (Knowledge Base)\n请务必参考以下资料进行构思：\n${kContent}`;
-    }
-
-    try {
-      // 创建新的AbortController用于取消请求
-      abortControllerRef.current = new AbortController();
-      
-      // 根据输出模式选择调用方式
-      if (outputMode === 'streaming' && activeModel.supportsStreaming !== false) {
-        await AIService.callStreaming(
-          activeModel,
-          finalPrompt,
-          (response) => handleStreamingChunk(response, finalPrompt),
-          { signal: abortControllerRef.current.signal }
-        );
-      } else {
-        // 使用传统方法
-        const result = await AIService.call(activeModel, finalPrompt, { signal: abortControllerRef.current.signal });
-        if (result.error) {
-          dialogService.alert(t('steps:common.generateFailed', { error: result.error }));
-          return;
-        }
-        
-        // 保存传统输出模式的token信息
-        if (result.tokens) {
-          setTraditionalTokens(result.tokens);
-        } else {
-          setTraditionalTokens({ prompt: 0, completion: 0, total: 0 });
-        }
-        
-        // 创建AI历史记录（传统输出模式）
-        const historyRecord = AIService.buildHistoryRecordData(
-          'inspiration-virtual-chapter', // 虚拟章节ID
-          finalPrompt,
-          result.content,
-          activeModel,
-          result,
-          {
-            templateName: templateDisplayName(prompts.find(p => p.id === selectedPromptId) ?? { name: t('steps:inspiration.defaultTemplateName') }),
-            batchGeneration: false,
-            chapterTitle: t('steps:inspiration.chapterTitle')
-          }
-        );
-        
-        // 将历史记录添加到虚拟章节
-        const updatedVirtualChapters = project?.virtualChapters || [];
-        const inspirationChapter = updatedVirtualChapters.find(c => c.id === 'inspiration-virtual-chapter') || {
-          id: 'inspiration-virtual-chapter',
-          title: t('steps:inspiration.chapterTitle'),
-          summary: t('steps:inspiration.historySummary'),
-          content: '',
-          order: VIRTUAL_CHAPTER_ORDER, // 特殊顺序，放在最前面
-          history: []
-        };
-        
-        const existingHistory = inspirationChapter.history || [];
-        const updatedInspirationChapter = {
-          ...inspirationChapter,
-          history: [...existingHistory, historyRecord]
-        };
-        
-        // 更新虚拟章节列表
-        const finalVirtualChapters = updatedVirtualChapters.filter(c => c.id !== 'inspiration-virtual-chapter');
-        finalVirtualChapters.unshift(updatedInspirationChapter);
-        
-        // 更新项目数据
-        const firstLine = result.content.split('\n')[0]?.replace(/[#*]/g, '').trim() ?? '';
-        onUpdate({
-          inspiration: input,
-          intro: result.content,
-          title: project?.title && project.title !== i18n.t('app:book.defaultTitle') ? project.title : (firstLine || t('steps:inspiration.untitledNovel')),
-          virtualChapters: finalVirtualChapters
-        }, { agentId: 'ai:inspiration', cause: selectedPromptId });
-        setIsStreaming(false);
-      }
-    } catch (e) {
-      if (e instanceof Error && e.name === 'AbortError') {
-        logger.debug('流式输出已停止');
-      } else {
-        dialogService.alert(t('steps:inspiration.generateFailedGeneric'));
-        logger.error(e);
-      }
-    } finally {
-      if (!isStreaming) {
-        setLoading(false);
-      }
-    }
-  };
 
   const handleClear = async () => {
     if (await dialogService.confirm({ message: t('steps:inspiration.clearConfirm'), danger: true })) {
