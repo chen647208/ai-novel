@@ -19,6 +19,7 @@ import WritingEditorOverlayLayer from './components/WritingEditorOverlayLayer';
 import FindBar from './components/FindBar';
 import { useFindReplace } from './hooks/useFindReplace';
 import { useChapterExport } from './hooks/useChapterExport';
+import { useChapterMutations } from './hooks/useChapterMutations';
 import { useChapterGeneration } from './hooks/useChapterGeneration';
 import WritingEditorCanvas from './components/WritingEditorCanvas';
 import ForeshadowPanel from '../foreshadowing/components/ForeshadowPanel';
@@ -198,14 +199,13 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     onUpdate: (updates) => onUpdateRef.current(updates),
   });
 
-  // 用新的 chapter 对象（如删除快照后）替换 chapters 中同 ID 项
-  const handleUpdateChapter = (updated: Chapter) => {
-    const chapters = projectRef.current.chapters.map((c) => (c.id === updated.id ? updated : c));
-    onUpdate({ chapters });
-  };
-
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [isForeshadowOpen, setIsForeshadowOpen] = useState(false);
+
+  // 章节字段写回统一见 useChapterMutations
+  const { handleUpdateChapter, updateChapterContent, updateChapterSummary, updateChapterContentSummary, updateActiveChapterTitle } = useChapterMutations({
+    project, activeChapterId, onUpdate, setSaveDirty,
+  });
 
   // 章节导出：选择/格式/预设/落盘统一见 useChapterExport
   const exporter = useChapterExport({ project, t });
@@ -239,39 +239,6 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
       setEditableSummary(genModal.chapter.summary || "");
     }
   }, [genModal.isOpen, genModal.chapter]);
-
-  const updateChapterContent = (text: string) => {
-    if (!activeChapterId) return;
-    const newChapters = project.chapters.map(c =>
-      c.id === activeChapterId ? { ...c, content: text } : c
-    );
-    onUpdate({ chapters: newChapters });
-    setSaveDirty(true);
-  };
-
-  const updateChapterSummary = (summary: string) => {
-    if (!activeChapterId) return;
-    const newChapters = project.chapters.map(c => 
-      c.id === activeChapterId ? { ...c, summary } : c
-    );
-    onUpdate({ chapters: newChapters });
-  };
-
-  const updateChapterContentSummary = (contentSummary: string) => {
-    if (!activeChapterId) return;
-    const newChapters = project.chapters.map(c => 
-      c.id === activeChapterId ? { ...c, contentSummary } : c
-    );
-    onUpdate({ chapters: newChapters });
-  };
-
-  const updateActiveChapterTitle = (title: string) => {
-    if (!activeChapterId) return;
-    const newChapters = project.chapters.map(c =>
-      c.id === activeChapterId ? { ...c, title } : c
-    );
-    onUpdate({ chapters: newChapters });
-  };
 
   // Enter×3 连按：在当前章之后插入新章并切换过去（默认名「第N章」，不阻塞继续输入）。
   const handleNewChapter = useCallback(() => {
