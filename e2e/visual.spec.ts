@@ -2,7 +2,7 @@ import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test, expect } from '@playwright/test';
-import { createBook, launchApp } from './helpers';
+import { cleanupUserDataDir, createBook, launchApp } from './helpers';
 
 /**
  * 视觉回归：截取工作台左侧导航栏（结构稳定），按平台存基线。
@@ -20,6 +20,7 @@ test('工作台导航栏视觉快照', async () => {
     await expect(nav).toHaveScreenshot('workspace-nav.png', { maxDiffPixelRatio: 0.02 });
   } finally {
     await app.close();
+    cleanupUserDataDir(userDataDir);
   }
 });
 
@@ -34,6 +35,7 @@ test('命令面板视觉快照', async () => {
     await expect(dialog).toHaveScreenshot('command-palette.png', { maxDiffPixelRatio: 0.02 });
   } finally {
     await app.close();
+    cleanupUserDataDir(userDataDir);
   }
 });
 
@@ -51,5 +53,6 @@ test('写作区空态视觉快照', async () => {
     });
   } finally {
     await app.close();
+    cleanupUserDataDir(userDataDir);
   }
 });

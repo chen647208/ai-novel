@@ -1,3 +1,4 @@
+import { rmSync } from 'node:fs';
 import { expect, _electron as electron, type ElectronApplication, type Page } from '@playwright/test';
 
 /**
@@ -34,9 +35,17 @@ export const launchApp = async (userDataDir: string): Promise<{ app: ElectronApp
   return { app, page: page! };
 };
 
+/** 删除本次运行的隔离数据目录（Electron 未释放时静默跳过，避免阻塞清理）。 */
+export const cleanupUserDataDir = (dir: string): void => {
+  try {
+    rmSync(dir, { recursive: true, force: true });
+  } catch {
+    /* 进程仍占用时留下，交由系统/后续清理 */
+  }
+};
+
 /** 建书进工作台灵感分区（首启走向导跳过，非首启走新建模态）。 */
-export const createBook = async (page: Page): Promise<void> => {
-  const skip = page.getByRole('button', { name: /跳过|Skip/ });
+export const createBook = async (page: Page): Promise<void> => {  const skip = page.getByRole('button', { name: /跳过|Skip/ });
   if (await skip.isVisible({ timeout: 10_000 }).catch(() => false)) {
     await skip.click();
   } else {

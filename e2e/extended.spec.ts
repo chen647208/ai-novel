@@ -2,7 +2,7 @@ import { existsSync, mkdtempSync, readdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test, expect } from '@playwright/test';
-import { launchApp, createBook } from './helpers';
+import { cleanupUserDataDir, launchApp, createBook } from './helpers';
 
 /**
  * 扩展回归（无 AI Key 可跑）：章节拆分/合并、自动备份落盘、主题持久化。
@@ -49,6 +49,7 @@ test('章节拆分与合并：光标处拆出新章，再合并回本章', async
     await expect(page.getByText(/（续）/)).toHaveCount(0, { timeout: 15_000 });
   } finally {
     await app.close();
+    cleanupUserDataDir(userDataDir);
   }
 });
 
@@ -71,6 +72,7 @@ test('自动备份按间隔落盘（预置 5 秒间隔）', async () => {
     expect(files.length, '未按间隔生成备份文件').toBeGreaterThan(0);
   } finally {
     await app.close();
+    cleanupUserDataDir(userDataDir);
   }
 });
 
@@ -91,6 +93,7 @@ test('主题切换后重启保持（深色持久化）', async () => {
     await expect(second.page.locator('html.dark')).toHaveCount(1, { timeout: 30_000 });
   } finally {
     await second.app.close();
+    cleanupUserDataDir(userDataDir);
   }
 });
 
@@ -108,5 +111,6 @@ test('命令面板：Ctrl+K 打开、过滤并在执行后关闭', async () => {
     await expect(input).toBeHidden({ timeout: 10_000 });
   } finally {
     await app.close();
+    cleanupUserDataDir(userDataDir);
   }
 });

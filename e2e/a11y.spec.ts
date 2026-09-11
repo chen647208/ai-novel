@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
 import { test, expect } from '@playwright/test';
-import { createBook, launchApp } from './helpers';
+import { cleanupUserDataDir, createBook, launchApp } from './helpers';
 
 const require = createRequire(import.meta.url);
 const axeSource = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
@@ -39,5 +39,6 @@ test('工作台通过 axe 棘轮审计', async () => {
     ).toEqual([]);
   } finally {
     await app.close();
+    cleanupUserDataDir(userDataDir);
   }
 });

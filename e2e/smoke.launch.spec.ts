@@ -2,6 +2,7 @@ import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test, expect, _electron as electron, type Page } from '@playwright/test';
+import { cleanupUserDataDir } from './helpers';
 
 /**
  * 启动冒烟：开发模式 Electron 能亮应用窗、无渲染进程致命错误即过。
@@ -42,5 +43,6 @@ test('dev app launches with a visible app window', async () => {
     expect(errors, JSON.stringify(errors.slice(0, 5))).toEqual([]);
   } finally {
     await app.close();
+    cleanupUserDataDir(userDataDir);
   }
 });

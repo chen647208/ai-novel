@@ -1,5 +1,5 @@
 import { test, expect, _electron as electron, type Page } from '@playwright/test';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -31,5 +31,6 @@ test('打包应用可启动并显示窗口', async () => {
     expect(bg).toBe('rgb(250, 250, 249)');
   } finally {
     await app.close();
+    try { rmSync(userDataDir, { recursive: true, force: true }); } catch { /* 进程未释放时留下 */ }
   }
 });

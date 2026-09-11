@@ -2,7 +2,7 @@ import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test, expect } from '@playwright/test';
-import { launchApp, createBook } from './helpers';
+import { launchApp, createBook, cleanupUserDataDir } from './helpers';
 
 /**
  * 工作台主流程断言（无 AI Key 可跑）：
@@ -21,6 +21,7 @@ test('建书进工作台：无模型时生成按钮禁用，手写不受影响',
     await expect(page.getByRole('button', { name: /生成书名与简介|Generate Title/ })).toBeDisabled();
   } finally {
     await app.close();
+    cleanupUserDataDir(userDataDir);
   }
 });
 
@@ -45,6 +46,7 @@ test('填灵感后出现下一步建议；Ctrl+J 开关助手，Ctrl+2 切世界
     await expect(page.getByText(/知识库|世界构建|Knowledge|World Building/).first()).toBeVisible({ timeout: 15_000 });
   } finally {
     await app.close();
+    cleanupUserDataDir(userDataDir);
   }
 });
 
@@ -73,5 +75,6 @@ test('同一数据目录重启后书籍仍在（持久化回归）', async () =>
     await expect(second.page.getByText(/持久化回归测试灵感/).first()).toBeVisible({ timeout: 30_000 });
   } finally {
     await second.app.close();
+    cleanupUserDataDir(userDataDir);
   }
 });
