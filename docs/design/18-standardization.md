@@ -112,7 +112,9 @@
 
 UI 槽位注册表 `shared/services/uiSlots.ts` + 渲染点 `shared/ui/Slot.tsx`：应用壳在固定位置渲染
 `<Slot id>`，功能/插件注册节点即可插入。`getSnapshot` 按槽缓存保证 `useSyncExternalStore` 引用稳定。
-已接入 `topbar.actions`（版本徽标经 `app/app-shell/coreSlots.tsx` 注册）；新增插槽位置只加 `SlotId` 与一处 `<Slot>`。
+已接入 `topbar.actions`/`nav.actions`/`sidebar.actions`/`editor.toolbar`/`status-bar`，内置贡献在
+`app/app-shell/coreSlots.tsx` 注册（命令面板按钮经 `appEvents.ts` 的 `COMMAND_PALETTE_EVENT` 解耦，状态栏读 store）；
+`settings.tab` 因设置页签是类型化路由，待页签注册表落地再加。新增插槽位置只加 `SlotId` 与一处 `<Slot>`。
 
 
 
