@@ -13,10 +13,10 @@ import { useTranslation } from '@/i18n';
 import { type Project, type KnowledgeItem, type KnowledgeCategory, type HybridSearchResult, type DiagramType, type ModelConfig, type EmbeddingModelConfig, type ConsistencyCheckPromptTemplate, type ConsistencyCheckConfig } from '../../../shared/types';
 import { vectorIntegrationService } from './services/vectorIntegrationService';
 import { searchKnowledge } from './services/knowledgeSearch';
+import { useKnowledgeIndex } from './hooks/useKnowledgeIndex';
 import { repository } from '../../shared/services/repository';
 import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
 import { useUsableModel } from '@/app/stores/settingsStore';
-import { sha256Hex } from '@core/entities';
 import { embeddingModelService } from '../settings/services/embeddingModelService';
 import LocationEditor from '../world/LocationEditor';
 import FactionEditor from '../world/FactionEditor';
@@ -38,7 +38,6 @@ import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
 import { BookOpen, Bot, Brain, Calendar, Clock, CloudUpload, FileText, Flag, Globe, MapPinned, PenLine, Search, Settings2, Tag, X } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
-import { uuidv7 } from '@core/entities';
 import { Progress } from '@/shared/ui/Progress';
 
 interface StepKnowledgeEnhancedProps {
@@ -72,9 +71,6 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
   const [isSearching, setIsSearching] = useState(false);
   const [searchMode, setSearchMode] = useState<'keyword' | 'semantic' | 'hybrid'>('hybrid');
   const [showSearchResults, setShowSearchResults] = useState(false);
-  const [vectorStats, setVectorStats] = useState<{ count: number; dimensions: number; categories: Record<string, number> } | null>(null);
-  const [isIndexing, setIsIndexing] = useState(false);
-  const [indexProgress, setIndexProgress] = useState(0);
 
   const [showLocationEditor, setShowLocationEditor] = useState(false);
   const [showFactionEditor, setShowFactionEditor] = useState(false);
@@ -188,20 +184,11 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
     }
   }, [viewingItem]);
 
-  useEffect(() => {
-    const loadVectorStats = async () => {
-      try {
-        const stats = await vectorIntegrationService.getVectorStats(project.id);
-        setVectorStats(stats);
-      } catch (error) {
-        logger.error('Failed to load vector stats:', error);
-      }
-    };
 
-    if (project.id) {
-      loadVectorStats();
-    }
-  }, [project.id]);
+  // 上传与向量索引状态/动作统一见 useKnowledgeIndex
+  const { vectorStats, setVectorStats, isIndexing, setIsIndexing, indexProgress, indexKnowledgeItems, handleFiles } = useKnowledgeIndex({
+    project, onUpdate, selectedCategory, t,
+  });
 
   const getCategoryDisplayName = (category: KnowledgeCategory | 'all'): string =>
     t(`category.${category}`);
@@ -212,88 +199,6 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
       return knowledge;
     }
     return knowledge.filter(item => item.category === selectedCategory);
-  };
-
-  const handleFiles = async (files: FileList) => {
-    const newItems: KnowledgeItem[] = [];
-    const skipped: string[] = [];
-    // 内容哈希去重：已有条目与本批文件统一比对，同内容只留一份
-    const seenHashes = new Set(
-      await Promise.all((project.knowledge || []).map((k) => sha256Hex(k.content ?? ''))),
-    );
-    
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      if (!file) continue;
-      if (file.type.startsWith('text/') || file.name.endsWith('.md') || file.name.endsWith('.json') || file.name.endsWith('.txt') || file.name.endsWith('.csv')) {
-        try {
-          const text = await file.text();
-          const hash = await sha256Hex(text);
-          if (seenHashes.has(hash)) {
-            skipped.push(file.name);
-            continue;
-          }
-          seenHashes.add(hash);
-          const uniqueId = Date.now().toString() + '_' + uuidv7() + '_' + i;
-          newItems.push({
-            id: uniqueId,
-            name: file.name,
-            content: text,
-            type: file.name.split('.').pop() || 'txt',
-            size: file.size,
-            addedAt: Date.now(),
-            category: selectedCategory === 'all' ? 'writing' : selectedCategory
-          });
-        } catch (err) {
-          logger.error("Failed to read file", file.name, err);
-          dialogService.alert(t('readFailed', { name: file.name }));
-        }
-      } else {
-        dialogService.alert(t('formatUnsupported', { name: file.name }));
-      }
-    }
-
-    if (skipped.length > 0) {
-      dialogService.alert(t('center.duplicateSkipped', { count: skipped.length, names: skipped.slice(0, 5).join('、') }));
-    }
-
-    if (newItems.length > 0) {
-      const updatedKnowledge = [...(project.knowledge || []), ...newItems];
-      onUpdate({ knowledge: updatedKnowledge });
-
-      await indexKnowledgeItems(newItems);
-    }
-  };
-
-  const indexKnowledgeItems = async (items: KnowledgeItem[]) => {
-    if (items.length === 0) return;
-
-    setIsIndexing(true);
-    setIndexProgress(0);
-
-    try {
-      logger.debug(`开始索引 ${items.length} 个知识库项目...`);
-      const result = await vectorIntegrationService.indexKnowledgeBase(project.id, items);
-      
-      logger.debug('索引结果:', result);
-      
-      if (result.success) {
-        const stats = await vectorIntegrationService.getVectorStats(project.id);
-        logger.debug('更新后的统计信息:', stats);
-        setVectorStats(stats);
-        
-        logger.debug(`✅ 成功索引 ${result.indexedCount} 个文档`);
-      } else {
-        logger.error('❌ 索引失败:', result.error);
-        dialogService.alert(t('center.indexFailed', { error: result.error ?? '' }));
-      }
-    } catch (error) {
-      logger.error('❌ 索引过程中出错:', error);
-      dialogService.alert(t('center.indexError', { error: error instanceof Error ? error.message : String(error) }));
-    } finally {
-      setIsIndexing(false);
-      setIndexProgress(100);
-    }
   };
 
   const handleSemanticSearch = async (query: string) => {
