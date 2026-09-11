@@ -4,7 +4,8 @@
   "tabGroup": {
     "ai": "AI Models",
     "prompts": "Prompts",
-    "system": "System"
+    "system": "System",
+    "extensions": "Extensions"
   },
   "tab": {
     "models": "Model Providers",

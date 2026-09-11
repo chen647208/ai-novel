@@ -7,10 +7,11 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React from 'react';
-import { Brain, Cpu, Database, GraduationCap, Puzzle, SlidersHorizontal, Stethoscope, Terminal, WandSparkles, type LucideIcon } from 'lucide-react';
+import React, { useSyncExternalStore } from 'react';
+import { Brain, Cpu, Database, GraduationCap, SlidersHorizontal, Stethoscope, Terminal, WandSparkles, type LucideIcon } from 'lucide-react';
 import { useTranslation } from '@/i18n';
 import { cn } from '@/shared/utils/cn';
+import { settingsTabRegistry } from '../services/settingsTabs';
 import type { SettingsTab } from '../types';
 
 interface SettingsTabNavProps {
@@ -50,16 +51,30 @@ const TAB_GROUPS: TabGroup[] = [
       { id: 'general', icon: SlidersHorizontal, labelKey: 'tab.general' },
       { id: 'system', icon: GraduationCap, labelKey: 'tab.system' },
       { id: 'storage', icon: Database, labelKey: 'tab.storage' },
-      { id: 'plugins', icon: Puzzle, labelKey: 'tab.plugins' },
     ],
   },
 ];
 
 const SettingsTabNav: React.FC<SettingsTabNavProps> = ({ activeTab, onChange }) => {
   const { t } = useTranslation('settings');
+  const registered = useSyncExternalStore(
+    (cb) => settingsTabRegistry.subscribe(cb),
+    () => settingsTabRegistry.list(),
+  );
+  const groups: TabGroup[] = registered.length === 0
+    ? TAB_GROUPS
+    : [
+        ...TAB_GROUPS,
+        {
+          id: 'extensions',
+          labelKey: 'tabGroup.extensions',
+          fallback: '扩展',
+          items: registered.map((tab) => ({ id: tab.id, icon: tab.icon as LucideIcon, labelKey: tab.labelKey as LabelKey })),
+        },
+      ];
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-      {TAB_GROUPS.map((group) => (
+      {groups.map((group) => (
         <div key={group.id} className="flex items-center gap-2">
           <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground/70">
             {t(group.labelKey, group.fallback)}

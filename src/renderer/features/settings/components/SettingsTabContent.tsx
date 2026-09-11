@@ -13,13 +13,14 @@ import ConsistencyPromptSettingsPanel from './ConsistencyPromptSettingsPanel';
 import EmbeddingSettingsPanel from './EmbeddingSettingsPanel';
 import GeneralSettingsPanel from './GeneralSettingsPanel';
 import ModelSettingsPanel from './ModelSettingsPanel';
-import PluginSettingsPanel from './PluginSettingsPanel';
 import PromptTemplatesPanel from './PromptTemplatesPanel';
 import StorageSettingsPanel from './StorageSettingsPanel';
 import SystemGuidePanel from './SystemGuidePanel';
+import { settingsTabRegistry } from '../services/settingsTabs';
 import type { SettingsTabContentProps } from '../types';
 
-const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
+const SettingsTabContent: React.FC<SettingsTabContentProps> = (props) => {
+  const {
   activeTab,
   localModels,
   activeId,
@@ -80,7 +81,7 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
   onLanguageChange,
   theme,
   onThemeChange,
-}) => {
+  } = props;
   return (
     <>
       {activeTab === 'general' && (
@@ -163,7 +164,9 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = ({
         />
       )}
 
-      {activeTab === 'plugins' && <PluginSettingsPanel />}
+      {settingsTabRegistry.list().map((tab) => (
+        activeTab === tab.id ? <React.Fragment key={tab.id}>{tab.render(props)}</React.Fragment> : null
+      ))}
 
       {activeTab === 'embedding' && (
         <EmbeddingSettingsPanel

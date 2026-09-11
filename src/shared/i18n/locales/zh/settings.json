@@ -4,7 +4,8 @@
   "tabGroup": {
     "ai": "AI 模型",
     "prompts": "提示词",
-    "system": "系统"
+    "system": "系统",
+    "extensions": "扩展"
   },
   "tab": {
     "models": "模型提供商",

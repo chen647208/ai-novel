@@ -50,11 +50,13 @@ import { COMMAND_PALETTE_EVENT } from '@/shared/constants/appEvents';
 import { Bot } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { registerCoreSlots } from './app-shell/coreSlots';
+import { registerCoreSettingsTabs } from '@/features/settings/coreSettingsTabs';
 
 /** 分区快捷键顺序：Ctrl/Cmd+1..5（模块级常量，避免 effect 依赖抖动）。 */
 const SECTION_ORDER: SectionId[] = WORKSPACE_SECTIONS.map((s) => s.id);
 
 registerCoreSlots();
+registerCoreSettingsTabs();
 
 const App: React.FC = () => {
   useAppBootstrap();

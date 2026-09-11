@@ -45,7 +45,8 @@ export interface SettingsModalProps {
   onThemeChange: (theme: AppTheme) => void;
 }
 
-export type SettingsTab = 'models' | 'prompts' | 'card-prompts' | 'consistency-prompts' | 'system' | 'storage' | 'embedding' | 'general' | 'plugins';
+/** 内置页签 + 注册表页签 id（后者任意字符串，保留内置字面量自动补全）。 */
+export type SettingsTab = 'models' | 'prompts' | 'card-prompts' | 'consistency-prompts' | 'system' | 'storage' | 'embedding' | 'general' | (string & {});
 export type ImportExportMode = 'import' | 'export';
 
 export interface CardPromptTestResult {
