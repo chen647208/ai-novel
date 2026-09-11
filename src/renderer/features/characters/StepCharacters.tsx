@@ -26,7 +26,7 @@ import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { Select } from '@/shared/ui/Select';
-import { AlertCircle, Check, CheckCheck, Network, Plus, Settings, Trash2, UserRound, WandSparkles, XCircle } from 'lucide-react';
+import { Check, CheckCheck, Network, Plus, Settings, Trash2, UserRound, WandSparkles, XCircle } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
 import { uuidv7 } from '@core/entities';
 
@@ -72,23 +72,6 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
   
   // Knowledge Base Selection State
   const [selectedKnowledgeIds, setSelectedKnowledgeIds] = useState<Set<string>>(new Set());
-  
-  // 双重确认状态管理
-  const [clearConfirm, setClearConfirm] = useState(false);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-
-  // 自动重置确认状态（3秒后自动取消删除状态，防止误触）
-  useEffect(() => {
-    if (!deleteConfirmId) return;
-    const timer = setTimeout(() => setDeleteConfirmId(null), 3000);
-    return () => clearTimeout(timer);
-  }, [deleteConfirmId]);
-
-  useEffect(() => {
-    if (!clearConfirm) return;
-    const timer = setTimeout(() => setClearConfirm(false), 3000);
-    return () => clearTimeout(timer);
-  }, [clearConfirm]);
   
   const characterPrompts = useMemo(() => 
     prompts.filter(p => p.category === 'character'), 
@@ -343,26 +326,14 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
     ? (project.characters || []).find(c => c.id === modalCharacterId)
     : null;
 
-  // 1. 坚如磐石的清空逻辑：不依赖系统弹窗，使用按钮状态切换
-  const handleClearClick = () => {
-    if (clearConfirm) {
-      onUpdate({ characters: [] });
-      setClearConfirm(false);
-    } else {
-      setClearConfirm(true);
-    }
+  const handleClearClick = async () => {
+    if (!(await dialogService.confirm({ message: t('archive.clearConfirm'), danger: true }))) return;
+    onUpdate({ characters: [] });
   };
 
-  // 2. 坚如磐石的删除逻辑：不依赖系统弹窗，使用按钮状态切换
-  const handleDeleteClick = (id: string) => {
-    if (deleteConfirmId === id) {
-      const currentList = project.characters || [];
-      const newList = currentList.filter(c => c.id !== id);
-      onUpdate({ characters: newList });
-      setDeleteConfirmId(null);
-    } else {
-      setDeleteConfirmId(id);
-    }
+  const handleDeleteClick = async (id: string) => {
+    if (!(await dialogService.confirm({ message: t('archive.deleteConfirm'), danger: true }))) return;
+    onUpdate({ characters: (project.characters || []).filter(c => c.id !== id) });
   };
 
   const toggleKnowledge = (id: string) => {
@@ -530,13 +501,13 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
             <div className="flex gap-2">
               <Button
                 type="button"
-                variant={clearConfirm ? 'destructive' : 'outline'}
+                variant="outline"
                 size="sm"
-                onClick={handleClearClick}
+                onClick={() => void handleClearClick()}
                 disabled={(project.characters || []).length === 0}
               >
-                {clearConfirm ? <AlertCircle className="size-3.5" /> : <Trash2 className="size-3.5" />}
-                {clearConfirm ? t('archive.clearConfirm') : t('archive.clear')}
+                <Trash2 className="size-3.5" />
+                {t('archive.clear')}
               </Button>
               <Button
                 type="button"
@@ -591,24 +562,15 @@ const StepCharacters: React.FC<StepCharactersProps> = ({
                     />
                     {/* 删除按钮 - 悬浮在卡片右上角 */}
                     <Button
-                      variant={deleteConfirmId === char.id ? 'destructive' : 'ghost'}
+                      variant="ghost"
                       size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDeleteClick(char.id);
+                        void handleDeleteClick(char.id);
                       }}
-                      className={cn(
-                        'absolute right-3 top-3 z-10 h-8',
-                        deleteConfirmId === char.id
-                          ? 'w-20 text-xs font-medium'
-                          : 'w-8 bg-card/80 text-muted-foreground opacity-0 backdrop-blur-sm hover:text-destructive group-hover:opacity-100'
-                      )}
+                      className="absolute right-3 top-3 z-10 size-8 bg-card/80 text-muted-foreground opacity-0 backdrop-blur-sm hover:text-destructive group-hover:opacity-100"
                     >
-                      {deleteConfirmId === char.id ? (
-                        <span className="animate-pulse">{t('archive.deleteConfirm')}</span>
-                      ) : (
-                        <Trash2 className="size-4" />
-                      )}
+                      <Trash2 className="size-4" />
                     </Button>
                   </div>
                 ))}

@@ -59,7 +59,6 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
   const { t, i18n } = useTranslation('knowledge');
   const [dragActive, setDragActive] = useState(false);
   const [viewingItem, setViewingItem] = useState<KnowledgeItem | null>(null);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<KnowledgeCategory | 'all'>('all');
 
   const [editContent, setEditContent] = useState('');
@@ -408,25 +407,18 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
 
   const handleDeleteClick = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (deleteConfirmId === id) {
-      const newList = (project.knowledge || []).filter(k => k.id !== id);
-      onUpdate({ knowledge: newList });
-      if (viewingItem?.id === id) setViewingItem(null);
-      setDeleteConfirmId(null);
+    if (!(await dialogService.confirm({ message: t('center.confirmDelete'), danger: true }))) return;
+    const newList = (project.knowledge || []).filter(k => k.id !== id);
+    onUpdate({ knowledge: newList });
+    if (viewingItem?.id === id) setViewingItem(null);
 
-      try {
-        await vectorIntegrationService.cleanupProject(project.id);
-        if (newList.length > 0) {
-          await indexKnowledgeItems(newList);
-        }
-      } catch (error) {
-        logger.error('从向量数据库删除失败:', error);
+    try {
+      await vectorIntegrationService.cleanupProject(project.id);
+      if (newList.length > 0) {
+        await indexKnowledgeItems(newList);
       }
-    } else {
-      setDeleteConfirmId(id);
-      setTimeout(() => {
-        setDeleteConfirmId(prev => (prev === id ? null : prev));
-      }, 3000);
+    } catch (error) {
+      logger.error('从向量数据库删除失败:', error);
     }
   };
 
@@ -878,15 +870,12 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
                         </div>
                       </div>
                       <Button
-                        variant={deleteConfirmId === item.id ? 'destructive' : 'ghost'}
+                        variant="ghost"
                         size="sm"
-                        onClick={(e) => handleDeleteClick(e, item.id)}
-                        className={cn(
-                          'ml-2 h-auto shrink-0 px-2 py-1 text-xs font-normal',
-                          deleteConfirmId !== item.id && 'opacity-0 group-hover:opacity-100'
-                        )}
+                        onClick={(e) => void handleDeleteClick(e, item.id)}
+                        className="ml-2 h-auto shrink-0 px-2 py-1 text-xs font-normal opacity-0 group-hover:opacity-100"
                       >
-                        {deleteConfirmId === item.id ? t('center.confirmDelete') : t('center.delete')}
+                        {t('center.delete')}
                       </Button>
                     </div>
                   </div>
