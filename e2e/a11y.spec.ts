@@ -12,12 +12,8 @@ interface AxeNode { target: unknown }
 interface AxeViolation { id: string; impact?: string | null; help: string; nodes: AxeNode[] }
 
 /**
- * 无障碍审计（棘轮门禁）：首启建书进入工作台后跑 axe。
- * 已知存量两类（button-name / color-contrast）登记为债务（docs/design/18），
- * 只拦截"新出现的 serious/critical 类别"，保证不再新增严重无障碍问题。
+ * 无障碍审计（棘轮门禁）：首启建书进入工作台后跑 axe，拦截任何 serious/critical 问题。
  */
-const KNOWN = new Set(['button-name', 'color-contrast']);
-
 test('工作台通过 axe 棘轮审计', async () => {
   const userDataDir = mkdtempSync(join(tmpdir(), 'hongyue-a11y-'));
   const { app, page } = await launchApp(userDataDir);
@@ -31,7 +27,7 @@ test('工作台通过 axe 棘轮审计', async () => {
     })) as AxeViolation[];
 
     const blocking = violations.filter(
-      (v) => (v.impact === 'critical' || v.impact === 'serious') && !KNOWN.has(v.id),
+      (v) => v.impact === 'critical' || v.impact === 'serious',
     );
     expect(
       blocking.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length, help: v.help })),

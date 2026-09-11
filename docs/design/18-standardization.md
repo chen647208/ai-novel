@@ -86,12 +86,9 @@
 
 ## 四、无障碍审计债务
 
-`e2e/a11y.spec.ts` 以 axe-core 做棘轮门禁，只拦"新出现的 serious/critical 类别"。已登记债务：
-
-- `button-name`：部分 Radix Select 触发器在当前状态无可访问名；
-- `color-contrast`：`.border-warning/30` 文本与 `.opacity-70` 文本。
-
-清除一条即从 `KNOWN` 集合删除，规则不放宽。
+`e2e/a11y.spec.ts` 以 axe-core 做门禁：首启建书进工作台后跑 axe，拦截任何 serious/critical 问题。
+存量两类（`button-name`、`color-contrast`）已清零：Select 触发器补 `aria-label`，警告横幅与提示文字提对比度；
+`KNOWN` 集合已移除，规则不放宽。
 
 ## 五、构建档模型（已统一）
 

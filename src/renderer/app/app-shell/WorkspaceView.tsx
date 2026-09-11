@@ -156,7 +156,7 @@ const WorkspaceSection: React.FC<WorkspaceViewProps> = ({
     <div className="flex h-full flex-col">
       {bannerBlocked && (
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-warning/30 bg-warning/5 px-4 py-2 text-xs">
-          <span className="flex items-center gap-2 text-muted-foreground">
+          <span className="flex items-center gap-2 text-foreground">
             <Plug className="size-3.5 text-warning" />
             {t('model.bannerHandwrite', '未配置可用模型，AI 已停用，可继续手写')}
           </span>

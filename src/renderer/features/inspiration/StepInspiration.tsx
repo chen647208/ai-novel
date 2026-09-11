@@ -447,7 +447,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, onGoSection 
              {inspirationKnowledge.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border py-4 text-center text-xs text-muted-foreground">
                    {t('steps:inspiration.noKnowledge')}<br/>
-                   <span className="text-2xs opacity-70">{t('steps:inspiration.noKnowledgeHint')}</span>
+                   <span className="text-2xs">{t('steps:inspiration.noKnowledgeHint')}</span>
                 </div>
              ) : (
                 <div className="max-h-48 overflow-y-auto pr-2">
@@ -485,6 +485,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, onGoSection 
               <Select
                 value={outputMode}
                 onChange={(e) => setOutputMode(e.target.value as OutputMode)}
+                aria-label={t('steps:common.outputMode')}
                 className="h-8 w-auto text-sm"
               >
                 <option value="streaming">{t('steps:common.streaming')}</option>
@@ -497,6 +498,7 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, onGoSection 
               <Select
                 value={selectedPromptId}
                 onChange={(e) => setSelectedPromptId(e.target.value)}
+                aria-label={t('steps:common.promptTemplate')}
                 className="h-8 w-auto text-sm"
               >
                 {prompts.filter(p => p.category === 'inspiration').map(p => (
