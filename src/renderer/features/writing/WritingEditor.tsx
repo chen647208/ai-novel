@@ -18,13 +18,13 @@ import WritingSidebar from './components/WritingSidebar';
 import WritingEditorOverlayLayer from './components/WritingEditorOverlayLayer';
 import FindBar from './components/FindBar';
 import { useFindReplace } from './hooks/useFindReplace';
+import { useChapterExport } from './hooks/useChapterExport';
 import { useChapterGeneration } from './hooks/useChapterGeneration';
 import WritingEditorCanvas from './components/WritingEditorCanvas';
 import ForeshadowPanel from '../foreshadowing/components/ForeshadowPanel';
 import { extractChapterSummary } from './services/summaryExtractionService';
 import { appendSnapshot, createSnapshot } from './services/chapterSnapshotService';
 import { useChapterSnapshots } from './hooks/useChapterSnapshots';
-import { buildProfileRegistry } from '@/shared/services/buildProfiles';
 import { computeBookStats, computeChapterStats } from './services/writingStatsService';
 import { openForeshadows, overdueForeshadows } from '../foreshadowing/services/foreshadowService';
 import {
@@ -41,17 +41,11 @@ import type {
   WritingEditorProps,
 } from './types';
 import {
-  buildExportContent,
-  buildExportFilename,
-  buildExportPackage,
-  savePackageFile,
   debounce,
   getChapterContext,
   getPreviousChapterSummaryIds,
   getFloatingMenuPosition,
-  saveExportFile,
   toggleSetValue,
-  type ExportFormat,
 } from './utils';
 import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -118,11 +112,6 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const [selectedEditPromptId, setSelectedEditPromptId] = useState<string>('');
   const [customEditPrompt, setCustomEditPrompt] = useState<string>(''); // 自定义提示词
 
-  const [exportModalOpen, setExportModalOpen] = useState(false);
-  const [selectedExportChapterIds, setSelectedExportChapterIds] = useState<Set<string>>(new Set());
-  const [exportFormat, setExportFormat] = useState<ExportFormat>('txt');
-  const [exportProfileId, setExportProfileId] = useState<string>('');
-  
   const [isHistoryViewerOpen, setIsHistoryViewerOpen] = useState(false);
   const [isGlobalHistorySidebarOpen, setIsGlobalHistorySidebarOpen] = useState(false);
 
@@ -218,12 +207,15 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [isForeshadowOpen, setIsForeshadowOpen] = useState(false);
 
+  // 章节导出：选择/格式/预设/落盘统一见 useChapterExport
+  const exporter = useChapterExport({ project, t });
+
   // 查找替换：状态/快捷键/匹配跳转统一见 useFindReplace
   const find = useFindReplace({
     editorRef,
     activeChapterId,
     content: activeChapter?.content ?? '',
-    shortcutBlocked: genModal.isOpen || editModalOpen || exportModalOpen || isHistoryViewerOpen || isForeshadowOpen,
+    shortcutBlocked: genModal.isOpen || editModalOpen || exporter.open || isHistoryViewerOpen || isForeshadowOpen,
   });
 
   // 专注模式下 Esc 退出
@@ -355,42 +347,6 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     onUpdate({ chapters: updated });
   }, [activeChapterId, onUpdate, t]);
 
-  const handleOpenExportModal = () => {
-    const allIds = new Set(project.chapters.map(c => c.id));
-    setSelectedExportChapterIds(allIds);
-    setExportModalOpen(true);
-  };
-  const toggleExportChapter = (id: string) => {
-    const newSet = new Set(selectedExportChapterIds);
-    if (newSet.has(id)) newSet.delete(id); else newSet.add(id);
-    setSelectedExportChapterIds(newSet);
-  };
-  const toggleAllExport = () => {
-    if (selectedExportChapterIds.size === project.chapters.length) setSelectedExportChapterIds(new Set());
-    else setSelectedExportChapterIds(new Set(project.chapters.map(c => c.id)));
-  };
-  const handleExecuteExport = async () => {
-    if (selectedExportChapterIds.size === 0) {
-      dialogService.alert(t('editor.selectAtLeastOne'));
-      return;
-    }
-    const filename = buildExportFilename(project.title, exportFormat);
-    const exportProfile = exportProfileId ? buildProfileRegistry.get(exportProfileId) : undefined;
-    try {
-      if (exportFormat === 'epub' || exportFormat === 'docx') {
-        const files = buildExportPackage(project, selectedExportChapterIds, exportFormat, exportProfile);
-        const fallbackHtml = buildExportContent(project, selectedExportChapterIds, 'html', exportProfile);
-        await savePackageFile(filename, files, exportFormat, fallbackHtml);
-      } else {
-        const fileContent = buildExportContent(project, selectedExportChapterIds, exportFormat, exportProfile);
-        await saveExportFile(filename, fileContent, exportFormat);
-      }
-      setExportModalOpen(false);
-    } catch (err) {
-      dialogService.alert(t('editor.exportFailed', { error: err instanceof Error ? err.message : t('editor.unknownError') }));
-    }
-  };
-
   const toggleKnowledge = (id: string) => {
     setSelectedKnowledgeIds((prev) => toggleSetValue(prev, id));
   };
@@ -432,7 +388,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     setSelectedChapterSummaryIds(new Set());
   };
 
-  const selectionBlocked = editModalOpen || genModal.isOpen || exportModalOpen;
+  const selectionBlocked = editModalOpen || genModal.isOpen || exporter.open;
 
   const applySelectionMenu = (text: string, range: TextSelectionRange, x: number, y: number) => {
     setMenuPos(getFloatingMenuPosition(x, y));
@@ -652,16 +608,16 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
         onSelectedEditPromptChange={setSelectedEditPromptId}
         onCustomEditPromptChange={setCustomEditPrompt}
         onEditSubmit={handleEditGenerate}
-        exportModalOpen={exportModalOpen}
-        selectedExportChapterIds={selectedExportChapterIds}
-        exportFormat={exportFormat}
-        exportProfileId={exportProfileId}
-        onExportProfileChange={setExportProfileId}
-        onCloseExportModal={() => setExportModalOpen(false)}
-        onToggleAllExport={toggleAllExport}
-        onToggleExportChapter={toggleExportChapter}
-        onExportFormatChange={setExportFormat}
-        onConfirmExport={handleExecuteExport}
+        exportModalOpen={exporter.open}
+        selectedExportChapterIds={exporter.selectedIds}
+        exportFormat={exporter.format}
+        exportProfileId={exporter.profileId}
+        onExportProfileChange={exporter.setProfileId}
+        onCloseExportModal={() => exporter.setOpen(false)}
+        onToggleAllExport={exporter.toggleAll}
+        onToggleExportChapter={exporter.toggle}
+        onExportFormatChange={exporter.setFormat}
+        onConfirmExport={exporter.execute}
         menuPos={menuPos}
         hasModel={isModelUsable(activeModel)}
         onOpenEditModal={openEditModal}
@@ -741,7 +697,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           canRedo={editorRef.current?.canRedo() ?? false}
           onBack={onBack}
           onTitleChange={updateActiveChapterTitle}
-          onOpenExport={handleOpenExportModal}
+          onOpenExport={exporter.openModal}
           onOpenForeshadow={() => setIsForeshadowOpen(true)}
           onClearContent={handleClearContent}
           onToggleGlobalHistory={() => setIsGlobalHistorySidebarOpen(!isGlobalHistorySidebarOpen)}
