@@ -76,6 +76,12 @@
 - 插件化：禁用全部插件后纯写作可用；加载示例插件后技能/类型在 UI 可见并可往返；
   minimal 档所有 AI 入口被统一拒绝；新增 feature 不改应用壳。
 
+## 六、视觉回归
+
+`e2e/visual.spec.ts` 截取工作台左侧导航栏，基线按平台存 `e2e/visual.spec.ts-snapshots/…-{platform}.png`
+（截图渲染跨 OS 有差异）。默认跳过，仅 `npm run test:e2e:visual` 运行；CI 不设 `VISUAL` 故不参与门禁，
+需要时在对应平台生成基线。
+
 ## 四、无障碍审计债务
 
 `e2e/a11y.spec.ts` 以 axe-core 做棘轮门禁，只拦"新出现的 serious/critical 类别"。已登记债务：

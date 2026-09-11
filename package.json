@@ -51,6 +51,7 @@
     "test:coverage": "cross-env NODE_OPTIONS=--max-old-space-size=2048 vitest run --coverage",
     "test:watch": "cross-env NODE_OPTIONS=--max-old-space-size=2048 vitest",
     "test:e2e": "playwright test",
+    "test:e2e:visual": "cross-env VISUAL=1 playwright test e2e/visual.spec.ts",
     "test:e2e:packaged": "playwright test -c playwright.packaged.config.ts",
     "check:icons": "node scripts/check-win-icon.cjs",
     "icons:generate": "node scripts/generate-icons.mjs",

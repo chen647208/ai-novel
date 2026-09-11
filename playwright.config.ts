@@ -14,6 +14,8 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   use: {
     trace: 'on-first-retry',
+    // 视觉基线按平台存放（跨 OS 渲染有差异）
+    snapshotPathTemplate: '{testDir}/__screenshots__/{platform}/{testFilePath}/{arg}{ext}',
   },
   webServer: {
     command: 'npx vite --port 3000 --strictPort',
