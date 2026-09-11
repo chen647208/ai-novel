@@ -18,7 +18,7 @@ import type { UpdaterStatus } from '@shared/types';
 import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
-import { Dialog, DialogContent } from '@/shared/ui/Dialog';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { Switch } from '@/shared/ui/Switch';
 import { cn } from '@/shared/utils/cn';
 import { AlertCircle, AlertTriangle, CheckCircle2, ExternalLink, RefreshCw, Rocket, Tag } from 'lucide-react';
@@ -167,8 +167,12 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="flex max-h-[85vh] w-[92vw] max-w-2xl flex-col gap-0 overflow-hidden p-0">
+    <ModalShell
+      open={isOpen}
+      onOpenChange={(open) => { if (!open) onClose(); }}
+      bare
+      contentClassName="flex max-h-[85vh] w-[92vw] max-w-2xl flex-col gap-0 overflow-hidden p-0"
+    >
         {/* 标题栏 */}
         <div className="flex items-center gap-3 border-b border-border bg-muted/30 px-6 py-4">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -372,8 +376,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
         <div className="flex justify-end border-t border-border bg-muted/30 px-6 py-4">
           <Button variant="secondary" size="sm" onClick={onClose}>{t('modal.close')}</Button>
         </div>
-      </DialogContent>
-    </Dialog>
+    </ModalShell>
   );
 };
 

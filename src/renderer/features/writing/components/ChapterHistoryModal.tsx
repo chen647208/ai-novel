@@ -17,7 +17,8 @@ import { listSnapshots, removeSnapshot } from '../services/chapterSnapshotServic
 import { dialogService } from '@/shared/services/dialogService';
 import { diffLines } from '../services/historyDiff';
 import { Button } from '@/shared/ui/Button';
-import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
+import { DialogTitle } from '@/shared/ui/Dialog';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { cn } from '@/shared/utils/cn';
 import { Bot, Camera, Copy, History, Redo2, RotateCcw, Trash2 } from 'lucide-react';
@@ -90,13 +91,11 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
   };
 
   return (
-    <Dialog
+    <ModalShell
       open={isOpen}
       onOpenChange={(open) => {
         if (!open) onClose();
-      }}
-    >
-      <DialogContent className="flex h-[85vh] w-[92vw] max-w-6xl flex-col gap-0 overflow-hidden p-0">
+      }} bare contentClassName="flex h-[85vh] w-[92vw] max-w-6xl flex-col gap-0 overflow-hidden p-0">
         <div className="shrink-0 border-b border-border bg-muted/30 px-6 py-4">
           <DialogTitle className="font-serif text-lg">{t('chapterHistory.title')}</DialogTitle>
           <p className="mt-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -352,8 +351,7 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
             </Button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+    </ModalShell>
   );
 };
 

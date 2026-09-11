@@ -14,7 +14,8 @@ import AIHistoryRecordList from './components/history/AIHistoryRecordList';
 import SessionEventBrowser from '../assistant/components/SessionEventBrowser';
 import { toggleSetValue } from './utils';
 import { Button } from '@/shared/ui/Button';
-import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
+import { DialogTitle } from '@/shared/ui/Dialog';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { Select } from '@/shared/ui/Select';
@@ -337,13 +338,11 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
   }
 
   return (
-    <Dialog
+    <ModalShell
       open
       onOpenChange={(open) => {
         if (!open) onClose();
-      }}
-    >
-      <DialogContent className="flex h-[90vh] w-[94vw] max-w-6xl flex-col gap-0 overflow-hidden p-0">
+      }} bare contentClassName="flex h-[90vh] w-[94vw] max-w-6xl flex-col gap-0 overflow-hidden p-0">
         <div className="flex shrink-0 items-center justify-between border-b border-border bg-muted/30 px-6 py-4">
           <DialogTitle className="font-serif text-lg">{t('history.modalTitle')}</DialogTitle>
           <div className="ml-4 flex gap-1">
@@ -508,8 +507,7 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
             </Button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+    </ModalShell>
   );
 };
 

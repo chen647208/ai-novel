@@ -16,7 +16,8 @@ import { buildProfileRegistry, profileKey } from '@/shared/services/buildProfile
 import { computeChapterStats } from '../services/writingStatsService';
 import MarkdownView from '@/shared/ui/Markdown';
 import { Button } from '@/shared/ui/Button';
-import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
+import { DialogTitle } from '@/shared/ui/Dialog';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { cn } from '@/shared/utils/cn';
 import { AlignLeft, Check, Code, FileDown, FileOutput, FileText, Globe, Package, type LucideIcon } from 'lucide-react';
 
@@ -72,13 +73,11 @@ const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
   const previewStats = useMemo(() => (showPreview ? computeChapterStats(previewText) : null), [showPreview, previewText]);
 
   return (
-    <Dialog
+    <ModalShell
       open={isOpen}
       onOpenChange={(open) => {
         if (!open) onClose();
-      }}
-    >
-      <DialogContent className="flex max-h-[85vh] w-full max-w-lg flex-col gap-0 overflow-hidden p-0">
+      }} bare contentClassName="flex max-h-[85vh] w-full max-w-lg flex-col gap-0 overflow-hidden p-0">
         <div className="border-b border-border bg-muted/30 px-6 py-4">
           <DialogTitle className="font-serif text-lg">{t('export.title')}</DialogTitle>
         </div>
@@ -199,8 +198,7 @@ const ExportChapterModal: React.FC<ExportChapterModalProps> = ({
             <FileOutput className="size-4" /> {t('export.confirmExport', { format: format.toUpperCase() })}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+    </ModalShell>
   );
 };
 

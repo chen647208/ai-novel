@@ -32,7 +32,7 @@
     "docs:dev": "vitepress dev docs-site",
     "docs:build": "node scripts/sync-docs.mjs && vitepress build docs-site",
     "docs:preview": "vitepress preview docs-site",
-    "electron:dev": "npm run build:electron && concurrently -k \"vite\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron:dev": "npm run build:electron && concurrently -k \"vite\" \"wait-on http://localhost:5199 && electron .\"",
     "build:electron": "npm run build:electron:main && npm run build:electron:preload",
     "build:electron:main": "tsc -p src/main/tsconfig.json",
     "build:electron:preload": "esbuild src/main/preload.ts --bundle --platform=node --format=cjs --target=node20 --external:electron --outfile=build/main/preload/preload.js",

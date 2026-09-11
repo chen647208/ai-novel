@@ -12,7 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { templateDisplayName } from '@/i18n';
 import type { WritingEditModalProps } from '../types';
 import { Button } from '@/shared/ui/Button';
-import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
+import { DialogTitle } from '@/shared/ui/Dialog';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { Label } from '@/shared/ui/Label';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
@@ -42,13 +43,11 @@ const WritingEditModal: React.FC<WritingEditModalProps> = ({
   const streamingSupported = isModelUsable(activeModel) ? activeModel.supportsStreaming !== false : false;
   const hasModel = isModelUsable(activeModel);
   return (
-    <Dialog
+    <ModalShell
       open={isOpen}
       onOpenChange={(open) => {
         if (!open) onClose();
-      }}
-    >
-      <DialogContent className="flex max-h-[85vh] w-full max-w-2xl flex-col gap-0 overflow-hidden p-0">
+      }} bare contentClassName="flex max-h-[85vh] w-full max-w-2xl flex-col gap-0 overflow-hidden p-0">
         <div className="flex items-center justify-between border-b border-border bg-muted/30 px-6 py-4">
           <div>
             <DialogTitle className="font-serif text-lg">{t('editModal.title')}</DialogTitle>
@@ -159,8 +158,7 @@ const WritingEditModal: React.FC<WritingEditModalProps> = ({
             </Button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+    </ModalShell>
   );
 };
 

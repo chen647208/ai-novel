@@ -11,7 +11,7 @@ export default defineConfig({
   base: './',
   publicDir: path.resolve(__dirname, 'src/assets'),
   server: {
-    port: 3000,
+    port: 5199,
     host: '0.0.0.0',
   },
   plugins: [react(), tailwindcss()],

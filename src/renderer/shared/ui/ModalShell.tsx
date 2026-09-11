@@ -23,7 +23,7 @@ const SIZE: Record<ModalSize, string> = {
 export interface ModalShellProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  title: React.ReactNode;
+  title?: React.ReactNode;
   description?: React.ReactNode;
   /** 标题左侧的图标徽标（如特性图标）。 */
   icon?: React.ReactNode;
@@ -31,10 +31,12 @@ export interface ModalShellProps {
   footer?: React.ReactNode;
   hideClose?: boolean;
   contentClassName?: string;
+  /** 自带头部/全高布局的模态：只借外壳（Portal/Overlay/Content），头部由 children 自绘。 */
+  bare?: boolean;
   children: React.ReactNode;
 }
 
-/** 统一模态外壳：标题/描述 + 内容 + 页脚，尺寸走令牌。 */
+/** 统一模态外壳：标题/描述 + 内容 + 页脚，尺寸走令牌；bare 模式仅提供外壳。 */
 export const ModalShell: React.FC<ModalShellProps> = ({
   open,
   onOpenChange,
@@ -45,30 +47,40 @@ export const ModalShell: React.FC<ModalShellProps> = ({
   footer,
   hideClose,
   contentClassName,
+  bare,
   children,
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent hideClose={hideClose} className={cn(SIZE[size], contentClassName)}>
-      <DialogHeader>
-        {icon ? (
-          <div className="flex items-start gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              {icon}
-            </div>
-            <div className="min-w-0">
-              <DialogTitle className="font-serif text-lg">{title}</DialogTitle>
-              {description && <DialogDescription className="mt-1">{description}</DialogDescription>}
-            </div>
-          </div>
-        ) : (
-          <>
-            <DialogTitle>{title}</DialogTitle>
-            {description && <DialogDescription>{description}</DialogDescription>}
-          </>
-        )}
-      </DialogHeader>
-      {children}
-      {footer && <DialogFooter>{footer}</DialogFooter>}
+    <DialogContent
+      hideClose={hideClose}
+      className={cn(bare ? undefined : SIZE[size], contentClassName)}
+    >
+      {bare ? (
+        children
+      ) : (
+        <>
+          <DialogHeader>
+            {icon ? (
+              <div className="flex items-start gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  {icon}
+                </div>
+                <div className="min-w-0">
+                  <DialogTitle className="font-serif text-lg">{title}</DialogTitle>
+                  {description && <DialogDescription className="mt-1">{description}</DialogDescription>}
+                </div>
+              </div>
+            ) : (
+              <>
+                <DialogTitle>{title}</DialogTitle>
+                {description && <DialogDescription>{description}</DialogDescription>}
+              </>
+            )}
+          </DialogHeader>
+          {children}
+          {footer && <DialogFooter>{footer}</DialogFooter>}
+        </>
+      )}
     </DialogContent>
   </Dialog>
 );

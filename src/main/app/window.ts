@@ -15,8 +15,8 @@ import { interceptClose } from './tray.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-/** 开发服务器候选端口（与 vite.config.ts 的 3000 及并发实例回退保持一致） */
-const DEV_SERVER_PORTS = [3000, 3001, 3002, 3003];
+/** 开发服务器候选端口（与 vite.config.ts 的 5199 及并发实例回退保持一致） */
+const DEV_SERVER_PORTS = [5199, 5200, 5201, 5202];
 
 const LOAD_ERROR_HTML = [
   '<html><body style="font-family:Arial;padding:40px;text-align:center;">',

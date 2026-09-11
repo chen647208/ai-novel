@@ -14,7 +14,8 @@ import { getTemplateVariableDescriptions } from '../../cards/services/cardPrompt
 import type { CardPromptSettingsPanelProps } from '../types';
 import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';
-import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
+import { DialogTitle } from '@/shared/ui/Dialog';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
 import { cn } from '@/shared/utils/cn';
@@ -251,8 +252,7 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
       </div>
 
       {/* 导入/导出模态框 */}
-      <Dialog open={importExportModalOpen} onOpenChange={(open) => { if (!open) closeImportExport(); }}>
-        <DialogContent className="flex max-h-[80vh] w-full max-w-2xl flex-col gap-0 overflow-hidden p-0">
+      <ModalShell open={importExportModalOpen} onOpenChange={(open) => { if (!open) closeImportExport(); }} bare contentClassName="flex max-h-[80vh] w-full max-w-2xl flex-col gap-0 overflow-hidden p-0">
           <div className="border-b border-border bg-muted/30 px-6 py-4">
             <DialogTitle className="font-serif text-lg">
               {importExportMode === 'import' ? t('cardPrompts.importTitle') : t('cardPrompts.exportTitle')}
@@ -304,8 +304,7 @@ const CardPromptSettingsPanel: React.FC<CardPromptSettingsPanelProps> = ({
               </div>
             )}
           </div>
-        </DialogContent>
-      </Dialog>
+    </ModalShell>
     </div>
   );
 };

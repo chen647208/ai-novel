@@ -10,7 +10,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '@/i18n';
 import { BookOpen, FileText, Search } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
+import { DialogTitle } from '@/shared/ui/Dialog';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { Input } from '@/shared/ui/Input';
 import { Spinner } from '@/shared/ui/Spinner';
 import { repository } from '@/shared/services/repository';
@@ -83,8 +84,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, onClose, 
   const q = query.trim();
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="flex max-h-[80vh] w-[92vw] max-w-2xl flex-col gap-0 overflow-hidden p-0">
+    <ModalShell open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} bare contentClassName="flex max-h-[80vh] w-[92vw] max-w-2xl flex-col gap-0 overflow-hidden p-0">
         <div className="flex items-center gap-3 border-b border-border px-5 py-4">
           <Search className="size-4 shrink-0 text-muted-foreground" />
           <DialogTitle className="sr-only">{t('search.title')}</DialogTitle>
@@ -128,8 +128,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, onClose, 
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+    </ModalShell>
   );
 };
 

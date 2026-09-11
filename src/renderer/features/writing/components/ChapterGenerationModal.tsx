@@ -16,7 +16,8 @@ import type { ChapterGenerationModalProps } from '../types';
 import { useSettingsStore } from '../../../app/stores/settingsStore';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
 import { Button } from '@/shared/ui/Button';
-import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
+import { DialogTitle } from '@/shared/ui/Dialog';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { Input } from '@/shared/ui/Input';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
@@ -121,13 +122,11 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
 
   return (
     genModal.isOpen && genModal.chapter && (
-      <Dialog
+      <ModalShell
         open
         onOpenChange={(open) => {
           if (!open) setGenModal({ isOpen: false, chapter: null });
-        }}
-      >
-        <DialogContent className="flex h-[92vh] w-[94vw] max-w-5xl flex-col gap-0 overflow-hidden p-0">
+        }} bare contentClassName="flex h-[92vh] w-[94vw] max-w-5xl flex-col gap-0 overflow-hidden p-0">
           <div className="shrink-0 border-b border-border bg-muted/30 px-6 py-4">
             <DialogTitle className="font-serif text-lg">{t('genModal.title')}</DialogTitle>
           </div>
@@ -512,8 +511,7 @@ const ChapterGenerationModal: React.FC<ChapterGenerationModalProps> = ({
               </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+    </ModalShell>
     )
   );
 };

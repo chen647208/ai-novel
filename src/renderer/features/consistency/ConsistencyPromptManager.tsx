@@ -22,7 +22,7 @@ import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
-import { Dialog, DialogContent } from '@/shared/ui/Dialog';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { cn } from '@/shared/utils/cn';
 import { AlertCircle, CheckCircle2, ChevronDown, ChevronUp, Copy, Download, FileText, FlaskConical, Plus, Trash2, Undo2, Upload } from 'lucide-react';
@@ -338,8 +338,7 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
       </div>
 
       {/* 导入/导出模态框 */}
-      <Dialog open={importExportOpen} onOpenChange={(open) => { if (!open) closeImportExport(); }}>
-        <DialogContent className="flex max-h-[85vh] w-[92vw] max-w-2xl flex-col gap-0 overflow-hidden p-0">
+      <ModalShell open={importExportOpen} onOpenChange={(open) => { if (!open) closeImportExport(); }} bare contentClassName="flex max-h-[85vh] w-[92vw] max-w-2xl flex-col gap-0 overflow-hidden p-0">
           <div className="border-b border-border bg-muted/30 px-6 py-4">
             <h3 className="font-serif text-lg font-medium text-foreground">
               {importExportMode === 'import' ? t('consistency:pm.importTitle') : t('consistency:pm.exportTitle')}
@@ -385,8 +384,7 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
               </div>
             )}
           </div>
-        </DialogContent>
-      </Dialog>
+    </ModalShell>
     </div>
   );
 };
