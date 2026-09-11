@@ -10,11 +10,11 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/i18n';
 import { type WorldView, type MagicSystem, type TechnologyLevel, type WorldHistory, type HistoryEvent, type MagicLevel } from '../../../shared/types';
-import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { Textarea } from '@/shared/ui/Textarea';
+import { TabBar } from '@/shared/ui/TabBar';
 import { Cpu, Landmark, Plus, Save, Trash2, WandSparkles, X } from 'lucide-react';
 
 interface WorldViewEditorProps {
@@ -539,23 +539,7 @@ export const WorldViewEditor: React.FC<WorldViewEditorProps> = ({
   return (
     <div className="space-y-4">
       {/* 标签页切换 */}
-      <div className="flex gap-1 border-b border-border">
-        {tabs.map(({ id, icon: Icon, label }) => (
-          <button
-            key={id}
-            onClick={() => setActiveTab(id)}
-            className={cn(
-              '-mb-px flex items-center gap-2 border-b-2 px-3 py-2 text-sm font-medium transition-colors',
-              activeTab === id
-                ? 'border-primary text-foreground'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <Icon className="size-4" />
-            {label}
-          </button>
-        ))}
-      </div>
+      <TabBar value={activeTab} onChange={setActiveTab} items={tabs} />
 
       {/* 内容区域 */}
       <div className="min-h-[300px]">
