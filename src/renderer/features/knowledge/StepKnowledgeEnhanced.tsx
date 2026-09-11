@@ -29,6 +29,7 @@ import EnhancedTimeline from '../timeline/EnhancedTimeline';
 import KnowledgeFeaturePanels from './components/KnowledgeFeaturePanels';
 import { dialogService } from '@/shared/services/dialogService';
 import { cn } from '@/shared/utils/cn';
+import { formatBytes, formatPercent } from '@/shared/utils/format';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -459,16 +460,6 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
     }
   };
 
-  const formatSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  };
-
-  const formatScore = (score: number) => {
-    return (score * 100).toFixed(1) + '%';
-  };
-
   // 一键重建索引：先清本项目向量，再全量重索（换嵌入模型/维度后修复不一致）
   const handleRebuildIndex = async (): Promise<void> => {
     const items = project.knowledge || [];
@@ -662,7 +653,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
                   </div>
                   <div className="shrink-0 text-right">
                     <div className="text-xs tabular-nums text-muted-foreground">
-                      {formatScore(result.combinedScore)}
+                      {formatPercent(result.combinedScore)}
                     </div>
                     <span className={cn(
                       'mt-1 inline-block rounded px-1.5 py-0.5 text-xs',
@@ -865,7 +856,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
                           <span className="rounded border border-border bg-muted/40 px-1.5 py-0.5">
                             {t(`categoryShort.${item.category}`)}
                           </span>
-                          <span className="tabular-nums">{formatSize(item.size)}</span>
+                          <span className="tabular-nums">{formatBytes(item.size)}</span>
                           <span>{new Date(item.addedAt).toLocaleDateString(i18n.language)}</span>
                         </div>
                       </div>
@@ -995,7 +986,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
                   <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1.5">
                       <FileText className="size-3.5" />
-                      <span className="tabular-nums">{formatSize(viewingItem.size)}</span>
+                      <span className="tabular-nums">{formatBytes(viewingItem.size)}</span>
                     </span>
                     <span className="flex items-center gap-1.5">
                       <Calendar className="size-3.5" />
