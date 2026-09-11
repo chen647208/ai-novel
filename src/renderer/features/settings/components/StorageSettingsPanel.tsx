@@ -1,3 +1,4 @@
+import { formatDate, formatDateTime } from '@/shared/utils/format';
 /*
  * 本文件属于 红月创作 (Hongyue Creation) 项目。
  * Copyright (C) 2026 chen647208
@@ -206,7 +207,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                 {storageConfig.lastMigration && (
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock className="size-3.5" />
-                    {t('storage.lastMigration', { date: new Date(storageConfig.lastMigration).toLocaleDateString(i18n.language) })}
+                    {t('storage.lastMigration', { date: formatDate(storageConfig.lastMigration, i18n.language) })}
                   </div>
                 )}
               </div>
@@ -377,7 +378,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                             <div className="min-w-0">
                               <div className="truncate font-mono text-xs text-foreground">{b.fileName}</div>
                               <div className="text-2xs tabular-nums text-muted-foreground">
-                                {new Date(b.timestamp).toLocaleString(i18n.language)} · {(b.size / 1024).toFixed(1)} KB
+                                {formatDateTime(b.timestamp, i18n.language)} · {(b.size / 1024).toFixed(1)} KB
                               </div>
                             </div>
                             <Button size="sm" variant="outline" className="shrink-0" onClick={() => void handleRestoreBackup(b.filePath)}>

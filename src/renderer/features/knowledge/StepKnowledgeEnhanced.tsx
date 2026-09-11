@@ -29,7 +29,7 @@ import EnhancedTimeline from '../timeline/EnhancedTimeline';
 import KnowledgeFeaturePanels from './components/KnowledgeFeaturePanels';
 import { dialogService } from '@/shared/services/dialogService';
 import { cn } from '@/shared/utils/cn';
-import { formatBytes, formatPercent } from '@/shared/utils/format';
+import { formatBytes, formatPercent, formatDate, formatDateTime } from '@/shared/utils/format';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -694,7 +694,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
                             {t(`categoryShort.${item.category}`)}
                           </span>
                           <span className="tabular-nums">{formatBytes(item.size)}</span>
-                          <span>{new Date(item.addedAt).toLocaleDateString(i18n.language)}</span>
+                          <span>{formatDate(item.addedAt, i18n.language)}</span>
                         </div>
                       </div>
                       <Button
@@ -827,7 +827,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
                     </span>
                     <span className="flex items-center gap-1.5">
                       <Calendar className="size-3.5" />
-                      {new Date(viewingItem.addedAt).toLocaleString(i18n.language)}
+                      {formatDateTime(viewingItem.addedAt, i18n.language)}
                     </span>
                     <span className="flex items-center gap-1.5">
                       <Tag className="size-3.5" />

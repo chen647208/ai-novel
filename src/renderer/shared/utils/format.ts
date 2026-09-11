@@ -20,3 +20,13 @@ export function formatBytes(bytes: number): string {
 export function formatPercent(ratio: number): string {
   return `${(ratio * 100).toFixed(1)}%`;
 }
+
+/** 时间戳/日期串 → 本地日期（仅年月日）。 */
+export function formatDate(value: number | string | Date, locale: string): string {
+  return new Date(value).toLocaleDateString(locale);
+}
+
+/** 时间戳/日期串 → 本地日期时间。 */
+export function formatDateTime(value: number | string | Date, locale: string): string {
+  return new Date(value).toLocaleString(locale);
+}

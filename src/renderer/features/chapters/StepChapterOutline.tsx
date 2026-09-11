@@ -8,6 +8,7 @@
  */
 import { logger } from '@/shared/utils/logger';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
+import { formatDateTime } from '@/shared/utils/format';
 
 import React, { useState, useMemo } from 'react';
 import { useTranslation, i18n, templateDisplayName } from '@/i18n';
@@ -92,7 +93,7 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
       // 生成文件内容
       let content = t('steps:chapters.exportHeader', { title: project.title || t('steps:chapters.unnamedProject') }) + '\n';
       content += `${'='.repeat(50)}\n\n`;
-      content += `${t('steps:chapters.exportTime', { time: new Date().toLocaleString(i18n.language) })}\n`;
+      content += `${t('steps:chapters.exportTime', { time: formatDateTime(Date.now(), i18n.language) })}\n`;
       content += `${t('steps:chapters.exportCount', { count: project.chapters.length })}\n\n`;
       content += `${'='.repeat(50)}\n\n`;
 

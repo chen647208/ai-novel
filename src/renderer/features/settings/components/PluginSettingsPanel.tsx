@@ -118,9 +118,9 @@ const PluginSettingsPanel: React.FC = () => {
         <div className="mb-2 text-sm font-medium">{t('plugins.types.title', { count: registeredTypes.length })}</div>
         <div className="flex max-h-40 flex-wrap gap-1.5 overflow-y-auto">
           {registeredTypes.map((tpl) => (
-            <span key={tpl.id} className="rounded-full border border-border px-2 py-0.5 text-2xs text-muted-foreground" title={tpl.id}>
+            <Badge key={tpl.id} variant="outline" className="rounded-full text-2xs font-normal" title={tpl.id}>
               {tpl.label}
-            </span>
+            </Badge>
           ))}
         </div>
       </div>

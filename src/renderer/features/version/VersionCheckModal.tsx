@@ -1,3 +1,4 @@
+import { formatDate } from '@/shared/utils/format';
 /*
  * 本文件属于 红月创作 (Hongyue Creation) 项目。
  * Copyright (C) 2026 chen647208
@@ -241,7 +242,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
                         </div>
                         {updateResult.success && updateResult.versionInfo.publishedAt && (
                           <div className="text-xs text-muted-foreground">
-                            {t('modal.publishedAt')} {new Date(updateResult.versionInfo.publishedAt).toLocaleDateString(i18n.language)}
+                            {t('modal.publishedAt')} {formatDate(updateResult.versionInfo.publishedAt, i18n.language)}
                           </div>
                         )}
                       </div>
