@@ -16,14 +16,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import { useTranslation } from 'react-i18next';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/shared/ui/Dialog';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { X } from 'lucide-react';
@@ -183,39 +176,14 @@ const ApprovalHost: React.FC = () => {
   return (
     <>
       {current && (
-        <Dialog open onOpenChange={(open) => { if (!open) defer(current); }}>
-          <DialogContent className="max-w-xl">
-            <DialogHeader>
-              <DialogTitle>{t('approval.title')}</DialogTitle>
-              <DialogDescription>{t('approval.description')}</DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-3 text-sm">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="secondary">{current.proposal.title}</Badge>
-                <Badge variant="outline">{t('approval.toolLabel')}: {current.toolId}</Badge>
-                <Badge variant="outline">{t('approval.permissionLabel')}: {permLabel}</Badge>
-              </div>
-              {current.proposal.summary && (
-                <p className="text-muted-foreground">{current.proposal.summary}</p>
-              )}
-              {current.proposal.diff && (
-                <div>
-                  <div className="mb-1 font-medium">{t('approval.diffTitle')}</div>
-                  <DiffPreview diff={current.proposal.diff} />
-                </div>
-              )}
-              {current.proposal.suggestion && (
-                <div>
-                  <div className="mb-1 font-medium">{t('approval.suggestionTitle')}</div>
-                  <div className="max-h-56 overflow-auto rounded-md border border-border p-3 whitespace-pre-wrap">
-                    {current.proposal.suggestion}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <DialogFooter>
+        <ModalShell
+          open
+          onOpenChange={(open) => { if (!open) defer(current); }}
+          size="xl"
+          title={t('approval.title')}
+          description={t('approval.description')}
+          footer={
+            <>
               <Button variant="outline" onClick={() => defer(current)}>
                 {t('approval.defer')}
               </Button>
@@ -223,9 +191,34 @@ const ApprovalHost: React.FC = () => {
                 {t('approval.reject')}
               </Button>
               <Button onClick={() => settle(current, 'approved')}>{t('approval.approve')}</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </>
+          }
+        >
+          <div className="space-y-3 text-sm">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary">{current.proposal.title}</Badge>
+              <Badge variant="outline">{t('approval.toolLabel')}: {current.toolId}</Badge>
+              <Badge variant="outline">{t('approval.permissionLabel')}: {permLabel}</Badge>
+            </div>
+            {current.proposal.summary && (
+              <p className="text-muted-foreground">{current.proposal.summary}</p>
+            )}
+            {current.proposal.diff && (
+              <div>
+                <div className="mb-1 font-medium">{t('approval.diffTitle')}</div>
+                <DiffPreview diff={current.proposal.diff} />
+              </div>
+            )}
+            {current.proposal.suggestion && (
+              <div>
+                <div className="mb-1 font-medium">{t('approval.suggestionTitle')}</div>
+                <div className="max-h-56 overflow-auto rounded-md border border-border p-3 whitespace-pre-wrap">
+                  {current.proposal.suggestion}
+                </div>
+              </div>
+            )}
+          </div>
+        </ModalShell>
       )}
 
       {pendingCount > 0 && (

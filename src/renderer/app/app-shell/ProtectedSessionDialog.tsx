@@ -16,14 +16,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Shield } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/shared/ui/Dialog';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { Input } from '@/shared/ui/Input';
 import { dialogService } from '@/shared/services/dialogService';
 import { protectedSession } from '@/shared/services/protectedSessionService';
@@ -92,60 +85,13 @@ export const ProtectedSessionDialog: React.FC = () => {
       </Button>
 
       {open && (
-        <Dialog open onOpenChange={setOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>{t('protected.title')}</DialogTitle>
-              <DialogDescription>{t('protected.description')}</DialogDescription>
-            </DialogHeader>
-
-            {!unlocked ? (
-              <div className="space-y-2">
-                <Input
-                  type="password"
-                  value={passphrase}
-                  onChange={(e) => setPassphrase(e.target.value)}
-                  placeholder={t('protected.passphrasePlaceholder')}
-                />
-                <p className="text-xs text-muted-foreground">{t('protected.unlockHint')}</p>
-              </div>
-            ) : (
-              <div className="max-h-72 space-y-2 overflow-auto">
-                {(project?.chapters ?? []).map((c) => {
-                  const encrypted = (c.content ?? '').startsWith('enc.v1:');
-                  const chapterContent = c.content ?? '';
-                  return (
-                    <div key={c.id} className="flex items-center justify-between gap-2 rounded-md border border-border p-2 text-sm">
-                      <span className="truncate">{c.title}</span>
-                      {encrypted ? (
-                        <Button size="sm" variant="outline" onClick={() => void decryptChapter(c.id, chapterContent)} disabled={busy}>
-                          {t('protected.decrypt')}
-                        </Button>
-                      ) : (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            dialogService.confirm({
-                              title: t('protected.encryptConfirmTitle'),
-                              message: t('protected.encryptConfirmMessage', { title: c.title }),
-                            }).then((ok) => {
-                              if (ok) void encryptChapter(c.id, c.content ?? '');
-                            });
-                          }}
-                          disabled={busy}
-                        >
-                          {t('protected.encrypt')}
-                        </Button>
-                      )}
-                    </div>
-                  );
-                })}
-                {!project?.chapters.length && <p className="text-sm text-muted-foreground">{t('protected.noChapters')}</p>}
-              </div>
-            )}
-
-            <DialogFooter>
+        <ModalShell
+          open
+          onOpenChange={setOpen}
+          title={t('protected.title')}
+          description={t('protected.description')}
+          footer={
+            <>
               {unlocked && (
                 <Button
                   variant="outline"
@@ -165,9 +111,55 @@ export const ProtectedSessionDialog: React.FC = () => {
               <Button variant="ghost" onClick={() => setOpen(false)}>
                 {t('protected.close')}
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </>
+          }
+        >
+          {!unlocked ? (
+            <div className="space-y-2">
+              <Input
+                type="password"
+                value={passphrase}
+                onChange={(e) => setPassphrase(e.target.value)}
+                placeholder={t('protected.passphrasePlaceholder')}
+              />
+              <p className="text-xs text-muted-foreground">{t('protected.unlockHint')}</p>
+            </div>
+          ) : (
+            <div className="max-h-72 space-y-2 overflow-auto">
+              {(project?.chapters ?? []).map((c) => {
+                const encrypted = (c.content ?? '').startsWith('enc.v1:');
+                const chapterContent = c.content ?? '';
+                return (
+                  <div key={c.id} className="flex items-center justify-between gap-2 rounded-md border border-border p-2 text-sm">
+                    <span className="truncate">{c.title}</span>
+                    {encrypted ? (
+                      <Button size="sm" variant="outline" onClick={() => void decryptChapter(c.id, chapterContent)} disabled={busy}>
+                        {t('protected.decrypt')}
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          dialogService.confirm({
+                            title: t('protected.encryptConfirmTitle'),
+                            message: t('protected.encryptConfirmMessage', { title: c.title }),
+                          }).then((ok) => {
+                            if (ok) void encryptChapter(c.id, c.content ?? '');
+                          });
+                        }}
+                        disabled={busy}
+                      >
+                        {t('protected.encrypt')}
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+              {!project?.chapters.length && <p className="text-sm text-muted-foreground">{t('protected.noChapters')}</p>}
+            </div>
+          )}
+        </ModalShell>
       )}
     </>
   );
