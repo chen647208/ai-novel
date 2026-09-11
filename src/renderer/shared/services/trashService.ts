@@ -7,6 +7,8 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { localStore } from '@/shared/services/localStore';
+
 /**
  * 回收站（docs/design 扩展）：删除的书先落 trash/ 目录 JSON，30 天后自动清，
  * 期间可恢复、可彻底删除。Electron 走 userData/trash，Web 预览降级 localStorage。
@@ -32,7 +34,7 @@ async function trashDir(): Promise<string | null> {
 
 function readLocal(): Record<string, { project: Project; deletedAt: number }> {
   try {
-    return JSON.parse(localStorage.getItem(TRASH_LS_KEY) ?? '{}') as Record<string, { project: Project; deletedAt: number }>;
+    return JSON.parse(localStore.getItem(TRASH_LS_KEY) ?? '{}') as Record<string, { project: Project; deletedAt: number }>;
   } catch {
     return {};
   }
@@ -40,7 +42,7 @@ function readLocal(): Record<string, { project: Project; deletedAt: number }> {
 
 function writeLocal(all: Record<string, { project: Project; deletedAt: number }>): void {
   try {
-    localStorage.setItem(TRASH_LS_KEY, JSON.stringify(all));
+    localStore.setItem(TRASH_LS_KEY, JSON.stringify(all));
   } catch {
     // 配额不足则放弃持久化，内存态本次有效
   }

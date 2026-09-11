@@ -16,6 +16,8 @@
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import type { ModelConfig } from '@shared/types';
 
+import { localStore } from '@/shared/services/localStore';
+
 export interface UsageEntry {
   modelId: string;
   modelName: string;
@@ -63,7 +65,7 @@ export function estimateCost(tokens: { prompt: number; completion: number }, pri
 function readAll(): UsageEntry[] {
   if (typeof localStorage === 'undefined') return [];
   try {
-    const raw = localStorage.getItem(USAGE_KEY);
+    const raw = localStore.getItem(USAGE_KEY);
     return raw ? (JSON.parse(raw) as UsageEntry[]) : [];
   } catch {
     return [];
@@ -73,7 +75,7 @@ function readAll(): UsageEntry[] {
 function writeAll(entries: UsageEntry[]): void {
   if (typeof localStorage === 'undefined') return;
   try {
-    localStorage.setItem(USAGE_KEY, JSON.stringify(entries.slice(-MAX_ENTRIES)));
+    localStore.setItem(USAGE_KEY, JSON.stringify(entries.slice(-MAX_ENTRIES)));
   } catch {
     // 存储不可用或超限时忽略：用量是辅助信息，不阻断主流程
   }
@@ -100,14 +102,14 @@ const HOUR_MS = 3600_000;
 /** 每小时请求上限；0 或非法值表示不限。 */
 export function getHourlyLimit(): number {
   if (typeof localStorage === 'undefined') return 0;
-  const n = Number(localStorage.getItem(STORAGE_KEYS.aiHourlyLimit));
+  const n = Number(localStore.getItem(STORAGE_KEYS.aiHourlyLimit));
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
 }
 
 export function setHourlyLimit(limit: number): void {
   if (typeof localStorage === 'undefined') return;
   try {
-    localStorage.setItem(STORAGE_KEYS.aiHourlyLimit, String(Math.max(0, Math.floor(limit))));
+    localStore.setItem(STORAGE_KEYS.aiHourlyLimit, String(Math.max(0, Math.floor(limit))));
   } catch {
     // 忽略
   }

@@ -6,10 +6,12 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import React from 'react';
 
 import { i18n } from '@/i18n';
+import { localStore } from '@/shared/services/localStore';
 import { logger } from '@/shared/utils/logger';
 
 interface ErrorBoundaryProps {
@@ -42,10 +44,10 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     try {
       // 保留最近 20 条崩溃记录，便于在设置面板/日志中排查
       const KEY = STORAGE_KEYS.errorLogs;
-      const raw = localStorage.getItem(KEY);
+      const raw = localStore.getItem(KEY);
       const logs: Array<{ time: number; scope: string; message: string }> = raw ? JSON.parse(raw) : [];
       logs.push({ time: Date.now(), scope: this.props.scope ?? 'app', message: error.message });
-      localStorage.setItem(KEY, JSON.stringify(logs.slice(-20)));
+      localStore.setItem(KEY, JSON.stringify(logs.slice(-20)));
     } catch {
       // localStorage 不可用时忽略
     }

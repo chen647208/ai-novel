@@ -16,6 +16,7 @@ import React, { useEffect, useState } from 'react';
 import { useSettingsStore } from '@/app/stores/settingsStore';
 import { pluginHostPromise, saveDisabledList } from '@/features/assistant/services/aiRuntime';
 import { useTranslation } from '@/i18n';
+import { localStore } from '@/shared/services/localStore';
 import { connectServer, disconnectServer, fetchServerTools } from '@/shared/services/mcpClient';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
@@ -41,7 +42,7 @@ const PluginSettingsPanel: React.FC = () => {
   const { t } = useTranslation(['settings', 'common']);
   const [statuses, setStatuses] = useState<PluginStatus[] | null>(null);
   const [showTree, setShowTree] = useState(false);
-  const [profile, setProfile] = useState<string>(() => localStorage.getItem(STORAGE_KEYS.profileCurrent) ?? DEFAULT_RELEASE_PROFILE);
+  const [profile, setProfile] = useState<string>(() => localStore.getItem(STORAGE_KEYS.profileCurrent) ?? DEFAULT_RELEASE_PROFILE);
   const registeredTypes = builtinRegistry.list();
 
   useEffect(() => {
@@ -56,7 +57,7 @@ const PluginSettingsPanel: React.FC = () => {
 
   const applyProfile = (name: string): void => {
     setProfile(name);
-    localStorage.setItem(STORAGE_KEYS.profileCurrent, name);
+    localStore.setItem(STORAGE_KEYS.profileCurrent, name);
     window.dispatchEvent(new CustomEvent(PROFILE_CHANGED_EVENT));
     // AI 拦截由 aiRuntime 的 aiGate 按档位实时生效（覆盖所有网关出口），此处只改档位。
   };

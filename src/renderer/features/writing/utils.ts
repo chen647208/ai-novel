@@ -212,8 +212,10 @@ export const saveExportFile = async (filename: string, content: string, format: 
     }
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
-    printWindow.document.write(content);
-    printWindow.document.close();
+    // 用 DOMParser 写入替代已废弃的 document.write：保留内联样式，脚本不执行（仅打印用）
+    const doc = printWindow.document;
+    const parsed = new DOMParser().parseFromString(content, 'text/html');
+    doc.replaceChild(doc.importNode(parsed.documentElement, true), doc.documentElement);
     printWindow.focus();
     printWindow.print();
     return;

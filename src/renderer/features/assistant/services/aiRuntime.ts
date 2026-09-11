@@ -18,6 +18,7 @@ import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import { setAiGate } from '@/shared/services/ai/aiGate';
 import { isOverHourlyLimit } from '@/shared/services/ai/usageTracker';
 import { buildProfileRegistry } from '@/shared/services/buildProfiles';
+import { localStore } from '@/shared/services/localStore';
 import { APP_VERSION } from '@/shared/version';
 
 import { AiSessionManager } from './aiSessionManager';
@@ -34,7 +35,7 @@ export const eventBus = new EventBus();
 
 // 精简档 + 每小时配额统一 AI 门：所有经网关的 AI 调用在此实时校验
 setAiGate(() => {
-  if (typeof window !== 'undefined' && profileDeniesAi(localStorage.getItem(STORAGE_KEYS.profileCurrent) ?? 'full')) {
+  if (typeof window !== 'undefined' && profileDeniesAi(localStore.getItem(STORAGE_KEYS.profileCurrent) ?? 'full')) {
     throw new Error('minimal 发行档已禁用全部 AI 请求');
   }
   if (isOverHourlyLimit()) {
@@ -56,14 +57,14 @@ const DISABLED_KEY = STORAGE_KEYS.pluginsDisabled;
 
 function readDisabledList(): string[] {
   try {
-    return JSON.parse(localStorage.getItem(DISABLED_KEY) ?? '[]') as string[];
+    return JSON.parse(localStore.getItem(DISABLED_KEY) ?? '[]') as string[];
   } catch {
     return [];
   }
 }
 
 export function saveDisabledList(ids: string[]): void {
-  localStorage.setItem(DISABLED_KEY, JSON.stringify(ids));
+  localStore.setItem(DISABLED_KEY, JSON.stringify(ids));
 }
 
 /** 启动期插件装载（预览环境无文件系统时空宿主）。状态面板复用同一 Promise。 */

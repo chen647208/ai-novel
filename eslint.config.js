@@ -62,6 +62,9 @@ export default tseslint.config(
     ],
   },
 
+  // 禁止无用的 eslint-disable（多半是规则改为 error 后遗留），有则报错
+  { linterOptions: { reportUnusedDisableDirectives: 'error' } },
+
   js.configs.recommended,
   ...tseslint.configs.recommended,
 
@@ -112,6 +115,9 @@ export default tseslint.config(
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: false }],
       '@typescript-eslint/await-thenable': 'error',
+      // 联合/枚举穷尽与弃用 API（类型感知）
+      '@typescript-eslint/switch-exhaustiveness-check': ['error', { considerDefaultExhaustiveForUnions: true }],
+      '@typescript-eslint/no-deprecated': 'error',
 
       // 通用纪律（渲染层日志唯一出口是 shared/utils/logger.ts，该文件自带豁免注释）
       'no-console': 'error',
@@ -120,6 +126,18 @@ export default tseslint.config(
       'no-var': 'error',
       'no-debugger': 'error',
       'no-constant-condition': ['error', { checkLoops: false }],
+      // 禁裸调 localStorage：键归 shared/constants/storageKeys，读写归 storage 服务
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "MemberExpression[object.name='localStorage']",
+          message: '禁止直接使用 localStorage：键见 @shared/constants/storageKeys，读写走存储服务',
+        },
+        {
+          selector: "CallExpression[callee.object.name='Math'][callee.property.name='random']",
+          message: '禁止 Math.random 生成 id：走 @core/entities 的 uuidv7',
+        },
+      ],
 
       // React Hooks（正确性关键）
       'react-hooks/rules-of-hooks': 'error',
@@ -155,6 +173,18 @@ export default tseslint.config(
         },
       ],
     },
+  },
+
+  // localStorage 唯一合法直调点（封装本体）
+  {
+    files: ['src/renderer/shared/services/localStore.ts'],
+    rules: { 'no-restricted-syntax': 'off' },
+  },
+
+  // 重试抖动与 k-means 随机初始质心使用 Math.random（非 id 生成），与 id 规则无关
+  {
+    files: ['src/main/ai/retry.ts', 'src/renderer/features/knowledge/services/embeddingService.ts'],
+    rules: { 'no-restricted-syntax': 'off' },
   },
 
   // 测试文件：放宽部分规则（断言、console、any 在测试中是惯用写法）

@@ -12,11 +12,13 @@ import { DEFAULT_RELEASE_PROFILE, enabledFeatureIds, PROFILE_CHANGED_EVENT } fro
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import { useEffect, useState } from 'react';
 
+import { localStore } from '@/shared/services/localStore';
+
 export function useFeatureAvailability(): Set<string> {
-  const [enabled, setEnabled] = useState<Set<string>>(() => enabledFeatureIds(localStorage.getItem(STORAGE_KEYS.profileCurrent) ?? DEFAULT_RELEASE_PROFILE));
+  const [enabled, setEnabled] = useState<Set<string>>(() => enabledFeatureIds(localStore.getItem(STORAGE_KEYS.profileCurrent) ?? DEFAULT_RELEASE_PROFILE));
 
   useEffect(() => {
-    const refresh = (): void => setEnabled(enabledFeatureIds(localStorage.getItem(STORAGE_KEYS.profileCurrent) ?? DEFAULT_RELEASE_PROFILE));
+    const refresh = (): void => setEnabled(enabledFeatureIds(localStore.getItem(STORAGE_KEYS.profileCurrent) ?? DEFAULT_RELEASE_PROFILE));
     window.addEventListener(PROFILE_CHANGED_EVENT, refresh);
     window.addEventListener('storage', refresh);
     return () => {

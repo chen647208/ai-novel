@@ -7,9 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-
 import { i18n } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
+import { localStore } from '@/shared/services/localStore';
 
 import { type AppState, type ConsistencyCheckConfig, type ConsistencyCheckPromptTemplate,type Project, type StorageConfig } from "../../../shared/types";
 import { logger } from '../utils/logger';
@@ -101,11 +101,11 @@ export const storage = {
       } catch (error) {
         logger.error('Failed to save state to file:', error);
         // 回退到localStorage
-        localStorage.setItem(STORAGE_FILE_NAME, JSON.stringify(state));
+        localStore.setItem(STORAGE_FILE_NAME, JSON.stringify(state));
       }
     } else {
       // 开发模式：使用localStorage
-      localStorage.setItem(STORAGE_FILE_NAME, JSON.stringify(state));
+      localStore.setItem(STORAGE_FILE_NAME, JSON.stringify(state));
     }
   },
   
@@ -116,7 +116,7 @@ export const storage = {
       return null;
     } else {
       // 开发模式：使用localStorage
-      const data = localStorage.getItem(STORAGE_FILE_NAME);
+      const data = localStore.getItem(STORAGE_FILE_NAME);
       return data ? JSON.parse(data) : null;
     }
   },
@@ -140,7 +140,7 @@ export const storage = {
       } catch (error) {
         logger.error('Failed to load state from file:', error);
         // 回退到localStorage
-        const data = localStorage.getItem(STORAGE_FILE_NAME);
+        const data = localStore.getItem(STORAGE_FILE_NAME);
         if (data) {
           const state = JSON.parse(data);
           const stateWithKnowledgeCategories = migrateKnowledgeCategories(state);
@@ -150,7 +150,7 @@ export const storage = {
       }
     } else {
       // 开发模式：使用localStorage
-      const data = localStorage.getItem(STORAGE_FILE_NAME);
+      const data = localStore.getItem(STORAGE_FILE_NAME);
       if (data) {
         const state = JSON.parse(data);
         const stateWithKnowledgeCategories = migrateKnowledgeCategories(state);
@@ -170,10 +170,10 @@ export const storage = {
         }
       } catch (error) {
         logger.error('Failed to delete state file:', error);
-        localStorage.removeItem(STORAGE_FILE_NAME);
+        localStore.removeItem(STORAGE_FILE_NAME);
       }
     } else {
-      localStorage.removeItem(STORAGE_FILE_NAME);
+      localStore.removeItem(STORAGE_FILE_NAME);
     }
   },
 
@@ -529,7 +529,7 @@ export const storage = {
         const data = await window.electronAPI.readFile(filePath);
         state = JSON.parse(data);
       } else {
-        const data = localStorage.getItem(STORAGE_FILE_NAME);
+        const data = localStore.getItem(STORAGE_FILE_NAME);
         state = data ? JSON.parse(data) : null;
       }
       
@@ -550,7 +550,7 @@ export const storage = {
         const data = await window.electronAPI.readFile(filePath);
         state = JSON.parse(data);
       } else {
-        const data = localStorage.getItem(STORAGE_FILE_NAME);
+        const data = localStore.getItem(STORAGE_FILE_NAME);
         state = data ? JSON.parse(data) : null;
       }
       

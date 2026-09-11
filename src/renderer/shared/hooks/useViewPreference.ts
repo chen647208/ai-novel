@@ -9,11 +9,13 @@
 
 import { useState } from 'react';
 
+import { localStore } from '@/shared/services/localStore';
+
 /** 视图偏好（网格/列表/大纲）：localStorage 持久化，Scrivener 式多形态。 */
 export function useViewPreference<T extends string>(key: string, defaultValue: T): [T, (v: T) => void] {
   const [value, setValue] = useState<T>(() => {
     try {
-      const raw = localStorage.getItem(key);
+      const raw = localStore.getItem(key);
       return (raw as T) || defaultValue;
     } catch {
       return defaultValue;
@@ -22,7 +24,7 @@ export function useViewPreference<T extends string>(key: string, defaultValue: T
   const set = (v: T) => {
     setValue(v);
     try {
-      localStorage.setItem(key, v);
+      localStore.setItem(key, v);
     } catch {
       // 忽略持久化失败
     }

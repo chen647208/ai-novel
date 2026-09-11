@@ -34,7 +34,7 @@ const ShortcutRecorder: React.FC = () => {
   const [recording, setRecording] = useState<KeybindingActionId | null>(null);
   const [conflict, setConflict] = useState<string | null>(null);
   const resolved = resolveKeybindings(overrides);
-  const isMac = typeof navigator !== 'undefined' && /mac/i.test(navigator.platform);
+  const isMac = typeof navigator !== 'undefined' && /mac/i.test(navigator.userAgent);
 
   useEffect(() => {
     if (!recording) return;

@@ -131,7 +131,17 @@ UI 槽位注册表 `shared/services/uiSlots.ts` + 渲染点 `shared/ui/Slot.tsx`
 - lint 风格约定：`simple-import-sort`（导入/导出排序，`--fix` 自动修复）+ `@typescript-eslint/naming-convention`
   （变量/函数/类型命名；属性名不约束）。`npm run lint:fix` 会顺带把许可证头搬回文件首位。
 - 零警告：`no-non-null-assertion`、`consistent-type-imports`、`react-hooks/exhaustive-deps` 由 warn 升为 error，
-  lint 现为 0 errors / 0 warnings。
+  lint 现为 0 errors / 0 warnings。`lint` 带 `--max-warnings=0`，`reportUnusedDisableDirectives: 'error'`，
+  无用的 `eslint-disable` 视为错误。
+- 穷尽与弃用：`switch-exhaustiveness-check`（`considerDefaultExhaustiveForUnions` 打开，`default` 视为穷尽）、
+  `no-deprecated`（联合类型 switch 与弃用 API 用错即报）。
+- 直调禁令：`no-restricted-syntax` 禁裸 `localStorage`（唯一出口 `renderer/shared/services/localStore.ts`，
+  统一 try/catch 与日志）与 `Math.random` 生成 id（走 `@core/entities` 的 `uuidv7`）；两处算法性随机
+  （重试抖动、k-means 初始质心）按文件豁免。
+- `lint:dead`：`knip` 统计死文件、未用依赖、未列依赖、未用二进制，接入 verify。`exports`/`types`
+  不进 verify（core 公共面有意保留），本地 `npx knip` 全量查看。
+- 依赖卫生：清理未用依赖（`chromadb`、`@chroma-core/default-embed`、未用 Radix、`@tailwindcss/postcss`、
+  `autoprefixer` 等），补齐隐式依赖（`@codemirror/autocomplete`、`axe-core`、`@eslint/js`）。
 
 
 

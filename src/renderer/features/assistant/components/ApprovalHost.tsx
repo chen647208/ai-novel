@@ -20,6 +20,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 
 import { dialogService } from '@/shared/services/dialogService';
+import { localStore } from '@/shared/services/localStore';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { ModalShell } from '@/shared/ui/ModalShell';
@@ -77,7 +78,7 @@ const ApprovalHost: React.FC = () => {
   useEffect(() => {
     if (!window.electronAPI) return;
     const consumed = new Set<string>(
-        JSON.parse(localStorage.getItem(STORAGE_KEYS.approvalMcpConsumed) ?? '[]') as string[],
+        JSON.parse(localStore.getItem(STORAGE_KEYS.approvalMcpConsumed) ?? '[]') as string[],
     );
     const poll = (): void => {
       void (async () => {
@@ -104,7 +105,7 @@ const ApprovalHost: React.FC = () => {
           for (const id of [...consumed]) {
             if (!seen.has(id)) consumed.delete(id);
           }
-          localStorage.setItem(STORAGE_KEYS.approvalMcpConsumed, JSON.stringify([...consumed]));
+          localStore.setItem(STORAGE_KEYS.approvalMcpConsumed, JSON.stringify([...consumed]));
           refreshPending();
           mcpBridgeOk.current = true;
           setMcpBridgeError(false);

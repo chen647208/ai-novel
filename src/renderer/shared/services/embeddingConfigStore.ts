@@ -6,6 +6,8 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+
+import { localStore } from '@/shared/services/localStore';
 import { logger } from '@/shared/utils/logger';
 
 import { type EmbeddingModelConfig } from "../../../shared/types";
@@ -32,7 +34,7 @@ const readConfigs = async (): Promise<EmbeddingModelConfig[]> => {
       logger.error('Failed to load embedding configs:', error);
     }
   } else {
-    const data = localStorage.getItem(EMBEDDING_CONFIG_FILE);
+    const data = localStore.getItem(EMBEDDING_CONFIG_FILE);
     if (data) {
       return JSON.parse(data);
     }
@@ -53,7 +55,7 @@ const writeConfigs = async (configs: EmbeddingModelConfig[]): Promise<boolean> =
       return false;
     }
   } else {
-    localStorage.setItem(EMBEDDING_CONFIG_FILE, JSON.stringify(configs));
+    localStore.setItem(EMBEDDING_CONFIG_FILE, JSON.stringify(configs));
     return true;
   }
 };

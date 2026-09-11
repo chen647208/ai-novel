@@ -7,6 +7,8 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { uuidv7 } from '@core/entities';
+
 import type { CustomFontMeta } from '../../../../shared/types';
 import { useSettingsStore } from '../../../app/stores/settingsStore';
 
@@ -92,7 +94,7 @@ export async function importCustomFont(file: File): Promise<CustomFontMeta> {
   const store = useSettingsStore.getState();
   const baseName = file.name.replace(/\.[^.]+$/, '').trim() || `字体${Date.now()}`;
   // 同名复用同一家族名，避免 @font-face 重名堆积
-  const id = `${Date.now().toString(36)}${Math.floor(Math.random() * 0xffff).toString(36)}`;
+  const id = `font_${uuidv7()}`;
   const fileName = `${id}.${ext}`;
   const base = await appDataPath();
   await api().writeFile(`${base}/${fontPath(fileName)}`, base64);
