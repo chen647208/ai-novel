@@ -22,3 +22,17 @@ test('工作台导航栏视觉快照', async () => {
     await app.close();
   }
 });
+
+test('命令面板视觉快照', async () => {
+  const userDataDir = mkdtempSync(join(tmpdir(), 'hongyue-visual-'));
+  const { app, page } = await launchApp(userDataDir);
+  try {
+    await createBook(page);
+    await page.keyboard.press('Control+K');
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible({ timeout: 30_000 });
+    await expect(dialog).toHaveScreenshot('command-palette.png', { maxDiffPixelRatio: 0.02 });
+  } finally {
+    await app.close();
+  }
+});
