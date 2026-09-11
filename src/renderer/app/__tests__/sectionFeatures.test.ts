@@ -7,13 +7,15 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 import { describe, it, expect } from 'vitest';
-import { SECTION_FEATURE, isSectionVisible } from '../sectionFeatures';
+import { isSectionVisible } from '../sectionFeatures';
+import { WORKSPACE_SECTIONS } from '../sections';
 
 describe('sectionFeatures', () => {
-  it('五分区映射齐全', () => {
-    expect(Object.keys(SECTION_FEATURE).sort()).toEqual(
+  it('五分区功能映射齐全（单源在 sections.ts）', () => {
+    expect(WORKSPACE_SECTIONS.map((s) => s.id).sort()).toEqual(
       ['characters', 'inspiration', 'structure', 'writing', 'world'].sort(),
     );
+    expect(WORKSPACE_SECTIONS.every((s) => s.features.length > 0)).toBe(true);
   });
 
   it('structure 任一子功能可用即显', () => {

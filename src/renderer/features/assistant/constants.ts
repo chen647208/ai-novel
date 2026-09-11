@@ -22,3 +22,6 @@ export const DEFAULT_ASSISTANT_SUB_SELECTION_ID = 'all';
 
 /** 语义检查串行调用间隔（毫秒）：降低上游限流概率。 */
 export const AI_SEMANTIC_THROTTLE_MS = 300;
+
+/** 助手功能 id（发行档可见性判断用，与 core/plugin 的功能声明同名）。 */
+export const ASSISTANT_FEATURE_ID = 'core.assistant';

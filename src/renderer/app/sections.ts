@@ -31,14 +31,16 @@ export interface SectionDef {
   id: SectionId;
   icon: React.ComponentType<{ className?: string }>;
   labelKey: SectionLabelKey;
+  /** 该分区所需的功能 id（任一可用即显示；发行档禁用后回退写作）。 */
+  features: readonly string[];
   /** 分区是否已有内容（驱动完成状态点）。 */
   done: (p: Project) => boolean;
 }
 
 export const WORKSPACE_SECTIONS: readonly SectionDef[] = [
-  { id: 'inspiration', icon: PenLine, labelKey: 'steps.inspiration', done: (p) => !!(p.inspiration || p.intro) },
-  { id: 'world', icon: Globe, labelKey: 'steps.world', done: (p) => (p.knowledge?.length ?? 0) > 0 || !!p.worldView },
-  { id: 'characters', icon: Users, labelKey: 'steps.characters', done: (p) => p.characters.length > 0 },
-  { id: 'structure', icon: ListOrdered, labelKey: 'steps.structure', done: (p) => !!p.outline || p.chapters.length > 0 },
-  { id: 'writing', icon: Feather, labelKey: 'steps.writing', done: (p) => p.chapters.some((c) => !!c.content) },
+  { id: 'inspiration', icon: PenLine, labelKey: 'steps.inspiration', features: ['core.inspiration'], done: (p) => !!(p.inspiration || p.intro) },
+  { id: 'world', icon: Globe, labelKey: 'steps.world', features: ['core.world'], done: (p) => (p.knowledge?.length ?? 0) > 0 || !!p.worldView },
+  { id: 'characters', icon: Users, labelKey: 'steps.characters', features: ['core.characters'], done: (p) => p.characters.length > 0 },
+  { id: 'structure', icon: ListOrdered, labelKey: 'steps.structure', features: ['core.chapters', 'core.outline'], done: (p) => !!p.outline || p.chapters.length > 0 },
+  { id: 'writing', icon: Feather, labelKey: 'steps.writing', features: ['core.writing'], done: (p) => p.chapters.some((c) => !!c.content) },
 ];

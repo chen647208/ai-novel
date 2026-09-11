@@ -45,6 +45,7 @@ import { useAppBootstrap } from './useAppBootstrap';
 import { useFeatureAvailability } from './useFeatureAvailability';
 import { useBookActions } from './useBookActions';
 import { isSectionVisible } from './sectionFeatures';
+import { ASSISTANT_FEATURE_ID } from '@/features/assistant/constants';
 import { Bot } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 
@@ -240,7 +241,7 @@ const App: React.FC = () => {
     }
   }, [actions]);
 
-  const assistantNode = availableFeatures.has('core.assistant') ? (
+  const assistantNode = availableFeatures.has(ASSISTANT_FEATURE_ID) ? (
     <GlobalAssistant
       models={models}
       activeModelId={activeModelId}

@@ -18,8 +18,6 @@ import { WORKSPACE_SECTIONS, type SectionId } from '../sections';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/Tooltip';
 import { Feather, Library, Settings2 } from 'lucide-react';
 
-export { SECTION_FEATURE } from '../sectionFeatures';
-
 interface WorkspaceNavProps {
   activeSection: SectionId;
   onSectionChange: (section: SectionId) => void;
