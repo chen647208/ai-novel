@@ -102,5 +102,15 @@
 设置面板选项、`profileByName` 装配树、`profileDeniesAi` 的 AI 策略判断均读它，未知档名回退
 `DEFAULT_RELEASE_PROFILE`。新增发行档只改这一处。
 
+## 七、扩展点（命令与 UI 槽位）
+
+命令注册表 `shared/services/commandRegistry.ts`：命令面板数据源，`register` 返回解绑函数，
+应用壳在 `App.tsx` 注册内置命令（命令内容走 ref，注册 effect 只依赖语言/活动书/功能集等稳定原始值），
+插件可续注。
+
+UI 槽位注册表 `shared/services/uiSlots.ts` + 渲染点 `shared/ui/Slot.tsx`：应用壳在固定位置渲染
+`<Slot id>`，功能/插件注册节点即可插入。`getSnapshot` 按槽缓存保证 `useSyncExternalStore` 引用稳定。
+已接入 `topbar.actions`（版本徽标经 `app/app-shell/coreSlots.tsx` 注册）；新增插槽位置只加 `SlotId` 与一处 `<Slot>`。
+
 
 

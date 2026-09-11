@@ -48,9 +48,12 @@ import { isSectionVisible } from './sectionFeatures';
 import { ASSISTANT_FEATURE_ID } from '@/features/assistant/constants';
 import { Bot } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
+import { registerCoreSlots } from './app-shell/coreSlots';
 
 /** 分区快捷键顺序：Ctrl/Cmd+1..5（模块级常量，避免 effect 依赖抖动）。 */
 const SECTION_ORDER: SectionId[] = WORKSPACE_SECTIONS.map((s) => s.id);
+
+registerCoreSlots();
 
 const App: React.FC = () => {
   useAppBootstrap();

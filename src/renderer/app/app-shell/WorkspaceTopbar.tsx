@@ -32,7 +32,7 @@ import {
 
 import SyncDialog from './SyncDialog';
 import ProtectedSessionDialog from './ProtectedSessionDialog';
-import VersionBadge from '@/features/version/components/VersionBadge';
+import Slot from '@/shared/ui/Slot';
 
 interface WorkspaceTopbarProps {
   project: Project | null;
@@ -207,7 +207,7 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
         </Button>
 
         <div className="flex items-center gap-1">
-          <VersionBadge />
+          <Slot id="topbar.actions" />
           <Button
             variant="ghost"
             size="icon"
