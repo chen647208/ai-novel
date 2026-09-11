@@ -36,3 +36,20 @@ test('命令面板视觉快照', async () => {
     await app.close();
   }
 });
+
+test('写作区空态视觉快照', async () => {
+  const userDataDir = mkdtempSync(join(tmpdir(), 'hongyue-visual-'));
+  const { app, page } = await launchApp(userDataDir);
+  try {
+    await createBook(page);
+    await page.keyboard.press('Control+5');
+    await expect(page.getByRole('button', { name: /新建第一章|Create first chapter/ })).toBeVisible({ timeout: 30_000 });
+    // 遮罩顶栏：版本号等随构建变化，不入快照
+    await expect(page).toHaveScreenshot('writing-empty.png', {
+      mask: [page.locator('header')],
+      maxDiffPixelRatio: 0.02,
+    });
+  } finally {
+    await app.close();
+  }
+});
