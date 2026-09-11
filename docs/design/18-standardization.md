@@ -127,8 +127,9 @@ UI 槽位注册表 `shared/services/uiSlots.ts` + 渲染点 `shared/ui/Slot.tsx`
 - `types:escapes`：`scripts/check-type-escapes.mjs`——统计非测试代码 `as unknown as`，超上限即失败
   （2026-09 基线 37，清理后下调）。
 - `bundle:check`：`scripts/check-bundle-size.mjs`——渲染层 JS+CSS 体积预算（2026-09 基线约 3014KB，预算 3200KB）。
-- lint 类型感知：开启 `no-misused-promises`、`await-thenable`（error）；`no-floating-promises` 存量较多先
-  置 warn（当前 168 warnings，其中悬浮 Promise 约 143），清理到阈值后升 error。
+- lint 类型感知：`no-misused-promises`、`await-thenable`、`no-floating-promises`（均 error；悬浮 Promise 已清零）。
+- lint 风格约定：`simple-import-sort`（导入/导出排序，`--fix` 自动修复）+ `@typescript-eslint/naming-convention`
+  （变量/函数/类型命名；属性名不约束）。`npm run lint:fix` 会顺带把许可证头搬回文件首位。
 
 
 

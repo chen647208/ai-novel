@@ -91,6 +91,23 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': ['warn', { prefer: 'type-imports', fixStyle: 'inline-type-imports' }],
       '@typescript-eslint/no-empty-object-type': 'warn',
 
+      // 命名约定：标识符按 TS 惯例；属性/对象键不约束（外部数据键名不受控）
+      '@typescript-eslint/naming-convention': [
+        'error',
+        { selector: 'default', format: ['camelCase'], leadingUnderscore: 'allow', trailingUnderscore: 'allow' },
+        { selector: 'variable', filter: { regex: '^__', match: true }, format: null },
+        { selector: 'variable', format: ['camelCase', 'UPPER_CASE', 'PascalCase'], leadingUnderscore: 'allowDouble', trailingUnderscore: 'allow' },
+        { selector: 'function', format: ['camelCase', 'PascalCase'] },
+        { selector: 'parameter', format: ['camelCase', 'PascalCase'], leadingUnderscore: 'allow' },
+        { selector: 'typeLike', format: ['PascalCase'] },
+        { selector: 'enumMember', format: ['UPPER_CASE', 'PascalCase'] },
+        { selector: 'typeProperty', format: null },
+        { selector: 'objectLiteralProperty', format: null },
+        { selector: 'objectLiteralMethod', format: null },
+        { selector: 'classProperty', format: ['camelCase', 'UPPER_CASE'], leadingUnderscore: 'allow' },
+        { selector: 'import', format: null },
+      ],
+
       // 异步正确性（类型感知）
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: false }],
