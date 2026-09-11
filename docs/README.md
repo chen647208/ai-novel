@@ -45,6 +45,7 @@ Trail of Bits、Cloudflare coding standards、WordPress 文档风格指南同款
 - `features/settings.md`：模型、Embedding、提示词和存储设置
 - `features/plugins-and-sync.md`：插件系统、同步（冲突副本）、逐条目加密、导出构建管线
 - `features/version.md`：版本信息、更新检查与版本历史
+- `features/ui-catalog.md`：UI 组件清单与用法（通用交互的唯一来源，配套 `design/19-ui-system.md`）
 
 ### 3. 目标设计（design/）
 
