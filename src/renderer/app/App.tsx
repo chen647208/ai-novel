@@ -28,7 +28,8 @@ import { exportCover } from '../shared/services/coverService';
 import WorkspaceView from './app-shell/WorkspaceView';
 import type { SectionId } from './sections';
 import { WORKSPACE_SECTIONS } from './sections';
-import CommandPalette, { type Command } from './app-shell/CommandPalette';
+import CommandPalette from './app-shell/CommandPalette';
+import { commandRegistry, type AppCommand } from '@/shared/services/commandRegistry';
 import { dt } from '@/i18n';
 import GlobalAssistant from '../features/assistant/GlobalAssistant';
 import { eventToKeybinding, resolveKeybindings } from '../features/settings/services/keybindings';
@@ -179,20 +180,20 @@ const App: React.FC = () => {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  const commands = useMemo<Command[]>(() => {
-    const list: Command[] = [
-      { id: 'settings', label: t('command.settings'), keywords: 'settings', run: () => setIsSettingsOpen(true) },
-      { id: 'search', label: t('command.search'), keywords: 'search find', run: () => setIsSearchOpen(true) },
-      { id: 'assistant', label: t('command.toggleAssistant'), keywords: 'assistant ctrl+j', run: toggleAssistant },
-      { id: 'bookshelf', label: t('command.bookshelf'), keywords: 'bookshelf shelf', run: () => setView('bookshelf') },
+  const builtInCommands = useMemo<AppCommand[]>(() => {
+    const list: AppCommand[] = [
+      { id: 'settings', title: t('command.settings'), keywords: 'settings', run: () => setIsSettingsOpen(true) },
+      { id: 'search', title: t('command.search'), keywords: 'search find', run: () => setIsSearchOpen(true) },
+      { id: 'assistant', title: t('command.toggleAssistant'), keywords: 'assistant ctrl+j', run: toggleAssistant },
+      { id: 'bookshelf', title: t('command.bookshelf'), keywords: 'bookshelf shelf', run: () => setView('bookshelf') },
     ];
     if (activeProject) {
-      list.push({ id: 'exportCover', label: t('command.exportCover'), keywords: 'cover export', run: () => handleExportCover(activeProject) });
+      list.push({ id: 'exportCover', title: t('command.exportCover'), keywords: 'cover export', run: () => handleExportCover(activeProject) });
       for (const s of WORKSPACE_SECTIONS) {
         if (isSectionVisible(s.id, (id) => availableFeatures.has(id))) {
           list.push({
             id: `section.${s.id}`,
-            label: t('command.goSection', { name: dt(`nav:${s.labelKey}`) }),
+            title: t('command.goSection', { name: dt(`nav:${s.labelKey}`) }),
             keywords: s.id,
             run: () => handleSectionChange(s.id),
           });
@@ -201,6 +202,14 @@ const App: React.FC = () => {
     }
     return list;
   }, [t, toggleAssistant, activeProject, handleExportCover, handleSectionChange, availableFeatures]);
+
+  // 命令面板数据来自全局命令注册表（应用壳注册内置命令，插件/功能可续注）
+  const [registryCommands, setRegistryCommands] = useState<AppCommand[]>(() => commandRegistry.list());
+  useEffect(() => commandRegistry.subscribe(setRegistryCommands), []);
+  useEffect(() => {
+    const disposers = builtInCommands.map((c) => commandRegistry.register(c));
+    return () => disposers.forEach((dispose) => dispose());
+  }, [builtInCommands]);
 
   // 当前分区不可用（minimal 档禁 AI 功能）时回退写作编辑器（映射单源见 sectionFeatures）
   useEffect(() => {
@@ -356,7 +365,7 @@ const App: React.FC = () => {
             }
           }}
         />
-        <CommandPalette open={isCommandPaletteOpen} onOpenChange={setIsCommandPaletteOpen} commands={commands} />
+        <CommandPalette open={isCommandPaletteOpen} onOpenChange={setIsCommandPaletteOpen} commands={registryCommands} />
       </div>
     </TooltipProvider>
   );

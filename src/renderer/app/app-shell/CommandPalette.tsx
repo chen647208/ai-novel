@@ -13,19 +13,12 @@ import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/Dialog';
 import { Input } from '@/shared/ui/Input';
 import { cn } from '@/shared/utils/cn';
 import { Search } from 'lucide-react';
-
-export interface Command {
-  id: string;
-  label: string;
-  /** 额外匹配词（拼音/英文/别名）。 */
-  keywords?: string;
-  run: () => void;
-}
+import type { AppCommand } from '@/shared/services/commandRegistry';
 
 interface CommandPaletteProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  commands: Command[];
+  commands: AppCommand[];
 }
 
 /** 命令面板（Ctrl/Cmd+K）：模糊过滤命令，回车执行首项。 */
@@ -44,7 +37,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onOpenChange, com
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return commands;
-    return commands.filter((c) => `${c.label} ${c.keywords ?? ''}`.toLowerCase().includes(q));
+    return commands.filter((c) => `${c.title} ${c.keywords ?? ''}`.toLowerCase().includes(q));
   }, [commands, query]);
 
   const runAt = (index: number): void => {
@@ -88,7 +81,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onOpenChange, com
                   index === activeIndex ? 'bg-accent text-accent-foreground' : 'text-foreground hover:bg-accent/50',
                 )}
               >
-                {cmd.label}
+                {cmd.title}
               </button>
             ))
           )}
