@@ -37,6 +37,7 @@ import type {
 } from '../../../../shared/types';
 import type { BatchMode, BatchProgress, GenerationModalState, MenuPosition, TextSelectionRange, TokenUsage } from '../types';
 import { applySelectionReplacement } from '../../../editor/commands';
+import { applyGeneratedContent, applyBatchResults, generateChapterContent } from '../services/chapterGeneration';
 import { buildChapterPrompt } from '../services/chapterPrompt';
 
 interface UseChapterGenerationOptions {
@@ -185,7 +186,7 @@ export function useChapterGeneration(options: UseChapterGenerationOptions) {
             const result = response.content;
             if (selectedText && selectionRange && !genModal.isOpen) {
               const currentContent = activeChapter?.content || '';
-              const newContent = applySelectionReplacement(currentContent, selectionRange.start, selectionRange.end, result);
+              const newContent = applyGeneratedContent(currentContent, result, selectionRange, applySelectionReplacement);
 
               const historyRecord = AIService.buildHistoryRecordData(
                 targetChapter.id,
@@ -214,7 +215,7 @@ export function useChapterGeneration(options: UseChapterGenerationOptions) {
               commitAIChapters(updatedChapters, template);
             } else {
               const currentContent = targetChapter.content || '';
-              const newContent = currentContent.length < 50 ? result : (currentContent + '\n\n' + result);
+              const newContent = applyGeneratedContent(currentContent, result);
               const newChapters = project.chapters.map(c => {
                 if (c.id === targetChapter.id) {
                   const historyRecord = AIService.buildHistoryRecordData(
@@ -264,7 +265,7 @@ export function useChapterGeneration(options: UseChapterGenerationOptions) {
 
         if (selectedText && selectionRange && !genModal.isOpen) {
           const currentContent = activeChapter?.content || '';
-          const newContent = applySelectionReplacement(currentContent, selectionRange.start, selectionRange.end, result.content);
+          const newContent = applyGeneratedContent(currentContent, result.content, selectionRange, applySelectionReplacement);
 
           const historyRecord = AIService.buildHistoryRecordData(
             targetChapter.id,
@@ -293,7 +294,7 @@ export function useChapterGeneration(options: UseChapterGenerationOptions) {
           commitAIChapters(updatedChapters, template);
         } else {
           const currentContent = targetChapter.content || '';
-          const newContent = currentContent.length < 50 ? result.content : (currentContent + '\n\n' + result.content);
+          const newContent = applyGeneratedContent(currentContent, result.content);
           const newChapters = project.chapters.map(c => {
             if (c.id === targetChapter.id) {
               const historyRecord = AIService.buildHistoryRecordData(
@@ -354,7 +355,7 @@ export function useChapterGeneration(options: UseChapterGenerationOptions) {
       return;
     }
     const currentContent = activeChapter.content || '';
-    const merged = currentContent.length < 50 ? stoppedPartial : (currentContent + '\n\n' + stoppedPartial);
+    const merged = applyGeneratedContent(currentContent, stoppedPartial);
     updateChapterContent(merged);
     setStoppedPartial(null);
     setStreamingContent('');
@@ -371,11 +372,12 @@ export function useChapterGeneration(options: UseChapterGenerationOptions) {
     void runAITemplate(last.template, last.overrideContent);
   };
 
-  const generateSingleChapter = async (chapter: Chapter, template: PromptTemplate, model: ModelConfig, externalSignal?: AbortSignal): Promise<{ content: string; historyRecord?: AIHistoryRecord }> => {
-    try {
-      setActiveChapterId(chapter.id);
-
-      const finalPrompt = buildChapterPrompt({
+  const generateSingleChapter = (chapter: Chapter, template: PromptTemplate, model: ModelConfig, externalSignal?: AbortSignal) =>
+    generateChapterContent({
+      chapter,
+      template,
+      model,
+      prompt: buildChapterPrompt({
         template,
         project,
         targetChapter: chapter,
@@ -388,92 +390,19 @@ export function useChapterGeneration(options: UseChapterGenerationOptions) {
         selectedKnowledgeIds,
         selectedCharacterIds,
         selectedChapterSummaryIds,
-      });
-
-      const shouldUseStreaming = outputMode === 'streaming' && model.supportsStreaming !== false;
-
-      if (shouldUseStreaming) {
-        setIsStreaming(true);
-        setStreamingContent('');
-        setStreamingResponse(null);
-
-        const abortController = new AbortController();
-        setStreamingAbortController(abortController);
-        // 批量停止信号联动本次请求
-        if (externalSignal) {
-          if (externalSignal.aborted) abortController.abort();
-          else externalSignal.addEventListener('abort', () => abortController.abort(), { once: true });
-        }
-
-        return new Promise<{ content: string; historyRecord?: AIHistoryRecord }>((resolve, reject) => {
-          AIService.callStreaming(model, finalPrompt, (response) => {
-            setStreamingContent(response.content);
-            setStreamingResponse(response);
-
-            if (response.tokens) {
-              setStreamingTokens(response.tokens);
-            }
-
-            if (response.isComplete) {
-              setIsStreaming(false);
-              setStreamingAbortController(null);
-
-              if (response.error) {
-                reject(new Error(response.error));
-                return;
-              }
-
-              const result = response.content;
-              const currentContent = chapter.content || '';
-              const newContent = currentContent.length < 50 ? result : (currentContent + '\n\n' + result);
-
-              const historyRecord = AIService.buildHistoryRecordData(
-                chapter.id,
-                finalPrompt,
-                result,
-                model,
-                response,
-                {
-                  templateName: templateDisplayName(template),
-                  batchGeneration: true,
-                  chapterTitle: chapter.title,
-                },
-              );
-
-              resolve({ content: newContent, historyRecord });
-            }
-          }, { signal: abortController.signal }).catch(reject);
-        });
-      } else {
-        const result = await AIService.call(model, finalPrompt, { signal: externalSignal });
-
-        if (result.tokens) {
-          setTraditionalTokens(result.tokens);
-        }
-
-        const currentContent = chapter.content || '';
-        const newContent = currentContent.length < 50 ? result.content : (currentContent + '\n\n' + result.content);
-
-        const historyRecord = AIService.buildHistoryRecordData(
-          chapter.id,
-          finalPrompt,
-          result.content,
-          model,
-          result,
-          {
-            templateName: templateDisplayName(template),
-            batchGeneration: true,
-            chapterTitle: chapter.title,
-          },
-        );
-
-        return { content: newContent, historyRecord };
-      }
-    } catch (err) {
-      logger.error(err);
-      throw err;
-    }
-  };
+      }),
+      outputMode,
+      externalSignal,
+      io: {
+        setActiveChapterId,
+        setIsStreaming,
+        setStreamingContent,
+        setStreamingResponse,
+        setStreamingAbortController,
+        setStreamingTokens,
+        setTraditionalTokens,
+      },
+    });
 
   const runBatchGeneration = async () => {
     const template = prompts.find(p => p.id === selectedGenPromptId);
@@ -534,19 +463,7 @@ export function useChapterGeneration(options: UseChapterGenerationOptions) {
       }
 
       if (chapterUpdates.length > 0) {
-        const newChapters = project.chapters.map(c => {
-          const update = chapterUpdates.find(u => u.id === c.id);
-          if (update) {
-            const existingHistory = c.history || [];
-            const newHistory = update.historyRecord ? [...existingHistory, update.historyRecord] : existingHistory;
-            return {
-              ...c,
-              content: update.content,
-              history: newHistory,
-            };
-          }
-          return c;
-        });
+        const newChapters = applyBatchResults(project.chapters, chapterUpdates);
 
         onUpdate({ chapters: newChapters }, { agentId: 'ai:writing-batch', cause: selectedGenPromptId });
 
