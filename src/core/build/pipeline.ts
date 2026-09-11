@@ -82,8 +82,12 @@ export interface Transformer {
 
 const transformers = new Map<string, Transformer>();
 
-export function registerTransformer(t: Transformer): void {
+/** 注册变换器贡献；返回解绑函数（插件卸载/热替换可逆）。 */
+export function registerTransformer(t: Transformer): () => void {
   transformers.set(t.id, t);
+  return () => {
+    transformers.delete(t.id);
+  };
 }
 
 export function listTransformers(): Transformer[] {
@@ -152,8 +156,12 @@ export interface Renderer {
 
 const renderers = new Map<string, Renderer>();
 
-export function registerRenderer(r: Renderer): void {
+/** 注册渲染器贡献；返回解绑函数（插件卸载/热替换可逆）。 */
+export function registerRenderer(r: Renderer): () => void {
   renderers.set(r.id, r);
+  return () => {
+    renderers.delete(r.id);
+  };
 }
 
 export function listRenderers(): Renderer[] {
