@@ -27,11 +27,11 @@ import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { MarkdownView } from '@/shared/ui/Markdown';
 import { Select } from '@/shared/ui/Select';
-import { Textarea } from '@/shared/ui/Textarea';
-import { BookOpen, BookOpenText, Check, CheckCheck, ChevronDown, ChevronRight, ChevronUp, Clock, FastForward, FileOutput, Flag, Globe2, Layers, LayoutGrid, LayoutList, ListOrdered, MapPin, PenTool, Trash2, WandSparkles, XCircle } from 'lucide-react';
+import { BookOpen, BookOpenText, Check, CheckCheck, ChevronDown, ChevronRight, Clock, FastForward, FileOutput, Flag, Globe2, Layers, LayoutGrid, LayoutList, ListOrdered, MapPin, WandSparkles, XCircle } from 'lucide-react';
 import { useViewPreference } from '@/shared/hooks/useViewPreference';
 import { ViewModeToggle } from '@/shared/ui/ViewModeToggle';
 import { useChapterOutlineGeneration } from './hooks/useChapterOutlineGeneration';
+import { ChapterOutlineList } from './components/ChapterOutlineList';
 
 interface StepChapterOutlineProps {
   project: Project;
@@ -333,113 +333,31 @@ const StepChapterOutline: React.FC<StepChapterOutlineProps> = ({ project, onEnte
                 );
               }
 
-              if (chapterView === 'table') {
-                return (
-                  <div className="overflow-hidden rounded-lg border border-border">
-                    {sortedChapters.map((chap, idx) => (
-                      <div
-                        key={chap.id}
-                        draggable
-                        onDragStart={(e) => { setDragId(chap.id); e.dataTransfer.effectAllowed = 'move'; }}
-                        onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (dropIndex !== idx) setDropIndex(idx); }}
-                        onDrop={(e) => { e.preventDefault(); if (dragId) moveChapterTo(dragId, idx); clearDragState(); }}
-                        onDragEnd={clearDragState}
-                        className={`group flex cursor-grab items-center gap-3 px-4 py-2.5 transition-colors hover:bg-accent/40 active:cursor-grabbing ${idx > 0 ? 'border-t border-border' : ''} ${dropIndex === idx && dragId !== chap.id ? 'bg-primary/10' : ''}`}
-                      >                        <span className="w-8 shrink-0 text-xs tabular-nums text-muted-foreground">{idx + 1}</span>
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate text-sm font-medium text-foreground">{chap.title || t('steps:chapters.titlePlaceholder')}</div>
-                          <div className="truncate text-xs text-muted-foreground">
-                            {(chap.summary || '').slice(0, 60) || '—'}
-                            {(chap.content?.length ?? 0) > 0 && ` · ${(chap.content?.length ?? 0).toLocaleString()}字`}
-                          </div>
-                        </div>
-                        <div className="flex shrink-0 items-center">
-                          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" disabled={idx === 0} onClick={() => moveChapter(chap.id, -1)} title={t('steps:chapters.moveUp')}>
-                            <ChevronUp className="size-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" disabled={idx === sortedChapters.length - 1} onClick={() => moveChapter(chap.id, 1)} title={t('steps:chapters.moveDown')}>
-                            <ChevronDown className="size-4" />
-                          </Button>
-                          <Button size="sm" onClick={() => onEnterWriting(chap.id)}>
-                            <PenTool className="size-3.5" /> {t('steps:chapters.writeThis')}
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                );
-              }
-
-              return sortedChapters.map((chap, idx) => (
-                <div
-                  key={chap.id}
-                  draggable
-                  onDragStart={(e) => { setDragId(chap.id); e.dataTransfer.effectAllowed = 'move'; }}
-                  onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (dropIndex !== idx) setDropIndex(idx); }}
-                  onDrop={(e) => { e.preventDefault(); if (dragId) moveChapterTo(dragId, idx); clearDragState(); }}
-                  onDragEnd={clearDragState}
-                  className={`group rounded-lg border border-border bg-card p-5 shadow-sm transition-colors hover:border-primary/30 ${dropIndex === idx && dragId !== chap.id ? 'border-primary/60 bg-primary/5' : ''}`}
-                >
-                  <div className="mb-4 flex items-center gap-4 border-b border-border pb-4">
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-medium text-muted-foreground">
-                      {idx + 1}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <Input
-                        className="h-auto border-none bg-transparent p-0 font-serif text-base font-medium shadow-none focus-visible:ring-0"
-                        value={chap.title}
-                        onChange={(e) => {
-                          const newChaps = project.chapters.map(c => c.id === chap.id ? { ...c, title: e.target.value } : c);
-                          onUpdate({ chapters: newChaps });
-                        }}
-                        placeholder={t('steps:chapters.titlePlaceholder')}
-                      />
-                    </div>
-                    <div className="flex shrink-0 items-center gap-1">
-                      <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" disabled={idx === 0} onClick={() => moveChapter(chap.id, -1)} title={t('steps:chapters.moveUp')}>
-                        <ChevronUp className="size-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" disabled={idx === sortedChapters.length - 1} onClick={() => moveChapter(chap.id, 1)} title={t('steps:chapters.moveDown')}>
-                        <ChevronDown className="size-4" />
-                      </Button>
-                      <Button size="sm" onClick={() => onEnterWriting(chap.id)}>
-                        <PenTool className="size-3.5" /> {t('steps:chapters.writeThis')}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-7 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
-                        onClick={() => onUpdate({ chapters: project.chapters.filter(c => c.id !== chap.id) })}
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="mb-1">
-                    <Label className="mb-1.5 block text-2xs uppercase tracking-wider text-muted-foreground">{t('steps:chapters.summaryLabel')}</Label>
-                    <Textarea
-                      className="min-h-24 resize-none bg-muted/40 leading-relaxed"
-                      value={chap.summary}
-                      onChange={(e) => {
-                        const newChaps = project.chapters.map(c => c.id === chap.id ? { ...c, summary: e.target.value } : c);
-                        onUpdate({ chapters: newChaps });
+              return (
+                <ChapterOutlineList
+                  chapters={sortedChapters}
+                  view={chapterView}
+                  dragId={dragId}
+                  dropIndex={dropIndex}
+                  setDragId={setDragId}
+                  setDropIndex={setDropIndex}
+                  clearDragState={clearDragState}
+                  moveChapter={moveChapter}
+                  moveChapterTo={moveChapterTo}
+                  onEnterWriting={onEnterWriting}
+                  project={project}
+                  onUpdate={onUpdate}
+                  renderRelationEditor={(chap) => (
+                    <ChapterWorldRelationEditor
+                      chapter={chap}
+                      project={project}
+                      onUpdate={(updates) => {
+                        onUpdate({ chapters: project.chapters.map(c => c.id === chap.id ? { ...c, ...updates } : c) });
                       }}
-                      placeholder={t('steps:chapters.summaryPlaceholder')}
                     />
-                  </div>
-
-                  {/* 世界关联信息编辑器 */}
-                  <ChapterWorldRelationEditor
-                    chapter={chap}
-                    project={project}
-                    onUpdate={(updates) => {
-                      const newChaps = project.chapters.map(c => c.id === chap.id ? { ...c, ...updates } : c);
-                      onUpdate({ chapters: newChaps });
-                    }}
-                  />
-                </div>
-              ));
+                  )}
+                />
+              );
             })()}
           </div>
         </Card>

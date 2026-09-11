@@ -14,6 +14,7 @@ import { type Project, type KnowledgeItem, type KnowledgeCategory, type HybridSe
 import { vectorIntegrationService } from './services/vectorIntegrationService';
 import { searchKnowledge } from './services/knowledgeSearch';
 import { useKnowledgeIndex } from './hooks/useKnowledgeIndex';
+import { KnowledgeDetailPanel } from './components/KnowledgeDetailPanel';
 import { repository } from '../../shared/services/repository';
 import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
 import { useUsableModel } from '@/app/stores/settingsStore';
@@ -29,14 +30,12 @@ import EnhancedTimeline from '../timeline/EnhancedTimeline';
 import KnowledgeFeaturePanels from './components/KnowledgeFeaturePanels';
 import { dialogService } from '@/shared/services/dialogService';
 import { cn } from '@/shared/utils/cn';
-import { formatBytes, formatPercent, formatDate, formatDateTime } from '@/shared/utils/format';
+import { formatBytes, formatPercent, formatDate } from '@/shared/utils/format';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { Input } from '@/shared/ui/Input';
-import { Select } from '@/shared/ui/Select';
-import { Textarea } from '@/shared/ui/Textarea';
-import { BookOpen, Bot, Brain, Calendar, Clock, CloudUpload, FileText, Flag, Globe, MapPinned, PenLine, Search, Settings2, Tag, X } from 'lucide-react';
+import { BookOpen, Bot, Brain, Clock, CloudUpload, Flag, Globe, MapPinned, Search, Settings2, X } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
 import { Progress } from '@/shared/ui/Progress';
 
@@ -781,84 +780,17 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
           </div>
         </Card>
 
-        <Card className="col-span-2 flex flex-col overflow-hidden">
-          <div className="flex flex-none items-center justify-between gap-2 border-b border-border bg-muted/30 p-4">
-            <h3 className="text-sm font-medium">
-              {viewingItem ? t('center.editTitle') : t('center.selectToEdit')}
-            </h3>
-            {viewingItem && (
-              <div className="flex items-center gap-2">
-                <Select
-                  value={editCategory}
-                  onChange={(e) => {
-                    setEditCategory(e.target.value as KnowledgeCategory);
-                    setIsDirty(true);
-                  }}
-                  className="h-8 w-auto text-sm"
-                >
-                  {(['inspiration', 'character', 'outline', 'chapter', 'writing'] as KnowledgeCategory[]).map(category => (
-                    <option key={category} value={category}>{t(`category.${category}`)}</option>
-                  ))}
-                </Select>
-                <Button size="sm" onClick={handleSave} disabled={!isDirty}>
-                  {t('center.saveChanges')}
-                </Button>
-              </div>
-            )}
-          </div>
-
-          <div className="flex-1 overflow-hidden">
-            {viewingItem ? (
-              <div className="flex h-full flex-col">
-                <div className="flex-none border-b border-border p-4">
-                  <Input
-                    value={editName}
-                    onChange={(e) => {
-                      setEditName(e.target.value);
-                      setIsDirty(true);
-                    }}
-                    placeholder={t('center.titlePlaceholder')}
-                    className="font-serif text-lg"
-                  />
-                  <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1.5">
-                      <FileText className="size-3.5" />
-                      <span className="tabular-nums">{formatBytes(viewingItem.size)}</span>
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="size-3.5" />
-                      {formatDateTime(viewingItem.addedAt, i18n.language)}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Tag className="size-3.5" />
-                      {viewingItem.type.toUpperCase()}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex-1 overflow-hidden">
-                  <Textarea
-                    value={editContent}
-                    onChange={(e) => {
-                      setEditContent(e.target.value);
-                      setIsDirty(true);
-                    }}
-                    placeholder={t('center.contentPlaceholder')}
-                    className="h-full min-h-[300px] w-full resize-none rounded-none border-0 bg-transparent font-mono text-sm leading-relaxed shadow-none focus-visible:ring-0"
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="flex h-full items-center justify-center">
-                <EmptyState
-                  icon={PenLine}
-                  title={t('center.emptyEditor')}
-                  description={t('center.emptyEditorHint')}
-                />
-              </div>
-            )}
-          </div>
-        </Card>
+        <KnowledgeDetailPanel
+          viewingItem={viewingItem}
+          editName={editName}
+          editContent={editContent}
+          editCategory={editCategory}
+          isDirty={isDirty}
+          onNameChange={(v) => { setEditName(v); setIsDirty(true); }}
+          onContentChange={(v) => { setEditContent(v); setIsDirty(true); }}
+          onCategoryChange={(v) => { setEditCategory(v); setIsDirty(true); }}
+          onSave={handleSave}
+        />
       </div>
       </div>{/* 可滚动内容区域结束 */}
 
