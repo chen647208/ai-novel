@@ -54,6 +54,9 @@
 11. `WorldViewGraph` 抽 `graphLayout.ts`（纯算法可测）；`storage.ts` 拆迁移/配置；
     `StepKnowledgeEnhanced`/`StepChapterOutline` 拆面板。
 
+以上 hook 与 `graphLayout`/`storageMigrations` 已落地；两个 Step 面板另抽出
+`useChapterOutlineGeneration`/`useKnowledgeIndex`/`chapterOutline`/`knowledgeSearch`，进一步的面板级 JSX 拆分按需进行。
+
 ### 批次 F：插件化通电（P0 → P1）
 
 12. `ai.request` 门常态化：minimal 档在 `aiRuntime` 注册，所有 AI 出口经统一门
