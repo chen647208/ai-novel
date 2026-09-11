@@ -10,6 +10,8 @@
 /** 内置槽位贡献：应用壳启动时注册，与插件贡献走同一注册表。 */
 import VersionBadge from '@/features/version/components/VersionBadge';
 import { uiSlotRegistry } from '@/shared/services/uiSlots';
+import { CommandPaletteButton } from './CommandPaletteButton';
+import { StatusBarStats } from './StatusBarStats';
 
 export function registerCoreSlots(): void {
   uiSlotRegistry.register({
@@ -17,5 +19,19 @@ export function registerCoreSlots(): void {
     slot: 'topbar.actions',
     order: 0,
     render: () => <VersionBadge />,
+  });
+  for (const slot of ['nav.actions', 'sidebar.actions', 'editor.toolbar'] as const) {
+    uiSlotRegistry.register({
+      id: `core.command-palette.${slot}`,
+      slot,
+      order: 0,
+      render: () => <CommandPaletteButton />,
+    });
+  }
+  uiSlotRegistry.register({
+    id: 'core.status-bar.stats',
+    slot: 'status-bar',
+    order: 0,
+    render: () => <StatusBarStats />,
   });
 }

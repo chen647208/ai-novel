@@ -13,7 +13,12 @@
  */
 import type React from 'react';
 
-export type SlotId = 'topbar.actions';
+export type SlotId =
+  | 'topbar.actions'
+  | 'nav.actions'
+  | 'sidebar.actions'
+  | 'editor.toolbar'
+  | 'status-bar';
 
 export interface SlotContribution {
   id: string;

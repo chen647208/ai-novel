@@ -16,6 +16,7 @@ import { PageHeader, PageHeaderDivider } from '@/shared/ui/PageHeader';
 import { cn } from '@/shared/utils/cn';
 import { ArrowLeft, AlignCenterVertical, Camera, ChevronsRight, Eraser, Expand, FileOutput, FileText, History, Maximize2, Merge, Minimize2, Redo2, RotateCcw, Scissors, Search, SpellCheck, Sprout, Undo2 } from 'lucide-react';
 import { Progress } from '@/shared/ui/Progress';
+import Slot from '@/shared/ui/Slot';
 
 const iconBtn = 'size-8 text-muted-foreground';
 const textBtn = 'h-8 gap-1.5 px-2 text-xs text-muted-foreground';
@@ -106,6 +107,7 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
       }
       right={
         <>
+          <Slot id="editor.toolbar" />
           {/* 统计组：本章 / 全书 / 今日增量（按工具条实际宽度折叠，容器查询） */}
           <div
             className="hidden items-center gap-2.5 text-xs text-muted-foreground @2xl:flex"

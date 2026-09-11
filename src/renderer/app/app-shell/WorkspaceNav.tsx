@@ -16,6 +16,7 @@ import { Button } from '@/shared/ui/Button';
 import { isSectionVisible } from '../sectionFeatures';
 import { WORKSPACE_SECTIONS, type SectionId } from '../sections';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/Tooltip';
+import Slot from '@/shared/ui/Slot';
 import { Feather, Library, Settings2 } from 'lucide-react';
 
 interface WorkspaceNavProps {
@@ -97,6 +98,9 @@ const WorkspaceNav: React.FC<WorkspaceNavProps> = ({
           );
         })}
       </nav>
+
+      {/* 扩展槽位：导航动作 */}
+      <Slot id="nav.actions" />
 
       {/* 设置 */}
       <Tooltip>

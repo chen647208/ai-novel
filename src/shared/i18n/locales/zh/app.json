@@ -64,7 +64,12 @@
     "toggleAssistant": "切换 AI 助手",
     "bookshelf": "返回书架",
     "exportCover": "导出当前书籍封面",
-    "goSection": "前往：{{name}}"
+    "goSection": "前往：{{name}}",
+    "openPalette": "命令面板"
+  },
+  "statusBar": {
+    "chapters": "{{count}} 章",
+    "words": "{{count}} 字"
   },
   "model": {
     "notConfiguredKey": "当前模型尚未配置 API Key / 端点",

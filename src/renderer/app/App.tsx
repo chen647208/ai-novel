@@ -46,6 +46,7 @@ import { useFeatureAvailability } from './useFeatureAvailability';
 import { useBookActions } from './useBookActions';
 import { isSectionVisible } from './sectionFeatures';
 import { ASSISTANT_FEATURE_ID } from '@/features/assistant/constants';
+import { COMMAND_PALETTE_EVENT } from '@/shared/constants/appEvents';
 import { Bot } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { registerCoreSlots } from './app-shell/coreSlots';
@@ -172,7 +173,7 @@ const App: React.FC = () => {
     return () => window.removeEventListener('keydown', onSectionKey);
   }, [view, handleSectionChange, bindings.section1, bindings.section2, bindings.section3, bindings.section4, bindings.section5]);
 
-  // 命令面板：Ctrl/Cmd+K 随时开关
+  // 命令面板：Ctrl/Cmd+K 随时开关；槽位贡献按钮经事件打开
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
@@ -180,8 +181,13 @@ const App: React.FC = () => {
         setIsCommandPaletteOpen((v) => !v);
       }
     };
+    const onOpenEvent = () => setIsCommandPaletteOpen(true);
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener(COMMAND_PALETTE_EVENT, onOpenEvent);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener(COMMAND_PALETTE_EVENT, onOpenEvent);
+    };
   }, []);
 
   const builtInCommands = useMemo<AppCommand[]>(() => {

@@ -14,6 +14,7 @@ import ChapterNavigationSection from './ChapterNavigationSection';
 import ChapterSummarySection from './ChapterSummarySection';
 import type { WritingSidebarProps } from '../types';
 import { Button } from '@/shared/ui/Button';
+import Slot from '@/shared/ui/Slot';
 import { Textarea } from '@/shared/ui/Textarea';
 import { ChevronsLeft } from 'lucide-react';
 
@@ -42,9 +43,12 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
     <div className="flex h-full w-80 shrink-0 flex-col border-r border-border bg-card">
       <div className="flex items-center justify-between border-b border-border bg-muted/30 p-4">
         <h3 className="text-sm font-medium">{t('sidebar.title')}</h3>
-        <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={onClose}>
-          <ChevronsLeft className="size-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Slot id="sidebar.actions" />
+          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={onClose}>
+            <ChevronsLeft className="size-4" />
+          </Button>
+        </div>
       </div>
       <div className=" flex-1 space-y-6 overflow-y-auto p-4">
         <section>

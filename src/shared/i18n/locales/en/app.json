@@ -64,7 +64,12 @@
     "toggleAssistant": "Toggle AI assistant",
     "bookshelf": "Back to bookshelf",
     "exportCover": "Export current book cover",
-    "goSection": "Go to: {{name}}"
+    "goSection": "Go to: {{name}}",
+    "openPalette": "Command palette"
+  },
+  "statusBar": {
+    "chapters": "{{count}} chapters",
+    "words": "{{count}} words"
   },
   "model": {
     "notConfiguredKey": "The current model has no API Key / endpoint configured",

@@ -21,6 +21,7 @@ import WorkspaceNav from './WorkspaceNav';
 import type { SectionId } from '../sections';
 import WorkspaceTopbar from './WorkspaceTopbar';
 import StructureSection from './StructureSection';
+import Slot from '@/shared/ui/Slot';
 import StepInspiration from '../../features/inspiration/StepInspiration';
 import StepKnowledgeEnhanced from '../../features/knowledge/StepKnowledgeEnhanced';
 import StepCharacters from '../../features/characters/StepCharacters';
@@ -164,6 +165,9 @@ const WorkspaceSection: React.FC<WorkspaceViewProps> = ({
         </div>
       )}
       <div className="min-h-0 flex-1">{content}</div>
+      <div className="flex h-6 shrink-0 items-center justify-end gap-3 border-t border-border bg-muted/20 px-3">
+        <Slot id="status-bar" />
+      </div>
     </div>
   );
 };
