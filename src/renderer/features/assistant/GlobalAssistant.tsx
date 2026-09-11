@@ -10,15 +10,16 @@ import { logger } from '@/shared/utils/logger';
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { type KnowledgeItem, type OutputMode, type Character, type AICardCommand, type CreatedCard, type Project } from '../../../shared/types';
+import { type KnowledgeItem, type OutputMode, type Character, type Project } from '../../../shared/types';
 import { useProjectStore } from '@/app/stores/projectStore';
 import { collectChatAttachments } from './services/chatAttachments';
 import { useAssistantChat } from './hooks/useAssistantChat';
+import { useModelSelection } from './hooks/useModelSelection';
+import { useAssistantCards } from './hooks/useAssistantCards';
 import { type GlobalAssistantProps, type AssistantCategory, type AssistantEditCategory, type SyncStatus, type EditingData } from './types';
 import { type LooseRecord, asRecord, asStr } from '../../shared/utils/loose';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
 import { AIService } from '@/shared/services/ai/aiService';
-import { buildCardUpdates } from '../cards/services/cardApply';
 import { parseSingleCharacterFromText } from './services/characterParsing';
 import { buildContextContent } from './services/assistantContextContent';
 import { normalizeGenderId, normalizeRoleId } from '@/shared/utils/characterKinds';
@@ -29,7 +30,6 @@ import { Select } from '@/shared/ui/Select';
 import { Button } from '@/shared/ui/Button';
 import { cn } from '@/shared/utils/cn';
 import { dialogService } from '@/shared/services/dialogService';
-import { useSettingsStore } from '../../app/stores/settingsStore';
 import { BookOpenText, Bot, CircleStop, ListChecks, PenLine, RotateCcw, Trash2, X } from 'lucide-react';
 
 
@@ -37,39 +37,11 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
   const { t, i18n } = useTranslation('assistant');
   const resizeRef = useRef<HTMLDivElement>(null);
 
-  const firstEnabledModel = models.find((m) => m.isEnabled !== false) ?? models[0];
   const updateActiveProject = useProjectStore((s) => s.updateActiveProject);
-  // AI 产物归因：助手生成的卡片/角色标注来源，用户手改走 onUpdate 默认 user
-  const commitAICard = (updates: Partial<Project>) =>
-    updateActiveProject(updates, { agentId: 'ai:assistant' });
-  // 单源：助手内切换直接写回 settingsStore，不再私设分叉状态。外部 activeModelId 变化时跟随。
-  const [currentModelId, setCurrentModelId] = useState<string>(activeModelId || firstEnabledModel?.id || '');
-  useEffect(() => {
-    if (activeModelId) setCurrentModelId(activeModelId);
-  }, [activeModelId]);
-  const handleModelChange = (id: string) => {
-    setCurrentModelId(id);
-    useSettingsStore.getState().setActiveModelId(id);
-  };
-  // 单源可用模型：三处 AI 入口共用，isEnabled 过滤一致（须在 currentModelId 声明之后）
-  const usableModel = models.find((m) => m.id === currentModelId && m.isEnabled !== false)
-    ?? models.find((m) => m.isEnabled !== false)
-    ?? models[0];
-  // 可用 = 已启用 && 已配好凭证：默认模型未填 Key 时按钮禁用，与全屏拦截同口径
-  const hasModel = isModelUsable(usableModel);
-  // AI 产物归因：助手生成的卡片/角色标注来源，用户手改走 onUpdate 默认 user
-  const addCardToProject = (command: AICardCommand, data: CreatedCard) => {
-    if (!project || !onUpdate) return;
-    const updates = buildCardUpdates(project, command, data);
-    if (!updates) {
-      // 未知命令无落库目标：记日志并让调用方感知，避免"审批通过却无事发生"的假闭环
-      logger.warn('addCardToProject: 未知卡片命令', command);
-      // as string：模板字面量类型会干扰 i18next 插值参数推断， widen 后再传
-      dialogService.alert(t('chat.unknownCommand', { text: `/${command}` as string }));
-      return;
-    }
-    commitAICard(updates);
-  };
+  // 模型选择（单源写回 settingsStore）见 useModelSelection
+  const { usableModel, hasModel, handleModelChange } = useModelSelection({ models, activeModelId });
+  // 卡片落库（AI 归因 + 未知命令提示）见 useAssistantCards
+  const { commitAICard, addCardToProject } = useAssistantCards({ project, updateActiveProject, t });
 
   // 聊天编排（消息/发送/停止/会话记忆/卡片模板）见 useAssistantChat
   const chat = useAssistantChat({
