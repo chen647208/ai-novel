@@ -171,3 +171,63 @@ interface Event Bus {
 3. unwind 测试：禁用插件后其注册的命令/类型/事件全部消失，重新启用恢复。
 4. 命名空间冲突测试：两个插件注册同名类型 → 各自前缀化，互不覆盖。
 5. 权限测试：未声明 write 的插件写数据 → PermissionDenied 且 cause 链完整。
+6. 资源配额测试：装载超限插件 → 仅该插件 failed，错误含贡献键与实测值，其余照常。
+7. 路径门测试：符号链接越界、`../` 越界、deny-list 命中各返回 PermissionDenied 且 cause 完整。
+
+## 11. PI-Desktop 对标落地方案
+
+来源：https://github.com/vastsa/PI-Desktop（LGPL-3.0，只借设计不抄代码）；对位见 `20-external-benchmark.md` §2.1。
+本节给出插件系统对齐该蓝本的落地规范，是 §2/§6/§10 的细化。
+
+### 11.1 现状对位
+
+| 机制 | PI-Desktop | 本项目现状 | 落地动作 |
+|---|---|---|---|
+| 生命周期状态机 | discover→validate→load→activate→deactivate→unwind，装配失败回滚 | `PluginHost` 同序；activate 失败先 unwind 再置 failed（`runtime.ts`） | 对齐，补失败注入用例（§11.6.8） |
+| 可逆注册 | Disposable 逆序释放 | `Disposable` + `unwind` 已具备 | 对齐 |
+| 权限默认拒绝 | 声明 ∩ 授权，deny-by-default | `assertPermission`/`assertCan` 域级 deny-by-default | 对齐，补 write 边界用例 |
+| 路径四道门 | 声明∩授权 → realpath 包含 → deny-list → scope | 无（插件无文件访问面） | 待建（§11.2） |
+| 资源配额 | 每插件 ≤32 skill、单文件 ≤128KiB | 无上限 | 落地中（§11.3） |
+| 长会话检查点 | JSONL 真相 + SQLite 索引 + `.inflight.json` 原子替换 | 会话存储归 05/11 | 不在此，转 05/11 |
+| 进程隔离 | Rust host core + sidecar stdio JSON-RPC | 全 Node、无 Rust 人力 | 不迁移 |
+
+### 11.2 文件访问四道门（目标规范）
+
+插件的任何文件系统访问，依次过四道门，任一道不过即 `PermissionDenied`，且 `cause` 链完整：
+
+1. **声明 ∩ 授权**：manifest `permissions.fs.read`/`permissions.fs.write` 声明的**路径模式**，且用户在安装/设置中授予；默认拒绝。
+2. **realpath 包含**：目标路径经 `fs.realpath`（解析符号链接后）必须落在授权根内；跨根即拒绝。
+3. **deny-list**：无论是否声明，`.git`、应用数据根、密钥目录、`node_modules` 永久拒绝。
+4. **scope**：插件可写面限于 `plugin-data/<pluginId>/`，可读面限于自身贡献目录；项目正文/设定的写必须显式 `write:<domain>`。
+
+落点：`PluginPermissions` 扩 `fs` 字段；执行在宿主侧 fs 代理（插件拿不到原生 `fs`）。
+逻辑型插件上线前，§5 的 `fs` 接缝只接受声明式策略；本项与逻辑型插件同批交付。
+
+### 11.3 资源配额与校验（已落地）
+
+装载期对 `DiscoveredPlugin.files` 施加，违规使该插件 `failed`（phase=`load`），错误给出贡献键与实测值：
+
+| 约束 | 上限 |
+|---|---|
+| 单文件字节 | 128 KiB |
+| 单贡献键文件数 | 32 |
+| 插件文件总数 | 96 |
+| 插件总字节 | 2 MiB |
+| 路径 | 必须相对且不含 `..` 段（拒绝越界） |
+
+落点：`runtime.ts` 的 `checkContributionLimits(plugin)`，`loadAll` 装载前调用；上限常量为具名导出。
+
+### 11.4 安全边界（现在时）
+
+- 插件无 OS 级沙箱；`fs` 权限只挡宿主 API，不挡插件进程内建调用——逻辑型插件维持不执行（第一条总根：v0 仅资源型可用）。
+- 插件包仅 sha256 校验、无签名；安装来源需用户显式确认。
+
+### 11.5 不迁移项
+
+Rust host core、stdio JSON-RPC sidecar、面向编码的文件/diff/Bash 工具、LGPL 代码。
+
+### 11.6 验收标准（补 §10）
+
+8. 装配回滚：注入第 2/3 个注册项抛错的插件 → 逆序释放已注册项，状态 `failed`，宿主无残留。
+9. 配额：见 §10.6；路径门：见 §10.7。
+10. `fs` 门（逻辑型插件同批）：符号链接指向授权根外 → 拒绝；`../` 越界 → 拒绝；写入非 `plugin-data/<id>/` → 拒绝。

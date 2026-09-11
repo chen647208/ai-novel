@@ -32,6 +32,47 @@ import {
 
 export type PluginState = 'discovered' | 'active' | 'failed' | 'disabled' | 'uninstalled';
 
+/** 资源配额（§11.3）：防止插件包以超大/超量资源拖垮宿主。 */
+export const MAX_CONTRIBUTION_FILE_BYTES = 128 * 1024;
+export const MAX_FILES_PER_CONTRIBUTION_KEY = 32;
+export const MAX_TOTAL_FILES = 96;
+export const MAX_TOTAL_BYTES = 2 * 1024 * 1024;
+
+const encoder = new TextEncoder();
+
+/** 贡献资源配额校验（相对路径安全 + 单文件/单键/总量上限）。返回问题清单，空数组即通过。 */
+export function checkContributionLimits(plugin: DiscoveredPlugin): string[] {
+  const issues: string[] = [];
+  const keys = Object.keys(plugin.files);
+  if (keys.length > MAX_TOTAL_FILES) {
+    issues.push(`文件总数 ${keys.length} 超过上限 ${MAX_TOTAL_FILES}`);
+  }
+  const perKey = new Map<string, number>();
+  let totalBytes = 0;
+  for (const key of keys) {
+    if (key.startsWith('/') || key.startsWith('\\') || /(^|[\\/])\.\.([\\/]|$)/.test(key)) {
+      issues.push(`贡献路径越界：${key}`);
+      continue;
+    }
+    const bytes = encoder.encode(plugin.files[key] ?? '').length;
+    totalBytes += bytes;
+    if (bytes > MAX_CONTRIBUTION_FILE_BYTES) {
+      issues.push(`文件 ${key} 体积 ${bytes} 超上限 ${MAX_CONTRIBUTION_FILE_BYTES}`);
+    }
+    const group = key.split(/[\\/]/)[0] ?? key;
+    perKey.set(group, (perKey.get(group) ?? 0) + 1);
+  }
+  for (const [group, count] of perKey) {
+    if (count > MAX_FILES_PER_CONTRIBUTION_KEY) {
+      issues.push(`贡献 ${group} 文件数 ${count} 超上限 ${MAX_FILES_PER_CONTRIBUTION_KEY}`);
+    }
+  }
+  if (totalBytes > MAX_TOTAL_BYTES) {
+    issues.push(`资源总字节 ${totalBytes} 超上限 ${MAX_TOTAL_BYTES}`);
+  }
+  return issues;
+}
+
 export interface PluginStatus {
   id: string;
   state: PluginState;
@@ -81,6 +122,15 @@ export class PluginHost {
       try {
         if (this.statuses.has(id)) {
           throw new Error('重复加载同名插件');
+        }
+        const limitIssues = checkContributionLimits(candidate);
+        if (limitIssues.length) {
+          this.statuses.set(id, {
+            id,
+            state: 'failed',
+            error: { pluginId: id, phase: 'load', message: `资源配额校验失败：${limitIssues.join('; ')}`, cause: [] },
+          });
+          continue;
         }
         this.plugins.set(id, candidate);
         if (this.disabled.has(id)) {
