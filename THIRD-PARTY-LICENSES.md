@@ -387,6 +387,6 @@
 | yargs | 18.1.0 | MIT |
 | yargs-parser | 21.1.1 | ISC |
 | yargs-parser | 22.0.0 | ISC |
-| zod | 3.25.76 | MIT |
+| zod | 4.6.2 | MIT |
 | zustand | 5.0.15 | MIT |
 | zwitch | 2.0.4 | MIT |
