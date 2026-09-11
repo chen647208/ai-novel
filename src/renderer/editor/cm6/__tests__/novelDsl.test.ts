@@ -7,9 +7,10 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 // @vitest-environment jsdom
-import { describe, it, expect } from 'vitest';
-import { EditorState } from '@codemirror/state';
 import { ensureSyntaxTree } from '@codemirror/language';
+import { EditorState } from '@codemirror/state';
+import { describe, expect,it } from 'vitest';
+
 import { novelDslLanguage } from '../novelDsl';
 
 function state(doc: string) {

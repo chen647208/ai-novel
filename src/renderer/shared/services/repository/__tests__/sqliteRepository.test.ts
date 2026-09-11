@@ -7,16 +7,18 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
-import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
-import type { AppState, Project, KnowledgeItem, Chapter } from '../../../../../shared/types';
-import type { SqlDriver, SqlRunResult, SqlValue } from '../types';
-import { SCHEMA_VERSION } from '../schema';
-import { APP_STATE_VERSION } from '../../../../../shared/constants/versions';
-import { SqliteRepository } from '../sqliteRepository';
+
 import { indexService } from '@core/index';
+import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { APP_STATE_VERSION } from '../../../../../shared/constants/versions';
+import type { AppState, Chapter,KnowledgeItem, Project } from '../../../../../shared/types';
 import { jsonRepository } from '../jsonRepository';
+import { SCHEMA_VERSION } from '../schema';
+import { SqliteRepository } from '../sqliteRepository';
+import type { SqlDriver, SqlRunResult, SqlValue } from '../types';
 import { runWasmRequest } from '../wasmSql';
 
 /**

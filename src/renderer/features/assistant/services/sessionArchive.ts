@@ -8,7 +8,7 @@
  */
 
 /** 会话归档读取：userData/ai-sessions/<bookId>/*.jsonl → 事件列表（事件浏览器消费）。 */
-import { parseEventLine, type AiEvent } from '@core/ai';
+import { type AiEvent,parseEventLine } from '@core/ai';
 
 export interface SessionArchiveEntry {
   sessionId: string;

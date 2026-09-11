@@ -7,7 +7,8 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect,it } from 'vitest';
+
 import { DEFAULT_EDITOR_FONT, DEFAULT_UI_FONT, findFontPreset, fontPresets, resolveFontStack } from '../fonts';
 
 describe('fontPresets 字体注册表', () => {

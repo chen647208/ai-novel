@@ -7,12 +7,14 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React from 'react';
-import { useTranslation } from '@/i18n';
 import type { LucideIcon } from 'lucide-react';
-import type { DiagramType, Project } from '../../../../shared/types';
-import { cn } from '@/shared/utils/cn';
 import { ChevronDown, ChevronUp, Clock, Flag, LayoutList, MapPinned, Network, ScrollText, Shield, WandSparkles } from 'lucide-react';
+import React from 'react';
+
+import { useTranslation } from '@/i18n';
+import { cn } from '@/shared/utils/cn';
+
+import type { DiagramType, Project } from '../../../../shared/types';
 
 interface KnowledgeFeaturePanelsProps {
   project: Project;

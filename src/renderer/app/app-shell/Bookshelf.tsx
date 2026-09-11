@@ -7,25 +7,6 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useTranslation } from '@/i18n';
-import type { Project } from '../../../shared/types';
-import { dialogService } from '@/shared/services/dialogService';
-import { logger } from '@/shared/utils/logger';
-import { Badge } from '@/shared/ui/Badge';
-import { Button } from '@/shared/ui/Button';
-import { Card } from '@/shared/ui/Card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/shared/ui/DropdownMenu';
-import { EmptyState } from '@/shared/ui/EmptyState';
-import { Input } from '@/shared/ui/Input';
-import { PageIntro } from '@/shared/ui/PageHeader';
-import NewBookModal from '@/features/books/NewBookModal';
 import {
   BookHeart,
   BookOpen,
@@ -46,10 +27,31 @@ import {
   Upload,
   Users,
 } from 'lucide-react';
-import { ViewModeToggle } from '@/shared/ui/ViewModeToggle';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+
 import { collectAllTags, filterBooksByTags, normalizeTagInput } from '@/features/books/bookTags';
+import NewBookModal from '@/features/books/NewBookModal';
+import { useTranslation } from '@/i18n';
 import { useViewPreference } from '@/shared/hooks/useViewPreference';
+import { dialogService } from '@/shared/services/dialogService';
 import { listTrash, type TrashEntry } from '@/shared/services/trashService';
+import { Badge } from '@/shared/ui/Badge';
+import { Button } from '@/shared/ui/Button';
+import { Card } from '@/shared/ui/Card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/shared/ui/DropdownMenu';
+import { EmptyState } from '@/shared/ui/EmptyState';
+import { Input } from '@/shared/ui/Input';
+import { PageIntro } from '@/shared/ui/PageHeader';
+import { ViewModeToggle } from '@/shared/ui/ViewModeToggle';
+import { logger } from '@/shared/utils/logger';
+
+import type { Project } from '../../../shared/types';
 
 interface BookshelfProps {
   books: Project[];

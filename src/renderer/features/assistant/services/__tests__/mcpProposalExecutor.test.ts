@@ -7,16 +7,18 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { Project } from '../../../../../shared/types';
 import type { McpProposalExec } from '@core/ai';
+import { beforeEach,describe, expect, it, vi } from 'vitest';
+
+import type { Project } from '../../../../../shared/types';
 
 vi.mock('@/shared/services/ai/gatewayClient.js', () => ({
   aiGatewayClient: { complete: vi.fn(), stream: vi.fn() },
 }));
 
-import { executeMcpProposal } from '../mcpProposalExecutor';
 import { useProjectStore } from '@/app/stores/projectStore';
+
+import { executeMcpProposal } from '../mcpProposalExecutor';
 
 function book(): Project {
   return {

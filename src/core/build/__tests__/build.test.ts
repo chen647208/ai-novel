@@ -7,20 +7,21 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect,it } from 'vitest';
+
+import type { AttributeEntity, EdgeEntity,NodeEntity } from '../../entities';
 import {
-  DEFAULT_BUILD_PROFILE,
+  type BuildProfile,
   COMPENDIUM_BUILD_PROFILE,
-  roundtripProfile,
-  serializeProfileYaml,
-  parseProfileYaml,
-  runBuild,
-  registerTransformer,
+  DEFAULT_BUILD_PROFILE,
   listRenderers,
   listTransformers,
-  type BuildProfile,
+  parseProfileYaml,
+  registerTransformer,
+  roundtripProfile,
+  runBuild,
+  serializeProfileYaml,
 } from '../index.js';
-import type { NodeEntity, AttributeEntity, EdgeEntity } from '../../entities';
 
 function node(id: string, type: string, title: string, body: string): NodeEntity {
   return { id, bookId: 'b1', type, title, body, createdAt: 0, updatedAt: 0, erased: false } as NodeEntity;

@@ -7,10 +7,12 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { Brain, Cpu, Database, GraduationCap, type LucideIcon,SlidersHorizontal, Stethoscope, Terminal, WandSparkles } from 'lucide-react';
 import React, { useSyncExternalStore } from 'react';
-import { Brain, Cpu, Database, GraduationCap, SlidersHorizontal, Stethoscope, Terminal, WandSparkles, type LucideIcon } from 'lucide-react';
+
 import { useTranslation } from '@/i18n';
 import { cn } from '@/shared/utils/cn';
+
 import { settingsTabRegistry } from '../services/settingsTabs';
 import type { SettingsTab } from '../types';
 

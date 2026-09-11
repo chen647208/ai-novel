@@ -8,6 +8,7 @@
  */
 
 import type { BrowserWindow } from 'electron';
+
 import { logger } from '../logger.js';
 
 /**

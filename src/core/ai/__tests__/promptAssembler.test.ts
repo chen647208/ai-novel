@@ -7,16 +7,17 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
-import { PromptAssembler, truncateText, type PromptSection } from '../promptAssembler.js';
+import { describe, expect,it } from 'vitest';
+
+import type { Project } from '../../../shared/types';
+import type { IndexSnapshot } from '../../index';
 import {
   registerBuiltinSections,
   renderIndexDigest,
   renderWorldDigest,
   userTaskSection,
 } from '../builtinSections.js';
-import type { IndexSnapshot } from '../../index';
-import type { Project } from '../../../shared/types';
+import { PromptAssembler, type PromptSection,truncateText } from '../promptAssembler.js';
 
 const section = (id: string, order: number, body: string | undefined, title = id): PromptSection => ({
   id,

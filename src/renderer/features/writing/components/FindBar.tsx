@@ -6,11 +6,12 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+import { ChevronDown, ChevronUp, RefreshCcw, ReplaceAll, X } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
-import { ChevronDown, ChevronUp, RefreshCcw, ReplaceAll, X } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 
 export interface FindBarProps {

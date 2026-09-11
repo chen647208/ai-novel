@@ -6,17 +6,17 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
-import { logger } from '@/shared/utils/logger';
-
 /**
  * 设置弹窗宿主：从 settingsStore 直读各切片并回写，保存后刷新向量服务配置。
  * 从 App.tsx 内联 JSX 收编而来，App 不再感知设置切片细节。
  */
-
 import React from 'react';
-import { getEffectiveLanguage } from '../../i18n';
+
+import { logger } from '@/shared/utils/logger';
+
 import { vectorIntegrationService } from '../../features/knowledge/services/vectorIntegrationService';
 import SettingsModal from '../../features/settings/SettingsModal';
+import { getEffectiveLanguage } from '../../i18n';
 import { useSettingsStore } from '../stores/settingsStore';
 
 interface SettingsModalHostProps {

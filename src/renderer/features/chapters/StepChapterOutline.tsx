@@ -6,32 +6,33 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
-import { logger } from '@/shared/utils/logger';
-import { isModelUsable } from '@/shared/utils/modelReadiness';
-import { formatDateTime } from '@/shared/utils/format';
+import { BookOpen, BookOpenText, Check, CheckCheck, ChevronDown, ChevronRight, Clock, FastForward, FileOutput, Flag, Globe2, Layers, LayoutGrid, LayoutList, ListOrdered, MapPin, WandSparkles, XCircle } from 'lucide-react';
+import React, { useMemo,useState } from 'react';
 
-import React, { useState, useMemo } from 'react';
-import { useTranslation, i18n, templateDisplayName } from '@/i18n';
-import { type Project, type Chapter } from '../../../shared/types';
-import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
-import { isVirtualChapter } from '../../../shared/constants/chapters';
+import { type CommitOptions,useProjectStore } from '@/app/stores/projectStore';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
+import { i18n, templateDisplayName,useTranslation } from '@/i18n';
+import { useViewPreference } from '@/shared/hooks/useViewPreference';
 import { dialogService } from '@/shared/services/dialogService';
-import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
-import { Checkbox } from '@/shared/ui/Checkbox';
-import { Spinner } from '@/shared/ui/Spinner';
 import { Card } from '@/shared/ui/Card';
+import { Checkbox } from '@/shared/ui/Checkbox';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { MarkdownView } from '@/shared/ui/Markdown';
 import { Select } from '@/shared/ui/Select';
-import { BookOpen, BookOpenText, Check, CheckCheck, ChevronDown, ChevronRight, Clock, FastForward, FileOutput, Flag, Globe2, Layers, LayoutGrid, LayoutList, ListOrdered, MapPin, WandSparkles, XCircle } from 'lucide-react';
-import { useViewPreference } from '@/shared/hooks/useViewPreference';
+import { Spinner } from '@/shared/ui/Spinner';
 import { ViewModeToggle } from '@/shared/ui/ViewModeToggle';
-import { useChapterOutlineGeneration } from './hooks/useChapterOutlineGeneration';
+import { cn } from '@/shared/utils/cn';
+import { formatDateTime } from '@/shared/utils/format';
+import { logger } from '@/shared/utils/logger';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
+
+import { isVirtualChapter } from '../../../shared/constants/chapters';
+import { type Chapter,type Project } from '../../../shared/types';
 import { ChapterOutlineList } from './components/ChapterOutlineList';
+import { useChapterOutlineGeneration } from './hooks/useChapterOutlineGeneration';
 
 interface StepChapterOutlineProps {
   project: Project;

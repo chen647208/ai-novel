@@ -7,12 +7,13 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { logger } from '../../shared/utils/logger';
-import { i18n, dt } from '@/i18n';
-import { dialogService } from '@/shared/services/dialogService';
 import React, { useEffect, useRef, useState } from 'react';
-import type { ModelProviderInfo } from '../../constants/modelProviders';
-import { isModelConfigured } from '../../shared/utils/modelReadiness';
+
+import { dt,i18n } from '@/i18n';
+import { AIService } from '@/shared/services/ai/aiService';
+import { dialogService } from '@/shared/services/dialogService';
+import { Dialog, DialogContent } from '@/shared/ui/Dialog';
+
 import {
   type CardPromptTemplate,
   type ConsistencyCheckPromptTemplate,
@@ -21,17 +22,15 @@ import {
   type PromptTemplate,
   type StorageConfig,
 } from '../../../shared/types';
-import { AIService } from '@/shared/services/ai/aiService';
-import { ModelListService } from './services/modelListService';
-import { isVaultRef, persistApiKey, removeApiKey } from './services/credentialService';
+import type { ModelProviderInfo } from '../../constants/modelProviders';
 import { repository } from '../../shared/services/repository';
-import { embeddingModelService } from './services/embeddingModelService';
+import { logger } from '../../shared/utils/logger';
+import { isModelConfigured } from '../../shared/utils/modelReadiness';
 import { getDefaultCardPrompts, validateCardPromptTemplate } from '../cards/services/cardPromptService';
-import { DEFAULT_IMPORT_EXPORT_MODE, DEFAULT_SETTINGS_TAB, DEFAULT_STORAGE_CONFIG } from './constants';
-import SettingsModalHeader from './components/SettingsModalHeader';
 import SettingsModalFooter from './components/SettingsModalFooter';
+import SettingsModalHeader from './components/SettingsModalHeader';
 import SettingsTabContent from './components/SettingsTabContent';
-import { Dialog, DialogContent } from '@/shared/ui/Dialog';
+import { DEFAULT_IMPORT_EXPORT_MODE, DEFAULT_SETTINGS_TAB, DEFAULT_STORAGE_CONFIG } from './constants';
 import {
   createDefaultEmbeddingConfig,
   createNewCardPromptTemplate,
@@ -41,6 +40,9 @@ import {
   duplicateCardPromptTemplate,
   importCardPromptTemplates,
 } from './factories';
+import { isVaultRef, persistApiKey, removeApiKey } from './services/credentialService';
+import { embeddingModelService } from './services/embeddingModelService';
+import { ModelListService } from './services/modelListService';
 import type {
   CardPromptTestResult,
   EmbeddingQuickAddTemplate,
@@ -120,7 +122,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       }
     };
     
-    loadStorageConfig();
+    void loadStorageConfig();
   }, []);
 
   // 加载Embedding模型配置
@@ -141,7 +143,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       }
     };
     
-    loadEmbeddingConfigs();
+    void loadEmbeddingConfigs();
   }, []);
 
   const addModel = () => {
@@ -342,7 +344,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       })
     );
     if (plainFallback > 0) {
-      await dialogService.alert(i18n.t('settings:models.vaultUnavailable', { count: plainFallback }));
+      dialogService.alert(i18n.t('settings:models.vaultUnavailable', { count: plainFallback }));
     }
     // 保存模型配置
     onSaveModels(vaultedModels, activeId || '');

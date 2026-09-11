@@ -8,26 +8,27 @@
  */
 
 import { app, crashReporter } from 'electron';
-import { logger } from './logger.js';
+
+import { aiGatewayProvider } from './ai/gateway.js';
 import { AppContainer, type ProviderContext } from './app/container.js';
-import { getMainWindow } from './app/window.js';
+import { legacyDataDir, migrateLegacyDataDir, shouldRunMigration, standardDataDir } from './app/dataDir.js';
+import { requestRendererFlush } from './app/flushHandshake.js';
 import {
-  windowProvider,
-  fileProvider,
   dialogProvider,
-  vectorProvider,
-  sqliteProvider,
+  fileProvider,
   mcpClientProvider,
   netProvider,
   shellProvider,
+  sqliteProvider,
   updaterProvider,
+  vectorProvider,
+  windowProvider,
 } from './app/providers.js';
-import { setQuitting } from './app/tray.js';
-import { requestRendererFlush } from './app/flushHandshake.js';
-import { applySecurityHeaders } from './app/security.js';
-import { legacyDataDir, migrateLegacyDataDir, shouldRunMigration, standardDataDir } from './app/dataDir.js';
 import { secureStoreProvider } from './app/secureStore.js';
-import { aiGatewayProvider } from './ai/gateway.js';
+import { applySecurityHeaders } from './app/security.js';
+import { setQuitting } from './app/tray.js';
+import { getMainWindow } from './app/window.js';
+import { logger } from './logger.js';
 
 /**
  * 应用入口：装配 Provider 容器并按序启动（docs/design/02）。
@@ -76,7 +77,7 @@ process.on('unhandledRejection', (reason) => {
   logger.error('main', 'Unhandled rejection in main process', reason);
 });
 
-app.whenReady().then(async () => {
+void app.whenReady().then(async () => {
   if (!hasSingleInstanceLock) return;
   // 崩溃转储本地留存（不上传服务器），崩溃后可在转储目录手动取用
   crashReporter.start({ productName: '红月创作', uploadToServer: false, compress: true });

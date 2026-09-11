@@ -7,10 +7,11 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
-import { satisfiesRange, validateManifest } from '../manifest.js';
-import { PluginHost, type DiscoveredPlugin } from '../runtime.js';
+import { describe, expect,it } from 'vitest';
+
 import { BUILTIN_BUNDLE_MANIFESTS } from '../builtin/manifests.js';
+import { satisfiesRange, validateManifest } from '../manifest.js';
+import { type DiscoveredPlugin,PluginHost } from '../runtime.js';
 
 const HOST = '2.0.0';
 

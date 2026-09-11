@@ -7,29 +7,31 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { logger } from '../../shared/utils/logger';
-import { isModelUsable } from '@/shared/utils/modelReadiness';
-import React, { useState, useEffect } from 'react';
-import { useTranslation, i18n, templateDisplayName } from '@/i18n';
-import { type Project, type KnowledgeItem, type OutputMode } from '../../../shared/types';
-import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
+import { uuidv7 } from '@core/entities';
+import { BookOpenText, Bot, Check, CheckCheck, ChevronDown, ChevronUp, CloudUpload, Eye, Globe, Lightbulb, Pause, Pencil, PenLine, Play, Square, Trash2, WandSparkles, XCircle } from 'lucide-react';
+import React, { useEffect,useState } from 'react';
+
+import { type CommitOptions,useProjectStore } from '@/app/stores/projectStore';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
-import WorldViewEditor from '../world/WorldViewEditor';
+import { i18n, templateDisplayName,useTranslation } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
-import { cn } from '@/shared/utils/cn';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
-import { Select } from '@/shared/ui/Select';
-import { Textarea } from '@/shared/ui/Textarea';
-import { BookOpenText, Bot, Check, CheckCheck, ChevronDown, ChevronUp, CloudUpload, Eye, Globe, Lightbulb, Pause, PenLine, Pencil, Play, Square, Trash2, WandSparkles, XCircle } from 'lucide-react';
-import { Spinner } from '@/shared/ui/Spinner';
 import { MarkdownView } from '@/shared/ui/Markdown';
+import { Select } from '@/shared/ui/Select';
+import { Spinner } from '@/shared/ui/Spinner';
+import { Textarea } from '@/shared/ui/Textarea';
+import { cn } from '@/shared/utils/cn';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
+
+import { type KnowledgeItem, type OutputMode,type Project } from '../../../shared/types';
+import { logger } from '../../shared/utils/logger';
+import WorldViewEditor from '../world/WorldViewEditor';
 import { useInspirationGeneration } from './hooks/useInspirationGeneration';
-import { uuidv7 } from '@core/entities';
 
 interface StepInspirationProps {
   project: Project | null;

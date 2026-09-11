@@ -12,13 +12,13 @@
  * 覆盖三类上游：provider=openai-chat、provider=ollama、
  * 以及使用 /v1beta/openai/ 兼容端点的 Gemini 配置。
  */
-import { aiT } from '../i18n.js';
-import type { ModelConfig, AIResponse, StreamingAIResponse } from '../../../shared/types.js';
-import { buildMessages, cleanModelOutput, extractOpenAITokenUsage, isAbortError, openAIChatUrl, readErrorResponse } from '../messages.js';
-import { createSSEParser } from '../sse.js';
-import { AIRequestError, DEFAULT_TEMPERATURE, type CallOptions, type ProviderAdapter } from '../types.js';
-import { parseRetryAfter, requestErrorFromResponse, withRetry } from '../retry.js';
+import type { AIResponse, ModelConfig, StreamingAIResponse } from '../../../shared/types.js';
 import { proxiedFetch } from '../../net/proxy.js';
+import { aiT } from '../i18n.js';
+import { buildMessages, cleanModelOutput, extractOpenAITokenUsage, isAbortError, openAIChatUrl, readErrorResponse } from '../messages.js';
+import { parseRetryAfter, requestErrorFromResponse, withRetry } from '../retry.js';
+import { createSSEParser } from '../sse.js';
+import { AIRequestError, type CallOptions, DEFAULT_TEMPERATURE, type ProviderAdapter } from '../types.js';
 
 interface OpenAIChoice {
   message?: { content?: string };

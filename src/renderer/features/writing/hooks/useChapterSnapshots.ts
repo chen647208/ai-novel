@@ -3,7 +3,7 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
@@ -12,6 +12,7 @@
  * 防误删/误覆盖；单轮最多一章、30s 扫描，避免高频写盘。
  */
 import { useCallback, useEffect, useRef } from 'react';
+
 import type { Project } from '../../../../shared/types';
 import { appendSnapshot, createSnapshot, shouldAutoSnapshot } from '../services/chapterSnapshotService';
 

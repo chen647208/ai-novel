@@ -12,6 +12,7 @@
  * （网关 undici dispatcher + Chromium 会话代理），测试连接返回对照结果。
  */
 import { ipcMain, session } from 'electron';
+
 import { IPC } from '../channels.js';
 import { logger } from '../logger.js';
 import { applyProxyConfig, buildChromiumProxyRules, parseProxyUrl, testProxy } from './proxy.js';

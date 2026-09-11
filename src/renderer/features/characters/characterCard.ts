@@ -8,9 +8,10 @@
  */
 
 /** 人物卡导出（docs/design/16）：Markdown 文本构建 + 另存为。 */
-import type { Character } from '../../../shared/types';
 import { dt } from '@/i18n';
-import { roleLabel, genderLabel } from '@/shared/utils/displayLabels';
+import { genderLabel,roleLabel } from '@/shared/utils/displayLabels';
+
+import type { Character } from '../../../shared/types';
 
 /** 人物卡字段（空值不落，顺序固定）。 */
 const FIELDS: Array<{ key: keyof Character | 'roleLabel' | 'genderLabel'; labelKey: string }> = [

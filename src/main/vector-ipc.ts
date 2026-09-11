@@ -12,9 +12,11 @@
  * 线格式（documents / 搜索结果）与旧版 main.js 保持完全一致，
  * 以保证磁盘上已有索引与渲染层现有调用无需改动。
  */
-import { app, ipcMain } from 'electron';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+
+import { app, ipcMain } from 'electron';
+
 import { IPC } from './channels.js';
 import { logger } from './logger.js';
 

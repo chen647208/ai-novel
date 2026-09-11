@@ -7,8 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { type AICardCommand, type AICardCommandResult } from '../../../../shared/types';
 import { i18n } from '@/i18n';
+
+import { type AICardCommand, type AICardCommandResult } from '../../../../shared/types';
 
 /**
  * AI卡片命令解析服务

@@ -7,9 +7,10 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
-import { projectToEntities, entitiesToProject } from '../bridge';
+import { describe, expect,it } from 'vitest';
+
 import type { Project } from '../../../shared/types';
+import { entitiesToProject,projectToEntities } from '../bridge';
 
 /** 覆盖全部集合与嵌套结构的富样本 */
 function richProject(): Project {

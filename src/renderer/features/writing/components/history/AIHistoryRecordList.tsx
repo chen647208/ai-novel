@@ -7,16 +7,18 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import type { TFunction } from 'i18next';
+import { Check, ChevronRight, Copy, Eye, History } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { TFunction } from 'i18next';
-import { formatHistoryTimestamp, formatTokenUsage, getGenerationType, getProviderIcon } from '../../utils';
-import type { AIHistoryRecordListProps, AIHistoryRecordWithChapter } from '../../types';
+
 import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { cn } from '@/shared/utils/cn';
-import { Check, ChevronRight, Copy, Eye, History } from 'lucide-react';
+
+import type { AIHistoryRecordListProps, AIHistoryRecordWithChapter } from '../../types';
+import { formatHistoryTimestamp, formatTokenUsage, getGenerationType, getProviderIcon } from '../../utils';
 
 const sectionLabel = 'mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground';
 
@@ -68,7 +70,7 @@ const renderActionBlock = (item: AIHistoryRecordWithChapter, compact: boolean, t
         size={compact ? 'sm' : 'md'}
         className="w-full"
         onClick={() => {
-          navigator.clipboard.writeText(item.record.generatedContent);
+          void navigator.clipboard.writeText(item.record.generatedContent);
           dialogService.alert(t('record.copied'));
         }}
       >

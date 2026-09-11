@@ -7,10 +7,11 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
-import { installTypeTemplates } from '../contributions.js';
-import { typeTemplateId, toPluginError } from '../manifest.js';
+import { describe, expect,it } from 'vitest';
+
 import { TypeRegistry } from '../../types-registry/registry.js';
+import { installTypeTemplates } from '../contributions.js';
+import { toPluginError,typeTemplateId } from '../manifest.js';
 import { PluginHost } from '../runtime.js';
 
 /**

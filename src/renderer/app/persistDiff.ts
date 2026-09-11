@@ -7,9 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import type { AppState, Project } from '../../shared/types';
 import type { StorageRepository } from '../shared/services/repository';
 import type { CommitOptions } from '../shared/services/repository/types';
-import type { AppState, Project } from '../../shared/types';
 
 /** 非项目配置切片键（settings + meta），用于差分持久化。 */
 const NON_PROJECT_KEYS = [

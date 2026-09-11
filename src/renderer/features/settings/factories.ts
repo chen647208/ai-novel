@@ -7,11 +7,13 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { uuidv7 } from '@core/entities';
+
+import { dt, i18n, templateDisplayName } from '@/i18n';
+
 import type { CardPromptTemplate, EmbeddingModelConfig, ModelConfig, PromptTemplate } from '../../../shared/types';
-import { i18n, dt, templateDisplayName } from '@/i18n';
 import { embeddingProviders, getDefaultEmbeddingParams } from '../../constants/embeddingProviders';
 import type { CardPromptImportResult, EmbeddingQuickAddTemplate } from './types';
-import { uuidv7 } from '@core/entities';
 
 export const createNewModelConfig = (): ModelConfig => ({
   id: Date.now().toString(),

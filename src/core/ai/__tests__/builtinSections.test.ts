@@ -7,9 +7,10 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
-import { PromptAssembler } from '../promptAssembler.js';
+import { describe, expect,it } from 'vitest';
+
 import { agentProtocolSection, historySection, registerBuiltinSections } from '../builtinSections.js';
+import { PromptAssembler } from '../promptAssembler.js';
 
 describe('agentProtocolSection', () => {
   it('讲清 JSON 调用协议与多步策略', () => {

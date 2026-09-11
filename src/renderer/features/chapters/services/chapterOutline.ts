@@ -3,16 +3,18 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 /**
  * 章节细纲：AI 文本解析与上下文块拼装（纯函数，便于单测）。
  */
-import { type Chapter, type Project } from '../../../../shared/types';
 import { uuidv7 } from '@core/entities';
+
 import { roleLabel } from '@/shared/utils/displayLabels';
+
+import { type Chapter, type Project } from '../../../../shared/types';
 
 const CHAPTER_REGEX = /第\s*([0-9一二三四五六七八九十百]+)\s*章[:：]?\s*([^\n]+)([\s\S]*?)(?=第\s*[0-9一二三四五六七八九十百]+\s*章|---|$(?![\s\S]))/gi;
 const SUMMARY_MARKERS = ['剧情细纲[:：]', '内容[:：]', '情节[:：]', '本章细纲[:：]'];

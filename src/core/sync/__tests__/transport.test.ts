@@ -7,9 +7,10 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
-import { MemorySyncTransport } from '../transport.js';
+import { describe, expect,it } from 'vitest';
+
 import { buildBundle, type EntitySnapshot } from '../protocol.js';
+import { MemorySyncTransport } from '../transport.js';
 
 const empty: EntitySnapshot = { nodes: [], attrs: [], edges: [] };
 

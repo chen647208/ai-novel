@@ -8,6 +8,7 @@
  */
 
 import type {
+  AttachmentEntity,
   AttributeEntity,
   AttributeType,
   BlobEntity,
@@ -15,7 +16,6 @@ import type {
   EdgeKind,
   NodeEntity,
   RevisionEntity,
-  AttachmentEntity,
 } from './types';
 
 /**

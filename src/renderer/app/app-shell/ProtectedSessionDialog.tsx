@@ -12,14 +12,16 @@
  * 加密即把章节正文替换为 enc.v1 信封（不可逆——没有口令无法还原）；
  * 解密需要已解锁的同口令会话。
  */
+import { Shield } from 'lucide-react';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Shield } from 'lucide-react';
-import { Button } from '@/shared/ui/Button';
-import { ModalShell } from '@/shared/ui/ModalShell';
-import { Input } from '@/shared/ui/Input';
+
 import { dialogService } from '@/shared/services/dialogService';
 import { protectedSession } from '@/shared/services/protectedSessionService';
+import { Button } from '@/shared/ui/Button';
+import { Input } from '@/shared/ui/Input';
+import { ModalShell } from '@/shared/ui/ModalShell';
+
 import { useProjectStore } from '../stores/projectStore';
 
 export const ProtectedSessionDialog: React.FC = () => {
@@ -141,7 +143,7 @@ export const ProtectedSessionDialog: React.FC = () => {
                         size="sm"
                         variant="outline"
                         onClick={() => {
-                          dialogService.confirm({
+                          void dialogService.confirm({
                             title: t('protected.encryptConfirmTitle'),
                             message: t('protected.encryptConfirmMessage', { title: c.title }),
                           }).then((ok) => {

@@ -6,6 +6,7 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import localPlugin from './eslint-rules/no-cross-feature.js';
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
@@ -75,8 +76,11 @@ export default tseslint.config(
         tsconfigRootDir: rootDir,
       },
     },
-    plugins: { 'react-hooks': reactHooks },
+    plugins: { 'react-hooks': reactHooks, 'simple-import-sort': simpleImportSort },
     rules: {
+      // 导入排序（自动修复）
+      'simple-import-sort/imports': 'error',
+      'simple-import-sort/exports': 'error',
       // 类型纪律
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': [
@@ -88,8 +92,7 @@ export default tseslint.config(
       '@typescript-eslint/no-empty-object-type': 'warn',
 
       // 异步正确性（类型感知）
-      // no-floating-promises 存量较多（见 docs/design/18 §八），先 warn 暴露，清理到阈值后再升 error
-      '@typescript-eslint/no-floating-promises': 'warn',
+      '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: false }],
       '@typescript-eslint/await-thenable': 'error',
 

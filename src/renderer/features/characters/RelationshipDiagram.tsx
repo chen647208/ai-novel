@@ -7,13 +7,15 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { useTranslation } from '@/i18n';
-import { type Character } from '../../../shared/types';
-import { roleLabel } from '@/shared/utils/displayLabels';
-import { normalizeRoleId } from '@/shared/utils/characterKinds';
-import { Button } from '@/shared/ui/Button';
 import { Heart, RefreshCw, X } from 'lucide-react';
+import React, { useEffect,useMemo, useRef, useState } from 'react';
+
+import { useTranslation } from '@/i18n';
+import { Button } from '@/shared/ui/Button';
+import { normalizeRoleId } from '@/shared/utils/characterKinds';
+import { roleLabel } from '@/shared/utils/displayLabels';
+
+import { type Character } from '../../../shared/types';
 
 interface RelationshipDiagramProps {
   characters: Character[];

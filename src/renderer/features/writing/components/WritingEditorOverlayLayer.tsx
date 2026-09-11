@@ -8,13 +8,14 @@
  */
 
 import React from 'react';
+
 import AIHistoryViewer from '../AIHistoryViewer';
+import type { WritingEditorOverlayLayerProps } from '../types';
 import ChapterGenerationModal from './ChapterGenerationModal';
 import ChapterHistoryModal from './ChapterHistoryModal';
 import ExportChapterModal from './ExportChapterModal';
 import WritingEditModal from './WritingEditModal';
 import WritingSelectionMenu from './WritingSelectionMenu';
-import type { WritingEditorOverlayLayerProps } from '../types';
 
 const WritingEditorOverlayLayer: React.FC<WritingEditorOverlayLayerProps> = ({
   genModal,

@@ -6,30 +6,29 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
-import { logger } from '@/shared/utils/logger';
-
+import { CalendarDays, Circle, Eye, Gavel, Info, Lightbulb, type LucideIcon,MapPin, Plus, RefreshCw, Search, User, Users } from 'lucide-react';
 /**
  * 智能推荐组件
  * 根据当前上下文推荐相关的世界观元素
  */
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback,useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { type Project, type ModelConfig } from '../../../shared/types';
+
 import { Button } from '@/shared/ui/Button';
 import { Checkbox } from '@/shared/ui/Checkbox';
 import { Spinner } from '@/shared/ui/Spinner';
 import { cn } from '@/shared/utils/cn';
-import { CalendarDays, Circle, Eye, Gavel, Info, Lightbulb, MapPin, Plus, RefreshCw, Search, User, Users, type LucideIcon } from 'lucide-react';
+import { logger } from '@/shared/utils/logger';
+
+import { type ModelConfig,type Project } from '../../../shared/types';
 import {
-  type SmartRecommendationResult,
-  type RecommendationItem,
-  getSmartRecommendations,
-  getSceneRecommendations,
   getAIEnhancedRecommendations,
   getDisplayName,
-  type RecommendationContext
-} from './services/smartRecommendationService';
+  getSceneRecommendations,
+  getSmartRecommendations,
+  type RecommendationContext,
+  type RecommendationItem,
+  type SmartRecommendationResult} from './services/smartRecommendationService';
 
 interface SmartRecommenderProps {
   project: Project;
@@ -80,7 +79,7 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
 
   // 当上下文变化时重新获取推荐
   useEffect(() => {
-    fetchRecommendations();
+    void fetchRecommendations();
   }, [fetchRecommendations]);
 
   // 获取类型图标（lucide 组件，形状区分类型）

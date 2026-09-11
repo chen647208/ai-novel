@@ -23,7 +23,7 @@
  * 判定只信任它；entity_changes.hash（仓库内部哈希）随 bundle 留档审计。
  * 纯模块，无 IO。
  */
-import type { NodeEntity, EdgeEntity, AttributeEntity } from '../entities';
+import type { AttributeEntity,EdgeEntity, NodeEntity } from '../entities';
 import { uuidv7 } from '../entities/uuid';
 
 export interface EntitySnapshot {

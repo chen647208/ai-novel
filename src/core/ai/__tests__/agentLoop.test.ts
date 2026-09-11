@@ -7,14 +7,15 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
-import { runAgentSession, parseAgentReply } from '../agentLoop.js';
+import { describe, expect,it } from 'vitest';
+
+import type { ModelConfig } from '../../../shared/types';
+import type { AgentLoopDeps } from '../agentLoop.js';
+import { parseAgentReply,runAgentSession } from '../agentLoop.js';
 import { ApprovalBroker, ApprovalRouter } from '../approval.js';
 import { PromptAssembler } from '../promptAssembler.js';
 import { AiSession } from '../session.js';
 import { ToolRegistry, type ToolSpec } from '../tools.js';
-import type { AgentLoopDeps } from '../agentLoop.js';
-import type { ModelConfig } from '../../../shared/types';
 
 const model: ModelConfig = { id: 'm', name: 'M', provider: 'openai-chat', modelName: 'test' };
 

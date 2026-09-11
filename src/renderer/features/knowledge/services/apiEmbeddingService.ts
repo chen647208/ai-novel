@@ -8,15 +8,15 @@
  */
 
 
-import { logger } from '../../../shared/utils/logger';
 import { i18n } from '@/i18n';
-import { type EmbeddingService } from './embeddingService';
-import { embeddingModelService } from '../../settings/services/embeddingModelService';
+
 import { 
-  type VectorDocument, 
+  type EmbeddingModelConfig, 
   type KnowledgeCategory,
-  type EmbeddingModelConfig 
-} from '../../../../shared/types';
+  type VectorDocument} from '../../../../shared/types';
+import { logger } from '../../../shared/utils/logger';
+import { embeddingModelService } from '../../settings/services/embeddingModelService';
+import { type EmbeddingService } from './embeddingService';
 
 /**
  * API Embedding服务实现

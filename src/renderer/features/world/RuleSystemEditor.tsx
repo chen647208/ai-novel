@@ -7,17 +7,19 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React, { useState, useEffect } from 'react';
+import { ArrowDown, ArrowUp, Briefcase, ChevronDown, ChevronUp, Coins, Cpu, Crown, Dumbbell, ListTree, type LucideIcon,Plus, Save, Settings2, Sparkles, Trash2, X } from 'lucide-react';
+import React, { useEffect,useState } from 'react';
+
 import { useTranslation } from '@/i18n';
-import { type RuleSystem, type RuleSystemType, type RuleLevel, type Character } from '../../../shared/types';
 import { dialogService } from '@/shared/services/dialogService';
-import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
 import { Checkbox } from '@/shared/ui/Checkbox';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { Textarea } from '@/shared/ui/Textarea';
-import { ArrowDown, ArrowUp, Briefcase, ChevronDown, ChevronUp, Coins, Crown, Cpu, Dumbbell, ListTree, Plus, Save, Settings2, Sparkles, Trash2, X, type LucideIcon } from 'lucide-react';
+import { cn } from '@/shared/utils/cn';
+
+import { type Character,type RuleLevel, type RuleSystem, type RuleSystemType } from '../../../shared/types';
 
 
 interface RuleSystemEditorProps {
@@ -271,7 +273,7 @@ export const RuleSystemEditor: React.FC<RuleSystemEditorProps> = ({
                     className="size-8 text-muted-foreground hover:text-destructive"
                     onClick={(e) => {
                       e.stopPropagation();
-                      deleteSystem(system.id);
+                      void deleteSystem(system.id);
                     }}
                   >
                     <Trash2 className="size-4" />

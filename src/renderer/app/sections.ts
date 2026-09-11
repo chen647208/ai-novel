@@ -3,7 +3,7 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
@@ -12,8 +12,9 @@
  * 导航（WorkspaceNav）、顶栏（WorkspaceTopbar）、壳路由（App/WorkspaceView/guidedFlow）
  * 与功能映射（sectionFeatures）均引用此表，新增分区只改本文件 + WorkspaceView 内容分支。
  */
-import type React from 'react';
 import { Feather, Globe, ListOrdered, PenLine, Users } from 'lucide-react';
+import type React from 'react';
+
 import type { Project } from '../../shared/types';
 
 /** 工作台分区标识；大纲与细纲合并为 structure（一页两段），与旧线性向导解耦。 */

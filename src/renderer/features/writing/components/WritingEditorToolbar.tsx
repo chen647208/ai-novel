@@ -7,16 +7,18 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { AlignCenterVertical, ArrowLeft, Camera, ChevronsRight, Eraser, Expand, FileOutput, FileText, History, Maximize2, Merge, Minimize2, Redo2, RotateCcw, Scissors, Search, SpellCheck, Sprout, Undo2 } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { WritingEditorToolbarProps } from '../types';
-import { formatCharCount } from '../services/writingStatsService';
+
 import { Button } from '@/shared/ui/Button';
 import { PageHeader, PageHeaderDivider } from '@/shared/ui/PageHeader';
-import { cn } from '@/shared/utils/cn';
-import { ArrowLeft, AlignCenterVertical, Camera, ChevronsRight, Eraser, Expand, FileOutput, FileText, History, Maximize2, Merge, Minimize2, Redo2, RotateCcw, Scissors, Search, SpellCheck, Sprout, Undo2 } from 'lucide-react';
 import { Progress } from '@/shared/ui/Progress';
 import Slot from '@/shared/ui/Slot';
+import { cn } from '@/shared/utils/cn';
+
+import { formatCharCount } from '../services/writingStatsService';
+import type { WritingEditorToolbarProps } from '../types';
 
 const iconBtn = 'size-8 text-muted-foreground';
 const textBtn = 'h-8 gap-1.5 px-2 text-xs text-muted-foreground';

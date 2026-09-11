@@ -18,13 +18,13 @@
  *  - 响应正文在 output[].content[] 中 type==='output_text' 的 text；
  *  - 流式为 SSE，事件 response.output_text.delta 携带增量，response.completed 收尾并带 usage。
  */
+import type { AIResponse, ModelConfig, StreamingAIResponse } from '../../../shared/types.js';
+import { proxiedFetch } from '../../net/proxy.js';
 import { aiT } from '../i18n.js';
-import type { ModelConfig, AIResponse, StreamingAIResponse } from '../../../shared/types.js';
 import { cleanModelOutput, extractResponsesTokenUsage, isAbortError, readErrorResponse } from '../messages.js';
+import { parseRetryAfter, requestErrorFromResponse, withRetry } from '../retry.js';
 import { createSSEParser } from '../sse.js';
 import { AIRequestError, type CallOptions, type ProviderAdapter } from '../types.js';
-import { parseRetryAfter, requestErrorFromResponse, withRetry } from '../retry.js';
-import { proxiedFetch } from '../../net/proxy.js';
 
 interface ResponsesContentPart {
   type?: string;

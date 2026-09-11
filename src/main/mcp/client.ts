@@ -13,7 +13,7 @@
  * initialize / notifications/initialized / tools/list / tools/call。
  * 零依赖（child_process 为 Node 内置）。
  */
-import { spawn, type ChildProcess } from 'node:child_process';
+import { type ChildProcess,spawn } from 'node:child_process';
 
 export interface McpToolDef {
   name: string;

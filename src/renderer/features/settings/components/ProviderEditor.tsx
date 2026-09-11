@@ -7,22 +7,24 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { AlertCircle, CheckCircle2, Clock, Eye, EyeOff, FlaskConical, List, RefreshCw, SlidersHorizontal, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
-import { useTranslation, dt } from '@/i18n';
+
+import { dt,useTranslation } from '@/i18n';
 import { Alert } from '@/shared/ui/Alert';
-import type { ModelConfig } from '../../../../shared/types';
-import { modelProviders, findProviderPreset } from '../../../constants/modelProviders';
-import { channelValueFor, channelPatch, channelGroups } from '../utils/channelPreset';
-import { isModelConfigured } from '../../../shared/utils/modelReadiness';
-import { classifyProviderError, isErrorResult, isProviderEnabled, maskApiKey } from '../utils/providerHealth';
 import { Button } from '@/shared/ui/Button';
-import { Spinner } from '@/shared/ui/Spinner';
+import { Checkbox } from '@/shared/ui/Checkbox';
 import { Input } from '@/shared/ui/Input';
 import { Select } from '@/shared/ui/Select';
-import { Checkbox } from '@/shared/ui/Checkbox';
+import { Spinner } from '@/shared/ui/Spinner';
 import { Textarea } from '@/shared/ui/Textarea';
 import { cn } from '@/shared/utils/cn';
-import { AlertCircle, CheckCircle2, Clock, Eye, EyeOff, FlaskConical, List, RefreshCw, SlidersHorizontal, Trash2 } from 'lucide-react';
+
+import type { ModelConfig } from '../../../../shared/types';
+import { findProviderPreset,modelProviders } from '../../../constants/modelProviders';
+import { isModelConfigured } from '../../../shared/utils/modelReadiness';
+import { channelGroups,channelPatch, channelValueFor } from '../utils/channelPreset';
+import { classifyProviderError, isErrorResult, isProviderEnabled, maskApiKey } from '../utils/providerHealth';
 
 const CHANNEL_GROUPS = channelGroups(modelProviders);
 const fieldLabel = 'mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground';

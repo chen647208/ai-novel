@@ -7,15 +7,17 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React, { useState, useEffect } from 'react';
+import { Cpu, Landmark, Plus, Save, Trash2, WandSparkles, X } from 'lucide-react';
+import React, { useEffect,useState } from 'react';
+
 import { useTranslation } from '@/i18n';
-import { type WorldView, type MagicSystem, type TechnologyLevel, type WorldHistory, type HistoryEvent, type MagicLevel } from '../../../shared/types';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
-import { Textarea } from '@/shared/ui/Textarea';
 import { TabBar } from '@/shared/ui/TabBar';
-import { Cpu, Landmark, Plus, Save, Trash2, WandSparkles, X } from 'lucide-react';
+import { Textarea } from '@/shared/ui/Textarea';
+
+import { type HistoryEvent, type MagicLevel,type MagicSystem, type TechnologyLevel, type WorldHistory, type WorldView } from '../../../shared/types';
 
 interface WorldViewEditorProps {
   projectId: string;

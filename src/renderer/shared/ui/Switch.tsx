@@ -7,8 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import * as React from 'react';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
+import * as React from 'react';
+
 import { cn } from '../utils/cn';
 
 export const Switch = React.forwardRef<

@@ -7,8 +7,8 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { useSettingsStore } from '../stores/settingsStore';
 import { logger } from '../../shared/utils/logger';
+import { useSettingsStore } from '../stores/settingsStore';
 
 /**
  * 系统壳同步（docs/design/15）：托盘/自启/代理三项变更即下发主进程。

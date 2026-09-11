@@ -15,10 +15,11 @@
  */
 
 import { create } from 'zustand';
-import { type AppState, type AppLanguage, type AppTheme, type CardPromptTemplate, type ConsistencyCheckPromptTemplate, type CustomFontMeta, type EmbeddingModelConfig, type KeybindingActionId, type McpServerConfig, type ModelConfig, type PromptTemplate, type ProxyConfig } from '../../../shared/types';
-import { INITIAL_APP_STATE } from '../initialState';
+
+import { type AppLanguage, type AppState, type AppTheme, type CardPromptTemplate, type ConsistencyCheckPromptTemplate, type CustomFontMeta, type EmbeddingModelConfig, type KeybindingActionId, type McpServerConfig, type ModelConfig, type PromptTemplate, type ProxyConfig } from '../../../shared/types';
 import { changeLanguage } from '../../i18n';
 import { applyTheme } from '../../shared/services/themeService';
+import { INITIAL_APP_STATE } from '../initialState';
 
 type ConsistencyConfig = NonNullable<AppState['consistencyCheckConfig']>;
 

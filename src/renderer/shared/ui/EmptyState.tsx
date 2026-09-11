@@ -7,8 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import * as React from 'react';
 import type { LucideIcon } from 'lucide-react';
+import * as React from 'react';
+
 import { cn } from '../utils/cn';
 
 export interface EmptyStateProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {

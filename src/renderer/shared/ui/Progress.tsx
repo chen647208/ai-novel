@@ -7,8 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import * as React from 'react';
 import * as ProgressPrimitive from '@radix-ui/react-progress';
+import * as React from 'react';
+
 import { cn } from '../utils/cn';
 
 export const Progress = React.forwardRef<

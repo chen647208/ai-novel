@@ -8,15 +8,15 @@
  */
 
 
-import { logger } from '../../../shared/utils/logger';
 import { i18n } from '@/i18n';
+
 import {
-  type EmbeddingModelConfig,
-  type EmbeddingConnectionTestResult
-} from '../../../../shared/types';
-import { resolveEmbeddingApiKey } from './credentialService';
-import { asRecord, asRecords, asStr, asNum, asNumArr } from '../../../shared/utils/loose';
+  type EmbeddingConnectionTestResult,
+  type EmbeddingModelConfig} from '../../../../shared/types';
 import { embeddingConfigStore } from '../../../shared/services/embeddingConfigStore';
+import { logger } from '../../../shared/utils/logger';
+import { asNum, asNumArr,asRecord, asRecords, asStr } from '../../../shared/utils/loose';
+import { resolveEmbeddingApiKey } from './credentialService';
 
 /**
  * Embedding模型管理服务

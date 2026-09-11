@@ -14,8 +14,9 @@
  * http/https 走 ProxyAgent，socks5 走 Socks5ProxyAgent（undici 原生支持）。
  */
 
-import { Agent, ProxyAgent, Socks5ProxyAgent, fetch as undiciFetch, setGlobalDispatcher } from 'undici';
 import type { RequestInit as UndiciRequestInit } from 'undici';
+import { Agent, fetch as undiciFetch, ProxyAgent, setGlobalDispatcher,Socks5ProxyAgent } from 'undici';
+
 import { logger } from '../logger.js';
 
 /** 代理测试超时毫秒（改值只改一处）。 */

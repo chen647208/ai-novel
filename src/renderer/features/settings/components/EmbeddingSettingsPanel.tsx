@@ -7,13 +7,15 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { PlusCircle } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import { useTranslation, dt } from '@/i18n';
+
+import { dt,useTranslation } from '@/i18n';
+
 import { quickAddTemplates } from '../../../constants/embeddingProviders';
 import type { EmbeddingSettingsPanelProps } from '../types';
-import EmbeddingSidebar from './EmbeddingSidebar';
 import EmbeddingEditor from './EmbeddingEditor';
-import { PlusCircle } from 'lucide-react';
+import EmbeddingSidebar from './EmbeddingSidebar';
 
 /** 向量模型设置：顶部快捷添加 + 左侧列表 + 右侧单配置编辑，与 AI 渠道同一套交互。 */
 const EmbeddingSettingsPanel: React.FC<EmbeddingSettingsPanelProps> = ({

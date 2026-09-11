@@ -8,24 +8,25 @@
  */
 
 import 'i18next';
-import type zhCommon from '../../shared/i18n/locales/zh/common.json';
-import type zhSettings from '../../shared/i18n/locales/zh/settings.json';
-import type zhNav from '../../shared/i18n/locales/zh/nav.json';
+
 import type zhApp from '../../shared/i18n/locales/zh/app.json';
-import type zhErrors from '../../shared/i18n/locales/zh/errors.json';
-import type zhBooks from '../../shared/i18n/locales/zh/books.json';
-import type zhVersion from '../../shared/i18n/locales/zh/version.json';
-import type zhTimeline from '../../shared/i18n/locales/zh/timeline.json';
-import type zhForeshadow from '../../shared/i18n/locales/zh/foreshadow.json';
-import type zhSteps from '../../shared/i18n/locales/zh/steps.json';
-import type zhCharacters from '../../shared/i18n/locales/zh/characters.json';
-import type zhWorld from '../../shared/i18n/locales/zh/world.json';
-import type zhConsistency from '../../shared/i18n/locales/zh/consistency.json';
-import type zhKnowledge from '../../shared/i18n/locales/zh/knowledge.json';
-import type zhWriting from '../../shared/i18n/locales/zh/writing.json';
 import type zhAssistant from '../../shared/i18n/locales/zh/assistant.json';
+import type zhBooks from '../../shared/i18n/locales/zh/books.json';
 import type zhCards from '../../shared/i18n/locales/zh/cards.json';
+import type zhCharacters from '../../shared/i18n/locales/zh/characters.json';
+import type zhCommon from '../../shared/i18n/locales/zh/common.json';
+import type zhConsistency from '../../shared/i18n/locales/zh/consistency.json';
+import type zhErrors from '../../shared/i18n/locales/zh/errors.json';
+import type zhForeshadow from '../../shared/i18n/locales/zh/foreshadow.json';
+import type zhKnowledge from '../../shared/i18n/locales/zh/knowledge.json';
+import type zhNav from '../../shared/i18n/locales/zh/nav.json';
 import type zhOnboarding from '../../shared/i18n/locales/zh/onboarding.json';
+import type zhSettings from '../../shared/i18n/locales/zh/settings.json';
+import type zhSteps from '../../shared/i18n/locales/zh/steps.json';
+import type zhTimeline from '../../shared/i18n/locales/zh/timeline.json';
+import type zhVersion from '../../shared/i18n/locales/zh/version.json';
+import type zhWorld from '../../shared/i18n/locales/zh/world.json';
+import type zhWriting from '../../shared/i18n/locales/zh/writing.json';
 
 /**
  * 类型化翻译键：以中文母版字典推导 resources 形状，使 t() 的键与命名空间在编译期受检、

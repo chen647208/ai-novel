@@ -7,20 +7,21 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { Search, Trash, Trash2, X } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { dialogService } from '@/shared/services/dialogService';
-import AIHistoryRecordList from './components/history/AIHistoryRecordList';
-import SessionEventBrowser from '../assistant/components/SessionEventBrowser';
-import { toggleSetValue } from './utils';
 import { Button } from '@/shared/ui/Button';
 import { DialogTitle } from '@/shared/ui/Dialog';
-import { ModalShell } from '@/shared/ui/ModalShell';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { Select } from '@/shared/ui/Select';
 import { SegmentedControl } from '@/shared/ui/ViewModeToggle';
-import { Search, Trash, Trash2, X } from 'lucide-react';
+
+import SessionEventBrowser from '../assistant/components/SessionEventBrowser';
+import AIHistoryRecordList from './components/history/AIHistoryRecordList';
 import type {
   AIHistoryRecordWithChapter,
   AIHistorySortBy,
@@ -28,6 +29,7 @@ import type {
   AIHistoryViewerProps,
   AIHistoryViewMode,
 } from './types';
+import { toggleSetValue } from './utils';
 
 const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, onClose, mode = 'modal' }) => {
   const { t } = useTranslation('writing');

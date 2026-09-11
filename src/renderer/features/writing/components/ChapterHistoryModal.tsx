@@ -7,21 +7,23 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import type { RevisionEntity } from '@core/entities';
+import { Bot, Camera, Copy, History, Redo2, RotateCcw, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Chapter } from '../../../../shared/types';
-import type { RevisionEntity } from '@core/entities';
-import { repository } from '@/shared/services/repository';
-import { formatHistoryTimestamp, getGenerationType, getProviderIcon } from '../utils';
-import { listSnapshots, removeSnapshot } from '../services/chapterSnapshotService';
+
 import { dialogService } from '@/shared/services/dialogService';
-import { diffLines } from '../services/historyDiff';
+import { repository } from '@/shared/services/repository';
 import { Button } from '@/shared/ui/Button';
 import { DialogTitle } from '@/shared/ui/Dialog';
-import { ModalShell } from '@/shared/ui/ModalShell';
 import { EmptyState } from '@/shared/ui/EmptyState';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { cn } from '@/shared/utils/cn';
-import { Bot, Camera, Copy, History, Redo2, RotateCcw, Trash2 } from 'lucide-react';
+
+import type { Chapter } from '../../../../shared/types';
+import { listSnapshots, removeSnapshot } from '../services/chapterSnapshotService';
+import { diffLines } from '../services/historyDiff';
+import { formatHistoryTimestamp, getGenerationType, getProviderIcon } from '../utils';
 
 interface ChapterHistoryModalProps {
   isOpen: boolean;
@@ -314,7 +316,7 @@ const ChapterHistoryModal: React.FC<ChapterHistoryModalProps> = ({
                         variant="secondary"
                         size="sm"
                         onClick={() => {
-                          navigator.clipboard.writeText(record.generatedContent);
+                          void navigator.clipboard.writeText(record.generatedContent);
                           dialogService.alert(t('record.copied'));
                         }}
                       >

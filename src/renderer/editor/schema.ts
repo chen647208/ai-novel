@@ -18,7 +18,7 @@
  * 编辑器 getJSON() 产出即 serialization 的 PmNode 结构，正文与 DSL 文本经 pmDocToDsl/dslToPmDoc 往返。
  */
 
-import { Node, Mark, type Extensions } from '@tiptap/core';
+import { type Extensions,Mark, Node } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 
 /** 场景分隔（*** 行；Enter×2 产物）——块级叶节点 */

@@ -7,14 +7,16 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { AlertCircle, CheckCircle2, Search } from 'lucide-react';
 import React from 'react';
+
 import { useTranslation } from '@/i18n';
+import { dt } from '@/i18n';
+import { Input } from '@/shared/ui/Input';
+import { cn } from '@/shared/utils/cn';
+
 import type { EmbeddingModelConfig } from '../../../../shared/types';
 import { embeddingProviders } from '../../../constants/embeddingProviders';
-import { cn } from '@/shared/utils/cn';
-import { Input } from '@/shared/ui/Input';
-import { AlertCircle, CheckCircle2, Search } from 'lucide-react';
-import { dt } from '@/i18n';
 
 interface EmbeddingSidebarProps {
   configs: EmbeddingModelConfig[];

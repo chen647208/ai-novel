@@ -7,11 +7,12 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
-import type { Project } from '../../../../../shared/types';
 import { DEFAULT_BUILD_PROFILE, runBuild } from '@core/build';
+import { describe, expect,it } from 'vitest';
+
+import type { Project } from '../../../../../shared/types';
 import { projectToBuildEntities } from '../../utils';
-import { computeChapterStats, computeBookStats, formatCharCount } from '../writingStatsService';
+import { computeBookStats, computeChapterStats, formatCharCount } from '../writingStatsService';
 
 describe('computeChapterStats', () => {
   it('统计净字数/段落/句子', () => {

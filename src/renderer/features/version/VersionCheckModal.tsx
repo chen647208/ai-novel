@@ -1,4 +1,3 @@
-import { formatDate } from '@/shared/utils/format';
 /*
  * 本文件属于 红月创作 (Hongyue Creation) 项目。
  * Copyright (C) 2026 chen647208
@@ -7,21 +6,24 @@ import { formatDate } from '@/shared/utils/format';
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
-import { logger } from '@/shared/utils/logger';
-import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useTranslation, i18n } from '@/i18n';
-import { checkForUpdates, getCurrentVersionInfo, getVersionHistory, formatVersion, type UpdateCheckResult } from './services/versionService';
-import { hasNativeUpdater, nativeCheckForUpdate, nativeDownloadUpdate, nativeInstallUpdate, onUpdaterStatus } from './services/updateService';
+import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import type { UpdaterStatus } from '@shared/types';
+import { AlertCircle, AlertTriangle, CheckCircle2, ExternalLink, RefreshCw, Rocket, Tag } from 'lucide-react';
+import React, { useCallback, useEffect, useRef,useState } from 'react';
+
+import { i18n,useTranslation } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';
-import { Spinner } from '@/shared/ui/Spinner';
 import { ModalShell } from '@/shared/ui/ModalShell';
+import { Spinner } from '@/shared/ui/Spinner';
 import { Switch } from '@/shared/ui/Switch';
 import { cn } from '@/shared/utils/cn';
-import { AlertCircle, AlertTriangle, CheckCircle2, ExternalLink, RefreshCw, Rocket, Tag } from 'lucide-react';
+import { formatDate } from '@/shared/utils/format';
+import { logger } from '@/shared/utils/logger';
+
+import { hasNativeUpdater, nativeCheckForUpdate, nativeDownloadUpdate, nativeInstallUpdate, onUpdaterStatus } from './services/updateService';
+import { checkForUpdates, formatVersion, getCurrentVersionInfo, getVersionHistory, type UpdateCheckResult } from './services/versionService';
 
 
 interface VersionCheckModalProps {
@@ -81,7 +83,7 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
 
       // 自动检查更新（如果启用）
       if (autoCheckEnabledRef.current) {
-        handleAutoCheck();
+        void handleAutoCheck();
       }
     }
   }, [isOpen, handleAutoCheck]);

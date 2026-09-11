@@ -12,7 +12,7 @@
  * 发行档 → assemblyTree → 当前可用的功能 id 集合；UI（导航/入口）以它为准。
  */
 
-import { assemblyTree, profileByName, BUILTIN_BUNDLES } from './bundles.js';
+import { assemblyTree, BUILTIN_BUNDLES,profileByName } from './bundles.js';
 
 /** 当前发行档下可用的功能 id 集合（核心结论：minimal 只剩纯写作链）。 */
 export function enabledFeatureIds(profileName: string): Set<string> {

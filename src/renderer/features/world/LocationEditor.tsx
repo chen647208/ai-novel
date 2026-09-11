@@ -7,17 +7,19 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React, { useState, useEffect } from 'react';
+import { Flag, MapPinned, Mountain, Plus, Save, Search, Trash2, X } from 'lucide-react';
+import React, { useEffect,useState } from 'react';
+
 import { useTranslation } from '@/i18n';
-import { type Location, type Faction } from '../../../shared/types';
 import { dialogService } from '@/shared/services/dialogService';
-import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
-import { Flag, MapPinned, Mountain, Plus, Save, Search, Trash2, X } from 'lucide-react';
+import { cn } from '@/shared/utils/cn';
+
+import { type Faction,type Location } from '../../../shared/types';
 
 interface LocationEditorProps {
   projectId: string;

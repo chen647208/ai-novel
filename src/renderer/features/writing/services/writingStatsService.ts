@@ -10,13 +10,15 @@
 /**
  * 写作统计（纯函数）：字数、段落、句子、阅读时长、全书进度。
  */
-import type { Project } from '../../../../shared/types';
-import { i18n } from '@/i18n';
 import { DEFAULT_BUILD_PROFILE, runBuild } from '@core/build';
-import { projectToBuildEntities } from '../utils';
-import type { ChapterStats, BookStats } from '../types';
 
-export type { ChapterStats, BookStats };
+import { i18n } from '@/i18n';
+
+import type { Project } from '../../../../shared/types';
+import type { BookStats,ChapterStats } from '../types';
+import { projectToBuildEntities } from '../utils';
+
+export type { BookStats,ChapterStats };
 
 const READING_CHARS_PER_MINUTE = 400;
 

@@ -7,12 +7,14 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { CheckCircle2, ExternalLink, GraduationCap, Key, Lightbulb, PlusCircle } from 'lucide-react';
 import React from 'react';
-import { useTranslation, dt, dtList } from '@/i18n';
+
+import { dt, dtList,useTranslation } from '@/i18n';
+import { Button } from '@/shared/ui/Button';
+
 import { modelProviders } from '../../../constants/modelProviders';
 import type { SystemGuidePanelProps } from '../types';
-import { Button } from '@/shared/ui/Button';
-import { CheckCircle2, ExternalLink, GraduationCap, Key, Lightbulb, PlusCircle } from 'lucide-react';
 
 const fieldLabel = 'mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground';
 

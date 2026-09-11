@@ -3,7 +3,7 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
@@ -11,9 +11,11 @@
  * 查找替换（编辑器内）：状态 + 快捷键 + 匹配跳转/替换。
  * 匹配经 editor doc 实时计算，当前匹配即选区（选区即高亮）。
  */
-import { useCallback, useEffect, useState, type RefObject } from 'react';
-import { eventToKeybinding, resolveKeybindings } from '../../settings/services/keybindings';
+import { type RefObject,useCallback, useEffect, useState } from 'react';
+
 import { useSettingsStore } from '@/app/stores/settingsStore';
+
+import { eventToKeybinding, resolveKeybindings } from '../../settings/services/keybindings';
 import type { NovelEditorHandle } from '../types';
 
 interface UseFindReplaceOptions {

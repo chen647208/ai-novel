@@ -12,7 +12,8 @@
  * 语言取自系统 locale（app.getLocale()），字典与渲染端同源于 src/shared/i18n/catalog。
  */
 import i18next from 'i18next';
-import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, normalizeLanguage, resources } from '../../shared/i18n/catalog.js';
+
+import { DEFAULT_LANGUAGE, normalizeLanguage, resources,SUPPORTED_LANGUAGES } from '../../shared/i18n/catalog.js';
 
 /** 主进程独立实例，避免与渲染端全局单例耦合；只加载 errors 命名空间。 */
 const instance = i18next.createInstance();

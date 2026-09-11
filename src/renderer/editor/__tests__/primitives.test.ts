@@ -8,14 +8,15 @@
  */
 
 // @vitest-environment jsdom
-import { describe, it, expect, afterEach, vi } from 'vitest';
 import { Editor } from '@tiptap/core';
 import type { Node as PmNode } from '@tiptap/pm/model';
-import { createNovelExtensions } from '../schema';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import {
   createWritingPrimitives,
   type RenumberItem,
 } from '../primitives';
+import { createNovelExtensions } from '../schema';
 import { dslToPmDoc } from '../serialization';
 
 /** 构建一个带 schema + 8 原语的无头编辑器（jsdom 下可实例化 ProseMirror）。 */

@@ -7,31 +7,32 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import {
+  type AttributeEntity,
+  type BookEntities,
+  type EdgeEntity,
+  type EntityChange,
+  getInstanceId,
+  hashEntity,
+  type NodeEntity,
+  type RevisionEntity,
+  uuidv7,
+} from '@core/entities';
+import { indexService } from '@core/index';
+import { entitiesToProject,projectToEntities } from '@core/project';
+
+import { APP_STATE_VERSION } from '../../../../shared/constants/versions';
 import type {
   AppState,
-  Project,
-  StorageConfig,
   ConsistencyCheckConfig,
   ConsistencyCheckPromptTemplate,
+  Project,
+  StorageConfig,
 } from '../../../../shared/types';
-import type { StorageRepository, SqlDriver, SqlValue, SearchHit, SearchOptions, CommitOptions } from './types';
-import { migrate, SETTING_KEYS, META_KEYS } from './schema';
-import { APP_STATE_VERSION } from '../../../../shared/constants/versions';
-import { jsonRepository } from './jsonRepository';
 import { logger } from '../../utils/logger';
-import { projectToEntities, entitiesToProject } from '@core/project';
-import { indexService } from '@core/index';
-import {
-  hashEntity,
-  getInstanceId,
-  uuidv7,
-  type EntityChange,
-  type BookEntities,
-  type RevisionEntity,
-  type NodeEntity,
-  type EdgeEntity,
-  type AttributeEntity,
-} from '@core/entities';
+import { jsonRepository } from './jsonRepository';
+import { META_KEYS,migrate, SETTING_KEYS } from './schema';
+import type { CommitOptions,SearchHit, SearchOptions, SqlDriver, SqlValue, StorageRepository } from './types';
 
 const DEFAULT_SEARCH_LIMIT = 50;
 /** trigram 分词器需要至少 3 个字符才能命中 */

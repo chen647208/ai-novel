@@ -7,15 +7,17 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { EditorContent, useEditor } from '@tiptap/react';
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EditorContent, useEditor } from '@tiptap/react';
-import { createNovelExtensions } from '../../../editor/schema';
+
+import { cn } from '@/shared/utils/cn';
+
 import { findMatches } from '../../../editor/findReplace';
 import { createWritingPrimitives } from '../../../editor/primitives';
+import { createNovelExtensions } from '../../../editor/schema';
 import { dslToPmDoc, pmDocToDsl, type PmNode } from '../../../editor/serialization';
 import type { NovelEditorHandle } from '../types';
-import { cn } from '@/shared/utils/cn';
 
 interface TipTapCanvasProps {
   content: string;

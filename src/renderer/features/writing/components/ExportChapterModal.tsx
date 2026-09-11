@@ -7,20 +7,22 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { AlignLeft, Check, Code, FileDown, FileOutput, FileText, Globe, type LucideIcon,Package } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Chapter, Project } from '../../../../shared/types';
-import { buildExportContent } from '../utils';
-import type { ExportFormat } from '../types';
-import { Select } from '@/shared/ui/Select';
+
 import { buildProfileRegistry, profileKey } from '@/shared/services/buildProfiles';
-import { computeChapterStats } from '../services/writingStatsService';
-import MarkdownView from '@/shared/ui/Markdown';
 import { Button } from '@/shared/ui/Button';
 import { DialogTitle } from '@/shared/ui/Dialog';
+import MarkdownView from '@/shared/ui/Markdown';
 import { ModalShell } from '@/shared/ui/ModalShell';
+import { Select } from '@/shared/ui/Select';
 import { cn } from '@/shared/utils/cn';
-import { AlignLeft, Check, Code, FileDown, FileOutput, FileText, Globe, Package, type LucideIcon } from 'lucide-react';
+
+import type { Chapter, Project } from '../../../../shared/types';
+import { computeChapterStats } from '../services/writingStatsService';
+import type { ExportFormat } from '../types';
+import { buildExportContent } from '../utils';
 
 interface ExportChapterModalProps {
   isOpen: boolean;

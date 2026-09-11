@@ -16,9 +16,10 @@
  */
 
 import { create } from 'zustand';
+
 import { type Project } from '../../../shared/types';
-import type { CommitOptions } from '../../shared/services/repository/types';
 import { i18n } from '../../i18n';
+import type { CommitOptions } from '../../shared/services/repository/types';
 
 /**
  * 变更归因绑定：新 Project 对象引用 → 本次提交的 CommitOptions。

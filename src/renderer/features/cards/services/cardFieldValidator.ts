@@ -12,10 +12,12 @@
  * 负责确保AI生成的卡片数据包含所有必需字段
  */
 
+import { uuidv7 } from '@core/entities';
+
+import { i18n } from '@/i18n';
+
 import { type AICardCommand } from '../../../../shared/types';
 import { type LooseRecord } from '../../../shared/utils/loose';
-import { i18n } from '@/i18n';
-import { uuidv7 } from '@core/entities';
 
 /**
  * 字段定义配置

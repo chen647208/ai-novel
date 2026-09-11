@@ -20,7 +20,7 @@
  */
 
 import type { EventBus, SeamPolicy } from './events.js';
-import { shortId, type Disposable, type PluginPermissions } from './manifest.js';
+import { type Disposable, type PluginPermissions,shortId } from './manifest.js';
 
 /** 插件任务句柄：宿主在停用/卸载时可等待或放弃。 */
 export interface TaskHandle extends Disposable {

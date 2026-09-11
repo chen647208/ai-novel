@@ -7,16 +7,17 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect,it } from 'vitest';
+
+import type { AttributeEntity, BookEntities, EdgeEntity, NodeEntity } from '../../entities/types';
 import {
   buildIndex,
-  IndexService,
-  fingerprintEntities,
-  serializeIndexSnapshot,
   deserializeIndexSnapshot,
+  fingerprintEntities,
+  IndexService,
+  serializeIndexSnapshot,
 } from '../indexer';
 import { countWords } from '../words';
-import type { AttributeEntity, BookEntities, EdgeEntity, NodeEntity } from '../../entities/types';
 
 function node(partial: Partial<NodeEntity> & Pick<NodeEntity, 'id' | 'type'>): NodeEntity {
   return { title: '', bookId: 'b1', body: '', createdAt: 0, updatedAt: 0, erased: false, ...partial };

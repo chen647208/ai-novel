@@ -7,10 +7,11 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { beforeAll,describe, expect, it, vi } from 'vitest';
+
 import type { AiStreamEvent, ModelConfig, StreamingAIResponse } from '../../../shared/types.js';
-import type { ProviderAdapter } from '../types.js';
 import { initAiI18n } from '../i18n.js';
+import type { ProviderAdapter } from '../types.js';
 
 const { mockResolve } = vi.hoisted(() => ({ mockResolve: vi.fn() }));
 vi.mock('../resolve.js', () => ({ resolveAdapter: mockResolve }));

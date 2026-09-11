@@ -6,31 +6,32 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
-import { logger } from '@/shared/utils/logger';
-
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { BookOpenText, Bot, CircleStop, ListChecks, PenLine, RotateCcw, Trash2, X } from 'lucide-react';
+import React, { useEffect, useMemo,useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { type KnowledgeItem, type OutputMode, type Character, type Project } from '../../../shared/types';
+
 import { useProjectStore } from '@/app/stores/projectStore';
-import { collectChatAttachments } from './services/chatAttachments';
-import { useAssistantChat } from './hooks/useAssistantChat';
-import { useModelSelection } from './hooks/useModelSelection';
-import { useAssistantCards } from './hooks/useAssistantCards';
-import { type GlobalAssistantProps, type AssistantCategory, type AssistantEditCategory, type SyncStatus, type EditingData } from './types';
-import { type LooseRecord, asRecord, asStr } from '../../shared/utils/loose';
-import { isModelUsable } from '@/shared/utils/modelReadiness';
 import { AIService } from '@/shared/services/ai/aiService';
-import { parseSingleCharacterFromText } from './services/characterParsing';
-import { buildContextContent } from './services/assistantContextContent';
+import { dialogService } from '@/shared/services/dialogService';
+import { Button } from '@/shared/ui/Button';
+import { Select } from '@/shared/ui/Select';
 import { normalizeGenderId, normalizeRoleId } from '@/shared/utils/characterKinds';
+import { cn } from '@/shared/utils/cn';
+import { logger } from '@/shared/utils/logger';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
+
+import { type Character, type KnowledgeItem, type OutputMode, type Project } from '../../../shared/types';
+import { asRecord, asStr,type LooseRecord } from '../../shared/utils/loose';
+import AssistantChatWorkspace from './components/AssistantChatWorkspace';
 import AssistantContextPanel from './components/AssistantContextPanel';
 import AssistantEditPanel from './components/AssistantEditPanel';
-import AssistantChatWorkspace from './components/AssistantChatWorkspace';
-import { Select } from '@/shared/ui/Select';
-import { Button } from '@/shared/ui/Button';
-import { cn } from '@/shared/utils/cn';
-import { dialogService } from '@/shared/services/dialogService';
-import { BookOpenText, Bot, CircleStop, ListChecks, PenLine, RotateCcw, Trash2, X } from 'lucide-react';
+import { useAssistantCards } from './hooks/useAssistantCards';
+import { useAssistantChat } from './hooks/useAssistantChat';
+import { useModelSelection } from './hooks/useModelSelection';
+import { buildContextContent } from './services/assistantContextContent';
+import { parseSingleCharacterFromText } from './services/characterParsing';
+import { collectChatAttachments } from './services/chatAttachments';
+import { type AssistantCategory, type AssistantEditCategory, type EditingData,type GlobalAssistantProps, type SyncStatus } from './types';
 
 
 const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId, project, prompts, onUpdate, width = 380, onClose, onWidthChange }) => {
@@ -136,7 +137,7 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
      }
 
      setContextPanelOpen(false);
-     sendMessageInternal(finalInstruction, [attachment]);
+     void sendMessageInternal(finalInstruction, [attachment]);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

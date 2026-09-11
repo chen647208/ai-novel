@@ -7,10 +7,10 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { type AICardCommand, type AIProjectContext, type Project, type CardPromptTemplate } from '../../../../shared/types';
+import { type AICardCommand, type AIProjectContext, type CardPromptTemplate,type Project } from '../../../../shared/types';
 import { 
-  getDefaultTemplateForCommand, 
   buildCardPrompt as buildPromptFromTemplate,
+  getDefaultTemplateForCommand, 
   getTemplateVariableDescriptions 
 } from './cardPromptService';
 

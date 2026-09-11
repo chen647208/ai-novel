@@ -8,6 +8,9 @@
  */
 
 import React from 'react';
+
+import { settingsTabRegistry } from '../services/settingsTabs';
+import type { SettingsTabContentProps } from '../types';
 import CardPromptSettingsPanel from './CardPromptSettingsPanel';
 import ConsistencyPromptSettingsPanel from './ConsistencyPromptSettingsPanel';
 import EmbeddingSettingsPanel from './EmbeddingSettingsPanel';
@@ -16,8 +19,6 @@ import ModelSettingsPanel from './ModelSettingsPanel';
 import PromptTemplatesPanel from './PromptTemplatesPanel';
 import StorageSettingsPanel from './StorageSettingsPanel';
 import SystemGuidePanel from './SystemGuidePanel';
-import { settingsTabRegistry } from '../services/settingsTabs';
-import type { SettingsTabContentProps } from '../types';
 
 const SettingsTabContent: React.FC<SettingsTabContentProps> = (props) => {
   const {

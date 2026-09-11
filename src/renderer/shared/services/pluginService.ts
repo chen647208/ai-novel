@@ -17,15 +17,15 @@
  * 禁用清单持久化在设置域（配置级 disabled，不碰插件文件）。
  */
 import { parseSkillMd, type SkillCatalog } from '@core/ai';
-import { PluginHost, installHooks, installTypeTemplates, typeTemplateId } from '@core/plugin';
 import type {
   BuildProfileRegistry,
-  EventBus,
   DiscoveredPlugin,
   Disposable,
-  PluginStatus,
+  EventBus,
   PluginHostOptions,
+  PluginStatus,
 } from '@core/plugin';
+import { installHooks, installTypeTemplates, PluginHost, typeTemplateId } from '@core/plugin';
 import { builtinRegistry } from '@core/types-registry';
 
 function electron(): NonNullable<Window['electronAPI']> {
@@ -152,4 +152,4 @@ export async function bootstrapPlugins(deps: PluginDeps, hostVersion: string, di
   return host;
 }
 
-export type { PluginStatus, PluginHostOptions };
+export type { PluginHostOptions,PluginStatus };

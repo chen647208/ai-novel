@@ -8,14 +8,16 @@
  */
 
 /** 同步对话框：导出/导入同步包 + 冲突副本报告。 */
+import { ArrowLeftRight } from 'lucide-react';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeftRight } from 'lucide-react';
-import { Spinner } from '@/shared/ui/Spinner';
-import { Button } from '@/shared/ui/Button';
-import { ModalShell } from '@/shared/ui/ModalShell';
+
 import { dialogService } from '@/shared/services/dialogService';
 import { exportSyncBundle, importSyncBundle, type SyncApplyReport } from '@/shared/services/syncService';
+import { Button } from '@/shared/ui/Button';
+import { ModalShell } from '@/shared/ui/ModalShell';
+import { Spinner } from '@/shared/ui/Spinner';
+
 import type { Project } from '../../../shared/types';
 
 export const SyncDialog: React.FC<{ project: Project | null }> = ({ project }) => {

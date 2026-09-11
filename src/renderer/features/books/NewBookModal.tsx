@@ -3,21 +3,22 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { BookHeart } from 'lucide-react';
 import React, { useState } from 'react';
+
 import { useTranslation } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
-import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
-import { ModalShell } from '@/shared/ui/ModalShell';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
-import { BookHeart } from 'lucide-react';
+import { cn } from '@/shared/utils/cn';
 
 interface NewBookModalProps {
   isOpen: boolean;

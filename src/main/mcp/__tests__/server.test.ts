@@ -7,10 +7,12 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+
+import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+
 import { dispatch } from '../server.js';
 
 let dir = '';

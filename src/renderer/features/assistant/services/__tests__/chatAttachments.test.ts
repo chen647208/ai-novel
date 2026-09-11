@@ -3,12 +3,14 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
-import { describe, it, expect, vi } from 'vitest';
-import { collectChatAttachments, type AttachmentDeps } from '../chatAttachments';
+
 import { CHAT_IMAGE_MAX_BYTES } from '@shared/constants/chat';
+import { describe, expect, it, vi } from 'vitest';
+
+import { type AttachmentDeps,collectChatAttachments } from '../chatAttachments';
 
 function file(name: string, type: string, size = 100): File {
   return { name, type, size } as unknown as File;

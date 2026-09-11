@@ -6,34 +6,42 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
-import { logger } from '@/shared/utils/logger';
+import { uuidv7 } from '@core/entities';
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
-
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useCallback,useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { type CommitOptions,useProjectStore } from '@/app/stores/projectStore';
+import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
 import { dialogService } from '@/shared/services/dialogService';
+import { Button } from '@/shared/ui/Button';
+import { EmptyState } from '@/shared/ui/EmptyState';
+import { logger } from '@/shared/utils/logger';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
+
+import { isVirtualChapter } from '../../../shared/constants/chapters';
 import { type Chapter, type Project, type PromptTemplate } from '../../../shared/types';
+import ForeshadowPanel from '../foreshadowing/components/ForeshadowPanel';
+import { openForeshadows, overdueForeshadows } from '../foreshadowing/services/foreshadowService';
+import FindBar from './components/FindBar';
+import WritingEditorCanvas from './components/WritingEditorCanvas';
+import WritingEditorOverlayLayer from './components/WritingEditorOverlayLayer';
 import WritingEditorToolbar from './components/WritingEditorToolbar';
 import WritingSidebar from './components/WritingSidebar';
-import WritingEditorOverlayLayer from './components/WritingEditorOverlayLayer';
-import FindBar from './components/FindBar';
-import { useFindReplace } from './hooks/useFindReplace';
-import { useChapterExport } from './hooks/useChapterExport';
-import { useChapterMutations } from './hooks/useChapterMutations';
-import { useChapterGeneration } from './hooks/useChapterGeneration';
-import WritingEditorCanvas from './components/WritingEditorCanvas';
-import ForeshadowPanel from '../foreshadowing/components/ForeshadowPanel';
-import { extractChapterSummary } from './services/summaryExtractionService';
-import { appendSnapshot, createSnapshot } from './services/chapterSnapshotService';
-import { useChapterSnapshots } from './hooks/useChapterSnapshots';
-import { computeBookStats, computeChapterStats } from './services/writingStatsService';
-import { openForeshadows, overdueForeshadows } from '../foreshadowing/services/foreshadowService';
 import {
   DEFAULT_OUTPUT_MODE,
   DEFAULT_TARGET_WORD_COUNT,
   INITIAL_GENERATION_MODAL_STATE,
   SELECTION_MENU_DEBOUNCE_MS,
 } from './constants';
+import { useChapterExport } from './hooks/useChapterExport';
+import { useChapterGeneration } from './hooks/useChapterGeneration';
+import { useChapterMutations } from './hooks/useChapterMutations';
+import { useChapterSnapshots } from './hooks/useChapterSnapshots';
+import { useFindReplace } from './hooks/useFindReplace';
+import { appendSnapshot, createSnapshot } from './services/chapterSnapshotService';
+import { extractChapterSummary } from './services/summaryExtractionService';
+import { computeBookStats, computeChapterStats } from './services/writingStatsService';
 import type {
   GenerationModalState,
   MenuPosition,
@@ -44,17 +52,10 @@ import type {
 import {
   debounce,
   getChapterContext,
-  getPreviousChapterSummaryIds,
   getFloatingMenuPosition,
+  getPreviousChapterSummaryIds,
   toggleSetValue,
 } from './utils';
-import { Button } from '@/shared/ui/Button';
-import { EmptyState } from '@/shared/ui/EmptyState';
-import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
-import { isVirtualChapter } from '../../../shared/constants/chapters';
-import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
-import { isModelUsable } from '@/shared/utils/modelReadiness';
-import { uuidv7 } from '@core/entities';
 
 const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId, onBack, onNavigateToCharacters, onOpenSettings }) => {
   const { t } = useTranslation(['writing', 'steps']);
@@ -469,10 +470,10 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
         name: t('editor.customPromptName'),
         content: customEditPrompt.trim()
       };
-      gen.runAITemplate(customTemplate);
+      void gen.runAITemplate(customTemplate);
     } else {
       const template = prompts.find(p => p.id === selectedEditPromptId);
-      if (template) gen.runAITemplate(template);
+      if (template) void gen.runAITemplate(template);
     }
   };
   const openEditModal = () => { 

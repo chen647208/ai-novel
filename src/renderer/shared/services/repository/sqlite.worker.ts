@@ -7,12 +7,13 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import type { CAPI,Database } from '@sqlite.org/sqlite-wasm';
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
-import type { Database, CAPI } from '@sqlite.org/sqlite-wasm';
 // 显式以 ?url 引入 wasm 资源：vite 在 dev 下按原始资源正确返回字节、在 build 下产出带哈希的资产 URL。
 // 若依赖 emscripten 默认的相对路径解析，dev 服务器会把该请求当作 SPA 回退返回 index.html（HTML 字节），
 // 导致 WebAssembly.instantiate 报 "expected magic word 00 61 73 6d"。
 import wasmUrl from '@sqlite.org/sqlite-wasm/sqlite3.wasm?url';
+
 import { runWasmRequest, type WasmRequest } from './wasmSql';
 
 /**

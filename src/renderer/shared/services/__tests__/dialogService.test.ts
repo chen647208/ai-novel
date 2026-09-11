@@ -7,7 +7,8 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect, afterEach } from 'vitest';
+import { afterEach,describe, expect, it } from 'vitest';
+
 import { dialogService } from '../dialogService';
 
 describe('dialogService', () => {
@@ -23,10 +24,14 @@ describe('dialogService', () => {
     expect(await b).toBe(false);
   });
 
-  it('alert：settle 后解析（忽略 value）', async () => {
-    const p = dialogService.alert('生成成功');
+  it('alert：即发即忘，返回 void 并入队', () => {
+    const seen: number[] = [];
+    const unsub = dialogService.subscribe((q) => seen.push(q.length));
+    expect(dialogService.alert('生成成功')).toBeUndefined();
+    expect(seen[seen.length - 1]).toBe(1);
     dialogService.settle(true);
-    await expect(p).resolves.toBeUndefined();
+    expect(seen[seen.length - 1]).toBe(0);
+    unsub();
   });
 
   it('prompt：确认返回输入文本，取消返回 null', async () => {

@@ -7,14 +7,16 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
-import type { Project } from '../../../../shared/types';
+import { describe, expect,it } from 'vitest';
+
 import {
   normalizeGenderId,
   normalizeImpactId,
   normalizeProjectKinds,
   normalizeRoleId,
 } from '@/shared/utils/characterKinds';
+
+import type { Project } from '../../../../shared/types';
 
 describe('normalizeRoleId', () => {
   it('中英映射到枚举', () => {

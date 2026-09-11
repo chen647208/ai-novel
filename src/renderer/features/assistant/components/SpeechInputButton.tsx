@@ -7,12 +7,14 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { Mic, Square } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Mic, Square } from 'lucide-react';
+
 import { Button } from '@/shared/ui/Button';
 import { logger } from '@/shared/utils/logger';
-import { createDictation, isDictationSupported, type DictationController } from '../services/speechService';
+
+import { createDictation, type DictationController,isDictationSupported } from '../services/speechService';
 
 interface SpeechInputButtonProps {
   onTranscript: (text: string) => void;

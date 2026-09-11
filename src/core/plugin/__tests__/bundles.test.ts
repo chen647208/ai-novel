@@ -7,9 +7,10 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
-import { BUILTIN_FEATURES, BUILTIN_BUNDLES, RELEASE_PROFILES, DEFAULT_RELEASE_PROFILE, profileByName, assemblyTree } from '../bundles.js';
-import { profileDeniesAi, enabledFeatureIds } from '../availability.js';
+import { describe, expect,it } from 'vitest';
+
+import { enabledFeatureIds,profileDeniesAi } from '../availability.js';
+import { assemblyTree,BUILTIN_BUNDLES, BUILTIN_FEATURES, DEFAULT_RELEASE_PROFILE, profileByName, RELEASE_PROFILES } from '../bundles.js';
 
 describe('bundle 装配树（design/04 §7）', () => {
   it('全 bundle 启用：15 个内置功能全部装配', () => {

@@ -6,20 +6,20 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+import { renderWorldDigest } from '@core/ai';
+
+import { i18n } from '@/i18n';
+import { AIService } from '@/shared/services/ai/aiService';
+import { genderLabel, roleLabel } from '@/shared/utils/displayLabels';
 import { logger } from '@/shared/utils/logger';
 
 /**
  * AI语义检查服务
  * 使用LLM分析描述文本中的语义矛盾和逻辑不一致
  */
-
-import { type Project, type Character, type Faction, type Location, type ModelConfig, type ConsistencyCheckPromptTemplate } from '../../../../shared/types';
-import { type LooseRecord, asRecord, asRecords, asStr, asNum, asStrArr } from '../../../shared/utils/loose';
-import { i18n } from '@/i18n';
-import { AIService } from '@/shared/services/ai/aiService';
+import { type Character, type ConsistencyCheckPromptTemplate,type Faction, type Location, type ModelConfig, type Project } from '../../../../shared/types';
+import { asNum, asRecord, asRecords, asStr, asStrArr,type LooseRecord } from '../../../shared/utils/loose';
 import { ConsistencyCheckPromptService } from '../../consistency/services/consistencyCheckPromptService';
-import { genderLabel, roleLabel } from '@/shared/utils/displayLabels';
-import { renderWorldDigest } from '@core/ai';
 import { AI_SEMANTIC_THROTTLE_MS } from '../constants';
 
 export interface SemanticIssue {

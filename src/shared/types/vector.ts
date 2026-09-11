@@ -8,15 +8,14 @@
  */
 
 export type {
-  VectorDocument,
-  SearchResult,
-  SearchOptions,
   CollectionStats,
-  ConsistencyCheckResult,
-  HybridSearchResult,
-  HybridSearchOptions,
+  ConsistencyCheckConfig,
   ConsistencyCheckMode,
   ConsistencyCheckPromptCategory,
   ConsistencyCheckPromptTemplate,
-  ConsistencyCheckConfig
-} from '../types.js';
+  ConsistencyCheckResult,
+  HybridSearchOptions,
+  HybridSearchResult,
+  SearchOptions,
+  SearchResult,
+  VectorDocument} from '../types.js';

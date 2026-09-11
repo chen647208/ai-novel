@@ -7,7 +7,8 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect,it } from 'vitest';
+
 import { createSSEParser } from '../sse.js';
 
 /** 把字符串按任意边界切片喂给解析器，验证输出与切片方式无关 */

@@ -7,13 +7,15 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { app, ipcMain, safeStorage } from 'electron';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { logger } from '../logger.js';
-import { IPC } from '../channels.js';
-import type { Provider } from './container.js';
+
+import { app, ipcMain, safeStorage } from 'electron';
+
 import type { ModelConfig } from '../../shared/types.js';
+import { IPC } from '../channels.js';
+import { logger } from '../logger.js';
+import type { Provider } from './container.js';
 
 /**
  * 安全密钥库：API Key 落盘加密（对标 CC Switch 安全复盘“本地≠加密”的教训）。

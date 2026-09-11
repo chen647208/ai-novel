@@ -11,9 +11,11 @@
  * 伏笔追踪服务。
  * 纯函数负责数据管理与提示词注入；AI 辅助检测复用新 AI 层的 callJSON。
  */
-import type { Foreshadow, ForeshadowImportance, ForeshadowStatus, ModelConfig, Project } from '../../../../shared/types';
-import { AIService } from '@/shared/services/ai/aiService';
 import { uuidv7 } from '@core/entities';
+
+import { AIService } from '@/shared/services/ai/aiService';
+
+import type { Foreshadow, ForeshadowImportance, ForeshadowStatus, ModelConfig, Project } from '../../../../shared/types';
 
 const IMPORTANCE_RANK: Record<ForeshadowImportance, number> = { critical: 0, major: 1, minor: 2 };
 

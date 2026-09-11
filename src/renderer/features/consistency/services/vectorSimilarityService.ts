@@ -6,28 +6,26 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+import { i18n } from '@/i18n';
+import { AIService } from '@/shared/services/ai/aiService';
+import { genderLabel, roleLabel } from '@/shared/utils/displayLabels';
 import { logger } from '@/shared/utils/logger';
 
 /**
  * 向量相似度检测服务
  * 使用Embedding模型发现相似或重复的世界观元素
  */
-
 import { 
-  type Project, 
   type Character, 
-  type Faction, 
-  type Location, 
-  type EmbeddingModelConfig,
   type ConsistencyCheckPromptTemplate,
+  type EmbeddingModelConfig,
+  type Faction, 
+  type KnowledgeCategory, 
+  type Location, 
   type ModelConfig,
-  type KnowledgeCategory 
-} from '../../../../shared/types';
+  type Project} from '../../../../shared/types';
 import { vectorIntegrationService } from '../../knowledge/services/vectorIntegrationService';
-import { AIService } from '@/shared/services/ai/aiService';
 import { ConsistencyCheckPromptService } from './consistencyCheckPromptService';
-import { genderLabel, roleLabel } from '@/shared/utils/displayLabels';
-import { i18n } from '@/i18n';
 
 export interface SimilarityIssue {
   id: string;

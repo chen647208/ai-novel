@@ -3,19 +3,21 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 /** 章节细纲列表（表格/卡片两种视图，从 StepChapterOutline 抽出）。 */
+import { ChevronDown, ChevronUp, PenTool, Trash2 } from 'lucide-react';
 import React from 'react';
+
 import { useTranslation } from '@/i18n';
-import { type Chapter, type Project } from '../../../../shared/types';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { Textarea } from '@/shared/ui/Textarea';
-import { ChevronDown, ChevronUp, PenTool, Trash2 } from 'lucide-react';
+
+import { type Chapter, type Project } from '../../../../shared/types';
 
 export interface ChapterOutlineListProps {
   chapters: Chapter[];

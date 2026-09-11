@@ -20,13 +20,14 @@
  *    现统一放入 config 字段，系统提示词真正生效
  */
 import { GoogleGenAI } from '@google/genai';
-import { aiT } from '../i18n.js';
-import type { ModelConfig, AIResponse, StreamingAIResponse } from '../../../shared/types.js';
-import { cleanModelOutput, extractGeminiTokenUsage, isAbortError, readErrorResponse } from '../messages.js';
-import { createSSEParser } from '../sse.js';
-import { AIRequestError, DEFAULT_TEMPERATURE, type CallOptions, type ProviderAdapter } from '../types.js';
-import { parseRetryAfter, requestErrorFromResponse, withRetry } from '../retry.js';
+
+import type { AIResponse, ModelConfig, StreamingAIResponse } from '../../../shared/types.js';
 import { proxiedFetch } from '../../net/proxy.js';
+import { aiT } from '../i18n.js';
+import { cleanModelOutput, extractGeminiTokenUsage, isAbortError, readErrorResponse } from '../messages.js';
+import { parseRetryAfter, requestErrorFromResponse, withRetry } from '../retry.js';
+import { createSSEParser } from '../sse.js';
+import { AIRequestError, type CallOptions, DEFAULT_TEMPERATURE, type ProviderAdapter } from '../types.js';
 import { openAICompatibleAdapter } from './openai-compatible.js';
 
 interface GeminiPart {

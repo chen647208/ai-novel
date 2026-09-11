@@ -7,22 +7,24 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React, { useRef, useState } from 'react';
-import { Download, Keyboard, Languages, Monitor, Moon, Sun, Trash2, Type, Upload } from 'lucide-react';
-import { useTranslation, SUPPORTED_LANGUAGES } from '@/i18n';
 import type { AppLanguage, AppTheme } from '@shared/types';
+import { Download, Keyboard, Languages, Monitor, Moon, Sun, Trash2, Type, Upload } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+
+import { useSettingsStore } from '@/app/stores/settingsStore';
+import { SUPPORTED_LANGUAGES,useTranslation } from '@/i18n';
+import { Button } from '@/shared/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/Card';
 import { Label } from '@/shared/ui/Label';
 import { Select } from '@/shared/ui/Select';
-import { Button } from '@/shared/ui/Button';
 import { cn } from '@/shared/utils/cn';
-import type { GeneralSettingsPanelProps } from '../types';
+
 import { DEFAULT_EDITOR_FONT, DEFAULT_UI_FONT, fontPresets, resolveFontStack } from '../../../constants/fonts';
 import { importCustomFont, removeCustomFont } from '../services/customFontService';
-import { useSettingsStore } from '@/app/stores/settingsStore';
+import type { GeneralSettingsPanelProps } from '../types';
+import ProxyPanel from './ProxyPanel';
 import ShortcutRecorder from './ShortcutRecorder';
 import SystemPanel from './SystemPanel';
-import ProxyPanel from './ProxyPanel';
 
 const THEME_OPTIONS: {
   value: AppTheme;

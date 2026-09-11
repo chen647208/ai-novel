@@ -6,18 +6,20 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+import { CheckSquare, ChevronRight, LayoutGrid, List, Square, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { ChapterNavigationSectionProps } from '../types';
-import type { Chapter } from '../../../../shared/types';
-import { cn } from '@/shared/utils/cn';
+
+import { useViewPreference } from '@/shared/hooks/useViewPreference';
+import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';
 import { Checkbox } from '@/shared/ui/Checkbox';
 import { Input } from '@/shared/ui/Input';
 import { ViewModeToggle } from '@/shared/ui/ViewModeToggle';
-import { useViewPreference } from '@/shared/hooks/useViewPreference';
-import { dialogService } from '@/shared/services/dialogService';
-import { CheckSquare, ChevronRight, LayoutGrid, List, Square, Trash2 } from 'lucide-react';
+import { cn } from '@/shared/utils/cn';
+
+import type { Chapter } from '../../../../shared/types';
+import type { ChapterNavigationSectionProps } from '../types';
 
 const STATUS_ORDER: Array<NonNullable<Chapter['status']>> = ['draft', 'writing', 'done'];
 

@@ -7,18 +7,20 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { AlertCircle, BookOpenText, CheckCircle2, FileText, Info, Lightbulb, ListOrdered, ListTree, type LucideIcon,Save, Users, WandSparkles } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { AssistantEditPanelProps, AssistantEditCategory } from '../types';
+
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
-import { normalizeGenderId } from '@/shared/utils/characterKinds';
 import { Select } from '@/shared/ui/Select';
 import { Spinner } from '@/shared/ui/Spinner';
-import { Textarea } from '@/shared/ui/Textarea';
 import { TabBar } from '@/shared/ui/TabBar';
-import { AlertCircle, BookOpenText, CheckCircle2, FileText, Info, Lightbulb, ListOrdered, ListTree, Save, Users, WandSparkles, type LucideIcon } from 'lucide-react';
+import { Textarea } from '@/shared/ui/Textarea';
+import { normalizeGenderId } from '@/shared/utils/characterKinds';
+
+import type { AssistantEditCategory,AssistantEditPanelProps } from '../types';
 
 const EDIT_CATEGORIES: Array<{ id: AssistantEditCategory; icon: LucideIcon }> = [
   { id: 'inspiration', icon: Lightbulb },

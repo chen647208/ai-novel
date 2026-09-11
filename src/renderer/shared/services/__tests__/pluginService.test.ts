@@ -7,9 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { SkillCatalog } from '@core/ai';
 import { BuildProfileRegistry, EventBus } from '@core/plugin';
+import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
 
 const files: Record<string, string> = {
   '/data/plugins/com.example.golden3/plugin.json': JSON.stringify({

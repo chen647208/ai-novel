@@ -57,10 +57,10 @@ class DialogService {
     return new Promise<boolean>((resolve) => this.enqueue({ kind: 'confirm', options: opts, resolve }));
   }
 
-  /** 通知用户：点击确定后 resolve。返回 Promise 以便需要时 await，但通常即发即忘。 */
-  alert(options: AlertOptions | string): Promise<void> {
+  /** 通知用户：即发即忘（返回 void），调用方无需 void/await。 */
+  alert(options: AlertOptions | string): void {
     const opts: AlertOptions = typeof options === 'string' ? { message: options } : options;
-    return new Promise<void>((resolve) => this.enqueue({ kind: 'alert', options: opts, resolve }));
+    this.enqueue({ kind: 'alert', options: opts, resolve: () => {} });
   }
 
   /** 询问用户输入文本：确认返回输入的字符串，取消返回 null。 */

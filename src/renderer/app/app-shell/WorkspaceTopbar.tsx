@@ -7,16 +7,6 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React, { useState } from 'react';
-import { useTranslation } from '@/i18n';
-import type { AppTheme, ModelConfig, Project } from '../../../shared/types';
-import { resolveTheme } from '@/shared/services/themeService';
-import { isModelUsable } from '@/shared/utils/modelReadiness';
-import { Button } from '@/shared/ui/Button';
-import { IconButton } from '@/shared/ui/IconButton';
-import { Input } from '@/shared/ui/Input';
-import { WORKSPACE_SECTIONS, type SectionId } from '../sections';
-import { suggestNextSection } from '../guidedFlow';
 import {
   ChevronRight,
   Compass,
@@ -30,10 +20,21 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
+import React, { useState } from 'react';
 
-import SyncDialog from './SyncDialog';
-import ProtectedSessionDialog from './ProtectedSessionDialog';
+import { useTranslation } from '@/i18n';
+import { resolveTheme } from '@/shared/services/themeService';
+import { Button } from '@/shared/ui/Button';
+import { IconButton } from '@/shared/ui/IconButton';
+import { Input } from '@/shared/ui/Input';
 import Slot from '@/shared/ui/Slot';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
+
+import type { AppTheme, ModelConfig, Project } from '../../../shared/types';
+import { suggestNextSection } from '../guidedFlow';
+import { type SectionId,WORKSPACE_SECTIONS } from '../sections';
+import ProtectedSessionDialog from './ProtectedSessionDialog';
+import SyncDialog from './SyncDialog';
 
 interface WorkspaceTopbarProps {
   project: Project | null;

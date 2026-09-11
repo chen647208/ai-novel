@@ -18,6 +18,7 @@
 import fsSync from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+
 import { logger } from '../logger.js';
 
 /** 当前数据目录名（改值只改一处；Electron 按 appId 自动落到此名）。 */

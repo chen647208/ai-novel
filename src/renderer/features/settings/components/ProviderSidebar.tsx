@@ -7,17 +7,19 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { AlertCircle, CheckCircle2, Search } from 'lucide-react';
 import React from 'react';
+
 import { useTranslation } from '@/i18n';
-import type { ModelConfig } from '../../../../shared/types';
-import { channelValueFor } from '../utils/channelPreset';
-import { findProviderPreset } from '../../../constants/modelProviders';
-import { isProviderEnabled } from '../utils/providerHealth';
-import { cn } from '@/shared/utils/cn';
+import { dt } from '@/i18n';
 import { Input } from '@/shared/ui/Input';
 import { SegmentedControl } from '@/shared/ui/ViewModeToggle';
-import { CheckCircle2, AlertCircle, Search } from 'lucide-react';
-import { dt } from '@/i18n';
+import { cn } from '@/shared/utils/cn';
+
+import type { ModelConfig } from '../../../../shared/types';
+import { findProviderPreset } from '../../../constants/modelProviders';
+import { channelValueFor } from '../utils/channelPreset';
+import { isProviderEnabled } from '../utils/providerHealth';
 
 export type ProviderFilter = 'all' | 'enabled' | 'disabled' | 'unconfigured';
 

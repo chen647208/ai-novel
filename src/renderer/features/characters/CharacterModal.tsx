@@ -7,11 +7,10 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { Brain, Calculator, CalendarDays, Check, ChevronDown, ChevronRight, ChevronUp, Download, Eye, Flag, Globe2, Home, IdCard, Layers, LineChart, MapPin, ScrollText, Share2, Shield, UserRound } from 'lucide-react';
 import React, { useState } from 'react';
+
 import { useTranslation } from '@/i18n';
-import { type Character, type Project } from '../../../shared/types';
-import { normalizeGenderId, normalizeRoleId } from '@/shared/utils/characterKinds';
-import { exportCharacterCard } from './characterCard';
 import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';
 import {
@@ -24,7 +23,10 @@ import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
-import { Brain, Calculator, CalendarDays, Check, ChevronDown, ChevronRight, ChevronUp, Download, Eye, Flag, Globe2, Home, IdCard, Layers, LineChart, MapPin, ScrollText, Share2, Shield, UserRound } from 'lucide-react';
+import { normalizeGenderId, normalizeRoleId } from '@/shared/utils/characterKinds';
+
+import { type Character, type Project } from '../../../shared/types';
+import { exportCharacterCard } from './characterCard';
 
 interface CharacterModalProps {
   character: Character;

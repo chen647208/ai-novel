@@ -7,11 +7,13 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import type { AIHistoryRecord, Chapter, Project } from '../../../shared/types';
-import { runBuild, buildEpubFiles, buildDocxFiles, type BuildProfile } from '@core/build';
-import type { NodeEntity, AttributeEntity, EdgeEntity } from '@core/entities';
+import { buildDocxFiles, buildEpubFiles, type BuildProfile,runBuild } from '@core/build';
+import type { AttributeEntity, EdgeEntity,NodeEntity } from '@core/entities';
+import { Bot, Brain, Cpu, Feather, type LucideIcon,Server } from 'lucide-react';
+
 import { i18n } from '@/i18n';
-import { Bot, Brain, Cpu, Feather, Server, type LucideIcon } from 'lucide-react';
+
+import type { AIHistoryRecord, Chapter, Project } from '../../../shared/types';
 import {
   FLOATING_MENU_HEIGHT,
   FLOATING_MENU_OFFSET_X,
@@ -21,7 +23,7 @@ import {
   MAX_CHAPTER_CONTEXT_LENGTH,
   MAX_PREVIOUS_CHAPTER_SUMMARIES,
 } from './constants';
-import type { TextSelectionRange, TokenUsage, ExportFormat } from './types';
+import type { ExportFormat,TextSelectionRange, TokenUsage } from './types';
 
 export const debounce = <Args extends unknown[]>(func: (...args: Args) => void, wait: number) => {
   let timeout: ReturnType<typeof setTimeout>;

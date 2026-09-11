@@ -3,7 +3,7 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
@@ -11,25 +11,27 @@
  * 助手聊天编排（从 GlobalAssistant 抽出）：消息流、输入、发送/重试/停止、
  * 会话记忆、卡片模板选择。卡片落库经 addCardToProject 回调交回组件（保持归因与审批语义）。
  */
-import { useEffect, useRef, useState } from 'react';
+import { indexService } from '@core/index';
 import type { TFunction } from 'i18next';
+import { useEffect, useRef, useState } from 'react';
+
+import { isModelUsable } from '@/shared/utils/modelReadiness';
+
+import { ATTACHMENT_TRUNCATE } from '../../../../shared/constants/chapters';
 import {
-  type AIMessageImage,
   type AICardCommand,
+  type AIMessageImage,
   type CardPromptTemplate,
   type CreatedCard,
   type KnowledgeItem,
   type ModelConfig,
   type Project,
 } from '../../../../shared/types';
-import { type ChatMessage } from '../types';
-import { ATTACHMENT_TRUNCATE } from '../../../../shared/constants/chapters';
-import { approvalBroker, sessionManager } from '../services/aiRuntime';
-import { AICardCreationService } from '../../cards/services/aiCardCreationService';
 import { AICardCommandService } from '../../cards/services/aiCardCommandService';
+import { AICardCreationService } from '../../cards/services/aiCardCreationService';
 import { getDefaultCardPrompts } from '../../cards/services/cardPromptService';
-import { indexService } from '@core/index';
-import { isModelUsable } from '@/shared/utils/modelReadiness';
+import { approvalBroker, sessionManager } from '../services/aiRuntime';
+import { type ChatMessage } from '../types';
 import { useAssistantHistory } from './useAssistantHistory';
 
 export interface PendingImage {
@@ -265,7 +267,7 @@ export function useAssistantChat({
 
   const handleSendMessage = () => {
     if ((!input.trim() && pendingFiles.length === 0 && pendingImages.length === 0) || isLoading) return;
-    sendMessageInternal(input, [...pendingFiles], pendingImages.map(({ mime, dataUrl }) => ({ mime, dataUrl })));
+    void sendMessageInternal(input, [...pendingFiles], pendingImages.map(({ mime, dataUrl }) => ({ mime, dataUrl })));
     setInput('');
     setPendingFiles([]);
     setPendingImages([]);
@@ -292,7 +294,7 @@ export function useAssistantChat({
   const handleRetry = () => {
     // 重新生成：旧答案保留在历史流，按上轮原文重跑（与发送键同口径守卫）
     if (isLoading || !lastUserText.current.trim() || !hasModel) return;
-    sendMessageInternal(lastUserText.current, []);
+    void sendMessageInternal(lastUserText.current, []);
   };
 
   const handleClearChat = () => {

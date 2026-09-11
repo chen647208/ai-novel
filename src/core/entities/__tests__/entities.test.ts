@@ -7,11 +7,12 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
-import { uuidv7, getInstanceId } from '../uuid';
+import { describe, expect,it } from 'vitest';
+
 import { hashEntity } from '../hash';
-import { validateNode, validateEdge, validateAttribute } from '../validate';
-import type { NodeEntity, EdgeEntity, AttributeEntity } from '../types';
+import type { AttributeEntity,EdgeEntity, NodeEntity } from '../types';
+import { getInstanceId,uuidv7 } from '../uuid';
+import { validateAttribute,validateEdge, validateNode } from '../validate';
 
 describe('uuidv7', () => {
   it('符合 RFC 9562 格式与版本/变体位', () => {

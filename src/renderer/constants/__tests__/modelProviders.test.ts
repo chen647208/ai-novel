@@ -7,9 +7,10 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
-import { modelProviders, findProviderPreset } from '../modelProviders';
+import { describe, expect,it } from 'vitest';
+
 import type { ModelProvider } from '../../../shared/types';
+import { findProviderPreset,modelProviders } from '../modelProviders';
 
 const VALID_PROTOCOLS: ModelProvider[] = ['openai-chat', 'openai-responses', 'anthropic', 'gemini', 'ollama'];
 

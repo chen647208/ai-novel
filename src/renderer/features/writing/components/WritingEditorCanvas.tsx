@@ -8,10 +8,12 @@
  */
 
 import React from 'react';
-import WritingEditorStatusOverlay from './WritingEditorStatusOverlay';
-import TipTapCanvas from './TipTapCanvas';
-import type { WritingEditorCanvasProps } from '../types';
+
 import { cn } from '@/shared/utils/cn';
+
+import type { WritingEditorCanvasProps } from '../types';
+import TipTapCanvas from './TipTapCanvas';
+import WritingEditorStatusOverlay from './WritingEditorStatusOverlay';
 
 const WritingEditorCanvas: React.FC<WritingEditorCanvasProps> = ({
   editorRef,

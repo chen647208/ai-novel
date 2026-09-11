@@ -16,6 +16,7 @@
 
 import { getSchema } from '@tiptap/core';
 import { Transform } from '@tiptap/pm/transform';
+
 import { createNovelExtensions } from './schema';
 import { dslToPmDoc, pmDocToDsl, type PmNode } from './serialization';
 

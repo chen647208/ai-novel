@@ -13,17 +13,19 @@
  * （批准/拒绝/稍后处理）；「稍后」与超时的请求进待审箱，左下角角标
  * 可打开列表逐条决定。多并发请求排队，先到先审。
  */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ApprovalRequest } from '@core/ai';
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
+import { X } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ModalShell } from '@/shared/ui/ModalShell';
+
+import { dialogService } from '@/shared/services/dialogService';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
-import { X } from 'lucide-react';
-import type { ApprovalRequest } from '@core/ai';
+import { ModalShell } from '@/shared/ui/ModalShell';
+
 import { approvalBroker } from '../services/aiRuntime';
 import { executeMcpProposal } from '../services/mcpProposalExecutor';
-import { dialogService } from '@/shared/services/dialogService';
 
 /** diff 行渲染：+ 绿 / - 红 / 其余中性。 */
 const DiffPreview: React.FC<{ diff: string }> = ({ diff }) => (

@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import { getDisplayVersion } from '@/shared/version';
+
 import { cn } from '@/shared/utils/cn';
+import { getDisplayVersion } from '@/shared/version';
 
 interface VersionBadgeProps {
   className?: string;

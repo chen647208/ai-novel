@@ -7,8 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import type { Database, CAPI } from '@sqlite.org/sqlite-wasm';
-import type { SqlValue, SqlRunResult } from './types';
+import type { CAPI,Database } from '@sqlite.org/sqlite-wasm';
+
+import type { SqlRunResult,SqlValue } from './types';
 
 /**
  * 网页端 SQL 执行核心 —— 基于官方 @sqlite.org/sqlite-wasm 的 oo1 高层 API。

@@ -1,4 +1,3 @@
-import { formatDateTime } from '@/shared/utils/format';
 /*
  * 本文件属于 红月创作 (Hongyue Creation) 项目。
  * Copyright (C) 2026 chen647208
@@ -7,38 +6,38 @@ import { formatDateTime } from '@/shared/utils/format';
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
-import { logger } from '@/shared/utils/logger';
-import { isModelUsable } from '@/shared/utils/modelReadiness';
 
+import { AlertTriangle, BookOpen, CheckCircle2, ChevronDown, ChevronUp, Circle, Clock, ExternalLink, Gavel, Info, type LucideIcon,MapPin, RefreshCw, Stethoscope, User, Users, WandSparkles, XCircle } from 'lucide-react';
 /**
  * 世界观一致性检查面板
  * 显示并修复世界观数据的一致性问题
  */
+import React, { useCallback,useEffect, useState } from 'react';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { useTranslation, i18n } from '@/i18n';
+import { i18n,useTranslation } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';
+import { Progress } from '@/shared/ui/Progress';
 import { Select } from '@/shared/ui/Select';
-import { AlertTriangle, BookOpen, CheckCircle2, ChevronDown, ChevronUp, Circle, Clock, ExternalLink, Gavel, Info, MapPin, RefreshCw, Stethoscope, User, Users, WandSparkles, XCircle, type LucideIcon } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
 import { cn } from '@/shared/utils/cn';
+import { formatDateTime } from '@/shared/utils/format';
+import { logger } from '@/shared/utils/logger';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
+
 import {
-  type Project,
-  type ModelConfig,
+  type ConsistencyCheckConfig,
   type ConsistencyCheckMode,
   type ConsistencyCheckPromptTemplate,
-  type ConsistencyCheckConfig,
-  type EmbeddingModelConfig
-} from '../../../shared/types';
+  type EmbeddingModelConfig,
+  type ModelConfig,
+  type Project} from '../../../shared/types';
 import {
-  type WorldConsistencyCheckResult,
-  quickCheck,
   fixDanglingReferences,
-  performAdvancedConsistencyCheck
-} from '../world/services/worldConsistencyService';
+  performAdvancedConsistencyCheck,
+  quickCheck,
+  type WorldConsistencyCheckResult} from '../world/services/worldConsistencyService';
 import { performSimilarityCheck,} from './services/vectorSimilarityService';
-import { Progress } from '@/shared/ui/Progress';
 
 interface ConsistencyCheckerProps {
   project: Project;

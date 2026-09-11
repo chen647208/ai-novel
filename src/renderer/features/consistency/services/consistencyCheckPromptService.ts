@@ -12,10 +12,12 @@
  * 管理AI语义检查和向量相似度检测的提示词模板
  */
 
-import { type ConsistencyCheckPromptTemplate, type ConsistencyCheckPromptCategory } from '../../../../shared/types';
-import { getDefaultConsistencyPrompts } from '../../../constants/consistencyCheck';
-import { i18n } from '@/i18n';
 import { uuidv7 } from '@core/entities';
+
+import { i18n } from '@/i18n';
+
+import { type ConsistencyCheckPromptCategory,type ConsistencyCheckPromptTemplate } from '../../../../shared/types';
+import { getDefaultConsistencyPrompts } from '../../../constants/consistencyCheck';
 
 export class ConsistencyCheckPromptService {
   /**

@@ -7,14 +7,15 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { STORAGE_KEYS } from '@shared/constants/storageKeys';
+import { Bot, PenLine, Sparkles } from 'lucide-react';
 import React, { useState } from 'react';
+
 import { useTranslation } from '@/i18n';
 import { Button } from '@/shared/ui/Button';
 import { Dialog, DialogContent } from '@/shared/ui/Dialog';
-import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import { Input } from '@/shared/ui/Input';
 import { cn } from '@/shared/utils/cn';
-import { Bot, PenLine, Sparkles } from 'lucide-react';
 
 export type OnboardingPersona = 'hand' | 'assisted' | 'ai';
 

@@ -8,9 +8,9 @@
  */
 
 import { logger } from '../../../shared/utils/logger';
-import { embeddingService as simpleEmbeddingService, type EmbeddingService } from './embeddingService';
-import { apiEmbeddingService } from './apiEmbeddingService';
 import { embeddingModelService } from '../../settings/services/embeddingModelService';
+import { apiEmbeddingService } from './apiEmbeddingService';
+import { type EmbeddingService,embeddingService as simpleEmbeddingService } from './embeddingService';
 
 export type EmbeddingMode = 'api' | 'local';
 
@@ -63,7 +63,7 @@ export class EmbeddingProvider {
    * 重新加载配置并重选后端（设置变更后调用）。
    */
   async refresh(): Promise<void> {
-    apiEmbeddingService.reloadConfig();
+    void apiEmbeddingService.reloadConfig();
     const apiReady = await apiEmbeddingService.initialize();
     this.useAPI = apiReady;
     this.current = apiReady ? apiEmbeddingService : simpleEmbeddingService;

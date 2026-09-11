@@ -7,8 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
-import { asRecord, asStr, asNum, asStrArr, asNumArr, asRecords } from '../loose';
+import { describe, expect,it } from 'vitest';
+
+import { asNum, asNumArr, asRecord, asRecords,asStr, asStrArr } from '../loose';
 
 describe('asRecord', () => {
   it('普通对象原样返回', () => {

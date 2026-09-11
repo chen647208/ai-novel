@@ -7,15 +7,16 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { initAiI18n } from '../i18n.js';
+import { afterEach,describe, expect, it, vi } from 'vitest';
 import { beforeAll } from 'vitest';
+
+import { initAiI18n } from '../i18n.js';
 
 beforeAll(async () => {
   await initAiI18n('zh');
 });
-import { openAIResponsesAdapter, responsesUrl } from '../adapters/openai-responses.js';
 import type { ModelConfig, StreamingAIResponse } from '../../../shared/types.js';
+import { openAIResponsesAdapter, responsesUrl } from '../adapters/openai-responses.js';
 
 const baseModel: ModelConfig = {
   id: 'r1',

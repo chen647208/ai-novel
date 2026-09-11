@@ -7,8 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import * as React from 'react';
 import { Loader2 } from 'lucide-react';
+import * as React from 'react';
+
 import { cn } from '../utils/cn';
 
 export function Spinner({ className, ...props }: React.ComponentProps<typeof Loader2>) {

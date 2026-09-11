@@ -15,23 +15,25 @@
  * 第二批是 Agent 按需上下文：章节/大纲/人物/知识读接口 + 全文/语义检索。
  * 多步约定：先读后写，读工具可同轮并行；写工具只产提案（审批后落稿）。
  */
-import { ToolRegistry, type ToolContext, type ToolSpec } from '@core/ai';
-import { aiGatewayClient, type CallOptions } from '@/shared/services/ai/gatewayClient';
-import type { ModelConfig, Project } from '@shared/types';
+import { type ToolContext, ToolRegistry, type ToolSpec } from '@core/ai';
 import type { IndexSnapshot } from '@core/index';
-import { AICardCreationService } from '@/features/cards/services/aiCardCreationService';
+import type { ModelConfig, Project } from '@shared/types';
+import type { ConsistencyCheckPromptTemplate } from '@shared/types';
+
 import { AICardCommandService } from '@/features/cards/services/aiCardCommandService';
+import { AICardCreationService } from '@/features/cards/services/aiCardCreationService';
+import { aiGatewayClient, type CallOptions } from '@/shared/services/ai/gatewayClient';
 import { roleLabel } from '@/shared/utils/displayLabels';
+
 import {
-  performSemanticCheck,
   performQuickSemanticCheck,
+  performSemanticCheck,
 } from './aiSemanticCheckService';
+import type { RecommendationContext } from './smartRecommendationService';
 import {
   getAIEnhancedRecommendations,
   getSmartRecommendations,
 } from './smartRecommendationService';
-import type { ConsistencyCheckPromptTemplate } from '@shared/types';
-import type { RecommendationContext } from './smartRecommendationService';
 
 function projectOf(ctx: ToolContext): Project {
   const project = ctx.project as Project | undefined | null;

@@ -13,12 +13,6 @@
  * 审批 broker 全部在此装配。UI（GlobalAssistant / 审批面板 / 事件浏览器）
  * 只消费这里暴露的会话与状态。
  */
-import {
-  ApprovalRouter,
-  AiSession,
-  registerBuiltinSections,
-  runAgentSession,
-} from '@core/ai';
 import type {
   AgentTurnResult,
   AiEvent,
@@ -28,13 +22,21 @@ import type {
   SkillCatalog,
   ToolRegistry,
 } from '@core/ai';
+import {
+  AiSession,
+  ApprovalRouter,
+  registerBuiltinSections,
+  runAgentSession,
+} from '@core/ai';
+import { uuidv7 } from '@core/entities';
 import type { EventBus, SeamPolicy } from '@core/plugin';
 import type { AIMessageImage, CardPromptTemplate, ConsistencyCheckPromptTemplate, ModelConfig, Project } from '@shared/types';
-import { buildHistoryText } from './chatHistory.js';
-import { syncMcpTools } from '@/shared/services/mcpClient';
-import { aiGatewayClient } from '@/shared/services/ai/gatewayClient.js';
+
 import { useSettingsStore } from '@/app/stores/settingsStore';
-import { uuidv7 } from '@core/entities';
+import { aiGatewayClient } from '@/shared/services/ai/gatewayClient.js';
+import { syncMcpTools } from '@/shared/services/mcpClient';
+
+import { buildHistoryText } from './chatHistory.js';
 
 function electron(): NonNullable<Window['electronAPI']> {
   if (!window.electronAPI) {

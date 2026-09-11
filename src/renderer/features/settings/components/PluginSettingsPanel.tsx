@@ -8,20 +8,22 @@
  */
 
 /** 插件状态面板（docs/design/04 §2）：状态汇总 + 错误详情 + 一键禁用/启用。 */
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from '@/i18n';
+import { type AssemblyRow, assemblyTree, DEFAULT_RELEASE_PROFILE, type PluginStatus,PROFILE_CHANGED_EVENT, profileByName, RELEASE_PROFILES } from '@core/plugin';
+import { builtinRegistry } from '@core/types-registry';
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
+import React, { useEffect, useState } from 'react';
+
+import { useSettingsStore } from '@/app/stores/settingsStore';
+import { pluginHostPromise, saveDisabledList } from '@/features/assistant/services/aiRuntime';
+import { useTranslation } from '@/i18n';
+import { connectServer, disconnectServer, fetchServerTools } from '@/shared/services/mcpClient';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
-import { Spinner } from '@/shared/ui/Spinner';
-import { LoadingState } from '@/shared/ui/LoadingState';
-import { pluginHostPromise, saveDisabledList } from '@/features/assistant/services/aiRuntime';
-import { PROFILE_CHANGED_EVENT, RELEASE_PROFILES, DEFAULT_RELEASE_PROFILE, assemblyTree, profileByName, type AssemblyRow, type PluginStatus } from '@core/plugin';
-import { builtinRegistry } from '@core/types-registry';
-import type { McpServerConfig } from '../../../../shared/types';
-import { useSettingsStore } from '@/app/stores/settingsStore';
-import { connectServer, disconnectServer, fetchServerTools } from '@/shared/services/mcpClient';
 import { Input } from '@/shared/ui/Input';
+import { LoadingState } from '@/shared/ui/LoadingState';
+import { Spinner } from '@/shared/ui/Spinner';
+
+import type { McpServerConfig } from '../../../../shared/types';
 import UserSkillsCard from './UserSkillsCard';
 
 /** 装配树实时视图：行随当前发行档即时重算，切换档位不用开关重看。 */

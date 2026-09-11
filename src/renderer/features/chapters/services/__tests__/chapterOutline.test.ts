@@ -3,12 +3,14 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
-import { describe, it, expect } from 'vitest';
-import { parseChaptersFromAI, buildChapterContextBlock } from '../chapterOutline';
+
 import type { Project } from '@shared/types';
+import { describe, expect,it } from 'vitest';
+
+import { buildChapterContextBlock,parseChaptersFromAI } from '../chapterOutline';
 
 const fallbacks = { titleFor: (n: number) => `第${n}章`, defaultSummary: '（无）' };
 

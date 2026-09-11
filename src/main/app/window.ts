@@ -7,9 +7,11 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { app, BrowserWindow } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { app, BrowserWindow } from 'electron';
+
 import { logger } from '../logger.js';
 import { interceptClose } from './tray.js';
 

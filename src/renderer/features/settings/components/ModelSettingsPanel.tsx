@@ -7,15 +7,17 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React, { useMemo, useState } from 'react';
-import { useTranslation } from '@/i18n';
-import type { ModelSettingsPanelProps } from '../types';
-import { isModelConfigured } from '../../../shared/utils/modelReadiness';
-import { isProviderEnabled } from '../utils/providerHealth';
-import ProviderSidebar, { type ProviderFilter } from './ProviderSidebar';
-import ProviderEditor from './ProviderEditor';
-import UsageSummaryCard from './UsageSummaryCard';
 import { PlusCircle } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+
+import { useTranslation } from '@/i18n';
+
+import { isModelConfigured } from '../../../shared/utils/modelReadiness';
+import type { ModelSettingsPanelProps } from '../types';
+import { isProviderEnabled } from '../utils/providerHealth';
+import ProviderEditor from './ProviderEditor';
+import ProviderSidebar, { type ProviderFilter } from './ProviderSidebar';
+import UsageSummaryCard from './UsageSummaryCard';
 
 /**
  * 模型渠道设置：左侧列表 + 右侧单渠道编辑（Cherry Studio 式）。

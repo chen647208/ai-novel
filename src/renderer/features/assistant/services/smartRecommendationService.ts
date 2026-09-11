@@ -6,23 +6,23 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
+import { renderWorldDigest } from '@core/ai';
+
+import { i18n } from '@/i18n';
+import { AIService } from '@/shared/services/ai/aiService';
+import { roleLabel } from '@/shared/utils/displayLabels';
 import { logger } from '@/shared/utils/logger';
 
 /**
  * 智能推荐服务
  * 根据当前上下文智能推荐世界观元素
  */
-
 import { 
-  type Project, type Character, type Faction, type Location, 
-  type KnowledgeItem, type AICardCommand, type ModelConfig,
-  type TimelineEvent, type RuleSystem
-} from '../../../../shared/types';
+type AICardCommand, type Character, type Faction,   type KnowledgeItem, type Location, 
+type ModelConfig,
+  type Project, type RuleSystem,
+  type TimelineEvent} from '../../../../shared/types';
 import { asRecord, asRecords, asStr } from '../../../shared/utils/loose';
-import { i18n } from '@/i18n';
-import { roleLabel } from '@/shared/utils/displayLabels';
-import { renderWorldDigest } from '@core/ai';
-import { AIService } from '@/shared/services/ai/aiService';
 
 /** 可参与推荐的实体类型 */
 type RecommendableItem = Character | Faction | Location | KnowledgeItem | TimelineEvent | RuleSystem;

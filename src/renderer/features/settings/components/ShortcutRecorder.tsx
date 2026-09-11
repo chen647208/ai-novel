@@ -8,19 +8,21 @@
  */
 
 import React, { useEffect, useState } from 'react';
+
+import { useSettingsStore } from '@/app/stores/settingsStore';
 import { useTranslation } from '@/i18n';
-import type { KeybindingActionId } from '../../../../shared/types';
 import { Button } from '@/shared/ui/Button';
 import { Label } from '@/shared/ui/Label';
+
+import type { KeybindingActionId } from '../../../../shared/types';
 import {
   DEFAULT_KEYBINDINGS,
   eventToKeybinding,
   findConflicts,
   formatKeybinding,
-  resolveKeybindings,
   type KeybindingMap,
+  resolveKeybindings,
 } from '../services/keybindings';
-import { useSettingsStore } from '@/app/stores/settingsStore';
 
 const ACTIONS = Object.keys(DEFAULT_KEYBINDINGS) as KeybindingActionId[];
 

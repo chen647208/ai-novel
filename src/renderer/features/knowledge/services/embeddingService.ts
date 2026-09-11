@@ -7,8 +7,8 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { type KnowledgeCategory,type VectorDocument } from '../../../../shared/types';
 import { logger } from '../../../shared/utils/logger';
-import { type VectorDocument, type KnowledgeCategory } from '../../../../shared/types';
 
 /**
  * 嵌入服务接口

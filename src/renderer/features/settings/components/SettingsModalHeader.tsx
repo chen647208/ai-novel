@@ -7,12 +7,14 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React from 'react';
-import { useTranslation } from '@/i18n';
-import SettingsTabNav from './SettingsTabNav';
-import { Button } from '@/shared/ui/Button';
-import type { SettingsModalHeaderProps } from '../types';
 import { X } from 'lucide-react';
+import React from 'react';
+
+import { useTranslation } from '@/i18n';
+import { Button } from '@/shared/ui/Button';
+
+import type { SettingsModalHeaderProps } from '../types';
+import SettingsTabNav from './SettingsTabNav';
 
 const SettingsModalHeader: React.FC<SettingsModalHeaderProps> = ({ activeTab, onChange, onClose }) => {
   const { t } = useTranslation(['settings', 'common']);

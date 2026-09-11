@@ -8,14 +8,16 @@
  */
 
 /** 会话事件流浏览器：AI 历史（jsonl 归档）的回放视图。 */
+import type { AiEvent } from '@core/ai';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { LoadingState } from '@/shared/ui/LoadingState';
-import type { AiEvent } from '@core/ai';
-import { listSessionArchives, summarizeSessionUsage, type SessionArchiveEntry } from '../services/sessionArchive';
+
+import { listSessionArchives, type SessionArchiveEntry,summarizeSessionUsage } from '../services/sessionArchive';
 
 function eventLine(e: AiEvent): { label: string; tone: 'ok' | 'err' | 'muted' } {
   switch (e.t) {

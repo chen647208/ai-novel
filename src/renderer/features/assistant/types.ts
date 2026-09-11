@@ -8,6 +8,7 @@
  */
 
 import type React from 'react';
+
 import type { KnowledgeItem, ModelConfig, Project, PromptTemplate } from '../../../shared/types';
 
 export interface GlobalAssistantProps {

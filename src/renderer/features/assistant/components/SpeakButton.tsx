@@ -7,11 +7,13 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { Square,Volume2 } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Volume2, Square } from 'lucide-react';
+
 import { Button } from '@/shared/ui/Button';
 import { logger } from '@/shared/utils/logger';
+
 import { isSpeechSynthesisSupported, speak, type SpeechHandle } from '../services/speechService';
 
 interface SpeakButtonProps {

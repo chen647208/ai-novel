@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import type { AIMessageImage, ModelConfig, AIResponse, StreamingAIResponse, TokenUsage } from '../../shared/types.js';
+import type { AIMessageImage, AIResponse, ModelConfig, StreamingAIResponse, TokenUsage } from '../../shared/types.js';
 
 export type { TokenUsage };
 

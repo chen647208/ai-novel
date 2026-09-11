@@ -7,10 +7,10 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import type { StorageRepository } from './types';
+import { IpcSqlDriver } from './ipcDriver';
 import { jsonRepository } from './jsonRepository';
 import { SqliteRepository } from './sqliteRepository';
-import { IpcSqlDriver } from './ipcDriver';
+import type { StorageRepository } from './types';
 import { WasmSqliteDriver } from './wasmDriver';
 
 /**
@@ -39,4 +39,4 @@ function selectRepository(): StorageRepository {
 
 export const repository: StorageRepository = selectRepository();
 
-export type { StorageRepository, SqlDriver, SqlValue, SqlRunResult } from './types';
+export type { SqlDriver, SqlRunResult,SqlValue, StorageRepository } from './types';

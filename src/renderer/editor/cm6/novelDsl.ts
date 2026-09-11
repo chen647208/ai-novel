@@ -22,9 +22,9 @@
  *   {待填}          占位符
  *   @林渊           行内软标签
  */
-import { StreamLanguage, HighlightStyle, syntaxHighlighting } from '@codemirror/language';
-import { tags as t } from '@lezer/highlight';
+import { HighlightStyle, StreamLanguage, syntaxHighlighting } from '@codemirror/language';
 import { KEYWORD_ROLES, TAG_KEYWORD } from '@core/dsl/keywords';
+import { tags as t } from '@lezer/highlight';
 
 /** 合法关键字名集合（tag + 各引用角色），供语言与校验共用。 */
 export const DSL_KEYWORDS: ReadonlySet<string> = new Set([TAG_KEYWORD, ...Object.keys(KEYWORD_ROLES)]);

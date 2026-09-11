@@ -14,10 +14,12 @@
  * AIResponse.error / 最终 onChunk 块返回。AbortSignal 在本地监听并转换为
  * abort 通道调用（信号对象不跨进程）；流式事件按 requestId 多路分发。
  */
+import type { AiCallOptions, AIResponse, AiStreamEvent, ModelConfig, StreamingCallback } from '@shared/types';
+
 import { i18n } from '@/i18n';
+
 import { assertAiAllowed } from './aiGate';
 import { recordUsage } from './usageTracker';
-import type { AiCallOptions, AiStreamEvent, AIResponse, ModelConfig, StreamingCallback } from '@shared/types';
 
 /** 渲染端调用选项：线上选项 + 本地取消信号。 */
 export interface CallOptions extends AiCallOptions {

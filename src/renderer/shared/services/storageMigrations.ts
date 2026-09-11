@@ -11,9 +11,9 @@
  * 历史数据迁移（从 storage.ts 抽出）：知识库分类补全、虚拟章节升级。
  * 纯 state→state 变换，不改外部存储；由 storage 在载入后调用。
  */
-import { logger } from '../utils/logger';
 import { isVirtualChapter } from '../../../shared/constants/chapters';
 import { type AppState, type Chapter } from '../../../shared/types';
+import { logger } from '../utils/logger';
 
 // 数据迁移：为知识库条目添加默认分类
 export const migrateKnowledgeCategories = (state: AppState): AppState => {

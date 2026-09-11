@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { clsx, type ClassValue } from 'clsx';
+import { type ClassValue,clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 /**

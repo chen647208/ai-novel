@@ -11,13 +11,15 @@
  * 诊断包导出 IPC：收集（见 diagnosticsCore）→ STORE zip → 另存为。
  */
 
-import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+
+import { app, type BrowserWindow, dialog, ipcMain } from 'electron';
+
 import { IPC } from '../channels.js';
 import { logger } from '../logger.js';
+import { type AppInfo,collectDiagnostics } from './diagnosticsCore.js';
 import { zipStore } from './zipStore.js';
-import { collectDiagnostics, type AppInfo } from './diagnosticsCore.js';
 
 export function registerDiagnosticsIpc(getMainWindow: () => BrowserWindow | null): void {
   ipcMain.handle(IPC.exportDiagnostics, async () => {

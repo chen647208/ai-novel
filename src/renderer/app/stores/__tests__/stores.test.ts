@@ -7,12 +7,13 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useProjectStore, selectActiveProject } from '../projectStore';
-import { useSettingsStore } from '../settingsStore';
-import { composeAppState, seedPersistBaseline, getLastPersistedSnapshot } from '../persistenceBridge';
-import { computePersistDiff } from '../../persistDiff';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import type { Project } from '../../../../shared/types';
+import { computePersistDiff } from '../../persistDiff';
+import { composeAppState, getLastPersistedSnapshot,seedPersistBaseline } from '../persistenceBridge';
+import { selectActiveProject,useProjectStore } from '../projectStore';
+import { useSettingsStore } from '../settingsStore';
 
 // setTheme 动作内即时生效会触碰 document；无头环境 mock 掉主题应用
 vi.mock('../../../shared/services/themeService', () => ({

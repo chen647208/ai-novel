@@ -7,10 +7,11 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
-import { parseFrontmatter, serializeFrontmatter, serializeDocument, parseDocument } from '../frontmatter';
-import { parseKeywords } from '../keywords';
+import { describe, expect,it } from 'vitest';
+
 import type { Frontmatter } from '../frontmatter';
+import { parseDocument,parseFrontmatter, serializeDocument, serializeFrontmatter } from '../frontmatter';
+import { parseKeywords } from '../keywords';
 
 describe('frontmatter 往返', () => {
   const cases: Frontmatter[] = [

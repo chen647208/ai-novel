@@ -7,8 +7,8 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { ModelConfig, AIResponse } from '@shared/types';
+import type { AIResponse,ModelConfig } from '@shared/types';
+import { beforeEach,describe, expect, it, vi } from 'vitest';
 
 const { mockComplete, mockStream } = vi.hoisted(() => ({
   mockComplete: vi.fn(),

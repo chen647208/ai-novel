@@ -13,44 +13,46 @@
  * 书籍/项目动作在 useBookActions，引导在 useAppBootstrap——本文件只做装配。
  */
 
+import { Bot } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Project } from '../../shared/types';
-import { TooltipProvider } from '@/shared/ui/Tooltip';
-import Bookshelf from './app-shell/Bookshelf';
-import GlobalSearchModal from './app-shell/GlobalSearchModal';
-import DialogHost from './app-shell/DialogHost';
-import ToastHost from './app-shell/ToastHost';
-import ResetAlertDialog from './app-shell/ResetAlertDialog';
-import SettingsModalHost from './app-shell/SettingsModalHost';
-import { dialogService } from '../shared/services/dialogService';
-import { exportCover } from '../shared/services/coverService';
-import WorkspaceView from './app-shell/WorkspaceView';
-import type { SectionId } from './sections';
-import { WORKSPACE_SECTIONS } from './sections';
-import CommandPalette from './app-shell/CommandPalette';
-import { commandRegistry, type AppCommand } from '@/shared/services/commandRegistry';
+
+import { ASSISTANT_FEATURE_ID } from '@/features/assistant/constants';
+import { registerCoreSettingsTabs } from '@/features/settings/coreSettingsTabs';
 import { dt } from '@/i18n';
+import { COMMAND_PALETTE_EVENT } from '@/shared/constants/appEvents';
+import { type AppCommand,commandRegistry } from '@/shared/services/commandRegistry';
+import { Button } from '@/shared/ui/Button';
+import { TooltipProvider } from '@/shared/ui/Tooltip';
+
+import type { Project } from '../../shared/types';
+import { DEFAULT_EDITOR_FONT, DEFAULT_UI_FONT, resolveFontStack } from '../constants/fonts';
+import ApprovalHost from '../features/assistant/components/ApprovalHost';
 import GlobalAssistant from '../features/assistant/GlobalAssistant';
 import { eventToKeybinding, resolveKeybindings } from '../features/settings/services/keybindings';
-import ApprovalHost from '../features/assistant/components/ApprovalHost';
-import AIHistoryViewer from '../features/writing/AIHistoryViewer';
 import VersionCheckModal from '../features/version/VersionCheckModal';
-import OnboardingModal, { isOnboardingDone, markOnboardingDone, type OnboardingPersona } from './app-shell/OnboardingModal';
+import AIHistoryViewer from '../features/writing/AIHistoryViewer';
 import { useViewPreference } from '../shared/hooks/useViewPreference';
-import { DEFAULT_EDITOR_FONT, DEFAULT_UI_FONT, resolveFontStack } from '../constants/fonts';
-import { useProjectStore, selectActiveProject } from './stores/projectStore';
+import { exportCover } from '../shared/services/coverService';
+import { dialogService } from '../shared/services/dialogService';
+import Bookshelf from './app-shell/Bookshelf';
+import CommandPalette from './app-shell/CommandPalette';
+import { registerCoreSlots } from './app-shell/coreSlots';
+import DialogHost from './app-shell/DialogHost';
+import GlobalSearchModal from './app-shell/GlobalSearchModal';
+import OnboardingModal, { isOnboardingDone, markOnboardingDone, type OnboardingPersona } from './app-shell/OnboardingModal';
+import ResetAlertDialog from './app-shell/ResetAlertDialog';
+import SettingsModalHost from './app-shell/SettingsModalHost';
+import ToastHost from './app-shell/ToastHost';
+import WorkspaceView from './app-shell/WorkspaceView';
+import { isSectionVisible } from './sectionFeatures';
+import type { SectionId } from './sections';
+import { WORKSPACE_SECTIONS } from './sections';
+import { selectActiveProject,useProjectStore } from './stores/projectStore';
 import { useSettingsStore, useUsableModel } from './stores/settingsStore';
 import { useAppBootstrap } from './useAppBootstrap';
-import { useFeatureAvailability } from './useFeatureAvailability';
 import { useBookActions } from './useBookActions';
-import { isSectionVisible } from './sectionFeatures';
-import { ASSISTANT_FEATURE_ID } from '@/features/assistant/constants';
-import { COMMAND_PALETTE_EVENT } from '@/shared/constants/appEvents';
-import { Bot } from 'lucide-react';
-import { Button } from '@/shared/ui/Button';
-import { registerCoreSlots } from './app-shell/coreSlots';
-import { registerCoreSettingsTabs } from '@/features/settings/coreSettingsTabs';
+import { useFeatureAvailability } from './useFeatureAvailability';
 
 /** 分区快捷键顺序：Ctrl/Cmd+1..5（模块级常量，避免 effect 依赖抖动）。 */
 const SECTION_ORDER: SectionId[] = WORKSPACE_SECTIONS.map((s) => s.id);

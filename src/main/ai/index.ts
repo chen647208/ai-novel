@@ -11,16 +11,16 @@
  * 主进程 AI 网关层出口：适配器、协议工具与本地化。
  * 渲染进程不直接 import 本目录，一律经 preload 暴露的 aiGateway 语义化方法调用。
  */
-import type { ProviderAdapter } from './types.js';
 import { anthropicAdapter } from './adapters/anthropic.js';
 import { geminiAdapter } from './adapters/gemini.js';
 import { openAICompatibleAdapter } from './adapters/openai-compatible.js';
 import { openAIResponsesAdapter } from './adapters/openai-responses.js';
+import type { ProviderAdapter } from './types.js';
 
+export { aiT,initAiI18n } from './i18n.js';
 export { resolveAdapter } from './resolve.js';
-export * from './types.js';
+export { isRetryableError,withRetry } from './retry.js';
 export { createSSEParser } from './sse.js';
-export { withRetry, isRetryableError } from './retry.js';
-export { initAiI18n, aiT } from './i18n.js';
+export * from './types.js';
 export { anthropicAdapter, geminiAdapter, openAICompatibleAdapter, openAIResponsesAdapter };
 export type { ProviderAdapter };

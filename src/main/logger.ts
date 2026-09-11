@@ -7,10 +7,11 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { app } from 'electron';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
+
+import { app } from 'electron';
 
 export type LogLevel = 'info' | 'warn' | 'error';
 

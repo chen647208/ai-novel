@@ -7,10 +7,11 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect,it } from 'vitest';
+
 import type { ModelConfig } from '../../../../../shared/types';
-import { channelValueFor, channelPatch, channelGroups } from '../channelPreset';
-import { modelProviders, findProviderPreset } from '../../../../constants/modelProviders';
+import { findProviderPreset,modelProviders } from '../../../../constants/modelProviders';
+import { channelGroups,channelPatch, channelValueFor } from '../channelPreset';
 
 const model = (over: Partial<ModelConfig>): ModelConfig =>
   ({ id: 'm', name: 'M', provider: 'openai-chat', modelName: 'x', ...over });

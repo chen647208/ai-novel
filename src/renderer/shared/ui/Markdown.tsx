@@ -8,9 +8,10 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useTranslation } from 'react-i18next';
+
 import { cn } from '@/shared/utils/cn';
 
 interface MarkdownViewProps {

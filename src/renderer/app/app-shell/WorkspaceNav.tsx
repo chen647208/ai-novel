@@ -7,17 +7,19 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React from 'react';
-import { useTranslation } from '@/i18n';
-import type { Project } from '../../../shared/types';
-import { useFeatureAvailability } from '../useFeatureAvailability';
-import { cn } from '@/shared/utils/cn';
-import { Button } from '@/shared/ui/Button';
-import { isSectionVisible } from '../sectionFeatures';
-import { WORKSPACE_SECTIONS, type SectionId } from '../sections';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/Tooltip';
-import Slot from '@/shared/ui/Slot';
 import { Feather, Library, Settings2 } from 'lucide-react';
+import React from 'react';
+
+import { useTranslation } from '@/i18n';
+import { Button } from '@/shared/ui/Button';
+import Slot from '@/shared/ui/Slot';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ui/Tooltip';
+import { cn } from '@/shared/utils/cn';
+
+import type { Project } from '../../../shared/types';
+import { isSectionVisible } from '../sectionFeatures';
+import { type SectionId,WORKSPACE_SECTIONS } from '../sections';
+import { useFeatureAvailability } from '../useFeatureAvailability';
 
 interface WorkspaceNavProps {
   activeSection: SectionId;

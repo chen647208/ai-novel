@@ -3,26 +3,28 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 /**
  * 章节导出编排（从 WritingEditor 抽出）：选择章节/格式/导出预设并执行落盘。
  */
-import { useState } from 'react';
 import type { TFunction } from 'i18next';
-import type { Project } from '../../../../shared/types';
-import { dialogService } from '@/shared/services/dialogService';
+import { useState } from 'react';
+
 import { buildProfileRegistry } from '@/shared/services/buildProfiles';
+import { dialogService } from '@/shared/services/dialogService';
+
+import type { Project } from '../../../../shared/types';
+import type { ExportFormat } from '../types';
 import {
   buildExportContent,
   buildExportFilename,
   buildExportPackage,
-  savePackageFile,
   saveExportFile,
+  savePackageFile,
 } from '../utils';
-import type { ExportFormat } from '../types';
 
 interface UseChapterExportOptions {
   project: Project;

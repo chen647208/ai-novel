@@ -13,20 +13,22 @@
  */
 
 import { useEffect } from 'react';
-import { INITIAL_APP_STATE } from './initialState';
-import { repository } from '../shared/services/repository';
+
+import { normalizeProjectKinds } from '@/shared/utils/characterKinds';
+
+import { vectorIntegrationService } from '../features/knowledge/services/vectorIntegrationService';
+import { bootCustomFonts } from '../features/settings/services/customFontService';
 import { changeLanguage } from '../i18n';
 import { dt } from '../i18n';
 import { dialogService } from '../shared/services/dialogService';
-import { vectorIntegrationService } from '../features/knowledge/services/vectorIntegrationService';
+import { repository } from '../shared/services/repository';
 import { applyTheme, watchSystemTheme } from '../shared/services/themeService';
 import { logger } from '../shared/utils/logger';
-import { useProjectStore } from './stores/projectStore';
-import { normalizeProjectKinds } from '@/shared/utils/characterKinds';
-import { useSettingsStore } from './stores/settingsStore';
-import { bootCustomFonts } from '../features/settings/services/customFontService';
-import { composeAppState, seedPersistBaseline, startPersistenceBridge } from './stores/persistenceBridge';
+import { INITIAL_APP_STATE } from './initialState';
 import { startShellSync } from './services/shellSync';
+import { composeAppState, seedPersistBaseline, startPersistenceBridge } from './stores/persistenceBridge';
+import { useProjectStore } from './stores/projectStore';
+import { useSettingsStore } from './stores/settingsStore';
 
 /** 把规范化 AppState 灌入双 store（首启动与全量导入共用）。 */
 export function hydrateStoresFromState(state: typeof INITIAL_APP_STATE): void {

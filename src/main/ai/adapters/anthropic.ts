@@ -21,8 +21,9 @@
  *  （上限 4 个，这里用 2 个）；Agent 循环每轮 prompt = 同一前缀 + 追加观察，
  *  前缀命中缓存，只有尾部增量按全价计费。OpenAI/Gemini 走服务端自动前缀缓存，无需客户端标记。
  */
+import type { AIMessageImage, AIResponse, ModelConfig, StreamingAIResponse } from '../../../shared/types.js';
+import { proxiedFetch } from '../../net/proxy.js';
 import { aiT } from '../i18n.js';
-import type { AIMessageImage, ModelConfig, AIResponse, StreamingAIResponse } from '../../../shared/types.js';
 import {
   buildMessages,
   cleanModelOutput,
@@ -31,11 +32,10 @@ import {
   messageText,
   readErrorResponse,
 } from '../messages.js';
-import type { AdapterChatMessage } from '../types.js';
-import { createSSEParser } from '../sse.js';
-import { AIRequestError, DEFAULT_TEMPERATURE, type CallOptions, type ProviderAdapter } from '../types.js';
 import { parseRetryAfter, requestErrorFromResponse, withRetry } from '../retry.js';
-import { proxiedFetch } from '../../net/proxy.js';
+import { createSSEParser } from '../sse.js';
+import type { AdapterChatMessage } from '../types.js';
+import { AIRequestError, type CallOptions, DEFAULT_TEMPERATURE, type ProviderAdapter } from '../types.js';
 
 const ANTHROPIC_VERSION = '2023-06-01';
 const ANTHROPIC_DEFAULT_MAX_TOKENS = 8192;

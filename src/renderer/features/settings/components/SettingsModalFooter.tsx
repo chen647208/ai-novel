@@ -8,8 +8,10 @@
  */
 
 import React from 'react';
+
 import { useTranslation } from '@/i18n';
 import { Button } from '@/shared/ui/Button';
+
 import type { SettingsModalFooterProps } from '../types';
 
 const SettingsModalFooter: React.FC<SettingsModalFooterProps> = ({ onClose, onSave }) => {

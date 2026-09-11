@@ -135,4 +135,4 @@ export async function bootCustomFonts(): Promise<void> {
   }
 }
 
-export { bytesToBase64, base64ToBytes };
+export { base64ToBytes,bytesToBase64 };

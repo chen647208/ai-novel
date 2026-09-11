@@ -11,21 +11,23 @@
  * 一致性检查提示词模板管理组件
  */
 
-import React, { useState, useMemo } from 'react';
-import { useTranslation, templateDisplayName, dt } from '@/i18n';
-import { type ConsistencyCheckPromptTemplate, type ConsistencyCheckPromptCategory } from '../../../shared/types';
-import { ConsistencyCheckPromptService } from './services/consistencyCheckPromptService';
-import { getDefaultConsistencyPrompts } from '../../constants/consistencyCheck';
+import { AlertCircle, CheckCircle2, ChevronDown, ChevronUp, Copy, Download, FileText, FlaskConical, Plus, Trash2, Undo2, Upload } from 'lucide-react';
+import React, { useMemo,useState } from 'react';
+
+import { dt,templateDisplayName, useTranslation } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';
+import { EmptyState } from '@/shared/ui/EmptyState';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
-import { ModalShell } from '@/shared/ui/ModalShell';
-import { EmptyState } from '@/shared/ui/EmptyState';
 import { cn } from '@/shared/utils/cn';
-import { AlertCircle, CheckCircle2, ChevronDown, ChevronUp, Copy, Download, FileText, FlaskConical, Plus, Trash2, Undo2, Upload } from 'lucide-react';
+
+import { type ConsistencyCheckPromptCategory,type ConsistencyCheckPromptTemplate } from '../../../shared/types';
+import { getDefaultConsistencyPrompts } from '../../constants/consistencyCheck';
+import { ConsistencyCheckPromptService } from './services/consistencyCheckPromptService';
 
 
 interface ConsistencyPromptManagerProps {
@@ -353,7 +355,7 @@ const ConsistencyPromptManager: React.FC<ConsistencyPromptManagerProps> = ({
                   value={exportTemplates()}
                   readOnly
                 />
-                <Button className="mt-4 w-full" onClick={() => { navigator.clipboard.writeText(exportTemplates()); dialogService.alert(t('consistency:pm.copied')); }}>
+                <Button className="mt-4 w-full" onClick={() => { void navigator.clipboard.writeText(exportTemplates()); dialogService.alert(t('consistency:pm.copied')); }}>
                   <Copy className="size-4" />{t('consistency:pm.copyBtn')}
                 </Button>
               </div>

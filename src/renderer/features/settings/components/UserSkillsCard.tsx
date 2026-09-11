@@ -8,12 +8,9 @@
  */
 
 /** 写法技能管理（docs/design/05 §3）：内置技能只读，用户技能可导入/删除（SKILL.md 即数据）。 */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useTranslation } from '@/i18n';
 import { BookOpen, Upload, X } from 'lucide-react';
-import { Button } from '@/shared/ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/Card';
-import { Badge } from '@/shared/ui/Badge';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+
 import {
   deleteUserSkill,
   importUserSkill,
@@ -21,6 +18,10 @@ import {
   listUserSkills,
   type UserSkillInfo,
 } from '@/features/assistant/services/userSkillsService';
+import { useTranslation } from '@/i18n';
+import { Badge } from '@/shared/ui/Badge';
+import { Button } from '@/shared/ui/Button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/Card';
 
 const UserSkillsCard: React.FC = () => {
   const { t } = useTranslation('settings');

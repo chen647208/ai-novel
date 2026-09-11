@@ -7,8 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { resolveTheme, applyTheme, systemPrefersDark, watchSystemTheme } from '../themeService';
+import { afterEach,describe, expect, it, vi } from 'vitest';
+
+import { applyTheme, resolveTheme, systemPrefersDark, watchSystemTheme } from '../themeService';
 
 /** 安装最小 window.matchMedia 桩；返回当前是否“偏好深色”。 */
 function stubMatchMedia(matches: boolean) {

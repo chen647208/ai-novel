@@ -8,13 +8,15 @@
  */
 
 import React, { useEffect } from 'react';
+
 import { useTranslation } from '@/i18n';
-import type { Project } from '../../../shared/types';
-import StepOutline from '../../features/outline/StepOutline';
-import StepChapterOutline from '../../features/chapters/StepChapterOutline';
 import { useViewPreference } from '@/shared/hooks/useViewPreference';
-import { SegmentedControl } from '@/shared/ui/ViewModeToggle';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { SegmentedControl } from '@/shared/ui/ViewModeToggle';
+
+import type { Project } from '../../../shared/types';
+import StepChapterOutline from '../../features/chapters/StepChapterOutline';
+import StepOutline from '../../features/outline/StepOutline';
 
 interface StructureSectionProps {
   project: Project;

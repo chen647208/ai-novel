@@ -7,13 +7,14 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { AppWindow } from 'lucide-react';
 import React from 'react';
+
+import { useSettingsStore } from '@/app/stores/settingsStore';
 import { useTranslation } from '@/i18n';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/Card';
 import { Label } from '@/shared/ui/Label';
 import { Switch } from '@/shared/ui/Switch';
-import { useSettingsStore } from '@/app/stores/settingsStore';
-import { AppWindow } from 'lucide-react';
 
 /** 系统壳设置（docs/design/15）：最小化到托盘 + 开机自启，直写 store 即下发主进程。 */
 const SystemPanel: React.FC = () => {

@@ -13,10 +13,10 @@
  * - Build Profile：导出构建档（07 篇消费），v0 先登记清单。
  * 注册一律返回 Disposable（unwind 不变量）。
  */
-import type { Disposable } from './manifest.js';
-import type { TypeTemplate, TypeRegistry } from '../types-registry';
-import type { SeamPolicy } from './events.js';
 import type { BuildProfile } from '../build/profile.js';
+import type { TypeRegistry,TypeTemplate } from '../types-registry';
+import type { SeamPolicy } from './events.js';
+import type { Disposable } from './manifest.js';
 
 /** 构建档注册表 key：id 优先，缺省回落 name（与 core/build 单源类型）。 */
 export function buildProfileKey(profile: BuildProfile): string {

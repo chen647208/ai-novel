@@ -8,7 +8,6 @@
  */
 
 export type {
+  HistoryDate,
   Timeline,
-  TimelineEvent,
-  HistoryDate
-} from '../types.js';
+  TimelineEvent} from '../types.js';

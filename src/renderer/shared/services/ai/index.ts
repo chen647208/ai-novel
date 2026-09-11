@@ -8,5 +8,5 @@
  */
 
 /** 渲染端 AI 出口：类型化网关客户端 + JSON 修复编排。协议实现见 src/main/ai。 */
-export { aiGatewayClient, gatewayComplete, gatewayStream, type CallOptions } from './gatewayClient.js';
+export { aiGatewayClient, type CallOptions,gatewayComplete, gatewayStream } from './gatewayClient.js';
 export { callJSON, extractJSONCandidate, type JSONCallOptions, type JSONCallResult } from './json.js';

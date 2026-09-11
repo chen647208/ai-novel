@@ -12,8 +12,9 @@
  * 负责管理AI卡片创建用的提示词模板
  */
 
-import { type AICardCommand, type CardPromptTemplate, type AIProjectContext } from '../../../../shared/types';
 import { i18n } from '@/i18n';
+
+import { type AICardCommand, type AIProjectContext,type CardPromptTemplate } from '../../../../shared/types';
 
 /**
  * 获取默认的AI卡片提示词模板

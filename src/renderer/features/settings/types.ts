@@ -8,7 +8,7 @@
  */
 
 import type React from 'react';
-import type { ModelProviderInfo } from '../../constants/modelProviders';
+
 import type {
   AppLanguage,
   AppTheme,
@@ -20,6 +20,7 @@ import type {
   PromptTemplate,
   StorageConfig,
 } from '../../../shared/types';
+import type { ModelProviderInfo } from '../../constants/modelProviders';
 
 export interface SettingsModalProps {
   models: ModelConfig[];

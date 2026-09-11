@@ -9,8 +9,8 @@
 
 /** 逐条目加密出口（docs/design/03 protected session）。 */
 export {
-  encryptBody,
   decryptBody,
+  encryptBody,
   isEncryptedEnvelope,
   ProtectedSession,
 } from './protected.js';

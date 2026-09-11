@@ -7,21 +7,23 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { AlertCircle, BookOpen, Calculator, Check, Clock, Copy, Cpu, FileText, Flag, Keyboard, Landmark, MapPin, MessagesSquare, Paperclip, Pencil, Reply, Send, Settings2, Square, Trash2, User, X, Zap } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { templateDisplayName } from '@/i18n';
-import type { CardPromptTemplate, KnowledgeItem } from '../../../../shared/types';
-import type { ChatMessage } from '../types';
 import { Button } from '@/shared/ui/Button';
-import { Select } from '@/shared/ui/Select';
-import { Textarea } from '@/shared/ui/Textarea';
 import { MarkdownView } from '@/shared/ui/Markdown';
-import { cn } from '@/shared/utils/cn';
-import { AlertCircle, BookOpen, Calculator, Check, Clock, Copy, Cpu, FileText, Flag, Keyboard, Landmark, MapPin, MessagesSquare, Paperclip, Pencil, Reply, Send, Settings2, Square, Trash2, User, X, Zap } from 'lucide-react';
+import { Select } from '@/shared/ui/Select';
 import { Spinner } from '@/shared/ui/Spinner';
-import SpeechInputButton from './SpeechInputButton';
-import SpeakButton from './SpeakButton';
+import { Textarea } from '@/shared/ui/Textarea';
+import { cn } from '@/shared/utils/cn';
+
+import type { CardPromptTemplate, KnowledgeItem } from '../../../../shared/types';
 import { speechLocale } from '../services/speechService';
+import type { ChatMessage } from '../types';
+import SpeakButton from './SpeakButton';
+import SpeechInputButton from './SpeechInputButton';
 
 
 interface AssistantChatWorkspaceProps {

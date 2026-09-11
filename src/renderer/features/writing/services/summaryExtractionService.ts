@@ -7,11 +7,12 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { AIService } from '@/shared/services/ai/aiService';
-import type { Chapter, ModelConfig, Project, PromptTemplate } from '../../../../shared/types';
-import type { CommitOptions } from '@/shared/services/repository/types';
-import { dialogService } from '@/shared/services/dialogService';
 import { i18n, templateDisplayName } from '@/i18n';
+import { AIService } from '@/shared/services/ai/aiService';
+import { dialogService } from '@/shared/services/dialogService';
+import type { CommitOptions } from '@/shared/services/repository/types';
+
+import type { Chapter, ModelConfig, Project, PromptTemplate } from '../../../../shared/types';
 
 interface ExtractChapterSummaryArgs {
   activeChapter: Chapter | undefined;

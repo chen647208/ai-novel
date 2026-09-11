@@ -12,8 +12,8 @@
  * 工具合并进 ToolRegistry（`mcp.<serverId>.<tool>` 命名空间）。
  * 权限默认 write:proposal（走审批）；readOnlyHint 显式只读才直通。
  */
-import type { McpServerConfig } from '@shared/types';
 import type { ToolRegistry } from '@core/ai';
+import type { McpServerConfig } from '@shared/types';
 
 export interface McpRemoteTool {
   serverId: string;

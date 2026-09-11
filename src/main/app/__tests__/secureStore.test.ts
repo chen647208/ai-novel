@@ -7,10 +7,11 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+
+import { beforeEach,describe, expect, it, vi } from 'vitest';
 
 const state = vi.hoisted(() => ({
   encAvailable: true,
@@ -36,19 +37,19 @@ vi.mock('electron', () => ({
   },
 }));
 
+import type { ModelConfig } from '../../../shared/types.js';
 import {
+  isVaultAvailable,
+  isVaultRef,
+  resolveVaultApiKey,
   VAULT_REF_PREFIX,
   VAULT_UNAVAILABLE,
-  isVaultRef,
-  isVaultAvailable,
-  vaultSet,
   vaultGet,
-  vaultRemove,
   vaultIdFor,
-  resolveVaultApiKey,
+  vaultRemove,
+  vaultSet,
   withVaultKey,
 } from '../secureStore.js';
-import type { ModelConfig } from '../../../shared/types.js';
 
 if (!state.userData) {
   state.userData = mkdtempSync(join(tmpdir(), 'vault-test-'));

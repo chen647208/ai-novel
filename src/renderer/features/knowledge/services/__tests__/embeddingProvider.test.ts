@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach,describe, expect, it, vi } from 'vitest';
 
 // 三个被封装依赖的替身：以对象引用形式暴露，便于逐用例改其行为。
 // 用 vi.hoisted 创建，确保被提升的 vi.mock 工厂可安全引用。

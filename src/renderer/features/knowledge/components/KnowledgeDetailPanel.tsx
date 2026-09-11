@@ -3,22 +3,24 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
 /** 知识库详情/编辑面板（从 StepKnowledgeEnhanced 抽出）。 */
-import React from 'react';
-import { useTranslation, i18n } from '@/i18n';
-import { type KnowledgeCategory, type KnowledgeItem } from '../../../../shared/types';
-import { Card } from '@/shared/ui/Card';
-import { Select } from '@/shared/ui/Select';
-import { Button } from '@/shared/ui/Button';
-import { Input } from '@/shared/ui/Input';
-import { Textarea } from '@/shared/ui/Textarea';
-import { EmptyState } from '@/shared/ui/EmptyState';
-import { formatBytes, formatDateTime } from '@/shared/utils/format';
 import { Calendar, FileText, PenLine, Tag } from 'lucide-react';
+import React from 'react';
+
+import { i18n,useTranslation } from '@/i18n';
+import { Button } from '@/shared/ui/Button';
+import { Card } from '@/shared/ui/Card';
+import { EmptyState } from '@/shared/ui/EmptyState';
+import { Input } from '@/shared/ui/Input';
+import { Select } from '@/shared/ui/Select';
+import { Textarea } from '@/shared/ui/Textarea';
+import { formatBytes, formatDateTime } from '@/shared/utils/format';
+
+import { type KnowledgeCategory, type KnowledgeItem } from '../../../../shared/types';
 
 const CATEGORIES: KnowledgeCategory[] = ['inspiration', 'character', 'outline', 'chapter', 'writing'];
 

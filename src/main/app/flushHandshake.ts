@@ -12,7 +12,8 @@
  * 主进程在 before-quit 调 `requestRendererFlush`，渲染层完成后回 `flush-done`；带超时兜底。
  */
 
-import { ipcMain, type BrowserWindow } from 'electron';
+import { type BrowserWindow,ipcMain } from 'electron';
+
 import { IPC } from '../channels.js';
 
 export function requestRendererFlush(

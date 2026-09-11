@@ -7,15 +7,17 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { Bot } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { templateDisplayName } from '@/i18n';
-import type { ChapterSummarySectionProps } from '../types';
 import { Button } from '@/shared/ui/Button';
 import { Select } from '@/shared/ui/Select';
-import { Textarea } from '@/shared/ui/Textarea';
-import { Bot } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
+import { Textarea } from '@/shared/ui/Textarea';
+
+import type { ChapterSummarySectionProps } from '../types';
 
 const ChapterSummarySection: React.FC<ChapterSummarySectionProps> = ({
   activeChapter,

@@ -20,15 +20,16 @@
  * 协议仅实现本服务器需要的最小集：initialize / tools/list / tools/call /
  * resources/list / resources/read。
  */
-import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
+
 import { uuidv7 } from '../../core/entities/uuid.js';
 import {
   APP_DATA_DIR_NAME,
-  DB_FILE_NAME,
   dataDirOverride,
+  DB_FILE_NAME,
   legacyDataDir,
   migrateLegacyDataDirSync,
   standardDataDir,

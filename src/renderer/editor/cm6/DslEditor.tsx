@@ -12,10 +12,11 @@
  * 用于大纲 / 卡片正文 / prompt 等「结构化文本」区，替代裸 textarea：
  * 关键字高亮 + @tag 引用波浪线校验。正文创作仍走 TipTap 画布。
  */
-import { useMemo, useRef } from 'react';
-import CodeMirror from '@uiw/react-codemirror';
-import { EditorView } from '@codemirror/view';
 import { autocompletion, type CompletionContext, type CompletionResult } from '@codemirror/autocomplete';
+import { EditorView } from '@codemirror/view';
+import CodeMirror from '@uiw/react-codemirror';
+import { useMemo, useRef } from 'react';
+
 import { novelDslExtensions } from './novelDsl';
 import { tagValidation } from './tagValidation';
 

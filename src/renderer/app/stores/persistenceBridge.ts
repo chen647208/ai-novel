@@ -15,15 +15,16 @@
  * 基线由首启动 hydrate 建立：磁盘现状 == 刚载入的组合态，首帧不整体重写。
  */
 
-import { type AppState } from '../../../shared/types';
-import { repository } from '../../shared/services/repository';
-import { autoBackupService } from '../../shared/services/autoBackupService';
-import { logger } from '../../shared/utils/logger';
-import { toast } from '../../shared/services/toastService';
 import { dt } from '@/i18n';
-import { persistDiff } from '../persistDiff';
+
 import { APP_STATE_VERSION } from '../../../shared/constants/versions';
-import { useProjectStore, commitMetaOf } from './projectStore';
+import { type AppState } from '../../../shared/types';
+import { autoBackupService } from '../../shared/services/autoBackupService';
+import { repository } from '../../shared/services/repository';
+import { toast } from '../../shared/services/toastService';
+import { logger } from '../../shared/utils/logger';
+import { persistDiff } from '../persistDiff';
+import { commitMetaOf,useProjectStore } from './projectStore';
 import { useSettingsStore } from './settingsStore';
 
 /** 把两个 store 的当前值组合为逻辑 AppState（供导出/一致性哨兵使用）。 */

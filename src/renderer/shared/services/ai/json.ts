@@ -13,9 +13,10 @@
  * 修复循环留在渲染端：validate 是函数（不可跨 IPC），补全经网关主进程执行。
  */
 import { i18n } from '@/i18n';
+
 import type { ModelConfig } from '../../../../shared/types';
-import { aiGatewayClient } from './gatewayClient.js';
 import type { CallOptions } from './gatewayClient.js';
+import { aiGatewayClient } from './gatewayClient.js';
 
 /** 从模型输出中提取 JSON 候选文本：容忍围栏、前后缀说明文字 */
 export function extractJSONCandidate(raw: string): string {

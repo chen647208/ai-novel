@@ -3,7 +3,7 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
@@ -12,20 +12,15 @@
  * 停止保留半截、重试、批量多章生成与其停止。状态与副作用集中于此，
  * 组件只负责渲染与把用户操作转成对 hook 的调用。
  */
-import { useRef, useState } from 'react';
 import type { TFunction } from 'i18next';
+import { useRef, useState } from 'react';
+
+import { templateDisplayName } from '@/i18n';
 import { AIService } from '@/shared/services/ai/aiService';
 import { dialogService } from '@/shared/services/dialogService';
 import { logger } from '@/shared/utils/logger';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
-import { templateDisplayName } from '@/i18n';
-import {
-  BATCH_CHAPTER_INTERVAL_MS,
-  DEFAULT_BATCH_MODE,
-  INITIAL_BATCH_PROGRESS,
-  INITIAL_TOKEN_USAGE,
-  SELECTION_MENU_DEBOUNCE_MS,
-} from '../constants';
+
 import type {
   AIHistoryRecord,
   Chapter,
@@ -35,10 +30,17 @@ import type {
   PromptTemplate,
   StreamingAIResponse,
 } from '../../../../shared/types';
-import type { BatchMode, BatchProgress, GenerationModalState, MenuPosition, TextSelectionRange, TokenUsage } from '../types';
 import { applySelectionReplacement } from '../../../editor/commands';
-import { applyGeneratedContent, applyBatchResults, generateChapterContent } from '../services/chapterGeneration';
+import {
+  BATCH_CHAPTER_INTERVAL_MS,
+  DEFAULT_BATCH_MODE,
+  INITIAL_BATCH_PROGRESS,
+  INITIAL_TOKEN_USAGE,
+  SELECTION_MENU_DEBOUNCE_MS,
+} from '../constants';
+import { applyBatchResults, applyGeneratedContent, generateChapterContent } from '../services/chapterGeneration';
 import { buildChapterPrompt } from '../services/chapterPrompt';
+import type { BatchMode, BatchProgress, GenerationModalState, MenuPosition, TextSelectionRange, TokenUsage } from '../types';
 
 interface UseChapterGenerationOptions {
   project: Project;
@@ -493,9 +495,9 @@ export function useChapterGeneration(options: UseChapterGenerationOptions) {
   const handleModalGenerate = () => {
     if (batchMode === 'single') {
       const template = prompts.find(p => p.id === selectedGenPromptId);
-      if (template) runAITemplate(template);
+      if (template) void runAITemplate(template);
     } else {
-      runBatchGeneration();
+      void runBatchGeneration();
     }
   };
 

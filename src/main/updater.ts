@@ -17,9 +17,10 @@
 
 import { app, BrowserWindow, ipcMain } from 'electron';
 import updaterPkg from 'electron-updater';
+
+import type { UpdaterStatus } from '../shared/types.js';
 import { IPC } from './channels.js';
 import { logger } from './logger.js';
-import type { UpdaterStatus } from '../shared/types.js';
 
 const { autoUpdater } = updaterPkg;
 

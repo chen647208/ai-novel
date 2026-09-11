@@ -12,12 +12,11 @@
  * 确认后自持执行数据清除并强制刷新（核弹级重置），宿主只负责开与关。
  */
 
+import { Skull, Trash2 } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { repository } from '../../shared/services/repository';
+
 import { dialogService } from '@/shared/services/dialogService';
-import { i18n } from '../../i18n';
-import { INITIAL_APP_STATE } from '../initialState';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +27,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/shared/ui/AlertDialog';
-import { Skull, Trash2 } from 'lucide-react';
+
+import { i18n } from '../../i18n';
+import { repository } from '../../shared/services/repository';
+import { INITIAL_APP_STATE } from '../initialState';
 
 export type ResetType = 'clear_projects' | 'factory_reset';
 

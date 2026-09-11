@@ -13,7 +13,7 @@
  * 纯函数、无 IO：渲染端/测试环境共用；字数统计（写作统计）与导出
  * 共用同一段文本来源，保证「成稿字数」单一口径（验收 4）。
  */
-import type { NodeEntity, AttributeEntity, EdgeEntity } from '../entities';
+import type { AttributeEntity, EdgeEntity,NodeEntity } from '../entities';
 import type { BuildProfile } from './profile.js';
 import { typeMatches } from './profile.js';
 

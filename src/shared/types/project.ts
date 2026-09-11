@@ -8,11 +8,10 @@
  */
 
 export type {
-  Character,
+  AppState,
   Chapter,
+  Character,
   KnowledgeCategory,
   KnowledgeItem,
-  PromptTemplate,
   Project,
-  AppState
-} from '../types.js';
+  PromptTemplate} from '../types.js';

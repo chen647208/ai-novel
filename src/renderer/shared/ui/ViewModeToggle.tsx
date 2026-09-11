@@ -7,10 +7,12 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React from 'react';
-import { Button } from './Button';
-import { cn } from '@/shared/utils/cn';
 import type { LucideIcon } from 'lucide-react';
+import React from 'react';
+
+import { cn } from '@/shared/utils/cn';
+
+import { Button } from './Button';
 
 interface ViewModeToggleProps<T extends string> {
   value: T;

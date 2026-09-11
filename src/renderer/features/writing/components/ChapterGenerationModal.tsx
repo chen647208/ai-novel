@@ -7,22 +7,24 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { ArrowDown, ArrowUp, Ban, BookOpen, Check, WandSparkles } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { templateDisplayName } from '@/i18n';
-import { roleLabel } from '@/shared/utils/displayLabels';
-import { type OutputMode } from '../../../../shared/types';
-import type { ChapterGenerationModalProps } from '../types';
-import { useSettingsStore } from '../../../app/stores/settingsStore';
-import { isModelUsable } from '@/shared/utils/modelReadiness';
 import { Button } from '@/shared/ui/Button';
 import { DialogTitle } from '@/shared/ui/Dialog';
-import { ModalShell } from '@/shared/ui/ModalShell';
 import { Input } from '@/shared/ui/Input';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
 import { cn } from '@/shared/utils/cn';
-import { ArrowDown, ArrowUp, Ban, BookOpen, Check, WandSparkles } from 'lucide-react';
+import { roleLabel } from '@/shared/utils/displayLabels';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
+
+import { type OutputMode } from '../../../../shared/types';
+import { useSettingsStore } from '../../../app/stores/settingsStore';
+import type { ChapterGenerationModalProps } from '../types';
 
 /** 生成弹窗的「左标签 / 右内容」分区卡片 */
 const GenSection: React.FC<{ label: string; alignStart?: boolean; children: React.ReactNode }> = ({ label, alignStart, children }) => (

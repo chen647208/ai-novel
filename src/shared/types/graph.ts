@@ -9,11 +9,10 @@
 
 export type {
   DiagramType,
-  GraphLayout,
-  GraphNodeType,
-  VisualizationConfig,
-  GraphNode,
-  GraphLink,
   GraphData,
-  NodeSelection
-} from '../types.js';
+  GraphLayout,
+  GraphLink,
+  GraphNode,
+  GraphNodeType,
+  NodeSelection,
+  VisualizationConfig} from '../types.js';

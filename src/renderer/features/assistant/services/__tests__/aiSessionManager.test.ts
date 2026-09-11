@@ -7,17 +7,17 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ApprovalBroker, SkillCatalog, ToolRegistry } from '@core/ai';
 import { EventBus } from '@core/plugin';
+import { beforeEach,describe, expect, it, vi } from 'vitest';
 
 const { mockComplete } = vi.hoisted(() => ({ mockComplete: vi.fn() }));
 vi.mock('@/shared/services/ai/gatewayClient.js', () => ({
   aiGatewayClient: { complete: mockComplete, stream: vi.fn() },
 }));
 
-import { AiSessionManager } from '../aiSessionManager';
 import type { ModelConfig, Project } from '../../../../../shared/types';
+import { AiSessionManager } from '../aiSessionManager';
 
 const model: ModelConfig = { id: 'm', name: 'M', provider: 'openai-chat', modelName: 'test' };
 const project = { title: '测试书' } as unknown as Project;

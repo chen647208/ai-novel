@@ -3,7 +3,7 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
@@ -11,8 +11,9 @@
  * 批量生成单章与结果合并（从 useChapterGeneration 抽出，便于单测）。
  * 流式/传统两条路径的落盘内容与历史记录构造集中于此，UI 状态经 io 回调回传。
  */
-import { AIService } from '@/shared/services/ai/aiService';
 import { templateDisplayName } from '@/i18n';
+import { AIService } from '@/shared/services/ai/aiService';
+
 import { type AIHistoryRecord, type Chapter, type ModelConfig, type OutputMode, type StreamingAIResponse } from '../../../../shared/types';
 import type { TokenUsage } from '../types';
 

@@ -7,16 +7,17 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { useTranslation } from '@/i18n';
 import { BookOpen, FileText, Search } from 'lucide-react';
-import { DialogTitle } from '@/shared/ui/Dialog';
-import { ModalShell } from '@/shared/ui/ModalShell';
-import { Input } from '@/shared/ui/Input';
-import { Spinner } from '@/shared/ui/Spinner';
+import React, { useEffect, useMemo, useState } from 'react';
+
+import { useProjectStore } from '@/app/stores/projectStore';
+import { useTranslation } from '@/i18n';
 import { repository } from '@/shared/services/repository';
 import type { SearchHit } from '@/shared/services/repository/types';
-import { useProjectStore } from '@/app/stores/projectStore';
+import { DialogTitle } from '@/shared/ui/Dialog';
+import { Input } from '@/shared/ui/Input';
+import { ModalShell } from '@/shared/ui/ModalShell';
+import { Spinner } from '@/shared/ui/Spinner';
 
 interface GlobalSearchModalProps {
   isOpen: boolean;

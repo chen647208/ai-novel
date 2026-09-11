@@ -3,7 +3,7 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
@@ -11,8 +11,8 @@
  * 聊天附件收集（从 GlobalAssistant 抽出，读取器注入以便单测）。
  * 处理图片/PDF/纯文本三类；返回待发送的图片与知识条目，错误经 alert 回调提示。
  */
-import type { KnowledgeItem } from '@shared/types';
 import { CHAT_IMAGE_MAX_BYTES, CHAT_IMAGE_MIMES, CHAT_PDF_MAX_BYTES } from '@shared/constants/chat';
+import type { KnowledgeItem } from '@shared/types';
 
 export interface PendingImage {
   id: string;

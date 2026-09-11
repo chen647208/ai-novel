@@ -7,13 +7,14 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect,it } from 'vitest';
+
 import type { ModelConfig, ModelProvider } from '../../../shared/types.js';
-import { resolveAdapter } from '../resolve.js';
+import { anthropicAdapter } from '../adapters/anthropic.js';
 import { geminiAdapter } from '../adapters/gemini.js';
 import { openAICompatibleAdapter } from '../adapters/openai-compatible.js';
-import { anthropicAdapter } from '../adapters/anthropic.js';
 import { openAIResponsesAdapter } from '../adapters/openai-responses.js';
+import { resolveAdapter } from '../resolve.js';
 
 const model = (provider: ModelProvider): ModelConfig =>
   ({ id: 'm', name: 'M', provider, modelName: 'x' });

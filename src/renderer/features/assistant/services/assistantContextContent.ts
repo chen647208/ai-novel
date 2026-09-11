@@ -3,7 +3,7 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
@@ -11,8 +11,9 @@
  * 助手"上下文分析"面板的内容拼装：按分区把项目数据渲染为可发送文本。
  * 纯函数，便于单测；空内容表示该分区暂无数据（调用方保持静默）。
  */
-import { type Project } from '../../../../shared/types';
 import { genderLabel, roleLabel } from '@/shared/utils/displayLabels';
+
+import { type Project } from '../../../../shared/types';
 import { type AssistantCategory } from '../types';
 
 export function buildContextContent(

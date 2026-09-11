@@ -7,12 +7,14 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { type ModelConfig, type AIResponse, type StreamingCallback, type AIHistoryRecord } from "../../../../shared/types";
-import { i18n } from "@/i18n";
-import { aiGatewayClient } from "./gatewayClient.js";
-import type { CallOptions } from "./gatewayClient.js";
-import { callJSON, type JSONCallOptions, type JSONCallResult } from "./json.js";
 import { uuidv7 } from '@core/entities';
+
+import { i18n } from "@/i18n";
+
+import { type AIHistoryRecord,type AIResponse, type ModelConfig, type StreamingCallback } from "../../../../shared/types";
+import type { CallOptions } from "./gatewayClient.js";
+import { aiGatewayClient } from "./gatewayClient.js";
+import { callJSON, type JSONCallOptions, type JSONCallResult } from "./json.js";
 
 /**
  * AI 服务门面。

@@ -7,18 +7,19 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { initAiI18n } from '../i18n.js';
+import { afterEach,describe, expect, it, vi } from 'vitest';
 import { beforeAll } from 'vitest';
+
+import { initAiI18n } from '../i18n.js';
 
 beforeAll(async () => {
   await initAiI18n('zh');
 });
-import { openAICompatibleAdapter } from '../adapters/openai-compatible.js';
+import type { ModelConfig, StreamingAIResponse } from '../../../shared/types.js';
 import { anthropicAdapter } from '../adapters/anthropic.js';
 import { geminiAdapter } from '../adapters/gemini.js';
+import { openAICompatibleAdapter } from '../adapters/openai-compatible.js';
 import { DEFAULT_TEMPERATURE } from '../types.js';
-import type { ModelConfig, StreamingAIResponse } from '../../../shared/types.js';
 
 const baseModel: ModelConfig = {
   id: 'm1',

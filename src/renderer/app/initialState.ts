@@ -7,10 +7,10 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { type AppState } from '../../shared/types';
 import { DEFAULT_PROMPTS, INITIAL_MODELS } from '../../shared/constants';
-import { getDefaultConsistencyPrompts } from '../constants/consistencyCheck';
 import { APP_STATE_VERSION } from '../../shared/constants/versions';
+import { type AppState } from '../../shared/types';
+import { getDefaultConsistencyPrompts } from '../constants/consistencyCheck';
 
 export const INITIAL_APP_STATE: AppState = {
   schemaVersion: APP_STATE_VERSION,

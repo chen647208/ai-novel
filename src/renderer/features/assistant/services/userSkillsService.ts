@@ -14,8 +14,10 @@
  */
 
 import { parseSkillMd, type Skill } from '@core/ai';
-import { skillCatalog } from './aiRuntime';
+
 import { logger } from '@/shared/utils/logger';
+
+import { skillCatalog } from './aiRuntime';
 
 const USER_SKILLS_DIR = 'skills/user';
 

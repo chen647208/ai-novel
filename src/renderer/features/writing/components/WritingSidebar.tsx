@@ -7,16 +7,18 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { ChevronsLeft } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { roleLabel } from '@/shared/utils/displayLabels';
-import ChapterNavigationSection from './ChapterNavigationSection';
-import ChapterSummarySection from './ChapterSummarySection';
-import type { WritingSidebarProps } from '../types';
+
 import { Button } from '@/shared/ui/Button';
 import Slot from '@/shared/ui/Slot';
 import { Textarea } from '@/shared/ui/Textarea';
-import { ChevronsLeft } from 'lucide-react';
+import { roleLabel } from '@/shared/utils/displayLabels';
+
+import type { WritingSidebarProps } from '../types';
+import ChapterNavigationSection from './ChapterNavigationSection';
+import ChapterSummarySection from './ChapterSummarySection';
 
 const WritingSidebar: React.FC<WritingSidebarProps> = ({
   characters,

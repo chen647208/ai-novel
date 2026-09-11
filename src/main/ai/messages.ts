@@ -8,7 +8,7 @@
  */
 
 import type { AIMessageImage, ModelConfig } from '../../shared/types.js';
-import type { ChatContentPart, AdapterChatMessage, TokenUsage } from './types.js';
+import type { AdapterChatMessage, ChatContentPart, TokenUsage } from './types.js';
 
 /** 构建消息数组（系统提示词 + 用户提示词）——全适配器共用；附图挂在末条 user 消息后 */
 export function buildMessages(model: ModelConfig, prompt: string, images?: AIMessageImage[]): AdapterChatMessage[] {

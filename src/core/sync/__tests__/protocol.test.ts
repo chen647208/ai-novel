@@ -7,10 +7,11 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect,it } from 'vitest';
+
+import type { AttributeEntity, EdgeEntity,NodeEntity } from '../../entities';
 import type { EntitySnapshot } from '../protocol.js';
 import { buildBundle, canonicalHash, localState, mergeBundle } from '../protocol.js';
-import type { NodeEntity, AttributeEntity, EdgeEntity } from '../../entities';
 
 const node = (id: string, title: string, body: string): NodeEntity =>
   ({ id, bookId: 'b1', type: 'novel.chapter', title, body, createdAt: 0, updatedAt: 0, erased: false });

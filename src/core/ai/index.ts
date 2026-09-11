@@ -9,66 +9,66 @@
 
 /** core/ai 编排层出口（docs/design/05 §1）：prompt 装配器 + 工具注册表 + 内置 sections。 */
 export {
-  PromptAssembler,
-  truncateText,
-  type PromptContext,
-  type PromptSection,
-  type AssembleResult,
-} from './promptAssembler.js';
-export {
-  ApprovalBroker,
-  ApprovalRouter,
-  type ApprovalRequest,
-  type ApprovalDecision,
-  type ApprovalProposal,
-  type McpProposalExec,
-  type ApprovalVerdict,
-  type PendingApproval,
-} from './approval.js';
-export {
-  runAgentSession,
-  parseAgentReply,
   type AgentLoopDeps,
   type AgentTurnResult,
   type AgentTurnToolCall,
+  parseAgentReply,
+  runAgentSession,
 } from './agentLoop.js';
 export {
-  AiSession,
-  serializeEvent,
-  parseEventLine,
+  ApprovalBroker,
+  type ApprovalDecision,
+  type ApprovalProposal,
+  type ApprovalRequest,
+  ApprovalRouter,
+  type ApprovalVerdict,
+  type McpProposalExec,
+  type PendingApproval,
+} from './approval.js';
+export {
+  activeSkillSection,
+  aiPolicySection,
+  bookMetaSection,
+  historySection,
+  identitySection,
+  indexDigestSection,
+  registerBuiltinSections,
+  renderIndexDigest,
+  renderWorldDigest,
+  toolSchemasSection,
+  userTaskSection,
+  type WorldDigestOptions,
+  worldDigestSection,
+} from './builtinSections.js';
+export {
+  type AssembleResult,
+  PromptAssembler,
+  type PromptContext,
+  type PromptSection,
+  truncateText,
+} from './promptAssembler.js';
+export {
   type AiEvent,
-  type SessionSink,
+  AiSession,
+  parseEventLine,
+  serializeEvent,
   type SessionOptions,
+  type SessionSink,
 } from './session.js';
 export {
-  SkillCatalog,
+  type ParsedSkillFile,
   parseSkillMd,
   type Skill,
+  SkillCatalog,
   type SkillCatalogOptions,
   type SkillParseError,
-  type ParsedSkillFile,
 } from './skills.js';
 export {
-  ToolRegistry,
   lintToolSchema,
-  type ToolPermission,
   type ToolCallRequest,
   type ToolContext,
   type ToolOutput,
+  type ToolPermission,
+  ToolRegistry,
   type ToolSpec,
 } from './tools.js';
-export {
-  registerBuiltinSections,
-  renderWorldDigest,
-  renderIndexDigest,
-  identitySection,
-  aiPolicySection,
-  bookMetaSection,
-  worldDigestSection,
-  indexDigestSection,
-  activeSkillSection,
-  toolSchemasSection,
-  historySection,
-  userTaskSection,
-  type WorldDigestOptions,
-} from './builtinSections.js';

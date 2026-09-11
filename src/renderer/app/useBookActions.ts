@@ -6,25 +6,25 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
-import { logger } from '@/shared/utils/logger';
-
 /**
  * 书籍库动作 hook：建/开/删/复制/重命名/导入导出，全部落 projectStore。
  * App.tsx 只解构使用，不再持有项目 CRUD 细节。
  */
-
 import { useCallback } from 'react';
-import { type Project } from '../../shared/types';
-import { repository } from '../shared/services/repository';
+
 import { dialogService } from '@/shared/services/dialogService';
+import { logger } from '@/shared/utils/logger';
+
+import { type Project } from '../../shared/types';
 import { i18n } from '../i18n';
-import { useProjectStore } from './stores/projectStore';
+import { repository } from '../shared/services/repository';
 import { deleteTrash, moveToTrash, readTrash } from '../shared/services/trashService';
-import { composeAppState, seedPersistBaseline } from './stores/persistenceBridge';
-import { hydrateStoresFromState } from './useAppBootstrap';
+import { blankContents, buildExampleProject, cloneProject, emptyBook } from './bookFactory';
 import { normalizeImportedState } from './initialState';
 import { checkImportVersion } from './initialState';
-import { blankContents, buildExampleProject, cloneProject, emptyBook } from './bookFactory';
+import { composeAppState, seedPersistBaseline } from './stores/persistenceBridge';
+import { useProjectStore } from './stores/projectStore';
+import { hydrateStoresFromState } from './useAppBootstrap';
 
 export interface BookActions {
   openBook: (bookId: string) => void;
@@ -120,7 +120,7 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
   }, [enterWorkspace]);
 
   const exportBook = useCallback((book: Project) => {
-    repository.exportBook(book);
+    void repository.exportBook(book);
   }, []);
 
   const importBook = useCallback(async () => {

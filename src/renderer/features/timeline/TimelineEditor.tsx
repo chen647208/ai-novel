@@ -7,18 +7,20 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { useTranslation, i18n } from '@/i18n';
-import { type Timeline, type TimelineEvent, type HistoryDate, type Character, type Location, type Faction, type Chapter } from '../../../shared/types';
+import { Clock, Flag, MapPin, Plus, Save, Settings, Trash2, User } from 'lucide-react';
+import React, { useEffect, useMemo,useState } from 'react';
+
+import { i18n,useTranslation } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
-import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
 import { Checkbox } from '@/shared/ui/Checkbox';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
-import { Clock, Flag, MapPin, Plus, Save, Settings, Trash2, User } from 'lucide-react';
+import { cn } from '@/shared/utils/cn';
+
+import { type Chapter,type Character, type Faction, type HistoryDate, type Location, type Timeline, type TimelineEvent } from '../../../shared/types';
 
 interface TimelineEditorProps {
   projectId: string;

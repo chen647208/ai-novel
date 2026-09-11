@@ -13,12 +13,11 @@
  * 由插件发现层级接入，在返回的 SkillCatalog 上续注。
  */
 import { SkillCatalog } from '@core/ai';
-
-import goldenThreeChaptersMd from '@core/ai/skills/builtin/golden-three-chapters/SKILL.md?raw';
-import snowflakeMd from '@core/ai/skills/builtin/snowflake/SKILL.md?raw';
-import povSwitchMd from '@core/ai/skills/builtin/pov-switch/SKILL.md?raw';
-import foreshadowPayoffMd from '@core/ai/skills/builtin/foreshadow-payoff/SKILL.md?raw';
 import aiFlavorRemovalMd from '@core/ai/skills/builtin/ai-flavor-removal/SKILL.md?raw';
+import foreshadowPayoffMd from '@core/ai/skills/builtin/foreshadow-payoff/SKILL.md?raw';
+import goldenThreeChaptersMd from '@core/ai/skills/builtin/golden-three-chapters/SKILL.md?raw';
+import povSwitchMd from '@core/ai/skills/builtin/pov-switch/SKILL.md?raw';
+import snowflakeMd from '@core/ai/skills/builtin/snowflake/SKILL.md?raw';
 
 const BUILTIN_SKILLS = [
   { sourceFile: 'golden-three-chapters/SKILL.md', md: goldenThreeChaptersMd },

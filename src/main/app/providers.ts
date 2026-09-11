@@ -7,20 +7,22 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+
+import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron';
+
 import { IPC } from '../channels.js';
-import { registerVectorIpc } from '../vector-ipc.js';
-import { registerSqliteIpc, closeSqlite } from '../sqlite-ipc.js';
-import { registerMcpClientIpc, closeMcpClients } from '../mcp/clientIpc.js';
+import { closeMcpClients,registerMcpClientIpc } from '../mcp/clientIpc.js';
 import { registerProxyIpc } from '../net/proxyIpc.js';
+import { closeSqlite,registerSqliteIpc } from '../sqlite-ipc.js';
 import { registerUpdaterIpc } from '../updater.js';
+import { registerVectorIpc } from '../vector-ipc.js';
+import type { Provider, ProviderContext } from './container.js';
 import { registerDiagnosticsIpc } from './diagnostics.js';
 import { extractPdfText } from './documents.js';
 import { destroyTray, registerShellIpc } from './tray.js';
 import { getMainWindow } from './window.js';
-import type { Provider, ProviderContext } from './container.js';
 import { createWindow } from './window.js';
 
 /**

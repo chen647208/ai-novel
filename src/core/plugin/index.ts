@@ -8,74 +8,74 @@
  */
 
 /** 插件系统出口（docs/design/04）：manifest 校验 + 运行时。 */
-export {
-  validateManifest,
-  shortId,
-  commandId,
-  typeTemplateId,
-  eventDomain,
-  settingKey,
-  assertPermission,
-  PermissionDenied,
-  toPluginError,
-  type Disposable,
-  type PluginError,
-  type PluginPhase,
-  type PluginManifest,
-  type PluginPermissions,
-  type PluginContribution,
-  type ManifestIssue,
-  type ManifestValidateResult,
-} from './manifest.js';
-export {
-  EventBus,
-  type SeamName,
-  type SeamPolicy,
-  type VetoResult,
-  type ObserveHandler,
-  type InterceptHandler,
-} from './events.js';
-export {
-  BUILTIN_FEATURES,
-  BUILTIN_BUNDLES,
-  RELEASE_PROFILES,
-  DEFAULT_RELEASE_PROFILE,
-  profileByName,
-  assemblyTree,
-  type FeatureDecl,
-  type Bundle,
-  type Profile,
-  type ReleaseProfileName,
-  type AssemblyRow,
-} from './bundles.js';
-export {
-  createPluginContext,
-  registeredTasks,
-  drainTasks,
-  type PluginContext,
-  type PluginContextOptions,
-  type TaskHandle,
-} from './context.js';
-export { BUILTIN_BUNDLE_MANIFESTS } from './builtin/manifests.js';
+export type { BuildProfile } from '../build/profile.js';
 export {
   enabledFeatureIds,
   isFeatureEnabled,
-  profileDeniesAi,
   PROFILE_CHANGED_EVENT,
+  profileDeniesAi,
 } from './availability.js';
+export { BUILTIN_BUNDLE_MANIFESTS } from './builtin/manifests.js';
 export {
-  installHooks,
-  installTypeTemplates,
+  type AssemblyRow,
+  assemblyTree,
+  BUILTIN_BUNDLES,
+  BUILTIN_FEATURES,
+  type Bundle,
+  DEFAULT_RELEASE_PROFILE,
+  type FeatureDecl,
+  type Profile,
+  profileByName,
+  RELEASE_PROFILES,
+  type ReleaseProfileName,
+} from './bundles.js';
+export {
+  createPluginContext,
+  drainTasks,
+  type PluginContext,
+  type PluginContextOptions,
+  registeredTasks,
+  type TaskHandle,
+} from './context.js';
+export {
   buildProfileKey,
   BuildProfileRegistry,
   type HookDeclaration,
+  installHooks,
+  installTypeTemplates,
 } from './contributions.js';
-export type { BuildProfile } from '../build/profile.js';
 export {
+  EventBus,
+  type InterceptHandler,
+  type ObserveHandler,
+  type SeamName,
+  type SeamPolicy,
+  type VetoResult,
+} from './events.js';
+export {
+  assertPermission,
+  commandId,
+  type Disposable,
+  eventDomain,
+  type ManifestIssue,
+  type ManifestValidateResult,
+  PermissionDenied,
+  type PluginContribution,
+  type PluginError,
+  type PluginManifest,
+  type PluginPermissions,
+  type PluginPhase,
+  settingKey,
+  shortId,
+  toPluginError,
+  typeTemplateId,
+  validateManifest,
+} from './manifest.js';
+export {
+  type ContributionInstaller,
+  type DiscoveredPlugin,
   PluginHost,
+  type PluginHostOptions,
   type PluginState,
   type PluginStatus,
-  type DiscoveredPlugin,
-  type ContributionInstaller,
-  type PluginHostOptions,
 } from './runtime.js';

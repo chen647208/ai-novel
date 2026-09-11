@@ -13,22 +13,24 @@
  * Step 页直读双 store，WorkspaceSection 只做守卫与路由，不再透传模型/提示词。
  */
 
+import { BookHeart, Plug } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { type AppTheme, type ModelConfig, type Project, type PromptTemplate } from '../../../shared/types';
-import { isModelUsable } from '../../shared/utils/modelReadiness';
-import WorkspaceNav from './WorkspaceNav';
-import type { SectionId } from '../sections';
-import WorkspaceTopbar from './WorkspaceTopbar';
-import StructureSection from './StructureSection';
-import Slot from '@/shared/ui/Slot';
-import StepInspiration from '../../features/inspiration/StepInspiration';
-import StepKnowledgeEnhanced from '../../features/knowledge/StepKnowledgeEnhanced';
-import StepCharacters from '../../features/characters/StepCharacters';
-import WritingEditor from '../../features/writing/WritingEditor';
+
 import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
-import { BookHeart, Plug } from 'lucide-react';
+import Slot from '@/shared/ui/Slot';
+
+import { type AppTheme, type ModelConfig, type Project, type PromptTemplate } from '../../../shared/types';
+import StepCharacters from '../../features/characters/StepCharacters';
+import StepInspiration from '../../features/inspiration/StepInspiration';
+import StepKnowledgeEnhanced from '../../features/knowledge/StepKnowledgeEnhanced';
+import WritingEditor from '../../features/writing/WritingEditor';
+import { isModelUsable } from '../../shared/utils/modelReadiness';
+import type { SectionId } from '../sections';
+import StructureSection from './StructureSection';
+import WorkspaceNav from './WorkspaceNav';
+import WorkspaceTopbar from './WorkspaceTopbar';
 
 export interface WorkspaceViewProps {
   section: SectionId;

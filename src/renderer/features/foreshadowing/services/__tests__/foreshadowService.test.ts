@@ -7,19 +7,20 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect,it } from 'vitest';
+
 import type { Foreshadow, Project } from '../../../../../shared/types';
 import {
-  createForeshadow,
   addForeshadow,
-  updateForeshadow,
-  removeForeshadow,
-  payOffForeshadow,
-  setStatus,
+  buildForeshadowContextForPrompt,
+  createForeshadow,
+  foreshadowCounts,
   openForeshadows,
   overdueForeshadows,
-  foreshadowCounts,
-  buildForeshadowContextForPrompt,
+  payOffForeshadow,
+  removeForeshadow,
+  setStatus,
+  updateForeshadow,
 } from '../foreshadowService';
 
 const project = (foreshadows: Foreshadow[] = []): Project =>

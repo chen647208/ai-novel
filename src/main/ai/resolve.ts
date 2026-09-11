@@ -8,11 +8,11 @@
  */
 
 import type { ModelConfig } from '../../shared/types.js';
-import type { ProviderAdapter } from './types.js';
+import { anthropicAdapter } from './adapters/anthropic.js';
 import { geminiAdapter } from './adapters/gemini.js';
 import { openAICompatibleAdapter } from './adapters/openai-compatible.js';
-import { anthropicAdapter } from './adapters/anthropic.js';
 import { openAIResponsesAdapter } from './adapters/openai-responses.js';
+import type { ProviderAdapter } from './types.js';
 
 /** 根据模型配置解析出对应的 Provider 适配器 */
 export function resolveAdapter(model: ModelConfig): ProviderAdapter {

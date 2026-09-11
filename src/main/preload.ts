@@ -8,6 +8,7 @@
  */
 
 import { contextBridge, ipcRenderer } from 'electron';
+
 import { IPC } from './channels.js';
 
 /**

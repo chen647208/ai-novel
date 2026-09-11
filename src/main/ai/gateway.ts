@@ -16,12 +16,13 @@
  * 取消：渲染端持 requestId 调 abort 通道，主进程 AbortController 中止底层 fetch。
  */
 import { app, ipcMain } from 'electron';
-import { IPC } from '../channels.js';
+
+import type { AiCallOptions, AIResponse, AiStreamEvent, ModelConfig } from '../../shared/types.js';
 import type { Provider } from '../app/container.js';
-import type { AiCallOptions, AiStreamEvent, AIResponse, ModelConfig } from '../../shared/types.js';
+import { withVaultKey } from '../app/secureStore.js';
+import { IPC } from '../channels.js';
 import { aiT, initAiI18n } from './i18n.js';
 import { resolveAdapter } from './resolve.js';
-import { withVaultKey } from '../app/secureStore.js';
 
 /** 进行中的请求：requestId → 取消控制器。complete 与 stream 共用一张表。 */
 const active = new Map<string, AbortController>();

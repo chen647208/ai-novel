@@ -12,12 +12,14 @@
  * 支持章节事件叠加显示
  */
 
-import React, { useState, useMemo } from 'react';
+import { BookOpen, Calendar, CalendarX2, LayoutList, MapPin, User, Users } from 'lucide-react';
+import React, { useMemo,useState } from 'react';
+
 import { useTranslation } from '@/i18n';
-import { type Project, type TimelineEvent, type Chapter, type HistoryDate } from '../../../shared/types';
 import { Select } from '@/shared/ui/Select';
 import { cn } from '@/shared/utils/cn';
-import { BookOpen, Calendar, CalendarX2, LayoutList, MapPin, User, Users } from 'lucide-react';
+
+import { type Chapter, type HistoryDate,type Project, type TimelineEvent } from '../../../shared/types';
 
 interface EnhancedTimelineProps {
   project: Project;

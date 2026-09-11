@@ -7,13 +7,15 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { Check, Square, X } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { WritingEditorStatusOverlayProps } from '../types';
+
 import { Button } from '@/shared/ui/Button';
-import { Square, Check, X } from 'lucide-react';
-import { Spinner } from '@/shared/ui/Spinner';
 import { Progress } from '@/shared/ui/Progress';
+import { Spinner } from '@/shared/ui/Spinner';
+
+import type { WritingEditorStatusOverlayProps } from '../types';
 
 const WritingEditorStatusOverlay: React.FC<WritingEditorStatusOverlayProps> = ({
   isGenerating,

@@ -16,6 +16,7 @@
  */
 
 import { app, session } from 'electron';
+
 import { logger } from '../logger.js';
 
 /** 打包版 CSP（值集中在此，改策略只改一处）。 */

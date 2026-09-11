@@ -1,4 +1,3 @@
-import { formatDate, formatDateTime } from '@/shared/utils/format';
 /*
  * 本文件属于 红月创作 (Hongyue Creation) 项目。
  * Copyright (C) 2026 chen647208
@@ -7,25 +6,27 @@ import { formatDate, formatDateTime } from '@/shared/utils/format';
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
-import { logger } from '@/shared/utils/logger';
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { useTranslation } from '@/i18n';
-import type { StorageSettingsPanelProps } from '../types';
-import { dialogService } from '@/shared/services/dialogService';
-import { autoBackupService } from '@/shared/services/autoBackupService';
-import { composeAppState, seedPersistBaseline } from '@/app/stores/persistenceBridge';
-import { repository } from '@/shared/services/repository';
-import { hydrateStoresFromState } from '@/app/useAppBootstrap';
-import { normalizeImportedState, checkImportVersion } from '@/app/initialState';
-import { Button } from '@/shared/ui/Button';
-import { Spinner } from '@/shared/ui/Spinner';
-import { Input } from '@/shared/ui/Input';
 import { AlertTriangle, ArrowLeftRight, Clock, Database, FileText, FolderOpen, History, Info, Save, Settings, ShieldCheck, Trash2, Wrench } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
 
+import { checkImportVersion,normalizeImportedState } from '@/app/initialState';
+import { composeAppState, seedPersistBaseline } from '@/app/stores/persistenceBridge';
+import { hydrateStoresFromState } from '@/app/useAppBootstrap';
+import { useTranslation } from '@/i18n';
+import { autoBackupService } from '@/shared/services/autoBackupService';
+import { dialogService } from '@/shared/services/dialogService';
+import { repository } from '@/shared/services/repository';
+import { Button } from '@/shared/ui/Button';
 /** 存储设置区块的小标题 */
 import { FieldLabel } from '@/shared/ui/FieldLabel';
+import { Input } from '@/shared/ui/Input';
+import { Spinner } from '@/shared/ui/Spinner';
 import { Switch } from '@/shared/ui/Switch';
+import { formatDate, formatDateTime } from '@/shared/utils/format';
+import { logger } from '@/shared/utils/logger';
+
+import type { StorageSettingsPanelProps } from '../types';
 
 /** 状态徽章 */
 const StatusBadge: React.FC<{ tone: 'primary' | 'success' | 'muted'; children: React.ReactNode }> = ({ tone, children }) => (

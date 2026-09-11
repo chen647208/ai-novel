@@ -13,9 +13,10 @@
  * 连接数上限 8，命令白名单禁 shell 展开（spawn 数组传参，无 shell）。
  */
 import { ipcMain } from 'electron';
+
 import { IPC } from '../channels.js';
 import { logger } from '../logger.js';
-import { MinimalMcpClient, type McpToolDef } from './client.js';
+import { type McpToolDef,MinimalMcpClient } from './client.js';
 
 const MAX_CLIENTS = 8;
 const clients = new Map<string, MinimalMcpClient>();

@@ -3,7 +3,7 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
@@ -12,19 +12,21 @@
  * 按图类型 + 过滤开关产出节点/连线，位置沿用已拖拽坐标或按环形半径排布。
  */
 import type { TFunction } from 'i18next';
+
+import { normalizeRoleId } from '@/shared/utils/characterKinds';
+import { roleLabel } from '@/shared/utils/displayLabels';
+
 import {
   type Character,
-  type Location,
-  type Faction,
-  type Timeline,
-  type RuleSystem,
   type DiagramType,
-  type GraphNode,
-  type GraphLink,
+  type Faction,
   type GraphData,
+  type GraphLink,
+  type GraphNode,
+  type Location,
+  type RuleSystem,
+  type Timeline,
 } from '../../../../shared/types';
-import { roleLabel } from '@/shared/utils/displayLabels';
-import { normalizeRoleId } from '@/shared/utils/characterKinds';
 
 // 节点颜色映射：经主题 chart 令牌引用（深色自动切换，禁十六进制硬编码）
 export const NODE_COLORS = {

@@ -7,16 +7,18 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { BookOpenText, Lightbulb, ListOrdered, ListTree, type LucideIcon,Users, WandSparkles } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { templateDisplayName } from '@/i18n';
-import type { Project, PromptTemplate } from '../../../../shared/types';
-import type { AssistantCategory } from '../types';
 import { Button } from '@/shared/ui/Button';
 import { Select } from '@/shared/ui/Select';
-import { Textarea } from '@/shared/ui/Textarea';
 import { TabBar } from '@/shared/ui/TabBar';
-import { BookOpenText, Lightbulb, ListOrdered, ListTree, Users, WandSparkles, type LucideIcon } from 'lucide-react';
+import { Textarea } from '@/shared/ui/Textarea';
+
+import type { Project, PromptTemplate } from '../../../../shared/types';
+import type { AssistantCategory } from '../types';
 
 interface AssistantContextPanelProps {
   project: Project | null;

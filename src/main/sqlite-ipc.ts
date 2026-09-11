@@ -14,12 +14,14 @@
  * 信任模型：语句均来自应用自身编译代码（repository/schema），值一律走 params 绑定，
  * 渲染层不接收任何用户可控的 SQL 文本；与既有文件 IPC 同级信任。
  */
-import { app, ipcMain } from 'electron';
-import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
 import path from 'node:path';
+import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
+
+import { app, ipcMain } from 'electron';
+
+import { DB_FILE_NAME } from './app/dataDir.js';
 import { IPC } from './channels.js';
 import { logger } from './logger.js';
-import { DB_FILE_NAME } from './app/dataDir.js';
 
 let db: DatabaseSync | null = null;
 

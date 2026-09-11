@@ -7,14 +7,15 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import type { RevisionEntity } from '@core/entities';
+
 import type {
   AppState,
-  Project,
-  StorageConfig,
   ConsistencyCheckConfig,
   ConsistencyCheckPromptTemplate,
+  Project,
+  StorageConfig,
 } from '../../../../shared/types';
-import type { RevisionEntity } from '@core/entities';
 
 /** 提交选项：标注变更来源与触发原因（单一事务管线的 agentId 维度） */
 export interface CommitOptions {

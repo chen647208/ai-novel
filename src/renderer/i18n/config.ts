@@ -7,15 +7,14 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
-
+import { DEFAULT_LANGUAGE, NAMESPACES, normalizeLanguage,resources, SUPPORTED_LANGUAGES } from '@shared/i18n/catalog';
 import type { AppLanguage } from '@shared/types';
-import { DEFAULT_LANGUAGE, NAMESPACES, SUPPORTED_LANGUAGES, resources, normalizeLanguage } from '@shared/i18n/catalog';
+import i18n from 'i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
+import { initReactI18next } from 'react-i18next';
 
 // 语言清单、字典与归一化逻辑在 src/shared/i18n/catalog（主进程网关同样消费），此处只维护渲染端实例。
-export { SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE, NAMESPACES, resources, normalizeLanguage };
+export { DEFAULT_LANGUAGE, NAMESPACES, normalizeLanguage,resources, SUPPORTED_LANGUAGES };
 
 let initialized = false;
 

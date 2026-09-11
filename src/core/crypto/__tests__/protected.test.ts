@@ -7,8 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
-import { encryptBody, decryptBody, isEncryptedEnvelope, ProtectedSession } from '../protected.js';
+import { describe, expect,it } from 'vitest';
+
+import { decryptBody, encryptBody, isEncryptedEnvelope, ProtectedSession } from '../protected.js';
 
 describe('信封加密（encryptBody/decryptBody）', () => {
   it('往返无损；信封带前缀且不含明文', async () => {

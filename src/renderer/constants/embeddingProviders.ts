@@ -8,7 +8,8 @@
  */
 
 
-import { Boxes, Cloud, Cpu, Flame, Globe, Monitor, type LucideIcon } from 'lucide-react';
+import { Boxes, Cloud, Cpu, Flame, Globe, type LucideIcon,Monitor } from 'lucide-react';
+
 import { type EmbeddingModelProvider } from '../../shared/types';
 
 /**

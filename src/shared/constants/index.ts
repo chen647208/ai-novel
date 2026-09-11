@@ -7,8 +7,8 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-export * from './prompts.js';
-export * from './models.js';
 export * from './chapters.js';
 export * from './chat.js';
+export * from './models.js';
+export * from './prompts.js';
 export * from './versions.js';

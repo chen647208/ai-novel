@@ -13,14 +13,16 @@
  */
 import { ApprovalBroker, PromptAssembler, registerBuiltinSections } from '@core/ai';
 import { EventBus, profileDeniesAi } from '@core/plugin';
-import { buildProfileRegistry } from '@/shared/services/buildProfiles';
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
+
 import { setAiGate } from '@/shared/services/ai/aiGate';
 import { isOverHourlyLimit } from '@/shared/services/ai/usageTracker';
+import { buildProfileRegistry } from '@/shared/services/buildProfiles';
+import { APP_VERSION } from '@/shared/version';
+
+import { AiSessionManager } from './aiSessionManager';
 import { createToolRegistry } from './builtinTools';
 import { createBuiltinSkillCatalog } from './skillCatalogSetup';
-import { AiSessionManager } from './aiSessionManager';
-import { APP_VERSION } from '@/shared/version';
 
 const assembler = new PromptAssembler();
 registerBuiltinSections(assembler);

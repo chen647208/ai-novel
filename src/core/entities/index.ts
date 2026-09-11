@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-export * from './types';
 export * from './hash';
+export * from './types';
 export * from './uuid';
 export * from './validate';

@@ -7,12 +7,14 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { AlertTriangle, CircleAlert, CircleCheck, Info, type LucideIcon,SquarePen } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+
 import { useTranslation } from '@/i18n';
-import { dialogService, type ConfirmOptions, type AlertOptions, type PromptOptions } from '../../shared/services/dialogService';
+
+import { type AlertOptions, type ConfirmOptions, dialogService, type PromptOptions } from '../../shared/services/dialogService';
 import { Button } from '../../shared/ui/Button';
 import { Input } from '../../shared/ui/Input';
-import { AlertTriangle, CircleAlert, CircleCheck, Info, SquarePen, type LucideIcon } from 'lucide-react';
 
 type Front =
   | { kind: 'confirm'; options: ConfirmOptions }

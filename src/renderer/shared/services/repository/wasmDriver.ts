@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import type { SqlDriver, SqlValue, SqlRunResult } from './types';
+import type { SqlDriver, SqlRunResult,SqlValue } from './types';
 import type { WasmRequest } from './wasmSql';
 
 interface Reply {

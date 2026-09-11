@@ -6,14 +6,13 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
-import { logger } from '@/shared/utils/logger';
-
 /**
  * 版本服务 - 处理应用版本检查和更新
  */
-
 import { dt, i18n } from '@/i18n';
-import { APP_VERSION, GITHUB_API_URL, formatVersion } from '@/shared/version';
+import { logger } from '@/shared/utils/logger';
+import { APP_VERSION, formatVersion,GITHUB_API_URL } from '@/shared/version';
+
 import { RELEASES } from '../releases';
 
 export { formatVersion };

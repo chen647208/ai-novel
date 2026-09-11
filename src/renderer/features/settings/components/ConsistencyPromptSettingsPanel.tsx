@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+
 import ConsistencyPromptManager from '../../consistency/ConsistencyPromptManager';
 import type { ConsistencyPromptSettingsPanelProps } from '../types';
 

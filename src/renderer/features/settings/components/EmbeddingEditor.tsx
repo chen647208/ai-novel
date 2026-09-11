@@ -7,17 +7,19 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { AlertCircle, CheckCircle2, Cloud, Eye, EyeOff, FlaskConical, Home, Key, List, SlidersHorizontal, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
-import { useTranslation, dt } from '@/i18n';
-import { embeddingProviders, getDefaultEmbeddingParams } from '../../../constants/embeddingProviders';
-import type { EmbeddingModelProvider, EmbeddingModelConfig } from '../../../../shared/types';
+
+import { dt,useTranslation } from '@/i18n';
 import { Button } from '@/shared/ui/Button';
-import { Spinner } from '@/shared/ui/Spinner';
 import { Input } from '@/shared/ui/Input';
 import { Select } from '@/shared/ui/Select';
+import { Spinner } from '@/shared/ui/Spinner';
 import { Switch } from '@/shared/ui/Switch';
 import { cn } from '@/shared/utils/cn';
-import { AlertCircle, CheckCircle2, Cloud, Eye, EyeOff, FlaskConical, Home, Key, List, SlidersHorizontal, Trash2 } from 'lucide-react';
+
+import type { EmbeddingModelConfig,EmbeddingModelProvider } from '../../../../shared/types';
+import { embeddingProviders, getDefaultEmbeddingParams } from '../../../constants/embeddingProviders';
 
 const fieldLabel = 'mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground';
 const hintText = 'mt-1.5 text-xs text-muted-foreground';

@@ -7,15 +7,17 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { WandSparkles } from 'lucide-react';
 import React from 'react';
-import { useTranslation, templateDisplayName } from '@/i18n';
-import type { PromptTemplate } from '../../../../shared/types';
-import type { PromptTemplatesPanelProps } from '../types';
+
+import { templateDisplayName,useTranslation } from '@/i18n';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
-import { WandSparkles } from 'lucide-react';
+
+import type { PromptTemplate } from '../../../../shared/types';
+import type { PromptTemplatesPanelProps } from '../types';
 
 const PromptTemplatesPanel: React.FC<PromptTemplatesPanelProps> = ({
   localPrompts,

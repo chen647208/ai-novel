@@ -7,19 +7,21 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { WandSparkles } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { templateDisplayName } from '@/i18n';
-import type { WritingEditModalProps } from '../types';
 import { Button } from '@/shared/ui/Button';
 import { DialogTitle } from '@/shared/ui/Dialog';
-import { ModalShell } from '@/shared/ui/ModalShell';
 import { Label } from '@/shared/ui/Label';
+import { ModalShell } from '@/shared/ui/ModalShell';
 import { Select } from '@/shared/ui/Select';
 import { Textarea } from '@/shared/ui/Textarea';
 import { cn } from '@/shared/utils/cn';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
-import { WandSparkles } from 'lucide-react';
+
+import type { WritingEditModalProps } from '../types';
 
 const WritingEditModal: React.FC<WritingEditModalProps> = ({
   isOpen,

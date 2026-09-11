@@ -7,13 +7,15 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { ChevronRight, Crown, Eye, Info, type LucideIcon,Skull, Star, User, Users } from 'lucide-react';
 import React from 'react';
+
 import { useTranslation } from '@/i18n';
-import { type Character } from '../../../shared/types';
-import { roleLabel, genderLabel } from '@/shared/utils/displayLabels';
 import { normalizeRoleId } from '@/shared/utils/characterKinds';
 import { cn } from '@/shared/utils/cn';
-import { ChevronRight, Crown, Eye, Info, Skull, Star, User, Users, type LucideIcon } from 'lucide-react';
+import { genderLabel,roleLabel } from '@/shared/utils/displayLabels';
+
+import { type Character } from '../../../shared/types';
 
 interface CompactCharacterCardProps {
   character: Character;

@@ -9,18 +9,18 @@
 
 /** 同步地基出口（docs/design/03 entity_changes 协议 + 08 M4）。 */
 export {
+  buildBundle,
+  canonicalHash,
+  type ConflictCopy,
+  type EntitySnapshot,
+  type LocalEntityState,
+  localState,
+  mergeBundle,
+  type MergeReport,
+  type SyncBundle,
+  type SyncChange,
+} from './protocol.js';
+export {
   MemorySyncTransport,
   type SyncTransport,
 } from './transport.js';
-export {
-  buildBundle,
-  mergeBundle,
-  localState,
-  canonicalHash,
-  type SyncChange,
-  type SyncBundle,
-  type EntitySnapshot,
-  type LocalEntityState,
-  type ConflictCopy,
-  type MergeReport,
-} from './protocol.js';

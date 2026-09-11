@@ -7,8 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
-import { initI18n, normalizeLanguage, getEffectiveLanguage, i18n, DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES } from '../config';
+import { beforeAll,describe, expect, it } from 'vitest';
+
+import { DEFAULT_LANGUAGE, getEffectiveLanguage, i18n, initI18n, normalizeLanguage, SUPPORTED_LANGUAGES } from '../config';
 
 // 绕过类型化键，测试 i18next 自身的缺失回退/插值/复数行为（这些用任意键）。
 const tRaw = i18n.t.bind(i18n) as (key: string, options?: Record<string, unknown>) => string;

@@ -14,10 +14,10 @@
  * 导入：读 bundle → mergeBundle（LWW 禁用）→ INSERT OR REPLACE 应用插入集
  * （冲突副本以新 id 落库、本地保留），返回报告供 UI 展示。
  */
-import { buildBundle, canonicalHash, mergeBundle, localState, type EntitySnapshot, type SyncBundle } from '@core/sync';
+import type { AttributeEntity, EdgeEntity,NodeEntity } from '@core/entities';
+import { getInstanceId,hashEntity } from '@core/entities';
+import { buildBundle, canonicalHash, type EntitySnapshot, localState, mergeBundle, type SyncBundle } from '@core/sync';
 import type { FileDialogOptions, SaveDialogOptions } from '@shared/types';
-import { hashEntity, getInstanceId } from '@core/entities';
-import type { NodeEntity, AttributeEntity, EdgeEntity } from '@core/entities';
 
 function db(): NonNullable<Window['electronAPI']>['db'] {
   if (!window.electronAPI) throw new Error('同步需要桌面环境（文件系统/SQLite）');

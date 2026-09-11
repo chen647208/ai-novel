@@ -9,39 +9,39 @@
 
 /** 构建管线出口（docs/design/07）：profile + select/transform/render。 */
 export {
-  DEFAULT_BUILD_PROFILE,
-  COMPENDIUM_BUILD_PROFILE,
-  roundtripProfile,
-  serializeProfileYaml,
-  parseProfileYaml,
-  typeMatches,
-  type BuildProfile,
-  type BuildSelection,
-  type BuildTransform,
-  type BuildRender,
-} from './profile.js';
+  buildCoverSvg,
+  type CoverOptions,
+  escapeXml,
+  wrapTitle,
+} from './cover.js';
 export {
-  select,
-  transform,
-  renderDoc,
-  runBuild,
-  registerTransformer,
-  listTransformers,
-  registerRenderer,
-  listRenderers,
-  type SelectedNode,
-  type DocBlock,
-  type Transformer,
-  type Renderer,
-} from './pipeline.js';
-export {
-  buildEpubFiles,
   buildDocxFiles,
+  buildEpubFiles,
   htmlToDocxParagraphs,
 } from './package.js';
 export {
-  buildCoverSvg,
-  escapeXml,
-  wrapTitle,
-  type CoverOptions,
-} from './cover.js';
+  type DocBlock,
+  listRenderers,
+  listTransformers,
+  registerRenderer,
+  registerTransformer,
+  renderDoc,
+  type Renderer,
+  runBuild,
+  select,
+  type SelectedNode,
+  transform,
+  type Transformer,
+} from './pipeline.js';
+export {
+  type BuildProfile,
+  type BuildRender,
+  type BuildSelection,
+  type BuildTransform,
+  COMPENDIUM_BUILD_PROFILE,
+  DEFAULT_BUILD_PROFILE,
+  parseProfileYaml,
+  roundtripProfile,
+  serializeProfileYaml,
+  typeMatches,
+} from './profile.js';

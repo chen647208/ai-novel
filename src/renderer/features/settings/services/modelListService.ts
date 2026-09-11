@@ -7,10 +7,11 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { type ModelConfig } from '../../../../shared/types';
 import { i18n } from '@/i18n';
-import { resolveModelApiKey } from './credentialService';
+
+import { type ModelConfig } from '../../../../shared/types';
 import { asRecord, asRecords, asStr } from '../../../shared/utils/loose';
+import { resolveModelApiKey } from './credentialService';
 
 export class ModelListService {
   // 缓存时间：1小时

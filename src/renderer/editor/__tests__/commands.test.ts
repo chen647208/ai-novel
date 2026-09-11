@@ -7,8 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
-import { parseBody, serializeBody, applySelectionReplacement } from '../commands';
+import { describe, expect,it } from 'vitest';
+
+import { applySelectionReplacement,parseBody, serializeBody } from '../commands';
 
 describe('editor commands', () => {
   it('parseBody→serializeBody 与 serialization 往返一致', () => {

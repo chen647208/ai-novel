@@ -7,8 +7,8 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { logger } from '../utils/logger';
 import { type AppState, type StorageConfig } from '../../../shared/types';
+import { logger } from '../utils/logger';
 
 // 自动备份服务：按间隔判定 + 落盘备份（调度由持久化桥在每次落盘后触发）
 export class AutoBackupService {

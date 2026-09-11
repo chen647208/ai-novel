@@ -7,18 +7,19 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect,it } from 'vitest';
+
 import type { Chapter } from '../../../../../shared/types';
 import {
-  createSnapshot,
   appendSnapshot,
-  shouldAutoSnapshot,
-  getSnapshotContent,
-  removeSnapshot,
-  listSnapshots,
-  MAX_SNAPSHOTS_PER_CHAPTER,
   AUTO_SNAPSHOT_INTERVAL_MS,
   AUTO_SNAPSHOT_LARGE_DELTA,
+  createSnapshot,
+  getSnapshotContent,
+  listSnapshots,
+  MAX_SNAPSHOTS_PER_CHAPTER,
+  removeSnapshot,
+  shouldAutoSnapshot,
 } from '../chapterSnapshotService';
 
 const chapter = (over: Partial<Chapter> = {}): Chapter => ({

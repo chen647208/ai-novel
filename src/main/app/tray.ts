@@ -13,9 +13,11 @@
  * app.setLoginItemSettings（设置页开关，渲染层经 shell:sync 下发）。
  */
 
-import { app, BrowserWindow, ipcMain, Menu, Tray } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { app, type BrowserWindow, ipcMain, Menu, Tray } from 'electron';
+
 import { IPC } from '../channels.js';
 import { logger } from '../logger.js';
 

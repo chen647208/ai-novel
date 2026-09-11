@@ -7,5 +7,5 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-export * from './words';
 export * from './indexer';
+export * from './words';

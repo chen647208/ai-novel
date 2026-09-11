@@ -8,17 +8,16 @@
  */
 
 export type {
-  KnowledgeCategory,
-  KnowledgeItem,
-  SearchResult,
-  SearchOptions,
   CollectionStats,
-  HybridSearchResult,
-  HybridSearchOptions,
-  VectorDocument,
-  ConsistencyCheckResult,
+  ConsistencyCheckConfig,
   ConsistencyCheckMode,
   ConsistencyCheckPromptCategory,
   ConsistencyCheckPromptTemplate,
-  ConsistencyCheckConfig
-} from '../types.js';
+  ConsistencyCheckResult,
+  HybridSearchOptions,
+  HybridSearchResult,
+  KnowledgeCategory,
+  KnowledgeItem,
+  SearchOptions,
+  SearchResult,
+  VectorDocument} from '../types.js';

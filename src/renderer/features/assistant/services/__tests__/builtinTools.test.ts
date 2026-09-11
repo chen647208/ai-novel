@@ -7,9 +7,10 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect, vi } from 'vitest';
-import type { Project } from '../../../../../shared/types';
 import type { ToolContext } from '@core/ai';
+import { describe, expect, it, vi } from 'vitest';
+
+import type { Project } from '../../../../../shared/types';
 
 vi.mock('@/shared/services/ai/gatewayClient.js', () => ({
   aiGatewayClient: { complete: vi.fn(), stream: vi.fn() },

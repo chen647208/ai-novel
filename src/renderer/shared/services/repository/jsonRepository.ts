@@ -7,11 +7,12 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { storage } from '../storage';
-import type { AppState, Project, StorageConfig, ConsistencyCheckConfig, ConsistencyCheckPromptTemplate } from '../../../../shared/types';
-import type { StorageRepository, SearchHit, SearchOptions, CommitOptions } from './types';
 import type { RevisionEntity } from '@core/entities';
+
 import { APP_STATE_VERSION } from '../../../../shared/constants/versions';
+import type { AppState, ConsistencyCheckConfig, ConsistencyCheckPromptTemplate,Project, StorageConfig } from '../../../../shared/types';
+import { storage } from '../storage';
+import type { CommitOptions,SearchHit, SearchOptions, StorageRepository } from './types';
 
 /** 内存子串检索的片段窗口长度 */
 const SNIPPET_WINDOW = 80;

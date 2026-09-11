@@ -8,16 +8,15 @@
  */
 
 export type {
-  WorldView,
-  MagicSystem,
-  MagicLevel,
-  TechnologyLevel,
-  WorldHistory,
+  CharacterBirthInfo,
+  Faction,
   HistoryEvent,
   Location,
-  Faction,
-  RuleSystemType,
-  RuleSystem,
+  MagicLevel,
+  MagicSystem,
   RuleLevel,
-  CharacterBirthInfo
-} from '../types.js';
+  RuleSystem,
+  RuleSystemType,
+  TechnologyLevel,
+  WorldHistory,
+  WorldView} from '../types.js';

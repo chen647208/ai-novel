@@ -20,14 +20,14 @@
  * 逻辑型（editor/worker）当前无沙箱，本运行时不执行插件代码。
  */
 import {
-  PermissionDenied,
-  satisfiesRange,
   assertPermission,
-  toPluginError,
-  validateManifest,
   type Disposable,
+  PermissionDenied,
   type PluginError,
   type PluginManifest,
+  satisfiesRange,
+  toPluginError,
+  validateManifest,
 } from './manifest.js';
 
 export type PluginState = 'discovered' | 'active' | 'failed' | 'disabled' | 'uninstalled';

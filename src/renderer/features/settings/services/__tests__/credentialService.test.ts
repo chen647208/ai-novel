@@ -7,15 +7,16 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach,describe, expect, it, vi } from 'vitest';
+
 import {
-  VAULT_REF_PREFIX,
-  isVaultRef,
   isVaultAvailable,
+  isVaultRef,
   persistApiKey,
-  resolveApiKey,
   removeApiKey,
+  resolveApiKey,
   resolveModelApiKey,
+  VAULT_REF_PREFIX,
 } from '../credentialService';
 
 function stubVault(impl?: Partial<{ isAvailable: boolean; store: Map<string, string> }>): Map<string, string> {

@@ -18,8 +18,9 @@
  * `collectTagDiagnostics` 是纯函数（文本 + 合法标签集 → 诊断），便于单测；
  * `tagValidation` 把它包成 CodeMirror linter 扩展，延迟重算。
  */
-import { linter, forceLinting, type Diagnostic } from '@codemirror/lint';
-import { ViewPlugin, type EditorView } from '@codemirror/view';
+import { type Diagnostic,forceLinting, linter } from '@codemirror/lint';
+import { type EditorView,ViewPlugin } from '@codemirror/view';
+
 import { DSL_KEYWORDS } from './novelDsl';
 
 export interface TagDiagnostic {

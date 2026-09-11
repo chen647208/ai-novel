@@ -8,11 +8,12 @@
  */
 
 
-import { logger } from '../utils/logger';
-import { type AppState, type Project, type StorageConfig, type ConsistencyCheckConfig, type ConsistencyCheckPromptTemplate } from "../../../shared/types";
-import { AutoBackupService } from "./autoBackupService";
-import { dialogService } from '@/shared/services/dialogService';
 import { i18n } from '@/i18n';
+import { dialogService } from '@/shared/services/dialogService';
+
+import { type AppState, type ConsistencyCheckConfig, type ConsistencyCheckPromptTemplate,type Project, type StorageConfig } from "../../../shared/types";
+import { logger } from '../utils/logger';
+import { AutoBackupService } from "./autoBackupService";
 import { migrateKnowledgeCategories, migrateVirtualChapters } from './storageMigrations';
 
 // 使用Electron API进行文件系统存储

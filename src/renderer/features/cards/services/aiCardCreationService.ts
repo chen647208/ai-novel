@@ -7,34 +7,35 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { logger } from '../../../shared/utils/logger';
+import { uuidv7 } from '@core/entities';
+
+import { i18n } from '@/i18n';
+import { AIService } from '@/shared/services/ai/aiService';
+import { normalizeGenderId, normalizeImpactId, normalizeRoleId } from '@/shared/utils/characterKinds';
+
 import { 
   type AICardCommand, 
   type CardCreationResult, 
-  type CreatedCard,
-  type Project, 
+  type CardPromptTemplate,
   type Character, 
-  type Location, 
+  type CreatedCard,
   type Faction, 
-  type TimelineEvent,
-  type RuleSystem,
-  type RuleLevel,
   type HistoryDate,
   type HistoryEvent,
+  type Location, 
   type MagicSystem,
-  type TechnologyLevel,
-  type WorldHistory,
   type ModelConfig,
-  type CardPromptTemplate
-} from '../../../../shared/types';
-import { type LooseRecord, asRecord, asStr, asNum, asStrArr, asRecords } from '../../../shared/utils/loose';
-import { normalizeGenderId, normalizeImpactId, normalizeRoleId } from '@/shared/utils/characterKinds';
-import { i18n } from '@/i18n';
+  type Project, 
+  type RuleLevel,
+  type RuleSystem,
+  type TechnologyLevel,
+  type TimelineEvent,
+  type WorldHistory} from '../../../../shared/types';
+import { logger } from '../../../shared/utils/logger';
+import { asNum, asRecord, asRecords,asStr, asStrArr, type LooseRecord } from '../../../shared/utils/loose';
 import { AICardCommandService } from './aiCardCommandService';
 import { AICardPromptService } from './aiCardPromptService';
-import { AIService } from '@/shared/services/ai/aiService';
-import { validateAndCompleteCardData, generateFieldReport } from './cardFieldValidator';
-import { uuidv7 } from '@core/entities';
+import { generateFieldReport,validateAndCompleteCardData } from './cardFieldValidator';
 
 /**
  * AI卡片创建服务

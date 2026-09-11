@@ -6,28 +6,29 @@
  * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
-import { logger } from '@/shared/utils/logger';
-import { isModelUsable } from '@/shared/utils/modelReadiness';
+import { Check, CheckCheck, Network, Plus, Settings, Trash2, UserRound, WandSparkles, XCircle } from 'lucide-react';
+import React, { useEffect,useMemo, useState } from 'react';
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { useTranslation, templateDisplayName } from '@/i18n';
-import { type Project, type Character } from '../../../shared/types';
-import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
-import { VIRTUAL_CHAPTER_ORDER, KNOWLEDGE_SNIPPET_TRUNCATE } from '../../../shared/constants/chapters';
+import { type CommitOptions,useProjectStore } from '@/app/stores/projectStore';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
+import { templateDisplayName,useTranslation } from '@/i18n';
 import { AIService } from '@/shared/services/ai/aiService';
-import RelationshipDiagram from './RelationshipDiagram';
-import CompactCharacterCard from './CompactCharacterCard';
-import CharacterModal from './CharacterModal';
-import { parseCharactersFromText } from './services/characterListParsing';
 import { dialogService } from '@/shared/services/dialogService';
-import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { Select } from '@/shared/ui/Select';
-import { Check, CheckCheck, Network, Plus, Settings, Trash2, UserRound, WandSparkles, XCircle } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
+import { cn } from '@/shared/utils/cn';
+import { logger } from '@/shared/utils/logger';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
+
+import { KNOWLEDGE_SNIPPET_TRUNCATE,VIRTUAL_CHAPTER_ORDER } from '../../../shared/constants/chapters';
+import { type Character,type Project } from '../../../shared/types';
+import CharacterModal from './CharacterModal';
+import CompactCharacterCard from './CompactCharacterCard';
+import RelationshipDiagram from './RelationshipDiagram';
+import { parseCharactersFromText } from './services/characterListParsing';
 
 interface StepCharactersProps {
   project: Project;

@@ -7,20 +7,22 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { stepForces } from './graphLayout';
+import { Clock, Globe, ListTree, Map, Network, RefreshCw, Users, X } from 'lucide-react';
+import React, { useCallback,useEffect, useMemo, useRef, useState } from 'react';
+
 import { useTranslation } from '@/i18n';
 import { Button } from '@/shared/ui/Button';
 import { Checkbox } from '@/shared/ui/Checkbox';
 import { Dialog, DialogContent } from '@/shared/ui/Dialog';
 import { cn } from '@/shared/utils/cn';
-import { buildGraphData, NODE_COLORS } from './services/worldGraphData';
-import { Clock, Globe, ListTree, Map, Network, RefreshCw, Users, X } from 'lucide-react';
+
 import {
-  type Character, type Location, type Faction, type Timeline, type TimelineEvent,
-  type RuleSystem, type WorldView, type DiagramType, type GraphLayout,
-  type GraphNode, type GraphData
-} from '../../../shared/types';
+  type Character, type DiagramType, type Faction, type GraphData,
+type GraphLayout,
+  type GraphNode, type Location,   type RuleSystem, type Timeline, type TimelineEvent,
+type WorldView} from '../../../shared/types';
+import { stepForces } from './graphLayout';
+import { buildGraphData, NODE_COLORS } from './services/worldGraphData';
 
 interface WorldViewGraphProps {
   characters: Character[];

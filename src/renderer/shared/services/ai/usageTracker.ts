@@ -3,7 +3,7 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
@@ -13,8 +13,8 @@
  * 按模型聚合 token 与费用（单价来自 ModelConfig.priceInPerM/priceOutPerM，缺省不计费）。
  * 纯函数 summarize/estimateCost 可单测；持久化用 localStorage，不写业务库。
  */
-import type { ModelConfig } from '@shared/types';
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
+import type { ModelConfig } from '@shared/types';
 
 export interface UsageEntry {
   modelId: string;

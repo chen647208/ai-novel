@@ -7,10 +7,11 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { logger } from '../../../shared/utils/logger';
 import { i18n } from '@/i18n';
-import { type VectorDocument, type SearchResult, type SearchOptions, type CollectionStats, type HybridSearchResult, type HybridSearchOptions, type VectorConsistencyResult, type ElectronAPI, type KnowledgeCategory } from '../../../../shared/types';
-import { DEFAULT_SEMANTIC_WEIGHT, DEFAULT_KEYWORD_WEIGHT } from '../../../../shared/constants/chapters';
+
+import { DEFAULT_KEYWORD_WEIGHT,DEFAULT_SEMANTIC_WEIGHT } from '../../../../shared/constants/chapters';
+import { type CollectionStats, type ElectronAPI, type HybridSearchOptions, type HybridSearchResult, type KnowledgeCategory,type SearchOptions, type SearchResult, type VectorConsistencyResult, type VectorDocument } from '../../../../shared/types';
+import { logger } from '../../../shared/utils/logger';
 
 type VectorBridgeAPI = NonNullable<ElectronAPI['vector']>;
 

@@ -7,10 +7,11 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { describe, it, expect } from 'vitest';
-import type { AppState, Project } from '../../../shared/types';
-import { INITIAL_APP_STATE, normalizeImportedState, checkImportVersion } from '../initialState';
+import { describe, expect,it } from 'vitest';
+
 import { APP_STATE_VERSION } from '../../../shared/constants/versions';
+import type { AppState, Project } from '../../../shared/types';
+import { checkImportVersion,INITIAL_APP_STATE, normalizeImportedState } from '../initialState';
 
 const project = (id: string): Project =>
   ({ id, title: `书-${id}`, chapters: [] } as unknown as Project);

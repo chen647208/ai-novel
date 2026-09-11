@@ -13,7 +13,9 @@
  */
 
 import { buildCoverSvg, type CoverOptions } from '@core/build';
+
 import { dt } from '@/i18n';
+
 import type { Project } from '../../../shared/types';
 
 type ElectronAPI = NonNullable<Window['electronAPI']>;

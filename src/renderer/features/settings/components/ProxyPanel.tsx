@@ -7,14 +7,15 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React, { useState } from 'react';
-import { useTranslation } from '@/i18n';
 import { Globe } from 'lucide-react';
+import React, { useState } from 'react';
+
+import { useSettingsStore } from '@/app/stores/settingsStore';
+import { useTranslation } from '@/i18n';
 import { Button } from '@/shared/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/Card';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
-import { useSettingsStore } from '@/app/stores/settingsStore';
 
 type ElectronAPI = NonNullable<Window['electronAPI']>;
 

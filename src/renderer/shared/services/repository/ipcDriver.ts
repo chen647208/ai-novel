@@ -8,7 +8,7 @@
  */
 
 import type { ElectronAPI } from '../../../../shared/types';
-import type { SqlDriver, SqlValue, SqlRunResult } from './types';
+import type { SqlDriver, SqlRunResult,SqlValue } from './types';
 
 type DbBridge = NonNullable<ElectronAPI['db']>;
 

@@ -7,27 +7,29 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import React, { useState, useMemo, useRef } from 'react';
-import { useTranslation, templateDisplayName } from '@/i18n';
-import { type Project, type StreamingAIResponse, type OutputMode } from '../../../shared/types';
-import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
-import { VIRTUAL_CHAPTER_ORDER, KNOWLEDGE_SNIPPET_TRUNCATE } from '../../../shared/constants/chapters';
-import { AIService } from '@/shared/services/ai/aiService';
-import { roleLabel } from '@/shared/utils/displayLabels';
-import { dialogService } from '@/shared/services/dialogService';
-import { cn } from '@/shared/utils/cn';
-import { Badge } from '@/shared/ui/Badge';
-import { Button } from '@/shared/ui/Button';
-import { Spinner } from '@/shared/ui/Spinner';
-import { Card } from '@/shared/ui/Card';
-import { Select } from '@/shared/ui/Select';
-import { Check, CheckCheck, Eye, ListTree, Pause, PenLine, Pencil, Play, Square, Users, XCircle } from 'lucide-react';
-import { MarkdownView } from '@/shared/ui/Markdown';
+import { Check, CheckCheck, Eye, ListTree, Pause, Pencil, PenLine, Play, Square, Users, XCircle } from 'lucide-react';
+import React, { useMemo, useRef,useState } from 'react';
+
+import { type CommitOptions,useProjectStore } from '@/app/stores/projectStore';
+import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
 import { DslEditor } from '@/editor/cm6/DslEditor';
 import { collectProjectTags } from '@/editor/cm6/projectTags';
-import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
-import { isModelUsable } from '@/shared/utils/modelReadiness';
+import { templateDisplayName,useTranslation } from '@/i18n';
+import { AIService } from '@/shared/services/ai/aiService';
+import { dialogService } from '@/shared/services/dialogService';
 import { resolveTheme } from '@/shared/services/themeService';
+import { Badge } from '@/shared/ui/Badge';
+import { Button } from '@/shared/ui/Button';
+import { Card } from '@/shared/ui/Card';
+import { MarkdownView } from '@/shared/ui/Markdown';
+import { Select } from '@/shared/ui/Select';
+import { Spinner } from '@/shared/ui/Spinner';
+import { cn } from '@/shared/utils/cn';
+import { roleLabel } from '@/shared/utils/displayLabels';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
+
+import { KNOWLEDGE_SNIPPET_TRUNCATE,VIRTUAL_CHAPTER_ORDER } from '../../../shared/constants/chapters';
+import { type OutputMode,type Project, type StreamingAIResponse } from '../../../shared/types';
 
 interface StepOutlineProps {
   project: Project;

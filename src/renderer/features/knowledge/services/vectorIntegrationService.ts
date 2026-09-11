@@ -7,20 +7,20 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { logger } from '../../../shared/utils/logger';
 import { i18n } from '@/i18n';
-import { vectorService } from './vectorService';
-import { embeddingProvider } from './embeddingProvider';
+
 import { 
-  type VectorDocument, 
-  type SearchResult, 
-  type SearchOptions, 
   type CollectionStats,
-  type HybridSearchResult,
-  type HybridSearchOptions,
   type ConsistencyCheckResult,
-  type KnowledgeItem
-} from '../../../../shared/types';
+  type HybridSearchOptions,
+  type HybridSearchResult,
+  type KnowledgeItem,
+  type SearchOptions, 
+  type SearchResult, 
+  type VectorDocument} from '../../../../shared/types';
+import { logger } from '../../../shared/utils/logger';
+import { embeddingProvider } from './embeddingProvider';
+import { vectorService } from './vectorService';
 
 /**
  * 向量集成服务
@@ -31,7 +31,7 @@ export class VectorIntegrationService {
   private isInitialized: boolean = false;
 
   constructor() {
-    this.initialize();
+    void this.initialize();
   }
 
   /**

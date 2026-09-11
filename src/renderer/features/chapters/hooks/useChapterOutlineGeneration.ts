@@ -3,7 +3,7 @@
  * Copyright (C) 2026 chen647208
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * 本程序为自由软件：您可依据 GNU Affero 公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
@@ -11,8 +11,16 @@
  * 章节细纲生成（从 StepChapterOutline 抽出）：全量/续写两种模式，
  * 结果按 order 合并（保留既有正文/历史/快照），并写回虚拟章节历史。
  */
-import { useState } from 'react';
 import type { TFunction } from 'i18next';
+import { useState } from 'react';
+
+import { templateDisplayName } from '@/i18n';
+import { AIService } from '@/shared/services/ai/aiService';
+import { dialogService } from '@/shared/services/dialogService';
+import { logger } from '@/shared/utils/logger';
+import { isModelUsable } from '@/shared/utils/modelReadiness';
+
+import { KNOWLEDGE_SNIPPET_TRUNCATE,VIRTUAL_CHAPTER_ORDER } from '../../../../shared/constants/chapters';
 import {
   type Chapter,
   type ModelConfig,
@@ -20,13 +28,7 @@ import {
   type PromptTemplate,
   type TokenUsage,
 } from '../../../../shared/types';
-import { VIRTUAL_CHAPTER_ORDER, KNOWLEDGE_SNIPPET_TRUNCATE } from '../../../../shared/constants/chapters';
-import { AIService } from '@/shared/services/ai/aiService';
-import { dialogService } from '@/shared/services/dialogService';
-import { logger } from '@/shared/utils/logger';
-import { isModelUsable } from '@/shared/utils/modelReadiness';
-import { templateDisplayName } from '@/i18n';
-import { parseChaptersFromAI, buildChapterContextBlock } from '../services/chapterOutline';
+import { buildChapterContextBlock,parseChaptersFromAI } from '../services/chapterOutline';
 
 const EMPTY_TOKENS: TokenUsage = { prompt: 0, completion: 0, total: 0 };
 

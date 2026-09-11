@@ -7,36 +7,38 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { logger } from '../../shared/utils/logger';
-import React, { useState, useEffect, useRef } from 'react';
-import { useTranslation } from '@/i18n';
-import { type Project, type KnowledgeItem, type KnowledgeCategory, type HybridSearchResult, type DiagramType, type ModelConfig, type EmbeddingModelConfig, type ConsistencyCheckPromptTemplate, type ConsistencyCheckConfig } from '../../../shared/types';
-import { vectorIntegrationService } from './services/vectorIntegrationService';
-import { searchKnowledge } from './services/knowledgeSearch';
-import { useKnowledgeIndex } from './hooks/useKnowledgeIndex';
-import { KnowledgeDetailPanel } from './components/KnowledgeDetailPanel';
-import { KnowledgeListPanel } from './components/KnowledgeListPanel';
-import { repository } from '../../shared/services/repository';
-import { useProjectStore, type CommitOptions } from '@/app/stores/projectStore';
+import { Bot, Brain, Clock, Flag, Globe, MapPinned, Search, Settings2, X } from 'lucide-react';
+import React, { useEffect, useRef,useState } from 'react';
+
+import { type CommitOptions,useProjectStore } from '@/app/stores/projectStore';
 import { useUsableModel } from '@/app/stores/settingsStore';
-import { embeddingModelService } from '../settings/services/embeddingModelService';
-import LocationEditor from '../world/LocationEditor';
-import FactionEditor from '../world/FactionEditor';
-import TimelineEditor from '../timeline/TimelineEditor';
-import RuleSystemEditor from '../world/RuleSystemEditor';
-import WorldViewGraph from '../world/WorldViewGraph';
-import ConsistencyChecker from '../consistency/ConsistencyChecker';
-import SmartRecommender from '../assistant/SmartRecommender';
-import EnhancedTimeline from '../timeline/EnhancedTimeline';
-import KnowledgeFeaturePanels from './components/KnowledgeFeaturePanels';
+import { useTranslation } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
-import { cn } from '@/shared/utils/cn';
-import { formatPercent } from '@/shared/utils/format';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { Input } from '@/shared/ui/Input';
-import { Bot, Brain, Clock, Flag, Globe, MapPinned, Search, Settings2, X } from 'lucide-react';
 import { Spinner } from '@/shared/ui/Spinner';
+import { cn } from '@/shared/utils/cn';
+import { formatPercent } from '@/shared/utils/format';
+
+import { type ConsistencyCheckConfig,type ConsistencyCheckPromptTemplate, type DiagramType, type EmbeddingModelConfig, type HybridSearchResult, type KnowledgeCategory, type KnowledgeItem, type ModelConfig, type Project } from '../../../shared/types';
+import { repository } from '../../shared/services/repository';
+import { logger } from '../../shared/utils/logger';
+import SmartRecommender from '../assistant/SmartRecommender';
+import ConsistencyChecker from '../consistency/ConsistencyChecker';
+import { embeddingModelService } from '../settings/services/embeddingModelService';
+import EnhancedTimeline from '../timeline/EnhancedTimeline';
+import TimelineEditor from '../timeline/TimelineEditor';
+import FactionEditor from '../world/FactionEditor';
+import LocationEditor from '../world/LocationEditor';
+import RuleSystemEditor from '../world/RuleSystemEditor';
+import WorldViewGraph from '../world/WorldViewGraph';
+import { KnowledgeDetailPanel } from './components/KnowledgeDetailPanel';
+import KnowledgeFeaturePanels from './components/KnowledgeFeaturePanels';
+import { KnowledgeListPanel } from './components/KnowledgeListPanel';
+import { useKnowledgeIndex } from './hooks/useKnowledgeIndex';
+import { searchKnowledge } from './services/knowledgeSearch';
+import { vectorIntegrationService } from './services/vectorIntegrationService';
 
 interface StepKnowledgeEnhancedProps {
   project: Project;
@@ -167,7 +169,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
       }
     };
     
-    loadConfigs();
+    void loadConfigs();
   }, []);
 
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -229,7 +231,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
     
     if (query.trim()) {
       searchTimeoutRef.current = setTimeout(() => {
-        handleSemanticSearch(query);
+        void handleSemanticSearch(query);
       }, 500);
     } else {
       setSearchResults([]);
@@ -351,7 +353,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !isSearching && searchQuery.trim()) handleSemanticSearch(searchQuery);
+                  if (e.key === 'Enter' && !isSearching && searchQuery.trim()) void handleSemanticSearch(searchQuery);
                 }}
                 placeholder={t('center.searchPlaceholder')}
                 className="pr-28"
