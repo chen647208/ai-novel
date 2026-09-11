@@ -13,6 +13,7 @@ import type { AppTheme, ModelConfig, Project } from '../../../shared/types';
 import { resolveTheme } from '@/shared/services/themeService';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
 import { Button } from '@/shared/ui/Button';
+import { IconButton } from '@/shared/ui/IconButton';
 import { Input } from '@/shared/ui/Input';
 import { WORKSPACE_SECTIONS, type SectionId } from '../sections';
 import { suggestNextSection } from '../guidedFlow';
@@ -183,40 +184,36 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
       {/* 右侧工具区 */}
       <div className="flex shrink-0 items-center gap-2">
         {onToggleAssistant && (
-          <Button
-            variant="ghost"
-            size="icon"
+          <IconButton
+            tone="muted"
+            active={assistantOpen}
+            label={t('app:topbar.toggleAssistantTip')}
             onClick={onToggleAssistant}
-            title={t('app:topbar.toggleAssistantTip')}
-            aria-pressed={assistantOpen}
-            className={assistantOpen ? 'text-primary' : undefined}
           >
             <PanelRight className="size-4" />
-          </Button>
+          </IconButton>
         )}
         <SyncDialog project={project} />
         <ProtectedSessionDialog />
 
-        <Button
-          variant="ghost"
-          size="icon"
+        <IconButton
+          tone="muted"
+          label={isDark ? t('app:topbar.themeToLight') : t('app:topbar.themeToDark')}
           onClick={() => onThemeChange(isDark ? 'light' : 'dark')}
-          title={isDark ? t('app:topbar.themeToLight') : t('app:topbar.themeToDark')}
         >
           {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
-        </Button>
+        </IconButton>
 
         <div className="flex items-center gap-1">
           <Slot id="topbar.actions" />
-          <Button
-            variant="ghost"
-            size="icon"
+          <IconButton
+            tone="muted"
             className="size-6"
+            label={t('app:topbar.checkUpdateTip')}
             onClick={onOpenVersionCheck}
-            title={t('app:topbar.checkUpdateTip')}
           >
             <RefreshCw className="size-3.5" />
-          </Button>
+          </IconButton>
         </div>
 
         {hasHistory && (

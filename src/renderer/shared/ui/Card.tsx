@@ -10,11 +10,23 @@
 import * as React from 'react';
 import { cn } from '../utils/cn';
 
-export const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** 可点击卡片：悬停反馈 + 键盘可达。 */
+  interactive?: boolean;
+  /** 选中态描边。 */
+  selected?: boolean;
+}
+
+export const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, interactive, selected, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('rounded-lg border bg-card text-card-foreground shadow-sm', className)}
+      className={cn(
+        'rounded-lg border bg-card text-card-foreground shadow-sm',
+        interactive && 'cursor-pointer transition-colors hover:border-primary/40 hover:bg-accent/40',
+        selected && 'border-primary ring-1 ring-primary/40',
+        className,
+      )}
       {...props}
     />
   )

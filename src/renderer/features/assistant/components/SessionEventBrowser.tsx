@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
-import { Spinner } from '@/shared/ui/Spinner';
+import { LoadingState } from '@/shared/ui/LoadingState';
 import type { AiEvent } from '@core/ai';
 import { listSessionArchives, summarizeSessionUsage, type SessionArchiveEntry } from '../services/sessionArchive';
 
@@ -90,11 +90,7 @@ const SessionEventBrowser: React.FC<{ bookId: string }> = ({ bookId }) => {
   }, [bookId]);
 
   if (sessions === null) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Spinner />
-      </div>
-    );
+    return <LoadingState className="py-16" />;
   }
 
   if (!sessions.length) {

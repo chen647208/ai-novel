@@ -15,6 +15,7 @@ import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
 import { Input } from '@/shared/ui/Input';
 import { Select } from '@/shared/ui/Select';
+import { Switch } from '@/shared/ui/Switch';
 import { cn } from '@/shared/utils/cn';
 import { AlertCircle, CheckCircle2, Cloud, Eye, EyeOff, FlaskConical, Home, Key, List, SlidersHorizontal, Trash2 } from 'lucide-react';
 
@@ -252,11 +253,12 @@ export const EmbeddingEditor: React.FC<EmbeddingEditorProps> = ({
               </Select>
             </div>
             <div className="flex items-center">
-              <label className="relative inline-flex cursor-pointer items-center">
-                <input type="checkbox" className="peer sr-only" checked={config.normalizeEmbeddings} onChange={(e) => onUpdate({ normalizeEmbeddings: e.target.checked })} />
-                <span className="h-6 w-11 rounded-full bg-muted transition-colors after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:bg-background after:shadow after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-5" />
-                <span className="ml-3 text-sm text-foreground">{t('embedding.normalizeLabel')}</span>
-              </label>
+              <Switch
+                checked={config.normalizeEmbeddings}
+                onCheckedChange={(checked) => onUpdate({ normalizeEmbeddings: checked })}
+                aria-label={t('embedding.normalizeLabel')}
+              />
+              <span className="ml-3 text-sm text-foreground">{t('embedding.normalizeLabel')}</span>
             </div>
           </div>
         )}

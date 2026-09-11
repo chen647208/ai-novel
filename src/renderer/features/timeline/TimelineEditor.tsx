@@ -13,6 +13,7 @@ import { type Timeline, type TimelineEvent, type HistoryDate, type Character, ty
 import { dialogService } from '@/shared/services/dialogService';
 import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/ui/Button';
+import { Checkbox } from '@/shared/ui/Checkbox';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { Select } from '@/shared/ui/Select';
@@ -56,11 +57,10 @@ function RelatedToggleGrid({
               checked ? 'border-primary/40 bg-primary/5' : 'border-transparent bg-muted/30 hover:bg-muted'
             )}
           >
-            <input
-              type="checkbox"
+            <Checkbox
               checked={checked}
               onChange={() => onToggle(item.id)}
-              className="size-3.5 accent-primary"
+              className="size-3.5"
             />
             <span className="truncate text-xs">{item.name}</span>
           </label>

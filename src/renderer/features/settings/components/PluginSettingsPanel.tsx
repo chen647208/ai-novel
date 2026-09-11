@@ -14,6 +14,7 @@ import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
+import { LoadingState } from '@/shared/ui/LoadingState';
 import { pluginHostPromise, saveDisabledList } from '@/features/assistant/services/aiRuntime';
 import { PROFILE_CHANGED_EVENT, RELEASE_PROFILES, DEFAULT_RELEASE_PROFILE, assemblyTree, profileByName, type AssemblyRow, type PluginStatus } from '@core/plugin';
 import { builtinRegistry } from '@core/types-registry';
@@ -72,11 +73,7 @@ const PluginSettingsPanel: React.FC = () => {
   };
 
   if (statuses === null) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Spinner />
-      </div>
-    );
+    return <LoadingState className="py-16" />;
   }
 
   const failed = statuses.filter((s) => s.state === 'failed').length;

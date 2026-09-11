@@ -18,6 +18,7 @@ import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';
 import { Spinner } from '@/shared/ui/Spinner';
 import { Dialog, DialogContent } from '@/shared/ui/Dialog';
+import { Switch } from '@/shared/ui/Switch';
 import { cn } from '@/shared/utils/cn';
 import { AlertCircle, AlertTriangle, CheckCircle2, ExternalLink, RefreshCw, Rocket, Tag } from 'lucide-react';
 
@@ -209,16 +210,11 @@ const VersionCheckModal: React.FC<VersionCheckModalProps> = ({ isOpen, onClose }
                   <div className="mt-0.5 text-xs text-muted-foreground">{t('modal.autoCheckDesc')}</div>
                 </div>
                 <div className="flex shrink-0 items-center gap-4">
-                  <label className="relative inline-flex cursor-pointer items-center">
-                    <span className="sr-only">{t('modal.autoCheck')}</span>
-                    <input
-                      type="checkbox"
-                      className="peer sr-only"
-                      checked={autoCheckEnabled}
-                      onChange={(e) => handleToggleAutoCheck(e.target.checked)}
-                    />
-                    <span className="h-6 w-11 rounded-full bg-muted transition-colors after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:bg-background after:shadow after:transition-all peer-checked:bg-primary peer-checked:after:translate-x-5" />
-                  </label>
+                  <Switch
+                    checked={autoCheckEnabled}
+                    onCheckedChange={handleToggleAutoCheck}
+                    aria-label={t('modal.autoCheck')}
+                  />
                   <Button size="sm" onClick={handleCheckForUpdates} disabled={isChecking}>
                     {isChecking ? <Spinner className="size-3.5" /> : <RefreshCw className="size-3.5" />}
                     {isChecking ? t('modal.checking') : t('modal.checkNow')}
