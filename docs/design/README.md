@@ -20,6 +20,7 @@
 13. **[20 外部对标](20-external-benchmark.md)** — 16 个项目逐项剖析、分类结论与来源汇总
 14. **[21 插件沙箱](21-plugin-sandbox.md)** — 隔离层级、候选方案（WASM/QuickJS/V8 isolates）与推荐架构
 15. **[22 插件逻辑贡献协议](22-plugin-logic-contributions.md)** — editor 扩展与逻辑 hooks 的执行通道、协议与验收
+16. **[23 数据层存储选型](23-data-layer-storage.md)** — 文件/数据库/日志的边界与按类分层设计
 13. **[20 外部项目基准](20-external-benchmark.md)** — Trending 榜单 16 个项目的逐项剖析与分类判定（完整上位替代 / 局部更优），附来源地址与许可证红线
 
 ## 一页纸总览
