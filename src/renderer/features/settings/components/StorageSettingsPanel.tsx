@@ -177,7 +177,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    void repository.checkIntegrity?.().then((r) => {
+                    void repository.fullIntegrityCheck?.().then((r) => {
                       if (!r) { dialogService.alert(t('storage.integrityUnsupported')); return; }
                       dialogService.alert(r.ok ? t('storage.integrityOk') : t('storage.integrityFailed', { result: r.result }));
                     }).catch(() => dialogService.alert(t('storage.integrityFailed', { result: '' })));

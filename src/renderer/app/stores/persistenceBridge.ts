@@ -115,6 +115,10 @@ async function maybeAutoBackup(): Promise<void> {
   const config = await repository.getStorageConfig();
   if (!config.autoBackupEnabled || !autoBackupService.shouldPerformBackup(config)) return;
   const backedUp = await autoBackupService.performBackup(config, () => composeAppState());
+  // 数据库一致副本（VACUUM INTO）：与 JSON 快照互补，含 WAL 中未 checkpoint 的数据。
+  await repository.hotBackup?.().catch((error) => {
+    logger.warn('数据库热备份失败:', error);
+  });
   if (backedUp) {
     await repository.updateStorageConfig({ ...config, lastAutoBackup: Date.now() });
   }

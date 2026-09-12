@@ -73,13 +73,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
     checkConsistency: (projectId: string) => ipcRenderer.invoke(IPC.vector.checkConsistency, projectId),
   },
 
-  // SQLite 数据引擎（主进程托管 node:sqlite）
+  // SQLite 数据引擎（主进程托管 better-sqlite3）
   db: {
     exec: (sql: string) => ipcRenderer.invoke(IPC.db.exec, sql),
     run: (sql: string, params?: unknown[]) => ipcRenderer.invoke(IPC.db.run, sql, params),
     all: (sql: string, params?: unknown[]) => ipcRenderer.invoke(IPC.db.all, sql, params),
     get: (sql: string, params?: unknown[]) => ipcRenderer.invoke(IPC.db.get, sql, params),
     integrityCheck: () => ipcRenderer.invoke(IPC.db.integrityCheck),
+    fullIntegrityCheck: () => ipcRenderer.invoke(IPC.db.fullIntegrityCheck),
+    hotBackup: () => ipcRenderer.invoke(IPC.db.hotBackup),
     maintenance: () => ipcRenderer.invoke(IPC.db.maintenance),
   },
 

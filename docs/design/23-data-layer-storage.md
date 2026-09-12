@@ -87,7 +87,7 @@
 | ArangoDB | graph + document + KV + vector + search | 服务为主（本地可跑） | 非进程内嵌入 | 需核实（社区版与企业版分离） | 服务形态与本项目本地优先冲突 |
 | OrientDB | document + graph + KV + object | 服务（JVM） | JVM 进程 | Apache-2.0（社区版） | 不可嵌入 Node，拒绝 |
 | Kùzu | property graph（Cypher）+ vector | 嵌入式 | Node/WASM | MIT | 上游 2025-10 归档（公司被收购），仅社区 fork |
-| SQLite（现状） | relational + JSON1 + FTS5 | 嵌入式 | `node:sqlite` / WASM | Public Domain | 已有；图靠边表 + 递归 CTE，向量靠 vectra/扩展 |
+| SQLite（现状） | relational + JSON1 + FTS5 | 嵌入式 | `better-sqlite3` / WASM | Public Domain | 已有；图靠边表 + 递归 CTE，向量靠 vectra/扩展 |
 
 结论：
 

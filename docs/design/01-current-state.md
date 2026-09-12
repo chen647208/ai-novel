@@ -14,7 +14,7 @@
 | 编辑器 | **裸 `<textarea>`**（WritingEditorCanvas），外层 1174 行编排组件 + 工具栏/侧栏/覆盖层 | `src/renderer/features/writing/` |
 | AI | AIService 静态门面 + 5 适配器（openai-chat/responses/anthropic/gemini/ollama）+ sse/retry/json/messages | `src/renderer/shared/services/ai/` |
 | 向量 | vectra + 本地/API embedding 双路；`vector:*` IPC 走主进程 | knowledge/settings services |
-| 存储 | **三后端 StorageRepository**：Electron→node:sqlite(IPC)、浏览器→sqlite-wasm(OPFS)、兜底→JSON(localStorage)；schema v1 = 文档行 + FTS5 trigram；版本化 MIGRATIONS；AutoBackupService | `src/renderer/shared/services/repository/` |
+| 存储 | **三后端 StorageRepository**：Electron→better-sqlite3(IPC)、浏览器→sqlite-wasm(OPFS)、兜底→JSON(localStorage)；schema v1 = 文档行 + FTS5 trigram；版本化 MIGRATIONS；AutoBackupService | `src/renderer/shared/services/repository/` |
 
 ## 2. 数据模型事实
 

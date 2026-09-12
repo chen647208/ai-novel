@@ -56,7 +56,7 @@ interface EntityRow {
 }
 
 /**
- * SQLite 后端 —— 只依赖 SqlDriver 抽象，桌面(node:sqlite)与网页(wa-sqlite)共用。
+ * SQLite 后端 —— 只依赖 SqlDriver 抽象，桌面(better-sqlite3)与网页(wa-sqlite)共用。
  *
  * v2 数据模型：六实体表（nodes/edges/attrs）为存储真相，Project 文档模型经投影桥双向映射；
  * 每次 saveProject 在单事务内做“书级替换 + 哈希差分”，仅真实变化的实体写入 entity_changes，
@@ -295,6 +295,20 @@ export class SqliteRepository implements StorageRepository {
     await this.ready;
     if (!this.driver.integrityCheck) return null;
     return this.driver.integrityCheck();
+  }
+
+  /** 深度完整性检查（逐页校验）；后端不支持时返回 null。 */
+  async fullIntegrityCheck(): Promise<{ ok: boolean; result: string } | null> {
+    await this.ready;
+    if (!this.driver.fullIntegrityCheck) return null;
+    return this.driver.fullIntegrityCheck();
+  }
+
+  /** 热备份数据库一致副本；后端不支持时返回 null。 */
+  async hotBackup(): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string } | null> {
+    await this.ready;
+    if (!this.driver.hotBackup) return null;
+    return this.driver.hotBackup();
   }
 
   /** 压缩 + 重建索引；后端不支持时静默跳过。 */

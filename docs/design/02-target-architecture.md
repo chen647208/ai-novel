@@ -7,7 +7,7 @@
 ```
 ┌─ Electron 主进程 ────────────────────────────────────────────┐
 │ AppServiceContainer（Provider 容器，boot/shutdown 生命周期）    │
-│  LogProvider · ConfigProvider · DbProvider(node:sqlite)       │
+│  LogProvider · ConfigProvider · DbProvider(better-sqlite3)    │
 │  FsProvider · DialogProvider · BackupProvider · VectorProvider │
 │  StoreProvider（实体读写唯一入口，封装 repository v2）           │
 │  IndexProvider（引用索引器宿主）                                │

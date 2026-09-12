@@ -17,7 +17,7 @@ import { WasmSqliteDriver } from './wasmDriver';
  * 应用数据的唯一入口：统一经 `import { repository }` 访问。
  *
  * 按运行环境探测选择：
- *   - 桌面(Electron，有 electronAPI.db) → SQLite(IpcSqlDriver → 主进程 node:sqlite)
+ *   - 桌面(Electron，有 electronAPI.db) → SQLite(IpcSqlDriver → 主进程 better-sqlite3)
  *   - 安全上下文的浏览器(有 OPFS)        → SQLite(WasmSqliteDriver → worker + 官方 sqlite-wasm + OPFS)
  *   - 其余(非安全上下文/无 OPFS 的过渡)  → jsonRepository(localStorage)
  */

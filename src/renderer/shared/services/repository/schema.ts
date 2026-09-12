@@ -10,7 +10,7 @@
 import type { SqlDriver } from './types';
 
 /**
- * 数据库 schema 与迁移（v2 六实体）。桌面(node:sqlite)与网页(@sqlite.org/sqlite-wasm)共用，
+ * 数据库 schema 与迁移（v2 六实体）。桌面(better-sqlite3)与网页(@sqlite.org/sqlite-wasm)共用，
  * 只写标准 SQLite DDL，不含环境相关代码。
  *
  * v1→v2 换代（用户确认无生产数据，直接替换）：

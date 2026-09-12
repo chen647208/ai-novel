@@ -4,7 +4,7 @@
 收录运行期依赖（package-lock.json 中排除 dev/link）的许可证声明；
 各依赖的完整许可证文本随发行包内 `node_modules` 一并分发。
 
-共 389 个运行期依赖。
+共 391 个运行期依赖。
 
 | 依赖 | 版本 | 许可证 |
 | --- | --- | --- |
@@ -129,6 +129,7 @@
 | bail | 2.0.2 | MIT |
 | balanced-match | 1.0.2 | MIT |
 | base64-js | 1.5.1 | MIT |
+| better-sqlite3 | 13.0.3 | MIT |
 | bignumber.js | 9.3.1 | MIT |
 | boolbase | 1.0.0 | ISC |
 | brace-expansion | 2.1.4 | MIT |
@@ -276,6 +277,7 @@
 | minimatch | 9.0.9 | ISC |
 | minipass | 7.1.3 | BlueOak-1.0.0 |
 | ms | 2.1.3 | MIT |
+| node-addon-api | 8.9.2 | MIT |
 | node-domexception | 1.0.0 | MIT |
 | node-fetch | 3.3.2 | MIT |
 | nth-check | 2.1.1 | BSD-2-Clause |

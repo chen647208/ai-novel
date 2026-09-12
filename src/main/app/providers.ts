@@ -266,7 +266,7 @@ export const vectorProvider: Provider = {
   },
 };
 
-/** SQLite 数据引擎 Provider：node:sqlite 连接，退出时关闭。 */
+/** SQLite 数据引擎 Provider：better-sqlite3 连接，退出时关闭。 */
 export const sqliteProvider: Provider = {
   name: 'sqlite',
   boot() {

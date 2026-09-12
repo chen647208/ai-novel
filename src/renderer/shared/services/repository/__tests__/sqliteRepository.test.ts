@@ -7,10 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { DatabaseSync } from 'node:sqlite';
-
 import { indexService } from '@core/index';
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
+import Database from 'better-sqlite3';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { APP_STATE_VERSION } from '../../../../../shared/constants/versions';
@@ -23,7 +22,7 @@ import { runWasmRequest } from '../wasmSql';
 
 /**
  * 同一套 SqliteRepository 逻辑，分别用两种真实 SQLite 引擎驱动：
- *   - node:sqlite（桌面主进程所用）
+ *   - better-sqlite3（桌面主进程所用）
  *   - @sqlite.org/sqlite-wasm（网页 OPFS worker 所用）
  * 两端共用 schema/迁移/增量写/FTS5(trigram) 检索，这里即其正确性来源。
  */
@@ -39,9 +38,9 @@ interface DriverFixture {
 }
 
 const nodeSqliteFixture: DriverFixture = {
-  name: 'node:sqlite',
+  name: 'better-sqlite3',
   async create() {
-    const db = new DatabaseSync(':memory:');
+    const db = new Database(':memory:');
     const driver: SqlDriver = {
       exec: async (sql) => { db.exec(sql); },
       run: async (sql, params = []) => {

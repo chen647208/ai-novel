@@ -17,7 +17,7 @@ import type { SqlRunResult,SqlValue } from './types';
  * 这段逻辑被两处复用：
  *   1) 浏览器 OPFS worker（WasmSqliteDriver 经 postMessage 转发到这里执行）；
  *   2) Node 测试驱动（用 :memory: 库直接跑同一套 SqliteRepository 测试）。
- * 因此网页 SQL 语义与桌面 node:sqlite 的一致性在此锁定，无需浏览器即可回归。
+ * 因此网页 SQL 语义与桌面 better-sqlite3 的一致性在此锁定，无需浏览器即可回归。
  *
  * 约定：值一律走 bind 参数，绝不拼接进 SQL 文本。exec 支持多语句；
  * run/all/get 均为单语句（repository 保证），故可安全携带 bind。

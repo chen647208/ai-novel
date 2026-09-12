@@ -26,7 +26,7 @@ export interface CommitOptions {
 }
 
 /**
- * SQL 驱动抽象 —— repository 逻辑只依赖这一层，桌面(node:sqlite via IPC)
+ * SQL 驱动抽象 —— repository 逻辑只依赖这一层，桌面(better-sqlite3 via IPC)
  * 与网页(wa-sqlite via OPFS)各实现一份，schema 与查询语句两端共用。
  *
  * 约定：所有语句的值一律走 params 绑定，调用方不得拼接用户输入进 SQL 文本。
@@ -49,8 +49,12 @@ export interface SqlDriver {
   get<T = Record<string, SqlValue>>(sql: string, params?: SqlValue[]): Promise<T | undefined>;
   /** 事务：回调内的所有写操作原子提交，抛错则回滚 */
   transaction<T>(fn: (tx: SqlDriver) => Promise<T>): Promise<T>;
-  /** 快速完整性检查（桌面 node:sqlite 支持；无此能力的后端可省略） */
+  /** 快速完整性检查（桌面 better-sqlite3 支持；无此能力的后端可省略） */
   integrityCheck?(): Promise<{ ok: boolean; result: string }>;
+  /** 深度完整性检查（逐页校验，维护用） */
+  fullIntegrityCheck?(): Promise<{ ok: boolean; result: string }>;
+  /** 热备份（VACUUM INTO 一致副本，桌面 better-sqlite3 支持） */
+  hotBackup?(): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string }>;
   /** 维护：压缩 + 重建索引 */
   maintenance?(): Promise<void>;
   /** 关闭连接 */
@@ -104,6 +108,10 @@ export interface StorageRepository {
 
   /** 快速完整性检查；后端不提供时返回 null。 */
   checkIntegrity?(): Promise<{ ok: boolean; result: string } | null>;
+  /** 深度完整性检查（逐页校验）；后端不提供时返回 null。 */
+  fullIntegrityCheck?(): Promise<{ ok: boolean; result: string } | null>;
+  /** 热备份：生成数据库一致副本（桌面 better-sqlite3 支持） */
+  hotBackup?(): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string } | null>;
   /** 压缩 + 重建索引。 */
   runMaintenance?(): Promise<void>;
 

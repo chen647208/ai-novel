@@ -23,7 +23,8 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { DatabaseSync } from 'node:sqlite';
+
+import Database from 'better-sqlite3';
 
 import { uuidv7 } from '../../core/entities/uuid.js';
 import {
@@ -55,14 +56,14 @@ function dbPath(): string {
   return path.join(dataDir(), DB_FILE_NAME);
 }
 
-let db: DatabaseSync | null = null;
+let db: Database.Database | null = null;
 
-function getDb(): DatabaseSync {
+function getDb(): Database.Database {
   if (!db) {
     if (!fs.existsSync(dbPath())) {
       throw new Error(`数据库不存在：${dbPath()}`);
     }
-    db = new DatabaseSync(dbPath());
+    db = new Database(dbPath());
   }
   return db;
 }

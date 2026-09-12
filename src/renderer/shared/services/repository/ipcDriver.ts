@@ -13,7 +13,7 @@ import type { SqlDriver, SqlRunResult,SqlValue } from './types';
 type DbBridge = NonNullable<ElectronAPI['db']>;
 
 /**
- * 桌面 SqlDriver —— 把 SQL 操作经 electronAPI.db 转发到主进程的 node:sqlite。
+ * 桌面 SqlDriver —— 把 SQL 操作经 electronAPI.db 转发到主进程的 better-sqlite3。
  *
  * 序列化：单连接、单渲染线程。顶层操作(all/get/run/exec)通过 promise 链互斥串行；
  * transaction 在整个 BEGIN…COMMIT 期间持有该锁，并把一个“直连、不再排队”的子驱动交给回调，
@@ -85,6 +85,14 @@ export class IpcSqlDriver implements SqlDriver {
 
   integrityCheck(): Promise<{ ok: boolean; result: string }> {
     return this.enqueue(() => this.api.integrityCheck());
+  }
+
+  fullIntegrityCheck(): Promise<{ ok: boolean; result: string }> {
+    return this.enqueue(() => this.api.fullIntegrityCheck());
+  }
+
+  hotBackup(): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string }> {
+    return this.enqueue(() => this.api.hotBackup());
   }
 
   maintenance(): Promise<void> {

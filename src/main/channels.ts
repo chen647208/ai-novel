@@ -48,13 +48,15 @@ export const IPC = {
     checkConsistency: 'vector:check-consistency',
   },
 
-  // SQLite 数据引擎（主进程托管 node:sqlite，渲染层经类型化 IPC 调用）
+  // SQLite 数据引擎（主进程托管 better-sqlite3，渲染层经类型化 IPC 调用）
   db: {
     exec: 'db:exec',
     run: 'db:run',
     all: 'db:all',
     get: 'db:get',
     integrityCheck: 'db:integrity-check',
+    fullIntegrityCheck: 'db:full-integrity-check',
+    hotBackup: 'db:hot-backup',
     maintenance: 'db:maintenance',
   },
 
