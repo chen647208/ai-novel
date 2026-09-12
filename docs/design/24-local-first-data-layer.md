@@ -86,7 +86,7 @@
 - **可重建**：删掉 SQLite 与索引，能从 JSONL 日志 + 正文文件重建等价状态；
   投影重建是纯函数且幂等（对齐 projectmem/engram/gitmem/ActiveGraph 的做法）。
 - **不引入**：CRDT/协作同步、分布式、多模型引擎、服务型数据库、需自编译的原生引擎。
-- **许可**：新增依赖必须 Public Domain / MIT / Apache-2.0；copyleft 只借设计。
+- **许可**：依赖必须 Public Domain / MIT / Apache-2.0；copyleft 只借设计。
 
 ## 5. 分期与验收
 
