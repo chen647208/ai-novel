@@ -441,38 +441,55 @@ export class SqliteRepository implements StorageRepository {
     const changes: EntityChange[] = [];
     const revisions: RevisionEntity[] = [];
 
-    // 清空旧行
-    await tx.run(`DELETE FROM attrs WHERE node_id IN (SELECT id FROM nodes WHERE book_id = ?)`, [bookId]);
-    await tx.run(`DELETE FROM edges WHERE book_id = ?`, [bookId]);
-    await tx.run(`DELETE FROM nodes WHERE book_id = ?`, [bookId]);
-    await tx.run(`DELETE FROM nodes_fts WHERE book_id = ?`, [bookId]);
+    // 计算新实体哈希（差分基线）
+    const newNodeHash = new Map<string, string>();
+    for (const node of entities.nodes) newNodeHash.set(node.id, await hashEntity('nodes', node));
+    const newEdgeHash = new Map<string, string>();
+    for (const edge of entities.edges) newEdgeHash.set(edge.id, await hashEntity('edges', edge));
+    const newAttrHash = new Map<string, string>();
+    for (const attr of entities.attrs) newAttrHash.set(attr.id, await hashEntity('attrs', attr));
 
-    // 插入 + 差分
+    // 消失的旧实体：删除行 + 删除 FTS 投影 + 擦除变更
+    for (const r of oldNodes) {
+      if (newNodeHash.has(r.id)) continue;
+      await tx.run(`DELETE FROM nodes WHERE id = ?`, [r.id]);
+      await tx.run(`DELETE FROM nodes_fts WHERE node_id = ?`, [r.id]);
+      changes.push({ entityName: 'nodes', entityId: r.id, hash: '', isErased: true, instanceId, agentId, utcDateChanged: now });
+    }
+    for (const r of oldEdges) {
+      if (newEdgeHash.has(r.id)) continue;
+      await tx.run(`DELETE FROM edges WHERE id = ?`, [r.id]);
+      changes.push({ entityName: 'edges', entityId: r.id, hash: '', isErased: true, instanceId, agentId, utcDateChanged: now });
+    }
+    for (const r of oldAttrs) {
+      if (newAttrHash.has(r.id)) continue;
+      await tx.run(`DELETE FROM attrs WHERE id = ?`, [r.id]);
+      changes.push({ entityName: 'attrs', entityId: r.id, hash: '', isErased: true, instanceId, agentId, utcDateChanged: now });
+    }
+
+    // 新增/变更实体：upsert（哈希未变的实体完全不写）
     for (const node of entities.nodes) {
-      const hash = await hashEntity('nodes', node);
+      const hash = newNodeHash.get(node.id) as string;
+      if (oldHash.get(`nodes:${node.id}`) === hash) {
+        // 书节点内容未变也要刷新 updated_at：Project.lastModified 由它承载（书架排序）。
+        if (node.type === 'novel.book') {
+          await tx.run(`UPDATE nodes SET updated_at = ? WHERE id = ?`, [node.updatedAt, node.id]);
+        }
+        continue;
+      }
       await tx.run(
         `INSERT INTO nodes(id, book_id, type, title, body, path, created_at, updated_at, erased, hash)
-         VALUES(?,?,?,?,?,?,?,?,?,?)`,
+         VALUES(?,?,?,?,?,?,?,?,?,?)
+         ON CONFLICT(id) DO UPDATE SET
+           book_id=excluded.book_id, type=excluded.type, title=excluded.title, body=excluded.body,
+           path=excluded.path, created_at=excluded.created_at, updated_at=excluded.updated_at,
+           erased=excluded.erased, hash=excluded.hash`,
         [node.id, node.bookId, node.type, node.title, node.body, node.path ?? null, node.createdAt, node.updatedAt, node.erased ? 1 : 0, hash]
       );
-      if (oldHash.get(`nodes:${node.id}`) !== hash) {
-        changes.push({ entityName: 'nodes', entityId: node.id, hash, isErased: false, instanceId, agentId, utcDateChanged: now });
-      }
-      // 正文实质变化（新建含正文 / 编辑）→ 追加修订（单一事务管线：AI 必留底）
-      const prevBody = oldBody.get(node.id);
-      if (node.body && node.body !== prevBody) {
-        revisions.push({
-          id: uuidv7(),
-          nodeId: node.id,
-          seq: (maxSeq.get(node.id) ?? 0) + 1,
-          body: node.body,
-          author: agentId,
-          cause: cause ?? undefined,
-          createdAt: now,
-        });
-      }
-      const scope = scopeOf(node.type);
-      if (scope) {
+      changes.push({ entityName: 'nodes', entityId: node.id, hash, isErased: false, instanceId, agentId, utcDateChanged: now });
+      // FTS 投影随标题/正文变更刷新（先删后插，兼容不可检索类型）
+      await tx.run(`DELETE FROM nodes_fts WHERE node_id = ?`, [node.id]);
+      if (scopeOf(node.type)) {
         await tx.run(
           `INSERT INTO nodes_fts(book_id, node_id, type, title, content) VALUES(?,?,?,?,?)`,
           [bookId, node.id, node.type, node.title, node.body]
@@ -480,38 +497,45 @@ export class SqliteRepository implements StorageRepository {
       }
     }
     for (const edge of entities.edges) {
-      const hash = await hashEntity('edges', edge);
+      const hash = newEdgeHash.get(edge.id) as string;
+      if (oldHash.get(`edges:${edge.id}`) === hash) continue;
       await tx.run(
         `INSERT INTO edges(id, from_id, to_id, kind, role, position, book_id, erased, hash)
-         VALUES(?,?,?,?,?,?,?,?,?)`,
+         VALUES(?,?,?,?,?,?,?,?,?)
+         ON CONFLICT(id) DO UPDATE SET
+           from_id=excluded.from_id, to_id=excluded.to_id, kind=excluded.kind, role=excluded.role,
+           position=excluded.position, book_id=excluded.book_id, erased=excluded.erased, hash=excluded.hash`,
         [edge.id, edge.fromId, edge.toId, edge.kind, edge.role ?? null, edge.position, edge.bookId, edge.erased ? 1 : 0, hash]
       );
-      if (oldHash.get(`edges:${edge.id}`) !== hash) {
-        changes.push({ entityName: 'edges', entityId: edge.id, hash, isErased: false, instanceId, agentId, utcDateChanged: now });
-      }
+      changes.push({ entityName: 'edges', entityId: edge.id, hash, isErased: false, instanceId, agentId, utcDateChanged: now });
     }
     for (const attr of entities.attrs) {
-      const hash = await hashEntity('attrs', attr);
+      const hash = newAttrHash.get(attr.id) as string;
+      if (oldHash.get(`attrs:${attr.id}`) === hash) continue;
       await tx.run(
         `INSERT INTO attrs(id, node_id, type, name, value, inheritable, position, erased, hash)
-         VALUES(?,?,?,?,?,?,?,?,?)`,
+         VALUES(?,?,?,?,?,?,?,?,?)
+         ON CONFLICT(id) DO UPDATE SET
+           node_id=excluded.node_id, type=excluded.type, name=excluded.name, value=excluded.value,
+           inheritable=excluded.inheritable, position=excluded.position, erased=excluded.erased, hash=excluded.hash`,
         [attr.id, attr.nodeId, attr.type, attr.name, attr.value, attr.inheritable ? 1 : 0, attr.position, attr.erased ? 1 : 0, hash]
       );
-      if (oldHash.get(`attrs:${attr.id}`) !== hash) {
-        changes.push({ entityName: 'attrs', entityId: attr.id, hash, isErased: false, instanceId, agentId, utcDateChanged: now });
-      }
+      changes.push({ entityName: 'attrs', entityId: attr.id, hash, isErased: false, instanceId, agentId, utcDateChanged: now });
     }
 
-    // 消失的旧实体 → 擦除变更
-    const newIds = new Set<string>([
-      ...entities.nodes.map((n) => `nodes:${n.id}`),
-      ...entities.edges.map((e) => `edges:${e.id}`),
-      ...entities.attrs.map((a) => `attrs:${a.id}`),
-    ]);
-    for (const key of oldHash.keys()) {
-      if (newIds.has(key)) continue;
-      const [entityName, entityId] = key.split(':', 2) as [EntityChange['entityName'], string];
-      changes.push({ entityName, entityId, hash: '', isErased: true, instanceId, agentId, utcDateChanged: now });
+    // 正文实质变化（新建含正文 / 编辑）→ 追加修订（单一事务管线：AI 必留底）
+    for (const node of entities.nodes) {
+      const prevBody = oldBody.get(node.id);
+      if (!node.body || node.body === prevBody) continue;
+      revisions.push({
+        id: uuidv7(),
+        nodeId: node.id,
+        seq: (maxSeq.get(node.id) ?? 0) + 1,
+        body: node.body,
+        author: agentId,
+        cause: cause ?? undefined,
+        createdAt: now,
+      });
     }
 
     await this.writeChangesTx(tx, changes);

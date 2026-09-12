@@ -242,6 +242,36 @@ for (const fixture of [nodeSqliteFixture, wasmFixture]) {
       expect(loaded!.projects.map(p => p.id).sort()).toEqual(['a', 'c']);
     });
 
+    it('差分保存：内容未变不写库，仅变更节点追加修订', async () => {
+      const count = (sql: string, params: SqlValue[] = []): number =>
+        rawAll<{ c: number }>(sql, params)[0]!.c;
+      const proj = project('diff', {
+        chapters: [chapter('c1', '第一章', '正文一'), chapter('c2', '第二章', '正文二')],
+        lastModified: 1000,
+      });
+      await repo.saveAll(baseState([proj]));
+
+      const changesBefore = count('SELECT COUNT(*) AS c FROM entity_changes');
+      const revisionsBefore = count('SELECT COUNT(*) AS c FROM revisions');
+
+      // 内容一致地再存一次：无新修订、无新变更行
+      await repo.saveProject(proj);
+      expect(count('SELECT COUNT(*) AS c FROM revisions')).toBe(revisionsBefore);
+      expect(count('SELECT COUNT(*) AS c FROM entity_changes')).toBe(changesBefore);
+
+      // 只改第一章正文：章节节点数不变，仅新增一条修订，且只针对第一章
+      const c2RevisionsBefore = count(`SELECT COUNT(*) AS c FROM revisions WHERE node_id = ?`, ['c2']);
+      const edited = project('diff', {
+        chapters: [chapter('c1', '第一章', '正文一改'), chapter('c2', '第二章', '正文二')],
+        lastModified: 1000,
+      });
+      await repo.saveProject(edited);
+      expect(count("SELECT COUNT(*) AS c FROM nodes WHERE book_id='diff' AND type='novel.chapter'")).toBe(2);
+      expect(count('SELECT COUNT(*) AS c FROM revisions')).toBe(revisionsBefore + 1);
+      expect(rawGet<{ body: string }>(`SELECT body FROM nodes WHERE id = ?`, ['c1'])!.body).toBe('正文一改');
+      expect(count(`SELECT COUNT(*) AS c FROM revisions WHERE node_id = ?`, ['c2'])).toBe(c2RevisionsBefore);
+    });
+
     it('deleteProject 删除项目及其 FTS 索引', async () => {
       await repo.saveAll(baseState([
         project('a', { chapters: [chapter('c1', '第一章', '龙骑士闯入了古城堡')] }),
