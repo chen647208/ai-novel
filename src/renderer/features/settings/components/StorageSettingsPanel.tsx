@@ -86,6 +86,8 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
       dialogService.alert(t('storage.restoreTooNew'));
       return;
     }
+    // 恢复前对当前库做一次热备份，避免"恢复错了"无法回退
+    await repository.hotBackup?.().catch((error) => logger.warn('恢复前快照失败:', error));
     hydrateStoresFromState(normalizeImportedState(snapshot));
     // 全量落盘：恢复后的状态可能远超差分增量，必须整库写入，否则磁盘仍是恢复前数据
     await repository.saveAll(composeAppState());
@@ -344,10 +346,14 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
               <div>
                 <div className="mb-0.5 text-sm text-foreground">{t('storage.useCustomLabel')}</div>
                 <p className="text-xs text-muted-foreground">{t('storage.useCustomHint')}</p>
+                {typeof window !== 'undefined' && window.electronAPI?.db && (
+                  <p className="mt-0.5 text-xs text-warning">{t('storage.customPathDbNote')}</p>
+                )}
               </div>
               <Switch
                 aria-label={t('storage.useCustomLabel')}
                 checked={storageConfig.useCustomPath}
+                disabled={typeof window !== 'undefined' && !!window.electronAPI?.db}
                 onCheckedChange={(checked) => setStorageConfig({ ...storageConfig, useCustomPath: checked })}
               />
             </div>

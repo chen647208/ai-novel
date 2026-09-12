@@ -110,3 +110,38 @@ jobs:
           HONGYUE_PACKAGED_EXE="$EXE" xvfb-run -a npm run test:e2e:packaged
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+
+  # 平台打包校验：linux 之外的 win/mac 产物首次在 main 推送时构建（PR 不跑，省分钟数）。
+  package-matrix:
+    name: 打包校验（${{ matrix.os }}）
+    runs-on: ${{ matrix.os }}
+    needs: [verify, changes]
+    if: needs.changes.outputs.code == 'true' && github.event_name == 'push'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: --win
+          - os: macos-latest
+            target: --mac
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v7
+
+      - name: 配置 Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 构建渲染层与主进程产物
+        run: npm run electron:build
+
+      - name: 打包目录产物（不签名）
+        run: npx electron-builder ${{ matrix.target }} dir --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'

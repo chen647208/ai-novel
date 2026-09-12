@@ -21,6 +21,7 @@ import {
 import { indexService } from '@core/index';
 import { entitiesToProject,projectToEntities } from '@core/project';
 
+import { MIN_SEARCH_QUERY_LENGTH } from '../../../../shared/constants/search';
 import { APP_STATE_VERSION } from '../../../../shared/constants/versions';
 import type {
   AppState,
@@ -35,8 +36,6 @@ import { META_KEYS,migrate, SCHEMA_VERSION,SETTING_KEYS } from './schema';
 import type { CommitOptions,DbEncryptionStatus, SearchHit, SearchOptions, SqlDriver, StorageRepository } from './types';
 
 const DEFAULT_SEARCH_LIMIT = 50;
-/** trigram 分词器需要至少 3 个字符才能命中 */
-const MIN_TRIGRAM_QUERY = 3;
 
 /** 把用户查询安全地包成 FTS5 短语（双引号包裹，内部双引号翻倍），避免查询语法注入 */
 function toFtsPhrase(query: string): string {
@@ -373,7 +372,7 @@ export class SqliteRepository implements StorageRepository {
   async search(query: string, options?: SearchOptions): Promise<SearchHit[]> {
     await this.ready;
     const q = query.trim();
-    if (q.length < MIN_TRIGRAM_QUERY) return [];
+    if (q.length < MIN_SEARCH_QUERY_LENGTH) return [];
     const limit = options?.limit ?? DEFAULT_SEARCH_LIMIT;
     const match = toFtsPhrase(q);
     const projectFilter = options?.projectId ?? null;

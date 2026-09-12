@@ -9,6 +9,7 @@
 
 import type { RevisionEntity } from '@core/entities';
 
+import { MIN_SEARCH_QUERY_LENGTH } from '../../../../shared/constants/search';
 import { APP_STATE_VERSION } from '../../../../shared/constants/versions';
 import type { AppState, ConsistencyCheckConfig, ConsistencyCheckPromptTemplate,Project, StorageConfig } from '../../../../shared/types';
 import { storage } from '../storage';
@@ -91,7 +92,7 @@ export const jsonRepository: StorageRepository = {
 
   search: async (query: string, options?: SearchOptions): Promise<SearchHit[]> => {
     const q = query.trim();
-    if (!q) return [];
+    if (q.length < MIN_SEARCH_QUERY_LENGTH) return [];
     const state = await storage.loadStateAsync();
     if (!state) return [];
     const limit = options?.limit ?? 50;
