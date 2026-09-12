@@ -243,17 +243,17 @@ Rust host core、stdio JSON-RPC sidecar、面向编码的文件/diff/Bash 工具
 | 机制 | Sonarr | 本项目现状 | 动作 |
 |---|---|---|---|
 | 统一扩展点 | `ThingiProvider`：接口 + 设置 UI + 生命周期 | 多条注册表各自为政（`SkillCatalog`、类型注册表、`BuildProfileRegistry`、`uiSlots`、`commandRegistry`、`settingsTabRegistry`） | 目标：贡献点经 `contributionRegistry` 统一挂载，每 provider 声明 `{ id, kind, install, settings }`（v1 随命令/UI 槽位） |
-| 后台任务调度器 | 集中调度 + Housekeeping | `AutoBackupService` 自持 interval；索引维护无统一调度 | 目标：`TaskScheduler`（注册周期任务、错峰、崩溃恢复） |
-| 健康检查 | 内置子系统 | 有 DB 完整性检查与插件状态面板，无统一入口 | 目标：`healthCheck()` 聚合存储/DB/插件/AI 配置，设置页可见 |
+| 后台任务调度器 | 集中调度 + Housekeeping | `TaskScheduler` 已落地：`AutoBackupService` 的兜底备份经 60s 周期任务驱动，落盘触发路径共用同一入口 | 已落地 |
+| 健康检查 | 内置子系统 | `collectHealth` 已落地（数据目录可写/存储配置可解析/日志目录），随诊断包导出为 `health.json` | 已落地 |
 | 备份 | 内置 | `AutoBackupService` 已具备 | 对齐 |
 | 认证 | 内置 | 单机本地应用 | 不迁移 |
 | 双库迁移 | FluentMigrator | SQLite schema 迁移（v3） | 仅作迁移自检参考 |
 
-### 12.2 落地顺序
+### 12.2 落地状态
 
-1. `TaskScheduler`：把 `AutoBackupService` 的 interval 迁入，并登记索引维护任务；任务抛错不影响其他任务。
-2. `healthCheck()`：复用 DB 完整性检查 + `PluginHost.list()` + 模型配置，聚合为设置页可见项。
-3. `contributionRegistry`：统一扩展点，随第 4/5 类贡献点（命令/UI 槽位）落地。
+1. `TaskScheduler`（已落地）：`renderer/shared/services/taskScheduler.ts`；自动备份兜底（60s）经它驱动，任务抛错隔离、错峰不叠峰。
+2. `healthCheck`（已落地）：`main/app/diagnosticsCore.ts` 的 `collectHealth`，随诊断包导出为 `health.json`。
+3. `contributionRegistry`（待落地）：统一扩展点，随第 4/5 类贡献点（命令/UI 槽位）。
 
 ### 12.3 不迁移
 
@@ -261,5 +261,5 @@ GPL-3.0 代码、.NET/AspNetCore/SignalR 栈、PVR 领域模型、Web 服务 + �
 
 ### 12.4 验收标准
 
-- 调度器：单任务抛错不影响其余；周期任务错峰不叠峰；重启后周期任务恢复。
-- 健康检查：任一子项失败在设置页给出可执行建议，不阻断应用启动。
+- 调度器：单任务抛错不影响其余；周期任务错峰不叠峰；`stop()` 后计时器全部清除。
+- 健康检查：数据目录可写、存储配置可解析、日志目录存在三项随诊断包导出，失败项带可执行说明。
