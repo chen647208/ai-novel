@@ -69,7 +69,18 @@ AI 调用在主进程执行；渲染层只做模型列表/嵌入等直连，且�
 - 若要收窄，唯一正确做法是**按用户配置的端点动态生成 `connect-src`**（设置变更经 IPC 同步到主进程），
   作为独立项排期，不与本次改动混做。
 
-## 5. 分期
+## 5. 其他决定的记录（评估后不实现）
+
+- **senderFrame 来源校验**：应用只有一个受信窗口，且已禁导航与新窗口（`window.ts` 的
+  `will-navigate` 白名单与 `setWindowOpenHandler` deny）。能触达 `ipcMain` 的帧即该窗口；
+  逐 handler 校验来源收益低、改动面大，故保持现状，把关放在窗口安全配置上。
+- **`.npmrc ignore-scripts`**：`electron` 等依赖的 postinstall 是安装运行时所必需，全局禁用会破坏安装；
+  故不采用，供应链防线落在 lockfile + `npm audit` + 许可证允许清单 + 密钥扫描。
+- **崩溃转储**：保持本地留存（仅落 `userData`，不外发）；仅在上报开关开启且配置了 https 地址时才上传。
+- **更新签名/公证**：需平台证书与 CI secrets，开源项目暂缓；待有证书再补 `publisherName`/`notarize` 配置。
+- **动态 `connect-src`**：独立项（见 §4）。
+
+## 6. 分期
 
 | 阶段 | 内容 | 验收 |
 |---|---|---|
@@ -77,7 +88,7 @@ AI 调用在主进程执行；渲染层只做模型列表/嵌入等直连，且�
 | I2 | SQL catalog 抽取 + 驱动契约按 id；消除动态拼接 | 未知 id 拒绝；全仓无字符串 SQL 调用；测试全绿 |
 | I3 | 动态 `connect-src`（可选） | 仅放行已配置端点；无端点告警 |
 
-## 6. 来源
+## 7. 来源
 
 - Electron 安全清单：https://www.electronjs.org/docs/latest/tutorial/security
 - Content-Security-Policy `connect-src`：https://developer.mozilla.org/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src
