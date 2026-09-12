@@ -10,13 +10,16 @@
 /**
  * MCP 客户端 IPC（docs/design/14）：渲染层管理外部 MCP server，
  * 主进程持有 stdio 连接（子进程生命周期跟随应用）。
- * 连接数上限 8，命令白名单禁 shell 展开（spawn 数组传参，无 shell）。
+ * 连接数上限 8；spawn 前须经系统原生对话框由用户批准（防渲染层被控拉起任意进程），
+ * 参数以数组传参、不经 shell 展开。
  */
-import { ipcMain } from 'electron';
+import { dialog,ipcMain } from 'electron';
 
+import { getMainWindow } from '../app/window.js';
 import { IPC } from '../channels.js';
 import { logger } from '../logger.js';
 import { type McpToolDef,MinimalMcpClient } from './client.js';
+import { approveMcpCommand,isMcpCommandApproved, mcpFingerprint } from './commandApproval.js';
 import { dispatch } from './server.js';
 
 const MAX_CLIENTS = 8;
@@ -74,6 +77,25 @@ export function registerMcpClientIpc(): void {
     }
     if (clients.size >= MAX_CLIENTS) {
       throw new Error(`MCP 连接数上限 ${MAX_CLIENTS}`);
+    }
+    // 启动审批：未批准的 command+args 先经系统原生对话框确认，批准后持久化
+    const fingerprint = mcpFingerprint(command, args ?? []);
+    if (!isMcpCommandApproved(fingerprint)) {
+      const options = {
+        type: 'warning' as const,
+        buttons: ['拒绝', '允许'],
+        defaultId: 1,
+        cancelId: 0,
+        title: 'MCP 服务器',
+        message: '允许启动该 MCP 服务器进程吗？',
+        detail: `${command} ${(args ?? []).join(' ')}`.trim(),
+      };
+      const parent = getMainWindow();
+      const { response } = parent
+        ? await dialog.showMessageBox(parent, options)
+        : await dialog.showMessageBox(options);
+      if (response !== 1) throw new Error('用户未批准该 MCP 服务器');
+      approveMcpCommand(fingerprint);
     }
     const client = new MinimalMcpClient(command, args ?? []);
     try {

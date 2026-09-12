@@ -15,7 +15,7 @@
  */
 import type { BuildProfile } from '../build/profile.js';
 import type { TypeRegistry,TypeTemplate } from '../types-registry';
-import type { SeamPolicy } from './events.js';
+import type { InterceptHandler, SeamPolicy } from './events.js';
 import { assertPermission, type Disposable, type PluginManifest } from './manifest.js';
 
 /** 构建档注册表 key：id 优先，缺省回落 name（与 core/build 单源类型）。 */
@@ -45,11 +45,15 @@ export class BuildProfileRegistry {
 export interface HookDeclaration {
   on: string;
   seam?: 'fs' | 'ai' | 'index';
-  do: 'inject' | 'filter' | 'observe' | 'logic';
+  do: 'inject' | 'filter' | 'observe' | 'logic' | 'gate';
   where?: 'system' | 'user';
   text?: string;
   pattern?: string;
   replacement?: string;
+  /** do=gate 时：是否放行（默认 true）；false 即拒绝该接缝请求。 */
+  allow?: boolean;
+  /** do=gate 被拒绝时的原因文案。 */
+  reason?: string;
   /** do=logic 时：插件逻辑贡献中的具名函数（design/22 §3）。 */
   fn?: string;
 }
@@ -58,7 +62,10 @@ export interface HookDeclaration {
  *  声明 hooks 即视为写入对应接缝域，须在 manifest.permissions.write 声明，否则拒绝（默认拒绝）。 */
 export function installHooks(
   hooks: HookDeclaration[],
-  bus: { decorate(seam: 'fs' | 'ai' | 'index', policy: SeamPolicy, pluginId?: string): Disposable },
+  bus: {
+    decorate(seam: 'fs' | 'ai' | 'index', policy: SeamPolicy, pluginId?: string): Disposable;
+    intercept(type: string, handler: InterceptHandler, pluginId?: string): Disposable;
+  },
   pluginId?: string,
   manifest?: PluginManifest,
 ): Disposable[] {
@@ -76,6 +83,12 @@ export function installHooks(
       const seam = hook.seam ?? 'ai';
       if (manifest) assertPermission(manifest, 'write', seam);
       disposables.push(bus.decorate(seam, { do: 'logic', pluginId, fn: hook.fn }, pluginId));
+    } else if (hook.do === 'gate') {
+      const seam = hook.seam ?? 'ai';
+      if (manifest) assertPermission(manifest, 'write', seam);
+      const allow = hook.allow !== false;
+      const reason = hook.reason;
+      disposables.push(bus.intercept(hook.on, () => (allow ? true : { allowed: false, reason }), pluginId));
     }
   }
   return disposables;

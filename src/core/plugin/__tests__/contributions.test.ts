@@ -9,6 +9,7 @@
 import { describe, expect,it } from 'vitest';
 
 import { installHooks } from '../contributions.js';
+import type { InterceptHandler } from '../events.js';
 import { type Disposable, PermissionDenied, type PluginManifest } from '../manifest.js';
 
 function manifest(write?: string[]): PluginManifest {
@@ -43,5 +44,24 @@ describe('installHooks 权限强制', () => {
     const ds = installHooks([{ on: 'ai.request', do: 'inject', text: 'x' }], bus as never, 'com.test.p', manifest(['ai']));
     expect(ds).toHaveLength(1);
     expect(bus.calls).toHaveLength(1);
+  });
+
+  it('gate 钩子注册拦截器并按 allow 放行/拒绝', () => {
+    const handlers: InterceptHandler[] = [];
+    const bus = {
+      decorate: (): Disposable => ({ dispose: () => undefined }),
+      intercept: (_type: string, handler: InterceptHandler): Disposable => {
+        handlers.push(handler);
+        return { dispose: () => undefined };
+      },
+    };
+    const ds = installHooks(
+      [{ on: 'ai.request', do: 'gate', allow: false, reason: '发行档禁用' }],
+      bus as never,
+      'com.test.p',
+      manifest(['ai']),
+    );
+    expect(ds).toHaveLength(1);
+    expect(handlers[0]?.({})).toEqual({ allowed: false, reason: '发行档禁用' });
   });
 });
