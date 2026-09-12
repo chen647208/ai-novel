@@ -23,6 +23,7 @@ import type { Provider, ProviderContext } from './container.js';
 import { crashSubmitUrl, readCrashReportingConfig, writeCrashReportingConfig } from './crashReportConfig.js';
 import { registerDiagnosticsIpc } from './diagnostics.js';
 import { extractPdfText } from './documents.js';
+import { allowPath, allowRoot, assertPathAllowed } from './fsAccess.js';
 import { registerPluginFsIpc } from './pluginFs.js';
 import { sandboxHost } from './pluginSandbox/host.js';
 import { verifyEd25519 } from './pluginSignature.js';
@@ -64,10 +65,20 @@ export const windowProvider: Provider = {
 export const fileProvider: Provider = {
   name: 'file',
   boot(ctx: ProviderContext) {
+    // 默认只允许 userData；其余根经 fs:allow-path 注册或对话框返回时自动授权
+    allowRoot(app.getPath('userData'));
     ipcMain.handle(IPC.getAppDataPath, () => app.getPath('userData'));
+    ipcMain.handle(IPC.allowPath, async (_event, dirPath: string) => {
+      assertString(dirPath, 'dirPath');
+      const stat = await fs.stat(dirPath).catch(() => null);
+      if (!stat?.isDirectory()) throw new Error(`路径不是目录：${dirPath}`);
+      allowRoot(dirPath);
+      return true;
+    });
 
     ipcMain.handle(IPC.readFile, async (_event, filePath: string) => {
       assertString(filePath, 'filePath');
+      assertPathAllowed(filePath);
       try {
         return await fs.readFile(filePath, 'utf-8');
       } catch (error) {
@@ -79,6 +90,7 @@ export const fileProvider: Provider = {
 
     ipcMain.handle(IPC.writeFile, async (_event, filePath: string, data: string) => {
       assertString(filePath, 'filePath');
+      assertPathAllowed(filePath);
       if (typeof data !== 'string') {
         throw new TypeError('Invalid data: expected string');
       }
@@ -90,6 +102,7 @@ export const fileProvider: Provider = {
     ipcMain.handle(IPC.writeBinaryFile, async (_event, filePath: string, base64: string) => {
       assertString(filePath, 'filePath');
       assertString(base64, 'base64');
+      assertPathAllowed(filePath);
       // 只接受标准 base64，解码后落二进制（封面 PNG 等）
       if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64)) {
         throw new TypeError('Invalid base64 payload');
@@ -106,6 +119,7 @@ export const fileProvider: Provider = {
 
     ipcMain.handle(IPC.fileExists, async (_event, filePath: string) => {
       assertString(filePath, 'filePath');
+      assertPathAllowed(filePath);
       try {
         await fs.access(filePath);
         return true;
@@ -116,6 +130,7 @@ export const fileProvider: Provider = {
 
     ipcMain.handle(IPC.listDirectory, async (_event, dirPath: string) => {
       assertString(dirPath, 'dirPath');
+      assertPathAllowed(dirPath);
       try {
         const entries = await fs.readdir(dirPath, { withFileTypes: true });
         return entries.map((e) => ({ name: e.name, type: e.isDirectory() ? ('directory' as const) : ('file' as const) }));
@@ -201,6 +216,7 @@ export const fileProvider: Provider = {
         ? await dialog.showSaveDialog(parent, saveOptions)
         : await dialog.showSaveDialog(saveOptions);
       if (target.canceled || !target.filePath) return { canceled: true };
+      allowPath(target.filePath);
       await fs.mkdir(path.dirname(target.filePath), { recursive: true });
       await fs.writeFile(target.filePath, zip);
       return { canceled: false };
@@ -208,6 +224,7 @@ export const fileProvider: Provider = {
 
     ipcMain.handle(IPC.deleteFile, async (_event, filePath: string) => {
       assertString(filePath, 'filePath');
+      assertPathAllowed(filePath);
       await fs.unlink(filePath);
       return true;
     });
@@ -222,12 +239,16 @@ export const dialogProvider: Provider = {
   boot(ctx: ProviderContext) {
     ipcMain.handle(IPC.openFileDialog, async (_event, options: Electron.OpenDialogOptions) => {
       const win = ctx.getMainWindow();
-      return win ? dialog.showOpenDialog(win, options ?? {}) : dialog.showOpenDialog(options ?? {});
+      const result = win ? await dialog.showOpenDialog(win, options ?? {}) : await dialog.showOpenDialog(options ?? {});
+      result.filePaths.forEach(allowPath);
+      return result;
     });
 
     ipcMain.handle(IPC.saveFileDialog, async (_event, options: Electron.SaveDialogOptions) => {
       const win = ctx.getMainWindow();
-      return win ? dialog.showSaveDialog(win, options ?? {}) : dialog.showSaveDialog(options ?? {});
+      const result = win ? await dialog.showSaveDialog(win, options ?? {}) : await dialog.showSaveDialog(options ?? {});
+      if (!result.canceled && result.filePath) allowPath(result.filePath);
+      return result;
     });
 
     ipcMain.handle(IPC.openDirectoryDialog, async (_event, options: Electron.OpenDialogOptions) => {
@@ -237,7 +258,9 @@ export const dialogProvider: Provider = {
         ...options,
       };
       const win = ctx.getMainWindow();
-      return win ? dialog.showOpenDialog(win, merged) : dialog.showOpenDialog(merged);
+      const result = win ? await dialog.showOpenDialog(win, merged) : await dialog.showOpenDialog(merged);
+      result.filePaths.forEach(allowPath);
+      return result;
     });
 
     // HTML 打印为 PDF：隐藏窗口渲染 → 原生另存为 → 二进制落盘（渲染层不碰二进制）
@@ -255,6 +278,7 @@ export const dialogProvider: Provider = {
           filters: [{ name: 'PDF', extensions: ['pdf'] }],
         });
         if (target.canceled || !target.filePath) return { canceled: true };
+        allowPath(target.filePath);
         await fs.mkdir(path.dirname(target.filePath), { recursive: true });
         await fs.writeFile(target.filePath, pdf);
         return { canceled: false };

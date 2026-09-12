@@ -117,6 +117,8 @@ export class AutoBackupService {
     }
 
     if (config.useCustomPath && config.dataPath) {
+      // 自定义数据目录经路径门注册后才能读写
+      await window.electronAPI.allowPath?.(config.dataPath).catch(() => undefined);
       return config.dataPath;
     } else {
       const appDataPath = await window.electronAPI.getAppDataPath();

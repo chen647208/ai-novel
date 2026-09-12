@@ -1089,6 +1089,7 @@ export interface VectorConsistencyResult {
 export interface ElectronAPI {
   // 文件系统操作
   getAppDataPath: () => Promise<string>;
+  allowPath: (dirPath: string) => Promise<boolean>;
   readFile: (filePath: string) => Promise<string>;
   writeFile: (filePath: string, data: string) => Promise<boolean>;
   /** 写入二进制文件（base64 解码后落盘；封面 PNG 等）。 */

@@ -13,6 +13,7 @@
  */
 export const IPC = {
   getAppDataPath: 'get-app-data-path',
+  allowPath: 'fs:allow-path',
   readFile: 'read-file',
   writeFile: 'write-file',
   writeBinaryFile: 'write-binary-file',
