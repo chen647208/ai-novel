@@ -13,7 +13,16 @@
  */
 
 import type { Skill } from '@core/ai';
-import { adjudicateHandlerResult, type SandboxRunResult } from '@core/plugin';
+import { adjudicateHandlerResult, type SandboxRunResult, type WasmHostFunctionSpec, type WasmHostKind } from '@core/plugin';
+
+const WASM_HOST_KINDS: readonly WasmHostKind[] = ['now', 'log', 'hash'];
+
+/** 把 SKILL.md 声明的 hosts 映射为受控 WASM 宿主函数授权（未知种类丢弃）。 */
+function wasmHostFunctions(hosts: readonly string[]): WasmHostFunctionSpec[] {
+  return hosts
+    .filter((name): name is WasmHostKind => (WASM_HOST_KINDS as readonly string[]).includes(name))
+    .map((kind) => ({ module: 'env', name: kind, kind }));
+}
 
 export async function runSkillHandler(skill: Skill, input: unknown): Promise<SandboxRunResult> {
   const handler = skill.handler;
@@ -30,6 +39,7 @@ export async function runSkillHandler(skill: Skill, input: unknown): Promise<San
     allowedTools: skill.tools,
     mode: handler.mode ?? 'js',
     moduleBase64: handler.mode === 'wasm' ? handler.code : undefined,
+    hostFunctions: handler.mode === 'wasm' ? wasmHostFunctions(skill.hosts) : undefined,
   });
   if (!result.ok) return result;
   return adjudicateHandlerResult(result.output, skill.tools);

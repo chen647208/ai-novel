@@ -101,6 +101,8 @@ export {
   type SandboxRunRequest,
   type SandboxRunResult,
   type SandboxToolCall,
+  type WasmHostFunctionSpec,
+  type WasmHostKind,
 } from './sandbox/types.js';
 export {
   ESCALATION_BACKOFF_MS,

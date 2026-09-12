@@ -18,4 +18,6 @@ export {
   type SandboxRunRequest,
   type SandboxRunResult,
   type SandboxToolCall,
+  type WasmHostFunctionSpec,
+  type WasmHostKind,
 } from '../../../shared/sandbox';

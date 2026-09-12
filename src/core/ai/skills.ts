@@ -46,6 +46,8 @@ export interface Skill {
   triggers: string[];
   /** 技能自带的工具白名单（可选；空 = 不限制） */
   tools: string[];
+  /** WASM 逻辑轨可用的宿主函数种类（now/log/hash；空 = 无导入权限）。 */
+  hosts: string[];
   /** 来源：builtin / user / plugin / book */
   source: 'builtin' | 'user' | 'plugin' | 'book';
   /** 方法论正文 */
@@ -123,12 +125,17 @@ export function parseSkillMd(md: string, source: Skill['source'], sourceFile = '
     ? meta.tools.replace(/[\][]/g, '').split(/[、,，]/).map((s) => s.trim()).filter(Boolean)
     : [];
 
+  const hosts = meta.hosts
+    ? meta.hosts.replace(/[\][]/g, '').split(/[、,，]/).map((s) => s.trim()).filter(Boolean)
+    : [];
+
   return {
     skill: {
       name,
       description,
       triggers: [...triggers],
       tools,
+      hosts,
       source,
       body: body.trim(),
     },

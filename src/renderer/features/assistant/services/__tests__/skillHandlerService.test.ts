@@ -17,6 +17,7 @@ const skill = (over: Partial<Skill> = {}): Skill => ({
   description: 'd',
   triggers: [],
   tools: ['core.index.query'],
+  hosts: [],
   source: 'plugin',
   body: '',
   ...over,

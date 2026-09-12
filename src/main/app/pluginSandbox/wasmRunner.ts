@@ -16,7 +16,7 @@
 
 import { Buffer } from 'node:buffer';
 
-import type { SandboxRunRequest, SandboxRunResult } from '../../../shared/sandbox.js';
+import type { SandboxRunRequest, SandboxRunResult, WasmHostKind } from '../../../shared/sandbox.js';
 
 function isTypedResult(value: unknown): value is number | string | bigint | boolean | null {
   return (
@@ -54,7 +54,19 @@ function webAssembly(): WebAssemblyApi | undefined {
   return (globalThis as Record<string, unknown>).WebAssembly as WebAssemblyApi | undefined;
 }
 
-export async function runWasm(request: SandboxRunRequest): Promise<SandboxRunResult> {
+function fnv1a(bytes: Uint8Array): number {
+  let h = 0x811c9dc5;
+  for (const byte of bytes) {
+    h ^= byte;
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
+export async function runWasm(
+  request: SandboxRunRequest,
+  onLog?: (level: string, message: string) => void,
+): Promise<SandboxRunResult> {
   const base64 = request.moduleBase64;
   if (!base64) return { ok: false, error: { kind: 'runtime', message: '缺少 WASM 模块' } };
 
@@ -76,24 +88,50 @@ export async function runWasm(request: SandboxRunRequest): Promise<SandboxRunRes
     return { ok: false, error: { kind: 'runtime', message: `WASM 编译失败：${String(error)}` } };
   }
 
-  // 能力默认拒绝：任何未授权导入即拒绝实例化
-  const allowed = new Set(request.allowedImports ?? []);
+  // 能力默认拒绝：任何未授权导入即拒绝；授权的导入必须有受控实现
+  const specs = request.hostFunctions ?? [];
+  const specMap = new Map(specs.map((s) => [`${s.module}.${s.name}`, s]));
+  const allowed = new Set([...(request.allowedImports ?? []), ...specMap.keys()]);
   const denied: string[] = [];
+  const missingImpl: string[] = [];
   for (const imp of wa.Module.imports(module)) {
     const key = `${imp.module}.${imp.name}`;
     if (!allowed.has(key)) denied.push(key);
+    else if (!specMap.has(key)) missingImpl.push(key);
   }
   if (denied.length) {
     return { ok: false, error: { kind: 'capability', message: `未授权 WASM 导入：${denied.join(', ')}` } };
   }
+  if (missingImpl.length) {
+    return { ok: false, error: { kind: 'capability', message: `缺少宿主函数实现：${missingImpl.join(', ')}` } };
+  }
+
+  const memRef: { current?: { buffer: ArrayBuffer } } = {};
+  const readBytes = (ptr: number, len: number): Uint8Array => {
+    if (!memRef.current) throw new Error('WASM 模块未导出 memory，无法读取内存参数');
+    return new Uint8Array(memRef.current.buffer, ptr, len);
+  };
+  const impls: Record<WasmHostKind, (...args: number[]) => unknown> = {
+    now: () => Date.now() / 1000,
+    log: (ptr, len) => {
+      onLog?.('log', new TextDecoder().decode(readBytes(ptr, len)));
+      return undefined;
+    },
+    hash: (ptr, len) => fnv1a(readBytes(ptr, len)),
+  };
+  const importObject: Record<string, Record<string, unknown>> = {};
+  for (const spec of specs) {
+    (importObject[spec.module] ??= {})[spec.name] = impls[spec.kind];
+  }
 
   let instance: WasmInstanceHandle;
   try {
-    instance = await wa.instantiate(module, {});
+    instance = await wa.instantiate(module, importObject);
   } catch (error) {
     return { ok: false, error: { kind: 'runtime', message: `WASM 实例化失败：${String(error)}` } };
   }
 
+  memRef.current = instance.exports.memory as { buffer: ArrayBuffer } | undefined;
   const run = instance.exports.run;
   if (typeof run !== 'function') {
     return { ok: false, error: { kind: 'runtime', message: 'WASM 模块未导出 run 函数' } };

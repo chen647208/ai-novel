@@ -29,6 +29,16 @@ export const DEFAULT_SANDBOX_LIMITS: SandboxLimits = {
 
 export type SandboxErrorKind = 'timeout' | 'memory' | 'runtime' | 'limit' | 'capability';
 
+/** WASM 宿主函数种类（受控实现，见 wasmRunner）。 */
+export type WasmHostKind = 'now' | 'log' | 'hash';
+
+/** WASM 导入授权：module.name 映射到受控实现种类。 */
+export interface WasmHostFunctionSpec {
+  module: string;
+  name: string;
+  kind: WasmHostKind;
+}
+
 export interface SandboxError {
   kind: SandboxErrorKind;
   message: string;
@@ -53,6 +63,8 @@ export interface SandboxRunRequest {
   moduleBase64?: string;
   /** WASM 允许的导入（`module.name`）；默认拒绝任何导入。 */
   allowedImports?: readonly string[];
+  /** WASM 宿主函数授权：声明可用的受控导入实现。 */
+  hostFunctions?: readonly WasmHostFunctionSpec[];
 }
 
 export interface SandboxRunResult {

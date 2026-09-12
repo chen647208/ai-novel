@@ -16,6 +16,7 @@ const skill = (name: string) => ({
   description: 'd',
   triggers: [],
   tools: [],
+  hosts: [],
   source: 'plugin' as const,
   body: 'B',
 });
