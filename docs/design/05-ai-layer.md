@@ -123,3 +123,31 @@ type AiEvent =
 3. 技能渐进加载：注入清单 token 数 < 500；激活技能后全文注入且可卸载。
 4. MCP 出口：用外部 codex CLI 连我们的 server 完成"读大纲→改人物卡→写回"闭环。
 5. 审批超时不阻塞：挂起进待审箱，UI 有角标。
+
+## 9. CloddsBot 对标落地方案（技能双轨 / 会话 / 工具契约）
+
+来源：https://github.com/alsk1992/CloddsBot（MIT）；对位见 `20-external-benchmark.md` §7。
+
+### 9.1 现状对位
+
+| 机制 | CloddsBot | 本项目现状 | 动作 |
+|---|---|---|---|
+| 技能渐进加载 | skill catalog 常驻 + 正文按需 | `SkillCatalog`：`manifest()` 常驻清单、`activate()` 才注入正文（§3） | 对齐 |
+| 会话压缩分离 | append-only 历史 + 压缩摘要分离 | `useAssistantHistory`：摘要置顶 + 最近若干条，超阈值压缩最旧一半 | 对齐 |
+| 工具 JSON Schema | `{name, description, parameters, execute}` | `builtinTools` 的 `parameters` 为 JSON Schema | 对齐 |
+| 技能双轨 | Markdown 提示技能 + 惰性 `import()` handler | 仅轨道一（Markdown）落地 | 轨道二受"逻辑型插件不跑"约束，见 §9.2 |
+| 写前单点门禁 | `RiskEngine.validateTrade()` | AI 统一门 `ai.request` 拦截（04/§5） | 对齐 |
+
+### 9.2 双轨技能规范（沙箱接入后）
+
+- **轨道一（数据，已落地）**：`SKILL.md` 的 `name`/`description`/`triggers`/`tools`，正文按需激活。
+- **轨道二（逻辑，待沙箱）**：技能目录内 `handler` 指向沙箱模块；具备
+  依赖门禁（声明所需权限/工具，装载期与 manifest 交叉校验）、内容哈希快照缓存、热重载。
+  handler 只能经 `PluginContext` 的工具/事件/数据代理触达数据，不触原生能力。
+- 两轨同名时逻辑轨优先，卸载时逆序释放；任一轨损坏只影响该技能（逐项隔离）。
+
+### 9.3 验收标准（补 §8）
+
+6. 同名单轨/双轨技能可加载与卸载，互不残留。
+7. handler 抛错隔离：该技能失败，其余技能与 agent 循环照常。
+8. 内容哈希变更触发重载；未变更不重载。

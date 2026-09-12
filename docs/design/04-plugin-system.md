@@ -186,22 +186,24 @@ interface Event Bus {
 | 生命周期状态机 | discover→validate→load→activate→deactivate→unwind，装配失败回滚 | `PluginHost` 同序；activate 失败先 unwind 再置 failed（`runtime.ts`） | 对齐，补失败注入用例（§11.6.8） |
 | 可逆注册 | Disposable 逆序释放 | `Disposable` + `unwind` 已具备 | 对齐 |
 | 权限默认拒绝 | 声明 ∩ 授权，deny-by-default | `assertPermission`/`assertCan` 域级 deny-by-default | 对齐，补 write 边界用例 |
-| 路径四道门 | 声明∩授权 → realpath 包含 → deny-list → scope | 无（插件无文件访问面） | 待建（§11.2） |
-| 资源配额 | 每插件 ≤32 skill、单文件 ≤128KiB | 无上限 | 落地中（§11.3） |
+| 路径四道门 | 声明∩授权 → realpath 包含 → deny-list → scope | 词法两道门（相对/越界/拒绝清单）已落地（`pathGate.ts`），装配中途失败可回滚（`ContributionSink`） | realpath 由主进程 fs 代理承担（与逻辑型插件同批） |
+| 资源配额 | 每插件 ≤32 skill、单文件 ≤128KiB | `checkContributionLimits` 装载期校验（§11.3） | 已落地 |
 | 长会话检查点 | JSONL 真相 + SQLite 索引 + `.inflight.json` 原子替换 | 会话存储归 05/11 | 不在此，转 05/11 |
 | 进程隔离 | Rust host core + sidecar stdio JSON-RPC | 全 Node、无 Rust 人力 | 不迁移 |
 
-### 11.2 文件访问四道门（目标规范）
+### 11.2 文件访问四道门
 
-插件的任何文件系统访问，依次过四道门，任一道不过即 `PermissionDenied`，且 `cause` 链完整：
+插件的任何文件系统访问，依次过四道门，任一道不过即拒绝，且 `cause` 链完整：
 
 1. **声明 ∩ 授权**：manifest `permissions.fs.read`/`permissions.fs.write` 声明的**路径模式**，且用户在安装/设置中授予；默认拒绝。
 2. **realpath 包含**：目标路径经 `fs.realpath`（解析符号链接后）必须落在授权根内；跨根即拒绝。
 3. **deny-list**：无论是否声明，`.git`、应用数据根、密钥目录、`node_modules` 永久拒绝。
 4. **scope**：插件可写面限于 `plugin-data/<pluginId>/`，可读面限于自身贡献目录；项目正文/设定的写必须显式 `write:<domain>`。
 
-落点：`PluginPermissions` 扩 `fs` 字段；执行在宿主侧 fs 代理（插件拿不到原生 `fs`）。
-逻辑型插件上线前，§5 的 `fs` 接缝只接受声明式策略；本项与逻辑型插件同批交付。
+词法两道门（拒绝清单 + 作用域）已落地在 `core/plugin/pathGate.ts`：`checkPluginRelPath`/`checkPluginFileName`
+拒绝绝对路径、`..` 越界与拒绝清单命中，装配器对 `contributes` 声明的每个目录与目录项先过门再读取。
+realpath 包含需要宿主文件系统，归主进程 fs 代理（`PluginPermissions` 扩 `fs` 字段），与逻辑型插件同批交付。
+逻辑型插件上线前，§5 的 `fs` 接缝只接受声明式策略。
 
 ### 11.3 资源配额与校验（已落地）
 
@@ -231,3 +233,33 @@ Rust host core、stdio JSON-RPC sidecar、面向编码的文件/diff/Bash 工具
 8. 装配回滚：注入第 2/3 个注册项抛错的插件 → 逆序释放已注册项，状态 `failed`，宿主无残留。
 9. 配额：见 §10.6；路径门：见 §10.7。
 10. `fs` 门（逻辑型插件同批）：符号链接指向授权根外 → 拒绝；`../` 越界 → 拒绝；写入非 `plugin-data/<id>/` → 拒绝。
+
+## 12. Sonarr 对标落地方案（扩展点 / 调度 / 健康）
+
+来源：https://github.com/Sonarr/Sonarr（GPL-3.0，只借设计）；对位见 `20-external-benchmark.md` §2.2。
+
+### 12.1 现状对位
+
+| 机制 | Sonarr | 本项目现状 | 动作 |
+|---|---|---|---|
+| 统一扩展点 | `ThingiProvider`：接口 + 设置 UI + 生命周期 | 多条注册表各自为政（`SkillCatalog`、类型注册表、`BuildProfileRegistry`、`uiSlots`、`commandRegistry`、`settingsTabRegistry`） | 目标：贡献点经 `contributionRegistry` 统一挂载，每 provider 声明 `{ id, kind, install, settings }`（v1 随命令/UI 槽位） |
+| 后台任务调度器 | 集中调度 + Housekeeping | `AutoBackupService` 自持 interval；索引维护无统一调度 | 目标：`TaskScheduler`（注册周期任务、错峰、崩溃恢复） |
+| 健康检查 | 内置子系统 | 有 DB 完整性检查与插件状态面板，无统一入口 | 目标：`healthCheck()` 聚合存储/DB/插件/AI 配置，设置页可见 |
+| 备份 | 内置 | `AutoBackupService` 已具备 | 对齐 |
+| 认证 | 内置 | 单机本地应用 | 不迁移 |
+| 双库迁移 | FluentMigrator | SQLite schema 迁移（v3） | 仅作迁移自检参考 |
+
+### 12.2 落地顺序
+
+1. `TaskScheduler`：把 `AutoBackupService` 的 interval 迁入，并登记索引维护任务；任务抛错不影响其他任务。
+2. `healthCheck()`：复用 DB 完整性检查 + `PluginHost.list()` + 模型配置，聚合为设置页可见项。
+3. `contributionRegistry`：统一扩展点，随第 4/5 类贡献点（命令/UI 槽位）落地。
+
+### 12.3 不迁移
+
+GPL-3.0 代码、.NET/AspNetCore/SignalR 栈、PVR 领域模型、Web 服务 + 浏览器 UI 部署模型。
+
+### 12.4 验收标准
+
+- 调度器：单任务抛错不影响其余；周期任务错峰不叠峰；重启后周期任务恢复。
+- 健康检查：任一子项失败在设置页给出可执行建议，不阻断应用启动。
