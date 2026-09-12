@@ -7,6 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { SQL,type SqlId } from '../../../../shared/sql/catalog';
 import type { SqlDriver, SqlRunResult,SqlValue } from './types';
 import type { WasmRequest } from './wasmSql';
 
@@ -69,40 +70,40 @@ export class WasmSqliteDriver implements SqlDriver {
     return result;
   }
 
-  exec(sql: string): Promise<void> {
-    return this.enqueue(async () => { await this.request<void>({ method: 'exec', sql }); });
+  exec(id: SqlId): Promise<void> {
+    return this.enqueue(async () => { await this.request<void>({ method: 'exec', sql: SQL[id] }); });
   }
 
-  run(sql: string, params: SqlValue[] = []): Promise<SqlRunResult> {
-    return this.enqueue(() => this.request<SqlRunResult>({ method: 'run', sql, params }));
+  run(id: SqlId, params: SqlValue[] = []): Promise<SqlRunResult> {
+    return this.enqueue(() => this.request<SqlRunResult>({ method: 'run', sql: SQL[id], params }));
   }
 
-  all<T = Record<string, SqlValue>>(sql: string, params: SqlValue[] = []): Promise<T[]> {
-    return this.enqueue(() => this.request<T[]>({ method: 'all', sql, params }));
+  all<T = Record<string, SqlValue>>(id: SqlId, params: SqlValue[] = []): Promise<T[]> {
+    return this.enqueue(() => this.request<T[]>({ method: 'all', sql: SQL[id], params }));
   }
 
-  get<T = Record<string, SqlValue>>(sql: string, params: SqlValue[] = []): Promise<T | undefined> {
-    return this.enqueue(() => this.request<T | undefined>({ method: 'get', sql, params }));
+  get<T = Record<string, SqlValue>>(id: SqlId, params: SqlValue[] = []): Promise<T | undefined> {
+    return this.enqueue(() => this.request<T | undefined>({ method: 'get', sql: SQL[id], params }));
   }
 
   transaction<T>(fn: (tx: SqlDriver) => Promise<T>): Promise<T> {
     return this.enqueue(async () => {
       const direct: SqlDriver = {
-        exec: (sql) => this.request<void>({ method: 'exec', sql }),
-        run: (sql, p = []) => this.request<SqlRunResult>({ method: 'run', sql, params: p }),
-        all: <R>(sql: string, p: SqlValue[] = []) => this.request<R[]>({ method: 'all', sql, params: p }),
-        get: <R>(sql: string, p: SqlValue[] = []) => this.request<R | undefined>({ method: 'get', sql, params: p }),
+        exec: (id) => this.request<void>({ method: 'exec', sql: SQL[id] }),
+        run: (id, p = []) => this.request<SqlRunResult>({ method: 'run', sql: SQL[id], params: p }),
+        all: <R>(id: SqlId, p: SqlValue[] = []) => this.request<R[]>({ method: 'all', sql: SQL[id], params: p }),
+        get: <R>(id: SqlId, p: SqlValue[] = []) => this.request<R | undefined>({ method: 'get', sql: SQL[id], params: p }),
         transaction: (inner) => inner(direct),
         close: () => Promise.resolve(),
       };
-      await this.request<void>({ method: 'exec', sql: 'BEGIN' });
+      await this.request<void>({ method: 'exec', sql: SQL['engine.begin'] });
       try {
         const result = await fn(direct);
-        await this.request<void>({ method: 'exec', sql: 'COMMIT' });
+        await this.request<void>({ method: 'exec', sql: SQL['engine.commit'] });
         return result;
       } catch (error) {
         try {
-          await this.request<void>({ method: 'exec', sql: 'ROLLBACK' });
+          await this.request<void>({ method: 'exec', sql: SQL['engine.rollback'] });
         } catch { /* 回滚失败不覆盖原始错误 */ }
         throw error;
       }
@@ -110,14 +111,14 @@ export class WasmSqliteDriver implements SqlDriver {
   }
 
   async integrityCheck(): Promise<{ ok: boolean; result: string }> {
-    const rows = await this.all<Record<string, unknown>>('PRAGMA quick_check');
+    const rows = await this.all<Record<string, unknown>>('engine.quickCheck');
     const result = rows[0] ? String(Object.values(rows[0])[0] ?? '') : '';
     return { ok: result.toLowerCase() === 'ok', result: result || 'unknown' };
   }
 
   async maintenance(): Promise<void> {
-    await this.exec('VACUUM');
-    await this.exec('REINDEX');
+    await this.exec('engine.vacuum');
+    await this.exec('engine.reindex');
   }
 
   close(): Promise<void> {

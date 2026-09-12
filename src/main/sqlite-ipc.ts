@@ -20,6 +20,7 @@ import path from 'node:path';
 import Database from 'better-sqlite3-multiple-ciphers';
 import { app, ipcMain } from 'electron';
 
+import { SQL, type SqlId } from '../shared/sql/catalog.js';
 import { DB_FILE_NAME } from './app/dataDir.js';
 import { decryptWithKey,encryptWithKey } from './backupCrypto.js';
 import { IPC } from './channels.js';
@@ -116,25 +117,21 @@ function assertParams(value: unknown): BindValue[] {
 }
 
 export function registerSqliteIpc(): void {
-  ipcMain.handle(IPC.db.exec, (_event, sql: string) => {
-    assertString(sql, 'sql');
-    getDb().exec(sql);
+  ipcMain.handle(IPC.db.exec, (_event, id: string) => {
+    getDb().exec(resolveSql(id));
   });
 
-  ipcMain.handle(IPC.db.run, (_event, sql: string, params: unknown[]) => {
-    assertString(sql, 'sql');
-    const r = getDb().prepare(sql).run(...assertParams(params));
+  ipcMain.handle(IPC.db.run, (_event, id: string, params: unknown[]) => {
+    const r = getDb().prepare(resolveSql(id)).run(...assertParams(params));
     return { changes: Number(r.changes), lastInsertRowid: Number(r.lastInsertRowid) };
   });
 
-  ipcMain.handle(IPC.db.all, (_event, sql: string, params: unknown[]) => {
-    assertString(sql, 'sql');
-    return getDb().prepare(sql).all(...assertParams(params));
+  ipcMain.handle(IPC.db.all, (_event, id: string, params: unknown[]) => {
+    return getDb().prepare(resolveSql(id)).all(...assertParams(params));
   });
 
-  ipcMain.handle(IPC.db.get, (_event, sql: string, params: unknown[]) => {
-    assertString(sql, 'sql');
-    return getDb().prepare(sql).get(...assertParams(params));
+  ipcMain.handle(IPC.db.get, (_event, id: string, params: unknown[]) => {
+    return getDb().prepare(resolveSql(id)).get(...assertParams(params));
   });
 
   ipcMain.handle(IPC.db.batch, (_event, statements: unknown) => {
@@ -273,6 +270,14 @@ function decryptText(payload: string): { ok: boolean; text?: string; error?: str
   }
 }
 
+/** 解析语句 id 为 SQL 文本；未知 id 一律拒绝（docs/design/27 §2）。 */
+function resolveSql(id: unknown): string {
+  if (typeof id !== 'string' || !Object.prototype.hasOwnProperty.call(SQL, id)) {
+    throw new Error(`未知 SQL 语句：${String(id)}`);
+  }
+  return SQL[id as SqlId];
+}
+
 /**
  * 批量执行写语句（在一次 IPC 内跑多条，供事务内的连续写合并往返）。
  * 调用方须已开启事务；任一条失败由调用方 ROLLBACK。
@@ -282,13 +287,12 @@ function runBatch(statements: unknown): void {
   const connection = getDb();
   for (const raw of statements) {
     if (!raw || typeof raw !== 'object') throw new TypeError('Invalid batch statement');
-    const { sql, params, exec } = raw as { sql?: unknown; params?: unknown; exec?: unknown };
-    assertString(sql, 'batch.sql');
+    const { id, params, exec } = raw as { id?: unknown; params?: unknown; exec?: unknown };
     if (exec === true) {
-      connection.exec(sql);
+      connection.exec(resolveSql(id));
       continue;
     }
-    connection.prepare(sql).run(...assertParams(params));
+    connection.prepare(resolveSql(id)).run(...assertParams(params));
   }
 }
 

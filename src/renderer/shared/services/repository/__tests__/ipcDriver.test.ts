@@ -9,7 +9,7 @@
 
 /**
  * IpcSqlDriver 契约：顶层操作直连；事务内写缓冲为单次批量 IPC；
- * 读取前先下发缓冲（保序）；失败回滚且不下发缓冲。
+ * 读取前先下发缓冲（保序）；失败回滚且不下发缓冲。语句一律按 catalog id。
  */
 import { describe, expect,it, vi } from 'vitest';
 
@@ -17,10 +17,10 @@ import { IpcSqlDriver } from '../ipcDriver';
 
 function makeApi() {
   return {
-    exec: vi.fn(async (_sql: string) => undefined),
-    run: vi.fn(async (_sql: string, _params?: unknown[]) => ({ changes: 1, lastInsertRowid: 2 })),
-    all: vi.fn(async (_sql: string, _params?: unknown[]) => [] as Record<string, unknown>[]),
-    get: vi.fn(async (_sql: string, _params?: unknown[]) => undefined as Record<string, unknown> | undefined),
+    exec: vi.fn(async (_id: string) => undefined),
+    run: vi.fn(async (_id: string, _params?: unknown[]) => ({ changes: 1, lastInsertRowid: 2 })),
+    all: vi.fn(async (_id: string, _params?: unknown[]) => [] as Record<string, unknown>[]),
+    get: vi.fn(async (_id: string, _params?: unknown[]) => undefined as Record<string, unknown> | undefined),
     batch: vi.fn(async (_statements: unknown[]) => undefined),
     integrityCheck: vi.fn(async () => ({ ok: true, result: 'ok' })),
     fullIntegrityCheck: vi.fn(async () => ({ ok: true, result: 'ok' })),
@@ -40,8 +40,8 @@ describe('IpcSqlDriver', () => {
   it('顶层 run 直连 api.run', async () => {
     const api = makeApi();
     const driver = new IpcSqlDriver(api);
-    const result = await driver.run('SELECT 1', []);
-    expect(api.run).toHaveBeenCalledWith('SELECT 1', []);
+    const result = await driver.run('nodes.selectAll', []);
+    expect(api.run).toHaveBeenCalledWith('nodes.selectAll', []);
     expect(result).toEqual({ changes: 1, lastInsertRowid: 2 });
   });
 
@@ -49,15 +49,15 @@ describe('IpcSqlDriver', () => {
     const api = makeApi();
     const driver = new IpcSqlDriver(api);
     await driver.transaction(async (tx) => {
-      await tx.run('INSERT A', [1]);
-      await tx.run('INSERT B', [2]);
+      await tx.run('nodes.deleteAll', [1]);
+      await tx.run('edges.deleteAll', [2]);
     });
     expect(api.batch).toHaveBeenCalledTimes(1);
     expect(api.batch.mock.calls[0]?.[0]).toEqual([
-      { sql: 'INSERT A', params: [1] },
-      { sql: 'INSERT B', params: [2] },
+      { id: 'nodes.deleteAll', params: [1] },
+      { id: 'edges.deleteAll', params: [2] },
     ]);
-    expect(api.exec.mock.calls.map((c) => c[0])).toEqual(['BEGIN', 'COMMIT']);
+    expect(api.exec.mock.calls.map((c) => c[0])).toEqual(['engine.begin', 'engine.commit']);
     expect(api.run).not.toHaveBeenCalled();
   });
 
@@ -66,8 +66,8 @@ describe('IpcSqlDriver', () => {
     api.all.mockResolvedValue([{ n: 1 }]);
     const driver = new IpcSqlDriver(api);
     const rows = await driver.transaction(async (tx) => {
-      await tx.run('UPDATE X', []);
-      return tx.all('SELECT n', []);
+      await tx.run('nodes.deleteAll', []);
+      return tx.all('nodes.selectAll', []);
     });
     expect(rows).toEqual([{ n: 1 }]);
     expect(api.batch).toHaveBeenCalledTimes(1);
@@ -79,11 +79,11 @@ describe('IpcSqlDriver', () => {
     const driver = new IpcSqlDriver(api);
     await expect(
       driver.transaction(async (tx) => {
-        await tx.run('INSERT A', []);
+        await tx.run('nodes.deleteAll', []);
         throw new Error('boom');
       }),
     ).rejects.toThrow('boom');
     expect(api.batch).not.toHaveBeenCalled();
-    expect(api.exec.mock.calls.map((c) => c[0])).toEqual(['BEGIN', 'ROLLBACK']);
+    expect(api.exec.mock.calls.map((c) => c[0])).toEqual(['engine.begin', 'engine.rollback']);
   });
 });

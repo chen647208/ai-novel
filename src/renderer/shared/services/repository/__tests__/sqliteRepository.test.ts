@@ -13,6 +13,7 @@ import Database from 'better-sqlite3-multiple-ciphers';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { APP_STATE_VERSION } from '../../../../../shared/constants/versions';
+import { SQL,type SqlId } from '../../../../../shared/sql/catalog';
 import type { AppState, Chapter,KnowledgeItem, Project } from '../../../../../shared/types';
 import { jsonRepository } from '../jsonRepository';
 import { migrate,SCHEMA_VERSION } from '../schema';
@@ -42,13 +43,13 @@ const nodeSqliteFixture: DriverFixture = {
   async create() {
     const db = new Database(':memory:');
     const driver: SqlDriver = {
-      exec: async (sql) => { db.exec(sql); },
-      run: async (sql, params = []) => {
-        const r = db.prepare(sql).run(...(params as unknown as never[]));
+      exec: async (id) => { db.exec(SQL[id]); },
+      run: async (id, params = []) => {
+        const r = db.prepare(SQL[id]).run(...(params as unknown as never[]));
         return { changes: Number(r.changes), lastInsertRowid: Number(r.lastInsertRowid) };
       },
-      all: async <T>(sql: string, params: SqlValue[] = []) => db.prepare(sql).all(...(params as never[])) as T[],
-      get: async <T>(sql: string, params: SqlValue[] = []) => db.prepare(sql).get(...(params as never[])) as T | undefined,
+      all: async <T>(id: SqlId, params: SqlValue[] = []) => db.prepare(SQL[id]).all(...(params as never[])) as T[],
+      get: async <T>(id: SqlId, params: SqlValue[] = []) => db.prepare(SQL[id]).get(...(params as never[])) as T | undefined,
       transaction: async (fn) => {
         db.exec('BEGIN');
         try {
@@ -83,18 +84,18 @@ const wasmFixture: DriverFixture = {
     const req = (method: 'exec' | 'run' | 'all' | 'get', sql: string, params: SqlValue[] = []) =>
       runWasmRequest(db, capi, { method, sql, params });
     const driver: SqlDriver = {
-      exec: async (sql) => { req('exec', sql); },
-      run: async (sql, params = []) => req('run', sql, params) as SqlRunResult,
-      all: async <T>(sql: string, params: SqlValue[] = []) => req('all', sql, params) as T[],
-      get: async <T>(sql: string, params: SqlValue[] = []) => req('get', sql, params) as T | undefined,
+      exec: async (id) => { req('exec', SQL[id]); },
+      run: async (id, params = []) => req('run', SQL[id], params) as SqlRunResult,
+      all: async <T>(id: SqlId, params: SqlValue[] = []) => req('all', SQL[id], params) as T[],
+      get: async <T>(id: SqlId, params: SqlValue[] = []) => req('get', SQL[id], params) as T | undefined,
       transaction: async (fn) => {
-        req('exec', 'BEGIN');
+        req('exec', SQL['engine.begin']);
         try {
           const result = await fn(driver);
-          req('exec', 'COMMIT');
+          req('exec', SQL['engine.commit']);
           return result;
         } catch (e) {
-          try { req('exec', 'ROLLBACK'); } catch { /* noop */ }
+          try { req('exec', SQL['engine.rollback']); } catch { /* noop */ }
           throw e;
         }
       },

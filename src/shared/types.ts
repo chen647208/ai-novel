@@ -1153,13 +1153,13 @@ export interface ElectronAPI {
     checkConsistency: (projectId: string) => Promise<{ success: boolean; result?: VectorConsistencyResult; error?: string }>;
   };
 
-  // SQLite 数据引擎（主进程托管 better-sqlite3）。值一律走 params 绑定。
+  // SQLite 数据引擎（主进程托管 better-sqlite3）。语句只按 catalog id 引用，值走 params 绑定。
   db: {
-    exec: (sql: string) => Promise<void>;
-    run: (sql: string, params?: unknown[]) => Promise<{ changes: number; lastInsertRowid: number }>;
-    all: (sql: string, params?: unknown[]) => Promise<Record<string, unknown>[]>;
-    get: (sql: string, params?: unknown[]) => Promise<Record<string, unknown> | undefined>;
-    batch: (statements: Array<{ sql: string; params?: unknown[]; exec?: boolean }>) => Promise<void>;
+    exec: (id: string) => Promise<void>;
+    run: (id: string, params?: unknown[]) => Promise<{ changes: number; lastInsertRowid: number }>;
+    all: (id: string, params?: unknown[]) => Promise<Record<string, unknown>[]>;
+    get: (id: string, params?: unknown[]) => Promise<Record<string, unknown> | undefined>;
+    batch: (statements: Array<{ id: string; params?: unknown[]; exec?: boolean }>) => Promise<void>;
     integrityCheck: () => Promise<{ ok: boolean; result: string }>;
     fullIntegrityCheck: () => Promise<{ ok: boolean; result: string }>;
     hotBackup: () => Promise<{ ok: boolean; path?: string; bytes?: number; error?: string }>;

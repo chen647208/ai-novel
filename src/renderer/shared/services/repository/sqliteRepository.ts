@@ -32,7 +32,7 @@ import type {
 import { logger } from '../../utils/logger';
 import { jsonRepository } from './jsonRepository';
 import { META_KEYS,migrate, SETTING_KEYS } from './schema';
-import type { CommitOptions,DbEncryptionStatus, SearchHit, SearchOptions, SqlDriver, SqlValue, StorageRepository } from './types';
+import type { CommitOptions,DbEncryptionStatus, SearchHit, SearchOptions, SqlDriver, StorageRepository } from './types';
 
 const DEFAULT_SEARCH_LIMIT = 50;
 /** trigram 分词器需要至少 3 个字符才能命中 */
@@ -83,7 +83,7 @@ export class SqliteRepository implements StorageRepository {
     if (this.migrated) return;
     this.migrated = true;
     const sentinel = await this.driver.get<{ value: string }>(
-      `SELECT value FROM meta WHERE key = 'migrated_from_json'`
+      'meta.selectMigratedSentinel'
     );
     if (sentinel) return;
     const existing = await this.loadAll();
@@ -95,8 +95,7 @@ export class SqliteRepository implements StorageRepository {
       }
     }
     await this.driver.run(
-      `INSERT INTO meta(key, value) VALUES('migrated_from_json', '1')
-       ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+      'meta.insertMigratedSentinel',
       []
     );
   }
@@ -105,9 +104,9 @@ export class SqliteRepository implements StorageRepository {
 
   async loadAll(): Promise<AppState | null> {
     await this.ready;
-    const nodeRows = await this.driver.all<NodeRow>(`SELECT * FROM nodes`);
-    const settingRows = await this.driver.all<{ key: string; value: string }>(`SELECT key, value FROM settings`);
-    const metaRows = await this.driver.all<{ key: string; value: string }>(`SELECT key, value FROM meta`);
+    const nodeRows = await this.driver.all<NodeRow>('nodes.selectAll');
+    const settingRows = await this.driver.all<{ key: string; value: string }>('settings.selectAll');
+    const metaRows = await this.driver.all<{ key: string; value: string }>('meta.selectAll');
     if (nodeRows.length === 0 && settingRows.length === 0) return null;
 
     // 按书分组投影回文档模型
@@ -121,10 +120,10 @@ export class SqliteRepository implements StorageRepository {
       return g;
     };
     for (const r of nodeRows) ensure(r.book_id).nodes.push(rowToNode(r));
-    const edgeRows = await this.driver.all<EdgeRow>(`SELECT * FROM edges`);
+    const edgeRows = await this.driver.all<EdgeRow>('edges.selectAll');
     for (const r of edgeRows) ensure(r.book_id).edges.push(rowToEdge(r));
     const attrRows = await this.driver.all<AttrRow & { book_id: string }>(
-      `SELECT a.*, n.book_id FROM attrs a JOIN nodes n ON a.node_id = n.id`
+      'attrs.selectAllWithBook'
     );
     for (const r of attrRows) ensure(r.book_id).attrs.push(rowToAttr(r));
 
@@ -184,7 +183,7 @@ export class SqliteRepository implements StorageRepository {
   async loadConsistencyCheckConfig(): Promise<ConsistencyCheckConfig | null> {
     await this.ready;
     const row = await this.driver.get<{ value: string }>(
-      `SELECT value FROM settings WHERE key = 'consistencyCheckConfig'`
+      'settings.selectConsistencyConfig'
     );
     return row ? (JSON.parse(row.value) as ConsistencyCheckConfig) : null;
   }
@@ -192,7 +191,7 @@ export class SqliteRepository implements StorageRepository {
   async loadConsistencyPrompts(): Promise<ConsistencyCheckPromptTemplate[] | null> {
     await this.ready;
     const row = await this.driver.get<{ value: string }>(
-      `SELECT value FROM settings WHERE key = 'consistencyPrompts'`
+      'settings.selectConsistencyPrompts'
     );
     return row ? (JSON.parse(row.value) as ConsistencyCheckPromptTemplate[]) : null;
   }
@@ -201,7 +200,7 @@ export class SqliteRepository implements StorageRepository {
   async loadRevisions(nodeId: string): Promise<RevisionEntity[]> {
     await this.ready;
     const rows = await this.driver.all<RevisionRow>(
-      `SELECT id, node_id, seq, body, author, cause, created_at FROM revisions WHERE node_id = ? ORDER BY seq ASC`,
+      'revisions.selectByNode',
       [nodeId]
     );
     return rows.map((r) => ({
@@ -226,7 +225,7 @@ export class SqliteRepository implements StorageRepository {
       }
       // 删除 state 中不存在的书
       const keepIds = state.projects.map((p) => p.id);
-      const existingBooks = await tx.all<{ book_id: string }>(`SELECT DISTINCT book_id FROM nodes`);
+      const existingBooks = await tx.all<{ book_id: string }>('nodes.selectDistinctBooks');
       const erased: string[] = [];
       for (const row of existingBooks) {
         if (!keepIds.includes(row.book_id)) {
@@ -254,9 +253,9 @@ export class SqliteRepository implements StorageRepository {
     await this.ready;
     await this.driver.transaction(async (tx) => {
       await this.eraseBookTx(tx, id);
-      const active = await tx.get<{ value: string }>(`SELECT value FROM meta WHERE key = 'activeProjectId'`);
+      const active = await tx.get<{ value: string }>('meta.selectActiveProject');
       if (active && active.value === id) {
-        await tx.run(`DELETE FROM meta WHERE key = 'activeProjectId'`);
+        await tx.run('meta.deleteActiveProject');
       }
     });
     indexService.invalidate(id);
@@ -273,17 +272,17 @@ export class SqliteRepository implements StorageRepository {
   async clear(): Promise<void> {
     await this.ready;
     await this.driver.transaction(async (tx) => {
-      await tx.run(`DELETE FROM nodes`, []);
-      await tx.run(`DELETE FROM edges`, []);
-      await tx.run(`DELETE FROM attrs`, []);
-      await tx.run(`DELETE FROM revisions`, []);
-      await tx.run(`DELETE FROM attachments`, []);
-      await tx.run(`DELETE FROM blobs`, []);
-      await tx.run(`DELETE FROM entity_changes`, []);
-      await tx.run(`DELETE FROM nodes_fts`, []);
-      await tx.run(`DELETE FROM settings`, []);
+      await tx.run('nodes.deleteAll', []);
+      await tx.run('edges.deleteAll', []);
+      await tx.run('attrs.deleteAll', []);
+      await tx.run('revisions.deleteAll', []);
+      await tx.run('attachments.deleteAll', []);
+      await tx.run('blobs.deleteAll', []);
+      await tx.run('changes.deleteAll', []);
+      await tx.run('fts.deleteAll', []);
+      await tx.run('settings.deleteAll', []);
       await tx.run(
-        `DELETE FROM meta WHERE key IN ('activeProjectId','activeModelId','activeEmbeddingModelId','language','theme','uiFont','editorFont')`,
+        'meta.deleteKnownKeys',
         []
       );
     });
@@ -360,18 +359,13 @@ export class SqliteRepository implements StorageRepository {
     if (q.length < MIN_TRIGRAM_QUERY) return [];
     const limit = options?.limit ?? DEFAULT_SEARCH_LIMIT;
     const match = toFtsPhrase(q);
-    const projFilter = options?.projectId ? `AND book_id = ?` : '';
-    const baseParams: SqlValue[] = options?.projectId ? [match, options.projectId] : [match];
+    const projectFilter = options?.projectId ?? null;
 
     const rows = await this.driver.all<{
       book_id: string; node_id: string; type: string; title: string; snip: string; rank: number;
     }>(
-      `SELECT book_id, node_id, type, title,
-              snippet(nodes_fts, 4, '[', ']', '…', 16) AS snip, rank
-         FROM nodes_fts
-        WHERE nodes_fts MATCH ? ${projFilter}
-        ORDER BY rank LIMIT ?`,
-      [...baseParams, limit]
+      'fts.search',
+      [match, projectFilter, projectFilter, limit]
     );
 
     const hits: SearchHit[] = [];
@@ -413,10 +407,10 @@ export class SqliteRepository implements StorageRepository {
     const cause = opts?.cause ?? null;
 
     // 旧哈希（差分基线）+ 旧正文（Revision 触发判定）
-    const oldNodes = await tx.all<EntityRow & { body: string }>(`SELECT id, hash, body FROM nodes WHERE book_id = ?`, [bookId]);
-    const oldEdges = await tx.all<EntityRow>(`SELECT id, hash FROM edges WHERE book_id = ?`, [bookId]);
+    const oldNodes = await tx.all<EntityRow & { body: string }>('nodes.selectHashesByBook', [bookId]);
+    const oldEdges = await tx.all<EntityRow>('edges.selectHashesByBook', [bookId]);
     const oldAttrs = await tx.all<EntityRow>(
-      `SELECT a.id, a.hash FROM attrs a JOIN nodes n ON a.node_id = n.id WHERE n.book_id = ?`,
+      'attrs.selectHashesByBook',
       [bookId]
     );
     const oldHash = new Map<string, string>();
@@ -430,8 +424,7 @@ export class SqliteRepository implements StorageRepository {
 
     // 各节点当前最大修订序号（删除前查询，供新修订续号）
     const seqRows = await tx.all<{ node_id: string; max: number }>(
-      `SELECT r.node_id, MAX(r.seq) AS max FROM revisions r
-        WHERE r.node_id IN (SELECT id FROM nodes WHERE book_id = ?) GROUP BY r.node_id`,
+      'revisions.selectMaxSeqByBook',
       [bookId]
     );
     const maxSeq = new Map<string, number>(seqRows.map((r) => [r.node_id, Number(r.max)]));
@@ -452,18 +445,18 @@ export class SqliteRepository implements StorageRepository {
     // 消失的旧实体：删除行 + 删除 FTS 投影 + 擦除变更
     for (const r of oldNodes) {
       if (newNodeHash.has(r.id)) continue;
-      await tx.run(`DELETE FROM nodes WHERE id = ?`, [r.id]);
-      await tx.run(`DELETE FROM nodes_fts WHERE node_id = ?`, [r.id]);
+      await tx.run('nodes.deleteById', [r.id]);
+      await tx.run('fts.deleteByNode', [r.id]);
       changes.push({ entityName: 'nodes', entityId: r.id, hash: '', isErased: true, instanceId, agentId, utcDateChanged: now });
     }
     for (const r of oldEdges) {
       if (newEdgeHash.has(r.id)) continue;
-      await tx.run(`DELETE FROM edges WHERE id = ?`, [r.id]);
+      await tx.run('edges.deleteById', [r.id]);
       changes.push({ entityName: 'edges', entityId: r.id, hash: '', isErased: true, instanceId, agentId, utcDateChanged: now });
     }
     for (const r of oldAttrs) {
       if (newAttrHash.has(r.id)) continue;
-      await tx.run(`DELETE FROM attrs WHERE id = ?`, [r.id]);
+      await tx.run('attrs.deleteById', [r.id]);
       changes.push({ entityName: 'attrs', entityId: r.id, hash: '', isErased: true, instanceId, agentId, utcDateChanged: now });
     }
 
@@ -473,25 +466,20 @@ export class SqliteRepository implements StorageRepository {
       if (oldHash.get(`nodes:${node.id}`) === hash) {
         // 书节点内容未变也要刷新 updated_at：Project.lastModified 由它承载（书架排序）。
         if (node.type === 'novel.book') {
-          await tx.run(`UPDATE nodes SET updated_at = ? WHERE id = ?`, [node.updatedAt, node.id]);
+          await tx.run('nodes.updateUpdatedAt', [node.updatedAt, node.id]);
         }
         continue;
       }
       await tx.run(
-        `INSERT INTO nodes(id, book_id, type, title, body, path, created_at, updated_at, erased, hash)
-         VALUES(?,?,?,?,?,?,?,?,?,?)
-         ON CONFLICT(id) DO UPDATE SET
-           book_id=excluded.book_id, type=excluded.type, title=excluded.title, body=excluded.body,
-           path=excluded.path, created_at=excluded.created_at, updated_at=excluded.updated_at,
-           erased=excluded.erased, hash=excluded.hash`,
+        'nodes.upsert',
         [node.id, node.bookId, node.type, node.title, node.body, node.path ?? null, node.createdAt, node.updatedAt, node.erased ? 1 : 0, hash]
       );
       changes.push({ entityName: 'nodes', entityId: node.id, hash, isErased: false, instanceId, agentId, utcDateChanged: now });
       // FTS 投影随标题/正文变更刷新（先删后插，兼容不可检索类型）
-      await tx.run(`DELETE FROM nodes_fts WHERE node_id = ?`, [node.id]);
+      await tx.run('fts.deleteByNode', [node.id]);
       if (scopeOf(node.type)) {
         await tx.run(
-          `INSERT INTO nodes_fts(book_id, node_id, type, title, content) VALUES(?,?,?,?,?)`,
+          'fts.insert',
           [bookId, node.id, node.type, node.title, node.body]
         );
       }
@@ -500,11 +488,7 @@ export class SqliteRepository implements StorageRepository {
       const hash = newEdgeHash.get(edge.id) as string;
       if (oldHash.get(`edges:${edge.id}`) === hash) continue;
       await tx.run(
-        `INSERT INTO edges(id, from_id, to_id, kind, role, position, book_id, erased, hash)
-         VALUES(?,?,?,?,?,?,?,?,?)
-         ON CONFLICT(id) DO UPDATE SET
-           from_id=excluded.from_id, to_id=excluded.to_id, kind=excluded.kind, role=excluded.role,
-           position=excluded.position, book_id=excluded.book_id, erased=excluded.erased, hash=excluded.hash`,
+        'edges.upsert',
         [edge.id, edge.fromId, edge.toId, edge.kind, edge.role ?? null, edge.position, edge.bookId, edge.erased ? 1 : 0, hash]
       );
       changes.push({ entityName: 'edges', entityId: edge.id, hash, isErased: false, instanceId, agentId, utcDateChanged: now });
@@ -513,11 +497,7 @@ export class SqliteRepository implements StorageRepository {
       const hash = newAttrHash.get(attr.id) as string;
       if (oldHash.get(`attrs:${attr.id}`) === hash) continue;
       await tx.run(
-        `INSERT INTO attrs(id, node_id, type, name, value, inheritable, position, erased, hash)
-         VALUES(?,?,?,?,?,?,?,?,?)
-         ON CONFLICT(id) DO UPDATE SET
-           node_id=excluded.node_id, type=excluded.type, name=excluded.name, value=excluded.value,
-           inheritable=excluded.inheritable, position=excluded.position, erased=excluded.erased, hash=excluded.hash`,
+        'attrs.upsert',
         [attr.id, attr.nodeId, attr.type, attr.name, attr.value, attr.inheritable ? 1 : 0, attr.position, attr.erased ? 1 : 0, hash]
       );
       changes.push({ entityName: 'attrs', entityId: attr.id, hash, isErased: false, instanceId, agentId, utcDateChanged: now });
@@ -547,7 +527,7 @@ export class SqliteRepository implements StorageRepository {
   private async writeRevisionsTx(tx: SqlDriver, revisions: RevisionEntity[]): Promise<void> {
     for (const r of revisions) {
       await tx.run(
-        `INSERT INTO revisions(id, node_id, seq, body, author, cause, created_at) VALUES(?,?,?,?,?,?,?)`,
+        'revisions.insert',
         [r.id, r.nodeId, r.seq, r.body, r.author, r.cause ?? null, r.createdAt]
       );
     }
@@ -555,10 +535,10 @@ export class SqliteRepository implements StorageRepository {
 
   /** 整本书擦除（deleteProject / saveAll 清理）：删行 + 写擦除变更 + 清 FTS */
   private async eraseBookTx(tx: SqlDriver, bookId: string): Promise<void> {
-    const nodes = await tx.all<{ id: string }>(`SELECT id FROM nodes WHERE book_id = ?`, [bookId]);
-    const edges = await tx.all<{ id: string }>(`SELECT id FROM edges WHERE book_id = ?`, [bookId]);
+    const nodes = await tx.all<{ id: string }>('nodes.selectIdsByBook', [bookId]);
+    const edges = await tx.all<{ id: string }>('edges.selectIdsByBook', [bookId]);
     const attrs = await tx.all<{ id: string }>(
-      `SELECT a.id FROM attrs a JOIN nodes n ON a.node_id = n.id WHERE n.book_id = ?`,
+      'attrs.selectIdsByBook',
       [bookId]
     );
     const now = Date.now();
@@ -569,18 +549,17 @@ export class SqliteRepository implements StorageRepository {
       ...attrs.map((r) => ({ entityName: 'attrs' as const, entityId: r.id })),
     ].map((c) => ({ ...c, hash: '', isErased: true, instanceId, agentId: 'user', utcDateChanged: now }));
 
-    await tx.run(`DELETE FROM attrs WHERE node_id IN (SELECT id FROM nodes WHERE book_id = ?)`, [bookId]);
-    await tx.run(`DELETE FROM edges WHERE book_id = ?`, [bookId]);
-    await tx.run(`DELETE FROM nodes WHERE book_id = ?`, [bookId]);
-    await tx.run(`DELETE FROM nodes_fts WHERE book_id = ?`, [bookId]);
+    await tx.run('attrs.deleteByBook', [bookId]);
+    await tx.run('edges.deleteByBook', [bookId]);
+    await tx.run('nodes.deleteByBook', [bookId]);
+    await tx.run('fts.deleteByBook', [bookId]);
     await this.writeChangesTx(tx, changes);
   }
 
   private async writeChangesTx(tx: SqlDriver, changes: EntityChange[]): Promise<void> {
     for (const c of changes) {
       await tx.run(
-        `INSERT INTO entity_changes(entity_name, entity_id, hash, is_erased, instance_id, agent_id, utc_date_changed)
-         VALUES(?,?,?,?,?,?,?)`,
+        'changes.insert',
         [c.entityName, c.entityId, c.hash, c.isErased ? 1 : 0, c.instanceId, c.agentId, c.utcDateChanged]
       );
     }
@@ -595,10 +574,10 @@ export class SqliteRepository implements StorageRepository {
       if (onlyProvided && !present) continue;
       const val = (source as Record<string, unknown>)[key];
       if (val === undefined) {
-        await tx.run(`DELETE FROM settings WHERE key = ?`, [key]);
+        await tx.run('settings.deleteKey', [key]);
       } else {
         await tx.run(
-          `INSERT INTO settings(key, value) VALUES(?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+          'settings.upsert',
           [key, JSON.stringify(val)]
         );
       }
@@ -611,10 +590,10 @@ export class SqliteRepository implements StorageRepository {
       if (onlyProvided && !present) continue;
       const val = (source as Record<string, unknown>)[key];
       if (val === null || val === undefined) {
-        await tx.run(`DELETE FROM meta WHERE key = ?`, [key]);
+        await tx.run('meta.deleteKey', [key]);
       } else {
         await tx.run(
-          `INSERT INTO meta(key, value) VALUES(?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+          'meta.upsert',
           [key, String(val)]
         );
       }

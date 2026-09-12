@@ -7,6 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import type { SqlId } from '../../../../shared/sql/catalog';
 import type { ElectronAPI } from '../../../../shared/types';
 import type { DbEncryptionStatus,SqlDriver, SqlRunResult,SqlValue } from './types';
 
@@ -36,26 +37,26 @@ export class IpcSqlDriver implements SqlDriver {
     return result;
   }
 
-  exec(sql: string): Promise<void> {
-    return this.enqueue(() => this.api.exec(sql));
+  exec(id: SqlId): Promise<void> {
+    return this.enqueue(() => this.api.exec(id));
   }
 
-  run(sql: string, params: SqlValue[] = []): Promise<SqlRunResult> {
-    return this.enqueue(() => this.api.run(sql, params));
+  run(id: SqlId, params: SqlValue[] = []): Promise<SqlRunResult> {
+    return this.enqueue(() => this.api.run(id, params));
   }
 
-  all<T = Record<string, SqlValue>>(sql: string, params: SqlValue[] = []): Promise<T[]> {
-    return this.enqueue(async () => (await this.api.all(sql, params)) as unknown as T[]);
+  all<T = Record<string, SqlValue>>(id: SqlId, params: SqlValue[] = []): Promise<T[]> {
+    return this.enqueue(async () => (await this.api.all(id, params)) as unknown as T[]);
   }
 
-  get<T = Record<string, SqlValue>>(sql: string, params: SqlValue[] = []): Promise<T | undefined> {
-    return this.enqueue(async () => (await this.api.get(sql, params)) as unknown as T | undefined);
+  get<T = Record<string, SqlValue>>(id: SqlId, params: SqlValue[] = []): Promise<T | undefined> {
+    return this.enqueue(async () => (await this.api.get(id, params)) as unknown as T | undefined);
   }
 
   transaction<T>(fn: (tx: SqlDriver) => Promise<T>): Promise<T> {
     return this.enqueue(async () => {
       // 事务内写语句先缓冲，读到结果前或提交时一次性批量下发，消除逐条 IPC 往返。
-      const buffer: Array<{ sql: string; params?: SqlValue[]; exec?: boolean }> = [];
+      const buffer: Array<{ id: SqlId; params?: SqlValue[]; exec?: boolean }> = [];
       const drain = async (): Promise<void> => {
         if (buffer.length === 0) return;
         const chunk = buffer.splice(0, buffer.length);
@@ -64,34 +65,34 @@ export class IpcSqlDriver implements SqlDriver {
       // 事务内的直连子驱动：绕过队列（外层已持锁），避免自死锁。
       const direct: SqlDriver = {
         // exec 里的语句按顺序入缓冲，提交/读取前统一下发。
-        exec: async (sql) => { buffer.push({ sql, exec: true }); },
+        exec: async (id) => { buffer.push({ id, exec: true }); },
         // 批量模式不返回真实 changes/rowid；本仓库事务内无调用方读取该结果。
-        run: async (sql, p = []) => {
-          buffer.push({ sql, params: p });
+        run: async (id, p = []) => {
+          buffer.push({ id, params: p });
           return { changes: 0, lastInsertRowid: 0 };
         },
-        all: async <R>(sql: string, p: SqlValue[] = []) => {
+        all: async <R>(id: SqlId, p: SqlValue[] = []) => {
           await drain();
-          return (await this.api.all(sql, p)) as unknown as R[];
+          return (await this.api.all(id, p)) as unknown as R[];
         },
-        get: async <R>(sql: string, p: SqlValue[] = []) => {
+        get: async <R>(id: SqlId, p: SqlValue[] = []) => {
           await drain();
-          return (await this.api.get(sql, p)) as unknown as R | undefined;
+          return (await this.api.get(id, p)) as unknown as R | undefined;
         },
         // SQLite 不支持嵌套 BEGIN：内层事务直接内联执行。
         transaction: (inner) => inner(direct),
         close: () => Promise.resolve(),
       };
-      await this.api.exec('BEGIN');
+      await this.api.exec('engine.begin');
       try {
         const result = await fn(direct);
         await drain();
-        await this.api.exec('COMMIT');
+        await this.api.exec('engine.commit');
         return result;
       } catch (error) {
         buffer.length = 0;
         try {
-          await this.api.exec('ROLLBACK');
+          await this.api.exec('engine.rollback');
         } catch { /* 回滚失败不覆盖原始错误 */ }
         throw error;
       }

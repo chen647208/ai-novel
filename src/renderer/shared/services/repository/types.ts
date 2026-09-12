@@ -9,6 +9,7 @@
 
 import type { RevisionEntity } from '@core/entities';
 
+import type { SqlId } from '../../../../shared/sql/catalog';
 import type {
   AppState,
   ConsistencyCheckConfig,
@@ -47,14 +48,14 @@ export interface DbEncryptionStatus {
 }
 
 export interface SqlDriver {
-  /** 执行一条或多条无返回语句（建表、PRAGMA 等） */
-  exec(sql: string): Promise<void>;
+  /** 执行一条无返回语句（建表、PRAGMA、迁移等，按 catalog id） */
+  exec(id: SqlId): Promise<void>;
   /** 执行写入语句，返回受影响行数与自增主键 */
-  run(sql: string, params?: SqlValue[]): Promise<SqlRunResult>;
+  run(id: SqlId, params?: SqlValue[]): Promise<SqlRunResult>;
   /** 查询多行 */
-  all<T = Record<string, SqlValue>>(sql: string, params?: SqlValue[]): Promise<T[]>;
+  all<T = Record<string, SqlValue>>(id: SqlId, params?: SqlValue[]): Promise<T[]>;
   /** 查询单行 */
-  get<T = Record<string, SqlValue>>(sql: string, params?: SqlValue[]): Promise<T | undefined>;
+  get<T = Record<string, SqlValue>>(id: SqlId, params?: SqlValue[]): Promise<T | undefined>;
   /** 事务：回调内的所有写操作原子提交，抛错则回滚 */
   transaction<T>(fn: (tx: SqlDriver) => Promise<T>): Promise<T>;
   /** 快速完整性检查（桌面 better-sqlite3 支持；无此能力的后端可省略） */
