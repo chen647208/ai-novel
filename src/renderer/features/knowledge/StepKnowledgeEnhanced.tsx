@@ -7,7 +7,6 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { Bot, Brain, Clock, Flag, Globe, MapPinned, Search, Settings2, X } from 'lucide-react';
 import React, { useEffect, useRef,useState } from 'react';
 
 import { type CommitOptions,useProjectStore } from '@/app/stores/projectStore';
@@ -18,19 +17,17 @@ import { embeddingModelService } from '@/shared/services/embeddingModelService';
 import { searchKnowledge } from '@/shared/services/knowledge/knowledgeSearch';
 import { vectorIntegrationService } from '@/shared/services/knowledge/vectorIntegrationService';
 import { Button } from '@/shared/ui/Button';
-import { Card } from '@/shared/ui/Card';
-import { FeaturePanel } from '@/shared/ui/FeaturePanel';
-import { Input } from '@/shared/ui/Input';
-import { Spinner } from '@/shared/ui/Spinner';
-import { cn } from '@/shared/utils/cn';
-import { formatPercent } from '@/shared/utils/format';
 
 import { type ConsistencyCheckConfig,type ConsistencyCheckPromptTemplate, type DiagramType, type EmbeddingModelConfig, type HybridSearchResult, type KnowledgeCategory, type KnowledgeItem, type ModelConfig, type Project } from '../../../shared/types';
 import { repository } from '../../shared/services/repository';
 import { logger } from '../../shared/utils/logger';
 import { KnowledgeDetailPanel } from './components/KnowledgeDetailPanel';
+import { KnowledgeFeatureEditors } from './components/KnowledgeFeatureEditors';
 import KnowledgeFeaturePanels from './components/KnowledgeFeaturePanels';
 import { KnowledgeListPanel } from './components/KnowledgeListPanel';
+import { KnowledgeSearchBar, type KnowledgeSearchMode } from './components/KnowledgeSearchBar';
+import { KnowledgeSearchResults } from './components/KnowledgeSearchResults';
+import { KnowledgeStatsGrid } from './components/KnowledgeStatsGrid';
 import { useKnowledgeIndex } from './hooks/useKnowledgeIndex';
 
 interface StepKnowledgeEnhancedProps {
@@ -61,7 +58,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<HybridSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [searchMode, setSearchMode] = useState<'keyword' | 'semantic' | 'hybrid'>('hybrid');
+  const [searchMode, setSearchMode] = useState<KnowledgeSearchMode>('hybrid');
   const [showSearchResults, setShowSearchResults] = useState(false);
 
   const [showLocationEditor, setShowLocationEditor] = useState(false);
@@ -338,163 +335,33 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
           )}
         </div>
 
-        <div className="mt-6">
-          <div className="flex gap-3">
-            <div className="relative flex-1">
-              <Input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !isSearching && searchQuery.trim()) void handleSemanticSearch(searchQuery);
-                }}
-                placeholder={t('center.searchPlaceholder')}
-                className="pr-28"
-              />
-              <Button
-                size="sm"
-                onClick={() => handleSemanticSearch(searchQuery)}
-                disabled={isSearching || !searchQuery.trim()}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2"
-              >
-                {isSearching ? <Spinner className="size-3.5" /> : <Search className="size-3.5" />}
-                {isSearching ? t('center.searching') : t('center.search')}
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-1 rounded-lg border border-border bg-muted/40 p-1">
-              {([
-                { mode: 'hybrid' as const, icon: Bot, title: t('center.hybridTitle'), label: t('center.modeHybrid') },
-                { mode: 'semantic' as const, icon: Brain, title: t('center.semanticTitle'), label: t('center.modeSemantic') },
-                { mode: 'keyword' as const, icon: Search, title: t('center.keywordTitle'), label: t('center.modeKeyword') },
-              ]).map(({ mode, icon: Icon, title, label }) => (
-                <button
-                  key={mode}
-                  onClick={() => setSearchMode(mode)}
-                  title={title}
-                  className={cn(
-                    'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                    searchMode === mode
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-                  )}
-                >
-                  <Icon className="size-4" />
-                  <span className="hidden sm:inline">{label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full bg-primary" />
-              {t('center.hybridLegend')}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full bg-chart-1" />
-              {t('center.semanticLegend')}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full bg-chart-5" />
-              {t('center.keywordLegend')}
-            </span>
-          </div>
-        </div>
+        <KnowledgeSearchBar
+          value={searchQuery}
+          onChange={handleSearchChange}
+          onSearch={() => void handleSemanticSearch(searchQuery)}
+          isSearching={isSearching}
+          mode={searchMode}
+          onModeChange={setSearchMode}
+        />
       </div>{/* 固定头部区域结束 */}
 
       <div className="flex-1 overflow-y-auto px-8 pb-8 space-y-6">
 
-      <div className="grid grid-cols-5 gap-3">
-        {([
-          { icon: Globe, label: t('center.statsWorldview'), value: project.worldView ? t('center.set') : t('center.unset'), active: !!project.worldView },
-          { icon: MapPinned, label: t('center.statsLocation'), value: project.locations?.length ? t('center.countUnit', { count: project.locations.length }) : t('center.notDefined'), active: !!project.locations?.length },
-          { icon: Flag, label: t('center.statsFaction'), value: project.factions?.length ? t('center.countUnit', { count: project.factions.length }) : t('center.notDefined'), active: !!project.factions?.length },
-          { icon: Clock, label: t('center.statsTimeline'), value: project.timeline?.events?.length ? t('center.eventsCount', { count: project.timeline.events.length }) : t('center.notDefined'), active: !!project.timeline?.events?.length },
-          { icon: Settings2, label: t('center.statsRule'), value: project.ruleSystems?.length ? t('center.countUnit', { count: project.ruleSystems.length }) : t('center.notDefined'), active: !!project.ruleSystems?.length },
-        ]).map(({ icon: Icon, label, value, active }) => (
-          <div
-            key={label}
-            className={cn(
-              'flex items-center gap-3 rounded-lg border p-4 transition-colors',
-              active ? 'border-primary/40 bg-primary/5' : 'border-border bg-card'
-            )}
-          >
-            <div
-              className={cn(
-                'flex size-9 shrink-0 items-center justify-center rounded-lg',
-                active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
-              )}
-            >
-              <Icon className="size-4.5" />
-            </div>
-            <div className="min-w-0">
-              <h4 className="text-sm font-medium leading-tight">{label}</h4>
-              <p className="truncate text-xs text-muted-foreground">{value}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <KnowledgeStatsGrid project={project} />
 
       {showSearchResults && searchResults.length > 0 && (
-        <Card className="mb-6 overflow-hidden">
-          <div className="flex items-center justify-between border-b border-border bg-muted/30 p-4">
-            <h3 className="text-sm font-medium">
-              {t('center.searchResultsTitle', { count: searchResults.length })}
-              <span className="ml-2 text-xs font-normal text-muted-foreground">
-                {searchMode === 'hybrid' ? t('center.searchModeHybrid') : searchMode === 'semantic' ? t('center.searchModeSemantic') : t('center.searchModeKeyword')}
-              </span>
-            </h3>
-            <button
-              onClick={() => setShowSearchResults(false)}
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <X className="size-4" />
-            </button>
-          </div>
-          <div className="max-h-64 overflow-y-auto">
-            {searchResults.map((result) => (
-              <div
-                key={result.document.id}
-                className="cursor-pointer border-b border-border p-4 transition-colors last:border-0 hover:bg-accent/40"
-                onClick={() => {
-                  const item = project.knowledge?.find(k => k.id === result.document.knowledgeItemId);
-                  if (item) {
-                    setViewingItem(item);
-                    setShowSearchResults(false);
-                  }
-                }}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0 flex-1">
-                    <h4 className="truncate text-sm font-medium">
-                      {result.metadata?.name || t('center.unnamedDoc')}
-                      <span className="ml-2 rounded border border-border bg-muted/40 px-1.5 py-0.5 text-xs font-normal text-muted-foreground">
-                        {result.metadata?.category || t('center.unknown')}
-                      </span>
-                    </h4>
-                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                      {result.content}
-                    </p>
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <div className="text-xs tabular-nums text-muted-foreground">
-                      {formatPercent(result.combinedScore)}
-                    </div>
-                    <span className={cn(
-                      'mt-1 inline-block rounded px-1.5 py-0.5 text-xs',
-                      result.semanticScore > result.keywordScore
-                        ? 'bg-chart-1/10 text-chart-1'
-                        : 'bg-chart-5/10 text-chart-5'
-                    )}>
-                      {result.semanticScore > result.keywordScore ? t('center.scoreSemantic') : t('center.scoreKeyword')}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
+        <KnowledgeSearchResults
+          results={searchResults}
+          mode={searchMode}
+          onOpen={(knowledgeItemId) => {
+            const item = project.knowledge?.find(k => k.id === knowledgeItemId);
+            if (item) {
+              setViewingItem(item);
+              setShowSearchResults(false);
+            }
+          }}
+          onClose={() => setShowSearchResults(false)}
+        />
       )}
 
       <KnowledgeFeaturePanels
@@ -517,115 +384,27 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
         setGraphInitialType={setGraphInitialType}
       />
 
-      {showLocationEditor && (
-        <div className="max-h-[500px] overflow-y-auto rounded-lg border border-border bg-card p-6">
-          <FeaturePanel
-            id="world.locationEditor"
-            projectId={project.id}
-            locations={project.locations || []}
-            factions={project.factions || []}
-            initialSelectedId={navTarget?.type === 'location' ? navTarget.id : null}
-            onSave={(locations: Project['locations']) => {
-              onUpdate({ locations });
-            }}
-          />
-        </div>
-      )}
-
-      {showTimelineEditor && (
-        <div className="max-h-[600px] overflow-y-auto rounded-lg border border-border bg-card p-6">
-          <FeaturePanel
-            id="timeline.editor"
-            projectId={project.id}
-            timeline={project.timeline}
-            characters={project.characters || []}
-            locations={project.locations || []}
-            factions={project.factions || []}
-            chapters={project.chapters || []}
-            onSave={(timeline: Project['timeline']) => {
-              onUpdate({ timeline });
-            }}
-          />
-        </div>
-      )}
-
-      {showRuleSystemEditor && (
-        <div className="max-h-[600px] overflow-y-auto rounded-lg border border-border bg-card p-6">
-          <FeaturePanel
-            id="world.ruleSystemEditor"
-            projectId={project.id}
-            ruleSystems={project.ruleSystems || []}
-            characters={project.characters || []}
-            initialSelectedId={navTarget?.type === 'rule' ? navTarget.id : null}
-            onSave={(ruleSystems: Project['ruleSystems']) => {
-              onUpdate({ ruleSystems });
-            }}
-          />
-        </div>
-      )}
-
-      {showEnhancedTimeline && (
-        <FeaturePanel
-          id="timeline.enhanced"
-          project={project}
-          selectedEventId={navTarget?.type === 'timeline' ? navTarget.id : undefined}
-          onEventClick={(event: { id: string }) => {
-            setNavTarget({ type: 'timeline', id: event.id });
-          }}
-          onChapterClick={(chapter: { id: string }) => {
-            onNavigateToChapter?.(chapter.id);
-          }}
-          showChapters={true}
-        />
-      )}
-
-      {showConsistencyChecker && (
-        <FeaturePanel
-          id="consistency.checker"
-          project={project}
-          model={activeModel}
-          embeddingConfig={activeEmbeddingConfig || undefined}
-          consistencyPrompts={consistencyPrompts}
-          consistencyConfig={consistencyConfig || undefined}
-          onFixIssues={(fixedProject: Project) => {
-            onUpdate(fixedProject);
-            dialogService.alert(t('center.autoFixed'));
-          }}
-          onNavigateToItem={handleNavigateToItem}
-        />
-      )}
-
-      {showSmartRecommender && (
-        <FeaturePanel
-          id="assistant.smartRecommender"
-          project={project}
-          context={{
-            selectedCharacters: project.characters?.slice(0, 2).map(c => c.id),
-            selectedLocation: project.locations?.[0]?.id,
-            currentContent: ''
-          }}
-          onSelectItem={(item: { type: string; id: string }) => {
-            handleNavigateToItem(item.type, item.id);
-          }}
-          onViewItem={handleNavigateToItem}
-        />
-      )}
-
-      {showFactionEditor && (
-        <div className="max-h-[500px] overflow-y-auto rounded-lg border border-border bg-card p-6">
-          <FeaturePanel
-            id="world.factionEditor"
-            projectId={project.id}
-            factions={project.factions || []}
-            locations={project.locations || []}
-            characters={project.characters || []}
-            initialSelectedId={navTarget?.type === 'faction' ? navTarget.id : null}
-            onSave={(factions: Project['factions']) => {
-              onUpdate({ factions });
-            }}
-          />
-        </div>
-      )}
+      <KnowledgeFeatureEditors
+        project={project}
+        navTarget={navTarget}
+        onUpdate={onUpdate}
+        activeModel={activeModel}
+        activeEmbeddingConfig={activeEmbeddingConfig}
+        consistencyPrompts={consistencyPrompts}
+        consistencyConfig={consistencyConfig}
+        graphInitialType={graphInitialType}
+        showLocationEditor={showLocationEditor}
+        showFactionEditor={showFactionEditor}
+        showTimelineEditor={showTimelineEditor}
+        showRuleSystemEditor={showRuleSystemEditor}
+        showEnhancedTimeline={showEnhancedTimeline}
+        showConsistencyChecker={showConsistencyChecker}
+        showSmartRecommender={showSmartRecommender}
+        showWorldViewGraph={showWorldViewGraph}
+        onCloseWorldViewGraph={() => setShowWorldViewGraph(false)}
+        onNavigateToChapter={onNavigateToChapter}
+        onNavigateToItem={handleNavigateToItem}
+      />
 
       <div className="grid flex-1 grid-cols-3 gap-6 overflow-hidden">
         <KnowledgeListPanel
@@ -654,23 +433,6 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
         />
       </div>
       </div>{/* 可滚动内容区域结束 */}
-
-      {showWorldViewGraph && (
-        <FeaturePanel
-          id="world.worldViewGraph"
-          characters={project.characters || []}
-          locations={project.locations || []}
-          factions={project.factions || []}
-          timeline={project.timeline}
-          ruleSystems={project.ruleSystems || []}
-          worldView={project.worldView}
-          initialType={graphInitialType}
-          onClose={() => setShowWorldViewGraph(false)}
-          onSelectNode={(node: unknown) => {
-            logger.debug('选中节点:', node);
-          }}
-        />
-      )}
     </div>
   );
 };
