@@ -1,0 +1,17 @@
+{
+  "$schema": "https://hongyue.dev/schema/plugin-v0.json",
+  "id": "com.hongyue.example-wasm-skill",
+  "name": "WASM 技能示例插件",
+  "version": "1.0.0",
+  "description": "官方示例：WASM 轨技能（handler.wasm 纯计算、无导入，由 wabt 从 handler.wat 编译）。",
+  "keywords": ["示例", "wasm", "技能"],
+  "host": "^1.0.0",
+  "license": "MIT",
+  "contributes": {
+    "skills": ["skills/sum-series"]
+  },
+  "permissions": {
+    "read": []
+  },
+  "activation": "onDemand"
+}

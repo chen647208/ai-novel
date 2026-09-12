@@ -71,7 +71,8 @@
     "dist": "npm run electron:build && electron-builder",
     "dist:win": "npm run electron:build && electron-builder --win",
     "dist:mac": "npm run electron:build && electron-builder --mac",
-    "dist:linux": "npm run electron:build && electron-builder --linux"
+    "dist:linux": "npm run electron:build && electron-builder --linux",
+    "wasm:build": "node scripts/build-wasm-examples.mjs"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.3",
@@ -153,6 +154,7 @@
     "vite": "^8.2.2",
     "vitepress": "^1.6.4",
     "vitest": "^4.1.11",
+    "wabt": "^1.0.39",
     "wait-on": "^9.0.3"
   }
 }
