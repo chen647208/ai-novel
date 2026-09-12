@@ -11,10 +11,7 @@
 |---|---|---|
 | `23-data-layer-storage.md` §6、`24` D3 | 正文以文件为源（每章一文件 + 清单校验，外部改单章可导入） | 正文仍在 SQLite `nodes.body`，无章节文件与清单（用户明确暂缓） |
 | `24` D1 | 追加式事件日志（JSONL）为唯一真相源，SQLite 改为其投影、可重建 | 无事件日志源；SQLite 即真相（用户明确暂缓） |
-| `14-assistant-advanced.md` | 后台执行 / 多任务 | 未实现（图片附件、计划模式、MCP 客户端已落地） |
 | `21-plugin-sandbox.md` §5.5 | 插件包 Sigstore/cosign 签名 + 来源白名单 | 现为 Ed25519 签名 + 信任键 + 未签名禁可执行贡献；cosign 需外部工具链 |
-| `17-industry-gaps.md` | `attachments` / `blobs` 六实体用于文档附件 | 表已建但无 UI 消费（空转） |
-| `12-writing-manage.md` | 批量操作（多选删除/打标签） | 未实现；书库已有网格与筛选 |
 | `20-external-benchmark.md` | 借鉴项：选题→大纲→章节→修订→校验工作流、计划/待办落盘 | 参考性结论，未立项 |
 
 ## 部分
@@ -32,6 +29,9 @@
 - `25` §6 S5 恢复 UX：备份内容预览 + 条目级选择（`StorageSettingsPanel` + `BackupRestoreDialog`）。
 - `features/plugins-and-sync.md`：编辑器解锁态透明解密显示（`EncryptedChapterView`）。
 - `22` 编辑器 iframe 受控 https 联网（`permissions.network` 门，`PluginFrame`/`PluginEditorFrame` + 主进程 `plugin-fetch`）。
+- `14` 助手后台执行 / 多任务：应用级任务服务串行排队 + 顶栏指示/中止（`assistantTaskService`）。
+- `17` §7 文档附件：`attachments`/`blobs` 落地（按书持久化 + 助手附件库 `SavedAttachmentsButton`）。
+- `12` 批量操作：书库多选批量删除/打标（`Bookshelf` 选择态 + `useBookActions.deleteBooks`）。
 
 ## 有意挂起 / 评估后不做
 
