@@ -1158,6 +1158,7 @@ export interface ElectronAPI {
     run: (sql: string, params?: unknown[]) => Promise<{ changes: number; lastInsertRowid: number }>;
     all: (sql: string, params?: unknown[]) => Promise<Record<string, unknown>[]>;
     get: (sql: string, params?: unknown[]) => Promise<Record<string, unknown> | undefined>;
+    batch: (statements: Array<{ sql: string; params?: unknown[]; exec?: boolean }>) => Promise<void>;
     integrityCheck: () => Promise<{ ok: boolean; result: string }>;
     fullIntegrityCheck: () => Promise<{ ok: boolean; result: string }>;
     hotBackup: () => Promise<{ ok: boolean; path?: string; bytes?: number; error?: string }>;

@@ -136,6 +136,10 @@ export function registerSqliteIpc(): void {
     return getDb().prepare(sql).get(...assertParams(params));
   });
 
+  ipcMain.handle(IPC.db.batch, (_event, statements: unknown) => {
+    runBatch(statements);
+  });
+
   ipcMain.handle(IPC.db.integrityCheck, () => checkIntegrity());
   ipcMain.handle(IPC.db.fullIntegrityCheck, () => fullIntegrityCheck());
   ipcMain.handle(IPC.db.hotBackup, () => hotBackup());
@@ -236,6 +240,25 @@ export function closeSqlite(): void {
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+/**
+ * 批量执行写语句（在一次 IPC 内跑多条，供事务内的连续写合并往返）。
+ * 调用方须已开启事务；任一条失败由调用方 ROLLBACK。
+ */
+function runBatch(statements: unknown): void {
+  if (!Array.isArray(statements)) throw new TypeError('Invalid batch: expected array');
+  const connection = getDb();
+  for (const raw of statements) {
+    if (!raw || typeof raw !== 'object') throw new TypeError('Invalid batch statement');
+    const { sql, params, exec } = raw as { sql?: unknown; params?: unknown; exec?: unknown };
+    assertString(sql, 'batch.sql');
+    if (exec === true) {
+      connection.exec(sql);
+      continue;
+    }
+    connection.prepare(sql).run(...assertParams(params));
+  }
 }
 
 /**

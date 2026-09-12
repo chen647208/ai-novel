@@ -79,6 +79,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     run: (sql: string, params?: unknown[]) => ipcRenderer.invoke(IPC.db.run, sql, params),
     all: (sql: string, params?: unknown[]) => ipcRenderer.invoke(IPC.db.all, sql, params),
     get: (sql: string, params?: unknown[]) => ipcRenderer.invoke(IPC.db.get, sql, params),
+    batch: (statements: unknown[]) => ipcRenderer.invoke(IPC.db.batch, statements),
     integrityCheck: () => ipcRenderer.invoke(IPC.db.integrityCheck),
     fullIntegrityCheck: () => ipcRenderer.invoke(IPC.db.fullIntegrityCheck),
     hotBackup: () => ipcRenderer.invoke(IPC.db.hotBackup),

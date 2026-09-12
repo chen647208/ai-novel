@@ -8,7 +8,7 @@
  */
 
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
-import React, { useCallback,useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback,useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { type CommitOptions,useProjectStore } from '@/app/stores/projectStore';
@@ -132,7 +132,9 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
 
   const activeChapter = project.chapters.find(c => c.id === activeChapterId);
   const chapterStats = useMemo(() => computeChapterStats(activeChapter?.content || ''), [activeChapter?.content]);
-  const bookStats = useMemo(() => computeBookStats(project), [project]);
+  // 全书统计含 runBuild 全稿管线，逐键重算代价高：降为低优先级，打字不卡顿。
+  const deferredProject = useDeferredValue(project);
+  const bookStats = useMemo(() => computeBookStats(deferredProject), [deferredProject]);
   const openForeshadowCount = useMemo(() => openForeshadows(project).length, [project]);
   const overdueForeshadowCount = useMemo(
     () => overdueForeshadows(project, activeChapter?.order ?? 0).length,

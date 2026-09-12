@@ -54,6 +54,7 @@ export const IPC = {
     run: 'db:run',
     all: 'db:all',
     get: 'db:get',
+    batch: 'db:batch',
     integrityCheck: 'db:integrity-check',
     fullIntegrityCheck: 'db:full-integrity-check',
     hotBackup: 'db:hot-backup',

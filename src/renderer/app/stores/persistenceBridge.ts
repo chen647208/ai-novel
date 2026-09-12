@@ -67,6 +67,12 @@ let dirty = false;
 let failing = false;
 let retryTimer: ReturnType<typeof setTimeout> | null = null;
 let retryDelayMs = 0;
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+let firstDirtyAt = 0;
+
+/** 合并连续编辑：停止输入 400ms 后落盘；连续输入最多 3s 必落一次。 */
+const FLUSH_DEBOUNCE_MS = 400;
+const FLUSH_MAX_WAIT_MS = 3000;
 
 /** 周期任务调度器：自动备份兜底（空闲不落盘时也按间隔备份）。 */
 const scheduler = new TaskScheduler();
@@ -146,11 +152,31 @@ function flush(): Promise<void> {
   return inflight;
 }
 
-/** 强制刷盘（退出/隐藏前调用）：等待在途写入，再补一次，保证退出时差分已落库。 */
+/** 强制刷盘（退出/隐藏前调用）：取消去抖，等待在途写入，再补一次，保证退出时差分已落库。 */
 export async function flushNow(): Promise<void> {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
+  firstDirtyAt = 0;
   if (inflight) await inflight;
   dirty = true;
   await flush();
+}
+
+/** 去抖触发落盘：合并连续编辑，最多等待 FLUSH_MAX_WAIT_MS 后强制落一次。 */
+function scheduleFlush(): void {
+  dirty = true;
+  const now = Date.now();
+  if (!firstDirtyAt) firstDirtyAt = now;
+  if (debounceTimer) clearTimeout(debounceTimer);
+  const remainingMax = FLUSH_MAX_WAIT_MS - (now - firstDirtyAt);
+  const delay = Math.max(0, Math.min(FLUSH_DEBOUNCE_MS, remainingMax));
+  debounceTimer = setTimeout(() => {
+    debounceTimer = null;
+    firstDirtyAt = 0;
+    void flush();
+  }, delay);
 }
 
 let flushHandlersBound = false;
@@ -182,8 +208,7 @@ export function startPersistenceBridge(): () => void {
   scheduler.register({ id: 'auto-backup-fallback', everyMs: 60_000, run: maybeAutoBackup });
   scheduler.start();
   const schedule = () => {
-    dirty = true;
-    void flush();
+    scheduleFlush();
   };
   const unsubs = [
     useProjectStore.subscribe(schedule),
@@ -192,6 +217,11 @@ export function startPersistenceBridge(): () => void {
   return () => {
     scheduler.stop();
     unsubs.forEach((u) => u());
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
+    firstDirtyAt = 0;
     started = false;
   };
 }

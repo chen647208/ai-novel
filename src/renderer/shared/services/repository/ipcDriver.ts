@@ -54,12 +54,30 @@ export class IpcSqlDriver implements SqlDriver {
 
   transaction<T>(fn: (tx: SqlDriver) => Promise<T>): Promise<T> {
     return this.enqueue(async () => {
+      // 事务内写语句先缓冲，读到结果前或提交时一次性批量下发，消除逐条 IPC 往返。
+      const buffer: Array<{ sql: string; params?: SqlValue[]; exec?: boolean }> = [];
+      const drain = async (): Promise<void> => {
+        if (buffer.length === 0) return;
+        const chunk = buffer.splice(0, buffer.length);
+        await this.api.batch(chunk);
+      };
       // 事务内的直连子驱动：绕过队列（外层已持锁），避免自死锁。
       const direct: SqlDriver = {
-        exec: (sql) => this.api.exec(sql),
-        run: (sql, p = []) => this.api.run(sql, p),
-        all: async <R>(sql: string, p: SqlValue[] = []) => (await this.api.all(sql, p)) as unknown as R[],
-        get: async <R>(sql: string, p: SqlValue[] = []) => (await this.api.get(sql, p)) as unknown as R | undefined,
+        // exec 里的语句按顺序入缓冲，提交/读取前统一下发。
+        exec: async (sql) => { buffer.push({ sql, exec: true }); },
+        // 批量模式不返回真实 changes/rowid；本仓库事务内无调用方读取该结果。
+        run: async (sql, p = []) => {
+          buffer.push({ sql, params: p });
+          return { changes: 0, lastInsertRowid: 0 };
+        },
+        all: async <R>(sql: string, p: SqlValue[] = []) => {
+          await drain();
+          return (await this.api.all(sql, p)) as unknown as R[];
+        },
+        get: async <R>(sql: string, p: SqlValue[] = []) => {
+          await drain();
+          return (await this.api.get(sql, p)) as unknown as R | undefined;
+        },
         // SQLite 不支持嵌套 BEGIN：内层事务直接内联执行。
         transaction: (inner) => inner(direct),
         close: () => Promise.resolve(),
@@ -67,9 +85,11 @@ export class IpcSqlDriver implements SqlDriver {
       await this.api.exec('BEGIN');
       try {
         const result = await fn(direct);
+        await drain();
         await this.api.exec('COMMIT');
         return result;
       } catch (error) {
+        buffer.length = 0;
         try {
           await this.api.exec('ROLLBACK');
         } catch { /* 回滚失败不覆盖原始错误 */ }
