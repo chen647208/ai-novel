@@ -43,6 +43,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   pluginReadBinary: (rootDir: string, rel: string) => ipcRenderer.invoke(IPC.pluginReadBinary, rootDir, rel),
   pluginListDirectory: (rootDir: string, rel: string) => ipcRenderer.invoke(IPC.pluginListDirectory, rootDir, rel),
   pluginSandboxRun: (request: unknown) => ipcRenderer.invoke(IPC.pluginSandboxRun, request),
+  pluginFetch: (url: string) => ipcRenderer.invoke(IPC.pluginFetch, url),
   pluginVerifySignature: (contentBase64: string, signatureBase64: string, publicKeyPem: string) =>
     ipcRenderer.invoke(IPC.pluginVerifySignature, contentBase64, signatureBase64, publicKeyPem),
 

@@ -28,13 +28,15 @@ export function isPluginFrameMessage(data: unknown): data is PluginFrameMessage 
   );
 }
 
+export type PluginFrameRespond = (payload: unknown) => void;
+
 export interface PluginFrameProps {
   /** 插件 UI 的 HTML 文本（内联脚本可运行，但无同源权限）。 */
   html: string;
   title?: string;
   className?: string;
-  /** 收到插件 UI 消息时回调（已过滤来源与形状）。 */
-  onMessage?: (message: PluginFrameMessage) => void;
+  /** 收到插件 UI 消息时回调（已过滤来源与形状）；respond 用于回消息给 iframe。 */
+  onMessage?: (message: PluginFrameMessage, respond: PluginFrameRespond) => void;
 }
 
 export function PluginFrame({ html, title = 'Plugin UI', className, onMessage }: PluginFrameProps): React.ReactElement {
@@ -42,10 +44,13 @@ export function PluginFrame({ html, title = 'Plugin UI', className, onMessage }:
 
   React.useEffect(() => {
     if (!onMessage) return;
+    const respond: PluginFrameRespond = (payload) => {
+      frameRef.current?.contentWindow?.postMessage({ type: 'response', payload }, '*');
+    };
     const handler = (event: MessageEvent): void => {
       if (event.source !== frameRef.current?.contentWindow) return;
       if (!isPluginFrameMessage(event.data)) return;
-      onMessage(event.data);
+      onMessage(event.data, respond);
     };
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);

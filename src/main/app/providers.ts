@@ -152,6 +152,30 @@ export const fileProvider: Provider = {
 
     registerPluginFsIpc();
     ipcMain.handle(IPC.pluginSandboxRun, (_event, request: SandboxRunRequest) => sandboxHost.run(request));
+    // 插件编辑器 iframe 的受控联网：仅 https，主进程代理（15s 超时、截断 200KB）
+    ipcMain.handle(IPC.pluginFetch, async (_event, url: string) => {
+      if (typeof url !== 'string' || url.length === 0 || url.length > 2048) {
+        throw new TypeError('Invalid url');
+      }
+      let parsed: URL;
+      try {
+        parsed = new URL(url);
+      } catch {
+        return { ok: false as const, error: '非法 URL' };
+      }
+      if (parsed.protocol !== 'https:') return { ok: false as const, error: '插件联网仅允许 https' };
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 15_000);
+      try {
+        const res = await fetch(url, { signal: controller.signal, redirect: 'follow' });
+        const text = (await res.text()).slice(0, 200_000);
+        return { ok: true as const, status: res.status, text };
+      } catch (error) {
+        return { ok: false as const, error: error instanceof Error ? error.message : String(error) };
+      } finally {
+        clearTimeout(timer);
+      }
+    });
     ipcMain.handle(
       IPC.pluginVerifySignature,
       (_event, contentBase64: string, signatureBase64: string, publicKeyPem: string) =>

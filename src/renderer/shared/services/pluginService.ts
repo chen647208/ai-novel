@@ -283,7 +283,7 @@ export function createContributionInstaller(deps: PluginDeps): ContributionInsta
             id: `plugin.${manifest.id}.editor.${file}`,
             slot: 'plugin.editor',
             order: 100,
-            render: () => React.createElement(PluginEditorFrame, { html: content, title: manifest.name }),
+            render: () => React.createElement(PluginEditorFrame, { html: content, title: manifest.name, allowNetwork: manifest.permissions?.network === true }),
           }),
         });
       }

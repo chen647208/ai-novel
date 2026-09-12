@@ -1121,6 +1121,8 @@ export interface ElectronAPI {
   pluginListDirectory: (rootDir: string, rel: string) => Promise<Array<{ name: string; type: 'file' | 'directory' }>>;
   /** 在隔离沙箱里执行插件逻辑（utilityProcess + QuickJS）；主进程做资源限额与兜底超时。 */
   pluginSandboxRun: (request: SandboxRunRequest) => Promise<SandboxRunResult>;
+  /** 插件编辑器 iframe 的受控联网（仅 https；宿主权限判定后代理）。 */
+  pluginFetch: (url: string) => Promise<{ ok: boolean; status?: number; text?: string; error?: string }>;
   /** 校验插件包签名（Ed25519，主进程持私钥无关的公开校验）。 */
   pluginVerifySignature: (contentBase64: string, signatureBase64: string, publicKeyPem: string) => Promise<boolean>;
   /** 崩溃上报配置（默认只本地留存；开启且宿主配置地址后上传，重启生效）。 */

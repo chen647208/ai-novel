@@ -32,6 +32,7 @@ export const IPC = {
   pluginReadBinary: 'plugin-read-binary',
   pluginListDirectory: 'plugin-list-directory',
   pluginSandboxRun: 'plugin-sandbox-run',
+  pluginFetch: 'plugin-fetch',
   pluginVerifySignature: 'plugin-verify-signature',
   crashGetConfig: 'crash:get-config',
   crashSetEnabled: 'crash:set-enabled',
