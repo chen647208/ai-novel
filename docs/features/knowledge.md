@@ -8,6 +8,8 @@
 ## 核心文件
 
 - `StepKnowledgeEnhanced.tsx`：知识库主编排器（唯一入口）
+- `components/KnowledgeSearchBar.tsx` / `KnowledgeSearchResults.tsx` / `KnowledgeStatsGrid.tsx`：检索栏、结果卡片与世界要素统计
+- `components/KnowledgeFeatureEditors.tsx`：地点/势力/规则/时间线/一致性/推荐/图谱编辑器集合
 - `components/KnowledgeFeaturePanels.tsx`：`knowledge/components/` 下的世界构建能力入口面板
 - `services/vectorIntegrationService.ts`：知识索引与检索接入层
 - `services/vectorService.ts`：底层向量搜索能力
@@ -31,4 +33,4 @@
 
 - 新增世界构建入口优先接到 `KnowledgeFeaturePanels.tsx`
 - 向量索引、Embedding 与搜索实现继续集中在 `services`
-- `StepKnowledgeEnhanced.tsx` 954 行，后续优先继续拆列表区和编辑区
+- 知识库面板的展示逻辑拆在 `components/` 子组件，主编排器只保留状态与接线

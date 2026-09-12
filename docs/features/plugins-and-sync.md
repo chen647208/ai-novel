@@ -14,7 +14,7 @@
     handler 在隔离沙箱里执行，只能建议工具调用，经技能 `tools` 白名单裁决（越界拒绝）。
 - **签名**：插件可附 `plugin.sig`，信封支持三种算法：
   `ed25519`（detached 签名 + PEM 公钥，须命中信任键白名单）、`sha256`（仅完整性，不放行可执行贡献）、
-  `cosign`（Sigstore 证书签名，主进程调外部 cosign，工具链缺失即拒载）。校验 `plugin.json` 内容，失败拒载（fail closed）。
+  `cosign`（Sigstore bundle，key 或 keyless；主进程调外部 cosign，工具链缺失或缺信任锚即拒载）。校验 `plugin.json` 内容，失败拒载（fail closed）。
   可执行贡献（logic/editor）要求来源认证签名（ed25519/cosign）；无签名包只放行资源型。
 - **来源白名单**：设置 → 插件可维护 `manifest.source` 白名单（每行一个）；非空时来源不在清单的插件拒载。
   信任键与来源白名单都在设置 → 插件里维护。
