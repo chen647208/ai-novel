@@ -101,7 +101,7 @@ export const KnowledgeListPanel: React.FC<KnowledgeListPanelProps> = ({
               <div
                 key={item.id}
                 className={cn(
-                  'group cursor-pointer rounded-lg border p-3 transition-colors',
+                  'cv-auto group cursor-pointer rounded-lg border p-3 transition-colors',
                   activeId === item.id
                     ? 'border-primary/40 bg-primary/5'
                     : 'border-border hover:bg-accent/40',

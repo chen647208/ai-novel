@@ -384,6 +384,12 @@
   }
 }
 
+/* 长列表项：视口外跳过渲染与样式（轻量虚拟化，无需额外依赖） */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 48px;
+}
+
 /* 无障碍：尊重系统"减少动态效果"偏好，停用动画/过渡（保留最终状态） */
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -162,7 +162,7 @@ const SessionEventBrowser: React.FC<{ bookId: string }> = ({ bookId }) => {
                 <div
                   key={i}
                   className={
-                    tone === 'ok' ? 'text-success' : tone === 'err' ? 'text-destructive' : 'text-muted-foreground'
+                    tone === 'ok' ? 'cv-auto text-success' : tone === 'err' ? 'cv-auto text-destructive' : 'cv-auto text-muted-foreground'
                   }
                 >
                   {new Date('at' in e ? e.at : 0).toLocaleTimeString()}  {label}

@@ -14,7 +14,7 @@
  */
 
 import { Bot } from 'lucide-react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ASSISTANT_FEATURE_ID } from '@/features/assistant/constants';
@@ -28,8 +28,6 @@ import { TooltipProvider } from '@/shared/ui/Tooltip';
 import type { Project } from '../../shared/types';
 import { DEFAULT_EDITOR_FONT, DEFAULT_UI_FONT, resolveFontStack } from '../constants/fonts';
 import ApprovalHost from '../features/assistant/components/ApprovalHost';
-import GlobalAssistant from '../features/assistant/GlobalAssistant';
-import VersionCheckModal from '../features/version/VersionCheckModal';
 import AIHistoryViewer from '../features/writing/AIHistoryViewer';
 import { useViewPreference } from '../shared/hooks/useViewPreference';
 import { exportCover } from '../shared/services/coverService';
@@ -40,11 +38,9 @@ import Bookshelf from './app-shell/Bookshelf';
 import CommandPalette from './app-shell/CommandPalette';
 import { registerCoreSlots } from './app-shell/coreSlots';
 import DialogHost from './app-shell/DialogHost';
-import GlobalSearchModal from './app-shell/GlobalSearchModal';
 import OnboardingModal, { isOnboardingDone, markOnboardingDone, type OnboardingPersona } from './app-shell/OnboardingModal';
 import { registerFeaturePanels } from './app-shell/registerFeaturePanels';
 import ResetAlertDialog from './app-shell/ResetAlertDialog';
-import SettingsModalHost from './app-shell/SettingsModalHost';
 import ToastHost from './app-shell/ToastHost';
 import WorkspaceView from './app-shell/WorkspaceView';
 import { isSectionVisible } from './sectionFeatures';
@@ -63,6 +59,12 @@ registerCoreSlots();
 registerCoreSettingsTabs();
 registerFeaturePanels();
 registerAssistantRuntime();
+
+// 重组件按需加载：助手/设置/检索/历史只在相应入口打开时才拉取对应分包。
+const GlobalAssistant = lazy(() => import('../features/assistant/GlobalAssistant'));
+const SettingsModalHost = lazy(() => import('./app-shell/SettingsModalHost'));
+const GlobalSearchModal = lazy(() => import('./app-shell/GlobalSearchModal'));
+const VersionCheckModal = lazy(() => import('../features/version/VersionCheckModal'));
 
 const App: React.FC = () => {
   useAppBootstrap();
@@ -259,16 +261,18 @@ const App: React.FC = () => {
   }, [actions]);
 
   const assistantNode = availableFeatures.has(ASSISTANT_FEATURE_ID) ? (
-    <GlobalAssistant
-      models={models}
-      activeModelId={activeModelId}
-      project={activeProject}
-      prompts={prompts}
-      onUpdate={updateProject}
-      width={assistantWidth}
-      onClose={() => setAssistantOpenPref('closed')}
-      onWidthChange={(w) => setAssistantWidthPref(String(Math.min(560, Math.max(300, Math.round(w)))))}
-    />
+    <Suspense fallback={null}>
+      <GlobalAssistant
+        models={models}
+        activeModelId={activeModelId}
+        project={activeProject}
+        prompts={prompts}
+        onUpdate={updateProject}
+        width={assistantWidth}
+        onClose={() => setAssistantOpenPref('closed')}
+        onWidthChange={(w) => setAssistantWidthPref(String(Math.min(560, Math.max(300, Math.round(w)))))}
+      />
+    </Suspense>
   ) : null;
 
   return (
@@ -366,27 +370,33 @@ const App: React.FC = () => {
         )}
 
         {isSettingsOpen && (
-          <SettingsModalHost onClose={() => {
-            setIsSettingsOpen(false);
-            if (!isOnboardingDone()) setShowOnboarding(true);
-          }} onClearData={() => setResetOpen(true)} />
+          <Suspense fallback={null}>
+            <SettingsModalHost onClose={() => {
+              setIsSettingsOpen(false);
+              if (!isOnboardingDone()) setShowOnboarding(true);
+            }} onClearData={() => setResetOpen(true)} />
+          </Suspense>
         )}
 
         {isHistoryViewerOpen && activeProject && (
           <AIHistoryViewer project={activeProject} onUpdate={updateProject} onClose={() => setIsHistoryViewerOpen(false)} />
         )}
-        <VersionCheckModal isOpen={isVersionCheckOpen} onClose={() => setIsVersionCheckOpen(false)} />
-        <GlobalSearchModal
-          isOpen={isSearchOpen}
-          onClose={() => setIsSearchOpen(false)}
-          onOpenResult={(bookId, chapterId) => {
-            actions.openBook(bookId);
-            if (chapterId) {
-              setEditingChapterId(chapterId);
-              setSection('writing');
-            }
-          }}
-        />
+        <Suspense fallback={null}>
+          <VersionCheckModal isOpen={isVersionCheckOpen} onClose={() => setIsVersionCheckOpen(false)} />
+        </Suspense>
+        <Suspense fallback={null}>
+          <GlobalSearchModal
+            isOpen={isSearchOpen}
+            onClose={() => setIsSearchOpen(false)}
+            onOpenResult={(bookId, chapterId) => {
+              actions.openBook(bookId);
+              if (chapterId) {
+                setEditingChapterId(chapterId);
+                setSection('writing');
+              }
+            }}
+          />
+        </Suspense>
         <CommandPalette open={isCommandPaletteOpen} onOpenChange={setIsCommandPaletteOpen} commands={registryCommands} />
       </div>
     </TooltipProvider>
