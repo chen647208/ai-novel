@@ -1,0 +1,87 @@
+/*
+ * 本文件属于 红月创作 (Hongyue Creation) 项目。
+ * Copyright (C) 2026 chen647208
+ * SPDX-License-Identifier: AGPL-3.0-only
+ *
+ * 本程序为自由软件：您可依据 GNU Affero 通用公共许可证第 3 版（AGPL-3.0-only）修改与分发；
+ * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
+ */
+
+/**
+ * IpcSqlDriver 契约：顶层操作直连；事务内写缓冲为单次批量 IPC；
+ * 读取前先下发缓冲（保序）；失败回滚且不下发缓冲。
+ */
+import { describe, expect,it, vi } from 'vitest';
+
+import { IpcSqlDriver } from '../ipcDriver';
+
+function makeApi() {
+  return {
+    exec: vi.fn(async (_sql: string) => undefined),
+    run: vi.fn(async (_sql: string, _params?: unknown[]) => ({ changes: 1, lastInsertRowid: 2 })),
+    all: vi.fn(async (_sql: string, _params?: unknown[]) => [] as Record<string, unknown>[]),
+    get: vi.fn(async (_sql: string, _params?: unknown[]) => undefined as Record<string, unknown> | undefined),
+    batch: vi.fn(async (_statements: unknown[]) => undefined),
+    integrityCheck: vi.fn(async () => ({ ok: true, result: 'ok' })),
+    fullIntegrityCheck: vi.fn(async () => ({ ok: true, result: 'ok' })),
+    hotBackup: vi.fn(async () => ({ ok: true })),
+    maintenance: vi.fn(async () => undefined),
+    encryptionStatus: vi.fn(async () => ({ enabled: false, available: true, weakBackend: false, backend: 'default' })),
+    enableEncryption: vi.fn(async () => ({ ok: true })),
+    disableEncryption: vi.fn(async () => ({ ok: true })),
+    exportRecoveryKey: vi.fn(async () => ({ ok: false })),
+    applyRecoveryKey: vi.fn(async () => ({ ok: true })),
+  };
+}
+
+describe('IpcSqlDriver', () => {
+  it('顶层 run 直连 api.run', async () => {
+    const api = makeApi();
+    const driver = new IpcSqlDriver(api);
+    const result = await driver.run('SELECT 1', []);
+    expect(api.run).toHaveBeenCalledWith('SELECT 1', []);
+    expect(result).toEqual({ changes: 1, lastInsertRowid: 2 });
+  });
+
+  it('事务内写语句合并为一次批量 IPC', async () => {
+    const api = makeApi();
+    const driver = new IpcSqlDriver(api);
+    await driver.transaction(async (tx) => {
+      await tx.run('INSERT A', [1]);
+      await tx.run('INSERT B', [2]);
+    });
+    expect(api.batch).toHaveBeenCalledTimes(1);
+    expect(api.batch.mock.calls[0]?.[0]).toEqual([
+      { sql: 'INSERT A', params: [1] },
+      { sql: 'INSERT B', params: [2] },
+    ]);
+    expect(api.exec.mock.calls.map((c) => c[0])).toEqual(['BEGIN', 'COMMIT']);
+    expect(api.run).not.toHaveBeenCalled();
+  });
+
+  it('事务内读取先下发改动再查询（保序）', async () => {
+    const api = makeApi();
+    api.all.mockResolvedValue([{ n: 1 }]);
+    const driver = new IpcSqlDriver(api);
+    const rows = await driver.transaction(async (tx) => {
+      await tx.run('UPDATE X', []);
+      return tx.all('SELECT n', []);
+    });
+    expect(rows).toEqual([{ n: 1 }]);
+    expect(api.batch).toHaveBeenCalledTimes(1);
+    expect(api.batch.mock.invocationCallOrder[0]!).toBeLessThan(api.all.mock.invocationCallOrder[0]!);
+  });
+
+  it('事务回调抛错：回滚且不下发缓冲', async () => {
+    const api = makeApi();
+    const driver = new IpcSqlDriver(api);
+    await expect(
+      driver.transaction(async (tx) => {
+        await tx.run('INSERT A', []);
+        throw new Error('boom');
+      }),
+    ).rejects.toThrow('boom');
+    expect(api.batch).not.toHaveBeenCalled();
+    expect(api.exec.mock.calls.map((c) => c[0])).toEqual(['BEGIN', 'ROLLBACK']);
+  });
+});
