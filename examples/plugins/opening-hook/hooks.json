@@ -1,0 +1,17 @@
+{
+  "hooks": [
+    {
+      "on": "ai",
+      "seam": "ai",
+      "do": "inject",
+      "where": "system",
+      "text": "遵循开篇钩子方法论：首段先抛冲突，再铺垫背景。"
+    },
+    {
+      "on": "ai",
+      "seam": "ai",
+      "do": "logic",
+      "fn": "injectOpeningRules"
+    }
+  ]
+}

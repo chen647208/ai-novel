@@ -1,0 +1,29 @@
+{
+  "$schema": "https://hongyue.dev/schema/plugin-v0.json",
+  "id": "com.hongyue.example-opening-hook",
+  "name": "开篇钩子示例插件",
+  "version": "1.0.0",
+  "description": "官方示例：双轨技能、逻辑 hooks、编辑器扩展、设置 schema 与类型模板。",
+  "keywords": ["写法", "开篇", "钩子"],
+  "host": "^1.0.0",
+  "license": "MIT",
+  "contributes": {
+    "skills": ["skills/opening-hook"],
+    "logic": ["logic"],
+    "hooks": "hooks.json",
+    "editor": ["editor"],
+    "types": ["types"]
+  },
+  "permissions": {
+    "read": ["manuscript", "cards"],
+    "ai": { "quotaPerHour": 10 }
+  },
+  "activation": "onDemand",
+  "settingsSchema": {
+    "type": "object",
+    "properties": {
+      "hookLength": { "type": "number", "title": "钩子目标字数", "default": 300 },
+      "aggressive": { "type": "boolean", "title": "激进改写", "default": false }
+    }
+  }
+}

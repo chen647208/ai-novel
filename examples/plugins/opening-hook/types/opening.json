@@ -1,0 +1,18 @@
+[
+  {
+    "id": "opening-beat",
+    "label": "开篇节拍",
+    "labelEn": "Opening Beat",
+    "icon": "sparkles",
+    "category": "card",
+    "fields": [
+      { "key": "name", "label": "节拍名", "labelEn": "Name", "type": "text", "required": true },
+      { "key": "goal", "label": "目标", "labelEn": "Goal", "type": "richtext" },
+      { "key": "obstacle", "label": "阻碍", "labelEn": "Obstacle", "type": "richtext" },
+      { "key": "hookType", "label": "钩子类型", "labelEn": "Hook Type", "type": "enum", "enum": ["悬念", "反差", "危机", "情感"] },
+      { "key": "status", "label": "状态", "labelEn": "Status", "type": "enum", "enum": ["draft", "canon"] }
+    ],
+    "views": ["outline", "corkboard", "table"],
+    "statusLabels": "status"
+  }
+]

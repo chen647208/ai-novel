@@ -1,0 +1,27 @@
+{
+  "$schema": "https://hongyue.dev/schema/plugin-v0.json",
+  "id": "com.example.my-plugin",
+  "name": "我的插件",
+  "version": "0.1.0",
+  "description": "一句话说明这个插件做什么。",
+  "keywords": ["关键词"],
+  "host": "^1.0.0",
+  "license": "MIT",
+  "contributes": {
+    "skills": ["skills/example"],
+    "logic": ["logic"],
+    "editor": ["editor"],
+    "types": ["types"]
+  },
+  "permissions": {
+    "read": ["manuscript"],
+    "ai": { "quotaPerHour": 10 }
+  },
+  "activation": "onDemand",
+  "settingsSchema": {
+    "type": "object",
+    "properties": {
+      "enabledHint": { "type": "boolean", "title": "示例开关", "default": false }
+    }
+  }
+}

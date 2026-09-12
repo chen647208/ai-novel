@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body { font: 13px/1.6 system-ui, sans-serif; margin: 0; padding: 8px; }
+      button { padding: 6px 10px; cursor: pointer; }
+      p { color: #666; margin: 6px 0 0; }
+    </style>
+  </head>
+  <body>
+    <button id="apply">把开篇检查结果写入选区</button>
+    <p>编辑器扩展运行在 null-origin iframe：只能经消息请求宿主执行受控操作。</p>
+    <script>
+      var parentWindow = window.parent;
+      parentWindow.postMessage({ type: 'ready' }, '*');
+      document.getElementById('apply').addEventListener('click', function () {
+        // 越权/未知操作会被宿主过滤；这里只发白名单内的操作
+        parentWindow.postMessage(
+          { type: 'request', payload: { ops: [{ kind: 'replaceSelection', text: '【开篇检查】首段需出现人物、处境与麻烦。' }] } },
+          '*'
+        );
+      });
+    </script>
+  </body>
+</html>

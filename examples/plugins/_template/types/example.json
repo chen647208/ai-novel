@@ -1,0 +1,14 @@
+[
+  {
+    "id": "example-type",
+    "label": "示例类型",
+    "labelEn": "Example Type",
+    "icon": "sparkles",
+    "category": "card",
+    "fields": [
+      { "key": "name", "label": "名称", "labelEn": "Name", "type": "text", "required": true },
+      { "key": "note", "label": "说明", "labelEn": "Note", "type": "richtext" }
+    ],
+    "views": ["outline", "table"]
+  }
+]

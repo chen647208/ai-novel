@@ -28,6 +28,7 @@ Trail of Bits、Cloudflare coding standards、WordPress 文档风格指南同款
 - `guides/project-structure.md`：项目分层、主线结构与目录约定
 - `guides/build-and-release.md`：构建命令、产物位置与打包说明
 - `guides/ci-and-release.md`：CI 持续集成与基于标签的自动发布流程
+- `guides/writing-a-plugin.md`：从模板编写插件、贡献点与许可边界
 - `guides/licensing.md`：AGPL-3.0 社区版与商业授权的双重许可说明
 - `guides/acceptance-report.md`：M0–M5 验收报告（各设计篇验收标准逐项状态与证据）
 - `CLA.md`：贡献者许可协议正文
