@@ -7,8 +7,6 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import type { RevisionEntity } from '@core/entities';
-
 import { MIN_SEARCH_QUERY_LENGTH } from '../../../../shared/constants/search';
 import { APP_STATE_VERSION } from '../../../../shared/constants/versions';
 import type { AppState, ConsistencyCheckConfig, ConsistencyCheckPromptTemplate,Project, StorageConfig } from '../../../../shared/types';
@@ -66,15 +64,13 @@ export const jsonRepository: StorageRepository = {
   clear: () => withWriteLock(() => storage.clearState()),
 
   saveProject: (project: Project, _opts?: CommitOptions) => withWriteLock(async () => {
-    // JSON 后端无修订概念：opts 显式丢弃（审计断链，调用方已知；见 StorageRepository.loadRevisions）
+    // JSON 后端无修订概念：opts 显式丢弃；Revision 审计仅在 SQLite 后端可用
     const state = (await storage.loadStateAsync()) ?? structuredClone(INITIAL_FALLBACK);
     const idx = state.projects.findIndex(p => p.id === project.id);
     if (idx >= 0) state.projects[idx] = project;
     else state.projects.push(project);
     await storage.saveState(state);
   }),
-
-  loadRevisions: async (_nodeId: string): Promise<RevisionEntity[]> => [],
 
   deleteProject: (id: string) => withWriteLock(async () => {
     const state = await storage.loadStateAsync();

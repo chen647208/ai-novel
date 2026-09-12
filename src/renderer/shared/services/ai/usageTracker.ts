@@ -21,6 +21,8 @@ import { localStore } from '@/shared/services/localStore';
 export interface UsageEntry {
   modelId: string;
   modelName: string;
+  /** 功能归因（assistant/consistency/...）；未标注时不参与按功能聚合。 */
+  feature?: string;
   prompt: number;
   completion: number;
   cacheRead?: number;

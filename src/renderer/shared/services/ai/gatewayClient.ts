@@ -21,9 +21,11 @@ import { i18n } from '@/i18n';
 import { assertAiAllowed } from './aiGate';
 import { recordUsage } from './usageTracker';
 
-/** 渲染端调用选项：线上选项 + 本地取消信号。 */
+/** 渲染端调用选项：线上选项 + 本地取消信号 + 功能归因。 */
 export interface CallOptions extends AiCallOptions {
   signal?: AbortSignal;
+  /** 用量按功能归因（如 'assistant' / 'consistency'）。 */
+  feature?: string;
 }
 
 type Gateway = NonNullable<Window['electronAPI']>['aiGateway'];
@@ -81,6 +83,7 @@ export async function gatewayComplete(model: ModelConfig, prompt: string, option
       recordUsage({
         modelId: model.id,
         modelName: model.name,
+        feature: options?.feature,
         prompt: response.tokens.prompt ?? 0,
         completion: response.tokens.completion ?? 0,
         cacheRead: response.tokens.cacheRead,
@@ -152,6 +155,7 @@ export async function gatewayStream(
           recordUsage({
             modelId: model.id,
             modelName: model.name,
+            feature: options?.feature,
             prompt: event.response.tokens.prompt ?? 0,
             completion: event.response.tokens.completion ?? 0,
             cacheRead: event.response.tokens.cacheRead,

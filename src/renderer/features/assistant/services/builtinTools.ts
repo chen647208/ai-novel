@@ -538,7 +538,7 @@ export const pluginRunTool: ToolSpec = {
 
 // ── 生成类工具（write:proposal：产出提案文本，经审批后由用户落稿）──────
 async function generateProposal(ctx: ToolContext, prompt: string): Promise<{ ok: boolean; data?: unknown; error?: string }> {
-  const response = await aiGatewayClient.complete(modelOf(ctx), prompt, { signal: ctx.signal } as CallOptions);
+  const response = await aiGatewayClient.complete(modelOf(ctx), prompt, { signal: ctx.signal, feature: 'assistant' } as CallOptions);
   if (response.error) {
     return { ok: false, error: response.error };
   }

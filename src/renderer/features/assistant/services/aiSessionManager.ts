@@ -257,10 +257,10 @@ export class AiSessionManager {
             },
           }),
       complete: async (model, prompt, retries) => {
-        const primary = await aiGatewayClient.complete(model, prompt, { retries, signal: input.signal, images: input.images });
+        const primary = await aiGatewayClient.complete(model, prompt, { retries, signal: input.signal, images: input.images, feature: 'assistant' });
         // 主模型失败（非取消）且有备用模型且不同款时，按备用模型重试一次
         if (primary.error && !input.signal?.aborted && input.fallbackModel && input.fallbackModel.id !== model.id) {
-          const fallback = await aiGatewayClient.complete(input.fallbackModel, prompt, { retries, signal: input.signal, images: input.images });
+          const fallback = await aiGatewayClient.complete(input.fallbackModel, prompt, { retries, signal: input.signal, images: input.images, feature: 'assistant' });
           if (!fallback.error) return fallback;
         }
         return primary;
