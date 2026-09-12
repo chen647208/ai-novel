@@ -28,9 +28,15 @@ jobs:
       - name: 判断是否含非文档改动
         id: filter
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            echo "code=true" >> "$GITHUB_OUTPUT"
-          elif git diff --name-only "origin/${{ github.base_ref }}...HEAD" | grep -qEv '\.md$'; then
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            changed=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          elif [ "${{ github.event_name }}" = "push" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            changed=$(git diff --name-only "${{ github.event.before }}...${{ github.sha }}")
+          else
+            # 首次推送/手动触发：无法判定范围，按代码处理
+            changed="code"
+          fi
+          if printf '%s\n' "$changed" | grep -qEv '\.md$'; then
             echo "code=true" >> "$GITHUB_OUTPUT"
           else
             echo "code=false" >> "$GITHUB_OUTPUT"
