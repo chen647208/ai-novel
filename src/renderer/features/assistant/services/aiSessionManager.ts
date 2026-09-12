@@ -178,6 +178,16 @@ export class AiSessionManager {
       }
     }
 
+    // 逻辑 hooks（design/22 §3）：接缝命中时沙箱执行，返回文本注入 system 策略
+    const aiPolicies = this.events.policiesFor('ai');
+    const logicPolicyTexts: string[] = [];
+    for (const policy of aiPolicies) {
+      if (policy.do === 'logic') {
+        const r = await runPluginLogic(policy.pluginId, policy.fn, { task: input.task });
+        if (r.ok && typeof r.output === 'string' && r.output) logicPolicyTexts.push(r.output);
+      }
+    }
+
     try {
       const result = await runAgentSession(
         {
@@ -235,10 +245,12 @@ export class AiSessionManager {
               historyText: buildHistoryText(input.history ?? []) || undefined,
               // 技能清单常驻 prompt（渐进加载：清单一直可见，全文按需 core.skill.load）
               skillManifest: this.catalog.manifest() ?? undefined,
-              aiPolicies: this.events
-                .policiesFor('ai')
-                .filter((p): p is SeamPolicy & { do: 'inject'; text: string } => p.do === 'inject' && p.where === 'system')
-                .map((p) => p.text),
+              aiPolicies: [
+                ...aiPolicies
+                  .filter((p): p is SeamPolicy & { do: 'inject'; where: 'system'; text: string } => p.do === 'inject' && p.where === 'system')
+                  .map((p) => p.text),
+                ...logicPolicyTexts,
+              ],
             },
           }),
       complete: async (model, prompt, retries) => {

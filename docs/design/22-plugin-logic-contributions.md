@@ -68,8 +68,8 @@ QuickJS 无法提供 DOM，iframe 无法触达文档模型——两者分工，�
 
 1. `contributes.logic` 收集 + `runPluginLogic` 服务（复用沙箱与裁决）+ 单测：**已落地**；
    并经内置工具 `core.plugin.run` 接入助手（宿主注入 `services.pluginRun`）。
-2. hooks 的 `do: 'logic'` 分支：待落地（接缝命中调用函数）。
-3. `contributes.editor` + iframe 消息协议 + 编辑器操作白名单 + E2E：待落地。
+2. hooks 的 `do: 'logic'` 分支：**已落地**（`installHooks` 落 `logic` 策略；`aiSessionManager` 组装前经沙箱调用并将返回文本注入 system）。
+3. `contributes.editor` + iframe 消息协议 + 编辑器操作白名单：**已落地**（`PluginEditorFrame` + `editorOps` 校验/总线 + 写入区 `plugin.editor` 槽位；越权操作被过滤）。
 
 ## 8. 现有边界（现在时）
 

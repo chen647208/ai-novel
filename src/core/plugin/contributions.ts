@@ -45,14 +45,16 @@ export class BuildProfileRegistry {
 export interface HookDeclaration {
   on: string;
   seam?: 'fs' | 'ai' | 'index';
-  do: 'inject' | 'filter' | 'observe';
+  do: 'inject' | 'filter' | 'observe' | 'logic';
   where?: 'system' | 'user';
   text?: string;
   pattern?: string;
   replacement?: string;
+  /** do=logic 时：插件逻辑贡献中的具名函数（design/22 §3）。 */
+  fn?: string;
 }
 
-/** 解析 hooks 声明为总线操作（v0：inject/filter 落 ai 接缝，observe 落事件观察）。 */
+/** 解析 hooks 声明为总线操作（v0：inject/filter/logic 落 ai 接缝，observe 落事件观察）。 */
 export function installHooks(hooks: HookDeclaration[], bus: { decorate(seam: 'fs' | 'ai' | 'index', policy: SeamPolicy, pluginId?: string): Disposable }, pluginId?: string): Disposable[] {
   const disposables: Disposable[] = [];
   for (const hook of hooks) {
@@ -62,6 +64,8 @@ export function installHooks(hooks: HookDeclaration[], bus: { decorate(seam: 'fs
           ? { do: 'inject', where: hook.where ?? 'system', text: hook.text ?? '' }
           : { do: 'filter', pattern: hook.pattern ?? '', replacement: hook.replacement };
       disposables.push(bus.decorate(hook.seam ?? 'ai', policy, pluginId));
+    } else if (hook.do === 'logic' && pluginId && hook.fn) {
+      disposables.push(bus.decorate(hook.seam ?? 'ai', { do: 'logic', pluginId, fn: hook.fn }, pluginId));
     }
   }
   return disposables;

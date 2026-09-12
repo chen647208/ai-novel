@@ -14,11 +14,13 @@ import { useTranslation } from 'react-i18next';
 import { type CommitOptions,useProjectStore } from '@/app/stores/projectStore';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
 import { dialogService } from '@/shared/services/dialogService';
+import { onEditorOps } from '@/shared/services/editorOps';
 import { openForeshadows, overdueForeshadows } from '@/shared/services/foreshadowService';
 import { localStore } from '@/shared/services/localStore';
 import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { FeaturePanel } from '@/shared/ui/FeaturePanel';
+import { Slot } from '@/shared/ui/Slot';
 import { logger } from '@/shared/utils/logger';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
 
@@ -270,6 +272,16 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     handleMouseMove,
   } = useSelectionMenu(editorRef, selectionBlocked);
 
+  // 插件编辑器扩展请求的受控操作（design/22 §4）：应用到编辑器
+  useEffect(() => onEditorOps((ops) => {
+    const handle = editorRef.current;
+    if (!handle) return;
+    for (const op of ops) {
+      const sel = handle.getSelection();
+      if (sel) handle.replaceRange(sel.range.start, sel.range.end, op.text);
+    }
+  }), []);
+
   const handleChapterClick = (chapter: Chapter) => { setGenModal({ isOpen: true, chapter }); };
   const handleEnterEditor = () => {
     if (genModal.chapter) { setActiveChapterId(genModal.chapter.id); setGenModal({ isOpen: false, chapter: null }); }
@@ -511,6 +523,8 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           onSplitChapter={handleSplitChapter}
           onMergeChapter={() => void handleMergeNextChapter()}
         />
+
+        <Slot id="plugin.editor" />
 
         {project.chapters.length === 0 ? (
           <div className="flex flex-1 items-center justify-center">

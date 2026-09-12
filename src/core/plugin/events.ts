@@ -28,7 +28,8 @@ export type SeamName = 'fs' | 'ai' | 'index';
 /** ai 接缝策略（hooks 声明的 do 分支）。 */
 export type SeamPolicy =
   | { do: 'inject'; where: 'system' | 'user'; text: string }
-  | { do: 'filter'; pattern: string; replacement?: string };
+  | { do: 'filter'; pattern: string; replacement?: string }
+  | { do: 'logic'; pluginId: string; fn: string };
 
 /** 拦截器判定结果。 */
 export interface VetoResult {

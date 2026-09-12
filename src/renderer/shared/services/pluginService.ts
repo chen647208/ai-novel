@@ -31,6 +31,7 @@ import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import { parseSignatureEnvelope } from '@shared/pluginSignature';
 import * as React from 'react';
 
+import { PluginEditorFrame } from '@/shared/ui/PluginEditorFrame';
 import { PluginFrame } from '@/shared/ui/PluginFrame';
 
 import { localStore } from './localStore';
@@ -135,7 +136,7 @@ export async function discoverAndLoad(host: PluginHost): Promise<void> {
       const contributes = (manifestJson as { contributes?: Record<string, string[]> }).contributes;
       // 路径门（§11.2）：词法两道门在渲染侧前置，realpath 包含由主进程 fs 代理（pluginReadFile/pluginListDirectory）强制
       let denied = false;
-      for (const dirKey of ['skills', 'types', 'buildProfiles', 'ui', 'logic'] as const) {
+      for (const dirKey of ['skills', 'types', 'buildProfiles', 'ui', 'editor', 'logic'] as const) {
         for (const rel of contributes?.[dirKey] ?? []) {
           const dirCheck = checkPluginRelPath(rel);
           if (!dirCheck.ok) {
@@ -261,7 +262,23 @@ export function createContributionInstaller(deps: PluginDeps): ContributionInsta
       }
     }
 
-        // 逻辑贡献（design/22 §3）：收集 .js，调用时才进沙箱
+        // 编辑器扩展（design/22 §4）：贡献目录下的 .html 经 iframe 运行，只能请求受控编辑器操作
+    for (const rel of manifest.contributes?.editor ?? []) {
+      const prefix = `${rel.replace(/^\.\//, '').replace(/\/+$/, '')}/`;
+      for (const [file, content] of Object.entries(plugin.files)) {
+        if (!file.startsWith(prefix) || !file.endsWith('.html')) continue;
+        sink.add({
+          dispose: uiSlotRegistry.register({
+            id: `plugin.${manifest.id}.editor.${file}`,
+            slot: 'plugin.editor',
+            order: 100,
+            render: () => React.createElement(PluginEditorFrame, { html: content, title: manifest.name }),
+          }),
+        });
+      }
+    }
+
+    // 逻辑贡献（design/22 §3）：收集 .js，调用时才进沙箱
     for (const rel of manifest.contributes?.logic ?? []) {
       const prefix = `${rel.replace(/^\.\//, '').replace(/\/+$/, '')}/`;
       for (const [file, content] of Object.entries(plugin.files)) {
