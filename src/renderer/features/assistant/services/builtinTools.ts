@@ -504,6 +504,38 @@ export const skillRunTool: ToolSpec = {
   },
 };
 
+/** core.plugin.run：执行插件逻辑贡献的具名函数（沙箱内），返回输出与建议的工具调用。 */
+export const pluginRunTool: ToolSpec = {
+  id: 'core.plugin.run',
+  description: '执行插件逻辑贡献（design/22）中的具名函数（在隔离沙箱里运行）。返回输出与它建议调用的工具。',
+  parameters: {
+    type: 'object',
+    properties: {
+      pluginId: { type: 'string', description: '插件 id' },
+      fn: { type: 'string', description: '逻辑函数名' },
+      input: { type: 'string', description: '传给函数的输入' },
+    },
+    required: ['pluginId', 'fn'],
+  },
+  permission: 'read',
+  async execute(req, ctx) {
+    const args = (req.args ?? {}) as { pluginId?: unknown; fn?: unknown; input?: unknown };
+    const pluginId = str(args.pluginId, 'pluginId');
+    const fn = str(args.fn, 'fn');
+    const run = ctx.services?.pluginRun as
+      | ((id: string, name: string, input: unknown) => Promise<{ ok: boolean; output?: unknown; toolCalls?: unknown; error?: { message?: string } }>)
+      | undefined;
+    if (typeof run !== 'function') {
+      return { ok: false, error: '插件逻辑服务不可用（宿主未注入）' };
+    }
+    const result = await run(pluginId, fn, args.input);
+    if (!result.ok) {
+      return { ok: false, error: result.error?.message ?? '插件逻辑执行失败' };
+    }
+    return { ok: true, data: { output: result.output, toolCalls: result.toolCalls ?? [] } };
+  },
+};
+
 // ── 生成类工具（write:proposal：产出提案文本，经审批后由用户落稿）──────
 async function generateProposal(ctx: ToolContext, prompt: string): Promise<{ ok: boolean; data?: unknown; error?: string }> {
   const response = await aiGatewayClient.complete(modelOf(ctx), prompt, { signal: ctx.signal } as CallOptions);
@@ -635,6 +667,7 @@ export function createBuiltinTools(): ToolSpec[] {
     textSemanticSearchTool,
     skillLoadTool,
     skillRunTool,
+    pluginRunTool,
     textContinueTool,
     textRewriteTool,
     outlineGenerateTool,

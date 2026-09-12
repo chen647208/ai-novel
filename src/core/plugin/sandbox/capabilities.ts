@@ -36,6 +36,10 @@ export function adjudicateHandlerResult(
   if (!isRecord(raw)) {
     return { ok: true, output: raw };
   }
+  // 非建议形态（无 output/toolCalls 键）的普通对象即输出本身
+  if (!('output' in raw) && !('toolCalls' in raw)) {
+    return { ok: true, output: raw };
+  }
   const proposal = raw as HandlerProposal;
   const allowed = new Set(allowedTools);
   const toolCalls: SandboxToolCall[] = [];

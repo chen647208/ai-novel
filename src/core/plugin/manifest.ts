@@ -62,6 +62,8 @@ export interface PluginContribution {
   mcpServers?: Record<string, { command: string; args?: string[] }>;
   hooks?: string;
   editor?: string;
+  /** 逻辑贡献目录（.js，导出具名函数；调用时进沙箱，design/22 §3）。 */
+  logic?: string[];
   renderers?: string[];
 }
 

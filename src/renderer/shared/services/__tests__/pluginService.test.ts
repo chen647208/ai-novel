@@ -32,7 +32,7 @@ description: 社区黄金三章扩展写法。触发词：社区开篇
 
 vi.mock('@/shared/services/repository', () => ({}));
 
-import { bootstrapPlugins, setTrustedPluginKeys } from '../pluginService';
+import { bootstrapPlugins, runPluginLogic,setTrustedPluginKeys } from '../pluginService';
 import { uiSlotRegistry } from '../uiSlots';
 
 describe('pluginService（磁盘发现 + 技能贡献装配）', () => {
@@ -231,5 +231,51 @@ describe('pluginService（磁盘发现 + 技能贡献装配）', () => {
     expect(uiSlotRegistry.getSnapshot('plugin.panel')).toHaveLength(1);
     host.disable('com.ui.p');
     expect(uiSlotRegistry.getSnapshot('plugin.panel')).toHaveLength(0);
+  });
+
+  it('逻辑贡献：收集 .js 并经沙箱执行（design/22）', async () => {
+    vi.stubGlobal('window', {
+      electronAPI: {
+        getAppDataPath: async () => '/data',
+        listDirectory: async (dir: string) =>
+          dir === '/data/plugins' ? [{ name: 'com.logic.p', type: 'directory' }] : [],
+        pluginListDirectory: async (root: string, rel: string) =>
+          `${root}/${rel}` === '/data/plugins/com.logic.p/logic' ? [{ name: 'handler.js', type: 'file' }] : [],
+        pluginReadBinary: async () => '',
+        pluginReadFile: async (root: string, rel: string) => {
+          const full = `${root}/${rel}`;
+          if (full === '/data/plugins/com.logic.p/plugin.json') {
+            return JSON.stringify({
+              id: 'com.logic.p',
+              name: 'p',
+              version: '1.0.0',
+              host: '^2.0.0',
+              license: 'MIT',
+              contributes: { logic: ['./logic/'] },
+            });
+          }
+          if (full === '/data/plugins/com.logic.p/logic/handler.js') {
+            return 'function greet(input){ return input; }';
+          }
+          throw new Error('missing');
+        },
+        pluginSandboxRun: async (request: unknown) => ({
+          ok: true,
+          output: { echoed: (request as { input?: unknown }).input },
+        }),
+      },
+    });
+    const host = await bootstrapPlugins(
+      { skillCatalog: new SkillCatalog(), buildProfiles: new BuildProfileRegistry(), events: new EventBus() },
+      '2.0.0',
+      [],
+    );
+    expect(host.list().find((s) => s.id === 'com.logic.p')?.state).toBe('active');
+    const result = await runPluginLogic('com.logic.p', 'greet', 'hi');
+    expect(result.ok).toBe(true);
+    expect(result.output).toEqual({ echoed: 'hi' });
+
+    host.disable('com.logic.p');
+    expect((await runPluginLogic('com.logic.p', 'greet', 'hi')).ok).toBe(false);
   });
 });

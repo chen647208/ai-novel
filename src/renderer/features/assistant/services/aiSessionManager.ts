@@ -35,6 +35,7 @@ import type { AIMessageImage, CardPromptTemplate, ConsistencyCheckPromptTemplate
 import { useSettingsStore } from '@/app/stores/settingsStore';
 import { aiGatewayClient } from '@/shared/services/ai/gatewayClient.js';
 import { syncMcpTools } from '@/shared/services/mcpClient';
+import { runPluginLogic } from '@/shared/services/pluginService';
 
 import { buildHistoryText } from './chatHistory.js';
 import { runSkillHandler } from './skillHandlerService';
@@ -226,6 +227,8 @@ export class AiSessionManager {
                 }
                 return runSkillHandler(skill, skillInput);
               },
+              // 插件逻辑贡献：沙箱执行 + 能力裁决（design/22 §3）
+              pluginRun: (pluginId: string, fn: string, pluginInput: unknown) => runPluginLogic(pluginId, fn, pluginInput),
             },
             extra: {
               // 会话历史：宿主截断后的最近 N 轮，经 history section 注入（空即跳过）

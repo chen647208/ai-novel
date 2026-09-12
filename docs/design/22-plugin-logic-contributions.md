@@ -64,11 +64,12 @@ QuickJS 无法提供 DOM，iframe 无法触达文档模型——两者分工，�
 3. 示例 `editor/` 在 `PluginFrame` 中渲染，`ready` 后可请求一次文本插入并被宿主应用；越权消息被忽略。
 4. 禁用插件后逻辑贡献与编辑器 iframe 一并消失，重启不残留。
 
-## 7. 落地顺序
+## 7. 落地状态
 
-1. `contributes.logic` 收集 + `runPluginLogic` 服务（复用沙箱与裁决）+ 单测。
-2. hooks 的 `do: 'logic'` 分支：接缝命中调用函数。
-3. `contributes.editor` + iframe 消息协议 + 编辑器操作白名单 + E2E。
+1. `contributes.logic` 收集 + `runPluginLogic` 服务（复用沙箱与裁决）+ 单测：**已落地**；
+   并经内置工具 `core.plugin.run` 接入助手（宿主注入 `services.pluginRun`）。
+2. hooks 的 `do: 'logic'` 分支：待落地（接缝命中调用函数）。
+3. `contributes.editor` + iframe 消息协议 + 编辑器操作白名单 + E2E：待落地。
 
 ## 8. 现有边界（现在时）
 

@@ -25,7 +25,7 @@ import type {
   PluginStatus,
 } from '@core/plugin';
 import { installHooks, installTypeTemplates, PermissionDenied, PluginHost, typeTemplateId } from '@core/plugin';
-import { checkPluginFileName, checkPluginRelPath } from '@core/plugin';
+import { adjudicateHandlerResult, checkPluginFileName, checkPluginRelPath, type SandboxRunResult } from '@core/plugin';
 import { builtinRegistry } from '@core/types-registry';
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import { parseSignatureEnvelope } from '@shared/pluginSignature';
@@ -51,6 +51,32 @@ function toBase64(text: string): string {
 }
 
 let trustedPluginKeys: readonly string[] = [];
+
+/** 逻辑贡献源码：`<pluginId>:<file>` → 代码（调用时才进沙箱）。 */
+const logicHandlers = new Map<string, string>();
+
+function logicKey(pluginId: string, file: string): string {
+  return `${pluginId}:${file}`;
+}
+
+/** 执行插件逻辑贡献的具名函数（design/22 §3）：沙箱内运行，返回值经能力裁决。 */
+export async function runPluginLogic(pluginId: string, fn: string, input: unknown): Promise<SandboxRunResult> {
+  if (!/^[A-Za-z_$][\w$]*$/.test(fn)) {
+    return { ok: false, error: { kind: 'runtime', message: `非法函数名：${fn}` } };
+  }
+  const entry = [...logicHandlers.entries()].find(([key]) => key.startsWith(`${pluginId}:`));
+  if (!entry) {
+    return { ok: false, error: { kind: 'runtime', message: `插件 ${pluginId} 无逻辑贡献` } };
+  }
+  const api = typeof window === 'undefined' ? undefined : window.electronAPI;
+  if (!api?.pluginSandboxRun) {
+    return { ok: false, error: { kind: 'runtime', message: '当前环境不支持插件沙箱' } };
+  }
+  const code = `${entry[1]}\n;globalThis.run = typeof ${fn} === 'function' ? ${fn} : undefined;`;
+  const result = await api.pluginSandboxRun({ code, input, allowedTools: [] });
+  if (!result.ok) return result;
+  return adjudicateHandlerResult(result.output, []);
+}
 
 /** 配置受信任的插件签名公钥（PEM）。空清单 = 任何签名包一律拒载（fail closed）。 */
 export function setTrustedPluginKeys(keys: readonly string[]): void {
@@ -109,7 +135,7 @@ export async function discoverAndLoad(host: PluginHost): Promise<void> {
       const contributes = (manifestJson as { contributes?: Record<string, string[]> }).contributes;
       // 路径门（§11.2）：词法两道门在渲染侧前置，realpath 包含由主进程 fs 代理（pluginReadFile/pluginListDirectory）强制
       let denied = false;
-      for (const dirKey of ['skills', 'types', 'buildProfiles', 'ui'] as const) {
+      for (const dirKey of ['skills', 'types', 'buildProfiles', 'ui', 'logic'] as const) {
         for (const rel of contributes?.[dirKey] ?? []) {
           const dirCheck = checkPluginRelPath(rel);
           if (!dirCheck.ok) {
@@ -232,6 +258,17 @@ export function createContributionInstaller(deps: PluginDeps): ContributionInsta
             render: () => React.createElement(PluginFrame, { html: content, title: manifest.name }),
           }),
         });
+      }
+    }
+
+        // 逻辑贡献（design/22 §3）：收集 .js，调用时才进沙箱
+    for (const rel of manifest.contributes?.logic ?? []) {
+      const prefix = `${rel.replace(/^\.\//, '').replace(/\/+$/, '')}/`;
+      for (const [file, content] of Object.entries(plugin.files)) {
+        if (!file.startsWith(prefix) || !file.endsWith('.js')) continue;
+        const key = logicKey(manifest.id, file);
+        logicHandlers.set(key, content);
+        sink.add({ dispose: () => logicHandlers.delete(key) });
       }
     }
 
