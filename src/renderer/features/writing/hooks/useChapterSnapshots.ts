@@ -13,8 +13,9 @@
  */
 import { useCallback, useEffect, useRef } from 'react';
 
+import { appendSnapshot, createSnapshot, shouldAutoSnapshot } from '@/shared/services/chapterSnapshotService';
+
 import type { Project } from '../../../../shared/types';
-import { appendSnapshot, createSnapshot, shouldAutoSnapshot } from '../services/chapterSnapshotService';
 
 type SnapshotSource = 'auto' | 'manual' | 'before-clear';
 

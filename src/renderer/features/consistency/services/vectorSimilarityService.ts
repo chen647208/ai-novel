@@ -8,6 +8,7 @@
  */
 import { i18n } from '@/i18n';
 import { AIService } from '@/shared/services/ai/aiService';
+import { ConsistencyCheckPromptService } from '@/shared/services/consistencyCheckPromptService';
 import { genderLabel, roleLabel } from '@/shared/utils/displayLabels';
 import { logger } from '@/shared/utils/logger';
 
@@ -25,7 +26,6 @@ import {
   type ModelConfig,
   type Project} from '../../../../shared/types';
 import { vectorIntegrationService } from '../../knowledge/services/vectorIntegrationService';
-import { ConsistencyCheckPromptService } from './consistencyCheckPromptService';
 
 export interface SimilarityIssue {
   id: string;

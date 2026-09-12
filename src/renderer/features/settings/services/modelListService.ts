@@ -8,10 +8,10 @@
  */
 
 import { i18n } from '@/i18n';
+import { resolveModelApiKey } from '@/shared/services/credentialService';
 
 import { type ModelConfig } from '../../../../shared/types';
 import { asRecord, asRecords, asStr } from '../../../shared/utils/loose';
-import { resolveModelApiKey } from './credentialService';
 
 export class ModelListService {
   // 缓存时间：1小时

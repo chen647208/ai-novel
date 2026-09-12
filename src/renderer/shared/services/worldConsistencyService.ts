@@ -7,14 +7,14 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 import { i18n } from '@/i18n';
-import { logger } from '@/shared/utils/logger';
 
 /**
  * 世界观一致性检查服务
  * 提供世界观数据一致性验证
  */
-import { type ConsistencyCheckMode, type ConsistencyCheckPromptTemplate,type EmbeddingModelConfig, type ModelConfig, type Project } from '../../../../shared/types';
-import { performSemanticCheck, type SemanticCheckResult } from '../../assistant/services/aiSemanticCheckService';
+import { type ConsistencyCheckMode, type ConsistencyCheckPromptTemplate,type EmbeddingModelConfig, type ModelConfig, type Project } from '../../../shared/types';
+import { logger } from '../utils/logger';
+import { performSemanticCheck, type SemanticCheckResult } from './aiSemanticCheckService';
 
 export interface ConsistencyIssue {
   id: string;

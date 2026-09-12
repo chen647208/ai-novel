@@ -14,8 +14,8 @@
 import { type RefObject,useCallback, useEffect, useState } from 'react';
 
 import { useSettingsStore } from '@/app/stores/settingsStore';
+import { eventToKeybinding, resolveKeybindings } from '@/shared/services/keybindings';
 
-import { eventToKeybinding, resolveKeybindings } from '../../settings/services/keybindings';
 import type { NovelEditorHandle } from '../types';
 
 interface UseFindReplaceOptions {

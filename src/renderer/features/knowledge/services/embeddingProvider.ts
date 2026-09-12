@@ -7,8 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { embeddingModelService } from '@/shared/services/embeddingModelService';
+
 import { logger } from '../../../shared/utils/logger';
-import { embeddingModelService } from '../../settings/services/embeddingModelService';
 import { apiEmbeddingService } from './apiEmbeddingService';
 import { type EmbeddingService,embeddingService as simpleEmbeddingService } from './embeddingService';
 

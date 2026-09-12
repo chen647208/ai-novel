@@ -14,10 +14,10 @@
 
 import { uuidv7 } from '@core/entities';
 
+import { getDefaultConsistencyPrompts } from '@/constants/consistencyCheck';
 import { i18n } from '@/i18n';
 
-import { type ConsistencyCheckPromptCategory,type ConsistencyCheckPromptTemplate } from '../../../../shared/types';
-import { getDefaultConsistencyPrompts } from '../../../constants/consistencyCheck';
+import { type ConsistencyCheckPromptCategory,type ConsistencyCheckPromptTemplate } from '../../../shared/types';
 
 export class ConsistencyCheckPromptService {
   /**

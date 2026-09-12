@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import type { EmbeddingModelConfig, ModelConfig } from '../../../../shared/types';
+import type { EmbeddingModelConfig, ModelConfig } from '../../../shared/types';
 
 /**
  * 渲染端凭证门面：持久化只存 `vault:<id>` 引用，明文只活在编辑态内存。

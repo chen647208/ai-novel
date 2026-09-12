@@ -12,6 +12,7 @@ import { Bot, Camera, Copy, History, Redo2, RotateCcw, Trash2 } from 'lucide-rea
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { listSnapshots, removeSnapshot } from '@/shared/services/chapterSnapshotService';
 import { dialogService } from '@/shared/services/dialogService';
 import { repository } from '@/shared/services/repository';
 import { Button } from '@/shared/ui/Button';
@@ -21,7 +22,6 @@ import { ModalShell } from '@/shared/ui/ModalShell';
 import { cn } from '@/shared/utils/cn';
 
 import type { Chapter } from '../../../../shared/types';
-import { listSnapshots, removeSnapshot } from '../services/chapterSnapshotService';
 import { diffLines } from '../services/historyDiff';
 import { formatHistoryTimestamp, getGenerationType, getProviderIcon } from '../utils';
 

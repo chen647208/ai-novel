@@ -15,6 +15,7 @@ import { AlertCircle, CheckCircle2, ChevronDown, ChevronUp, Copy, Download, File
 import React, { useMemo,useState } from 'react';
 
 import { dt,templateDisplayName, useTranslation } from '@/i18n';
+import { ConsistencyCheckPromptService } from '@/shared/services/consistencyCheckPromptService';
 import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -27,7 +28,6 @@ import { cn } from '@/shared/utils/cn';
 
 import { type ConsistencyCheckPromptCategory,type ConsistencyCheckPromptTemplate } from '../../../shared/types';
 import { getDefaultConsistencyPrompts } from '../../constants/consistencyCheck';
-import { ConsistencyCheckPromptService } from './services/consistencyCheckPromptService';
 
 
 interface ConsistencyPromptManagerProps {

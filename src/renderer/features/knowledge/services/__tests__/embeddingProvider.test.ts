@@ -31,7 +31,7 @@ const { apiImpl, simpleImpl, modelImpl } = vi.hoisted(() => ({
 
 vi.mock('../apiEmbeddingService', () => ({ apiEmbeddingService: apiImpl }));
 vi.mock('../embeddingService', () => ({ embeddingService: simpleImpl }));
-vi.mock('../../../settings/services/embeddingModelService', () => ({ embeddingModelService: modelImpl }));
+vi.mock('@/shared/services/embeddingModelService', () => ({ embeddingModelService: modelImpl }));
 vi.mock('../../../../shared/utils/logger', () => ({
   logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));

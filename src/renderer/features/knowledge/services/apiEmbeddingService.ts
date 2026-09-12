@@ -9,13 +9,13 @@
 
 
 import { i18n } from '@/i18n';
+import { embeddingModelService } from '@/shared/services/embeddingModelService';
 
 import { 
   type EmbeddingModelConfig, 
   type KnowledgeCategory,
   type VectorDocument} from '../../../../shared/types';
 import { logger } from '../../../shared/utils/logger';
-import { embeddingModelService } from '../../settings/services/embeddingModelService';
 import { type EmbeddingService } from './embeddingService';
 
 /**

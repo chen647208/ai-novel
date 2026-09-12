@@ -12,11 +12,11 @@ import { i18n } from '@/i18n';
 
 import {
   type EmbeddingConnectionTestResult,
-  type EmbeddingModelConfig} from '../../../../shared/types';
-import { embeddingConfigStore } from '../../../shared/services/embeddingConfigStore';
-import { logger } from '../../../shared/utils/logger';
-import { asNum, asNumArr,asRecord, asRecords, asStr } from '../../../shared/utils/loose';
+  type EmbeddingModelConfig} from '../../../shared/types';
+import { logger } from '../utils/logger';
+import { asNum, asNumArr,asRecord, asRecords, asStr } from '../utils/loose';
 import { resolveEmbeddingApiKey } from './credentialService';
+import { embeddingConfigStore } from './embeddingConfigStore';
 
 /**
  * Embedding模型管理服务

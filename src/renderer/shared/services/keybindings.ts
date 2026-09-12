@@ -9,7 +9,7 @@
 
 /** 快捷键纯函数（docs/design/15）：事件序列化、冲突检测。 */
 
-import type { KeybindingActionId } from '../../../../shared/types';
+import type { KeybindingActionId } from '../../../shared/types';
 
 export type { KeybindingActionId };
 

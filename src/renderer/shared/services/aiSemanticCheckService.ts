@@ -10,6 +10,7 @@ import { renderWorldDigest } from '@core/ai';
 
 import { i18n } from '@/i18n';
 import { AIService } from '@/shared/services/ai/aiService';
+import { ConsistencyCheckPromptService } from '@/shared/services/consistencyCheckPromptService';
 import { genderLabel, roleLabel } from '@/shared/utils/displayLabels';
 import { logger } from '@/shared/utils/logger';
 
@@ -17,10 +18,9 @@ import { logger } from '@/shared/utils/logger';
  * AI语义检查服务
  * 使用LLM分析描述文本中的语义矛盾和逻辑不一致
  */
-import { type Character, type ConsistencyCheckPromptTemplate,type Faction, type Location, type ModelConfig, type Project } from '../../../../shared/types';
-import { asNum, asRecord, asRecords, asStr, asStrArr,type LooseRecord } from '../../../shared/utils/loose';
-import { ConsistencyCheckPromptService } from '../../consistency/services/consistencyCheckPromptService';
-import { AI_SEMANTIC_THROTTLE_MS } from '../constants';
+import { type Character, type ConsistencyCheckPromptTemplate,type Faction, type Location, type ModelConfig, type Project } from '../../../shared/types';
+import { AI_SEMANTIC_THROTTLE_MS } from '../constants/ai';
+import { asNum, asRecord, asRecords, asStr, asStrArr,type LooseRecord } from '../utils/loose';
 
 export interface SemanticIssue {
   id: string;

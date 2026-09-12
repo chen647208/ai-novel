@@ -14,7 +14,7 @@
  */
 import { uuidv7 } from '@core/entities';
 
-import type { Chapter, ChapterSnapshot } from '../../../../shared/types';
+import type { Chapter, ChapterSnapshot } from '../../../shared/types';
 
 /** 单章保留的最大快照数，超出按时间淘汰最旧 */
 export const MAX_SNAPSHOTS_PER_CHAPTER = 20;

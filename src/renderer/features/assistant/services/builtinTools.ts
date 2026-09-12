@@ -23,12 +23,12 @@ import type { ConsistencyCheckPromptTemplate } from '@shared/types';
 import { AICardCommandService } from '@/features/cards/services/aiCardCommandService';
 import { AICardCreationService } from '@/features/cards/services/aiCardCreationService';
 import { aiGatewayClient, type CallOptions } from '@/shared/services/ai/gatewayClient';
-import { roleLabel } from '@/shared/utils/displayLabels';
-
 import {
   performQuickSemanticCheck,
   performSemanticCheck,
-} from './aiSemanticCheckService';
+} from '@/shared/services/aiSemanticCheckService';
+import { roleLabel } from '@/shared/utils/displayLabels';
+
 import type { RecommendationContext } from './smartRecommendationService';
 import {
   getAIEnhancedRecommendations,

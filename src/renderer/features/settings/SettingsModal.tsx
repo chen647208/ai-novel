@@ -11,7 +11,9 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { dt,i18n } from '@/i18n';
 import { AIService } from '@/shared/services/ai/aiService';
+import { isVaultRef, persistApiKey, removeApiKey } from '@/shared/services/credentialService';
 import { dialogService } from '@/shared/services/dialogService';
+import { embeddingModelService } from '@/shared/services/embeddingModelService';
 import { Dialog, DialogContent } from '@/shared/ui/Dialog';
 
 import {
@@ -40,8 +42,6 @@ import {
   duplicateCardPromptTemplate,
   importCardPromptTemplates,
 } from './factories';
-import { isVaultRef, persistApiKey, removeApiKey } from './services/credentialService';
-import { embeddingModelService } from './services/embeddingModelService';
 import { ModelListService } from './services/modelListService';
 import type {
   CardPromptTestResult,

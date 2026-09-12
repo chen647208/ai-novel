@@ -22,24 +22,17 @@ const featureNames = fs.existsSync(featuresDir)
  */
 const CROSS_FEATURE_DEBT = [
   'assistant->cards',
-  'assistant->consistency',
-  'assistant->knowledge',
-  'assistant->writing',
   'consistency->knowledge',
-  'consistency->world',
   'inspiration->world',
   'knowledge->assistant',
   'knowledge->consistency',
-  'knowledge->settings',
   'knowledge->timeline',
   'knowledge->world',
   'settings->assistant',
   'settings->cards',
   'settings->consistency',
-  'world->assistant',
   'writing->assistant',
   'writing->foreshadowing',
-  'writing->settings',
 ];
 
 const featureBoundaryRules = featureNames.map((name) => ({
@@ -245,3 +238,4 @@ export default tseslint.config(
   // 跨 feature 边界（error，存量边冻结在 CROSS_FEATURE_DEBT）
   ...featureBoundaryRules,
 );
+

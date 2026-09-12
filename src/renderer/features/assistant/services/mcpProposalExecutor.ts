@@ -33,10 +33,10 @@ import type {
 
 import { useProjectStore } from '@/app/stores/projectStore';
 import { useSettingsStore } from '@/app/stores/settingsStore';
+import { appendSnapshot, createSnapshot } from '@/shared/services/chapterSnapshotService';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
 
 import { AICardCreationService } from '../../cards/services/aiCardCreationService';
-import { appendSnapshot, createSnapshot } from '../../writing/services/chapterSnapshotService';
 
 export interface McpExecResult {
   ok: boolean;

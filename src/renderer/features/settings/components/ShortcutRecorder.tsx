@@ -11,10 +11,6 @@ import React, { useEffect, useState } from 'react';
 
 import { useSettingsStore } from '@/app/stores/settingsStore';
 import { useTranslation } from '@/i18n';
-import { Button } from '@/shared/ui/Button';
-import { Label } from '@/shared/ui/Label';
-
-import type { KeybindingActionId } from '../../../../shared/types';
 import {
   DEFAULT_KEYBINDINGS,
   eventToKeybinding,
@@ -22,7 +18,11 @@ import {
   formatKeybinding,
   type KeybindingMap,
   resolveKeybindings,
-} from '../services/keybindings';
+} from '@/shared/services/keybindings';
+import { Button } from '@/shared/ui/Button';
+import { Label } from '@/shared/ui/Label';
+
+import type { KeybindingActionId } from '../../../../shared/types';
 
 const ACTIONS = Object.keys(DEFAULT_KEYBINDINGS) as KeybindingActionId[];
 

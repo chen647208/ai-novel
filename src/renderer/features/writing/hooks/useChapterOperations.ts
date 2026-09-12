@@ -16,11 +16,11 @@ import type { TFunction } from 'i18next';
 import type React from 'react';
 import { useCallback } from 'react';
 
+import { appendSnapshot, createSnapshot } from '@/shared/services/chapterSnapshotService';
 import { dialogService } from '@/shared/services/dialogService';
 
 import { isVirtualChapter } from '../../../../shared/constants/chapters';
 import type { Chapter, Project } from '../../../../shared/types';
-import { appendSnapshot, createSnapshot } from '../services/chapterSnapshotService';
 import type { NovelEditorHandle } from '../types';
 
 export interface ChapterOperationsOptions {

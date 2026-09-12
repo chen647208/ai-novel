@@ -16,6 +16,11 @@ import React, { useCallback,useEffect, useState } from 'react';
 
 import { i18n,useTranslation } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
+import {
+  fixDanglingReferences,
+  performAdvancedConsistencyCheck,
+  quickCheck,
+  type WorldConsistencyCheckResult} from '@/shared/services/worldConsistencyService';
 import { Button } from '@/shared/ui/Button';
 import { Progress } from '@/shared/ui/Progress';
 import { Select } from '@/shared/ui/Select';
@@ -32,11 +37,6 @@ import {
   type EmbeddingModelConfig,
   type ModelConfig,
   type Project} from '../../../shared/types';
-import {
-  fixDanglingReferences,
-  performAdvancedConsistencyCheck,
-  quickCheck,
-  type WorldConsistencyCheckResult} from '../world/services/worldConsistencyService';
 import { performSimilarityCheck,} from './services/vectorSimilarityService';
 
 interface ConsistencyCheckerProps {
