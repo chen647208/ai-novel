@@ -20,17 +20,26 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import Slot from '@/shared/ui/Slot';
+import { Spinner } from '@/shared/ui/Spinner';
 
 import { type AppTheme, type ModelConfig, type Project, type PromptTemplate } from '../../../shared/types';
-import StepCharacters from '../../features/characters/StepCharacters';
-import StepInspiration from '../../features/inspiration/StepInspiration';
-import StepKnowledgeEnhanced from '../../features/knowledge/StepKnowledgeEnhanced';
-import WritingEditor from '../../features/writing/WritingEditor';
 import { isModelUsable } from '../../shared/utils/modelReadiness';
 import type { SectionId } from '../sections';
-import StructureSection from './StructureSection';
 import WorkspaceNav from './WorkspaceNav';
 import WorkspaceTopbar from './WorkspaceTopbar';
+
+// 分区组件按需加载：进入某分区才拉取其代码，减小首屏主包
+const StepInspiration = React.lazy(() => import('../../features/inspiration/StepInspiration'));
+const StepKnowledgeEnhanced = React.lazy(() => import('../../features/knowledge/StepKnowledgeEnhanced'));
+const StepCharacters = React.lazy(() => import('../../features/characters/StepCharacters'));
+const StructureSection = React.lazy(() => import('./StructureSection'));
+const WritingEditor = React.lazy(() => import('../../features/writing/WritingEditor'));
+
+const SectionFallback: React.FC = () => (
+  <div className="flex h-full items-center justify-center">
+    <Spinner />
+  </div>
+);
 
 export interface WorkspaceViewProps {
   section: SectionId;
@@ -166,7 +175,9 @@ const WorkspaceSection: React.FC<WorkspaceViewProps> = ({
           <Button size="sm" variant="outline" onClick={onOpenSettings}>{t('model.goSettings')}</Button>
         </div>
       )}
-      <div className="min-h-0 flex-1">{content}</div>
+      <div className="min-h-0 flex-1">
+        <React.Suspense fallback={<SectionFallback />}>{content}</React.Suspense>
+      </div>
       <div className="flex h-6 shrink-0 items-center justify-end gap-3 border-t border-border bg-muted/20 px-3">
         <Slot id="status-bar" />
       </div>
