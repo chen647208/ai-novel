@@ -20,5 +20,9 @@
   "sdkStreamError": "{{provider}} SDK 流式错误: {{message}}",
   "jsonValidationFailed": "返回的 JSON 未通过结构校验",
   "jsonParseFailed": "JSON 解析失败: {{message}}",
-  "unknown": "未知错误"
+  "unknown": "未知错误",
+  "requestAuthFailed": "鉴权失败（{{status}}）：请检查 API Key 与权限。{{detail}}",
+  "requestRateLimited": "触发限流（{{status}}）：请稍后重试。{{detail}}",
+  "requestServerError": "服务端错误（{{status}}）：{{detail}}",
+  "requestBadRequest": "请求被拒绝（{{status}}）：{{detail}}"
 }

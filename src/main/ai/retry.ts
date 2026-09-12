@@ -8,7 +8,7 @@
  */
 
 import { aiT } from './i18n.js';
-import { AIRequestError } from './types.js';
+import { type AiErrorKind,AIRequestError } from './types.js';
 
 /** 判断错误是否值得重试：网络异常、429、5xx */
 export function isRetryableError(error: unknown): boolean {
@@ -60,14 +60,16 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
  * - 429 响应若带 Retry-After（AIRequestError.retryAfterMs）则优先遵守
  * - 尊重 AbortSignal：等待期间可被取消
  */
-export async function withRetry<T>(fn: (attempt: number) => Promise<T>, options: RetryOptions = {}): Promise<T> {
+export async function withRetry<T>(fn: (attempt: number, idempotencyKey: string) => Promise<T>, options: RetryOptions = {}): Promise<T> {
   const { retries = 2, baseDelayMs = 800, maxDelayMs = 15000, signal, onRetry } = options;
+  // 同一个逻辑请求的全部重试复用同一幂等键，避免上游重复计费/重复执行
+  const idempotencyKey = makeIdempotencyKey();
   let attempt = 0;
 
   while (true) {
     if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
     try {
-      return await fn(attempt);
+      return await fn(attempt, idempotencyKey);
     } catch (error) {
       attempt += 1;
       const retryable = isRetryableError(error) && attempt <= retries;
@@ -86,10 +88,35 @@ export async function withRetry<T>(fn: (attempt: number) => Promise<T>, options:
   }
 }
 
-/** 从失败响应构造 AIRequestError（统一状态码→可重试映射与 Retry-After 解析） */
+/** 生成幂等键：优先 crypto.randomUUID，回退时间戳+随机。 */
+export function makeIdempotencyKey(): string {
+  const c = globalThis.crypto as { randomUUID?: () => string } | undefined;
+  if (c && typeof c.randomUUID === 'function') return c.randomUUID();
+  return `idem-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
+/** 从失败响应构造 AIRequestError（按状态分类 + 统一可重试映射 + Retry-After 解析） */
 export function requestErrorFromResponse(status: number, statusText: string, bodySnippet: string): AIRequestError {
   const retryable = status === 429 || status >= 500;
-  return new AIRequestError(aiT('requestFailedStatus', { status, detail: bodySnippet || statusText }), status, retryable);
+  const detail = bodySnippet || statusText;
+  let kind: AiErrorKind = 'unknown';
+  let message: string;
+  if (status === 401 || status === 403) {
+    kind = 'auth';
+    message = aiT('requestAuthFailed', { status, detail });
+  } else if (status === 429) {
+    kind = 'rate-limit';
+    message = aiT('requestRateLimited', { status, detail });
+  } else if (status >= 500) {
+    kind = 'server';
+    message = aiT('requestServerError', { status, detail });
+  } else if (status >= 400) {
+    kind = 'bad-request';
+    message = aiT('requestBadRequest', { status, detail });
+  } else {
+    message = aiT('requestFailedStatus', { status, detail });
+  }
+  return new AIRequestError(message, status, retryable, undefined, kind);
 }
 
 /** 解析 Retry-After 头（秒）为毫秒 */

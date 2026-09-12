@@ -103,13 +103,66 @@ export function buildChromiumProxyRules(proxyUrl: string): ChromiumProxyRules {
   return { mode: 'fixed_servers', proxyRules: `http=${host};https=${host}` };
 }
 
-/** AI 请求首响应超时（毫秒）：仅覆盖建连到响应头，响应体/流式读取不受此限。 */
+/** AI 请求首响应超时（毫秒）：仅覆盖建连到响应头。 */
 export const AI_REQUEST_TIMEOUT_MS = 60_000;
+
+/** AI 流式读取空闲超时（毫秒）：响应头到达后，任意相邻两块之间超过此间隔即中止。 */
+export const AI_STREAM_IDLE_TIMEOUT_MS = 120_000;
+
+/**
+ * 给响应体加空闲超时：每读到一块重置计时；空闲超时即 abort controller（进而中断底层流）。
+ * 独立可测（不依赖真实网络）：body 结束/出错/取消时回调 onDone 做清理。
+ */
+export function withStreamIdleTimeout(
+  res: Response,
+  idleMs: number,
+  controller: AbortController,
+  onDone: () => void = () => undefined,
+): Response {
+  if (!res.body) {
+    onDone();
+    return res;
+  }
+  const reader = res.body.getReader();
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  const arm = (): void => {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => controller.abort(new DOMException('AI stream idle timeout', 'TimeoutError')), idleMs);
+  };
+  const stop = (): void => {
+    if (timer) clearTimeout(timer);
+    timer = null;
+  };
+  const stream = new ReadableStream<Uint8Array>({
+    async pull(c) {
+      arm();
+      try {
+        const { done, value } = await reader.read();
+        if (done) {
+          stop();
+          onDone();
+          c.close();
+          return;
+        }
+        c.enqueue(value);
+      } catch (error) {
+        stop();
+        onDone();
+        c.error(error);
+      }
+    },
+    cancel(reason) {
+      stop();
+      onDone();
+      return reader.cancel(reason);
+    },
+  });
+  return new Response(stream, { status: res.status, statusText: res.statusText, headers: res.headers });
+}
 
 /**
  * 网关 fetch 单出口：loopback 目标强制直连（Ollama 豁免），其余走全局 dispatcher。
- * 统一加首响应超时：到点前未返回响应头即中止，避免上游挂起导致请求永久悬挂；
- * 拿到响应头后清除计时器，故流式长响应不会被误杀。
+ * 首响应超时覆盖建连到响应头；响应体再套空闲超时，避免流式长响应永久悬挂。
  */
 export async function proxiedFetch(url: string, init?: RequestInit): Promise<Response> {
   const external = init?.signal ?? undefined;
@@ -119,17 +172,23 @@ export async function proxiedFetch(url: string, init?: RequestInit): Promise<Res
     if (external.aborted) controller.abort(external.reason);
     else external.addEventListener('abort', onAbort, { once: true });
   }
-  const timer = setTimeout(() => controller.abort(new DOMException('AI request timed out', 'TimeoutError')), AI_REQUEST_TIMEOUT_MS);
+  let connectTimer: ReturnType<typeof setTimeout> | null = null;
+  const finish = (): void => {
+    if (connectTimer) clearTimeout(connectTimer);
+    external?.removeEventListener('abort', onAbort);
+  };
+  connectTimer = setTimeout(() => controller.abort(new DOMException('AI request timed out', 'TimeoutError')), AI_REQUEST_TIMEOUT_MS);
   try {
     const withSignal: RequestInit = { ...(init ?? {}), signal: controller.signal };
-    if (shouldBypassProxy(url)) {
-      const res = await undiciFetch(url, { ...(withSignal as UndiciRequestInit), dispatcher: new Agent() });
-      return res as unknown as Response;
-    }
-    return await fetch(url, withSignal);
-  } finally {
-    clearTimeout(timer);
-    external?.removeEventListener('abort', onAbort);
+    const res = shouldBypassProxy(url)
+      ? await undiciFetch(url, { ...(withSignal as UndiciRequestInit), dispatcher: new Agent() })
+      : await fetch(url, withSignal);
+    if (connectTimer) clearTimeout(connectTimer);
+    connectTimer = null;
+    return withStreamIdleTimeout(res as unknown as Response, AI_STREAM_IDLE_TIMEOUT_MS, controller, finish);
+  } catch (error) {
+    finish();
+    throw error;
   }
 }
 

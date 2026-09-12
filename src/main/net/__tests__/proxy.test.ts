@@ -8,7 +8,46 @@
  */
 import { describe, expect,it } from 'vitest';
 
-import { buildChromiumProxyRules, buildDispatcher, parseProxyUrl, shouldBypassProxy } from '../proxy.js';
+import { buildChromiumProxyRules, buildDispatcher, parseProxyUrl, shouldBypassProxy, withStreamIdleTimeout } from '../proxy.js';
+
+describe('withStreamIdleTimeout', () => {
+  it('空闲超时后读取报错', async () => {
+    const controller = new AbortController();
+    const body = new ReadableStream<Uint8Array>({
+      start(c) {
+        controller.signal.addEventListener('abort', () => c.error(controller.signal.reason));
+      },
+      pull() {
+        /* 永不产出，模拟上游卡住 */
+      },
+    });
+    const res = withStreamIdleTimeout(new Response(body), 20, controller);
+    const reader = res.body!.getReader();
+    await expect(reader.read()).rejects.toBeTruthy();
+    expect(controller.signal.aborted).toBe(true);
+  });
+
+  it('持续有数据则不超时并正常结束', async () => {
+    const controller = new AbortController();
+    let n = 0;
+    const body = new ReadableStream<Uint8Array>({
+      pull(c) {
+        if (n++ < 3) c.enqueue(new Uint8Array([1]));
+        else c.close();
+      },
+    });
+    const res = withStreamIdleTimeout(new Response(body), 1000, controller);
+    const reader = res.body!.getReader();
+    let chunks = 0;
+    for (;;) {
+      const { done } = await reader.read();
+      if (done) break;
+      chunks += 1;
+    }
+    expect(chunks).toBe(3);
+    expect(controller.signal.aborted).toBe(false);
+  });
+});
 
 describe('parseProxyUrl', () => {
   it('空串合法（直连）', () => {

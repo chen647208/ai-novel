@@ -43,6 +43,7 @@ async function postChat(
   prompt: string,
   stream: boolean,
   options?: CallOptions,
+  idempotencyKey?: string,
 ): Promise<Response> {
   const res = await proxiedFetch(url, {
     method: 'POST',
@@ -50,6 +51,7 @@ async function postChat(
     headers: {
       'Content-Type': 'application/json',
       ...(model.apiKey ? { Authorization: `Bearer ${model.apiKey}` } : {}),
+      ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
     },
     body: JSON.stringify({
       model: model.modelName,
@@ -64,7 +66,7 @@ async function postChat(
     const message = await readErrorResponse(res);
     const err = requestErrorFromResponse(res.status, res.statusText, message);
     const retryAfter = parseRetryAfter(res.headers.get('retry-after'));
-    throw new AIRequestError(err.message, err.status, err.retryable, retryAfter);
+    throw new AIRequestError(err.message, err.status, err.retryable, retryAfter, err.kind);
   }
   return res;
 }
@@ -78,8 +80,8 @@ export const openAICompatibleAdapter: ProviderAdapter = {
     const url = openAIChatUrl(model.endpoint ?? (model.provider === 'ollama' ? 'http://localhost:11434/v1' : ''));
     try {
       const data = await withRetry(
-        async () => {
-          const res = await postChat(url, model, prompt, false, options);
+        async (_attempt, idempotencyKey) => {
+          const res = await postChat(url, model, prompt, false, options, idempotencyKey);
           return (await res.json()) as OpenAIChunk;
         },
         { retries: options?.retries ?? 2, signal: options?.signal },
@@ -119,7 +121,7 @@ export const openAICompatibleAdapter: ProviderAdapter = {
 
     try {
       const res = await withRetry(
-        async () => postChat(url, model, prompt, true, options),
+        async (_attempt, idempotencyKey) => postChat(url, model, prompt, true, options, idempotencyKey),
         { retries: options?.retries ?? 2, signal: options?.signal },
       );
 

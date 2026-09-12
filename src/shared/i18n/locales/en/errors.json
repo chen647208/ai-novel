@@ -20,5 +20,9 @@
   "sdkStreamError": "{{provider}} SDK streaming error: {{message}}",
   "jsonValidationFailed": "The returned JSON failed structure validation.",
   "jsonParseFailed": "JSON parse failed: {{message}}",
-  "unknown": "Unknown error"
+  "unknown": "Unknown error",
+  "requestAuthFailed": "Authentication failed ({{status}}): check the API key and permissions. {{detail}}",
+  "requestRateLimited": "Rate limited ({{status}}): please retry later. {{detail}}",
+  "requestServerError": "Server error ({{status}}): {{detail}}",
+  "requestBadRequest": "Request rejected ({{status}}): {{detail}}"
 }

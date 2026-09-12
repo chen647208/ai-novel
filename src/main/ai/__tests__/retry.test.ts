@@ -9,7 +9,7 @@
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { isRetryableError, parseRetryAfter,withRetry } from '../retry.js';
+import { isRetryableError, makeIdempotencyKey, parseRetryAfter, requestErrorFromResponse,withRetry } from '../retry.js';
 import { AIRequestError } from '../types.js';
 
 describe('isRetryableError', () => {
@@ -59,6 +59,32 @@ describe('withRetry', () => {
     const fn = vi.fn().mockResolvedValue('never');
     await expect(withRetry(fn, { retries: 1, baseDelayMs: 1, signal: controller.signal })).rejects.toThrow();
     expect(fn).not.toHaveBeenCalled();
+  });
+
+  it('同一请求的重试复用同一幂等键', async () => {
+    const keys: string[] = [];
+    const fn = vi.fn(async (_attempt: number, key: string) => {
+      keys.push(key);
+      if (keys.length === 1) throw new AIRequestError('retry me', 503, true);
+      return 'ok';
+    });
+    await withRetry(fn, { retries: 2, baseDelayMs: 1 });
+    expect(keys).toHaveLength(2);
+    expect(keys[0]).toBeTruthy();
+    expect(keys[0]).toBe(keys[1]);
+  });
+});
+
+describe('requestErrorFromResponse 分类', () => {
+  it('鉴权/限流/服务端/坏请求分别归类', () => {
+    expect(requestErrorFromResponse(401, '', '').kind).toBe('auth');
+    expect(requestErrorFromResponse(429, '', '').kind).toBe('rate-limit');
+    expect(requestErrorFromResponse(503, '', '').kind).toBe('server');
+    expect(requestErrorFromResponse(422, '', '').kind).toBe('bad-request');
+  });
+
+  it('幂等键非空', () => {
+    expect(makeIdempotencyKey()).toMatch(/\S/);
   });
 });
 
