@@ -101,4 +101,15 @@ describe('投影桥往返（M0 硬验收）', () => {
     const restored = entitiesToProject(projectToEntities(p, 500));
     expect(restored.chapters.map((c) => c.id)).toEqual(['ch1', 'ch2']); // 按 order 排序
   });
+
+  it('未知插件类型经 extensions 往返无损', () => {
+    const withExt: Project = {
+      ...richProject(),
+      extensions: { 'example.quest': [{ id: 'q1', title: '任务一', body: '正文', order: 0 }] },
+    };
+    const restored = entitiesToProject(projectToEntities(withExt, 500));
+    const list = restored.extensions?.['example.quest'] ?? [];
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({ id: 'q1', title: '任务一', body: '正文' });
+  });
 });

@@ -737,6 +737,8 @@ export interface Project {
   wordTarget?: number;
   /** 书籍标签（书籍库过滤分组；缺席=[]，免迁移）。 */
   tags?: string[];
+  /** 插件扩展类型的数据（键为命名空间化类型 id）；核心不解释其内部结构。 */
+  extensions?: Record<string, unknown[]>;
 }
 
 /** 自定义字体元数据（字形文件另存用户数据目录 fonts/ 下，不进状态 JSON）。 */

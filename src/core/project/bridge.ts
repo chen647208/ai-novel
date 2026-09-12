@@ -202,6 +202,22 @@ export function projectToEntities(project: Project, now = Date.now()): BookEntit
     });
   }
 
+  // 插件扩展类型：project.extensions[type] → 节点 + contain 边（role 'extension'），核心不解释其结构
+  for (const [type, list] of Object.entries(project.extensions ?? {})) {
+    if (!Array.isArray(list)) continue;
+    const template = builtinRegistry.get(type);
+    list.forEach((item, index) => {
+      const obj = item as Record<string, unknown>;
+      const id = String(obj.id ?? uuidv7());
+      const title = String(obj.title ?? obj.name ?? '');
+      const body = String(obj.body ?? '');
+      nodes.push(makeNode(id, type, title, bookId, body, now, now));
+      const order = typeof obj.order === 'number' ? obj.order : index;
+      edges.push(makeEdge(bookId, id, 'contain', 'extension', order, bookId));
+      attrs.push(...fieldsToAttrs(id, obj, template));
+    });
+  }
+
   // 世界观（单对象拆三节点，时间戳取 worldView 自身）
   const wv = project.worldView;
   if (wv) {
@@ -350,6 +366,10 @@ export function entitiesToProject(entities: BookEntities): Project {
       if (node.type === 'world.magic-system') project.worldView.magicSystem = obj as unknown as MagicSystem;
       else if (node.type === 'world.tech-level') project.worldView.technologyLevel = obj as unknown as TechnologyLevel;
       else if (node.type === 'world.history') project.worldView.history = obj as unknown as WorldHistory;
+    } else {
+      // 未知（插件扩展）类型：按 node.type 归入 extensions，核心不解释其结构
+      const bag = (project.extensions ??= {});
+      (bag[node.type] ??= []).push(nodeToObj(node, 'title', 'body'));
     }
   }
 
