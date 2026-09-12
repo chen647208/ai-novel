@@ -462,7 +462,8 @@
     },
     "panel": {
       "title": "Plugin UI"
-    }
+    },
+    "settingsCorrupt": "Plugin settings were corrupt and reset to defaults; the original value is backed up at plugin.<id>.settings.corrupt"
   },
   "usage": {
     "title": "Usage & cost",

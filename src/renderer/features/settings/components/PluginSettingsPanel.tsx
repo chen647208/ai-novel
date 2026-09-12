@@ -44,25 +44,29 @@ const AssemblyTreeView: React.FC<{ rows: AssemblyRow[] }> = ({ rows }) => (
 
 /** 单插件设置：按 manifest.settingsSchema 渲染，值持久化在 plugin.<id>.settings。 */
 const PluginSchemaSettings: React.FC<{ pluginId: string; schema: JsonSchemaObject }> = ({ pluginId, schema }) => {
+  const { t } = useTranslation(['settings']);
   const key = `plugin.${pluginId}.settings`;
-  const [value, setValue] = useState<Record<string, unknown>>(() => {
+  const [state, setState] = useState<{ value: Record<string, unknown>; corrupt: boolean }>(() => {
     const raw = localStore.getItem(key);
     if (raw) {
       try {
-        return { ...defaultFromSchema(schema), ...(JSON.parse(raw) as Record<string, unknown>) };
+        return { value: { ...defaultFromSchema(schema), ...(JSON.parse(raw) as Record<string, unknown>) }, corrupt: false };
       } catch {
-        // 损坏配置回默认
+        // 损坏配置：备份原值后回默认，不静默丢弃
+        localStore.setItem(`${key}.corrupt`, raw);
+        return { value: defaultFromSchema(schema), corrupt: true };
       }
     }
-    return defaultFromSchema(schema);
+    return { value: defaultFromSchema(schema), corrupt: false };
   });
   const update = (next: Record<string, unknown>): void => {
-    setValue(next);
+    setState({ value: next, corrupt: false });
     localStore.setItem(key, JSON.stringify(next));
   };
   return (
     <div className="mt-2 rounded-md border border-border p-2">
-      <SchemaForm schema={schema} value={value} onChange={update} idPrefix={`plugin-${pluginId}`} />
+      {state.corrupt && <p className="mb-2 text-xs text-warning">{t('plugins.settingsCorrupt')}</p>}
+      <SchemaForm schema={schema} value={state.value} onChange={update} idPrefix={`plugin-${pluginId}`} />
     </div>
   );
 };

@@ -462,7 +462,8 @@
     },
     "panel": {
       "title": "插件界面"
-    }
+    },
+    "settingsCorrupt": "插件配置损坏，已回默认；损坏原值已备份到 plugin.<id>.settings.corrupt"
   },
   "usage": {
     "title": "用量与费用",

@@ -198,7 +198,9 @@
       "faction": "Faction: {{name}}",
       "scene": "Scene: {{scene}}",
       "global": "Global recommendations"
-    }
+    },
+    "errorShort": "Failed to load recommendations",
+    "retry": "Retry"
   },
   "semantic": {
     "defaultIssueMessage": "Potential issue found",

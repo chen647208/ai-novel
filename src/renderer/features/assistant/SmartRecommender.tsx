@@ -49,6 +49,7 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
 }) => {
   const [recommendations, setRecommendations] = useState<SmartRecommendationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [useAI, setUseAI] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const { t } = useTranslation('assistant');
@@ -62,6 +63,7 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
     }
 
     setIsLoading(true);
+    setError(null);
     try {
       if (useAI && model) {
         const result = await getAIEnhancedRecommendations(project, context, model, { maxResults: 5 });
@@ -70,8 +72,10 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
         const result = getSmartRecommendations(project, context, { maxResults: 5 });
         setRecommendations(result);
       }
-    } catch (error) {
-      logger.error('获取推荐失败:', error);
+    } catch (err) {
+      logger.error('获取推荐失败:', err);
+      setRecommendations(null);
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsLoading(false);
     }
@@ -170,8 +174,8 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
             ))}
           </div>
         ) : (
-          <p className="py-2 text-center text-xs text-muted-foreground">
-            {isLoading ? t('rec.analyzingShort') : t('rec.noRecommendations')}
+          <p className={cn('py-2 text-center text-xs', error ? 'text-destructive' : 'text-muted-foreground')}>
+            {error ? t('rec.errorShort') : isLoading ? t('rec.analyzingShort') : t('rec.noRecommendations')}
           </p>
         )}
       </div>
@@ -287,6 +291,13 @@ const SmartRecommender: React.FC<SmartRecommenderProps> = ({
               </div>
             </div>
           ))
+        ) : error ? (
+          <div className="py-10 text-center">
+            <p className="text-sm text-destructive">{t('rec.errorShort')}</p>
+            <Button variant="secondary" size="sm" className="mt-2" onClick={fetchRecommendations} disabled={isLoading}>
+              {t('rec.retry')}
+            </Button>
+          </div>
         ) : (
           <div className="py-10 text-center">
             <Search className="mx-auto mb-2 size-8 text-muted-foreground" />

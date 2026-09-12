@@ -198,7 +198,9 @@
       "faction": "势力: {{name}}",
       "scene": "场景: {{scene}}",
       "global": "全局推荐"
-    }
+    },
+    "errorShort": "推荐获取失败",
+    "retry": "重试"
   },
   "semantic": {
     "defaultIssueMessage": "发现潜在问题",
