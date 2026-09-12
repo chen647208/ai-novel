@@ -119,7 +119,7 @@ Tailscale 把"完整性验证"做成流水线阶段：定期取备份、在隔�
 |---|---|---|---|
 | L0 写入 | WAL + `synchronous=FULL` + `busy_timeout=5000` + `wal_autocheckpoint=1000` + `foreign_keys=ON` | 实现 | 断电注入后库可打开且已提交事务在 |
 | L1 完整性 | `cell_size_check=ON`；启动 `quick_check`；手动深度 `integrity_check` | 实现 | 损坏库在启动即提示，不继续覆盖写 |
-| L2 备份 | 自动 JSON 快照（可配间隔/份数）+ `VACUUM INTO` 数据库热备份（滚动保留） | 实现 | 备份文件可被 SQLite 直接打开；份数按配置滚动 |
+| L2 备份 | 自动 JSON 快照（可配间隔/份数；启用库级加密时快照落 AES-256-GCM 密文）+ `VACUUM INTO` 数据库热备份（滚动保留） | 实现 | 备份文件可被 SQLite 直接打开；份数按配置滚动 |
 | L3 加密 | 库级 AES-256（SQLCipher 兼容）；密钥经 `safeStorage` 包裹，可导出恢复码 | 实现 | 无密钥不可读；钥匙串不可用时明确失败 |
 | L4 恢复 | 启动检测损坏 → 从备份恢复 → 重建投影；导出可移植 | 部分 | 从最近备份恢复后状态与备份一致 |
 | L5 验证 | 真实加密引擎的"备份→打开→校验"与篡改检出用例 | 实现 | CI 内含 `dbSafety` 演练 |

@@ -34,6 +34,7 @@ import * as React from 'react';
 import { PluginEditorFrame } from '@/shared/ui/PluginEditorFrame';
 import { PluginFrame } from '@/shared/ui/PluginFrame';
 
+import { logger } from '../utils/logger';
 import { localStore } from './localStore';
 import { uiSlotRegistry } from './uiSlots';
 
@@ -113,7 +114,8 @@ export async function discoverAndLoad(host: PluginHost): Promise<void> {
       const pluginRoot = `${root}/${pluginId}`;
       const manifestText = await api.pluginReadFile(pluginRoot, 'plugin.json');
       const manifestJson = JSON.parse(manifestText) as unknown;
-      // 签名（S4）：存在 plugin.sig 时强制校验（内容 + 信任键），失败即拒载
+      // 签名（S4）：可执行贡献（logic/editor）必须带有效签名；未签名一律不放行（fail-closed）
+      let signed = false;
       const sigText = await api.pluginReadFile(pluginRoot, 'plugin.sig').catch(() => undefined);
       if (sigText !== undefined) {
         const envelope = parseSignatureEnvelope(sigText);
@@ -130,6 +132,7 @@ export async function discoverAndLoad(host: PluginHost): Promise<void> {
           );
           continue;
         }
+        signed = true;
       }
       const files: Record<string, string> = {};
       // 浅层收集贡献点文件（skills/types/buildProfiles 目录下的文件）
@@ -137,6 +140,11 @@ export async function discoverAndLoad(host: PluginHost): Promise<void> {
       // 路径门（§11.2）：词法两道门在渲染侧前置，realpath 包含由主进程 fs 代理（pluginReadFile/pluginListDirectory）强制
       let denied = false;
       for (const dirKey of ['skills', 'types', 'buildProfiles', 'ui', 'editor', 'logic'] as const) {
+        // 未签名插件不加载可执行贡献（logic/editor）：资源型仍可用
+        if ((dirKey === 'logic' || dirKey === 'editor') && !signed) {
+          logger.warn(`未签名插件 ${pluginId}：跳过可执行贡献 ${dirKey}`);
+          continue;
+        }
         for (const rel of contributes?.[dirKey] ?? []) {
           const dirCheck = checkPluginRelPath(rel);
           if (!dirCheck.ok) {

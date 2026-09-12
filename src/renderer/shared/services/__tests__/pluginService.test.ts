@@ -257,14 +257,19 @@ describe('pluginService（磁盘发现 + 技能贡献装配）', () => {
           if (full === '/data/plugins/com.logic.p/logic/handler.js') {
             return 'function greet(input){ return input; }';
           }
+          if (full === '/data/plugins/com.logic.p/plugin.sig') {
+            return JSON.stringify({ algorithm: 'ed25519', signature: 'sig', publicKey: 'test-key' });
+          }
           throw new Error('missing');
         },
+        pluginVerifySignature: async () => true,
         pluginSandboxRun: async (request: unknown) => ({
           ok: true,
           output: { echoed: (request as { input?: unknown }).input },
         }),
       },
     });
+    setTrustedPluginKeys(['test-key']);
     const host = await bootstrapPlugins(
       { skillCatalog: new SkillCatalog(), buildProfiles: new BuildProfileRegistry(), events: new EventBus() },
       '2.0.0',
@@ -277,5 +282,38 @@ describe('pluginService（磁盘发现 + 技能贡献装配）', () => {
 
     host.disable('com.logic.p');
     expect((await runPluginLogic('com.logic.p', 'greet', 'hi')).ok).toBe(false);
+  });
+
+  it('未签名插件：逻辑贡献不放行（fail-closed）', async () => {
+    vi.stubGlobal('window', {
+      electronAPI: {
+        getAppDataPath: async () => '/data',
+        listDirectory: async (dir: string) =>
+          dir === '/data/plugins' ? [{ name: 'com.unsigned.p', type: 'directory' }] : [],
+        pluginListDirectory: async (root: string, rel: string) =>
+          `${root}/${rel}` === '/data/plugins/com.unsigned.p/logic' ? [{ name: 'handler.js', type: 'file' }] : [],
+        pluginReadBinary: async () => '',
+        pluginReadFile: async (root: string, rel: string) => {
+          const full = `${root}/${rel}`;
+          if (full === '/data/plugins/com.unsigned.p/plugin.json') {
+            return JSON.stringify({
+              id: 'com.unsigned.p', name: 'p', version: '1.0.0', host: '^2.0.0', license: 'MIT',
+              contributes: { logic: ['./logic/'] },
+            });
+          }
+          if (full === '/data/plugins/com.unsigned.p/logic/handler.js') {
+            return 'function greet(input){ return input; }';
+          }
+          throw new Error('missing');
+        },
+      },
+    });
+    const host = await bootstrapPlugins(
+      { skillCatalog: new SkillCatalog(), buildProfiles: new BuildProfileRegistry(), events: new EventBus() },
+      '2.0.0',
+      [],
+    );
+    expect(host.list().find((s) => s.id === 'com.unsigned.p')?.state).toBe('active');
+    expect((await runPluginLogic('com.unsigned.p', 'greet', 'hi')).ok).toBe(false);
   });
 });

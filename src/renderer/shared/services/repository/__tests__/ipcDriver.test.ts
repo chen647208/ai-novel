@@ -31,6 +31,8 @@ function makeApi() {
     disableEncryption: vi.fn(async () => ({ ok: true })),
     exportRecoveryKey: vi.fn(async () => ({ ok: false })),
     applyRecoveryKey: vi.fn(async () => ({ ok: true })),
+    encryptText: vi.fn(async () => ({ ok: true, data: 'x' })),
+    decryptText: vi.fn(async () => ({ ok: true, text: '{}' })),
   };
 }
 

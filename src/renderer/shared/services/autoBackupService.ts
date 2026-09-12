@@ -57,13 +57,26 @@ export class AutoBackupService {
         // 继续尝试备份，可能会失败
       }
 
-      // 生成备份文件名
+      // 生成备份文件名（库级加密启用时快照落密文，避免明文外泄）
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const backupFileName = `novalist-backup-${timestamp}.json`;
+      const payload = JSON.stringify(currentState, null, 2);
+      const dbApi = window.electronAPI.db;
+      const encryption = await dbApi?.encryptionStatus?.().catch(() => undefined);
+      const encrypted = encryption?.enabled === true;
+      let content = payload;
+      if (encrypted) {
+        const result = await dbApi?.encryptText?.(payload);
+        if (!result?.ok || !result.data) {
+          logger.error('备份加密失败:', result?.error);
+          return false;
+        }
+        content = result.data;
+      }
+      const backupFileName = `novalist-backup-${timestamp}.json${encrypted ? '.enc' : ''}`;
       const backupFilePath = `${backupDir}/${backupFileName}`;
 
       // 保存备份文件
-      await window.electronAPI.writeFile(backupFilePath, JSON.stringify(currentState, null, 2));
+      await window.electronAPI.writeFile(backupFilePath, content);
       
       // 更新上次备份时间
       config.lastAutoBackup = Date.now();
@@ -85,7 +98,7 @@ export class AutoBackupService {
       if (typeof window === 'undefined' || !window.electronAPI) return;
       const entries = await window.electronAPI.listDirectory(backupDir).catch(() => []);
       const backups = entries
-        .filter((e) => e.type === 'file' && e.name.startsWith('novalist-backup-') && e.name.endsWith('.json'))
+        .filter((e) => e.type === 'file' && isBackupName(e.name))
         .map((e) => e.name)
         .sort()
         .reverse();
@@ -137,7 +150,7 @@ export class AutoBackupService {
       const entries = await window.electronAPI.listDirectory(backupDir).catch(() => []);
       const out: Array<{ fileName: string; filePath: string; size: number; timestamp: number }> = [];
       for (const e of entries) {
-        if (e.type !== 'file' || !e.name.startsWith('novalist-backup-') || !e.name.endsWith('.json')) continue;
+        if (e.type !== 'file' || !isBackupName(e.name)) continue;
         try {
           const content = await window.electronAPI.readFile(`${backupDir}/${e.name}`);
           out.push({
@@ -161,7 +174,15 @@ export class AutoBackupService {
   public async readBackup(filePath: string): Promise<AppState | null> {
     try {
       if (typeof window === 'undefined' || !window.electronAPI) return null;
-      const content = await window.electronAPI.readFile(filePath);
+      let content = await window.electronAPI.readFile(filePath);
+      if (filePath.endsWith('.enc')) {
+        const result = await window.electronAPI.db.decryptText(content);
+        if (!result.ok || !result.text) {
+          logger.error('备份解密失败:', result.error);
+          return null;
+        }
+        content = result.text;
+      }
       const parsed = JSON.parse(content) as AppState;
       if (!parsed || !Array.isArray(parsed.projects)) return null;
       return parsed;
@@ -172,9 +193,14 @@ export class AutoBackupService {
   }
 }
 
-/** 备份文件名时间解析（novalist-backup-<ISO 变体>.json），失败回 0。 */
+/** 备份文件名判定（明文 .json 或加密 .json.enc）。 */
+function isBackupName(name: string): boolean {
+  return name.startsWith('novalist-backup-') && (name.endsWith('.json') || name.endsWith('.json.enc'));
+}
+
+/** 备份文件名时间解析（novalist-backup-<ISO 变体>.json[.enc]），失败回 0。 */
 function parseBackupTimestamp(fileName: string): number {
-  const m = fileName.match(/^novalist-backup-(.+)\.json$/);
+  const m = fileName.match(/^novalist-backup-(.+)\.json(?:\.enc)?$/);
   if (!m?.[1]) return 0;
   const iso = m[1].replace(/T(\d{2})-(\d{2})-(\d{2})-(\d+)(Z?)$/, 'T$1:$2:$3.$4$5');
   const ts = Date.parse(iso);

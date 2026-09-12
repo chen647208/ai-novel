@@ -64,6 +64,8 @@ export const IPC = {
     disableEncryption: 'db:disable-encryption',
     exportRecoveryKey: 'db:export-recovery-key',
     applyRecoveryKey: 'db:apply-recovery-key',
+    encryptText: 'db:encrypt-text',
+    decryptText: 'db:decrypt-text',
   },
 
   // AI 网关（适配器在主进程执行；流式事件按 requestId 多路推送）

@@ -1168,6 +1168,8 @@ export interface ElectronAPI {
     disableEncryption: () => Promise<{ ok: boolean; error?: string }>;
     exportRecoveryKey: () => Promise<{ ok: boolean; code?: string; error?: string }>;
     applyRecoveryKey: (code: string) => Promise<{ ok: boolean; error?: string }>;
+    encryptText: (text: string) => Promise<{ ok: boolean; data?: string; error?: string }>;
+    decryptText: (payload: string) => Promise<{ ok: boolean; text?: string; error?: string }>;
   };
 
   // AI 网关（适配器在主进程执行；流式经 ai:stream:event 按 requestId 推送）

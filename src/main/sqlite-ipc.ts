@@ -21,6 +21,7 @@ import Database from 'better-sqlite3-multiple-ciphers';
 import { app, ipcMain } from 'electron';
 
 import { DB_FILE_NAME } from './app/dataDir.js';
+import { decryptWithKey,encryptWithKey } from './backupCrypto.js';
 import { IPC } from './channels.js';
 import {
   encryptionStatus,
@@ -149,6 +150,14 @@ export function registerSqliteIpc(): void {
   ipcMain.handle(IPC.db.disableEncryption, () => disableDbEncryption());
   ipcMain.handle(IPC.db.exportRecoveryKey, () => exportDbRecoveryKey());
   ipcMain.handle(IPC.db.applyRecoveryKey, (_event, code: string) => applyDbRecoveryKey(code));
+  ipcMain.handle(IPC.db.encryptText, (_event, text: string) => {
+    assertString(text, 'text');
+    return encryptText(text);
+  });
+  ipcMain.handle(IPC.db.decryptText, (_event, payload: string) => {
+    assertString(payload, 'payload');
+    return decryptText(payload);
+  });
 }
 
 function runPragmaCheck(pragma: string): { ok: boolean; result: string } {
@@ -240,6 +249,28 @@ export function closeSqlite(): void {
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+/** 用数据库主密钥加密文本（备份快照）；未启用加密时报错。 */
+function encryptText(plaintext: string): { ok: boolean; data?: string; error?: string } {
+  try {
+    const key = loadDbKey();
+    if (!key) return { ok: false, error: '数据库未启用加密' };
+    return { ok: true, data: encryptWithKey(plaintext, key) };
+  } catch (error) {
+    return { ok: false, error: errorMessage(error) };
+  }
+}
+
+/** 用数据库主密钥解密文本（备份快照）。 */
+function decryptText(payload: string): { ok: boolean; text?: string; error?: string } {
+  try {
+    const key = loadDbKey();
+    if (!key) return { ok: false, error: '数据库未启用加密' };
+    return { ok: true, text: decryptWithKey(payload, key) };
+  } catch (error) {
+    return { ok: false, error: errorMessage(error) };
+  }
 }
 
 /**
