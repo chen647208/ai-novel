@@ -112,8 +112,8 @@ export class IpcSqlDriver implements SqlDriver {
     return this.enqueue(() => this.api.fullIntegrityCheck());
   }
 
-  hotBackup(): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string }> {
-    return this.enqueue(() => this.api.hotBackup());
+  hotBackup(keep?: number): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string }> {
+    return this.enqueue(() => this.api.hotBackup(keep));
   }
 
   maintenance(): Promise<void> {

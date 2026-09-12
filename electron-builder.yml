@@ -33,6 +33,8 @@ win:
 mac:
   target:
     - target: dmg
+    # zip 是 electron-updater 在 macOS 增量更新所需（latest-mac.yml 依赖 zip 产物）
+    - target: zip
       arch: [x64, arm64]
   artifactName: ${productName}-${version}-${arch}.${ext}
   icon: src/assets/icon.icns

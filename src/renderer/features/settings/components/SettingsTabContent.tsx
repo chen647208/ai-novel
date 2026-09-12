@@ -61,10 +61,6 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = (props) => {
   quickAddProviderModel,
   storageConfig,
   setStorageConfig,
-  isLoadingStorage,
-  setIsLoadingStorage,
-  migrationStatus,
-  setMigrationStatus,
   onClearData,
   embeddingConfigs,
   activeEmbeddingId,
@@ -157,10 +153,6 @@ const SettingsTabContent: React.FC<SettingsTabContentProps> = (props) => {
         <StorageSettingsPanel
           storageConfig={storageConfig}
           setStorageConfig={setStorageConfig}
-          isLoadingStorage={isLoadingStorage}
-          setIsLoadingStorage={setIsLoadingStorage}
-          migrationStatus={migrationStatus}
-          setMigrationStatus={setMigrationStatus}
           onClearData={onClearData}
         />
       )}

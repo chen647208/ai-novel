@@ -303,11 +303,11 @@ export class SqliteRepository implements StorageRepository {
     return this.driver.fullIntegrityCheck();
   }
 
-  /** 热备份数据库一致副本；后端不支持时返回 null。 */
-  async hotBackup(): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string } | null> {
+  /** 热备份数据库一致副本；后端不支持时返回 null。keep 为保留份数。 */
+  async hotBackup(keep?: number): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string } | null> {
     await this.ready;
     if (!this.driver.hotBackup) return null;
-    return this.driver.hotBackup();
+    return this.driver.hotBackup(keep);
   }
 
   /** 数据库加密状态；后端不支持时返回 null。 */

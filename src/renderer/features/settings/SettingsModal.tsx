@@ -86,8 +86,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
   // 存储配置状态
   const [storageConfig, setStorageConfig] = useState<StorageConfig>(DEFAULT_STORAGE_CONFIG);
-  const [isLoadingStorage, setIsLoadingStorage] = useState(false);
-  const [migrationStatus, setMigrationStatus] = useState<string>('');
 
   // Embedding模型配置状态
   const [embeddingConfigs, setEmbeddingConfigs] = useState<EmbeddingModelConfig[]>([]);
@@ -558,10 +556,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             quickAddProviderModel={quickAddProviderModel}
             storageConfig={storageConfig}
             setStorageConfig={setStorageConfig}
-            isLoadingStorage={isLoadingStorage}
-            setIsLoadingStorage={setIsLoadingStorage}
-            migrationStatus={migrationStatus}
-            setMigrationStatus={setMigrationStatus}
             onClearData={onClearData}
             embeddingConfigs={embeddingConfigs}
             activeEmbeddingId={activeEmbeddingId}

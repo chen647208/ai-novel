@@ -66,15 +66,18 @@ export async function runPluginLogic(pluginId: string, fn: string, input: unknow
   if (!/^[A-Za-z_$][\w$]*$/.test(fn)) {
     return { ok: false, error: { kind: 'runtime', message: `非法函数名：${fn}` } };
   }
-  const entry = [...logicHandlers.entries()].find(([key]) => key.startsWith(`${pluginId}:`));
-  if (!entry) {
+  // 合并该插件全部逻辑文件：具名函数可能定义在任一文件中，避免只取首个文件而遮蔽。
+  const sources = [...logicHandlers.entries()]
+    .filter(([key]) => key.startsWith(`${pluginId}:`))
+    .map(([, code]) => code);
+  if (sources.length === 0) {
     return { ok: false, error: { kind: 'runtime', message: `插件 ${pluginId} 无逻辑贡献` } };
   }
   const api = typeof window === 'undefined' ? undefined : window.electronAPI;
   if (!api?.pluginSandboxRun) {
     return { ok: false, error: { kind: 'runtime', message: '当前环境不支持插件沙箱' } };
   }
-  const code = `${entry[1]}\n;globalThis.run = typeof ${fn} === 'function' ? ${fn} : undefined;`;
+  const code = `${sources.join('\n;\n')}\n;globalThis.run = typeof ${fn} === 'function' ? ${fn} : undefined;`;
   const result = await api.pluginSandboxRun({ code, input, allowedTools: [] });
   if (!result.ok) return result;
   return adjudicateHandlerResult(result.output, []);

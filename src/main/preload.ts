@@ -83,7 +83,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     batch: (statements: unknown[]) => ipcRenderer.invoke(IPC.db.batch, statements),
     integrityCheck: () => ipcRenderer.invoke(IPC.db.integrityCheck),
     fullIntegrityCheck: () => ipcRenderer.invoke(IPC.db.fullIntegrityCheck),
-    hotBackup: () => ipcRenderer.invoke(IPC.db.hotBackup),
+    hotBackup: (keep?: number) => ipcRenderer.invoke(IPC.db.hotBackup, keep),
     maintenance: () => ipcRenderer.invoke(IPC.db.maintenance),
     encryptionStatus: () => ipcRenderer.invoke(IPC.db.encryptionStatus),
     enableEncryption: () => ipcRenderer.invoke(IPC.db.enableEncryption),

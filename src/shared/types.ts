@@ -1162,7 +1162,7 @@ export interface ElectronAPI {
     batch: (statements: Array<{ id: string; params?: unknown[]; exec?: boolean }>) => Promise<void>;
     integrityCheck: () => Promise<{ ok: boolean; result: string }>;
     fullIntegrityCheck: () => Promise<{ ok: boolean; result: string }>;
-    hotBackup: () => Promise<{ ok: boolean; path?: string; bytes?: number; error?: string }>;
+    hotBackup: (keep?: number) => Promise<{ ok: boolean; path?: string; bytes?: number; error?: string }>;
     maintenance: () => Promise<void>;
     encryptionStatus: () => Promise<{ enabled: boolean; available: boolean; weakBackend: boolean; backend: string }>;
     enableEncryption: () => Promise<{ ok: boolean; recoveryCode?: string; error?: string }>;

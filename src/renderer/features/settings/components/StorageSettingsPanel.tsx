@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { AlertTriangle, ArrowLeftRight, Clock, Database, FileText, FolderOpen, History, Info, Save, Settings, ShieldCheck, Trash2, Wrench } from 'lucide-react';
+import { AlertTriangle, Clock, Database, FileText, FolderOpen, History, Info, Save, Settings, ShieldCheck, Trash2, Wrench } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { checkImportVersion,normalizeImportedState } from '@/app/initialState';
@@ -21,7 +21,6 @@ import { Button } from '@/shared/ui/Button';
 /** 存储设置区块的小标题 */
 import { FieldLabel } from '@/shared/ui/FieldLabel';
 import { Input } from '@/shared/ui/Input';
-import { Spinner } from '@/shared/ui/Spinner';
 import { Switch } from '@/shared/ui/Switch';
 import { formatDate, formatDateTime } from '@/shared/utils/format';
 import { logger } from '@/shared/utils/logger';
@@ -46,10 +45,6 @@ const StatusBadge: React.FC<{ tone: 'primary' | 'success' | 'muted'; children: R
 const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
   storageConfig,
   setStorageConfig,
-  isLoadingStorage,
-  setIsLoadingStorage,
-  migrationStatus,
-  setMigrationStatus,
   onClearData,
 }) => {
   const { t, i18n } = useTranslation('settings');
@@ -263,6 +258,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
               </div>
             </div>
 
+            {encryption && (
             <div>
               <FieldLabel>{t('storage.encryptionLabel')}</FieldLabel>
               <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -296,6 +292,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                 <p className="mt-2 text-xs text-warning">{t('storage.encryptionWeakBackend')}</p>
               )}
             </div>
+            )}
 
             <div>
               <FieldLabel>{t('storage.modeLabel')}</FieldLabel>
@@ -502,37 +499,6 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
           {t('storage.dangerTitle')}
         </h4>
 
-        <div className="space-y-4">
-          <div>
-            <FieldLabel>{t('storage.migrationLabel')}</FieldLabel>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={async () => {
-                  setIsLoadingStorage(true);
-                  setMigrationStatus(t('storage.migrationChecking'));
-                  try {
-                    // 这里需要调用数据迁移逻辑
-                    // 暂时先模拟
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    setMigrationStatus(t('storage.migrationDone'));
-                  } catch (error) {
-                    setMigrationStatus(t('storage.migrationFailed', { message: (error as Error).message }));
-                  } finally {
-                    setIsLoadingStorage(false);
-                  }
-                }}
-                disabled={isLoadingStorage}
-              >
-                {isLoadingStorage ? <Spinner className="size-3.5" /> : <ArrowLeftRight className="size-3.5" />}
-                {t('storage.checkMigration')}
-              </Button>
-              {migrationStatus && (
-                <span className="text-xs text-muted-foreground">{migrationStatus}</span>
-              )}
-            </div>
-          </div>
 
           <div>
             <FieldLabel>{t('storage.clearLabel')}</FieldLabel>
@@ -551,7 +517,6 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
               {t('storage.clearLabel')}
             </Button>
           </div>
-        </div>
       </div>
     </div>
   );

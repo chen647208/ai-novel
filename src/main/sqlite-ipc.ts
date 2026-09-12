@@ -140,7 +140,13 @@ export function registerSqliteIpc(): void {
 
   ipcMain.handle(IPC.db.integrityCheck, () => checkIntegrity());
   ipcMain.handle(IPC.db.fullIntegrityCheck, () => fullIntegrityCheck());
-  ipcMain.handle(IPC.db.hotBackup, () => hotBackup());
+  ipcMain.handle(IPC.db.hotBackup, (_event, keep: unknown) => {
+    if (keep !== undefined && (typeof keep !== 'number' || !Number.isFinite(keep))) {
+      throw new TypeError('Invalid keep');
+    }
+    const resolved = typeof keep === 'number' ? Math.min(Math.max(1, Math.floor(keep)), 100) : DB_BACKUP_KEEP;
+    return hotBackup(resolved);
+  });
   ipcMain.handle(IPC.db.maintenance, () => runMaintenance());
   ipcMain.handle(IPC.db.encryptionStatus, () => encryptionStatus());
   ipcMain.handle(IPC.db.enableEncryption, () => enableDbEncryption());

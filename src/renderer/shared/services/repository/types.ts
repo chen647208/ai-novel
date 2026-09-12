@@ -62,8 +62,8 @@ export interface SqlDriver {
   integrityCheck?(): Promise<{ ok: boolean; result: string }>;
   /** 深度完整性检查（逐页校验，维护用） */
   fullIntegrityCheck?(): Promise<{ ok: boolean; result: string }>;
-  /** 热备份（VACUUM INTO 一致副本，桌面 better-sqlite3 支持） */
-  hotBackup?(): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string }>;
+  /** 热备份（VACUUM INTO 一致副本，桌面 better-sqlite3 支持；keep 为保留份数） */
+  hotBackup?(keep?: number): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string }>;
   /** 维护：压缩 + 重建索引 */
   maintenance?(): Promise<void>;
   /** 数据库加密状态（桌面 better-sqlite3-multiple-ciphers 支持） */
@@ -129,8 +129,8 @@ export interface StorageRepository {
   checkIntegrity?(): Promise<{ ok: boolean; result: string } | null>;
   /** 深度完整性检查（逐页校验）；后端不提供时返回 null。 */
   fullIntegrityCheck?(): Promise<{ ok: boolean; result: string } | null>;
-  /** 热备份：生成数据库一致副本（桌面 better-sqlite3 支持） */
-  hotBackup?(): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string } | null>;
+  /** 热备份：生成数据库一致副本（桌面 better-sqlite3 支持；keep 为保留份数） */
+  hotBackup?(keep?: number): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string } | null>;
   /** 数据库加密状态；后端不支持时返回 null。 */
   encryptionStatus?(): Promise<DbEncryptionStatus | null>;
   /** 启用库级加密并返回恢复码；后端不支持时返回 null。 */

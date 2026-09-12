@@ -71,10 +71,6 @@ export type EmbeddingQuickAddTemplate = {
 export interface StorageSettingsPanelProps {
   storageConfig: StorageConfig;
   setStorageConfig: React.Dispatch<React.SetStateAction<StorageConfig>>;
-  isLoadingStorage: boolean;
-  setIsLoadingStorage: React.Dispatch<React.SetStateAction<boolean>>;
-  migrationStatus: string;
-  setMigrationStatus: React.Dispatch<React.SetStateAction<string>>;
   onClearData: () => void;
 }
 
@@ -202,10 +198,6 @@ export interface SettingsTabContentProps {
   quickAddProviderModel: (provider: ModelProviderInfo) => void;
   storageConfig: StorageConfig;
   setStorageConfig: React.Dispatch<React.SetStateAction<StorageConfig>>;
-  isLoadingStorage: boolean;
-  setIsLoadingStorage: React.Dispatch<React.SetStateAction<boolean>>;
-  migrationStatus: string;
-  setMigrationStatus: React.Dispatch<React.SetStateAction<string>>;
   onClearData: () => void;
   embeddingConfigs: EmbeddingModelConfig[];
   activeEmbeddingId: string | null;
