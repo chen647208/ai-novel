@@ -79,7 +79,7 @@ export function installTypeTemplates(
     const declaredId = String(raw.id ?? '');
     if (!declaredId) continue;
     const id = namespaced(pluginId, declaredId);
-    const template = { ...raw, id } as unknown as TypeTemplate;
+    const template = { ...raw, id } as TypeTemplate;
     registry.register(template);
     disposables.push({ dispose: () => registry.unregister(id) });
   }

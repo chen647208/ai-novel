@@ -44,7 +44,7 @@ export async function hashEntity(entityName: EntityName, entity: AnyEntity): Pro
     return sha256Hex(blob.bytes);
   }
   const fields = HASHED_PROPERTIES[entityName];
-  const record = entity as unknown as Record<string, unknown>;
+  const record: Record<string, unknown> = Object.fromEntries(Object.entries(entity));
   const joined = fields.map((f) => `${f}=${normalizeValue(record[f])}`).join('\u001f');
   return sha256Hex(`${entityName}\u001e${entity.id}\u001e${joined}`);
 }

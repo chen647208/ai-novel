@@ -15,7 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 /** 当前上限（2026-09 基线）。清理后同步下调。 */
-const CEILING = 37;
+const CEILING = 34;
 const ROOT = path.resolve(process.cwd(), 'src');
 const EXCLUDE = [/__tests__/, /\.test\.ts$/, /\.spec\.ts$/];
 

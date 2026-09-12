@@ -85,7 +85,8 @@ export function parseSkillMd(md: string, source: Skill['source'], sourceFile = '
     return { error: { sourceFile, reason: '缺少 frontmatter（--- 包围的元数据块）' } };
   }
 
-  const [, frontmatter, body] = match as unknown as [string, string, string];
+  const frontmatter = match[1] ?? '';
+  const body = match[2] ?? '';
   const meta: Record<string, string> = {};
   for (const line of frontmatter.split('\n')) {
     const kv = line.match(/^([A-Za-z_-]+)\s*:\s*(.*)$/);
