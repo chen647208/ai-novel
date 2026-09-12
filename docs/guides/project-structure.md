@@ -27,7 +27,7 @@
 - `src/main/app/`：容器（`container.ts`）与各 Provider（`providers.ts`：file/dialog/vector/sqlite/window）
 - `src/main/ai/`：**AI 网关**——四 Provider 适配器 + sse/retry/messages/resolve + `gateway.ts`（IPC：complete/stream/abort）+ `i18n.ts`
 - `src/main/mcp/`：MCP stdio server（外部 agent 平权接入，读资源/工具 + 写提案进待审箱）
-- `src/main/channels.ts`：IPC 通道名常量；`sqlite-ipc.ts`：better-sqlite3 托管；`vector-ipc.ts`：Vectra 托管
+- `src/main/channels.ts`：IPC 通道名常量；`sqlite-ipc.ts`：better-sqlite3-multiple-ciphers 托管；`vector-ipc.ts`：Vectra 托管
 - 双 tsconfig：`tsconfig.json`（主进程，NodeNext/ESM，rootDir 扩至 `src/`）、`tsconfig.preload.json`（预加载）
 
 ## 领域层（src/core/）

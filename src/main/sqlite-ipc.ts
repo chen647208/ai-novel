@@ -17,7 +17,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import Database from 'better-sqlite3';
+import Database from 'better-sqlite3-multiple-ciphers';
 import { app, ipcMain } from 'electron';
 
 import { DB_FILE_NAME } from './app/dataDir.js';

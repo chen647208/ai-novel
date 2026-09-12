@@ -26,7 +26,7 @@ vi.mock('electron', () => ({
   ipcMain: { handle: vi.fn() },
 }));
 
-vi.mock('better-sqlite3', async () => {
+vi.mock('better-sqlite3-multiple-ciphers', async () => {
   const nodeFs = await import('node:fs');
   return {
     default: class {

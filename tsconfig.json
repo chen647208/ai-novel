@@ -47,6 +47,7 @@
     "src/renderer/**/*",
     "src/core/**/*",
     "src/shared/**/*",
+    "src/types/**/*.d.ts",
     "vite.config.ts"
   ]
 }

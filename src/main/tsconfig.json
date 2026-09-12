@@ -21,6 +21,7 @@
   },
   "include": [
     "**/*.ts",
+    "../types/**/*.d.ts",
     "../shared/types.ts",
     "../shared/sandbox.ts",
     "../shared/constants/**/*.ts",

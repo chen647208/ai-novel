@@ -9,7 +9,7 @@
 
 import { indexService } from '@core/index';
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
-import Database from 'better-sqlite3';
+import Database from 'better-sqlite3-multiple-ciphers';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { APP_STATE_VERSION } from '../../../../../shared/constants/versions';

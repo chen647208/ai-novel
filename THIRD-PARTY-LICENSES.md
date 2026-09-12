@@ -129,7 +129,7 @@
 | bail | 2.0.2 | MIT |
 | balanced-match | 1.0.2 | MIT |
 | base64-js | 1.5.1 | MIT |
-| better-sqlite3 | 13.0.3 | MIT |
+| better-sqlite3-multiple-ciphers | 13.0.3 | MIT |
 | bignumber.js | 9.3.1 | MIT |
 | boolbase | 1.0.0 | ISC |
 | brace-expansion | 2.1.4 | MIT |

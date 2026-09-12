@@ -10,7 +10,7 @@
 
 - Electron 44、React 19、TypeScript（渲染层/主进程均 strict）
 - Vite 6、Tailwind CSS 4、TipTap/CodeMirror 6、i18next（中英）
-- SQLite（better-sqlite3 主进程托管）、Vectra 向量索引、electron-builder、vitest
+- SQLite（better-sqlite3-multiple-ciphers 主进程托管）、Vectra 向量索引、electron-builder、vitest
 
 ## 特性亮点
 
