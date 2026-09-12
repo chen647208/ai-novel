@@ -169,9 +169,14 @@ export async function discoverAndLoad(host: PluginHost): Promise<void> {
         } else if (envelope.algorithm === 'cosign') {
           const verified =
             typeof api.pluginCosignVerify === 'function'
-              ? await api.pluginCosignVerify(toBase64(manifestText), envelope.signature, envelope.certificate)
+              ? await api.pluginCosignVerify(toBase64(manifestText), {
+                  bundle: envelope.bundle,
+                  publicKey: envelope.publicKey,
+                  certificateIdentity: envelope.certificateIdentity,
+                  certificateOidcIssuer: envelope.certificateOidcIssuer,
+                })
               : false;
-          if (!verified) fail('cosign 校验失败（需安装 cosign 且证书有效）');
+          if (!verified) fail('cosign 校验失败（需安装 cosign 且证书/公钥有效）');
           else signed = true;
         } else {
           const ok =

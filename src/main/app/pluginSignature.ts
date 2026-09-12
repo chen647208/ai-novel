@@ -48,37 +48,75 @@ export function verifyEd25519(
   }
 }
 
+/** cosign 可执行文件：优先环境变量 `HONGYUE_COSIGN_BIN`，否则 PATH 上的 `cosign`。 */
+export function resolveCosignBin(): string {
+  const override = typeof process.env.HONGYUE_COSIGN_BIN === 'string' ? process.env.HONGYUE_COSIGN_BIN.trim() : '';
+  return override.length > 0 ? override : 'cosign';
+}
+
 /** cosign 是否可用（外部工具链，缺失时 cosign 信封一律拒绝）。 */
 export function cosignAvailable(): boolean {
   try {
-    return spawnSync('cosign', ['version'], { stdio: 'ignore' }).status === 0;
+    return spawnSync(resolveCosignBin(), ['version'], { stdio: 'ignore' }).status === 0;
   } catch {
     return false;
   }
 }
 
-/** cosign verify-blob 参数（证书/签名/内容各为临时文件路径）。 */
-export function buildCosignVerifyArgs(paths: { blob: string; signature: string; certificate: string }): string[] {
-  return ['verify-blob', '--signature', paths.signature, '--certificate', paths.certificate, paths.blob];
+export interface CosignVerifyInput {
+  /** cosign bundle（JSON）的 base64。 */
+  bundle: string;
+  /** key 模式验证公钥（PEM）。 */
+  publicKey?: string;
+  /** keyless 模式：期望证书身份。 */
+  certificateIdentity?: string;
+  /** keyless 模式：期望 OIDC 签发方。 */
+  certificateOidcIssuer?: string;
 }
 
-/** 用 cosign 校验 blob 签名；cosign 不存在或校验失败均返回 false。 */
-export function verifyCosignBlob(
-  content: Uint8Array | string,
-  signatureBase64: string,
-  certificateBase64: string,
-): boolean {
-  if (!cosignAvailable()) return false;
+/** cosign verify-blob 参数（各为临时文件路径）。 */
+export function buildCosignVerifyArgs(paths: {
+  blob: string;
+  bundle: string;
+  publicKey?: string;
+  certificateIdentity?: string;
+  certificateOidcIssuer?: string;
+}): string[] {
+  const args = ['verify-blob', '--bundle', paths.bundle];
+  if (paths.publicKey) args.push('--key', paths.publicKey);
+  if (paths.certificateIdentity) args.push('--certificate-identity', paths.certificateIdentity);
+  if (paths.certificateOidcIssuer) args.push('--certificate-oidc-issuer', paths.certificateOidcIssuer);
+  args.push(paths.blob);
+  return args;
+}
+
+/** 用 cosign bundle 校验 blob；缺少信任锚、cosign 不存在或校验失败均返回 false。 */
+export function verifyCosignBlob(content: Uint8Array | string, input: CosignVerifyInput): boolean {
+  const hasAnchor = !!input.publicKey || (!!input.certificateIdentity && !!input.certificateOidcIssuer);
+  if (!hasAnchor || !cosignAvailable()) return false;
   let dir: string | undefined;
   try {
     dir = mkdtempSync(join(tmpdir(), 'hy-cosign-'));
     const blob = join(dir, 'plugin.json');
-    const signature = join(dir, 'plugin.sig');
-    const certificate = join(dir, 'plugin.crt');
+    const bundle = join(dir, 'plugin.bundle');
     writeFileSync(blob, typeof content === 'string' ? Buffer.from(content, 'utf-8') : content);
-    writeFileSync(signature, Buffer.from(signatureBase64, 'base64'));
-    writeFileSync(certificate, Buffer.from(certificateBase64, 'base64'));
-    const result = spawnSync('cosign', buildCosignVerifyArgs({ blob, signature, certificate }), { stdio: 'ignore' });
+    writeFileSync(bundle, Buffer.from(input.bundle, 'base64'));
+    let publicKeyPath: string | undefined;
+    if (input.publicKey) {
+      publicKeyPath = join(dir, 'cosign.pub');
+      writeFileSync(publicKeyPath, input.publicKey);
+    }
+    const result = spawnSync(
+      resolveCosignBin(),
+      buildCosignVerifyArgs({
+        blob,
+        bundle,
+        publicKey: publicKeyPath,
+        certificateIdentity: input.certificateIdentity,
+        certificateOidcIssuer: input.certificateOidcIssuer,
+      }),
+      { stdio: 'ignore' },
+    );
     return result.status === 0;
   } catch {
     return false;

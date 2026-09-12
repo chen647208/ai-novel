@@ -28,8 +28,14 @@ export interface Sha256SignatureEnvelope {
 
 export interface CosignSignatureEnvelope {
   algorithm: 'cosign';
-  signature: string;
-  certificate: string;
+  /** cosign bundle（JSON）的 base64；含签名，keyless 时还含证书与 Rekor 凭据。 */
+  bundle: string;
+  /** key 模式：验证用公钥（PEM）。与 certificateIdentity 二选一。 */
+  publicKey?: string;
+  /** keyless 模式：期望的证书身份（`--certificate-identity`）。 */
+  certificateIdentity?: string;
+  /** keyless 模式：期望的 OIDC 签发方（`--certificate-oidc-issuer`）。 */
+  certificateOidcIssuer?: string;
 }
 
 export type PluginSignatureEnvelope = Ed25519SignatureEnvelope | Sha256SignatureEnvelope | CosignSignatureEnvelope;
@@ -50,8 +56,14 @@ export function parseSignatureEnvelope(raw: string): PluginSignatureEnvelope | u
         if (!isNonEmptyString(parsed.digest)) return undefined;
         return { algorithm: 'sha256', digest: parsed.digest };
       case 'cosign':
-        if (!isNonEmptyString(parsed.signature) || !isNonEmptyString(parsed.certificate)) return undefined;
-        return { algorithm: 'cosign', signature: parsed.signature, certificate: parsed.certificate };
+        if (!isNonEmptyString(parsed.bundle)) return undefined;
+        return {
+          algorithm: 'cosign',
+          bundle: parsed.bundle,
+          publicKey: isNonEmptyString(parsed.publicKey) ? parsed.publicKey : undefined,
+          certificateIdentity: isNonEmptyString(parsed.certificateIdentity) ? parsed.certificateIdentity : undefined,
+          certificateOidcIssuer: isNonEmptyString(parsed.certificateOidcIssuer) ? parsed.certificateOidcIssuer : undefined,
+        };
       default:
         return undefined;
     }

@@ -1127,8 +1127,11 @@ export interface ElectronAPI {
   pluginVerifySignature: (contentBase64: string, signatureBase64: string, publicKeyPem: string) => Promise<boolean>;
   /** 校验 sha256 摘要信封（完整性，不认证来源）。 */
   pluginDigestMatches: (contentBase64: string, digestBase64: string) => Promise<boolean>;
-  /** 用外部 cosign 校验 blob 签名+证书；cosign 不可用返回 false。 */
-  pluginCosignVerify: (contentBase64: string, signatureBase64: string, certificateBase64: string) => Promise<boolean>;
+  /** 用外部 cosign bundle 校验 blob；缺信任锚或 cosign 不可用返回 false。 */
+  pluginCosignVerify: (
+    contentBase64: string,
+    envelope: { bundle: string; publicKey?: string; certificateIdentity?: string; certificateOidcIssuer?: string },
+  ) => Promise<boolean>;
   /** 崩溃上报配置（默认只本地留存；开启且宿主配置地址后上传，重启生效）。 */
   crashReporting: {
     getConfig: () => Promise<{ enabled: boolean; configured: boolean }>;

@@ -48,8 +48,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke(IPC.pluginVerifySignature, contentBase64, signatureBase64, publicKeyPem),
   pluginDigestMatches: (contentBase64: string, digestBase64: string) =>
     ipcRenderer.invoke(IPC.pluginDigestMatches, contentBase64, digestBase64),
-  pluginCosignVerify: (contentBase64: string, signatureBase64: string, certificateBase64: string) =>
-    ipcRenderer.invoke(IPC.pluginCosignVerify, contentBase64, signatureBase64, certificateBase64),
+  pluginCosignVerify: (contentBase64: string, envelope: { bundle: string; publicKey?: string; certificateIdentity?: string; certificateOidcIssuer?: string }) =>
+    ipcRenderer.invoke(IPC.pluginCosignVerify, contentBase64, envelope),
 
   crashReporting: {
     getConfig: () => ipcRenderer.invoke(IPC.crashGetConfig),

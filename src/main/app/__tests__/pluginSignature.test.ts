@@ -11,7 +11,7 @@ import { generateKeyPairSync, sign } from 'node:crypto';
 
 import { describe, expect, it } from 'vitest';
 
-import { buildCosignVerifyArgs, parseSignatureEnvelope, sha256Base64, sha256Matches, verifyEd25519 } from '../pluginSignature.js';
+import { buildCosignVerifyArgs, parseSignatureEnvelope, sha256Base64, sha256Matches, verifyCosignBlob, verifyEd25519 } from '../pluginSignature.js';
 
 function keypair(): { publicKey: string; privateKey: string } {
   const { publicKey, privateKey } = generateKeyPairSync('ed25519');
@@ -53,12 +53,9 @@ describe('pluginSignature（S4 签名校验）', () => {
   it('解析 sha256 与 cosign 信封，缺字段返回 undefined', () => {
     expect(parseSignatureEnvelope('{"algorithm":"sha256","digest":"abc"}')).toEqual({ algorithm: 'sha256', digest: 'abc' });
     expect(parseSignatureEnvelope('{"algorithm":"sha256"}')).toBeUndefined();
-    expect(parseSignatureEnvelope('{"algorithm":"cosign","signature":"s","certificate":"c"}')).toEqual({
-      algorithm: 'cosign',
-      signature: 's',
-      certificate: 'c',
-    });
-    expect(parseSignatureEnvelope('{"algorithm":"cosign","signature":"s"}')).toBeUndefined();
+    const cosign = { algorithm: 'cosign', bundle: 'b64', publicKey: 'pem' };
+    expect(parseSignatureEnvelope(JSON.stringify(cosign))).toEqual(cosign);
+    expect(parseSignatureEnvelope('{"algorithm":"cosign","publicKey":"pem"}')).toBeUndefined();
   });
 
   it('sha256 摘要比对：匹配通过、篡改失败', () => {
@@ -68,14 +65,30 @@ describe('pluginSignature（S4 签名校验）', () => {
     expect(sha256Matches('{"id":"tampered"}', digest)).toBe(false);
   });
 
-  it('cosign 参数：verify-blob 带签名与证书', () => {
-    expect(buildCosignVerifyArgs({ blob: '/tmp/b', signature: '/tmp/s', certificate: '/tmp/c' })).toEqual([
+  it('cosign 参数：verify-blob 带 bundle 与信任锚', () => {
+    expect(
+      buildCosignVerifyArgs({
+        blob: '/tmp/b',
+        bundle: '/tmp/bundle',
+        publicKey: '/tmp/key',
+        certificateIdentity: 'id@example.com',
+        certificateOidcIssuer: 'https://issuer',
+      }),
+    ).toEqual([
       'verify-blob',
-      '--signature',
-      '/tmp/s',
-      '--certificate',
-      '/tmp/c',
+      '--bundle',
+      '/tmp/bundle',
+      '--key',
+      '/tmp/key',
+      '--certificate-identity',
+      'id@example.com',
+      '--certificate-oidc-issuer',
+      'https://issuer',
       '/tmp/b',
     ]);
+  });
+
+  it('cosign 缺信任锚直接拒绝', () => {
+    expect(verifyCosignBlob('x', { bundle: 'b64' })).toBe(false);
   });
 });
