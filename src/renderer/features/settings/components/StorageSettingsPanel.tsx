@@ -25,7 +25,9 @@ import { Switch } from '@/shared/ui/Switch';
 import { formatDate, formatDateTime } from '@/shared/utils/format';
 import { logger } from '@/shared/utils/logger';
 
+import type { AppState } from '../../../../shared/types';
 import type { StorageSettingsPanelProps } from '../types';
+import { BackupRestoreDialog } from './BackupRestoreDialog';
 
 /** 状态徽章 */
 const StatusBadge: React.FC<{ tone: 'primary' | 'success' | 'muted'; children: React.ReactNode }> = ({ tone, children }) => (
@@ -52,6 +54,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
   const [backupBusy, setBackupBusy] = useState(false);
   const [encryption, setEncryption] = useState<{ enabled: boolean; available: boolean; weakBackend: boolean; backend: string } | null>(null);
   const [encryptionBusy, setEncryptionBusy] = useState(false);
+  const [restoreTarget, setRestoreTarget] = useState<{ fileName: string; snapshot: AppState } | null>(null);
 
   const reloadBackups = useCallback(() => {
     void autoBackupService.getBackupHistory(storageConfig).then(setBackups).catch(() => setBackups([]));
@@ -74,9 +77,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
     }
   };
 
-  const handleRestoreBackup = async (filePath: string): Promise<void> => {
-    const ok = await dialogService.confirm({ message: t('storage.restoreConfirm'), danger: true });
-    if (!ok) return;
+  const handleRestoreBackup = async (filePath: string, fileName: string): Promise<void> => {
     const snapshot = await autoBackupService.readBackup(filePath);
     if (!snapshot) {
       dialogService.alert(t('storage.restoreFailed'));
@@ -86,12 +87,30 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
       dialogService.alert(t('storage.restoreTooNew'));
       return;
     }
+    setRestoreTarget({ fileName, snapshot });
+  };
+
+  /** 按所选条目恢复：选中的快照书覆盖/插入当前状态，未选中的忽略；恢复前先快照当前库。 */
+  const handleRestoreSelected = async (ids: string[]): Promise<void> => {
+    const target = restoreTarget;
+    if (!target) return;
     // 恢复前对当前库做一次热备份，避免"恢复错了"无法回退
     await repository.hotBackup?.().catch((error) => logger.warn('恢复前快照失败:', error));
-    hydrateStoresFromState(normalizeImportedState(snapshot));
+    const byId = new Map(target.snapshot.projects.map((p) => [p.id, p]));
+    const selected = new Set(ids);
+    const current = composeAppState();
+    const currentIds = new Set(current.projects.map((p) => p.id));
+    const merged = current.projects.map((p) => (selected.has(p.id) ? (byId.get(p.id) ?? p) : p));
+    for (const id of ids) {
+      const book = byId.get(id);
+      if (book && !currentIds.has(id)) merged.push(book);
+    }
+    const next = { ...current, projects: merged, activeProjectId: current.activeProjectId ?? merged[0]?.id ?? null };
+    hydrateStoresFromState(normalizeImportedState(next));
     // 全量落盘：恢复后的状态可能远超差分增量，必须整库写入，否则磁盘仍是恢复前数据
     await repository.saveAll(composeAppState());
     seedPersistBaseline(composeAppState());
+    setRestoreTarget(null);
     dialogService.alert(t('storage.restoreDone'));
   };
 
@@ -483,7 +502,7 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                                 {formatDateTime(b.timestamp, i18n.language)} · {(b.size / 1024).toFixed(1)} KB
                               </div>
                             </div>
-                            <Button size="sm" variant="outline" className="shrink-0" onClick={() => void handleRestoreBackup(b.filePath)}>
+                            <Button size="sm" variant="outline" className="shrink-0" onClick={() => void handleRestoreBackup(b.filePath, b.fileName)}>
                               {t('storage.restore')}
                             </Button>
                           </div>
@@ -524,6 +543,14 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
             </Button>
           </div>
       </div>
+
+      <BackupRestoreDialog
+        open={restoreTarget !== null}
+        snapshot={restoreTarget?.snapshot ?? null}
+        fileName={restoreTarget?.fileName ?? ''}
+        onClose={() => setRestoreTarget(null)}
+        onConfirm={(ids) => void handleRestoreSelected(ids)}
+      />
     </div>
   );
 };

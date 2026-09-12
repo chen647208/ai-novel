@@ -310,7 +310,12 @@
     "recoveryApplyPrompt": "Enter the 64-hex recovery code:",
     "recoveryApplied": "Recovery code applied. Restart the app to reopen the database.",
     "recoveryApplyFailed": "Applying recovery code failed: {{error}}",
-    "customPathDbNote": "On desktop the database stays in the default data directory; this custom path only affects backups and the JSON fallback, not the database."
+    "customPathDbNote": "On desktop the database stays in the default data directory; this custom path only affects backups and the JSON fallback, not the database.",
+    "restorePreviewTitle": "Restore from backup",
+    "restorePreviewHint": "Select the books to restore; others keep their current state. The current database is backed up first.",
+    "restoreEmpty": "This backup has no books.",
+    "restoreCancel": "Cancel",
+    "restoreSelected": "Restore selected ({{count}})"
   },
   "embedding": {
     "providerLabel": "Provider",

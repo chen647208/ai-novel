@@ -310,7 +310,12 @@
     "recoveryApplyPrompt": "输入 64 位十六进制恢复码：",
     "recoveryApplied": "恢复码已应用，请重启应用以重新打开数据库。",
     "recoveryApplyFailed": "恢复码应用失败：{{error}}",
-    "customPathDbNote": "桌面版数据库固定存于系统默认数据目录；此自定义路径仅影响备份与 JSON 兜底，不迁移数据库。"
+    "customPathDbNote": "桌面版数据库固定存于系统默认数据目录；此自定义路径仅影响备份与 JSON 兜底，不迁移数据库。",
+    "restorePreviewTitle": "从备份恢复",
+    "restorePreviewHint": "勾选要恢复的书目；其余保持当前状态。恢复前会自动备份当前数据库。",
+    "restoreEmpty": "该备份没有书目。",
+    "restoreCancel": "取消",
+    "restoreSelected": "恢复所选（{{count}}）"
   },
   "embedding": {
     "providerLabel": "提供商",
