@@ -27,12 +27,27 @@ import type {
 import { installHooks, installTypeTemplates, PermissionDenied, PluginHost, typeTemplateId } from '@core/plugin';
 import { checkPluginFileName, checkPluginRelPath } from '@core/plugin';
 import { builtinRegistry } from '@core/types-registry';
+import { parseSignatureEnvelope } from '@shared/pluginSignature';
 
 function electron(): NonNullable<Window['electronAPI']> {
   if (!window.electronAPI) {
     throw new Error('插件发现需要文件系统（预览环境不可用）');
   }
   return window.electronAPI;
+}
+
+function toBase64(text: string): string {
+  const bytes = new TextEncoder().encode(text);
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
+}
+
+let trustedPluginKeys: readonly string[] = [];
+
+/** 配置受信任的插件签名公钥（PEM）。空清单 = 任何签名包一律拒载（fail closed）。 */
+export function setTrustedPluginKeys(keys: readonly string[]): void {
+  trustedPluginKeys = keys;
 }
 
 /** 从 userData/plugins/ 发现插件并装载进宿主。读取/校验失败按 failed 登记，面板可见。 */
@@ -45,7 +60,26 @@ export async function discoverAndLoad(host: PluginHost): Promise<void> {
     const pluginId = dir.name;
     try {
       const pluginRoot = `${root}/${pluginId}`;
-      const manifestJson = JSON.parse(await api.pluginReadFile(pluginRoot, 'plugin.json')) as unknown;
+      const manifestText = await api.pluginReadFile(pluginRoot, 'plugin.json');
+      const manifestJson = JSON.parse(manifestText) as unknown;
+      // 签名（S4）：存在 plugin.sig 时强制校验（内容 + 信任键），失败即拒载
+      const sigText = await api.pluginReadFile(pluginRoot, 'plugin.sig').catch(() => undefined);
+      if (sigText !== undefined) {
+        const envelope = parseSignatureEnvelope(sigText);
+        const trusted = !!envelope && trustedPluginKeys.includes(envelope.publicKey);
+        const verified =
+          envelope && trusted && typeof api.pluginVerifySignature === 'function'
+            ? await api.pluginVerifySignature(toBase64(manifestText), envelope.signature, envelope.publicKey)
+            : false;
+        if (!envelope || !verified) {
+          host.markFailed(
+            pluginId,
+            'discover',
+            new Error(!envelope ? '插件签名格式非法' : trusted ? '插件签名校验失败' : '插件签名公钥不在信任清单'),
+          );
+          continue;
+        }
+      }
       const files: Record<string, string> = {};
       // 浅层收集贡献点文件（skills/types/buildProfiles 目录下的文件）
       const contributes = (manifestJson as { contributes?: Record<string, string[]> }).contributes;
@@ -68,7 +102,10 @@ export async function discoverAndLoad(host: PluginHost): Promise<void> {
               denied = true;
               break;
             }
-            files[`${cleanRel}/${nameCheck.rel}`] = await api.pluginReadFile(pluginRoot, `${cleanRel}/${nameCheck.rel}`);
+            const key = `${cleanRel}/${nameCheck.rel}`;
+            files[key] = nameCheck.rel.endsWith('.wasm')
+              ? await api.pluginReadBinary(pluginRoot, key)
+              : await api.pluginReadFile(pluginRoot, key);
           }
           if (denied) break;
         }
@@ -98,21 +135,35 @@ export function createContributionInstaller(deps: PluginDeps): ContributionInsta
       for (const [file, content] of Object.entries(plugin.files)) {
         if (!file.startsWith(prefix) || !file.endsWith('.md')) continue;
         const parsed = parseSkillMd(content, 'plugin', `${manifest.id}/${file}`);
-        if (parsed.skill) {
-          deps.skillCatalog.register(parsed.skill);
-          const name = parsed.skill.name;
-          // 双轨技能：同目录 handler.js/handler.mjs 作为逻辑轨（沙箱内执行）
-          const dir = file.slice(0, file.lastIndexOf('/'));
-          for (const handlerName of ['handler.js', 'handler.mjs']) {
-            const handlerKey = `${dir}/${handlerName}`;
-            const code = plugin.files[handlerKey];
-            if (code !== undefined) {
-              deps.skillCatalog.setHandler(name, { code, sourceFile: `${manifest.id}/${handlerKey}` });
-              break;
-            }
+        if (!parsed.skill) continue;
+        // 双轨技能：同目录 handler.js/handler.mjs（JS 轨）或 handler.wasm（WASM 轨）
+        const dir = file.slice(0, file.lastIndexOf('/'));
+        let handlerKey: string | undefined;
+        let handlerMode: 'js' | 'wasm' = 'js';
+        for (const handlerName of ['handler.js', 'handler.mjs', 'handler.wasm']) {
+          const candidate = `${dir}/${handlerName}`;
+          if (plugin.files[candidate] !== undefined) {
+            handlerKey = candidate;
+            handlerMode = handlerName.endsWith('.wasm') ? 'wasm' : 'js';
+            break;
           }
-          sink.add({ dispose: () => deps.skillCatalog.unregister(name) });
         }
+        const handlerCode = handlerKey ? plugin.files[handlerKey] : undefined;
+        // 内容未变不重载：正文与 handler 均未变则跳过重注册
+        const existing = deps.skillCatalog.get(parsed.skill.name);
+        if (existing && existing.body === parsed.skill.body && existing.handler?.code === handlerCode) {
+          continue;
+        }
+        deps.skillCatalog.register(parsed.skill);
+        const name = parsed.skill.name;
+        if (handlerKey && handlerCode !== undefined) {
+          deps.skillCatalog.setHandler(name, {
+            code: handlerCode,
+            sourceFile: `${manifest.id}/${handlerKey}`,
+            mode: handlerMode,
+          });
+        }
+        sink.add({ dispose: () => deps.skillCatalog.unregister(name) });
       }
     }
 

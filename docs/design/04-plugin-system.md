@@ -244,6 +244,7 @@ Rust host core、stdio JSON-RPC sidecar、面向编码的文件/diff/Bash 工具
 |---|---|---|---|
 | 统一扩展点 | `ThingiProvider`：接口 + 设置 UI + 生命周期 | 多条注册表各自为政（`SkillCatalog`、类型注册表、`BuildProfileRegistry`、`uiSlots`、`commandRegistry`、`settingsTabRegistry`） | 目标：贡献点经 `contributionRegistry` 统一挂载，每 provider 声明 `{ id, kind, install, settings }`（v1 随命令/UI 槽位） |
 | 后台任务调度器 | 集中调度 + Housekeeping | `TaskScheduler` 已落地：`AutoBackupService` 的兜底备份经 60s 周期任务驱动，落盘触发路径共用同一入口 | 已落地 |
+| 状态退避 | `ProviderStatusServiceBase`：失败升档 → `DisabledTill` | `ProviderStatusService` 已落地；`PluginHost` 在退避窗内跳过激活 | 已落地 |
 | 健康检查 | 内置子系统 | `collectHealth` 已落地（数据目录可写/存储配置可解析/日志目录），随诊断包导出为 `health.json` | 已落地 |
 | 备份 | 内置 | `AutoBackupService` 已具备 | 对齐 |
 | 认证 | 内置 | 单机本地应用 | 不迁移 |
@@ -294,6 +295,6 @@ GPL-3.0 代码、.NET/AspNetCore/SignalR 栈、PVR 领域模型、Web 服务 + �
 
 1. `renderer/shared/services/contributionRegistry.ts`：`ContributionRegistry<T>`（注册返回 Disposable、按 order 排序、引用稳定快照、订阅）已落地，配单测。
 2. `commandRegistry` 与 `settingsTabRegistry` 已收编为它的子类，公开 API 不变。
-3. 设置表单由 schema 渲染：待后续（随 UI 槽位贡献点）。
+3. 设置表单由 schema 渲染（已落地引擎）：`shared/ui/SchemaForm.tsx` 按 JSON Schema 渲染 string/number/boolean；插件状态面板对声明 `settingsSchema` 的插件渲染设置并持久化在 `plugin.<id>.settings`。enum/嵌套对象待后续。
 
 验收：加一个贡献只写声明 + register，不改应用壳；禁用后贡献与设置项一并消失；状态退避可见（第 3 项待）。

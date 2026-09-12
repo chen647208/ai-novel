@@ -79,6 +79,8 @@ export interface PluginManifest {
   contributes?: PluginContribution;
   permissions?: PluginPermissions;
   activation?: 'onDemand' | 'onStartup';
+  /** 贡献设置的表单 schema（JSON Schema 对象）；宿主据此渲染设置面板（§13.2）。 */
+  settingsSchema?: unknown;
   interface?: {
     displayName?: string;
     category?: string;

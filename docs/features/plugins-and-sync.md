@@ -10,8 +10,12 @@
   校验错误定位到 JSON 路径；`host` 版本区间不匹配则贡献整体失效并上报。
 - **资源型贡献点（v0）**：
   - `skills`：SKILL.md 写法技能，进入技能目录（渐进注入、可卸载）。同目录可附
-    `handler.js`/`handler.mjs` 作为逻辑轨；handler 在隔离沙箱里执行，只能建议工具调用，
-    经技能 `tools` 白名单裁决（越界拒绝）。
+    `handler.js`/`handler.mjs`（JS 轨）或 `handler.wasm`（WASM 轨）作为逻辑轨；
+    handler 在隔离沙箱里执行，只能建议工具调用，经技能 `tools` 白名单裁决（越界拒绝）。
+- **签名**：插件可附 `plugin.sig`（Ed25519 信封）；存在即强制校验 `plugin.json` 内容且公钥须命中
+  宿主信任键白名单，否则拒载（fail closed）。无签名插件放行。
+- **设置 schema**：manifest 声明 `settingsSchema` 的插件，设置面板按其 schema 渲染表单，
+  值持久化在 `plugin.<id>.settings`。
   - `types`：类型模板（强制 `短id.` 命名空间前缀，防抢占内置类型）
   - `buildProfiles`：导出构建档（JSON/YAML 双序列化，`.yml` 可 diff 分享；构建管线消费）
   - `hooks`：声明式策略（JSON，v0 支持 ai 接缝的 inject/filter）

@@ -1111,10 +1111,14 @@ export interface ElectronAPI {
   listDirectory: (dirPath: string) => Promise<Array<{ name: string; type: 'file' | 'directory' }>>;
   /** 插件资源读取（主进程 fs 代理：realpath 包含 + 拒绝清单）。 */
   pluginReadFile: (rootDir: string, rel: string) => Promise<string>;
+  /** 插件二进制资源读取（base64；WASM 模块）。 */
+  pluginReadBinary: (rootDir: string, rel: string) => Promise<string>;
   /** 插件资源列目录（同上，经门）。 */
   pluginListDirectory: (rootDir: string, rel: string) => Promise<Array<{ name: string; type: 'file' | 'directory' }>>;
   /** 在隔离沙箱里执行插件逻辑（utilityProcess + QuickJS）；主进程做资源限额与兜底超时。 */
   pluginSandboxRun: (request: SandboxRunRequest) => Promise<SandboxRunResult>;
+  /** 校验插件包签名（Ed25519，主进程持私钥无关的公开校验）。 */
+  pluginVerifySignature: (contentBase64: string, signatureBase64: string, publicKeyPem: string) => Promise<boolean>;
   /** 系统文件管理器打开路径（日志目录/数据目录入口）。 */
   openPath: (targetPath: string) => Promise<boolean>;
   /** 外部浏览器打开链接（仅 https；应用内无浏览器）。 */

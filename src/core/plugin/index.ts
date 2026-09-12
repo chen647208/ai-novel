@@ -102,3 +102,8 @@ export {
   type SandboxRunResult,
   type SandboxToolCall,
 } from './sandbox/types.js';
+export {
+  ESCALATION_BACKOFF_MS,
+  ProviderStatusService,
+  type ProviderStatusState,
+} from './status.js';

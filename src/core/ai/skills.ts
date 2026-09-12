@@ -18,10 +18,24 @@
 
 /** 技能的逻辑轨（轨道二）：沙箱内执行的 handler 源码。 */
 export interface SkillHandler {
-  /** handler 源码；应定义 `function run(input)`。 */
+  /** handler 源码；JS 轨应定义 `function run(input)`，WASM 轨为模块字节（base64）。 */
   code: string;
   /** 来源文件（诊断用）。 */
   sourceFile: string;
+  /** 执行形态：JS（QuickJS）或 WASM。 */
+  mode?: 'js' | 'wasm';
+  /** 内容哈希（装载时用于"内容未变不重载"）。 */
+  hash?: string;
+}
+
+/** 内容哈希（FNV-1a 32 位十六进制）：判定 handler 是否变化，未变则不重载。 */
+export function hashContent(input: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < input.length; i += 1) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(16).padStart(8, '0');
 }
 
 /** 一个已解析的技能。body 是完整方法论正文（不常驻 prompt）。 */
@@ -165,12 +179,14 @@ export class SkillCatalog {
     return this.skills.delete(name);
   }
 
-  /** 为已注册技能挂上逻辑轨 handler（插件装载或用户技能装配时调用）。 */
-  setHandler(name: string, handler: SkillHandler): boolean {
+  /** 为已注册技能挂上逻辑轨 handler；内容哈希未变则不重载（返回 unchanged）。 */
+  setHandler(name: string, handler: SkillHandler): 'set' | 'unchanged' | 'missing' {
     const skill = this.skills.get(name);
-    if (!skill) return false;
-    skill.handler = handler;
-    return true;
+    if (!skill) return 'missing';
+    const hash = handler.hash ?? hashContent(handler.code);
+    if (skill.handler?.hash === hash) return 'unchanged';
+    skill.handler = { ...handler, hash };
+    return 'set';
   }
 
   list(): Skill[] {

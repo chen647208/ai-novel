@@ -28,6 +28,8 @@ export async function runSkillHandler(skill: Skill, input: unknown): Promise<San
     code: handler.code,
     input,
     allowedTools: skill.tools,
+    mode: handler.mode ?? 'js',
+    moduleBase64: handler.mode === 'wasm' ? handler.code : undefined,
   });
   if (!result.ok) return result;
   return adjudicateHandlerResult(result.output, skill.tools);

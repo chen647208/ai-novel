@@ -74,6 +74,11 @@ compression: normal
 asar: true
 asarUnpack:
   - "**/*.node"
+  # 沙箱子进程需被 OS 执行，不能在 asar 内；QuickJS 的 WASM 一并发在包内解包
+  - "build/main/**"
+  - "node_modules/quickjs-emscripten/**"
+  - "node_modules/quickjs-emscripten-core/**"
+  - "node_modules/@jitl/**"
 
 # Electron fuses 加固：关闭 RunAsNode、启用 Cookie 加密、仅从 asar 加载并校验完整性。
 # 不关 EnableNodeOptionsEnvironmentVariable / EnableNodeCliInspectArguments：

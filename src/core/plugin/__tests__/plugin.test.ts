@@ -145,6 +145,20 @@ describe('PluginHost 生命周期', () => {
     expect(host.list()[0]!.state).toBe('failed');
     expect(host.list()[0]!.error?.message).toContain('第三项注册失败');
   });
+
+  it('连续失败进入退避：退避窗内跳过再次激活（§13.1）', () => {
+    let attempts = 0;
+    const host = new PluginHost({ hostVersion: HOST }, () => {
+      attempts += 1;
+      throw new Error('boom');
+    });
+    host.loadAll([plugin('com.flaky.plugin')]);
+    host.activate('com.flaky.plugin');
+    expect(attempts).toBe(1);
+    host.activate('com.flaky.plugin');
+    expect(attempts).toBe(1);
+    expect(host.providerStatus.isDisabled('com.flaky.plugin')).toBe(true);
+  });
 });
 
 describe('权限（验收 5：deny-by-default）', () => {

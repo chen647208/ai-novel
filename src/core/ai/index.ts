@@ -56,11 +56,13 @@ export {
   type SessionSink,
 } from './session.js';
 export {
+  hashContent,
   type ParsedSkillFile,
   parseSkillMd,
   type Skill,
   SkillCatalog,
   type SkillCatalogOptions,
+  type SkillHandler,
   type SkillParseError,
 } from './skills.js';
 export {

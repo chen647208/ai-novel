@@ -136,9 +136,11 @@
 |---|---|---|
 | S0 | 仅资源型，不执行插件代码 | 禁用全部插件纯写作可用 |
 | S1（已落地） | utilityProcess 逻辑沙箱 + QuickJS 引擎隔离 + 资源限额 + IPC | 死循环被中断、内存炸弹被内存上限拦截、输出超限拒绝；子进程无响应由主进程兜底 kill；宿主对象不可达 |
-| S2 | 按形态接 WASM（Wasmtime/Extism）作为重逻辑轨 | 示例 WASM 插件端到端；宿主函数入参校验用例齐全 |
-| S3 | UI 沙箱 iframe + postMessage 协议 | 插件 UI 无法触达宿主对象；CSP 下无 `eval` |
-| S4 | 签名与来源白名单（cosign） | 篡改包拒载；来源离线白名单可配 |
+| S2（已落地，纯计算） | WASM 轨：默认拒绝任何导入，无导入即无宿主能力；死循环由进程超时兜底 | 无导入 WASM 模块可执行；越权导入被拒 |
+| S3（已落地，宿主侧） | `PluginFrame`：null-origin `sandbox="allow-scripts"` iframe + 来源与形状校验的消息桥 | 插件 UI 无法触达宿主对象；只接受本 iframe 的合法消息 |
+| S4（已落地，基础） | Ed25519 签名信封 `plugin.sig` + 信任键白名单（fail closed） | 篡改包/未信任公钥拒载；无签名包放行 |
+
+S2/S3/S4 落点：`main/app/pluginSandbox/wasmRunner.ts`、`shared/ui/PluginFrame.tsx`、`main/app/pluginSignature.ts` + `shared/pluginSignature.ts`、IPC `plugin-sandbox-run` / `plugin-verify-signature`。签名信任键经 `setTrustedPluginKeys` 配置。
 
 S1 实现落点：`core/plugin/sandbox/*`（契约与能力裁决）、`main/app/pluginSandbox/*`（QuickJS 运行时 + utilityProcess 宿主）、`shared/sandbox.ts`（跨层类型）、IPC `plugin-sandbox-run`。
 

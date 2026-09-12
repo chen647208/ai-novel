@@ -29,6 +29,7 @@ import {
   toPluginError,
   validateManifest,
 } from './manifest.js';
+import { ProviderStatusService } from './status.js';
 
 export type PluginState = 'discovered' | 'active' | 'failed' | 'disabled' | 'uninstalled';
 
@@ -111,6 +112,8 @@ export class PluginHost {
   private readonly installed = new Map<string, Disposable[]>();
   private readonly disabled: Set<string>;
   private readonly installer: ContributionInstaller;
+  /** 激活失败退避：连续失败的插件在退避窗内跳过激活（§13.1）。 */
+  readonly providerStatus = new ProviderStatusService();
 
   constructor(options: PluginHostOptions, installer: ContributionInstaller) {
     this.disabled = new Set(options.disabled ?? []);
@@ -178,6 +181,8 @@ export class PluginHost {
     const status = this.statuses.get(pluginId);
     const plugin = this.plugins.get(pluginId);
     if (!status || !plugin || status.state === 'active' || status.state === 'disabled') return;
+    // 退避窗内跳过激活，避免反复失败刷屏
+    if (this.providerStatus.isDisabled(pluginId)) return;
     try {
       if (!satisfiesRange(this.hostVersion, plugin.manifest.host)) {
         throw new Error(`宿主版本 ${this.hostVersion} 不满足插件要求 ${plugin.manifest.host}`);
@@ -205,11 +210,13 @@ export class PluginHost {
       status.state = 'active';
       status.activatedAt = Date.now();
       status.error = undefined;
+      this.providerStatus.recordSuccess(pluginId);
     } catch (error) {
       // 装配中途失败：回滚已注册部分，插件标记 failed
       this.unwind(pluginId);
       status.state = 'failed';
       status.error = toPluginError(pluginId, 'activate', error);
+      this.providerStatus.recordFailure(pluginId, error);
     }
   }
 

@@ -22,6 +22,7 @@ import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { LoadingState } from '@/shared/ui/LoadingState';
+import { defaultFromSchema, type JsonSchemaObject, SchemaForm } from '@/shared/ui/SchemaForm';
 import { Spinner } from '@/shared/ui/Spinner';
 
 import type { McpServerConfig } from '../../../../shared/types';
@@ -38,9 +39,35 @@ const AssemblyTreeView: React.FC<{ rows: AssemblyRow[] }> = ({ rows }) => (
   </div>
 );
 
+/** 单插件设置：按 manifest.settingsSchema 渲染，值持久化在 plugin.<id>.settings。 */
+const PluginSchemaSettings: React.FC<{ pluginId: string; schema: JsonSchemaObject }> = ({ pluginId, schema }) => {
+  const key = `plugin.${pluginId}.settings`;
+  const [value, setValue] = useState<Record<string, unknown>>(() => {
+    const raw = localStore.getItem(key);
+    if (raw) {
+      try {
+        return { ...defaultFromSchema(schema), ...(JSON.parse(raw) as Record<string, unknown>) };
+      } catch {
+        // 损坏配置回默认
+      }
+    }
+    return defaultFromSchema(schema);
+  });
+  const update = (next: Record<string, unknown>): void => {
+    setValue(next);
+    localStore.setItem(key, JSON.stringify(next));
+  };
+  return (
+    <div className="mt-2 rounded-md border border-border p-2">
+      <SchemaForm schema={schema} value={value} onChange={update} idPrefix={`plugin-${pluginId}`} />
+    </div>
+  );
+};
+
 const PluginSettingsPanel: React.FC = () => {
   const { t } = useTranslation(['settings', 'common']);
   const [statuses, setStatuses] = useState<PluginStatus[] | null>(null);
+  const [manifests, setManifests] = useState<Record<string, unknown>>({});
   const [showTree, setShowTree] = useState(false);
   const [profile, setProfile] = useState<string>(() => localStore.getItem(STORAGE_KEYS.profileCurrent) ?? DEFAULT_RELEASE_PROFILE);
   const registeredTypes = builtinRegistry.list();
@@ -48,7 +75,14 @@ const PluginSettingsPanel: React.FC = () => {
   useEffect(() => {
     let alive = true;
     void pluginHostPromise.then((host) => {
-      if (alive) setStatuses(host.list());
+      if (!alive) return;
+      setStatuses(host.list());
+      const schemaMap: Record<string, unknown> = {};
+      for (const status of host.list()) {
+        const schema = host.manifest(status.id)?.settingsSchema;
+        if (schema) schemaMap[status.id] = schema;
+      }
+      setManifests(schemaMap);
     });
     return () => {
       alive = false;
@@ -145,6 +179,9 @@ const PluginSettingsPanel: React.FC = () => {
                 {s.error && s.error.cause.length > 0 && (
                   <div className="mt-1 text-xs text-muted-foreground">cause: {s.error.cause.join(' ← ')}</div>
                 )}
+                {manifests[s.id] ? (
+                  <PluginSchemaSettings pluginId={s.id} schema={manifests[s.id] as JsonSchemaObject} />
+                ) : null}
               </div>
               {s.state === 'disabled' ? (
                 <Button size="sm" variant="outline" onClick={() => toggle(s.id, true)}>

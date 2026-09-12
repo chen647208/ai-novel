@@ -41,12 +41,18 @@ export interface SandboxToolCall {
 }
 
 export interface SandboxRunRequest {
-  /** 待执行代码；应定义 `function run(input)`，返回值作为输出。 */
+  /** 待执行代码；JS 轨应定义 `function run(input)`，WASM 轨见 moduleBase64。 */
   code: string;
   input?: unknown;
   limits?: Partial<SandboxLimits>;
   /** 技能声明的工具白名单；handler 提议的越界工具调用被拒。 */
   allowedTools?: readonly string[];
+  /** 执行形态：js（QuickJS）或 wasm（无导入纯计算模块）。 */
+  mode?: 'js' | 'wasm';
+  /** WASM 轨的模块字节（base64）。 */
+  moduleBase64?: string;
+  /** WASM 允许的导入（`module.name`）；默认拒绝任何导入。 */
+  allowedImports?: readonly string[];
 }
 
 export interface SandboxRunResult {

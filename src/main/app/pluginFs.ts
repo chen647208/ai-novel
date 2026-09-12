@@ -52,6 +52,13 @@ export async function pluginReadFile(rootDir: string, rel: string): Promise<stri
   return fs.readFile(target, 'utf-8');
 }
 
+/** 经门读取插件二进制资源（base64；WASM 模块等）。 */
+export async function pluginReadBinary(rootDir: string, rel: string): Promise<string> {
+  const target = await resolvePluginPath(rootDir, rel);
+  const content = await fs.readFile(target);
+  return content.toString('base64');
+}
+
 /** 经门列目录（只返回名字与类型）。 */
 export async function pluginListDirectory(
   rootDir: string,
@@ -65,5 +72,6 @@ export async function pluginListDirectory(
 /** 注册插件 fs 代理 IPC（主进程启动时调用一次）。 */
 export function registerPluginFsIpc(): void {
   ipcMain.handle(IPC.pluginReadFile, (_event, rootDir: string, rel: string) => pluginReadFile(rootDir, rel));
+  ipcMain.handle(IPC.pluginReadBinary, (_event, rootDir: string, rel: string) => pluginReadBinary(rootDir, rel));
   ipcMain.handle(IPC.pluginListDirectory, (_event, rootDir: string, rel: string) => pluginListDirectory(rootDir, rel));
 }

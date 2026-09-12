@@ -3,9 +3,12 @@
   "entry": [
     "src/main/main.ts",
     "src/main/app/pluginSandbox/sandboxChild.ts",
+    "src/renderer/shared/ui/PluginFrame.tsx",
     "sdk/src/index.ts",
     "scripts/**/*.mjs",
     "e2e/**/*.spec.ts",
+    "src/**/*.test.{ts,tsx}",
+    "src/**/__tests__/**/*.{ts,tsx}",
     "docs-site/.vitepress/config.mts",
     "*.config.{js,ts,mjs,cjs}"
   ],

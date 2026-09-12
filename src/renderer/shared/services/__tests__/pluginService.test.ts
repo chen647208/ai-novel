@@ -32,7 +32,7 @@ description: 社区黄金三章扩展写法。触发词：社区开篇
 
 vi.mock('@/shared/services/repository', () => ({}));
 
-import { bootstrapPlugins } from '../pluginService';
+import { bootstrapPlugins, setTrustedPluginKeys } from '../pluginService';
 
 describe('pluginService（磁盘发现 + 技能贡献装配）', () => {
   beforeEach(() => {
@@ -59,12 +59,18 @@ describe('pluginService（磁盘发现 + 技能贡献装配）', () => {
           if (raw === undefined) throw new Error(`not found: ${rootDir}/${rel}`);
           return raw;
         },
+        pluginReadBinary: async (rootDir: string, rel: string) => {
+          const raw = files[`${rootDir}/${rel}`];
+          if (raw === undefined) throw new Error(`not found: ${rootDir}/${rel}`);
+          return raw;
+        },
       },
     });
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    setTrustedPluginKeys([]);
   });
 
   it('发现→装载→自动激活：技能贡献进入目录；禁用后卸载', async () => {
@@ -104,6 +110,7 @@ describe('pluginService（磁盘发现 + 技能贡献装配）', () => {
         listDirectory: async (dir: string) =>
           dir === '/data/plugins' ? [{ name: 'com.bad.escape', type: 'directory' }] : [],
         pluginListDirectory: async () => [],
+        pluginReadBinary: async () => '',
         pluginReadFile: async (rootDir: string, rel: string) => {
           const path = `${rootDir}/${rel}`;
           if (path === '/data/plugins/com.bad.escape/plugin.json') {
@@ -126,5 +133,66 @@ describe('pluginService（磁盘发现 + 技能贡献装配）', () => {
     expect(status?.state).toBe('failed');
     expect(status?.error?.cause.some((c) => String(c).includes('越界'))).toBe(true);
     expect(catalog.list()).toEqual([]);
+  });
+
+  it('签名包无信任键：fail closed（S4）', async () => {
+    vi.stubGlobal('window', {
+      electronAPI: {
+        getAppDataPath: async () => '/data',
+        listDirectory: async (dir: string) =>
+          dir === '/data/plugins' ? [{ name: 'com.signed.p', type: 'directory' }] : [],
+        pluginListDirectory: async () => [],
+        pluginReadBinary: async () => '',
+        pluginReadFile: async (_root: string, rel: string) => {
+          if (rel === 'plugin.json') {
+            return JSON.stringify({ id: 'com.signed.p', name: 'p', version: '1.0.0', host: '^2.0.0', license: 'MIT' });
+          }
+          if (rel === 'plugin.sig') {
+            return JSON.stringify({ algorithm: 'ed25519', signature: 's', publicKey: 'k' });
+          }
+          throw new Error('missing');
+        },
+        pluginVerifySignature: async () => true,
+      },
+    });
+    const catalog = new SkillCatalog();
+    const host = await bootstrapPlugins(
+      { skillCatalog: catalog, buildProfiles: new BuildProfileRegistry(), events: new EventBus() },
+      '2.0.0',
+      [],
+    );
+    const status = host.list().find((s) => s.id === 'com.signed.p');
+    expect(status?.state).toBe('failed');
+    expect(status?.error?.message).toContain('信任清单');
+  });
+
+  it('信任键命中且校验通过：签名包放行（S4）', async () => {
+    setTrustedPluginKeys(['k']);
+    vi.stubGlobal('window', {
+      electronAPI: {
+        getAppDataPath: async () => '/data',
+        listDirectory: async (dir: string) =>
+          dir === '/data/plugins' ? [{ name: 'com.signed.ok', type: 'directory' }] : [],
+        pluginListDirectory: async () => [],
+        pluginReadBinary: async () => '',
+        pluginReadFile: async (_root: string, rel: string) => {
+          if (rel === 'plugin.json') {
+            return JSON.stringify({ id: 'com.signed.ok', name: 'p', version: '1.0.0', host: '^2.0.0', license: 'MIT' });
+          }
+          if (rel === 'plugin.sig') {
+            return JSON.stringify({ algorithm: 'ed25519', signature: 's', publicKey: 'k' });
+          }
+          throw new Error('missing');
+        },
+        pluginVerifySignature: async () => true,
+      },
+    });
+    const catalog = new SkillCatalog();
+    const host = await bootstrapPlugins(
+      { skillCatalog: catalog, buildProfiles: new BuildProfileRegistry(), events: new EventBus() },
+      '2.0.0',
+      [],
+    );
+    expect(host.list().find((s) => s.id === 'com.signed.ok')?.state).toBe('active');
   });
 });

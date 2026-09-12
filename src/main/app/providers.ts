@@ -24,6 +24,7 @@ import { registerDiagnosticsIpc } from './diagnostics.js';
 import { extractPdfText } from './documents.js';
 import { registerPluginFsIpc } from './pluginFs.js';
 import { sandboxHost } from './pluginSandbox/host.js';
+import { verifyEd25519 } from './pluginSignature.js';
 import { destroyTray, registerShellIpc } from './tray.js';
 import { getMainWindow } from './window.js';
 import { createWindow } from './window.js';
@@ -124,6 +125,11 @@ export const fileProvider: Provider = {
 
     registerPluginFsIpc();
     ipcMain.handle(IPC.pluginSandboxRun, (_event, request: SandboxRunRequest) => sandboxHost.run(request));
+    ipcMain.handle(
+      IPC.pluginVerifySignature,
+      (_event, contentBase64: string, signatureBase64: string, publicKeyPem: string) =>
+        verifyEd25519(Buffer.from(contentBase64, 'base64'), signatureBase64, publicKeyPem),
+    );
 
     // 系统文件管理器打开路径（日志/数据目录入口；只允许 userData 内路径）
     ipcMain.handle(IPC.openPath, async (_event, targetPath: string) => {

@@ -16,6 +16,7 @@
 
 import type { SandboxRunRequest, SandboxRunResult } from '../../../shared/sandbox.js';
 import { runQuickJS } from './quickjsRunner.js';
+import { runWasm } from './wasmRunner.js';
 
 interface ParentPortLike {
   on(event: 'message', listener: (event: { data: unknown }) => void): void;
@@ -33,7 +34,8 @@ if (parentPort) {
       parentPort.postMessage({ id, result: { ok: false, error: { kind: 'runtime', message: '缺少请求' } } });
       return;
     }
-    void runQuickJS(request)
+    const execute = request.mode === 'wasm' ? runWasm : runQuickJS;
+    void execute(request)
       .then((result) => parentPort.postMessage({ id, result }))
       .catch((error: unknown) =>
         parentPort.postMessage({

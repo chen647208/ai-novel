@@ -2,7 +2,7 @@
 
 本文件是界面一致性的唯一组件清单：通用交互只准用清单内组件，禁止在业务代码手写第二套。
 机制与验收标准见 `docs/design/19-ui-system.md`；组件实现位于 `src/renderer/shared/ui/`。
-新增组件时在同一次改动里登记本文件。
+添加组件时在同一次改动里登记本文件。
 
 ## 一、基础组件
 
@@ -17,6 +17,8 @@
 | `Label` / `FieldLabel` | 表单标签 | `htmlFor` | `FieldLabel` 为纯文本标签样式 |
 | `FormField` | 标签 + 提示 + 控件容器 | `label`、`htmlFor`、`hint` | 表单单字段首选 |
 | `Badge` | 状态标签 | `variant` | 轻量状态/分类标记 |
+| `SchemaForm` | 按 JSON Schema 渲染设置表单 | `schema`/`value`/`onChange` | string/number/boolean；贡献设置面板用它，不手写表单 |
+| `PluginFrame` | 插件 UI 沙箱宿主 | `html`/`onMessage` | null-origin `sandbox="allow-scripts"` iframe，只经消息桥通信 |
 
 ## 二、反馈与状态
 
