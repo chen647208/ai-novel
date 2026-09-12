@@ -33,6 +33,7 @@ description: 社区黄金三章扩展写法。触发词：社区开篇
 vi.mock('@/shared/services/repository', () => ({}));
 
 import { bootstrapPlugins, setTrustedPluginKeys } from '../pluginService';
+import { uiSlotRegistry } from '../uiSlots';
 
 describe('pluginService（磁盘发现 + 技能贡献装配）', () => {
   beforeEach(() => {
@@ -194,5 +195,41 @@ describe('pluginService（磁盘发现 + 技能贡献装配）', () => {
       [],
     );
     expect(host.list().find((s) => s.id === 'com.signed.ok')?.state).toBe('active');
+  });
+
+  it('UI 贡献渲染进 plugin.panel 槽位，禁用后移除（S3）', async () => {
+    vi.stubGlobal('window', {
+      electronAPI: {
+        getAppDataPath: async () => '/data',
+        listDirectory: async (dir: string) =>
+          dir === '/data/plugins' ? [{ name: 'com.ui.p', type: 'directory' }] : [],
+        pluginListDirectory: async (root: string, rel: string) =>
+          `${root}/${rel}` === '/data/plugins/com.ui.p/panel' ? [{ name: 'index.html', type: 'file' }] : [],
+        pluginReadBinary: async () => '',
+        pluginReadFile: async (root: string, rel: string) => {
+          const full = `${root}/${rel}`;
+          if (full === '/data/plugins/com.ui.p/plugin.json') {
+            return JSON.stringify({
+              id: 'com.ui.p',
+              name: 'ui-p',
+              version: '1.0.0',
+              host: '^2.0.0',
+              license: 'MIT',
+              contributes: { ui: ['./panel/'] },
+            });
+          }
+          if (full === '/data/plugins/com.ui.p/panel/index.html') return '<p>hello</p>';
+          throw new Error('missing');
+        },
+      },
+    });
+    const host = await bootstrapPlugins(
+      { skillCatalog: new SkillCatalog(), buildProfiles: new BuildProfileRegistry(), events: new EventBus() },
+      '2.0.0',
+      [],
+    );
+    expect(uiSlotRegistry.getSnapshot('plugin.panel')).toHaveLength(1);
+    host.disable('com.ui.p');
+    expect(uiSlotRegistry.getSnapshot('plugin.panel')).toHaveLength(0);
   });
 });

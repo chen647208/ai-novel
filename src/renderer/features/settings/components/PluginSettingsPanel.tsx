@@ -18,12 +18,15 @@ import { pluginHostPromise, saveDisabledList } from '@/features/assistant/servic
 import { useTranslation } from '@/i18n';
 import { localStore } from '@/shared/services/localStore';
 import { connectServer, disconnectServer, fetchServerTools } from '@/shared/services/mcpClient';
+import { saveTrustedPluginKeys } from '@/shared/services/pluginService';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { LoadingState } from '@/shared/ui/LoadingState';
 import { defaultFromSchema, type JsonSchemaObject, SchemaForm } from '@/shared/ui/SchemaForm';
+import { Slot } from '@/shared/ui/Slot';
 import { Spinner } from '@/shared/ui/Spinner';
+import { Textarea } from '@/shared/ui/Textarea';
 
 import type { McpServerConfig } from '../../../../shared/types';
 import UserSkillsCard from './UserSkillsCard';
@@ -60,6 +63,43 @@ const PluginSchemaSettings: React.FC<{ pluginId: string; schema: JsonSchemaObjec
   return (
     <div className="mt-2 rounded-md border border-border p-2">
       <SchemaForm schema={schema} value={value} onChange={update} idPrefix={`plugin-${pluginId}`} />
+    </div>
+  );
+};
+
+/** 受信任签名公钥：PEM 列表（空行分隔），保存即生效。 */
+const TrustedKeysSection: React.FC = () => {
+  const { t } = useTranslation(['settings']);
+  const [text, setText] = useState('');
+  const [saved, setSaved] = useState(false);
+  const save = (): void => {
+    const keys = text
+      .split(/\n\s*\n/)
+      .map((block) => block.trim())
+      .filter((block) => block.includes('BEGIN PUBLIC KEY'));
+    saveTrustedPluginKeys(keys);
+    setSaved(true);
+  };
+  return (
+    <div className="rounded-lg border border-border p-3">
+      <div className="mb-1 text-sm font-medium">{t('plugins.trust.title')}</div>
+      <p className="mb-2 text-xs text-muted-foreground">{t('plugins.trust.hint')}</p>
+      <Textarea
+        value={text}
+        onChange={(event) => {
+          setText(event.target.value);
+          setSaved(false);
+        }}
+        rows={4}
+        className="font-mono text-xs"
+        placeholder="-----BEGIN PUBLIC KEY-----"
+      />
+      <div className="mt-2 flex items-center gap-2">
+        <Button size="sm" onClick={save}>
+          {t('plugins.trust.save')}
+        </Button>
+        {saved && <span className="text-xs text-muted-foreground">{t('plugins.trust.saved')}</span>}
+      </div>
     </div>
   );
 };
@@ -125,6 +165,13 @@ const PluginSettingsPanel: React.FC = () => {
       <p className="text-sm text-muted-foreground">{t('plugins.description')}</p>
 
       <UserSkillsCard />
+
+      <TrustedKeysSection />
+
+      <div className="rounded-lg border border-border p-3">
+        <div className="mb-2 text-sm font-medium">{t('plugins.panel.title')}</div>
+        <Slot id="plugin.panel" />
+      </div>
 
       <div>
         <div className="mb-1 text-sm font-medium">{t('plugins.profile.title')}</div>

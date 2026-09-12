@@ -429,6 +429,15 @@
       "literary": "Literary",
       "minimal": "Minimal (no AI)",
       "hint": "minimal disables all AI requests (sessions and tools) immediately; switch back anytime."
+    },
+    "trust": {
+      "title": "Trusted signing keys",
+      "hint": "Paste plugin signing public keys (PEM, separate multiple with a blank line). Plugins shipping plugin.sig must be signed by a listed key or they are rejected; an empty list rejects all signed plugins.",
+      "save": "Save trusted keys",
+      "saved": "Saved"
+    },
+    "panel": {
+      "title": "Plugin UI"
     }
   },
   "usage": {

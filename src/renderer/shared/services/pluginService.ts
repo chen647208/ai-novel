@@ -27,7 +27,14 @@ import type {
 import { installHooks, installTypeTemplates, PermissionDenied, PluginHost, typeTemplateId } from '@core/plugin';
 import { checkPluginFileName, checkPluginRelPath } from '@core/plugin';
 import { builtinRegistry } from '@core/types-registry';
+import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import { parseSignatureEnvelope } from '@shared/pluginSignature';
+import * as React from 'react';
+
+import { PluginFrame } from '@/shared/ui/PluginFrame';
+
+import { localStore } from './localStore';
+import { uiSlotRegistry } from './uiSlots';
 
 function electron(): NonNullable<Window['electronAPI']> {
   if (!window.electronAPI) {
@@ -48,6 +55,23 @@ let trustedPluginKeys: readonly string[] = [];
 /** 配置受信任的插件签名公钥（PEM）。空清单 = 任何签名包一律拒载（fail closed）。 */
 export function setTrustedPluginKeys(keys: readonly string[]): void {
   trustedPluginKeys = keys;
+}
+
+function readTrustedPluginKeys(): string[] | undefined {
+  const raw = localStore.getItem(STORAGE_KEYS.trustedPluginKeys);
+  if (!raw) return undefined;
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    return Array.isArray(parsed) ? parsed.filter((k): k is string => typeof k === 'string') : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** 保存信任公钥并立即生效（设置面板调用）。 */
+export function saveTrustedPluginKeys(keys: readonly string[]): void {
+  localStore.setItem(STORAGE_KEYS.trustedPluginKeys, JSON.stringify(keys));
+  setTrustedPluginKeys(keys);
 }
 
 /** 从 userData/plugins/ 发现插件并装载进宿主。读取/校验失败按 failed 登记，面板可见。 */
@@ -85,7 +109,7 @@ export async function discoverAndLoad(host: PluginHost): Promise<void> {
       const contributes = (manifestJson as { contributes?: Record<string, string[]> }).contributes;
       // 路径门（§11.2）：词法两道门在渲染侧前置，realpath 包含由主进程 fs 代理（pluginReadFile/pluginListDirectory）强制
       let denied = false;
-      for (const dirKey of ['skills', 'types', 'buildProfiles'] as const) {
+      for (const dirKey of ['skills', 'types', 'buildProfiles', 'ui'] as const) {
         for (const rel of contributes?.[dirKey] ?? []) {
           const dirCheck = checkPluginRelPath(rel);
           if (!dirCheck.ok) {
@@ -195,9 +219,24 @@ export function createContributionInstaller(deps: PluginDeps): ContributionInsta
       }
     }
 
+    // UI 槽位（S3）：贡献目录下的 .html 经 PluginFrame 渲染进 plugin.panel
+    for (const rel of manifest.contributes?.ui ?? []) {
+      const prefix = `${rel.replace(/^\.\//, '').replace(/\/+$/, '')}/`;
+      for (const [file, content] of Object.entries(plugin.files)) {
+        if (!file.startsWith(prefix) || !file.endsWith('.html')) continue;
+        sink.add({
+          dispose: uiSlotRegistry.register({
+            id: `plugin.${manifest.id}.${file}`,
+            slot: 'plugin.panel',
+            order: 100,
+            render: () => React.createElement(PluginFrame, { html: content, title: manifest.name }),
+          }),
+        });
+      }
+    }
+
     // hooks（能力接缝，JSON 声明式策略）
-    const hooksFile = manifest.contributes?.hooks;
-    if (hooksFile) {
+    const hooksFile = manifest.contributes?.hooks;    if (hooksFile) {
       const key = hooksFile.replace(/^\.\//, '');
       const raw = plugin.files[key];
       if (raw) {
@@ -217,6 +256,8 @@ export function createContributionInstaller(deps: PluginDeps): ContributionInsta
 export async function bootstrapPlugins(deps: PluginDeps, hostVersion: string, disabled: string[]): Promise<PluginHost> {
   const host = new PluginHost({ hostVersion, disabled }, createContributionInstaller(deps));
   try {
+    const storedKeys = readTrustedPluginKeys();
+    if (storedKeys) setTrustedPluginKeys(storedKeys);
     await discoverAndLoad(host);
     // 发现后立即激活全部（含依赖拓扑）：否则插件停在 discovered，贡献点永不生效
     host.activateAll();

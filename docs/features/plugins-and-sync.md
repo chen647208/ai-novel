@@ -13,9 +13,13 @@
     `handler.js`/`handler.mjs`（JS 轨）或 `handler.wasm`（WASM 轨）作为逻辑轨；
     handler 在隔离沙箱里执行，只能建议工具调用，经技能 `tools` 白名单裁决（越界拒绝）。
 - **签名**：插件可附 `plugin.sig`（Ed25519 信封）；存在即强制校验 `plugin.json` 内容且公钥须命中
-  宿主信任键白名单，否则拒载（fail closed）。无签名插件放行。
+  宿主信任键白名单，否则拒载（fail closed）。无签名插件放行。信任键在设置 → 插件里维护。
+- **UI 界面**：manifest 的 `contributes.ui` 目录下 `.html` 经 `PluginFrame`（null-origin sandboxed iframe）
+  渲染进 `plugin.panel` 槽位；禁用插件即卸载界面。
 - **设置 schema**：manifest 声明 `settingsSchema` 的插件，设置面板按其 schema 渲染表单，
   值持久化在 `plugin.<id>.settings`。
+- **WASM 逻辑轨**：`handler.wasm` 默认拒绝任何导入；SKILL.md frontmatter `hosts` 声明可用的受控宿主函数
+  （`now`/`log`/`hash`），未授权导入或缺少实现即拒执行。
   - `types`：类型模板（强制 `短id.` 命名空间前缀，防抢占内置类型）
   - `buildProfiles`：导出构建档（JSON/YAML 双序列化，`.yml` 可 diff 分享；构建管线消费）
   - `hooks`：声明式策略（JSON，v0 支持 ai 接缝的 inject/filter）

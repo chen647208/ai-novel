@@ -17,6 +17,7 @@ import { logger } from '../utils/logger';
  */
 export const localStore = {
   getItem(key: string): string | null {
+    if (typeof localStorage === 'undefined') return null;
     try {
       return localStorage.getItem(key);
     } catch (error) {
@@ -26,6 +27,7 @@ export const localStore = {
   },
 
   setItem(key: string, value: string): void {
+    if (typeof localStorage === 'undefined') return;
     try {
       localStorage.setItem(key, value);
     } catch (error) {
@@ -34,6 +36,7 @@ export const localStore = {
   },
 
   removeItem(key: string): void {
+    if (typeof localStorage === 'undefined') return;
     try {
       localStorage.removeItem(key);
     } catch (error) {

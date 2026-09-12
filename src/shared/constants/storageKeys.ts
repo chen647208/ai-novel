@@ -21,6 +21,7 @@ export const STORAGE_KEYS = {
   versionSkipped: 'version.skipped',
   editorTypewriter: 'editor.typewriter',
   pluginsDisabled: 'plugins.disabled',
+  trustedPluginKeys: 'plugins.trustedKeys',
   errorLogs: 'novelocal_error_logs',
   aiUsage: 'ai.usage',
   aiHourlyLimit: 'ai.hourlyLimit',

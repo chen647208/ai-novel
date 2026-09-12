@@ -18,7 +18,8 @@ export type SlotId =
   | 'nav.actions'
   | 'sidebar.actions'
   | 'editor.toolbar'
-  | 'status-bar';
+  | 'status-bar'
+  | 'plugin.panel';
 
 export interface SlotContribution {
   id: string;
