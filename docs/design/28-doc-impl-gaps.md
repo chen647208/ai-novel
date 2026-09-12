@@ -11,7 +11,6 @@
 |---|---|---|
 | `23-data-layer-storage.md` §6、`24` D3 | 正文以文件为源（每章一文件 + 清单校验，外部改单章可导入） | 正文仍在 SQLite `nodes.body`，无章节文件与清单（用户明确暂缓） |
 | `24` D1 | 追加式事件日志（JSONL）为唯一真相源，SQLite 改为其投影、可重建 | 无事件日志源；SQLite 即真相（用户明确暂缓） |
-| `21-plugin-sandbox.md` §5.5 | 插件包 Sigstore/cosign 签名 + 来源白名单 | 现为 Ed25519 签名 + 信任键 + 未签名禁可执行贡献；cosign 需外部工具链 |
 | `20-external-benchmark.md` | 借鉴项：选题→大纲→章节→修订→校验工作流、计划/待办落盘 | 参考性结论，未立项 |
 
 ## 部分
@@ -32,6 +31,8 @@
 - `14` 助手后台执行 / 多任务：应用级任务服务串行排队 + 顶栏指示/中止（`assistantTaskService`）。
 - `17` §7 文档附件：`attachments`/`blobs` 落地（按书持久化 + 助手附件库 `SavedAttachmentsButton`）。
 - `12` 批量操作：书库多选批量删除/打标（`Bookshelf` 选择态 + `useBookActions.deleteBooks`）。
+- `21` §5.5 供应链：`sha256`/`ed25519`/`cosign` 多算法签名信封 + 来源白名单（`plugins.allowedSources`）。
+- 分区组件按需加载：工作台各分区 `React.lazy` + `Suspense`（减小首屏主包）。
 
 ## 有意挂起 / 评估后不做
 

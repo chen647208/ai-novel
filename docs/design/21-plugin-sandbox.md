@@ -139,8 +139,9 @@
 | S2（已落地） | WASM 轨：默认拒绝任何导入；授权导入须映射到受控宿主函数（`now`/`log`/`hash`）；死循环由进程超时兜底 | 未授权导入/缺实现被拒；授权后受控执行 |
 | S3（已落地） | `PluginFrame`：null-origin `sandbox="allow-scripts"` iframe；插件 `contributes.ui` 的 `.html` 注册进 `plugin.panel` 槽位 | 插件 UI 无法触达宿主对象；禁用即卸载槽位 |
 | S4（已落地） | Ed25519 签名信封 `plugin.sig` + 信任键白名单（设置面板可配，fail closed） | 篡改包/未信任公钥拒载；无签名包放行 |
+| S5（已落地） | 多算法签名信封：`sha256`（完整性）+ `cosign`（Sigstore 证书签名，主进程调外部 cosign）；来源白名单（`plugins.allowedSources`） | 摘要不匹配/证书无效拒载；来源不在白名单拒载；cosign 缺失即拒 cosign 信封 |
 
-S2/S3/S4 落点：`main/app/pluginSandbox/wasmRunner.ts`、`shared/ui/PluginFrame.tsx` + `uiSlots` 的 `plugin.panel`、`main/app/pluginSignature.ts` + `shared/pluginSignature.ts`、IPC `plugin-sandbox-run` / `plugin-verify-signature`。信任键经设置面板保存（`plugins.trustedKeys`），bootstrap 时生效。
+S2/S3/S4/S5 落点：`main/app/pluginSandbox/wasmRunner.ts`、`shared/ui/PluginFrame.tsx` + `uiSlots` 的 `plugin.panel`、`main/app/pluginSignature.ts` + `shared/pluginSignature.ts`、IPC `plugin-sandbox-run` / `plugin-verify-signature` / `plugin-digest-matches` / `plugin-cosign-verify`。信任键与来源白名单经设置面板保存（`plugins.trustedKeys` / `plugins.allowedSources`），bootstrap 时生效。
 
 S1 实现落点：`core/plugin/sandbox/*`（契约与能力裁决）、`main/app/pluginSandbox/*`（QuickJS 运行时 + utilityProcess 宿主）、`shared/sandbox.ts`（跨层类型）、IPC `plugin-sandbox-run`。
 
