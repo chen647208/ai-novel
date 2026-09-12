@@ -54,6 +54,7 @@
     "headers:check": "node scripts/add-license-headers.mjs --check",
     "licenses:generate": "node scripts/third-party-licenses.mjs",
     "licenses:check": "node scripts/third-party-licenses.mjs --check",
+    "sbom": "node scripts/sbom.mjs",
     "release:bump": "node scripts/bump-version.mjs",
     "test": "cross-env NODE_OPTIONS=--max-old-space-size=2048 vitest run",
     "test:coverage": "cross-env NODE_OPTIONS=--max-old-space-size=2048 vitest run --coverage",
