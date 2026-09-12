@@ -63,7 +63,7 @@ function getDb(): Database.Database {
     if (!fs.existsSync(dbPath())) {
       throw new Error(`数据库不存在：${dbPath()}`);
     }
-    db = new Database(dbPath());
+    db = new Database(dbPath(), { readonly: true });
   }
   return db;
 }

@@ -9,7 +9,7 @@
 
 import { describe, expect,it } from 'vitest';
 
-import { lintToolSchema, ToolRegistry, type ToolSpec } from '../tools.js';
+import { lintToolSchema, ToolRegistry, type ToolSpec, validateToolArgs } from '../tools.js';
 
 const tool = (id: string, over: Partial<ToolSpec> = {}): ToolSpec => ({
   id,
@@ -69,9 +69,34 @@ describe('ToolRegistry', () => {
         },
       }),
     );
-    const out = await reg.execute('core.boom', {});
+    const out = await reg.execute('core.boom', { x: 'v' });
     expect(out.ok).toBe(false);
     expect(out.error).toBe('炸了');
+  });
+
+  it('执行：缺必填/类型不符在入参校验即失败', async () => {
+    const reg = new ToolRegistry();
+    reg.register(tool('core.strict'));
+    const missing = await reg.execute('core.strict', {});
+    expect(missing.ok).toBe(false);
+    expect(missing.error).toContain('缺少必填参数');
+    const wrongType = await reg.execute('core.strict', { x: 123 });
+    expect(wrongType.ok).toBe(false);
+    expect(wrongType.error).toContain('类型应为 string');
+  });
+
+  it('validateToolArgs：类型与必填矩阵', () => {
+    const schema = {
+      type: 'object',
+      properties: { a: { type: 'string' }, b: { type: 'number' }, c: { type: 'integer' }, d: { type: 'boolean' }, e: { type: 'array' } },
+      required: ['a'],
+    };
+    expect(validateToolArgs('t', schema, { a: 'x', b: 1, c: 2, d: true, e: [] })).toBeNull();
+    expect(validateToolArgs('t', schema, {})).toContain('缺少必填参数');
+    expect(validateToolArgs('t', schema, { a: 1 })).toContain('类型应为 string');
+    expect(validateToolArgs('t', schema, { a: 'x', c: 1.5 })).toContain('类型应为 integer');
+    expect(validateToolArgs('t', schema, 'nope')).toContain('必须是对象');
+    expect(validateToolArgs('t', { type: 'object', properties: {} }, undefined)).toBeNull();
   });
 
   it('resolveSchemas 输出 prompt 注入形状并支持白名单', () => {

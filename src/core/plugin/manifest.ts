@@ -75,7 +75,6 @@ export interface PluginManifest {
   keywords?: string[];
   host: string;
   license: string;
-  engine?: string;
   /** 依赖的其他插件 id → 版本区间；激活按拓扑序，缺失/不满足/循环 = failed */
   dependencies?: Record<string, string>;
   contributes?: PluginContribution;

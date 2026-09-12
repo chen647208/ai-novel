@@ -20,8 +20,23 @@ export interface McpRemoteTool {
   toolId: string;
   name: string;
   description: string;
+  /** 远端 inputSchema（JSON Schema）；缺失或非对象类型时退化为空对象 schema。 */
+  parameters: Record<string, unknown>;
   /** 服务端声明只读：注册为 read 权限，直通不走审批。 */
   readOnly: boolean;
+}
+
+/** 取远端 inputSchema（须为 object 类型），否则回退空对象 schema。 */
+function remoteParameters(inputSchema: unknown): Record<string, unknown> {
+  if (
+    inputSchema &&
+    typeof inputSchema === 'object' &&
+    !Array.isArray(inputSchema) &&
+    (inputSchema as { type?: unknown }).type === 'object'
+  ) {
+    return inputSchema as Record<string, unknown>;
+  }
+  return { type: 'object', properties: {} };
 }
 
 function api() {
@@ -51,6 +66,7 @@ export async function fetchServerTools(server: McpServerConfig): Promise<McpRemo
     toolId: mcpToolId(server.id, t.name),
     name: t.name,
     description: t.description ?? '',
+    parameters: remoteParameters(t.inputSchema),
     readOnly: t.annotations?.readOnlyHint === true,
   }));
 }
@@ -87,7 +103,7 @@ export async function syncMcpTools(
         registry.register({
           id: tool.toolId,
           description: tool.description || tool.name,
-          parameters: { type: 'object', properties: {} },
+          parameters: tool.parameters,
           // 服务端声明只读（annotations.readOnlyHint）→ 直通；否则按可写走审批提案
           permission: tool.readOnly ? 'read' : 'write:proposal',
           execute: async (req) => {
