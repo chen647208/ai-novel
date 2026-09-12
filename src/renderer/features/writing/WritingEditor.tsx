@@ -40,6 +40,7 @@ import { useChapterGeneration } from './hooks/useChapterGeneration';
 import { useChapterMutations } from './hooks/useChapterMutations';
 import { useChapterSnapshots } from './hooks/useChapterSnapshots';
 import { useFindReplace } from './hooks/useFindReplace';
+import { useGenerationSelections } from './hooks/useGenerationSelections';
 import { useSelectionMenu } from './hooks/useSelectionMenu';
 import { appendSnapshot, createSnapshot } from './services/chapterSnapshotService';
 import { extractChapterSummary } from './services/summaryExtractionService';
@@ -51,8 +52,6 @@ import type {
 } from './types';
 import {
   getChapterContext,
-  getPreviousChapterSummaryIds,
-  toggleSetValue,
 } from './utils';
 
 const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId, onBack, onNavigateToCharacters, onOpenSettings }) => {
@@ -102,8 +101,6 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const [selectedGenPromptId, setSelectedGenPromptId] = useState<string>('');
   const [spellcheckOn, setSpellcheckOn] = useState(false);
 
-  const [selectedKnowledgeIds, setSelectedKnowledgeIds] = useState<Set<string>>(new Set());
-
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedEditPromptId, setSelectedEditPromptId] = useState<string>('');
   const [customEditPrompt, setCustomEditPrompt] = useState<string>(''); // 自定义提示词
@@ -114,8 +111,6 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const [isExtractingSummary, setIsExtractingSummary] = useState(false);
   const [selectedSummaryPromptId, setSelectedSummaryPromptId] = useState<string>('');
 
-  const [selectedCharacterIds, setSelectedCharacterIds] = useState<Set<string>>(new Set());
-  const [selectedChapterSummaryIds, setSelectedChapterSummaryIds] = useState<Set<string>>(new Set());
   const [useOutline, setUseOutline] = useState<boolean>(true);
   const [editableSummary, setEditableSummary] = useState<string>("");
 
@@ -224,12 +219,6 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   }, [isFocusMode]);
 
   useEffect(() => {
-    if (genModal.isOpen) {
-      setSelectedKnowledgeIds(new Set()); 
-    }
-  }, [genModal.isOpen]);
-
-  useEffect(() => {
     if (genModal.isOpen && genModal.chapter) {
       setEditableSummary(genModal.chapter.summary || "");
     }
@@ -309,46 +298,20 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     onUpdate({ chapters: updated });
   }, [activeChapterId, onUpdate, t]);
 
-  const toggleKnowledge = (id: string) => {
-    setSelectedKnowledgeIds((prev) => toggleSetValue(prev, id));
-  };
-
-  const selectAllKnowledge = () => {
-     const allIds = (project.knowledge || [])
-       .filter(k => k.category === 'writing')
-       .map(k => k.id);
-     setSelectedKnowledgeIds(new Set(allIds));
-  };
-
-  const clearAllKnowledge = () => {
-     setSelectedKnowledgeIds(new Set());
-  };
-
-  const toggleCharacter = (id: string) => {
-    setSelectedCharacterIds((prev) => toggleSetValue(prev, id));
-  };
-
-  const toggleChapterSummary = (id: string) => {
-    setSelectedChapterSummaryIds((prev) => toggleSetValue(prev, id));
-  };
-
-  const selectAllCharacters = () => {
-    const allIds = project.characters.map(c => c.id);
-    setSelectedCharacterIds(new Set(allIds));
-  };
-
-  const clearAllCharacters = () => {
-    setSelectedCharacterIds(new Set());
-  };
-
-  const selectAllChapterSummaries = () => {
-    const currentChapter = genModal.chapter || activeChapter;
-    setSelectedChapterSummaryIds(getPreviousChapterSummaryIds(project.chapters, currentChapter));
-  };
-
-  const clearAllChapterSummaries = () => {
-    setSelectedChapterSummaryIds(new Set());
-  };
+  const {
+    selectedKnowledgeIds,
+    selectedCharacterIds,
+    selectedChapterSummaryIds,
+    toggleKnowledge,
+    selectAllKnowledge,
+    clearAllKnowledge,
+    toggleCharacter,
+    selectAllCharacters,
+    clearAllCharacters,
+    toggleChapterSummary,
+    selectAllChapterSummaries,
+    clearAllChapterSummaries,
+  } = useGenerationSelections(project, genModal.isOpen);
 
   const selectionBlocked = editModalOpen || genModal.isOpen || exporter.open;
   const {
@@ -498,7 +461,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
         clearAllCharacters={clearAllCharacters}
         selectedChapterSummaryIds={selectedChapterSummaryIds}
         toggleChapterSummary={toggleChapterSummary}
-        selectAllChapterSummaries={selectAllChapterSummaries}
+        selectAllChapterSummaries={() => selectAllChapterSummaries(genModal.chapter || activeChapter)}
         clearAllChapterSummaries={clearAllChapterSummaries}
         editableSummary={editableSummary}
         setEditableSummary={setEditableSummary}
