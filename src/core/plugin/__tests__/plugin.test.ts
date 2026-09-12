@@ -69,10 +69,10 @@ describe('命名空间（验收 4：同名各自前缀化）', () => {
 describe('PluginHost 生命周期', () => {
   it('故障隔离（验收 2）：一个插件失败其余可用，状态面板正确', () => {
     const registry: string[] = [];
-    const host = new PluginHost({ hostVersion: HOST }, (p) => {
+    const host = new PluginHost({ hostVersion: HOST }, (p, sink) => {
       if (p.manifest.id === 'com.bad.plugin') throw new Error('装配爆炸');
       registry.push(p.manifest.id);
-      return [{ dispose: () => void registry.splice(registry.indexOf(p.manifest.id), 1) }];
+      sink.add({ dispose: () => void registry.splice(registry.indexOf(p.manifest.id), 1) });
     });
     host.loadRaw('com.bad.plugin', { id: 'com.bad.plugin', name: 'bad', version: '1.0.0', host: '^9.9.9', license: 'MIT' }, {});
     host.loadAll([plugin('com.good.plugin')]);
@@ -88,15 +88,13 @@ describe('PluginHost 生命周期', () => {
 
   it('unwind（验收 3）：禁用后注册全部消失，重新启用恢复', () => {
     const registry: string[] = [];
-    const host = new PluginHost({ hostVersion: HOST }, (p) => {
+    const host = new PluginHost({ hostVersion: HOST }, (p, sink) => {
       registry.push(p.manifest.id);
-      return [
-        {
-          dispose: () => {
-            registry.splice(registry.indexOf(p.manifest.id), 1);
-          },
+      sink.add({
+        dispose: () => {
+          registry.splice(registry.indexOf(p.manifest.id), 1);
         },
-      ];
+      });
     });
     host.loadAll([plugin('com.a.plugin')]);
     host.activate('com.a.plugin');
@@ -120,18 +118,32 @@ describe('PluginHost 生命周期', () => {
 
   it('unwind 逆序：dispose 按注册的相反顺序执行', () => {
     const order: string[] = [];
-    const host = new PluginHost({ hostVersion: HOST }, () => [
-      { dispose: () => void order.push('first') },
-      { dispose: () => void order.push('second') },
-      { dispose: () => {
+    const host = new PluginHost({ hostVersion: HOST }, (_p, sink) => {
+      sink.add({ dispose: () => void order.push('first') });
+      sink.add({ dispose: () => void order.push('second') });
+      sink.add({ dispose: () => {
         order.push('third');
         throw new Error('单个 dispose 失败不阻断其余');
-      } },
-    ]);
+      } });
+    });
     host.loadAll([plugin('com.rev.plugin')]);
     host.activate('com.rev.plugin');
     host.disable('com.rev.plugin');
     expect(order).toEqual(['third', 'second', 'first']);
+  });
+
+  it('装配中途抛错：已注册项逆序回滚（验收 8）', () => {
+    const order: string[] = [];
+    const host = new PluginHost({ hostVersion: HOST }, (_p, sink) => {
+      sink.add({ dispose: () => void order.push('first') });
+      sink.add({ dispose: () => void order.push('second') });
+      throw new Error('第三项注册失败');
+    });
+    host.loadAll([plugin('com.rollback.plugin')]);
+    host.activate('com.rollback.plugin');
+    expect(order).toEqual(['second', 'first']);
+    expect(host.list()[0]!.state).toBe('failed');
+    expect(host.list()[0]!.error?.message).toContain('第三项注册失败');
   });
 });
 

@@ -72,8 +72,21 @@ export {
   validateManifest,
 } from './manifest.js';
 export {
+  checkPluginFileName,
+  checkPluginRelPath,
+  joinPluginPath,
+  PLUGIN_DENY_SEGMENTS,
+  type PluginPathCheck,
+} from './pathGate.js';
+export {
+  checkContributionLimits,
   type ContributionInstaller,
+  type ContributionSink,
   type DiscoveredPlugin,
+  MAX_CONTRIBUTION_FILE_BYTES,
+  MAX_FILES_PER_CONTRIBUTION_KEY,
+  MAX_TOTAL_BYTES,
+  MAX_TOTAL_FILES,
   PluginHost,
   type PluginHostOptions,
   type PluginState,

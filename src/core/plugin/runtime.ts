@@ -87,8 +87,13 @@ export interface DiscoveredPlugin {
   files: Record<string, string>;
 }
 
-/** 贡献装配回调：宿主把插件资源注册进对应注册表，返回 Disposable。 */
-export type ContributionInstaller = (plugin: DiscoveredPlugin) => Disposable[];
+/** 贡献装配回调：宿主把插件资源注册进对应注册表，每项通过 `sink.add` 交回 Disposable。
+ * 用 sink 交回（而非返回值）保证装配中途抛错时宿主仍持有已注册项，可逆序回滚。 */
+export interface ContributionSink {
+  add(disposable: Disposable): void;
+}
+
+export type ContributionInstaller = (plugin: DiscoveredPlugin, sink: ContributionSink) => void;
 
 export interface PluginHostOptions {
   /** 禁用清单（配置级，不碰文件） */
@@ -193,8 +198,10 @@ export class PluginHost {
           throw new Error(`依赖 ${depId} 激活失败：${depStatus.error?.message ?? ''}`);
         }
       }
-      const disposables = this.installer(plugin) ?? [];
+      // 注册前先挂栈：装配中途抛错时，已注册项仍可被 unwind 逆序回滚
+      const disposables: Disposable[] = [];
       this.installed.set(pluginId, disposables);
+      this.installer(plugin, { add: (d) => disposables.push(d) });
       status.state = 'active';
       status.activatedAt = Date.now();
       status.error = undefined;

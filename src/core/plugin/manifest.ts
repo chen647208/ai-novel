@@ -231,6 +231,7 @@ export class PermissionDenied extends Error {
   ) {
     super(`插件 ${pluginId} 未声明 ${action}:${domain} 权限`);
     this.name = 'PermissionDenied';
+    if (causeChain.length) this.cause = causeChain[0];
   }
 }
 

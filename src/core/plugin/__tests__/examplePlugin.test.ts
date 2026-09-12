@@ -68,14 +68,13 @@ describe('示例插件', () => {
   it('loadRaw→activate 落为 active，模板带命名空间前缀可用', () => {
     const registry = new TypeRegistry();
     const skillNames: string[] = [];
-    const host = new PluginHost({ hostVersion: HOST_VERSION }, (plugin) => {
-      const disposables: Array<{ dispose(): void }> = [];
+    const host = new PluginHost({ hostVersion: HOST_VERSION }, (plugin, sink) => {
       for (const rel of plugin.manifest.contributes?.types ?? []) {
         const prefix = `${rel.replace(/^\.\//, '').replace(/\/+$/, '')}/`;
         for (const [file, content] of Object.entries(plugin.files)) {
           if (!file.startsWith(prefix) || !file.endsWith('.json')) continue;
           const templates = JSON.parse(content) as Array<Record<string, unknown>>;
-          disposables.push(...installTypeTemplates(plugin.manifest.id, templates, registry, typeTemplateId));
+          for (const d of installTypeTemplates(plugin.manifest.id, templates, registry, typeTemplateId)) sink.add(d);
         }
       }
       for (const rel of plugin.manifest.contributes?.skills ?? []) {
@@ -86,7 +85,6 @@ describe('示例插件', () => {
           if (parsed.skill) skillNames.push(parsed.skill.name);
         }
       }
-      return disposables;
     });
 
     const manifest = JSON.parse(readFileSync(join(ROOT, 'plugin.json'), 'utf-8'));

@@ -19,13 +19,13 @@
 import { parseSkillMd, type SkillCatalog } from '@core/ai';
 import type {
   BuildProfileRegistry,
-  DiscoveredPlugin,
-  Disposable,
+  ContributionInstaller,
   EventBus,
   PluginHostOptions,
   PluginStatus,
 } from '@core/plugin';
-import { installHooks, installTypeTemplates, PluginHost, typeTemplateId } from '@core/plugin';
+import { installHooks, installTypeTemplates, PermissionDenied, PluginHost, typeTemplateId } from '@core/plugin';
+import { checkPluginFileName, checkPluginRelPath, joinPluginPath } from '@core/plugin';
 import { builtinRegistry } from '@core/types-registry';
 
 function electron(): NonNullable<Window['electronAPI']> {
@@ -36,7 +36,7 @@ function electron(): NonNullable<Window['electronAPI']> {
 }
 
 /** 从 userData/plugins/ 发现插件并装载进宿主。读取/校验失败按 failed 登记，面板可见。 */
-export async function discoverAndLoad(host: PluginHost, _installer: (plugin: DiscoveredPlugin) => Disposable[]): Promise<void> {
+export async function discoverAndLoad(host: PluginHost): Promise<void> {
   const api = electron();
   const base = await api.getAppDataPath();
   const root = `${base}/plugins`;
@@ -48,17 +48,34 @@ export async function discoverAndLoad(host: PluginHost, _installer: (plugin: Dis
       const files: Record<string, string> = {};
       // 浅层收集贡献点文件（skills/types/buildProfiles 目录下的文件）
       const contributes = (manifestJson as { contributes?: Record<string, string[]> }).contributes;
+      // 路径门（§11.2 词法两道门）：越界/拒绝清单命中即整体 invalid，不再读取任何文件
+      const pluginRoot = `${root}/${pluginId}`;
+      let denied = false;
       for (const dirKey of ['skills', 'types', 'buildProfiles'] as const) {
         for (const rel of contributes?.[dirKey] ?? []) {
-          const cleanRel = rel.replace(/^\.\//, '').replace(/\/+$/, '');
-          const fullDir = `${root}/${pluginId}/${cleanRel}`;
-          for (const f of await api.listDirectory(fullDir).catch(() => [])) {
-            if (f.type === 'file') {
-              files[`${cleanRel}/${f.name}`] = await api.readFile(`${fullDir}/${f.name}`);
-            }
+          const dirCheck = checkPluginRelPath(rel);
+          if (!dirCheck.ok) {
+            host.markFailed(pluginId, 'discover', new PermissionDenied(pluginId, `fs:${dirKey}`, 'read', [dirCheck.reason]));
+            denied = true;
+            break;
           }
+          const cleanRel = dirCheck.rel;
+          const fullDir = joinPluginPath(pluginRoot, cleanRel);
+          for (const f of await api.listDirectory(fullDir).catch(() => [])) {
+            if (f.type !== 'file') continue;
+            const nameCheck = checkPluginFileName(f.name);
+            if (!nameCheck.ok) {
+              host.markFailed(pluginId, 'discover', new PermissionDenied(pluginId, `fs:${dirKey}`, 'read', [nameCheck.reason]));
+              denied = true;
+              break;
+            }
+            files[`${cleanRel}/${nameCheck.rel}`] = await api.readFile(joinPluginPath(fullDir, f.name));
+          }
+          if (denied) break;
         }
+        if (denied) break;
       }
+      if (denied) continue;
       host.loadRaw(pluginId, manifestJson, files);
     } catch (error) {
       host.markFailed(pluginId, 'discover', error);
@@ -72,10 +89,9 @@ export interface PluginDeps {
   events: EventBus;
 }
 
-/** 贡献装配器：把资源型贡献注册进各注册表（返回 Disposable 供 unwind）。 */
-export function createContributionInstaller(deps: PluginDeps) {
-  return (plugin: DiscoveredPlugin): Disposable[] => {
-    const disposables: Disposable[] = [];
+/** 贡献装配器：把资源型贡献注册进各注册表（经 sink 交回 Disposable 供 unwind）。 */
+export function createContributionInstaller(deps: PluginDeps): ContributionInstaller {
+  return (plugin, sink) => {
     const manifest = plugin.manifest;
 
     for (const rel of manifest.contributes?.skills ?? []) {
@@ -86,7 +102,7 @@ export function createContributionInstaller(deps: PluginDeps) {
         if (parsed.skill) {
           deps.skillCatalog.register(parsed.skill);
           const name = parsed.skill.name;
-          disposables.push({ dispose: () => deps.skillCatalog.unregister(name) });
+          sink.add({ dispose: () => deps.skillCatalog.unregister(name) });
         }
       }
     }
@@ -98,7 +114,7 @@ export function createContributionInstaller(deps: PluginDeps) {
         if (!file.startsWith(prefix) || !file.endsWith('.json')) continue;
         try {
           const templates = JSON.parse(content) as Array<Record<string, unknown>>;
-          disposables.push(...installTypeTemplates(manifest.id, templates, builtinRegistry, typeTemplateId));
+          for (const d of installTypeTemplates(manifest.id, templates, builtinRegistry, typeTemplateId)) sink.add(d);
         } catch {
           // 单文件损坏跳过（状态面板可经 markFailed 观测装载期错误）
         }
@@ -112,7 +128,7 @@ export function createContributionInstaller(deps: PluginDeps) {
         if (!file.startsWith(prefix) || !file.endsWith('.json')) continue;
         try {
           const profile = JSON.parse(content) as Parameters<BuildProfileRegistry['register']>[0];
-          disposables.push(deps.buildProfiles.register(profile));
+          sink.add(deps.buildProfiles.register(profile));
         } catch {
           // 同上：损坏档案跳过
         }
@@ -128,14 +144,12 @@ export function createContributionInstaller(deps: PluginDeps) {
         try {
           const parsed = JSON.parse(raw) as { hooks?: unknown } | unknown[];
           const list = Array.isArray(parsed) ? parsed : ((parsed.hooks ?? []) as unknown[]);
-          disposables.push(...installHooks(list as never[], deps.events, manifest.id));
+          for (const d of installHooks(list as never[], deps.events, manifest.id)) sink.add(d);
         } catch {
           // hooks 声明损坏跳过
         }
       }
     }
-
-    return disposables;
   };
 }
 
@@ -143,7 +157,7 @@ export function createContributionInstaller(deps: PluginDeps) {
 export async function bootstrapPlugins(deps: PluginDeps, hostVersion: string, disabled: string[]): Promise<PluginHost> {
   const host = new PluginHost({ hostVersion, disabled }, createContributionInstaller(deps));
   try {
-    await discoverAndLoad(host, createContributionInstaller(deps));
+    await discoverAndLoad(host);
     // 发现后立即激活全部（含依赖拓扑）：否则插件停在 discovered，贡献点永不生效
     host.activateAll();
   } catch {

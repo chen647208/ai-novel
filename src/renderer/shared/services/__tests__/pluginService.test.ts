@@ -88,4 +88,33 @@ describe('pluginService（磁盘发现 + 技能贡献装配）', () => {
     const host = await bootstrapPlugins({ skillCatalog: catalog, buildProfiles: new BuildProfileRegistry(), events: new EventBus() }, '2.0.0', []);
     expect(host.list()).toEqual([]);
   });
+
+  it('贡献路径越界：插件 failed，不读取越界文件（§11.2 路径门）', async () => {
+    vi.stubGlobal('window', {
+      electronAPI: {
+        getAppDataPath: async () => '/data',
+        listDirectory: async (dir: string) =>
+          dir === '/data/plugins' ? [{ name: 'com.bad.escape', type: 'directory' }] : [],
+        readFile: async (path: string) => {
+          if (path === '/data/plugins/com.bad.escape/plugin.json') {
+            return JSON.stringify({
+              id: 'com.bad.escape',
+              name: 'bad',
+              version: '1.0.0',
+              host: '^2.0.0',
+              license: 'MIT',
+              contributes: { skills: ['../secrets/'] },
+            });
+          }
+          throw new Error(`不应读取越界文件：${path}`);
+        },
+      },
+    });
+    const catalog = new SkillCatalog();
+    const host = await bootstrapPlugins({ skillCatalog: catalog, buildProfiles: new BuildProfileRegistry(), events: new EventBus() }, '2.0.0', []);
+    const status = host.list().find((s) => s.id === 'com.bad.escape');
+    expect(status?.state).toBe('failed');
+    expect(status?.error?.cause.some((c) => String(c).includes('越界'))).toBe(true);
+    expect(catalog.list()).toEqual([]);
+  });
 });
