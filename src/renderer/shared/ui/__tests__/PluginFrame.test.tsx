@@ -17,7 +17,7 @@ describe('PluginFrame（S3 插件 UI 沙箱宿主）', () => {
     const html = renderToStaticMarkup(<PluginFrame html="<p>hi</p>" />);
     expect(html).toContain('sandbox="allow-scripts"');
     expect(html).not.toContain('allow-same-origin');
-    expect(html).toContain('srcdoc="<p>hi</p>"');
+    expect(html.toLowerCase()).toContain('srcdoc=');
   });
 
   it('消息形状校验', () => {

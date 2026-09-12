@@ -34,27 +34,23 @@ import {
   DEFAULT_OUTPUT_MODE,
   DEFAULT_TARGET_WORD_COUNT,
   INITIAL_GENERATION_MODAL_STATE,
-  SELECTION_MENU_DEBOUNCE_MS,
 } from './constants';
 import { useChapterExport } from './hooks/useChapterExport';
 import { useChapterGeneration } from './hooks/useChapterGeneration';
 import { useChapterMutations } from './hooks/useChapterMutations';
 import { useChapterSnapshots } from './hooks/useChapterSnapshots';
 import { useFindReplace } from './hooks/useFindReplace';
+import { useSelectionMenu } from './hooks/useSelectionMenu';
 import { appendSnapshot, createSnapshot } from './services/chapterSnapshotService';
 import { extractChapterSummary } from './services/summaryExtractionService';
 import { computeBookStats, computeChapterStats } from './services/writingStatsService';
 import type {
   GenerationModalState,
-  MenuPosition,
   NovelEditorHandle,
-  TextSelectionRange,
   WritingEditorProps,
 } from './types';
 import {
-  debounce,
   getChapterContext,
-  getFloatingMenuPosition,
   getPreviousChapterSummaryIds,
   toggleSetValue,
 } from './utils';
@@ -100,10 +96,6 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   };
   const [outputMode, setOutputMode] = useState(DEFAULT_OUTPUT_MODE);
   
-
-  const [menuPos, setMenuPos] = useState<MenuPosition | null>(null);
-  const [selectedText, setSelectedText] = useState("");
-  const [selectionRange, setSelectionRange] = useState<TextSelectionRange | null>(null);
 
   const [genModal, setGenModal] = useState<GenerationModalState>(INITIAL_GENERATION_MODAL_STATE);
   const [targetWordCount, setTargetWordCountState] = useState<number>(project.wordTarget ?? DEFAULT_TARGET_WORD_COUNT);
@@ -359,48 +351,18 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   };
 
   const selectionBlocked = editModalOpen || genModal.isOpen || exporter.open;
-
-  const applySelectionMenu = (text: string, range: TextSelectionRange, x: number, y: number) => {
-    setMenuPos(getFloatingMenuPosition(x, y));
-    setSelectedText(text);
-    setSelectionRange(range);
-  };
-
-  const handleMouseSelect = (e: React.MouseEvent) => {
-    const handle = editorRef.current;
-    if (!handle || selectionBlocked) return;
-    const snapshot = handle.getSelection();
-    if (!snapshot) {
-      clearSelectionMenu();
-      return;
-    }
-    applySelectionMenu(snapshot.text, snapshot.range, e.clientX, e.clientY);
-  };
-
-  const handleKeySelect = () => {
-    const handle = editorRef.current;
-    if (!handle || selectionBlocked) return;
-    const snapshot = handle.getSelection();
-    if (!snapshot) {
-      clearSelectionMenu();
-      return;
-    }
-    const anchor = handle.getKeyboardSelectionMenuPosition();
-    if (anchor) setMenuPos(getFloatingMenuPosition(anchor.x, anchor.y));
-    setSelectedText(snapshot.text);
-    setSelectionRange(snapshot.range);
-  };
-
-  const handleMouseMove = useMemo(() => debounce((e: React.MouseEvent) => {
-    const handle = editorRef.current;
-    if (selectionBlocked || !handle) return;
-    const snapshot = handle.getSelection();
-    if (!snapshot) {
-      if (menuPos) setMenuPos(null);
-      return;
-    }
-    applySelectionMenu(snapshot.text, snapshot.range, e.clientX, e.clientY);
-    }, SELECTION_MENU_DEBOUNCE_MS), [selectionBlocked, menuPos]);
+  const {
+    menuPos,
+    setMenuPos,
+    selectedText,
+    setSelectedText,
+    selectionRange,
+    setSelectionRange,
+    clearSelectionMenu,
+    handleMouseSelect,
+    handleKeySelect,
+    handleMouseMove,
+  } = useSelectionMenu(editorRef, selectionBlocked);
 
   const handleChapterClick = (chapter: Chapter) => { setGenModal({ isOpen: true, chapter }); };
   const handleEnterEditor = () => {
@@ -482,12 +444,6 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     setMenuPos(null); 
     setEditModalOpen(true); 
     setCustomEditPrompt('');
-  };
-
-  const clearSelectionMenu = () => {
-    setMenuPos(null);
-    setSelectedText("");
-    setSelectionRange(null);
   };
 
   const handleClearChapterHistory = async () => {
