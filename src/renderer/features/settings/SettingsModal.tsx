@@ -7,12 +7,13 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { isVaultRef } from '@shared/constants/vault';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { dt,i18n } from '@/i18n';
 import { AIService } from '@/shared/services/ai/aiService';
 import { getDefaultCardPrompts, validateCardPromptTemplate } from '@/shared/services/cards/cardPromptService';
-import { isVaultRef, persistApiKey, removeApiKey } from '@/shared/services/credentialService';
+import { persistApiKey, removeApiKey } from '@/shared/services/credentialService';
 import { dialogService } from '@/shared/services/dialogService';
 import { embeddingModelService } from '@/shared/services/embeddingModelService';
 import { Dialog, DialogContent } from '@/shared/ui/Dialog';

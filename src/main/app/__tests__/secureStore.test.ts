@@ -37,15 +37,13 @@ vi.mock('electron', () => ({
   },
 }));
 
+import { isVaultRef,VAULT_REF_PREFIX,vaultIdFor } from '../../../shared/constants/vault.js';
 import type { ModelConfig } from '../../../shared/types.js';
 import {
   isVaultAvailable,
-  isVaultRef,
   resolveVaultApiKey,
-  VAULT_REF_PREFIX,
   VAULT_UNAVAILABLE,
   vaultGet,
-  vaultIdFor,
   vaultRemove,
   vaultSet,
   withVaultKey,

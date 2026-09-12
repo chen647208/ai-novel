@@ -15,7 +15,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { APP_STATE_VERSION } from '../../../../../shared/constants/versions';
 import type { AppState, Chapter,KnowledgeItem, Project } from '../../../../../shared/types';
 import { jsonRepository } from '../jsonRepository';
-import { SCHEMA_VERSION } from '../schema';
+import { migrate,SCHEMA_VERSION } from '../schema';
 import { SqliteRepository } from '../sqliteRepository';
 import type { SqlDriver, SqlRunResult, SqlValue } from '../types';
 import { runWasmRequest } from '../wasmSql';
@@ -175,6 +175,13 @@ for (const fixture of [nodeSqliteFixture, wasmFixture]) {
 
     it('空库 loadAll 返回 null', async () => {
       expect(await repo.loadAll()).toBeNull();
+    });
+
+    it('migrate 幂等：重复执行不报错且版本不变', async () => {
+      await repo.saveAll(baseState([]));
+      await migrate(driver);
+      const row = rawGet<{ value: string }>(`SELECT value FROM meta WHERE key='schema_version'`);
+      expect(Number(row!.value)).toBe(SCHEMA_VERSION);
     });
 
     it('init 首启从旧 JSON 迁移一次并写入迁移哨兵', async () => {

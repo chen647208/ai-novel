@@ -12,6 +12,7 @@ import path from 'node:path';
 
 import { app, ipcMain, safeStorage } from 'electron';
 
+import { isVaultRef, vaultIdFor } from '../../shared/constants/vault.js';
 import type { ModelConfig } from '../../shared/types.js';
 import { IPC } from '../channels.js';
 import { logger } from '../logger.js';
@@ -28,16 +29,7 @@ import type { Provider } from './container.js';
  *   让 README“Key 不进渲染端”从口号变成事实（编辑态内存明文除外，见 credentialService）。
  */
 
-export const VAULT_REF_PREFIX = 'vault:';
 export const VAULT_UNAVAILABLE = 'VAULT_UNAVAILABLE';
-
-export function isVaultRef(value: string | undefined): boolean {
-  return typeof value === 'string' && value.startsWith(VAULT_REF_PREFIX) && value.length > VAULT_REF_PREFIX.length;
-}
-
-export function vaultIdFor(ref: string): string {
-  return ref.slice(VAULT_REF_PREFIX.length);
-}
 
 export function isVaultAvailable(): boolean {
   try {

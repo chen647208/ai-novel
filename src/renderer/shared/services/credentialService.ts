@@ -7,6 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { isVaultRef,VAULT_REF_PREFIX } from '../../../shared/constants/vault';
 import type { EmbeddingModelConfig, ModelConfig } from '../../../shared/types';
 
 /**
@@ -17,12 +18,6 @@ import type { EmbeddingModelConfig, ModelConfig } from '../../../shared/types';
  * - 拉表/测连等渲染端直连场景用 resolveApiKey 解引用；
  * - 生成走主进程网关，由网关统一解引用，渲染端无需经手。
  */
-
-export const VAULT_REF_PREFIX = 'vault:';
-
-export function isVaultRef(value: string | undefined): boolean {
-  return typeof value === 'string' && value.startsWith(VAULT_REF_PREFIX) && value.length > VAULT_REF_PREFIX.length;
-}
 
 export async function isVaultAvailable(): Promise<boolean> {
   try {
