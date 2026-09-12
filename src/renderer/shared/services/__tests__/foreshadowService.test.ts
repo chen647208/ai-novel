@@ -7,9 +7,9 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import type { Foreshadow, Project } from '@shared/types';
 import { describe, expect,it } from 'vitest';
 
-import type { Foreshadow, Project } from '../../../../../shared/types';
 import {
   addForeshadow,
   buildForeshadowContextForPrompt,

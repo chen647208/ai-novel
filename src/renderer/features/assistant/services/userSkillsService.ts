@@ -15,18 +15,12 @@
 
 import { parseSkillMd, type Skill } from '@core/ai';
 
+import { type UserSkillInfo } from '@/shared/services/assistantRuntime';
 import { logger } from '@/shared/utils/logger';
 
 import { skillCatalog } from './aiRuntime';
 
 const USER_SKILLS_DIR = 'skills/user';
-
-export interface UserSkillInfo {
-  /** 目录 slug（删除用） */
-  slug: string;
-  name: string;
-  description: string;
-}
 
 type ElectronAPI = NonNullable<Window['electronAPI']>;
 

@@ -19,6 +19,7 @@ import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { EmptyState } from '@/shared/ui/EmptyState';
+import { FeaturePanel } from '@/shared/ui/FeaturePanel';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { MarkdownView } from '@/shared/ui/Markdown';
@@ -30,7 +31,6 @@ import { isModelUsable } from '@/shared/utils/modelReadiness';
 
 import { type KnowledgeItem, type OutputMode,type Project } from '../../../shared/types';
 import { logger } from '../../shared/utils/logger';
-import WorldViewEditor from '../world/WorldViewEditor';
 import { useInspirationGeneration } from './hooks/useInspirationGeneration';
 
 interface StepInspirationProps {
@@ -373,10 +373,11 @@ const StepInspiration: React.FC<StepInspirationProps> = ({ project, onGoSection 
 
         {showWorldView && (
           <div className="border-t border-border p-4">
-            <WorldViewEditor
+            <FeaturePanel
+              id="world.worldViewEditor"
               projectId={project?.id || ''}
               worldView={project?.worldView}
-              onSave={(worldView) => {
+              onSave={(worldView: Project['worldView']) => {
                 onUpdate({ worldView });
               }}
             />

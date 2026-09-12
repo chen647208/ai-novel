@@ -35,12 +35,14 @@ import { useViewPreference } from '../shared/hooks/useViewPreference';
 import { exportCover } from '../shared/services/coverService';
 import { dialogService } from '../shared/services/dialogService';
 import { eventToKeybinding, resolveKeybindings } from '../shared/services/keybindings';
+import { registerAssistantRuntime } from './app-shell/assistantRuntimeSetup';
 import Bookshelf from './app-shell/Bookshelf';
 import CommandPalette from './app-shell/CommandPalette';
 import { registerCoreSlots } from './app-shell/coreSlots';
 import DialogHost from './app-shell/DialogHost';
 import GlobalSearchModal from './app-shell/GlobalSearchModal';
 import OnboardingModal, { isOnboardingDone, markOnboardingDone, type OnboardingPersona } from './app-shell/OnboardingModal';
+import { registerFeaturePanels } from './app-shell/registerFeaturePanels';
 import ResetAlertDialog from './app-shell/ResetAlertDialog';
 import SettingsModalHost from './app-shell/SettingsModalHost';
 import ToastHost from './app-shell/ToastHost';
@@ -59,6 +61,8 @@ const SECTION_ORDER: SectionId[] = WORKSPACE_SECTIONS.map((s) => s.id);
 
 registerCoreSlots();
 registerCoreSettingsTabs();
+registerFeaturePanels();
+registerAssistantRuntime();
 
 const App: React.FC = () => {
   useAppBootstrap();

@@ -12,9 +12,9 @@
  */
 import React from 'react';
 
+import { vectorIntegrationService } from '@/shared/services/knowledge/vectorIntegrationService';
 import { logger } from '@/shared/utils/logger';
 
-import { vectorIntegrationService } from '../../features/knowledge/services/vectorIntegrationService';
 import SettingsModal from '../../features/settings/SettingsModal';
 import { getEffectiveLanguage } from '../../i18n';
 import { useSettingsStore } from '../stores/settingsStore';

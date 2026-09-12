@@ -14,13 +14,13 @@ import { useTranslation } from 'react-i18next';
 import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';
 import { DialogTitle } from '@/shared/ui/Dialog';
+import { FeaturePanel } from '@/shared/ui/FeaturePanel';
 import { Input } from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/Label';
 import { ModalShell } from '@/shared/ui/ModalShell';
 import { Select } from '@/shared/ui/Select';
 import { SegmentedControl } from '@/shared/ui/ViewModeToggle';
 
-import SessionEventBrowser from '../assistant/components/SessionEventBrowser';
 import AIHistoryRecordList from './components/history/AIHistoryRecordList';
 import type {
   AIHistoryRecordWithChapter,
@@ -489,7 +489,7 @@ const AIHistoryViewer: React.FC<AIHistoryViewerProps> = ({ project, onUpdate, on
           />
         ) : (
           <div className="min-h-0 flex-1 overflow-auto px-6 py-4">
-            <SessionEventBrowser bookId={project.id} />
+            <FeaturePanel id="assistant.sessionEventBrowser" bookId={project.id} />
           </div>
         )}
 

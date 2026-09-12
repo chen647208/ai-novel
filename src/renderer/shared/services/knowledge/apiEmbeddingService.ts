@@ -15,7 +15,7 @@ import {
   type EmbeddingModelConfig, 
   type KnowledgeCategory,
   type VectorDocument} from '../../../../shared/types';
-import { logger } from '../../../shared/utils/logger';
+import { logger } from '../../utils/logger';
 import { type EmbeddingService } from './embeddingService';
 
 /**

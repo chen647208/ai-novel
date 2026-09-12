@@ -20,18 +20,7 @@ const featureNames = fs.existsSync(featuresDir)
  * 规则 error 生效；存量边按「源->目标」冻结为债务（allow 清单），只拦新增边。
  * 债务清单归 docs/design/02-target-architecture.md §2，清完一条删一条，不放宽规则。
  */
-const CROSS_FEATURE_DEBT = [
-  'consistency->knowledge',
-  'inspiration->world',
-  'knowledge->assistant',
-  'knowledge->consistency',
-  'knowledge->timeline',
-  'knowledge->world',
-  'settings->assistant',
-  'settings->consistency',
-  'writing->assistant',
-  'writing->foreshadowing',
-];
+const CROSS_FEATURE_DEBT = [];
 
 const featureBoundaryRules = featureNames.map((name) => ({
   files: [`src/renderer/features/${name}/**/*.{ts,tsx}`],
@@ -174,7 +163,7 @@ export default tseslint.config(
 
   // 重试抖动与 k-means 随机初始质心使用 Math.random（非 id 生成），与 id 规则无关
   {
-    files: ['src/main/ai/retry.ts', 'src/renderer/features/knowledge/services/embeddingService.ts'],
+    files: ['src/main/ai/retry.ts', 'src/renderer/shared/services/knowledge/embeddingService.ts'],
     rules: { 'no-restricted-syntax': 'off' },
   },
 

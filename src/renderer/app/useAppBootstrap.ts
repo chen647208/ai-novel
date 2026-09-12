@@ -14,9 +14,9 @@
 
 import { useEffect } from 'react';
 
+import { vectorIntegrationService } from '@/shared/services/knowledge/vectorIntegrationService';
 import { normalizeProjectKinds } from '@/shared/utils/characterKinds';
 
-import { vectorIntegrationService } from '../features/knowledge/services/vectorIntegrationService';
 import { bootCustomFonts } from '../features/settings/services/customFontService';
 import { changeLanguage } from '../i18n';
 import { dt } from '../i18n';

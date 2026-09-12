@@ -11,11 +11,11 @@
  * 写作编辑器：把模板 + 项目上下文拼成最终 AI 提示词（纯函数，便于单测）。
  * 含知识库/大纲/角色/前文摘要/细纲补充/前后章连贯性/伏笔承接等段落。
  */
+import { buildForeshadowContextForPrompt } from '@/shared/services/foreshadowService';
 import { roleLabel } from '@/shared/utils/displayLabels';
 
 import { PROMPT_KNOWLEDGE_TRUNCATE } from '../../../../shared/constants/chapters';
 import type { Chapter, Project, PromptTemplate } from '../../../../shared/types';
-import { buildForeshadowContextForPrompt } from '../../foreshadowing/services/foreshadowService';
 import { WRITING_OUTPUT_FORMAT_DIRECTIVE } from '../constants';
 import { getChapterContext } from '../utils';
 

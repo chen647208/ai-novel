@@ -16,10 +16,10 @@ import type { TFunction } from 'i18next';
 import { useEffect, useState } from 'react';
 
 import { dialogService } from '@/shared/services/dialogService';
+import { vectorIntegrationService } from '@/shared/services/knowledge/vectorIntegrationService';
 import { logger } from '@/shared/utils/logger';
 
 import { type KnowledgeCategory, type KnowledgeItem, type Project } from '../../../../shared/types';
-import { vectorIntegrationService } from '../services/vectorIntegrationService';
 
 type VectorStats = Awaited<ReturnType<typeof vectorIntegrationService.getVectorStats>>;
 

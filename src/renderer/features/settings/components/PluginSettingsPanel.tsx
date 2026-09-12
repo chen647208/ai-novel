@@ -14,8 +14,8 @@ import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import React, { useEffect, useState } from 'react';
 
 import { useSettingsStore } from '@/app/stores/settingsStore';
-import { pluginHostPromise, saveDisabledList } from '@/features/assistant/services/aiRuntime';
 import { useTranslation } from '@/i18n';
+import { assistantRuntime } from '@/shared/services/assistantRuntime';
 import { localStore } from '@/shared/services/localStore';
 import { connectServer, disconnectServer, fetchServerTools } from '@/shared/services/mcpClient';
 import { saveTrustedPluginKeys } from '@/shared/services/pluginService';
@@ -114,7 +114,9 @@ const PluginSettingsPanel: React.FC = () => {
 
   useEffect(() => {
     let alive = true;
-    void pluginHostPromise.then((host) => {
+    const runtime = assistantRuntime();
+    if (!runtime) return () => { alive = false; };
+    void runtime.pluginHostPromise.then((host) => {
       if (!alive) return;
       setStatuses(host.list());
       const schemaMap: Record<string, unknown> = {};
@@ -137,14 +139,16 @@ const PluginSettingsPanel: React.FC = () => {
   };
 
   const toggle = (id: string, disabled: boolean): void => {
-    void pluginHostPromise.then((host) => {
+    const runtime = assistantRuntime();
+    if (!runtime) return;
+    void runtime.pluginHostPromise.then((host) => {
       if (disabled) {
         host.enable(id);
         host.activate(id);
       } else {
         host.disable(id);
       }
-      saveDisabledList(host.list().filter((st) => st.state === 'disabled').map((st) => st.id));
+      runtime.saveDisabledList(host.list().filter((st) => st.state === 'disabled').map((st) => st.id));
       setStatuses(host.list());
     });
   };

@@ -207,7 +207,7 @@ export class AiSessionManager {
                 const projectId = input.project?.id;
                 if (!projectId) throw new Error('当前没有打开的书籍项目');
                 const { vectorIntegrationService } = await import(
-                  '@/features/knowledge/services/vectorIntegrationService'
+                  '@/shared/services/knowledge/vectorIntegrationService'
                 );
                 const hits = await vectorIntegrationService.semanticSearchKnowledge(projectId, query, { limit });
                 return hits.map((h) => ({

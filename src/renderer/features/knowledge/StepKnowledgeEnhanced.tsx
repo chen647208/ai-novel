@@ -15,8 +15,11 @@ import { useUsableModel } from '@/app/stores/settingsStore';
 import { useTranslation } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
 import { embeddingModelService } from '@/shared/services/embeddingModelService';
+import { searchKnowledge } from '@/shared/services/knowledge/knowledgeSearch';
+import { vectorIntegrationService } from '@/shared/services/knowledge/vectorIntegrationService';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
+import { FeaturePanel } from '@/shared/ui/FeaturePanel';
 import { Input } from '@/shared/ui/Input';
 import { Spinner } from '@/shared/ui/Spinner';
 import { cn } from '@/shared/utils/cn';
@@ -25,20 +28,10 @@ import { formatPercent } from '@/shared/utils/format';
 import { type ConsistencyCheckConfig,type ConsistencyCheckPromptTemplate, type DiagramType, type EmbeddingModelConfig, type HybridSearchResult, type KnowledgeCategory, type KnowledgeItem, type ModelConfig, type Project } from '../../../shared/types';
 import { repository } from '../../shared/services/repository';
 import { logger } from '../../shared/utils/logger';
-import SmartRecommender from '../assistant/SmartRecommender';
-import ConsistencyChecker from '../consistency/ConsistencyChecker';
-import EnhancedTimeline from '../timeline/EnhancedTimeline';
-import TimelineEditor from '../timeline/TimelineEditor';
-import FactionEditor from '../world/FactionEditor';
-import LocationEditor from '../world/LocationEditor';
-import RuleSystemEditor from '../world/RuleSystemEditor';
-import WorldViewGraph from '../world/WorldViewGraph';
 import { KnowledgeDetailPanel } from './components/KnowledgeDetailPanel';
 import KnowledgeFeaturePanels from './components/KnowledgeFeaturePanels';
 import { KnowledgeListPanel } from './components/KnowledgeListPanel';
 import { useKnowledgeIndex } from './hooks/useKnowledgeIndex';
-import { searchKnowledge } from './services/knowledgeSearch';
-import { vectorIntegrationService } from './services/vectorIntegrationService';
 
 interface StepKnowledgeEnhancedProps {
   project: Project;
@@ -526,12 +519,13 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
 
       {showLocationEditor && (
         <div className="max-h-[500px] overflow-y-auto rounded-lg border border-border bg-card p-6">
-          <LocationEditor
+          <FeaturePanel
+            id="world.locationEditor"
             projectId={project.id}
             locations={project.locations || []}
             factions={project.factions || []}
             initialSelectedId={navTarget?.type === 'location' ? navTarget.id : null}
-            onSave={(locations) => {
+            onSave={(locations: Project['locations']) => {
               onUpdate({ locations });
             }}
           />
@@ -540,14 +534,15 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
 
       {showTimelineEditor && (
         <div className="max-h-[600px] overflow-y-auto rounded-lg border border-border bg-card p-6">
-          <TimelineEditor
+          <FeaturePanel
+            id="timeline.editor"
             projectId={project.id}
             timeline={project.timeline}
             characters={project.characters || []}
             locations={project.locations || []}
             factions={project.factions || []}
             chapters={project.chapters || []}
-            onSave={(timeline) => {
+            onSave={(timeline: Project['timeline']) => {
               onUpdate({ timeline });
             }}
           />
@@ -556,12 +551,13 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
 
       {showRuleSystemEditor && (
         <div className="max-h-[600px] overflow-y-auto rounded-lg border border-border bg-card p-6">
-          <RuleSystemEditor
+          <FeaturePanel
+            id="world.ruleSystemEditor"
             projectId={project.id}
             ruleSystems={project.ruleSystems || []}
             characters={project.characters || []}
             initialSelectedId={navTarget?.type === 'rule' ? navTarget.id : null}
-            onSave={(ruleSystems) => {
+            onSave={(ruleSystems: Project['ruleSystems']) => {
               onUpdate({ ruleSystems });
             }}
           />
@@ -569,13 +565,14 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
       )}
 
       {showEnhancedTimeline && (
-        <EnhancedTimeline
+        <FeaturePanel
+          id="timeline.enhanced"
           project={project}
           selectedEventId={navTarget?.type === 'timeline' ? navTarget.id : undefined}
-          onEventClick={(event) => {
+          onEventClick={(event: { id: string }) => {
             setNavTarget({ type: 'timeline', id: event.id });
           }}
-          onChapterClick={(chapter) => {
+          onChapterClick={(chapter: { id: string }) => {
             onNavigateToChapter?.(chapter.id);
           }}
           showChapters={true}
@@ -583,13 +580,14 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
       )}
 
       {showConsistencyChecker && (
-        <ConsistencyChecker
+        <FeaturePanel
+          id="consistency.checker"
           project={project}
           model={activeModel}
           embeddingConfig={activeEmbeddingConfig || undefined}
           consistencyPrompts={consistencyPrompts}
           consistencyConfig={consistencyConfig || undefined}
-          onFixIssues={(fixedProject) => {
+          onFixIssues={(fixedProject: Project) => {
             onUpdate(fixedProject);
             dialogService.alert(t('center.autoFixed'));
           }}
@@ -598,14 +596,15 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
       )}
 
       {showSmartRecommender && (
-        <SmartRecommender
+        <FeaturePanel
+          id="assistant.smartRecommender"
           project={project}
           context={{
             selectedCharacters: project.characters?.slice(0, 2).map(c => c.id),
             selectedLocation: project.locations?.[0]?.id,
             currentContent: ''
           }}
-          onSelectItem={(item) => {
+          onSelectItem={(item: { type: string; id: string }) => {
             handleNavigateToItem(item.type, item.id);
           }}
           onViewItem={handleNavigateToItem}
@@ -614,13 +613,14 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
 
       {showFactionEditor && (
         <div className="max-h-[500px] overflow-y-auto rounded-lg border border-border bg-card p-6">
-          <FactionEditor
+          <FeaturePanel
+            id="world.factionEditor"
             projectId={project.id}
             factions={project.factions || []}
             locations={project.locations || []}
             characters={project.characters || []}
             initialSelectedId={navTarget?.type === 'faction' ? navTarget.id : null}
-            onSave={(factions) => {
+            onSave={(factions: Project['factions']) => {
               onUpdate({ factions });
             }}
           />
@@ -656,7 +656,8 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
       </div>{/* 可滚动内容区域结束 */}
 
       {showWorldViewGraph && (
-        <WorldViewGraph
+        <FeaturePanel
+          id="world.worldViewGraph"
           characters={project.characters || []}
           locations={project.locations || []}
           factions={project.factions || []}
@@ -665,7 +666,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
           worldView={project.worldView}
           initialType={graphInitialType}
           onClose={() => setShowWorldViewGraph(false)}
-          onSelectNode={(node) => {
+          onSelectNode={(node: unknown) => {
             logger.debug('选中节点:', node);
           }}
         />

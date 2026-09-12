@@ -11,14 +11,8 @@
 import { BookOpen, Upload, X } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import {
-  deleteUserSkill,
-  importUserSkill,
-  listBuiltinSkills,
-  listUserSkills,
-  type UserSkillInfo,
-} from '@/features/assistant/services/userSkillsService';
 import { useTranslation } from '@/i18n';
+import { assistantRuntime, type UserSkillInfo } from '@/shared/services/assistantRuntime';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/Card';
@@ -29,20 +23,25 @@ const UserSkillsCard: React.FC = () => {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const builtin = listBuiltinSkills();
+  const runtime = assistantRuntime();
+  const builtin = runtime?.listBuiltinSkills() ?? [];
 
   const reload = useCallback(() => {
-    void listUserSkills().then(setUserSkills).catch(() => setUserSkills([]));
-  }, []);
+    if (!runtime) {
+      setUserSkills([]);
+      return;
+    }
+    void runtime.listUserSkills().then(setUserSkills).catch(() => setUserSkills([]));
+  }, [runtime]);
   useEffect(() => { reload(); }, [reload]);
 
   const handleFile = async (file: File | undefined) => {
-    if (!file) return;
+    if (!file || !runtime) return;
     setBusy(true);
     setError(null);
     try {
       const md = await file.text();
-      const result = await importUserSkill(md);
+      const result = await runtime.importUserSkill(md);
       if (!result.ok) setError(t('skills.importFailed', { reason: result.error }));
       reload();
     } finally {
@@ -99,7 +98,7 @@ const UserSkillsCard: React.FC = () => {
                     size="icon"
                     className="size-6 shrink-0 text-muted-foreground hover:text-destructive"
                     title={t('skills.remove')}
-                    onClick={() => { void deleteUserSkill(s.slug, s.name).then(reload); }}
+                    onClick={() => { void runtime?.deleteUserSkill(s.slug, s.name).then(reload); }}
                   >
                     <X className="size-3.5" />
                   </Button>

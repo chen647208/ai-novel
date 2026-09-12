@@ -11,7 +11,7 @@ import { i18n } from '@/i18n';
 
 import { DEFAULT_KEYWORD_WEIGHT,DEFAULT_SEMANTIC_WEIGHT } from '../../../../shared/constants/chapters';
 import { type CollectionStats, type ElectronAPI, type HybridSearchOptions, type HybridSearchResult, type KnowledgeCategory,type SearchOptions, type SearchResult, type VectorConsistencyResult, type VectorDocument } from '../../../../shared/types';
-import { logger } from '../../../shared/utils/logger';
+import { logger } from '../../utils/logger';
 
 type VectorBridgeAPI = NonNullable<ElectronAPI['vector']>;
 

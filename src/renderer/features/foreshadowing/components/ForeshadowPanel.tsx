@@ -12,6 +12,17 @@ import React, { useMemo, useState } from 'react';
 
 import { useTranslation } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
+import {
+  addForeshadow,
+  createForeshadow,
+  detectPaidOffForeshadows,
+  foreshadowCounts,
+  openForeshadows,
+  overdueForeshadows,
+  payOffForeshadow,
+  removeForeshadow,
+  setStatus,
+} from '@/shared/services/foreshadowService';
 import { Button } from '@/shared/ui/Button';
 import { Dialog, DialogContent } from '@/shared/ui/Dialog';
 import { Input } from '@/shared/ui/Input';
@@ -23,17 +34,6 @@ import { cn } from '@/shared/utils/cn';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
 
 import type { ForeshadowImportance, ModelConfig, Project } from '../../../../shared/types';
-import {
-  addForeshadow,
-  createForeshadow,
-  detectPaidOffForeshadows,
-  foreshadowCounts,
-  openForeshadows,
-  overdueForeshadows,
-  payOffForeshadow,
-  removeForeshadow,
-  setStatus,
-} from '../services/foreshadowService';
 
 interface ForeshadowPanelProps {
   isOpen: boolean;

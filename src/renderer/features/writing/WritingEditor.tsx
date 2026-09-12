@@ -14,15 +14,15 @@ import { useTranslation } from 'react-i18next';
 import { type CommitOptions,useProjectStore } from '@/app/stores/projectStore';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
 import { dialogService } from '@/shared/services/dialogService';
+import { openForeshadows, overdueForeshadows } from '@/shared/services/foreshadowService';
 import { localStore } from '@/shared/services/localStore';
 import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
+import { FeaturePanel } from '@/shared/ui/FeaturePanel';
 import { logger } from '@/shared/utils/logger';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
 
 import { type Chapter, type Project, type PromptTemplate } from '../../../shared/types';
-import ForeshadowPanel from '../foreshadowing/components/ForeshadowPanel';
-import { openForeshadows, overdueForeshadows } from '../foreshadowing/services/foreshadowService';
 import FindBar from './components/FindBar';
 import WritingEditorCanvas from './components/WritingEditorCanvas';
 import WritingEditorOverlayLayer from './components/WritingEditorOverlayLayer';
@@ -555,7 +555,8 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
         )}
       </div>
 
-      <ForeshadowPanel
+      <FeaturePanel
+        id="foreshadowing.panel"
         isOpen={isForeshadowOpen}
         project={project}
         activeModel={activeModel}

@@ -9,7 +9,7 @@
 
 import { embeddingModelService } from '@/shared/services/embeddingModelService';
 
-import { logger } from '../../../shared/utils/logger';
+import { logger } from '../../utils/logger';
 import { apiEmbeddingService } from './apiEmbeddingService';
 import { type EmbeddingService,embeddingService as simpleEmbeddingService } from './embeddingService';
 

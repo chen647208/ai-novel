@@ -8,7 +8,7 @@
  */
 
 import { type KnowledgeCategory,type VectorDocument } from '../../../../shared/types';
-import { logger } from '../../../shared/utils/logger';
+import { logger } from '../../utils/logger';
 
 /**
  * 嵌入服务接口

@@ -9,7 +9,8 @@
 
 import React from 'react';
 
-import ConsistencyPromptManager from '../../consistency/ConsistencyPromptManager';
+import { FeaturePanel } from '@/shared/ui/FeaturePanel';
+
 import type { ConsistencyPromptSettingsPanelProps } from '../types';
 
 const ConsistencyPromptSettingsPanel: React.FC<ConsistencyPromptSettingsPanelProps> = ({
@@ -17,7 +18,8 @@ const ConsistencyPromptSettingsPanel: React.FC<ConsistencyPromptSettingsPanelPro
   onTemplatesChange,
 }) => {
   return (
-    <ConsistencyPromptManager
+    <FeaturePanel
+      id="consistency.promptManager"
       templates={templates}
       onTemplatesChange={onTemplatesChange}
     />
