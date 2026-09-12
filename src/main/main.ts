@@ -80,7 +80,7 @@ process.on('unhandledRejection', (reason) => {
 
 void app.whenReady().then(async () => {
   if (!hasSingleInstanceLock) return;
-  // 崩溃转储：默认本地留存；用户开启且配置了上报地址时才上传
+  // 崩溃转储：本地留存；用户开启且配置了上报地址时才上传（转储仅落 userData，不外发）
   const crashConfig = readCrashReportingConfig();
   const submitURL = crashSubmitUrl();
   crashReporter.start({
