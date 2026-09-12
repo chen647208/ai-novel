@@ -12,7 +12,7 @@ import path from 'node:path';
 
 import { afterEach,beforeEach, describe, expect, it } from 'vitest';
 
-import { type AppInfo,collectDiagnostics } from '../diagnosticsCore.js';
+import { type AppInfo,collectDiagnostics, collectHealth } from '../diagnosticsCore.js';
 
 const info: AppInfo = {
   name: '红月创作', version: '1.0.0', electron: '44', chrome: '152', node: '24', platform: 'win32', arch: 'x64',
@@ -48,6 +48,34 @@ describe('collectDiagnostics', () => {
   it('目录不存在也不抛错', async () => {
     const files = await collectDiagnostics(path.join(dir, 'nope'), info);
     expect(files['app-info.json']).toBeTruthy();
-    expect(Object.keys(files)).toHaveLength(1);
+    expect(files['health.json']).toBeTruthy();
+    expect(Object.keys(files)).toHaveLength(2);
+  });
+});
+
+describe('collectHealth', () => {
+  let dir: string;
+
+  beforeEach(async () => {
+    dir = await fs.mkdtemp(path.join(os.tmpdir(), 'hongyue-health-'));
+    await fs.mkdir(path.join(dir, 'logs'), { recursive: true });
+  });
+
+  afterEach(async () => {
+    await fs.rm(dir, { recursive: true, force: true });
+  });
+
+  it('正常目录：可写 + 日志目录通过，缺配置文件视为正常', async () => {
+    const items = await collectHealth(dir);
+    const byId = Object.fromEntries(items.map((i) => [i.id, i]));
+    expect(byId.userDataWritable?.ok).toBe(true);
+    expect(byId.logsDir?.ok).toBe(true);
+    expect(byId.storageConfig?.ok).toBe(true);
+  });
+
+  it('损坏的 storage-config：标记不通过', async () => {
+    await fs.writeFile(path.join(dir, 'storage-config.json'), '{ not json');
+    const items = await collectHealth(dir);
+    expect(items.find((i) => i.id === 'storageConfig')?.ok).toBe(false);
   });
 });

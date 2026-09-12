@@ -52,10 +52,53 @@ async function collectInto(files: Record<string, string>, dir: string, prefix: s
   }
 }
 
-/** 组装诊断文件集：app-info.json + logs/** + window-state.json / storage-config.json。 */
+/** 单项健康检查结果。 */
+export interface HealthItem {
+  id: string;
+  ok: boolean;
+  detail?: string;
+}
+
+/** 健康检查（docs/design/04 §12）：数据目录可写、存储配置可解析、日志目录存在。 */
+export async function collectHealth(userData: string): Promise<HealthItem[]> {
+  const items: HealthItem[] = [];
+
+  try {
+    const probe = path.join(userData, '.health-probe');
+    await fs.writeFile(probe, '');
+    await fs.rm(probe, { force: true });
+    items.push({ id: 'userDataWritable', ok: true });
+  } catch (error) {
+    items.push({ id: 'userDataWritable', ok: false, detail: String(error) });
+  }
+
+  try {
+    JSON.parse(await fs.readFile(path.join(userData, 'storage-config.json'), 'utf-8'));
+    items.push({ id: 'storageConfig', ok: true });
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    items.push({
+      id: 'storageConfig',
+      ok: code === 'ENOENT',
+      detail: code === 'ENOENT' ? '尚未生成（首次启动正常）' : String(error),
+    });
+  }
+
+  try {
+    const stat = await fs.stat(path.join(userData, 'logs'));
+    items.push({ id: 'logsDir', ok: stat.isDirectory() });
+  } catch {
+    items.push({ id: 'logsDir', ok: false, detail: '日志目录缺失（启动后自动创建）' });
+  }
+
+  return items;
+}
+
+/** 组装诊断文件集：app-info.json + health.json + logs/** + window-state.json / storage-config.json。 */
 export async function collectDiagnostics(userData: string, appInfo: AppInfo): Promise<Record<string, string>> {
   const files: Record<string, string> = {};
   files['app-info.json'] = JSON.stringify({ ...appInfo, userData }, null, 2);
+  files['health.json'] = JSON.stringify(await collectHealth(userData), null, 2);
   await collectInto(files, path.join(userData, 'logs'), 'logs');
   for (const name of ['window-state.json', 'storage-config.json']) {
     try {

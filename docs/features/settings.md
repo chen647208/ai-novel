@@ -40,7 +40,7 @@
 - 写作、助手、知识库和一致性检查都会依赖设置中的模型或模板配置
 - 设置持久化走 `app/stores/settingsStore.ts` + `persistenceBridge.ts` 差分落盘
 - 主进程侧：`main/app/tray.ts`（托盘/自启/关闭拦截）+ `main/net/proxy.ts`（地址校验/豁免/dispatcher）+ `proxyIpc.ts`
-- 诊断：`main/app/diagnosticsCore.ts`（收集日志/窗口几何/存储配置/环境信息）+ `diagnostics.ts`（IPC + zip 另存）；存储面板「导出诊断包」；主进程 `crashReporter` 本地留存转储
+- 诊断：`main/app/diagnosticsCore.ts`（收集日志/窗口几何/存储配置/环境信息 + `health.json` 健康检查）+ `diagnostics.ts`（IPC + zip 另存）；存储面板「导出诊断包」；主进程 `crashReporter` 本地留存转储
 - 保存语义：语言/主题/字体直写即时生效；模型与密钥类暂存按保存落盘（防半配置生效），关闭直接丢弃
 
 ## 维护建议

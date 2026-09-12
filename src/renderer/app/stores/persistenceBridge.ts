@@ -21,6 +21,7 @@ import { APP_STATE_VERSION } from '../../../shared/constants/versions';
 import { type AppState } from '../../../shared/types';
 import { autoBackupService } from '../../shared/services/autoBackupService';
 import { repository } from '../../shared/services/repository';
+import { TaskScheduler } from '../../shared/services/taskScheduler';
 import { toast } from '../../shared/services/toastService';
 import { logger } from '../../shared/utils/logger';
 import { persistDiff } from '../persistDiff';
@@ -67,6 +68,9 @@ let failing = false;
 let retryTimer: ReturnType<typeof setTimeout> | null = null;
 let retryDelayMs = 0;
 
+/** 周期任务调度器：自动备份兜底（空闲不落盘时也按间隔备份）。 */
+const scheduler = new TaskScheduler();
+
 /** 建立差分基线（首启动 hydrate 后调用；base 即磁盘现状的组合态）。 */
 export function seedPersistBaseline(base: AppState | null): void {
   lastPersisted = base;
@@ -94,14 +98,7 @@ async function doFlush(): Promise<void> {
       failing = false;
       toast.success(dt('app:persist.saveRecovered'));
     }
-    const config = await repository.getStorageConfig();
-    // 自动备份：按间隔判定（每次落盘后检查，避免高频覆盖），成功后回写上次备份时间
-    if (config.autoBackupEnabled && autoBackupService.shouldPerformBackup(config)) {
-      const backedUp = await autoBackupService.performBackup(config, () => composeAppState());
-      if (backedUp) {
-        await repository.updateStorageConfig({ ...config, lastAutoBackup: Date.now() });
-      }
-    }
+    await maybeAutoBackup();
   } catch (error) {
     logger.error('持久化或自动备份失败:', error);
     dirty = true; // 保持待写，交给退避重试
@@ -110,6 +107,16 @@ async function doFlush(): Promise<void> {
       toast.error(dt('app:persist.saveFailed'));
     }
     scheduleRetry();
+  }
+}
+
+/** 自动备份：按间隔判定，成功后回写上次备份时间。落盘后与周期任务共用同一入口。 */
+async function maybeAutoBackup(): Promise<void> {
+  const config = await repository.getStorageConfig();
+  if (!config.autoBackupEnabled || !autoBackupService.shouldPerformBackup(config)) return;
+  const backedUp = await autoBackupService.performBackup(config, () => composeAppState());
+  if (backedUp) {
+    await repository.updateStorageConfig({ ...config, lastAutoBackup: Date.now() });
   }
 }
 
@@ -167,6 +174,9 @@ export function startPersistenceBridge(): () => void {
   if (started) return () => undefined;
   started = true;
   bindFlushHandlers();
+  // 自动备份兜底：落盘触发之外，按 60s 周期检查一次（空闲会话也能备份）
+  scheduler.register({ id: 'auto-backup-fallback', everyMs: 60_000, run: maybeAutoBackup });
+  scheduler.start();
   const schedule = () => {
     dirty = true;
     void flush();
@@ -176,6 +186,7 @@ export function startPersistenceBridge(): () => void {
     useSettingsStore.subscribe(schedule),
   ];
   return () => {
+    scheduler.stop();
     unsubs.forEach((u) => u());
     started = false;
   };
