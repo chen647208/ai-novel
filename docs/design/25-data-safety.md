@@ -72,11 +72,11 @@ SQLite 官方《How To Corrupt An SQLite Database File》列出的可控成因�
 Tailscale 把"完整性验证"做成流水线阶段：定期取备份、在隔离环境恢复、校验通过才保留，失败即告警。
 要点是**备份不算数，能恢复才算数**，与本篇 §5 的验收一致。
 
-## 4. 引擎决策：主进程改用 better-sqlite3
+## 4. 引擎决策：主进程改用 better-sqlite3-multiple-ciphers
 
 ### 4.1 问题
 
-运行时内置的 SQLite（`node:sqlite`）版本由 Electron/Node 决定，当前为 **3.50.4**，
+运行时内置的 SQLite（`node:sqlite`）版本由 Electron/Node 决定，为 **3.50.4**，
 落在 WAL-reset 缺陷区间（< 3.51.3），且独立 MCP server 会与之并发开库（T10）。
 
 ### 4.2 候选
@@ -84,21 +84,34 @@ Tailscale 把"完整性验证"做成流水线阶段：定期取备份、在隔�
 | 方案 | 版本来源 | 许可 | 预编译 | 判断 |
 |---|---|---|---|---|
 | 留在 `node:sqlite` | 随 Electron/Node | Public Domain | 无需 | 版本不可控，缺陷不可修 |
-| **better-sqlite3 13** | 随包发布 | **MIT** | **N-API，跨 Node/Electron** | **采用** |
+| **better-sqlite3-multiple-ciphers 13** | 随包发布 | **MIT** | **N-API，跨 Node/Electron** | **采用** |
 | `sqlite3`（node-sqlite3） | 随包发布 | BSD-3 | 需按 ABI 预编译 | 异步 API，改动大 |
 | `@sqlite.org/sqlite-wasm` | 随包发布 | Public Domain | WASM | 无本地文件 VFS，性能不及原生 |
 
 ### 4.3 实测结论（本机与 CI 目标环境）
 
-- better-sqlite3 **13.0.3** 内嵌 **SQLite 3.53.4**，已含 WAL-reset 修复。
+- 加密分支 **13.0.3**（与上游 better-sqlite3 同版本）内嵌 **SQLite 3.53.4**，已含 WAL-reset 修复。
 - 走 **N-API**：同一份预编译二进制跨 Node 版本与 Electron 版本可用，实测在 **Electron 44.0.0 / Node 24.18.1**
   下零重编译加载，建库、WAL、读写、bigint、Blob、数组绑定均正常。
 - 预编译覆盖 win32/darwin/linux（含 musl）× x64/arm64；安装不触发 node-gyp。
 - Linux 预编译依赖的最高 glibc 符号为 **2.34**，ubuntu-latest（24.04，glibc 2.39）兼容。
-- API 与 `node:sqlite` 同形（`prepare().run/get/all`、`exec`、`close`），迁移为机械替换。
+- API 与 `node:sqlite` 同形（`prepare().run/get/all`、`exec`、`close`），迁移为机械替换；
+  额外提供 SQLCipher 兼容的 `PRAGMA key` / `PRAGMA rekey`。
 - 启动开销：安装即带预编译，无编译步骤。
 
-结论：符合"默认全上最新、除明确不兼容"的原则，且是修掉 T10 根因的唯一低改动路径。
+结论：符合"默认全上最新、除明确不兼容"的原则，是修掉 T10 根因与启用 L3 的同一条低改动路径。
+
+### 4.4 加密启用流程
+
+库默认明文。启用加密时（`sqlite-ipc.ts`）：
+
+1. 生成 32 字节随机主密钥，用 `safeStorage` 包裹后写 `userData/db-encryption.json`。
+2. 明文库先切出 WAL（`journal_mode = DELETE`）再 `PRAGMA rekey='…'`，最后回到 WAL；
+   失败即删除刚写入的密钥文件，避免"密钥在、库未加密"的错配。
+3. 停用加密是逆过程（`rekey=''` 后删密钥文件）。
+
+恢复码即主密钥的 64 位十六进制串，可在设置内导出；换机或钥匙串损坏时，先校验恢复码能打开数据库
+（`validateRecoveryKey`），再重建密钥文件并重开连接。钥匙串不可用时一律显式失败，不静默降级。
 
 ## 5. 防护分层与验收
 
@@ -107,19 +120,19 @@ Tailscale 把"完整性验证"做成流水线阶段：定期取备份、在隔�
 | L0 写入 | WAL + `synchronous=FULL` + `busy_timeout=5000` + `wal_autocheckpoint=1000` + `foreign_keys=ON` | 实现 | 断电注入后库可打开且已提交事务在 |
 | L1 完整性 | `cell_size_check=ON`；启动 `quick_check`；手动深度 `integrity_check` | 实现 | 损坏库在启动即提示，不继续覆盖写 |
 | L2 备份 | 自动 JSON 快照（可配间隔/份数）+ `VACUUM INTO` 数据库热备份（滚动保留） | 实现 | 备份文件可被 SQLite 直接打开；份数按配置滚动 |
-| L3 加密 | OS 磁盘加密（基线）；库级加密为候选 | 部分 | 设备丢失时数据不可读；候选启用后密钥走系统钥匙串 |
+| L3 加密 | 库级 AES-256（SQLCipher 兼容）；密钥经 `safeStorage` 包裹，可导出恢复码 | 实现 | 无密钥不可读；钥匙串不可用时明确失败 |
 | L4 恢复 | 启动检测损坏 → 从备份恢复 → 重建投影；导出可移植 | 部分 | 从最近备份恢复后状态与备份一致 |
-| L5 验证 | 恢复演练、备份可打开校验、故障注入测试 | 待建 | CI 内含"备份→打开→校验"用例 |
+| L5 验证 | 真实加密引擎的"备份→打开→校验"与篡改检出用例 | 实现 | CI 内含 `dbSafety` 演练 |
 | L6 供应链 | 依赖锁版本、版本可见、许可证门禁 | 实现 | `verify` 全绿；第三方清单含引擎与许可 |
 
 ## 6. 分期
 
 | 阶段 | 内容 | 验收 |
 |---|---|---|
-| S1 | 引擎迁移到 better-sqlite3 + L0/L1 加固 | 现有测试与 E2E 全绿；SQLite 版本 ≥ 3.51.3 |
+| S1 | 引擎迁移到 better-sqlite3-multiple-ciphers + L0/L1 加固 | 现有测试与 E2E 全绿；SQLite 版本 ≥ 3.51.3 |
 | S2 | L2 数据库热备份接入自动备份流程 | 备份文件可被 SQLite 打开并含最新提交 |
-| S3 | L5 恢复演练与故障注入用例 | CI 中可复现"损坏→恢复→一致" |
-| S4 | L3 库级加密调研与启用（`better-sqlite3-multiple-ciphers` 或等价） | 密钥走 `safeStorage`；无密钥不可读 |
+| S3 | L5 恢复演练与篡改检出用例 | `dbSafety` 演练：副本可恢复、篡改可检出 |
+| S4 | L3 库级加密（safeStorage 保管密钥 + 恢复码） | 无密钥不可读；钥匙串不可用时明确失败 |
 | S5 | L4 恢复向导入导出体验（选择备份、预览、回滚） | 用户可在设置内完成恢复 |
 
 ## 7. 来源

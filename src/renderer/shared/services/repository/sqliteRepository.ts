@@ -32,7 +32,7 @@ import type {
 import { logger } from '../../utils/logger';
 import { jsonRepository } from './jsonRepository';
 import { META_KEYS,migrate, SETTING_KEYS } from './schema';
-import type { CommitOptions,SearchHit, SearchOptions, SqlDriver, SqlValue, StorageRepository } from './types';
+import type { CommitOptions,DbEncryptionStatus, SearchHit, SearchOptions, SqlDriver, SqlValue, StorageRepository } from './types';
 
 const DEFAULT_SEARCH_LIMIT = 50;
 /** trigram 分词器需要至少 3 个字符才能命中 */
@@ -309,6 +309,41 @@ export class SqliteRepository implements StorageRepository {
     await this.ready;
     if (!this.driver.hotBackup) return null;
     return this.driver.hotBackup();
+  }
+
+  /** 数据库加密状态；后端不支持时返回 null。 */
+  async encryptionStatus(): Promise<DbEncryptionStatus | null> {
+    await this.ready;
+    if (!this.driver.encryptionStatus) return null;
+    return this.driver.encryptionStatus();
+  }
+
+  /** 启用库级加密并返回恢复码；后端不支持时返回 null。 */
+  async enableEncryption(): Promise<{ ok: boolean; recoveryCode?: string; error?: string } | null> {
+    await this.ready;
+    if (!this.driver.enableEncryption) return null;
+    return this.driver.enableEncryption();
+  }
+
+  /** 停用库级加密。 */
+  async disableEncryption(): Promise<{ ok: boolean; error?: string } | null> {
+    await this.ready;
+    if (!this.driver.disableEncryption) return null;
+    return this.driver.disableEncryption();
+  }
+
+  /** 导出恢复码。 */
+  async exportRecoveryKey(): Promise<{ ok: boolean; code?: string; error?: string } | null> {
+    await this.ready;
+    if (!this.driver.exportRecoveryKey) return null;
+    return this.driver.exportRecoveryKey();
+  }
+
+  /** 用恢复码解锁数据库。 */
+  async applyRecoveryKey(code: string): Promise<{ ok: boolean; error?: string } | null> {
+    await this.ready;
+    if (!this.driver.applyRecoveryKey) return null;
+    return this.driver.applyRecoveryKey(code);
   }
 
   /** 压缩 + 重建索引；后端不支持时静默跳过。 */

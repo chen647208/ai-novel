@@ -38,6 +38,14 @@ export interface SqlRunResult {
   lastInsertRowid: number;
 }
 
+/** 数据库加密状态（密钥文件存在 + 系统钥匙串可用性）。 */
+export interface DbEncryptionStatus {
+  enabled: boolean;
+  available: boolean;
+  weakBackend: boolean;
+  backend: string;
+}
+
 export interface SqlDriver {
   /** 执行一条或多条无返回语句（建表、PRAGMA 等） */
   exec(sql: string): Promise<void>;
@@ -57,6 +65,16 @@ export interface SqlDriver {
   hotBackup?(): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string }>;
   /** 维护：压缩 + 重建索引 */
   maintenance?(): Promise<void>;
+  /** 数据库加密状态（桌面 better-sqlite3-multiple-ciphers 支持） */
+  encryptionStatus?(): Promise<DbEncryptionStatus>;
+  /** 启用库级加密，返回恢复码 */
+  enableEncryption?(): Promise<{ ok: boolean; recoveryCode?: string; error?: string }>;
+  /** 停用库级加密 */
+  disableEncryption?(): Promise<{ ok: boolean; error?: string }>;
+  /** 导出恢复码 */
+  exportRecoveryKey?(): Promise<{ ok: boolean; code?: string; error?: string }>;
+  /** 用恢复码解锁 */
+  applyRecoveryKey?(code: string): Promise<{ ok: boolean; error?: string }>;
   /** 关闭连接 */
   close(): Promise<void>;
 }
@@ -112,6 +130,16 @@ export interface StorageRepository {
   fullIntegrityCheck?(): Promise<{ ok: boolean; result: string } | null>;
   /** 热备份：生成数据库一致副本（桌面 better-sqlite3 支持） */
   hotBackup?(): Promise<{ ok: boolean; path?: string; bytes?: number; error?: string } | null>;
+  /** 数据库加密状态；后端不支持时返回 null。 */
+  encryptionStatus?(): Promise<DbEncryptionStatus | null>;
+  /** 启用库级加密并返回恢复码；后端不支持时返回 null。 */
+  enableEncryption?(): Promise<{ ok: boolean; recoveryCode?: string; error?: string } | null>;
+  /** 停用库级加密。 */
+  disableEncryption?(): Promise<{ ok: boolean; error?: string } | null>;
+  /** 导出恢复码。 */
+  exportRecoveryKey?(): Promise<{ ok: boolean; code?: string; error?: string } | null>;
+  /** 用恢复码解锁数据库。 */
+  applyRecoveryKey?(code: string): Promise<{ ok: boolean; error?: string } | null>;
   /** 压缩 + 重建索引。 */
   runMaintenance?(): Promise<void>;
 

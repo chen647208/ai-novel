@@ -83,6 +83,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     fullIntegrityCheck: () => ipcRenderer.invoke(IPC.db.fullIntegrityCheck),
     hotBackup: () => ipcRenderer.invoke(IPC.db.hotBackup),
     maintenance: () => ipcRenderer.invoke(IPC.db.maintenance),
+    encryptionStatus: () => ipcRenderer.invoke(IPC.db.encryptionStatus),
+    enableEncryption: () => ipcRenderer.invoke(IPC.db.enableEncryption),
+    disableEncryption: () => ipcRenderer.invoke(IPC.db.disableEncryption),
+    exportRecoveryKey: () => ipcRenderer.invoke(IPC.db.exportRecoveryKey),
+    applyRecoveryKey: (code: string) => ipcRenderer.invoke(IPC.db.applyRecoveryKey, code),
   },
 
   // AI 网关（适配器在主进程执行；流式事件经 streamEvent 通道按 requestId 推送）

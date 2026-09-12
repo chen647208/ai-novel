@@ -16,6 +16,9 @@ const store = vi.hoisted(() => ({
   quickCheckValue: 'ok' as string | undefined,
   throwOnGet: false,
   throwOnExec: false,
+  throwOnPragma: false,
+  encAvailable: true,
+  backend: 'gnome_libsecret',
   userDataDir: '',
   execs: [] as string[],
   pragmas: [] as string[],
@@ -24,6 +27,12 @@ const store = vi.hoisted(() => ({
 vi.mock('electron', () => ({
   app: { getPath: () => store.userDataDir },
   ipcMain: { handle: vi.fn() },
+  safeStorage: {
+    isEncryptionAvailable: () => store.encAvailable,
+    getSelectedStorageBackend: () => store.backend,
+    encryptString: (s: string) => Buffer.from(`enc:${s}`),
+    decryptString: (b: Buffer) => b.toString().replace('enc:', ''),
+  },
 }));
 
 vi.mock('better-sqlite3-multiple-ciphers', async () => {
@@ -37,7 +46,11 @@ vi.mock('better-sqlite3-multiple-ciphers', async () => {
         if (m?.[1]) nodeFs.writeFileSync(m[1], Buffer.from('backup-bytes'));
       }
       pragma(sql: string): void {
+        if (store.throwOnPragma) throw new Error('pragma boom');
         store.pragmas.push(sql);
+      }
+      close(): void {
+        /* 无底层资源，空实现 */
       }
       prepare(): { get: () => unknown } {
         return {
@@ -51,10 +64,15 @@ vi.mock('better-sqlite3-multiple-ciphers', async () => {
   };
 });
 
+import { encryptionStatus } from '../dbKey.js';
 import {
+  applyDbRecoveryKey,
   checkIntegrity,
   dbBackupFileName,
+  disableDbEncryption,
+  enableDbEncryption,
   escapeSqlLiteral,
+  exportDbRecoveryKey,
   fullIntegrityCheck,
   hotBackup,
   resolveDbBackupPath,
@@ -66,6 +84,9 @@ describe('sqlite 完整性检查与维护', () => {
     store.quickCheckValue = 'ok';
     store.throwOnGet = false;
     store.throwOnExec = false;
+    store.throwOnPragma = false;
+    store.encAvailable = true;
+    store.backend = 'gnome_libsecret';
     store.userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hongyue-sqlite-'));
     store.execs = [];
   });
@@ -128,5 +149,44 @@ describe('sqlite 完整性检查与维护', () => {
     const r = hotBackup();
     expect(r.ok).toBe(false);
     expect(r.error).toContain('exec boom');
+  });
+
+  it('启用加密写入密钥文件并返回恢复码', () => {
+    expect(encryptionStatus()).toMatchObject({ enabled: false, available: true, weakBackend: false });
+    const r = enableDbEncryption();
+    expect(r.ok).toBe(true);
+    expect(r.recoveryCode).toMatch(/^[0-9a-f]{64}$/);
+    expect(encryptionStatus().enabled).toBe(true);
+    expect(store.pragmas.some((p) => p.startsWith('rekey='))).toBe(true);
+    expect(enableDbEncryption().ok).toBe(false);
+  });
+
+  it('导出恢复码与停用加密', () => {
+    const enabled = enableDbEncryption();
+    const exported = exportDbRecoveryKey();
+    expect(exported.ok).toBe(true);
+    expect(exported.code).toBe(enabled.recoveryCode);
+    expect(disableDbEncryption().ok).toBe(true);
+    expect(encryptionStatus().enabled).toBe(false);
+  });
+
+  it('启用加密 rekey 失败回滚密钥文件', () => {
+    store.throwOnPragma = true;
+    const r = enableDbEncryption();
+    expect(r.ok).toBe(false);
+    expect(encryptionStatus().enabled).toBe(false);
+  });
+
+  it('钥匙串不可用时拒绝启用加密', () => {
+    store.encAvailable = false;
+    const r = enableDbEncryption();
+    expect(r.ok).toBe(false);
+    expect(encryptionStatus().enabled).toBe(false);
+  });
+
+  it('应用恢复码重建密钥文件', () => {
+    const r = applyDbRecoveryKey('a'.repeat(64));
+    expect(r.ok).toBe(true);
+    expect(encryptionStatus().enabled).toBe(true);
   });
 });

@@ -55,6 +55,8 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
   const { t, i18n } = useTranslation('settings');
   const [backups, setBackups] = useState<Array<{ fileName: string; filePath: string; size: number; timestamp: number }>>([]);
   const [backupBusy, setBackupBusy] = useState(false);
+  const [encryption, setEncryption] = useState<{ enabled: boolean; available: boolean; weakBackend: boolean; backend: string } | null>(null);
+  const [encryptionBusy, setEncryptionBusy] = useState(false);
 
   const reloadBackups = useCallback(() => {
     void autoBackupService.getBackupHistory(storageConfig).then(setBackups).catch(() => setBackups([]));
@@ -95,6 +97,68 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
     seedPersistBaseline(composeAppState());
     dialogService.alert(t('storage.restoreDone'));
   };
+
+  const reloadEncryption = useCallback(() => {
+    void repository.encryptionStatus?.().then(setEncryption).catch(() => setEncryption(null));
+  }, []);
+  useEffect(() => {
+    reloadEncryption();
+  }, [reloadEncryption]);
+
+  const handleEnableEncryption = async (): Promise<void> => {
+    const confirmed = await dialogService.confirm({ message: t('storage.enableEncryptionConfirm'), danger: true });
+    if (!confirmed) return;
+    setEncryptionBusy(true);
+    try {
+      const r = await repository.enableEncryption?.();
+      if (r?.ok && r.recoveryCode) {
+        await navigator.clipboard.writeText(r.recoveryCode).catch(() => {});
+        dialogService.alert(`${t('storage.recoveryTitle')}\n\n${r.recoveryCode}\n\n${t('storage.recoveryHint')}`);
+      } else {
+        dialogService.alert(t('storage.encryptionFailed', { error: r?.error ?? '' }));
+      }
+      reloadEncryption();
+    } finally {
+      setEncryptionBusy(false);
+    }
+  };
+
+  const handleDisableEncryption = async (): Promise<void> => {
+    const confirmed = await dialogService.confirm({ message: t('storage.disableEncryptionConfirm'), danger: true });
+    if (!confirmed) return;
+    setEncryptionBusy(true);
+    try {
+      const r = await repository.disableEncryption?.();
+      dialogService.alert(r?.ok ? t('storage.encryptionDisabledDone') : t('storage.encryptionFailed', { error: r?.error ?? '' }));
+      if (r?.ok) reloadEncryption();
+    } finally {
+      setEncryptionBusy(false);
+    }
+  };
+
+  const handleExportRecovery = async (): Promise<void> => {
+    const r = await repository.exportRecoveryKey?.();
+    if (r?.ok && r.code) {
+      await navigator.clipboard.writeText(r.code).catch(() => {});
+      dialogService.alert(`${t('storage.recoveryTitle')}\n\n${r.code}\n\n${t('storage.recoveryHint')}`);
+    } else {
+      dialogService.alert(t('storage.encryptionFailed', { error: r?.error ?? '' }));
+    }
+  };
+
+  const handleApplyRecovery = async (): Promise<void> => {
+    const code = await dialogService.prompt(t('storage.recoveryApplyPrompt'));
+    if (!code) return;
+    setEncryptionBusy(true);
+    try {
+      const r = await repository.applyRecoveryKey?.(code.trim());
+      dialogService.alert(r?.ok ? t('storage.recoveryApplied') : t('storage.recoveryApplyFailed', { error: r?.error ?? '' }));
+      if (r?.ok) reloadEncryption();
+    } finally {
+      setEncryptionBusy(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* 页头 */}
@@ -197,6 +261,40 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
                   <Wrench className="size-3.5" /> {t('storage.maintenance')}
                 </Button>
               </div>
+            </div>
+
+            <div>
+              <FieldLabel>{t('storage.encryptionLabel')}</FieldLabel>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <StatusBadge tone={encryption?.enabled ? 'success' : 'muted'}>
+                  {encryption?.enabled ? t('storage.encryptionEnabled') : t('storage.encryptionDisabled')}
+                </StatusBadge>
+                {encryption && !encryption.enabled && encryption.available && (
+                  <Button variant="outline" size="sm" disabled={encryptionBusy} onClick={() => void handleEnableEncryption()}>
+                    <ShieldCheck className="size-3.5" /> {t('storage.enableEncryption')}
+                  </Button>
+                )}
+                {encryption?.enabled && (
+                  <Button variant="outline" size="sm" disabled={encryptionBusy} onClick={() => void handleExportRecovery()}>
+                    <ShieldCheck className="size-3.5" /> {t('storage.exportRecoveryKey')}
+                  </Button>
+                )}
+                {encryption?.enabled && (
+                  <Button variant="outline" size="sm" disabled={encryptionBusy} onClick={() => void handleDisableEncryption()}>
+                    <Trash2 className="size-3.5" /> {t('storage.disableEncryption')}
+                  </Button>
+                )}
+                <Button variant="outline" size="sm" disabled={encryptionBusy} onClick={() => void handleApplyRecovery()}>
+                  <ShieldCheck className="size-3.5" /> {t('storage.applyRecoveryKey')}
+                </Button>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">{t('storage.encryptionHint')}</p>
+              {encryption && !encryption.available && (
+                <p className="mt-2 text-xs text-warning">{t('storage.encryptionUnavailable')}</p>
+              )}
+              {encryption?.enabled && encryption.weakBackend && (
+                <p className="mt-2 text-xs text-warning">{t('storage.encryptionWeakBackend')}</p>
+              )}
             </div>
 
             <div>

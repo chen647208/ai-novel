@@ -8,7 +8,7 @@
  */
 
 import type { ElectronAPI } from '../../../../shared/types';
-import type { SqlDriver, SqlRunResult,SqlValue } from './types';
+import type { DbEncryptionStatus,SqlDriver, SqlRunResult,SqlValue } from './types';
 
 type DbBridge = NonNullable<ElectronAPI['db']>;
 
@@ -97,5 +97,25 @@ export class IpcSqlDriver implements SqlDriver {
 
   maintenance(): Promise<void> {
     return this.enqueue(() => this.api.maintenance());
+  }
+
+  encryptionStatus(): Promise<DbEncryptionStatus> {
+    return this.enqueue(() => this.api.encryptionStatus());
+  }
+
+  enableEncryption(): Promise<{ ok: boolean; recoveryCode?: string; error?: string }> {
+    return this.enqueue(() => this.api.enableEncryption());
+  }
+
+  disableEncryption(): Promise<{ ok: boolean; error?: string }> {
+    return this.enqueue(() => this.api.disableEncryption());
+  }
+
+  exportRecoveryKey(): Promise<{ ok: boolean; code?: string; error?: string }> {
+    return this.enqueue(() => this.api.exportRecoveryKey());
+  }
+
+  applyRecoveryKey(code: string): Promise<{ ok: boolean; error?: string }> {
+    return this.enqueue(() => this.api.applyRecoveryKey(code));
   }
 }

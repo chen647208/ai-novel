@@ -1162,6 +1162,11 @@ export interface ElectronAPI {
     fullIntegrityCheck: () => Promise<{ ok: boolean; result: string }>;
     hotBackup: () => Promise<{ ok: boolean; path?: string; bytes?: number; error?: string }>;
     maintenance: () => Promise<void>;
+    encryptionStatus: () => Promise<{ enabled: boolean; available: boolean; weakBackend: boolean; backend: string }>;
+    enableEncryption: () => Promise<{ ok: boolean; recoveryCode?: string; error?: string }>;
+    disableEncryption: () => Promise<{ ok: boolean; error?: string }>;
+    exportRecoveryKey: () => Promise<{ ok: boolean; code?: string; error?: string }>;
+    applyRecoveryKey: (code: string) => Promise<{ ok: boolean; error?: string }>;
   };
 
   // AI 网关（适配器在主进程执行；流式经 ai:stream:event 按 requestId 推送）

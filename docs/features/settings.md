@@ -41,7 +41,7 @@
 - 设置持久化走 `app/stores/settingsStore.ts` + `persistenceBridge.ts` 差分落盘
 - 主进程侧：`main/app/tray.ts`（托盘/自启/关闭拦截）+ `main/net/proxy.ts`（地址校验/豁免/dispatcher）+ `proxyIpc.ts`
 - 诊断：`main/app/diagnosticsCore.ts`（收集日志/窗口几何/存储配置/环境信息 + `health.json` 健康检查）+ `diagnostics.ts`（IPC + zip 另存）；存储面板「导出诊断包」；主进程 `crashReporter` 本地留存转储
-- 存储安全：启动执行快速 `quick_check`；存储面板完整性检查执行深度 `integrity_check`；自动备份在 JSON 快照之外生成数据库热备份（`VACUUM INTO`，滚动保留），数据库进度与完整性详见 `docs/design/25-data-safety.md`
+- 存储安全：启动执行快速 `quick_check`；存储面板完整性检查执行深度 `integrity_check`；自动备份在 JSON 快照之外生成数据库热备份（`VACUUM INTO`，滚动保留）；库级 AES-256 加密默认关闭，可在存储面板启停并导出/应用恢复码（密钥走系统钥匙串），细节见 `docs/design/25-data-safety.md`
 - 保存语义：语言/主题/字体直写即时生效；模型与密钥类暂存按保存落盘（防半配置生效），关闭直接丢弃
 
 ## 维护建议

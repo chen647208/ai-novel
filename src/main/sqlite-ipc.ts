@@ -22,6 +22,14 @@ import { app, ipcMain } from 'electron';
 
 import { DB_FILE_NAME } from './app/dataDir.js';
 import { IPC } from './channels.js';
+import {
+  encryptionStatus,
+  generateDbKey,
+  isDbEncryptionEnabled,
+  loadDbKey,
+  removeDbKeyFile,
+  storeDbKey,
+} from './dbKey.js';
 import { logger } from './logger.js';
 
 /** 主进程热备份目录名与文件名前缀（VACUUM INTO 产物，保留在 userData 下）。 */
@@ -41,6 +49,9 @@ function getDb(): Database.Database {
   if (db) return db;
   const dbPath = path.join(app.getPath('userData'), DB_FILE_NAME);
   db = new Database(dbPath);
+  // 加密库：先给密钥，之后任何语句才能读取（密钥缺失/错误在此暴露，绝不继续覆盖写）。
+  const key = loadDbKey();
+  if (key) db.pragma(`key='${escapeSqlLiteral(key)}'`);
   // WAL：并发读写更稳、崩溃可恢复。
   db.pragma('journal_mode = WAL');
   // FULL：每次提交 fsync，断电也不丢已提交事务；本项目写入量小，优先耐久。
@@ -129,6 +140,11 @@ export function registerSqliteIpc(): void {
   ipcMain.handle(IPC.db.fullIntegrityCheck, () => fullIntegrityCheck());
   ipcMain.handle(IPC.db.hotBackup, () => hotBackup());
   ipcMain.handle(IPC.db.maintenance, () => runMaintenance());
+  ipcMain.handle(IPC.db.encryptionStatus, () => encryptionStatus());
+  ipcMain.handle(IPC.db.enableEncryption, () => enableDbEncryption());
+  ipcMain.handle(IPC.db.disableEncryption, () => disableDbEncryption());
+  ipcMain.handle(IPC.db.exportRecoveryKey, () => exportDbRecoveryKey());
+  ipcMain.handle(IPC.db.applyRecoveryKey, (_event, code: string) => applyDbRecoveryKey(code));
 }
 
 function runPragmaCheck(pragma: string): { ok: boolean; result: string } {
@@ -215,5 +231,97 @@ export function closeSqlite(): void {
       logger.warn('db', '关闭 SQLite 连接失败', error);
     }
     db = null;
+  }
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+/**
+ * 启用库级加密：生成密钥 → 明文库切出 WAL 后 `rekey` → 回到 WAL。
+ * rekey 失败时删除刚写入的密钥文件，避免留下"密钥在、库未加密"的错配。
+ */
+export function enableDbEncryption(): { ok: boolean; recoveryCode?: string; error?: string } {
+  if (isDbEncryptionEnabled()) return { ok: false, error: '数据库已启用加密' };
+  let key: string;
+  try {
+    key = generateDbKey();
+  } catch (error) {
+    return { ok: false, error: errorMessage(error) };
+  }
+  try {
+    const connection = getDb();
+    connection.pragma('journal_mode = DELETE');
+    connection.pragma(`rekey='${escapeSqlLiteral(key)}'`);
+    connection.pragma('journal_mode = WAL');
+    logger.info('db', '数据库加密已启用');
+    return { ok: true, recoveryCode: key };
+  } catch (error) {
+    removeDbKeyFile();
+    logger.warn('db', '启用数据库加密失败', error);
+    return { ok: false, error: errorMessage(error) };
+  }
+}
+
+/** 停用库级加密：密文库切出 WAL 后 `rekey` 为空 → 删除密钥文件。 */
+export function disableDbEncryption(): { ok: boolean; error?: string } {
+  if (!isDbEncryptionEnabled()) return { ok: true };
+  try {
+    const connection = getDb();
+    connection.pragma('journal_mode = DELETE');
+    connection.pragma("rekey=''");
+    connection.pragma('journal_mode = WAL');
+    removeDbKeyFile();
+    logger.info('db', '数据库加密已停用');
+    return { ok: true };
+  } catch (error) {
+    logger.warn('db', '停用数据库加密失败', error);
+    return { ok: false, error: errorMessage(error) };
+  }
+}
+
+/** 导出恢复码（当前主密钥的十六进制串）。 */
+export function exportDbRecoveryKey(): { ok: boolean; code?: string; error?: string } {
+  try {
+    const key = loadDbKey();
+    if (!key) return { ok: false, error: '数据库未启用加密' };
+    return { ok: true, code: key };
+  } catch (error) {
+    return { ok: false, error: errorMessage(error) };
+  }
+}
+
+/** 用恢复码试开数据库，验证是否匹配（不改动密钥文件）。 */
+function validateRecoveryKey(code: string): boolean {
+  const dbPath = path.join(app.getPath('userData'), DB_FILE_NAME);
+  let probe: Database.Database | null = null;
+  try {
+    probe = new Database(dbPath);
+    probe.pragma(`key='${escapeSqlLiteral(code)}'`);
+    probe.prepare('SELECT count(*) AS n FROM sqlite_master').get();
+    return true;
+  } catch {
+    return false;
+  } finally {
+    try {
+      probe?.close();
+    } catch {
+      /* 关闭失败不影响判定 */
+    }
+  }
+}
+
+/** 校验恢复码与数据库匹配后重建密钥文件，再重开连接。 */
+export function applyDbRecoveryKey(code: string): { ok: boolean; error?: string } {
+  try {
+    if (!validateRecoveryKey(code)) return { ok: false, error: '恢复码与数据库不匹配' };
+    storeDbKey(code);
+    closeSqlite();
+    getDb();
+    return { ok: true };
+  } catch (error) {
+    logger.warn('db', '应用恢复码失败', error);
+    return { ok: false, error: errorMessage(error) };
   }
 }

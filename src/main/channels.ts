@@ -58,6 +58,11 @@ export const IPC = {
     fullIntegrityCheck: 'db:full-integrity-check',
     hotBackup: 'db:hot-backup',
     maintenance: 'db:maintenance',
+    encryptionStatus: 'db:encryption-status',
+    enableEncryption: 'db:enable-encryption',
+    disableEncryption: 'db:disable-encryption',
+    exportRecoveryKey: 'db:export-recovery-key',
+    applyRecoveryKey: 'db:apply-recovery-key',
   },
 
   // AI 网关（适配器在主进程执行；流式事件按 requestId 多路推送）
