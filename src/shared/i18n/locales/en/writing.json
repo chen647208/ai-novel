@@ -360,7 +360,11 @@
     "emptyBookHint": "Create the first chapter, or go back to Structure to generate chapter plans with AI first.",
     "createFirstChapter": "Create first chapter",
     "backToStructure": "Back to Structure",
-    "deleteChapterConfirm": "Delete {{title}}? Content, history and snapshots are removed and cannot be recovered."
+    "deleteChapterConfirm": "Delete {{title}}? Content, history and snapshots are removed and cannot be recovered.",
+    "encryptedLocked": "This chapter is encrypted. Unlock the protected session to view it.",
+    "unlockSession": "Unlock protected session",
+    "encryptedDecryptFailed": "Decryption failed: wrong passphrase or corrupted data.",
+    "encryptedUnlockedHint": "Decrypted (read-only). To edit, decrypt this chapter in the protected session first."
   },
   "utils": {
     "tokenUsage": "Input: {{input}} | Output: {{output}} | Total: {{total}}",

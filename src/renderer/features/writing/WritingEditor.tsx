@@ -7,6 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { isEncryptedEnvelope } from '@core/crypto';
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import React, { useCallback,useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -25,6 +26,7 @@ import { logger } from '@/shared/utils/logger';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
 
 import { type Chapter, type Project, type PromptTemplate } from '../../../shared/types';
+import EncryptedChapterView from './components/EncryptedChapterView';
 import FindBar from './components/FindBar';
 import WritingEditorCanvas from './components/WritingEditorCanvas';
 import WritingEditorOverlayLayer from './components/WritingEditorOverlayLayer';
@@ -540,6 +542,10 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
                 </div>
               }
             />
+          </div>
+        ) : activeChapter && isEncryptedEnvelope(activeChapter.content) ? (
+          <div className="flex min-h-0 flex-1 items-center justify-center">
+            <EncryptedChapterView content={activeChapter.content} />
           </div>
         ) : (
         <WritingEditorCanvas

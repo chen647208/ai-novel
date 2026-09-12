@@ -11,3 +11,6 @@
 
 /** 打开命令面板：命令面板触发按钮派发，应用壳监听。 */
 export const COMMAND_PALETTE_EVENT = 'hongyue:command-palette.open';
+
+/** 打开受保护会话对话框：编辑器等触发点派发，对话框监听后自开。 */
+export const OPEN_PROTECTED_SESSION_EVENT = 'hongyue:protected-session.open';

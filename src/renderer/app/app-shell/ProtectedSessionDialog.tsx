@@ -13,9 +13,10 @@
  * 解密需要已解锁的同口令会话。
  */
 import { Shield } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { OPEN_PROTECTED_SESSION_EVENT } from '@/shared/constants/appEvents';
 import { dialogService } from '@/shared/services/dialogService';
 import { protectedSession } from '@/shared/services/protectedSessionService';
 import { Button } from '@/shared/ui/Button';
@@ -35,6 +36,13 @@ export const ProtectedSessionDialog: React.FC = () => {
   const unlocked = protectedSession.unlocked;
 
   const refresh = (): void => setTick((v) => v + 1);
+
+  // 外部触发点（加密章节视图等）派发事件即打开本对话框
+  useEffect(() => {
+    const openHandler = (): void => setOpen(true);
+    window.addEventListener(OPEN_PROTECTED_SESSION_EVENT, openHandler);
+    return () => window.removeEventListener(OPEN_PROTECTED_SESSION_EVENT, openHandler);
+  }, []);
 
   const handleUnlock = async (): Promise<void> => {
     setBusy(true);

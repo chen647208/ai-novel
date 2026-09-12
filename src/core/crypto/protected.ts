@@ -74,6 +74,25 @@ export class ProtectedSession {
   private keys = new Map<string, CryptoKey>();
   private passphrase = '';
   private salt: Uint8Array | null = null;
+  private listeners = new Set<() => void>();
+
+  /** 订阅解锁/锁定状态变化（供 UI 响应式刷新）。 */
+  subscribe(listener: () => void): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  private notify(): void {
+    for (const listener of this.listeners) {
+      try {
+        listener();
+      } catch {
+        // 订阅者异常不影响状态变更
+      }
+    }
+  }
 
   get unlocked(): boolean {
     return this.keys.size > 0;
@@ -85,12 +104,14 @@ export class ProtectedSession {
     this.passphrase = passphrase;
     this.salt = crypto.getRandomValues(new Uint8Array(16));
     await this.keyFor(this.salt);
+    this.notify();
   }
 
   lock(): void {
     this.keys.clear();
     this.passphrase = '';
     this.salt = null;
+    this.notify();
   }
 
   /** 会话内加密正文（随机 IV，信封自带会话盐）。未解锁抛错。 */

@@ -360,7 +360,11 @@
     "emptyBookHint": "先建第一章，或回结构页用 AI 生成章节细纲后再来写作。",
     "createFirstChapter": "新建第一章",
     "backToStructure": "回结构页",
-    "deleteChapterConfirm": "确定要删除《{{title}}》吗？正文、历史与快照一并移除，不可恢复。"
+    "deleteChapterConfirm": "确定要删除《{{title}}》吗？正文、历史与快照一并移除，不可恢复。",
+    "encryptedLocked": "本章已加密，解锁受保护会话后可查看。",
+    "unlockSession": "解锁受保护会话",
+    "encryptedDecryptFailed": "解密失败：口令错误或数据损坏。",
+    "encryptedUnlockedHint": "已解锁显示（只读）。如需编辑，请先在受保护会话中解密该章。"
   },
   "utils": {
     "tokenUsage": "输入: {{input}} | 输出: {{output}} | 总计: {{total}}",

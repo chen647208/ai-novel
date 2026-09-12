@@ -63,3 +63,18 @@ describe('ProtectedSession（受保护会话）', () => {
     await expect(wrong.decrypt(envelope)).rejects.toThrow('口令错误');
   });
 });
+
+describe('ProtectedSession 订阅', () => {
+  it('unlock/lock 通知订阅者，退订后不再通知', async () => {
+    const session = new ProtectedSession();
+    let n = 0;
+    const off = session.subscribe(() => { n += 1; });
+    await session.unlock('口令-abc123');
+    expect(n).toBe(1);
+    session.lock();
+    expect(n).toBe(2);
+    off();
+    await session.unlock('口令-abc123');
+    expect(n).toBe(2);
+  });
+});
