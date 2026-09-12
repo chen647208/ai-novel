@@ -28,6 +28,23 @@ const check = process.argv.includes('--check');
 const lock = JSON.parse(readFileSync(lockPath, 'utf-8'));
 const packages = lock.packages ?? {};
 
+/** 运行期依赖只允许宽松许可（copyleft 只借设计不引代码，见 AGENTS.md 一）。 */
+const ALLOWED_LICENSES = new Set([
+  'MIT',
+  'MIT-0',
+  'ISC',
+  'Apache-2.0',
+  'BSD-2-Clause',
+  'BSD-3-Clause',
+  '0BSD',
+  'CC0-1.0',
+  'Unlicense',
+  'BlueOak-1.0.0',
+  'Python-2.0',
+  'Zlib',
+  'WTFPL',
+]);
+
 /** 从 lock 的 key 取包名（取最后一段 node_modules/ 之后）。 */
 function nameOf(key) {
   const marker = 'node_modules/';
@@ -76,6 +93,14 @@ const content = lines.join('\n');
 if (unknown.length > 0) {
   console.error(`以下依赖缺少许可证字段，请人工确认：\n  ${unknown.join('\n  ')}`);
 }
+const disallowed = rows.filter((r) => !ALLOWED_LICENSES.has(r.license));
+if (disallowed.length > 0) {
+  console.error(
+    `以下依赖许可证不在允许清单（仅限宽松许可）：\n  ${disallowed
+      .map((r) => `${r.name}@${r.version} ${r.license || 'UNKNOWN'}`)
+      .join('\n  ')}`,
+  );
+}
 
 if (check) {
   const current = existsSync(outPath) ? readFileSync(outPath, 'utf-8') : '';
@@ -83,8 +108,8 @@ if (check) {
     console.error('THIRD-PARTY-LICENSES.md 与依赖现状不一致，请运行 `npm run licenses:generate`。');
     process.exit(1);
   }
-  if (unknown.length > 0) process.exit(1);
-  console.log(`许可证清单校验通过（${rows.length} 项）。`);
+  if (unknown.length > 0 || disallowed.length > 0) process.exit(1);
+  console.log(`许可证清单校验通过（${rows.length} 项，全部为宽松许可）。`);
 } else {
   writeFileSync(outPath, content, 'utf-8');
   console.log(`已写入 THIRD-PARTY-LICENSES.md（${rows.length} 项，${unknown.length} 项缺失许可证）。`);

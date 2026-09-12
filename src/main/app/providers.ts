@@ -177,7 +177,14 @@ export const fileProvider: Provider = {
         if (typeof content !== 'string' || content.length > 20_000_000) {
           throw new Error(`非法文件内容：${name}`);
         }
-        if (name.includes('..') || name.startsWith('/')) {
+        const normalized = name.replace(/\\/g, '/');
+        if (
+          normalized.length === 0 ||
+          normalized.includes('..') ||
+          normalized.startsWith('/') ||
+          /^[a-zA-Z]:/.test(normalized) ||
+          path.isAbsolute(name)
+        ) {
           throw new Error(`非法文件名：${name}`);
         }
         clean[name] = content;
