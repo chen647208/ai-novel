@@ -31,6 +31,6 @@
 
 ## 维护建议
 
-- 新增世界构建入口优先接到 `KnowledgeFeaturePanels.tsx`
+- 世界构建入口优先接到 `KnowledgeFeaturePanels.tsx`
 - 向量索引、Embedding 与搜索实现继续集中在 `services`
 - 知识库面板的展示逻辑拆在 `components/` 子组件，主编排器只保留状态与接线
