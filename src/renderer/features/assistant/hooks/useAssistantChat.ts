@@ -11,6 +11,7 @@
  * 助手聊天编排（从 GlobalAssistant 抽出）：消息流、输入、发送/重试/停止、
  * 会话记忆、卡片模板选择。卡片落库经 addCardToProject 回调交回组件（保持归因与审批语义）。
  */
+import type { AgentTurnResult } from '@core/ai';
 import { indexService } from '@core/index';
 import type { TFunction } from 'i18next';
 import { useEffect, useRef, useState } from 'react';
@@ -31,6 +32,7 @@ import {
   type Project,
 } from '../../../../shared/types';
 import { approvalBroker, sessionManager } from '../services/aiRuntime';
+import { assistantTaskService } from '../services/assistantTaskService';
 import { type ChatMessage } from '../types';
 import { useAssistantHistory } from './useAssistantHistory';
 
@@ -75,7 +77,7 @@ export function useAssistantChat({
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
   const [cardPromptTemplates, setCardPromptTemplates] = useState<CardPromptTemplate[]>([]);
   const [selectedCardTemplateId, setSelectedCardTemplateId] = useState<string | null>(null);
-  const streamAbortRef = useRef<AbortController | null>(null);
+  const streamAbortRef = useRef<string | null>(null);
 
   useEffect(() => {
     setCardPromptTemplates(getDefaultCardPrompts());
@@ -202,8 +204,6 @@ export function useAssistantChat({
       timestamp: Date.now(),
     }]);
 
-    const controller = new AbortController();
-    streamAbortRef.current = controller;
     // Agent 整轮可停止：停止键靠该 id 显示，中止经 signal 传入循环
     setStreamingMessageId('agent');
     setLastToolChain([]);
@@ -222,23 +222,36 @@ export function useAssistantChat({
     // 会话记忆：本次发送前已落盘的消息（不含刚推入的本轮） + 摘要
     const history = await buildHistoryTurns(activeModel);
 
-    const result = await sessionManager.run({
+    // 交给后台任务服务：面板关闭/切换书籍不中止；同一时刻串行执行
+    const taskHandle = assistantTaskService.enqueue({
       bookId: project?.id,
-      task: taskText,
-      project,
-      index: (project && indexService.snapshot(project.id)) || undefined,
-      model: activeModel,
-      fallbackModel: models.find((m) => m.id !== activeModel?.id && m.isEnabled !== false && isModelUsable(m)),
-      history,
-      images,
-      cardTemplate: selectedCardTemplateId
-        ? cardPromptTemplates.find((tpl) => tpl.id === selectedCardTemplateId)
-        : undefined,
-      signal: controller.signal,
+      label: text,
+      run: (signal) => sessionManager.run({
+        bookId: project?.id,
+        task: taskText,
+        project,
+        index: (project && indexService.snapshot(project.id)) || undefined,
+        model: activeModel,
+        fallbackModel: models.find((m) => m.id !== activeModel?.id && m.isEnabled !== false && isModelUsable(m)),
+        history,
+        images,
+        cardTemplate: selectedCardTemplateId
+          ? cardPromptTemplates.find((tpl) => tpl.id === selectedCardTemplateId)
+          : undefined,
+        signal,
+      }),
     });
+    streamAbortRef.current = taskHandle.id;
 
+    const outcome = await taskHandle.result;
     streamAbortRef.current = null;
     setStreamingMessageId(null);
+    const result = outcome.value as AgentTurnResult | undefined;
+    if (!result) {
+      // 中止（排队中移除或运行中被取消）：不追加答复
+      setIsLoading(false);
+      return;
+    }
     // 本轮工具链快照：callId 关联调用与结果，供聊天区折叠展示
     try {
       const names = new Map<string, string>();
@@ -266,7 +279,8 @@ export function useAssistantChat({
   };
 
   const handleSendMessage = () => {
-    if ((!input.trim() && pendingFiles.length === 0 && pendingImages.length === 0) || isLoading) return;
+    // 允许在上一条运行中继续发送：任务服务串行排队（后台多任务）
+    if (!input.trim() && pendingFiles.length === 0 && pendingImages.length === 0) return;
     void sendMessageInternal(input, [...pendingFiles], pendingImages.map(({ mime, dataUrl }) => ({ mime, dataUrl })));
     setInput('');
     setPendingFiles([]);
@@ -277,7 +291,7 @@ export function useAssistantChat({
 
   const handleStopStreaming = () => {
     // 先真正中止底层请求，再复位 UI 状态
-    streamAbortRef.current?.abort();
+    if (streamAbortRef.current) assistantTaskService.abort(streamAbortRef.current);
     streamAbortRef.current = null;
     if (streamingMessageId) {
       setMessages(prev => prev.map(msg => {

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import React, { useState } from 'react';
 
+import AssistantTasksIndicator from '@/features/assistant/components/AssistantTasksIndicator';
 import { useTranslation } from '@/i18n';
 import { resolveTheme } from '@/shared/services/themeService';
 import { Button } from '@/shared/ui/Button';
@@ -194,6 +195,7 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
             <PanelRight className="size-4" />
           </IconButton>
         )}
+        <AssistantTasksIndicator />
         <SyncDialog project={project} />
         <ProtectedSessionDialog />
 

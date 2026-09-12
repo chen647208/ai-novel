@@ -381,7 +381,7 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
                 }
               }}
             />
-            {isLoading && streamingMessageId ? (
+            {isLoading && streamingMessageId && (
               <Button
                 variant="outline"
                 size="icon"
@@ -391,17 +391,16 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
               >
                 <Square className="size-4" />
               </Button>
-            ) : (
-              <Button
-                size="icon"
-                onClick={handleSendMessage}
-                disabled={isLoading || !hasModel || (!input.trim() && pendingFiles.length === 0 && pendingImages.length === 0)}
-                title={!hasModel ? t('dialog.noModel') : t('chat.sendTitle')}
-                className="shrink-0"
-              >
-                <Send className="size-4" />
-              </Button>
             )}
+            <Button
+              size="icon"
+              onClick={handleSendMessage}
+              disabled={!hasModel || (!input.trim() && pendingFiles.length === 0 && pendingImages.length === 0)}
+              title={!hasModel ? t('dialog.noModel') : t('chat.sendTitle')}
+              className="shrink-0"
+            >
+              <Send className="size-4" />
+            </Button>
           </div>
         </div>
       }

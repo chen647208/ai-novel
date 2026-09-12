@@ -1,4 +1,20 @@
 {
+  "tasks": {
+    "title": "Assistant tasks",
+    "count": "{{count}} running",
+    "doneCount": "{{count}} done",
+    "runningTip": "{{count}} assistant tasks running in background",
+    "untitled": "Untitled task",
+    "abort": "Stop",
+    "clear": "Clear finished",
+    "status": {
+      "queued": "Queued",
+      "running": "Running",
+      "done": "Done",
+      "error": "Failed",
+      "aborted": "Stopped"
+    }
+  },
   "category": {
     "inspiration": "Inspiration",
     "knowledge": "Knowledge Base",
