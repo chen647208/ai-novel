@@ -22,7 +22,7 @@
 15. **[22 插件逻辑贡献协议](22-plugin-logic-contributions.md)** — editor 扩展与逻辑 hooks 的执行通道、协议与验收
 16. **[23 数据层存储选型](23-data-layer-storage.md)** — 文件/数据库/日志的边界与按类分层设计
 17. **[24 本地优先数据层](24-local-first-data-layer.md)** — 2026 格局调研与事件溯源选型
-13. **[20 外部项目基准](20-external-benchmark.md)** — Trending 榜单 16 个项目的逐项剖析与分类判定（完整上位替代 / 局部更优），附来源地址与许可证红线
+18. **[25 数据安全](25-data-safety.md)** — 威胁模型、防护分层、引擎决策与验证方式
 
 ## 一页纸总览
 
