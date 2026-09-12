@@ -43,6 +43,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   pluginSandboxRun: (request: unknown) => ipcRenderer.invoke(IPC.pluginSandboxRun, request),
   pluginVerifySignature: (contentBase64: string, signatureBase64: string, publicKeyPem: string) =>
     ipcRenderer.invoke(IPC.pluginVerifySignature, contentBase64, signatureBase64, publicKeyPem),
+
+  crashReporting: {
+    getConfig: () => ipcRenderer.invoke(IPC.crashGetConfig),
+    setEnabled: (enabled: boolean) => ipcRenderer.invoke(IPC.crashSetEnabled, enabled),
+  },
   openPath: (targetPath: string) => ipcRenderer.invoke(IPC.openPath, targetPath),
   openExternal: (url: string) => ipcRenderer.invoke(IPC.openExternal, url),
   exportPackage: (files: Record<string, string>, defaultPath: string) => ipcRenderer.invoke(IPC.exportPackage, files, defaultPath),

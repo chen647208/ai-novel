@@ -11,6 +11,7 @@ import { app, crashReporter } from 'electron';
 
 import { aiGatewayProvider } from './ai/gateway.js';
 import { AppContainer, type ProviderContext } from './app/container.js';
+import { crashSubmitUrl, readCrashReportingConfig } from './app/crashReportConfig.js';
 import { legacyDataDir, migrateLegacyDataDir, shouldRunMigration, standardDataDir } from './app/dataDir.js';
 import { requestRendererFlush } from './app/flushHandshake.js';
 import {
@@ -79,8 +80,15 @@ process.on('unhandledRejection', (reason) => {
 
 void app.whenReady().then(async () => {
   if (!hasSingleInstanceLock) return;
-  // 崩溃转储本地留存（不上传服务器），崩溃后可在转储目录手动取用
-  crashReporter.start({ productName: '红月创作', uploadToServer: false, compress: true });
+  // 崩溃转储：默认本地留存；用户开启且配置了上报地址时才上传
+  const crashConfig = readCrashReportingConfig();
+  const submitURL = crashSubmitUrl();
+  crashReporter.start({
+    productName: '红月创作',
+    uploadToServer: crashConfig.enabled && !!submitURL,
+    submitURL,
+    compress: true,
+  });
   applySecurityHeaders();
   logger.info('app', `User data path: ${app.getPath('userData')}`);
   // 更名迁移：仅标准路径跑（--user-data-dir 隔离的测试/调试实例不碰真实数据）

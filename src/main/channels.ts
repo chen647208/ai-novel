@@ -31,6 +31,8 @@ export const IPC = {
   pluginListDirectory: 'plugin-list-directory',
   pluginSandboxRun: 'plugin-sandbox-run',
   pluginVerifySignature: 'plugin-verify-signature',
+  crashGetConfig: 'crash:get-config',
+  crashSetEnabled: 'crash:set-enabled',
   openPath: 'open-path',
   openExternal: 'open-external',
   exportPackage: 'export-package',

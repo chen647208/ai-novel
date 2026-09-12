@@ -20,6 +20,7 @@ import { closeSqlite,registerSqliteIpc } from '../sqlite-ipc.js';
 import { registerUpdaterIpc } from '../updater.js';
 import { registerVectorIpc } from '../vector-ipc.js';
 import type { Provider, ProviderContext } from './container.js';
+import { crashSubmitUrl, readCrashReportingConfig, writeCrashReportingConfig } from './crashReportConfig.js';
 import { registerDiagnosticsIpc } from './diagnostics.js';
 import { extractPdfText } from './documents.js';
 import { registerPluginFsIpc } from './pluginFs.js';
@@ -130,6 +131,14 @@ export const fileProvider: Provider = {
       (_event, contentBase64: string, signatureBase64: string, publicKeyPem: string) =>
         verifyEd25519(Buffer.from(contentBase64, 'base64'), signatureBase64, publicKeyPem),
     );
+    ipcMain.handle(IPC.crashGetConfig, () => ({
+      enabled: readCrashReportingConfig().enabled,
+      configured: !!crashSubmitUrl(),
+    }));
+    ipcMain.handle(IPC.crashSetEnabled, (_event, enabled: boolean) => {
+      writeCrashReportingConfig({ enabled: enabled === true });
+      return { restartRequired: true };
+    });
 
     // 系统文件管理器打开路径（日志/数据目录入口；只允许 userData 内路径）
     ipcMain.handle(IPC.openPath, async (_event, targetPath: string) => {

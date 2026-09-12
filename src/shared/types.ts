@@ -1119,6 +1119,11 @@ export interface ElectronAPI {
   pluginSandboxRun: (request: SandboxRunRequest) => Promise<SandboxRunResult>;
   /** 校验插件包签名（Ed25519，主进程持私钥无关的公开校验）。 */
   pluginVerifySignature: (contentBase64: string, signatureBase64: string, publicKeyPem: string) => Promise<boolean>;
+  /** 崩溃上报配置（默认只本地留存；开启且宿主配置地址后上传，重启生效）。 */
+  crashReporting: {
+    getConfig: () => Promise<{ enabled: boolean; configured: boolean }>;
+    setEnabled: (enabled: boolean) => Promise<{ restartRequired: boolean }>;
+  };
   /** 系统文件管理器打开路径（日志目录/数据目录入口）。 */
   openPath: (targetPath: string) => Promise<boolean>;
   /** 外部浏览器打开链接（仅 https；应用内无浏览器）。 */
