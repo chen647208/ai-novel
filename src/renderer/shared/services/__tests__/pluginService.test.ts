@@ -27,6 +27,7 @@ description: 社区黄金三章扩展写法。触发词：社区开篇
 # 扩展方法论
 正文内容。
 `,
+  '/data/plugins/com.example.golden3/skills/handler.js': 'function run(input) { return { output: input }; }',
 };
 
 vi.mock('@/shared/services/repository', () => ({}));
@@ -46,7 +47,10 @@ describe('pluginService（磁盘发现 + 技能贡献装配）', () => {
         },
         pluginListDirectory: async (rootDir: string, rel: string) => {
           if (`${rootDir}/${rel}` === '/data/plugins/com.example.golden3/skills') {
-            return [{ name: 'extra.md', type: 'file' }];
+            return [
+              { name: 'extra.md', type: 'file' },
+              { name: 'handler.js', type: 'file' },
+            ];
           }
           return [];
         },
@@ -71,6 +75,7 @@ describe('pluginService（磁盘发现 + 技能贡献装配）', () => {
     // bootstrap 即激活（否则贡献点永不生效）
     expect(status?.state).toBe('active');
     expect(catalog.get('golden3-extra')?.body).toContain('扩展方法论');
+    expect(catalog.get('golden3-extra')?.handler?.code).toContain('function run');
 
     host.disable('com.example.golden3');
     expect(catalog.get('golden3-extra')).toBeUndefined();

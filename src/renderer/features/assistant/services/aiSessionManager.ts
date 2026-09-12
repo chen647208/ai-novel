@@ -37,6 +37,7 @@ import { aiGatewayClient } from '@/shared/services/ai/gatewayClient.js';
 import { syncMcpTools } from '@/shared/services/mcpClient';
 
 import { buildHistoryText } from './chatHistory.js';
+import { runSkillHandler } from './skillHandlerService';
 
 function electron(): NonNullable<Window['electronAPI']> {
   if (!window.electronAPI) {
@@ -214,6 +215,14 @@ export class AiSessionManager {
               },
               // 技能按名加载（会话内状态变更，不碰数据；激活后白名单对后续轮次生效）
               skillLoad: (name: string) => this.catalog.activate(name),
+              // 双轨技能逻辑轨：沙箱执行 + 能力白名单裁决（handler 只能建议工具调用）
+              skillRun: (name: string, skillInput: unknown) => {
+                const skill = this.catalog.get(name);
+                if (!skill) {
+                  return Promise.resolve({ ok: false, error: { kind: 'runtime', message: `没有名为“${name}”的技能` } });
+                }
+                return runSkillHandler(skill, skillInput);
+              },
             },
             extra: {
               // 会话历史：宿主截断后的最近 N 轮，经 history section 注入（空即跳过）

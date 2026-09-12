@@ -101,6 +101,16 @@ export function createContributionInstaller(deps: PluginDeps): ContributionInsta
         if (parsed.skill) {
           deps.skillCatalog.register(parsed.skill);
           const name = parsed.skill.name;
+          // 双轨技能：同目录 handler.js/handler.mjs 作为逻辑轨（沙箱内执行）
+          const dir = file.slice(0, file.lastIndexOf('/'));
+          for (const handlerName of ['handler.js', 'handler.mjs']) {
+            const handlerKey = `${dir}/${handlerName}`;
+            const code = plugin.files[handlerKey];
+            if (code !== undefined) {
+              deps.skillCatalog.setHandler(name, { code, sourceFile: `${manifest.id}/${handlerKey}` });
+              break;
+            }
+          }
           sink.add({ dispose: () => deps.skillCatalog.unregister(name) });
         }
       }

@@ -16,6 +16,14 @@
  * 纯模块：发现来源由调用方注入（内置 ?raw 打包 / 用户目录 / M3 插件贡献）。
  */
 
+/** 技能的逻辑轨（轨道二）：沙箱内执行的 handler 源码。 */
+export interface SkillHandler {
+  /** handler 源码；应定义 `function run(input)`。 */
+  code: string;
+  /** 来源文件（诊断用）。 */
+  sourceFile: string;
+}
+
 /** 一个已解析的技能。body 是完整方法论正文（不常驻 prompt）。 */
 export interface Skill {
   name: string;
@@ -28,6 +36,8 @@ export interface Skill {
   source: 'builtin' | 'user' | 'plugin' | 'book';
   /** 方法论正文 */
   body: string;
+  /** 逻辑轨（可选）：双轨技能在资源轨之外提供可执行的 handler。 */
+  handler?: SkillHandler;
 }
 
 /** 解析失败的容错信息（跳过该文件并记录原因）。 */
@@ -155,6 +165,14 @@ export class SkillCatalog {
     return this.skills.delete(name);
   }
 
+  /** 为已注册技能挂上逻辑轨 handler（插件装载或用户技能装配时调用）。 */
+  setHandler(name: string, handler: SkillHandler): boolean {
+    const skill = this.skills.get(name);
+    if (!skill) return false;
+    skill.handler = handler;
+    return true;
+  }
+
   list(): Skill[] {
     return [...this.skills.values()];
   }
@@ -210,9 +228,9 @@ export class SkillCatalog {
   }
 
   /** 当前激活技能（PromptContext.activeSkill 数据源；tools 供 Agent 循环做白名单拦截）。 */
-  getActive(): { name: string; body: string; tools: string[] } | null {
+  getActive(): { name: string; body: string; tools: string[]; handler?: SkillHandler } | null {
     if (!this.activeName) return null;
     const skill = this.skills.get(this.activeName);
-    return skill ? { name: skill.name, body: skill.body, tools: skill.tools } : null;
+    return skill ? { name: skill.name, body: skill.body, tools: skill.tools, handler: skill.handler } : null;
   }
 }

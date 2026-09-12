@@ -54,11 +54,11 @@ describe('按需上下文工具', () => {
     const registry = createToolRegistry();
     for (const id of [
       'core.chapter.list', 'core.chapter.read', 'core.outline.read', 'core.character.list',
-      'core.knowledge.read', 'core.text.search', 'core.text.semanticSearch', 'core.skill.load',
+      'core.knowledge.read', 'core.text.search', 'core.text.semanticSearch', 'core.skill.load', 'core.skill.run',
     ]) {
       expect(registry.has(id), id).toBe(true);
     }
-    expect(registry.list()).toHaveLength(17);
+    expect(registry.list()).toHaveLength(18);
   });
 
   it('chapter.list 按 order 排序并标注正文状态', async () => {

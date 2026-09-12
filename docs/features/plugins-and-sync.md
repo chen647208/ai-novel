@@ -9,7 +9,9 @@
 - **manifest v0**：插件 = `userData/plugins/<反向域名 id>/plugin.json` + 贡献文件。
   校验错误定位到 JSON 路径；`host` 版本区间不匹配则贡献整体失效并上报。
 - **资源型贡献点（v0）**：
-  - `skills`：SKILL.md 写法技能，进入技能目录（渐进注入、可卸载）
+  - `skills`：SKILL.md 写法技能，进入技能目录（渐进注入、可卸载）。同目录可附
+    `handler.js`/`handler.mjs` 作为逻辑轨；handler 在隔离沙箱里执行，只能建议工具调用，
+    经技能 `tools` 白名单裁决（越界拒绝）。
   - `types`：类型模板（强制 `短id.` 命名空间前缀，防抢占内置类型）
   - `buildProfiles`：导出构建档（JSON/YAML 双序列化，`.yml` 可 diff 分享；构建管线消费）
   - `hooks`：声明式策略（JSON，v0 支持 ai 接缝的 inject/filter）

@@ -474,8 +474,37 @@ export const skillLoadTool: ToolSpec = {
   },
 };
 
-// ── 生成类工具（write:proposal：产出提案文本，经审批后由用户落稿）──────
+/** core.skill.run：执行双轨技能的逻辑轨（沙箱内），返回输出与建议的工具调用。 */
+export const skillRunTool: ToolSpec = {
+  id: 'core.skill.run',
+  description: '执行双轨技能的逻辑处理器（在隔离沙箱里运行）。返回技能输出与它建议调用的工具；仅对带逻辑轨的技能有效。',
+  parameters: {
+    type: 'object',
+    properties: {
+      name: { type: 'string', description: '技能名称' },
+      input: { type: 'string', description: '传给处理器的输入（文本或 JSON 字符串）' },
+    },
+    required: ['name'],
+  },
+  permission: 'read',
+  async execute(req, ctx) {
+    const args = (req.args ?? {}) as { name?: unknown; input?: unknown };
+    const name = str(args.name, 'name');
+    const run = ctx.services?.skillRun as
+      | ((skillName: string, input: unknown) => Promise<{ ok: boolean; output?: unknown; toolCalls?: unknown; error?: { message?: string } }>)
+      | undefined;
+    if (typeof run !== 'function') {
+      return { ok: false, error: '技能运行服务不可用（宿主未注入）' };
+    }
+    const result = await run(name, args.input);
+    if (!result.ok) {
+      return { ok: false, error: result.error?.message ?? '技能执行失败' };
+    }
+    return { ok: true, data: { output: result.output, toolCalls: result.toolCalls ?? [] } };
+  },
+};
 
+// ── 生成类工具（write:proposal：产出提案文本，经审批后由用户落稿）──────
 async function generateProposal(ctx: ToolContext, prompt: string): Promise<{ ok: boolean; data?: unknown; error?: string }> {
   const response = await aiGatewayClient.complete(modelOf(ctx), prompt, { signal: ctx.signal } as CallOptions);
   if (response.error) {
@@ -605,6 +634,7 @@ export function createBuiltinTools(): ToolSpec[] {
     textSearchTool,
     textSemanticSearchTool,
     skillLoadTool,
+    skillRunTool,
     textContinueTool,
     textRewriteTool,
     outlineGenerateTool,
