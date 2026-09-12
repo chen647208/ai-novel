@@ -8,10 +8,13 @@
  */
 
 /**
- * 设置页签注册表：内置与插件页签同路径。注册返回解绑函数；getSnapshot 缓存保证引用稳定。
+ * 设置页签注册表：内置与插件页签同路径。注册返回解绑函数；快照按 order 排序且引用稳定。
  * 页签内容经 render(ctx) 渲染，ctx 为 SettingsTabContentProps（设置面板共用入参）。
+ * 存储与订阅语义复用统一贡献注册表引擎（design/04 §13）。
  */
 import type React from 'react';
+
+import { ContributionRegistry } from '@/shared/services/contributionRegistry';
 
 import type { SettingsTabContentProps } from '../types';
 
@@ -27,43 +30,9 @@ export interface SettingsTabContribution {
   render: (ctx: SettingsTabContentProps) => React.ReactNode;
 }
 
-type Listener = () => void;
-
-export class SettingsTabRegistry {
-  private readonly tabs = new Map<string, SettingsTabContribution>();
-  private readonly listeners = new Set<Listener>();
-  private snapshot: SettingsTabContribution[] | null = null;
-
-  register(tab: SettingsTabContribution): () => void {
-    this.tabs.set(tab.id, tab);
-    this.bump();
-    return () => {
-      this.tabs.delete(tab.id);
-      this.bump();
-    };
-  }
-
-  list(): SettingsTabContribution[] {
-    if (!this.snapshot) {
-      this.snapshot = [...this.tabs.values()].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-    }
-    return this.snapshot;
-  }
-
-  has(id: string): boolean {
-    return this.tabs.has(id);
-  }
-
-  subscribe(listener: Listener): () => void {
-    this.listeners.add(listener);
-    return () => {
-      this.listeners.delete(listener);
-    };
-  }
-
-  private bump(): void {
-    this.snapshot = null;
-    for (const listener of this.listeners) listener();
+export class SettingsTabRegistry extends ContributionRegistry<SettingsTabContribution> {
+  constructor() {
+    super('settingsTab');
   }
 }
 

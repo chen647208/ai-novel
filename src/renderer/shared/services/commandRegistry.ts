@@ -10,7 +10,10 @@
 /**
  * 命令注册表：命令面板的唯一来源。应用壳与功能在启动时注册内置命令，
  * 插件/后续扩展点可继续注册；注册返回解绑函数（可逆）。
+ * 存储与订阅语义复用统一贡献注册表引擎（§13）。
  */
+import { ContributionRegistry } from './contributionRegistry';
+
 export interface AppCommand {
   id: string;
   title: string;
@@ -18,33 +21,9 @@ export interface AppCommand {
   run: () => void;
 }
 
-type Listener = (commands: AppCommand[]) => void;
-
-export class CommandRegistry {
-  private readonly commands = new Map<string, AppCommand>();
-  private readonly listeners = new Set<Listener>();
-
-  register(command: AppCommand): () => void {
-    this.commands.set(command.id, command);
-    this.emit();
-    return () => {
-      this.commands.delete(command.id);
-      this.emit();
-    };
-  }
-
-  list(): AppCommand[] {
-    return [...this.commands.values()];
-  }
-
-  subscribe(listener: Listener): () => void {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
-  }
-
-  private emit(): void {
-    const snapshot = this.list();
-    for (const listener of this.listeners) listener(snapshot);
+export class CommandRegistry extends ContributionRegistry<AppCommand> {
+  constructor() {
+    super('command');
   }
 }
 
