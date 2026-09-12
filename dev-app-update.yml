@@ -1,0 +1,5 @@
+# 自动更新本地演练配置（HONGYUE_UPDATE_DRY_RUN=1 时 electron-updater 读取）。
+# 用途：不发布正式包也能验证 检查更新 → 下载 → 安装 链路。
+provider: github
+owner: chen647208
+repo: hongyue-creation

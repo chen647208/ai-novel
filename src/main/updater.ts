@@ -33,13 +33,21 @@ function broadcast(status: UpdaterStatus): void {
 let registered = false;
 
 export function registerUpdaterIpc(): void {
-  // 开发/网页预览无 app-update.yml，退回渲染层 GitHub 查询
-  if (!app.isPackaged) return;
+  // 开发/网页预览无 app-update.yml，退回渲染层 GitHub 查询；dry-run 例外（读 dev-app-update.yml）
+  const dryRun = process.env.HONGYUE_UPDATE_DRY_RUN === '1';
+  if (!app.isPackaged && !dryRun) return;
   if (registered) return;
   registered = true;
 
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
+  // 渠道可经环境变量覆盖（如 beta）；dry-run 时常读 dev-app-update.yml 并允许预发布
+  const channel = process.env.HONGYUE_UPDATE_CHANNEL;
+  if (channel) autoUpdater.channel = channel;
+  if (dryRun) {
+    autoUpdater.forceDevUpdateConfig = true;
+    autoUpdater.allowPrerelease = true;
+  }
   autoUpdater.on('checking-for-update', () => broadcast({ t: 'checking' }));
   autoUpdater.on('update-available', (info) => broadcast({ t: 'available', version: info.version }));
   autoUpdater.on('update-not-available', () => broadcast({ t: 'not-available' }));
