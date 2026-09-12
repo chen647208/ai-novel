@@ -12,8 +12,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { useProjectStore } from '@/app/stores/projectStore';
 import { useTranslation } from '@/i18n';
-import { repository } from '@/shared/services/repository';
 import type { SearchHit } from '@/shared/services/repository/types';
+import { hybridSearch } from '@/shared/services/searchService';
 import { DialogTitle } from '@/shared/ui/Dialog';
 import { Input } from '@/shared/ui/Input';
 import { ModalShell } from '@/shared/ui/ModalShell';
@@ -44,6 +44,7 @@ function renderSnippet(snippet: string): React.ReactNode[] {
 const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, onClose, onOpenResult }) => {
   const { t } = useTranslation('app');
   const projects = useProjectStore((s) => s.projects);
+  const activeProjectId = useProjectStore((s) => s.activeProjectId);
   const [query, setQuery] = useState('');
   const [hits, setHits] = useState<SearchHit[]>([]);
   const [busy, setBusy] = useState(false);
@@ -68,7 +69,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, onClose, 
     setBusy(true);
     const timer = setTimeout(async () => {
       try {
-        const result = await repository.search(q, { limit: 50 });
+        const result = await hybridSearch(q, { projectId: activeProjectId ?? undefined, limit: 50 });
         if (!cancelled) setHits(result);
       } catch {
         if (!cancelled) setHits([]);
@@ -80,7 +81,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, onClose, 
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [query]);
+  }, [query, activeProjectId]);
 
   const q = query.trim();
 
