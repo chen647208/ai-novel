@@ -11,6 +11,7 @@ import { AlertCircle, CheckCircle2, ChevronDown, ChevronUp, Copy, Download, Flas
 import React from 'react';
 
 import { templateDisplayName,useTranslation } from '@/i18n';
+import { getTemplateVariableDescriptions } from '@/shared/services/cards/cardPromptService';
 import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';
 import { DialogTitle } from '@/shared/ui/Dialog';
@@ -20,7 +21,6 @@ import { Textarea } from '@/shared/ui/Textarea';
 import { cn } from '@/shared/utils/cn';
 
 import type { CardPromptCategory } from '../../../../shared/types';
-import { getTemplateVariableDescriptions } from '../../cards/services/cardPromptService';
 import type { CardPromptSettingsPanelProps } from '../types';
 
 const fieldLabel = 'mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground';

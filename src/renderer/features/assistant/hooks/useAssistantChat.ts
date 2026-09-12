@@ -15,6 +15,9 @@ import { indexService } from '@core/index';
 import type { TFunction } from 'i18next';
 import { useEffect, useRef, useState } from 'react';
 
+import { AICardCommandService } from '@/shared/services/cards/aiCardCommandService';
+import { AICardCreationService } from '@/shared/services/cards/aiCardCreationService';
+import { getDefaultCardPrompts } from '@/shared/services/cards/cardPromptService';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
 
 import { ATTACHMENT_TRUNCATE } from '../../../../shared/constants/chapters';
@@ -27,9 +30,6 @@ import {
   type ModelConfig,
   type Project,
 } from '../../../../shared/types';
-import { AICardCommandService } from '../../cards/services/aiCardCommandService';
-import { AICardCreationService } from '../../cards/services/aiCardCreationService';
-import { getDefaultCardPrompts } from '../../cards/services/cardPromptService';
 import { approvalBroker, sessionManager } from '../services/aiRuntime';
 import { type ChatMessage } from '../types';
 import { useAssistantHistory } from './useAssistantHistory';

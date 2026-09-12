@@ -21,7 +21,6 @@ const featureNames = fs.existsSync(featuresDir)
  * 债务清单归 docs/design/02-target-architecture.md §2，清完一条删一条，不放宽规则。
  */
 const CROSS_FEATURE_DEBT = [
-  'assistant->cards',
   'consistency->knowledge',
   'inspiration->world',
   'knowledge->assistant',
@@ -29,7 +28,6 @@ const CROSS_FEATURE_DEBT = [
   'knowledge->timeline',
   'knowledge->world',
   'settings->assistant',
-  'settings->cards',
   'settings->consistency',
   'writing->assistant',
   'writing->foreshadowing',

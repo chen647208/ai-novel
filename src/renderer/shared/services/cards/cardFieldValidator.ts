@@ -17,7 +17,7 @@ import { uuidv7 } from '@core/entities';
 import { i18n } from '@/i18n';
 
 import { type AICardCommand } from '../../../../shared/types';
-import { type LooseRecord } from '../../../shared/utils/loose';
+import { type LooseRecord } from '../../utils/loose';
 
 /**
  * 字段定义配置

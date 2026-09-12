@@ -10,11 +10,11 @@
 /** 助手卡片落库（从 GlobalAssistant 抽出）：AI 归因提交 + 未知命令提示。 */
 import type { TFunction } from 'i18next';
 
+import { buildCardUpdates } from '@/shared/services/cards/cardApply';
 import { dialogService } from '@/shared/services/dialogService';
 import { logger } from '@/shared/utils/logger';
 
 import { type AICardCommand, type CreatedCard, type Project } from '../../../../shared/types';
-import { buildCardUpdates } from '../../cards/services/cardApply';
 
 interface UseAssistantCardsOptions {
   project: Project | null;

@@ -11,6 +11,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { dt,i18n } from '@/i18n';
 import { AIService } from '@/shared/services/ai/aiService';
+import { getDefaultCardPrompts, validateCardPromptTemplate } from '@/shared/services/cards/cardPromptService';
 import { isVaultRef, persistApiKey, removeApiKey } from '@/shared/services/credentialService';
 import { dialogService } from '@/shared/services/dialogService';
 import { embeddingModelService } from '@/shared/services/embeddingModelService';
@@ -28,7 +29,6 @@ import type { ModelProviderInfo } from '../../constants/modelProviders';
 import { repository } from '../../shared/services/repository';
 import { logger } from '../../shared/utils/logger';
 import { isModelConfigured } from '../../shared/utils/modelReadiness';
-import { getDefaultCardPrompts, validateCardPromptTemplate } from '../cards/services/cardPromptService';
 import SettingsModalFooter from './components/SettingsModalFooter';
 import SettingsModalHeader from './components/SettingsModalHeader';
 import SettingsTabContent from './components/SettingsTabContent';

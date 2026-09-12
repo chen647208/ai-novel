@@ -20,13 +20,13 @@ import type { IndexSnapshot } from '@core/index';
 import type { ModelConfig, Project } from '@shared/types';
 import type { ConsistencyCheckPromptTemplate } from '@shared/types';
 
-import { AICardCommandService } from '@/features/cards/services/aiCardCommandService';
-import { AICardCreationService } from '@/features/cards/services/aiCardCreationService';
 import { aiGatewayClient, type CallOptions } from '@/shared/services/ai/gatewayClient';
 import {
   performQuickSemanticCheck,
   performSemanticCheck,
 } from '@/shared/services/aiSemanticCheckService';
+import { AICardCommandService } from '@/shared/services/cards/aiCardCommandService';
+import { AICardCreationService } from '@/shared/services/cards/aiCardCreationService';
 import { roleLabel } from '@/shared/utils/displayLabels';
 
 import type { RecommendationContext } from './smartRecommendationService';

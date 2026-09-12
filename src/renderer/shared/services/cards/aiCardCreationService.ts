@@ -31,8 +31,8 @@ import {
   type TechnologyLevel,
   type TimelineEvent,
   type WorldHistory} from '../../../../shared/types';
-import { logger } from '../../../shared/utils/logger';
-import { asNum, asRecord, asRecords,asStr, asStrArr, type LooseRecord } from '../../../shared/utils/loose';
+import { logger } from '../../utils/logger';
+import { asNum, asRecord, asRecords,asStr, asStrArr, type LooseRecord } from '../../utils/loose';
 import { AICardCommandService } from './aiCardCommandService';
 import { AICardPromptService } from './aiCardPromptService';
 import { generateFieldReport,validateAndCompleteCardData } from './cardFieldValidator';
