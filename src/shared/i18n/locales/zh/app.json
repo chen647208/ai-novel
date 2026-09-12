@@ -28,7 +28,15 @@
     "clearFilter": "清除筛选",
     "words": "字数",
     "chapters": "章节",
-    "characters": "角色"
+    "characters": "角色",
+    "batchSelect": "批量管理",
+    "batchExit": "完成",
+    "batchSelected": "已选 {{count}} 本",
+    "selectAll": "全选",
+    "clearSelection": "清除选择",
+    "batchTag": "打标",
+    "batchTagMessage": "给所选书籍添加标签（逗号或空格分隔）：",
+    "batchDeleteConfirm": "确定删除所选的 {{count}} 本书籍？将移入回收站，30 天内可恢复。"
   },
   "search": {
     "title": "全文检索",

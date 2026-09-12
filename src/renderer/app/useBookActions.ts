@@ -36,6 +36,8 @@ export interface BookActions {
   /** 打标：标签数组整体替换（空数组即清除）。 */
   tagBook: (bookId: string, tags: string[]) => void;
   deleteBook: (bookId: string) => Promise<void>;
+  /** 批量删除：一次确认，逐本进回收站（进站失败的单本跳过）。 */
+  deleteBooks: (bookIds: string[]) => Promise<void>;
   /** 从回收站恢复（重名自动加序号，ID 冲突时换新 ID）。 */
   restoreTrashBook: (bookId: string) => Promise<void>;
   /** 彻底删除回收站条目（不可恢复）。 */
@@ -107,6 +109,35 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
     useProjectStore.getState().removeProject(bookId);
     if (wasActive && useProjectStore.getState().projects.length === 0) {
       // 删除后已无书籍：回到书籍库空态
+      useProjectStore.getState().setActiveProject(null);
+    }
+  }, []);
+
+  const deleteBooks = useCallback(async (bookIds: string[]) => {
+    const findBook = (id: string) => useProjectStore.getState().projects.find(p => p.id === id);
+    const targets = bookIds.filter((id) => findBook(id));
+    if (targets.length === 0) return;
+    if (!(await dialogService.confirm({ message: i18n.t('app:bookshelf.batchDeleteConfirm', { count: targets.length }), danger: true }))) return;
+    const moved: string[] = [];
+    for (const bookId of targets) {
+      const book = findBook(bookId);
+      if (!book) continue;
+      // 先进站再删库：进站失败则跳过该本，绝不丢数据
+      try {
+        await moveToTrash(book);
+        moved.push(bookId);
+      } catch (error) {
+        logger.error('Failed to move book to trash:', error);
+      }
+    }
+    if (moved.length === 0) {
+      dialogService.alert(i18n.t('app:book.trashFailed'));
+      return;
+    }
+    const activeId = useProjectStore.getState().activeProjectId;
+    const wasActiveDeleted = activeId !== null && moved.includes(activeId);
+    for (const id of moved) useProjectStore.getState().removeProject(id);
+    if (wasActiveDeleted && useProjectStore.getState().projects.length === 0) {
       useProjectStore.getState().setActiveProject(null);
     }
   }, []);
@@ -220,5 +251,5 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
     dialogService.alert(i18n.t('app:importAll.success'));
   }, []);
 
-  return { openBook, createBook, createQuickBook, renameBook, tagBook, deleteBook, restoreTrashBook, purgeTrashBook, duplicateBook, exportBook, importBook, clearCurrentProject, deleteCurrentProject, importAllData };
+  return { openBook, createBook, createQuickBook, renameBook, tagBook, deleteBook, deleteBooks, restoreTrashBook, purgeTrashBook, duplicateBook, exportBook, importBook, clearCurrentProject, deleteCurrentProject, importAllData };
 }

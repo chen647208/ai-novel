@@ -28,7 +28,15 @@
     "clearFilter": "Clear filter",
     "words": "Words",
     "chapters": "Chapters",
-    "characters": "Characters"
+    "characters": "Characters",
+    "batchSelect": "Select",
+    "batchExit": "Done",
+    "batchSelected": "{{count}} selected",
+    "selectAll": "Select all",
+    "clearSelection": "Clear",
+    "batchTag": "Tag",
+    "batchTagMessage": "Add tags to the selected books (comma or space separated):",
+    "batchDeleteConfirm": "Delete the {{count}} selected books? They move to trash and can be restored within 30 days."
   },
   "search": {
     "title": "Full-text search",

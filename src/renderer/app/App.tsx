@@ -295,6 +295,7 @@ const App: React.FC = () => {
               onRenameBook={actions.renameBook}
               onTagBook={actions.tagBook}
               onDeleteBook={actions.deleteBook}
+              onDeleteBooks={actions.deleteBooks}
               onDuplicateBook={actions.duplicateBook}
               onExportBook={actions.exportBook}
               onExportCover={handleExportCover}

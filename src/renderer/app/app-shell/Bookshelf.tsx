@@ -11,6 +11,7 @@ import {
   BookHeart,
   BookOpen,
   BookUp,
+  CheckSquare,
   Copy,
   Download,
   FolderOpen,
@@ -22,10 +23,12 @@ import {
   Pencil,
   Plus,
   Search,
+  Square,
   Tag,
   Trash2,
   Upload,
   Users,
+  X,
 } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -63,6 +66,8 @@ interface BookshelfProps {
   onRenameBook: (bookId: string, newTitle: string) => void;
   onTagBook: (bookId: string, tags: string[]) => void;
   onDeleteBook: (bookId: string) => void;
+  /** 批量删除：一次确认，逐本进回收站。 */
+  onDeleteBooks: (bookIds: string[]) => void;
   onDuplicateBook: (bookId: string) => void;
   onExportBook: (book: Project) => void;
   /** 导出封面图（PNG，失败退回 SVG）。 */
@@ -104,6 +109,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({
   onRenameBook,
   onTagBook,
   onDeleteBook,
+  onDeleteBooks,
   onDuplicateBook,
   onExportBook,
   onExportCover,
@@ -120,6 +126,8 @@ const Bookshelf: React.FC<BookshelfProps> = ({
   const [view, setView] = useViewPreference<'grid' | 'list'>('bookshelf.view', 'grid');
   const [trash, setTrash] = useState<TrashEntry[]>([]);
   const [trashOpen, setTrashOpen] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const reloadTrash = useCallback(() => {
     void listTrash().then(setTrash).catch(() => setTrash([]));
@@ -167,6 +175,42 @@ const Bookshelf: React.FC<BookshelfProps> = ({
     });
     if (input === null) return;
     onTagBook(book.id, normalizeTagInput(input));
+  };
+
+  const exitSelect = useCallback(() => {
+    setSelectMode(false);
+    setSelectedIds(new Set());
+  }, []);
+
+  const toggleSelect = useCallback((bookId: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(bookId)) next.delete(bookId);
+      else next.add(bookId);
+      return next;
+    });
+  }, []);
+
+  const handleBulkTag = async () => {
+    const input = await dialogService.prompt({
+      title: t('app:bookshelf.tagTitle'),
+      message: t('app:bookshelf.batchTagMessage'),
+      defaultValue: '',
+    });
+    if (input === null) return;
+    const tags = normalizeTagInput(input);
+    if (tags.length === 0) return;
+    for (const id of selectedIds) {
+      const book = books.find((b) => b.id === id);
+      if (!book) continue;
+      onTagBook(id, Array.from(new Set([...(book.tags ?? []), ...tags])));
+    }
+    exitSelect();
+  };
+
+  const handleBulkDelete = () => {
+    onDeleteBooks(Array.from(selectedIds));
+    exitSelect();
   };
 
   const handleImportAll = async () => {
@@ -235,6 +279,15 @@ const Bookshelf: React.FC<BookshelfProps> = ({
                 { value: 'list', icon: List, title: t('books:view.list') },
               ]}
             />
+            <Button
+              variant={selectMode ? 'default' : 'outline'}
+              size="sm"
+              aria-pressed={selectMode}
+              onClick={() => (selectMode ? exitSelect() : setSelectMode(true))}
+            >
+              <CheckSquare className="size-4" />
+              {selectMode ? t('app:bookshelf.batchExit') : t('app:bookshelf.batchSelect')}
+            </Button>
           </div>
         )}
 
@@ -310,15 +363,21 @@ const Bookshelf: React.FC<BookshelfProps> = ({
                 key={book.id}
                 role="button"
                 tabIndex={0}
-                onClick={() => onOpenBook(book.id)}
+                onClick={() => (selectMode ? toggleSelect(book.id) : onOpenBook(book.id))}
                 onKeyDown={e => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    onOpenBook(book.id);
+                    if (selectMode) toggleSelect(book.id);
+                    else onOpenBook(book.id);
                   }
                 }}
-                className={`group flex cursor-pointer items-center gap-4 px-4 py-3 transition-colors hover:bg-accent/40 ${idx > 0 ? 'border-t border-border' : ''}`}
+                className={`group flex cursor-pointer items-center gap-4 px-4 py-3 transition-colors hover:bg-accent/40 ${idx > 0 ? 'border-t border-border' : ''} ${selectedIds.has(book.id) ? 'bg-accent/60' : ''}`}
               >
+                {selectMode && (
+                  <span className="shrink-0 text-primary" aria-hidden="true">
+                    {selectedIds.has(book.id) ? <CheckSquare className="size-4" /> : <Square className="size-4 text-muted-foreground" />}
+                  </span>
+                )}
                 <h3 className="w-48 shrink-0 truncate font-serif text-base font-medium text-foreground">
                   {book.title}
                 </h3>
@@ -349,19 +408,27 @@ const Bookshelf: React.FC<BookshelfProps> = ({
                 key={book.id}
                 role="button"
                 tabIndex={0}
-                onClick={() => onOpenBook(book.id)}
+                onClick={() => (selectMode ? toggleSelect(book.id) : onOpenBook(book.id))}
                 onKeyDown={e => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    onOpenBook(book.id);
+                    if (selectMode) toggleSelect(book.id);
+                    else onOpenBook(book.id);
                   }
                 }}
-                className="group flex cursor-pointer flex-col gap-3 p-5 transition-colors hover:border-primary/40 hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className={`group flex cursor-pointer flex-col gap-3 p-5 transition-colors hover:border-primary/40 hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selectedIds.has(book.id) ? 'border-primary ring-1 ring-primary' : ''}`}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="line-clamp-1 font-serif text-lg font-medium text-foreground">
-                    {book.title}
-                  </h3>
+                  <div className="flex min-w-0 items-center gap-2">
+                    {selectMode && (
+                      <span className="shrink-0 text-primary" aria-hidden="true">
+                        {selectedIds.has(book.id) ? <CheckSquare className="size-4" /> : <Square className="size-4 text-muted-foreground" />}
+                      </span>
+                    )}
+                    <h3 className="line-clamp-1 font-serif text-lg font-medium text-foreground">
+                      {book.title}
+                    </h3>
+                  </div>
                   {book.id === activeBookId && (
                     <Badge variant="secondary" className="shrink-0">
                       {t('app:bookshelf.current')}
@@ -450,6 +517,33 @@ const Bookshelf: React.FC<BookshelfProps> = ({
           </div>
         )}
       </div>
+
+      {selectMode && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-6 z-40 flex justify-center px-4">
+          <div className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-2 shadow-lg">
+            <span className="px-1 text-sm tabular-nums text-foreground">
+              {t('app:bookshelf.batchSelected', { count: selectedIds.size })}
+            </span>
+            <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set(filtered.map((b) => b.id)))}>
+              {t('app:bookshelf.selectAll')}
+            </Button>
+            <Button variant="ghost" size="sm" disabled={selectedIds.size === 0} onClick={() => setSelectedIds(new Set())}>
+              {t('app:bookshelf.clearSelection')}
+            </Button>
+            <Button variant="outline" size="sm" disabled={selectedIds.size === 0} onClick={handleBulkTag}>
+              <Tag className="size-4" />
+              {t('app:bookshelf.batchTag')}
+            </Button>
+            <Button variant="destructive" size="sm" disabled={selectedIds.size === 0} onClick={handleBulkDelete}>
+              <Trash2 className="size-4" />
+              {t('common:delete')}
+            </Button>
+            <Button variant="ghost" size="icon" className="size-8" aria-label={t('app:bookshelf.batchExit')} onClick={exitSelect}>
+              <X className="size-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <NewBookModal
         isOpen={isNewBookOpen}
