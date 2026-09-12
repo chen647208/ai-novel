@@ -46,9 +46,17 @@ function walk(dir, out) {
   return out;
 }
 
-/** 头部是否已在文件最前（允许 BOM 之后紧接）。 */
+/** 文件首行的 vitest 环境 pragma（须保持最前，许可证头插到它之后）。 */
+function leadingPragma(body, eol) {
+  if (!body.startsWith('// @vitest-environment')) return '';
+  const nl = body.indexOf(eol);
+  return nl < 0 ? `${body}${eol}` : body.slice(0, nl + eol.length);
+}
+
+/** 头部是否已在文件最前（允许 BOM 与 vitest pragma 之后紧接）。 */
 function isHeaderAtTop(body, eol) {
-  return body.startsWith(HEADER_LINES.join(eol));
+  const pragma = leadingPragma(body, eol);
+  return body.slice(pragma.length).startsWith(HEADER_LINES.join(eol));
 }
 
 /** 去掉文件任意位置的既有许可证头（块注释），返回剩余正文。 */
@@ -79,9 +87,10 @@ for (const file of files) {
   if (atTop) continue; // 已就位
   missing.push(file);
   if (checkOnly) continue;
+  const pragma = leadingPragma(body, eol);
   const header = HEADER_LINES.join(eol) + eol + eol;
-  const stripped = stripExistingHeader(body).replace(/^\s+/, '');
-  writeFileSync(file, bom + header + stripped, 'utf8');
+  const stripped = stripExistingHeader(body.slice(pragma.length)).replace(/^\s+/, '');
+  writeFileSync(file, bom + pragma + header + stripped, 'utf8');
   modified += 1;
 }
 

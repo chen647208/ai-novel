@@ -7,7 +7,6 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { uuidv7 } from '@core/entities';
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import React, { useCallback,useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +20,6 @@ import { EmptyState } from '@/shared/ui/EmptyState';
 import { logger } from '@/shared/utils/logger';
 import { isModelUsable } from '@/shared/utils/modelReadiness';
 
-import { isVirtualChapter } from '../../../shared/constants/chapters';
 import { type Chapter, type Project, type PromptTemplate } from '../../../shared/types';
 import ForeshadowPanel from '../foreshadowing/components/ForeshadowPanel';
 import { openForeshadows, overdueForeshadows } from '../foreshadowing/services/foreshadowService';
@@ -38,11 +36,11 @@ import {
 import { useChapterExport } from './hooks/useChapterExport';
 import { useChapterGeneration } from './hooks/useChapterGeneration';
 import { useChapterMutations } from './hooks/useChapterMutations';
+import { useChapterOperations } from './hooks/useChapterOperations';
 import { useChapterSnapshots } from './hooks/useChapterSnapshots';
 import { useFindReplace } from './hooks/useFindReplace';
 import { useGenerationSelections } from './hooks/useGenerationSelections';
 import { useSelectionMenu } from './hooks/useSelectionMenu';
-import { appendSnapshot, createSnapshot } from './services/chapterSnapshotService';
 import { extractChapterSummary } from './services/summaryExtractionService';
 import { computeBookStats, computeChapterStats } from './services/writingStatsService';
 import type {
@@ -224,79 +222,24 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     }
   }, [genModal.isOpen, genModal.chapter]);
 
-  // Enter×3 连按：在当前章之后插入新章并切换过去（默认名「第N章」，不阻塞继续输入）。
-  const handleNewChapter = useCallback(() => {
-    const chapters = projectRef.current.chapters;
-    const nextOrder = chapters.reduce((m, c) => Math.max(m, c.order), -1) + 1;
-    const num = chapters.filter(c => !isVirtualChapter(c)).length + 1;
-    const newChapter: Chapter = {
-      id: `${Date.now()}-${uuidv7()}`,
-      title: t('canvas.newChapterTitle', { num }),
-      summary: '',
-      content: '',
-      order: nextOrder,
-    };
-    onUpdate({ chapters: [...chapters, newChapter] });
-    setActiveChapterId(newChapter.id);
-  }, [onUpdate, t]);
-
-  const handleClearContent = async () => {
-    if (await dialogService.confirm({ message: t('editor.clearContentConfirm'), danger: true })) {
-      if (!activeChapterId) return;
-      // 快照与清空必须在同一次 chapters 更新中完成，否则后者会用旧数组覆盖掉快照
-      const chapters = projectRef.current.chapters;
-      const target = chapters.find((c) => c.id === activeChapterId);
-      let updated = chapters;
-      if (target && (target.content ?? '').trim().length > 0 && !target.snapshots?.some((s) => s.content === target.content)) {
-        updated = updated.map((c) => (c.id === activeChapterId ? appendSnapshot(c, createSnapshot(c.content, 'before-clear')) : c));
-      }
-      updated = updated.map((c) => (c.id === activeChapterId ? { ...c, content: '' } : c));
-      onUpdate({ chapters: updated });
-    }
-  };
-
-  // 章节拆分：按光标把本章正文切成两段，后段成为紧随其后的新章
-  const handleSplitChapter = useCallback(() => {
-    const parts = editorRef.current?.splitAtCursor();
-    if (!parts) {
-      dialogService.alert(t('editor.splitNeedCursor'));
-      return;
-    }
-    const chapters = projectRef.current.chapters;
-    const idx = chapters.findIndex((c) => c.id === activeChapterId);
-    if (idx < 0) return;
-    const current = chapters[idx];
-    if (!current) return;
-    const nextOrder = chapters.reduce((m, c) => Math.max(m, c.order), -1) + 1;
-    const newChapter: Chapter = {
-      id: `${Date.now()}-${uuidv7()}`,
-      title: t('editor.splitNewTitle', { title: current.title }),
-      summary: '',
-      content: parts.after,
-      order: nextOrder,
-    };
-    const updated = [...chapters];
-    updated[idx] = { ...current, content: parts.before };
-    updated.splice(idx + 1, 0, newChapter);
-    onUpdate({ chapters: updated });
-    setActiveChapterId(newChapter.id);
-  }, [activeChapterId, onUpdate, t]);
-
-  // 章节合并：把下一章正文并入本章，删除下一章（正文全程保留，不漏字）
-  const handleMergeNextChapter = useCallback(async () => {
-    const chapters = projectRef.current.chapters;
-    const idx = chapters.findIndex((c) => c.id === activeChapterId);
-    if (idx < 0 || idx >= chapters.length - 1) return;
-    const current = chapters[idx];
-    const next = chapters[idx + 1];
-    if (!current || !next) return;
-    if (!(await dialogService.confirm({ message: t('editor.mergeConfirm', { title: next.title }) }))) return;
-    const merged = [current.content, next.content].filter((s) => s && s.trim().length > 0).join('\n\n');
-    const updated = [...chapters];
-    updated[idx] = { ...current, content: merged };
-    updated.splice(idx + 1, 1);
-    onUpdate({ chapters: updated });
-  }, [activeChapterId, onUpdate, t]);
+  const {
+    handleNewChapter,
+    handleClearContent,
+    handleSplitChapter,
+    handleMergeNextChapter,
+    handleDeleteChapter,
+    handleChaptersChange,
+    handleBatchDeleteChapter,
+    handleClearChapterHistory,
+  } = useChapterOperations({
+    projectRef,
+    onUpdate,
+    t,
+    activeChapterId,
+    setActiveChapterId,
+    editorRef,
+    onHistoryCleared: () => setIsHistoryViewerOpen(false),
+  });
 
   const {
     selectedKnowledgeIds,
@@ -361,34 +304,6 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     t,
   });
 
-  const handleDeleteChapter = async (chapterId: string) => {
-    const target = project.chapters.find((c) => c.id === chapterId);
-    if (!target) return;
-    const ok = await dialogService.confirm({
-      message: t('canvas.deleteChapterConfirm', { title: target.title }),
-      danger: true,
-    });
-    if (!ok) return;
-    const remaining = project.chapters.filter((c) => c.id !== chapterId);
-    onUpdate({ chapters: remaining });
-    if (activeChapterId === chapterId) {
-      setActiveChapterId(remaining[0]?.id ?? null);
-    }
-  };
-
-  const handleChaptersChange = (chapters: Chapter[]) => {
-    onUpdate({ chapters });
-  };
-
-  const handleBatchDeleteChapter = async (chapterIds: string[]) => {
-    const ids = new Set(chapterIds);
-    const remaining = project.chapters.filter((c) => !ids.has(c.id));
-    onUpdate({ chapters: remaining });
-    if (activeChapterId && ids.has(activeChapterId)) {
-      setActiveChapterId(remaining[0]?.id ?? null);
-    }
-  };
-
   const handleEditGenerate = () => {
     if (customEditPrompt && customEditPrompt.trim() !== '') {
       const customTemplate: PromptTemplate = {
@@ -407,17 +322,6 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
     setMenuPos(null); 
     setEditModalOpen(true); 
     setCustomEditPrompt('');
-  };
-
-  const handleClearChapterHistory = async () => {
-    if (!activeChapterId) return;
-    if (await dialogService.confirm({ message: t('editor.clearHistoryConfirm'), danger: true })) {
-      const newChapters = project.chapters.map(c =>
-        c.id === activeChapterId ? { ...c, history: [] } : c
-      );
-      onUpdate({ chapters: newChapters });
-      setIsHistoryViewerOpen(false);
-    }
   };
 
   const handleExtractSummary = async () => {

@@ -189,7 +189,7 @@ export default tseslint.config(
 
   // 测试文件：放宽部分规则（断言、console、any 在测试中是惯用写法）
   {
-    files: ['src/**/__tests__/**/*.ts', 'src/**/*.test.ts'],
+    files: ['src/**/__tests__/**/*.{ts,tsx}', 'src/**/*.test.{ts,tsx}'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
