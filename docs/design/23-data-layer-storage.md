@@ -75,3 +75,24 @@
 - Logseq 数据与持久化：https://deepwiki.com/logseq/logseq/4-data-and-persistence
 - bibisco v2 项目库改 JSON（可读、自动备份）：https://lordofthings.wordpress.com/2018/06/16/bibisco/
 - Zettlr（文件留在用户处）：https://www.zettlr.com/
+
+## 8. 多模型数据库候选（图 + 文档 + 向量一栈）
+
+有些引擎把文档、图、向量、全文放进一个引擎。逐个核对形态与许可证后：
+
+| 引擎 | 模型 | 形态 | 嵌入方式 | 许可证 | 适配判断 |
+|---|---|---|---|---|---|
+| SurrealDB | document + graph + relational + vector + FTS + 时序 | 单二进制；嵌入式或服务 | Rust 核心，官方 JS/TS、WASM、Python 嵌入 | 核心 **BSL 1.1**（非 OSI 开源；4 年后转 Apache-2.0）；SDK 为 MIT/Apache | 能力最全，但重且核心非 OSI；与"纯开源"取向冲突 |
+| CozoDB | relational + graph + vector（Datalog） | 嵌入式 | Rust 核心，Node/Python/WASM 嵌入 | **MPL-2.0**（弱 copyleft，可作依赖） | 最贴合本地优先：图算法 + HNSW 向量 + 时间旅行；引入 Datalog |
+| ArangoDB | graph + document + KV + vector + search | 服务为主（本地可跑） | 非进程内嵌入 | 需核实（社区版与企业版分离） | 服务形态与本项目本地优先冲突 |
+| OrientDB | document + graph + KV + object | 服务（JVM） | JVM 进程 | Apache-2.0（社区版） | 不可嵌入 Node，拒绝 |
+| Kùzu | property graph（Cypher）+ vector | 嵌入式 | Node/WASM | MIT | 上游 2025-10 归档（公司被收购），仅社区 fork |
+| SQLite（现状） | relational + JSON1 + FTS5 | 嵌入式 | `node:sqlite` / WASM | Public Domain | 已有；图靠边表 + 递归 CTE，向量靠 vectra/扩展 |
+
+结论：
+
+1. **先定数据哲学，再选引擎**（第 4 节）。引擎不会替你把"真相源是文件还是库"这件事决定掉。
+2. 就本项目现状，**SQLite 已覆盖 relational + JSON + FTS**；图用现有 `entities/edges` + 递归 CTE，向量用 `vectra`/`sqlite-vec`——**不引入新引擎是 1.0 更稳的选择**。
+3. 若确定要"多模型一栈"：**SurrealDB** 能力最全（含图、向量、实时、嵌入式），但核心 **BSL 非 OSI** 且依赖较重；**CozoDB** 是最贴合的 OSS 嵌入方案（图 + 向量 + 时间旅行，MPL-2.0，弱 copyleft）。
+4. **明确拒绝**：服务型/JVM（ArangoDB/OrientDB）、已归档（Kùzu）。
+
