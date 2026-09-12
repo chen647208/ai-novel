@@ -14,7 +14,8 @@ test('打包应用可启动并显示窗口', async () => {
   const userDataDir = mkdtempSync(join(tmpdir(), 'hongyue-packaged-'));
   const app = await electron.launch({
     executablePath: exe,
-    args: [`--user-data-dir=${userDataDir}`, '--lang=zh-CN'],
+    // Linux CI 无特权用户命名空间：加 --no-sandbox 仅供无头冒烟
+    args: [`--user-data-dir=${userDataDir}`, '--lang=zh-CN', '--no-sandbox'],
     env: { ...process.env, ELECTRON_ENABLE_LOGGING: '0', LANG: 'zh_CN.UTF-8', LANGUAGE: 'zh_CN:zh' } as Record<string, string>,
   });
   try {
@@ -39,7 +40,7 @@ test('打包应用沙箱可执行（asar 下 fork utilityProcess）', async () =
   const userDataDir = mkdtempSync(join(tmpdir(), 'hongyue-packaged-'));
   const app = await electron.launch({
     executablePath: exe,
-    args: [`--user-data-dir=${userDataDir}`, '--lang=zh-CN'],
+    args: [`--user-data-dir=${userDataDir}`, '--lang=zh-CN', '--no-sandbox'],
     env: { ...process.env, ELECTRON_ENABLE_LOGGING: '0', LANG: 'zh_CN.UTF-8', LANGUAGE: 'zh_CN:zh' } as Record<string, string>,
   });
   try {
