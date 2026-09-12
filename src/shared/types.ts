@@ -1107,6 +1107,10 @@ export interface ElectronAPI {
   printPdf: (html: string, defaultPath: string) => Promise<{ canceled: boolean }>;
   openDirectoryDialog: (options: FileDialogOptions) => Promise<{ canceled: boolean; filePaths: string[] }>;
   listDirectory: (dirPath: string) => Promise<Array<{ name: string; type: 'file' | 'directory' }>>;
+  /** 插件资源读取（主进程 fs 代理：realpath 包含 + 拒绝清单）。 */
+  pluginReadFile: (rootDir: string, rel: string) => Promise<string>;
+  /** 插件资源列目录（同上，经门）。 */
+  pluginListDirectory: (rootDir: string, rel: string) => Promise<Array<{ name: string; type: 'file' | 'directory' }>>;
   /** 系统文件管理器打开路径（日志目录/数据目录入口）。 */
   openPath: (targetPath: string) => Promise<boolean>;
   /** 外部浏览器打开链接（仅 https；应用内无浏览器）。 */

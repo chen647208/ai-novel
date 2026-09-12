@@ -26,6 +26,8 @@ export const IPC = {
   printPdf: 'print-pdf',
   openDirectoryDialog: 'open-directory-dialog',
   listDirectory: 'list-directory',
+  pluginReadFile: 'plugin-read-file',
+  pluginListDirectory: 'plugin-list-directory',
   openPath: 'open-path',
   openExternal: 'open-external',
   exportPackage: 'export-package',

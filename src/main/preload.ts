@@ -37,6 +37,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveFileDialog: (options: unknown) => ipcRenderer.invoke(IPC.saveFileDialog, options),
   openDirectoryDialog: (options: unknown) => ipcRenderer.invoke(IPC.openDirectoryDialog, options),
   listDirectory: (dirPath: string) => ipcRenderer.invoke(IPC.listDirectory, dirPath),
+  pluginReadFile: (rootDir: string, rel: string) => ipcRenderer.invoke(IPC.pluginReadFile, rootDir, rel),
+  pluginListDirectory: (rootDir: string, rel: string) => ipcRenderer.invoke(IPC.pluginListDirectory, rootDir, rel),
   openPath: (targetPath: string) => ipcRenderer.invoke(IPC.openPath, targetPath),
   openExternal: (url: string) => ipcRenderer.invoke(IPC.openExternal, url),
   exportPackage: (files: Record<string, string>, defaultPath: string) => ipcRenderer.invoke(IPC.exportPackage, files, defaultPath),

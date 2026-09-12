@@ -14,8 +14,13 @@
  * 符号链接解析（realpath 包含）需要宿主文件系统，由主进程 fs 代理承担，本模块保持平台无关。
  */
 
-/** 插件贡献路径中永久拒绝的目录/文件名（小写比较）。 */
-export const PLUGIN_DENY_SEGMENTS: readonly string[] = ['.git', 'node_modules', '.ssh', '.env', '.npmrc'];
+import {
+  hasDeniedPluginSegment,
+  isUnsafePluginRel,
+  PLUGIN_DENY_SEGMENTS,
+} from '../../shared/constants/pluginPaths';
+
+export { PLUGIN_DENY_SEGMENTS };
 
 export type PluginPathCheck = { ok: true; rel: string } | { ok: false; reason: string };
 
@@ -27,13 +32,9 @@ export function checkPluginRelPath(rel: string): PluginPathCheck {
   if (typeof rel !== 'string') return { ok: false, reason: '路径必须是字符串' };
   const raw = rel.replace(/^\.\//, '').replace(/\/+$/, '');
   if (!raw) return { ok: false, reason: '空路径' };
-  if (/^(?:[A-Za-z]:)?[\\/]/.test(raw)) return { ok: false, reason: `绝对路径被拒绝：${raw}` };
-  const segments = raw.split(/[\\/]+/);
-  if (segments.some((s) => s === '..')) return { ok: false, reason: `路径越界（..）：${raw}` };
-  if (segments.some((s) => PLUGIN_DENY_SEGMENTS.includes(s.toLowerCase()))) {
-    return { ok: false, reason: `命中拒绝清单：${raw}` };
-  }
-  return { ok: true, rel: segments.join('/') };
+  if (isUnsafePluginRel(raw)) return { ok: false, reason: `路径越界或绝对路径：${raw}` };
+  if (hasDeniedPluginSegment(raw)) return { ok: false, reason: `命中拒绝清单：${raw}` };
+  return { ok: true, rel: raw.split(/[\\/]+/).join('/') };
 }
 
 /** 单个目录项名（不含分隔符）校验：复用相对路径规则，额外拒绝 `.` / `..`。 */

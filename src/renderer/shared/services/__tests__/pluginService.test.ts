@@ -42,14 +42,17 @@ describe('pluginService（磁盘发现 + 技能贡献装配）', () => {
           if (dir === '/data/plugins') {
             return [{ name: 'com.example.golden3', type: 'directory' }];
           }
-          if (dir === '/data/plugins/com.example.golden3/skills') {
+          return [];
+        },
+        pluginListDirectory: async (rootDir: string, rel: string) => {
+          if (`${rootDir}/${rel}` === '/data/plugins/com.example.golden3/skills') {
             return [{ name: 'extra.md', type: 'file' }];
           }
           return [];
         },
-        readFile: async (path: string) => {
-          const raw = files[path];
-          if (raw === undefined) throw new Error(`not found: ${path}`);
+        pluginReadFile: async (rootDir: string, rel: string) => {
+          const raw = files[`${rootDir}/${rel}`];
+          if (raw === undefined) throw new Error(`not found: ${rootDir}/${rel}`);
           return raw;
         },
       },
@@ -95,7 +98,9 @@ describe('pluginService（磁盘发现 + 技能贡献装配）', () => {
         getAppDataPath: async () => '/data',
         listDirectory: async (dir: string) =>
           dir === '/data/plugins' ? [{ name: 'com.bad.escape', type: 'directory' }] : [],
-        readFile: async (path: string) => {
+        pluginListDirectory: async () => [],
+        pluginReadFile: async (rootDir: string, rel: string) => {
+          const path = `${rootDir}/${rel}`;
           if (path === '/data/plugins/com.bad.escape/plugin.json') {
             return JSON.stringify({
               id: 'com.bad.escape',

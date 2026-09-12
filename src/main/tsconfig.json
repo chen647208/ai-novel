@@ -22,6 +22,7 @@
   "include": [
     "**/*.ts",
     "../shared/types.ts",
+    "../shared/constants/**/*.ts",
     "../shared/i18n/**/*.ts"
   ],
   "exclude": ["node_modules"]

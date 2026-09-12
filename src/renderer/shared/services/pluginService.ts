@@ -25,7 +25,7 @@ import type {
   PluginStatus,
 } from '@core/plugin';
 import { installHooks, installTypeTemplates, PermissionDenied, PluginHost, typeTemplateId } from '@core/plugin';
-import { checkPluginFileName, checkPluginRelPath, joinPluginPath } from '@core/plugin';
+import { checkPluginFileName, checkPluginRelPath } from '@core/plugin';
 import { builtinRegistry } from '@core/types-registry';
 
 function electron(): NonNullable<Window['electronAPI']> {
@@ -44,12 +44,12 @@ export async function discoverAndLoad(host: PluginHost): Promise<void> {
   for (const dir of entries.filter((e) => e.type === 'directory')) {
     const pluginId = dir.name;
     try {
-      const manifestJson = JSON.parse(await api.readFile(`${root}/${pluginId}/plugin.json`)) as unknown;
+      const pluginRoot = `${root}/${pluginId}`;
+      const manifestJson = JSON.parse(await api.pluginReadFile(pluginRoot, 'plugin.json')) as unknown;
       const files: Record<string, string> = {};
       // 浅层收集贡献点文件（skills/types/buildProfiles 目录下的文件）
       const contributes = (manifestJson as { contributes?: Record<string, string[]> }).contributes;
-      // 路径门（§11.2 词法两道门）：越界/拒绝清单命中即整体 invalid，不再读取任何文件
-      const pluginRoot = `${root}/${pluginId}`;
+      // 路径门（§11.2）：词法两道门在渲染侧前置，realpath 包含由主进程 fs 代理（pluginReadFile/pluginListDirectory）强制
       let denied = false;
       for (const dirKey of ['skills', 'types', 'buildProfiles'] as const) {
         for (const rel of contributes?.[dirKey] ?? []) {
@@ -60,8 +60,7 @@ export async function discoverAndLoad(host: PluginHost): Promise<void> {
             break;
           }
           const cleanRel = dirCheck.rel;
-          const fullDir = joinPluginPath(pluginRoot, cleanRel);
-          for (const f of await api.listDirectory(fullDir).catch(() => [])) {
+          for (const f of await api.pluginListDirectory(pluginRoot, cleanRel).catch(() => [])) {
             if (f.type !== 'file') continue;
             const nameCheck = checkPluginFileName(f.name);
             if (!nameCheck.ok) {
@@ -69,7 +68,7 @@ export async function discoverAndLoad(host: PluginHost): Promise<void> {
               denied = true;
               break;
             }
-            files[`${cleanRel}/${nameCheck.rel}`] = await api.readFile(joinPluginPath(fullDir, f.name));
+            files[`${cleanRel}/${nameCheck.rel}`] = await api.pluginReadFile(pluginRoot, `${cleanRel}/${nameCheck.rel}`);
           }
           if (denied) break;
         }
