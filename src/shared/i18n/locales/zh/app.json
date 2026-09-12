@@ -51,7 +51,13 @@
     "saveRecovered": "数据已恢复保存。"
   },
   "storage": {
-    "corrupt": "数据库完整性检查未通过（{{result}}）。请到「设置 → 存储」从备份恢复后再继续写作，避免覆盖数据。"
+    "corrupt": "数据库完整性检查未通过（{{result}}）。请到「设置 → 存储」从备份恢复后再继续写作，避免覆盖数据。",
+    "loadFailed": "应用数据加载失败（{{message}}）。请到「设置 → 存储」检查数据目录，或从备份恢复。",
+    "exportAllTitle": "导出项目数据",
+    "importAllTitle": "导入项目数据",
+    "exportAllSuccess": "数据导出成功！",
+    "jsonFilter": "JSON文件",
+    "allFilesFilter": "所有文件"
   },
   "commandPalette": {
     "title": "命令面板",
@@ -134,19 +140,13 @@
     "trashEmpty": "回收站是空的",
     "exportTitle": "导出当前书籍",
     "exportSuccess": "书籍《{{title}}》导出成功！",
-    "invalidFile": "导入的文件不是有效的书籍数据"
+    "invalidFile": "导入的文件不是有效的书籍数据",
+    "exportFailed": "书籍导出失败：{{message}}"
   },
   "importAll": {
     "success": "全部数据导入成功！",
     "failed": "导入失败或已取消。",
     "tooNew": "该数据来自更新的版本，当前版本无法读取，请先升级应用。"
-  },
-  "storage": {
-    "exportAllTitle": "导出项目数据",
-    "importAllTitle": "导入项目数据",
-    "exportAllSuccess": "数据导出成功！",
-    "jsonFilter": "JSON文件",
-    "allFilesFilter": "所有文件"
   },
   "sync": {
     "title": "同步",

@@ -83,6 +83,60 @@ function safeProjectDir(projectId: string): string {
   return projectId.replace(/[^a-zA-Z0-9_-]/g, '_');
 }
 
+/** 向量维度上限 */
+const MAX_EMBEDDING_DIM = 8192;
+/** 单次写入/删除文档数上限 */
+const MAX_DOCUMENTS_PER_CALL = 5000;
+/** 语义检索返回条数上限 */
+const MAX_SEARCH_LIMIT = 100;
+
+/** IPC 边界校验：项目 ID */
+function assertProjectId(value: unknown): asserts value is string {
+  if (typeof value !== 'string' || value.length === 0 || value.length > 256) {
+    throw new TypeError('Invalid projectId');
+  }
+}
+
+/** IPC 边界校验：单条向量文档 */
+function assertDocument(value: unknown): asserts value is VectorDocumentInput {
+  if (!value || typeof value !== 'object') throw new TypeError('Invalid document');
+  const doc = value as Partial<VectorDocumentInput>;
+  if (typeof doc.id !== 'string' || doc.id.length === 0) throw new TypeError('Invalid document.id');
+  if (typeof doc.content !== 'string') throw new TypeError('Invalid document.content');
+  if (!Array.isArray(doc.embedding) || doc.embedding.length === 0 || doc.embedding.length > MAX_EMBEDDING_DIM) {
+    throw new TypeError('Invalid document.embedding');
+  }
+  for (const n of doc.embedding) {
+    if (typeof n !== 'number' || !Number.isFinite(n)) throw new TypeError('Invalid embedding value');
+  }
+}
+
+function assertDocumentList(value: unknown): asserts value is VectorDocumentInput[] {
+  if (!Array.isArray(value) || value.length > MAX_DOCUMENTS_PER_CALL) {
+    throw new TypeError('Invalid documents');
+  }
+  for (const doc of value) assertDocument(doc);
+}
+
+function assertStringList(value: unknown): asserts value is string[] {
+  if (!Array.isArray(value) || value.length > MAX_DOCUMENTS_PER_CALL) {
+    throw new TypeError('Invalid documentIds');
+  }
+  for (const id of value) {
+    if (typeof id !== 'string' || id.length === 0) throw new TypeError('Invalid documentId');
+  }
+}
+
+/** IPC 边界校验：查询向量 */
+function assertEmbedding(value: unknown): asserts value is number[] {
+  if (!Array.isArray(value) || value.length === 0 || value.length > MAX_EMBEDDING_DIM) {
+    throw new TypeError('Invalid queryEmbedding');
+  }
+  for (const n of value) {
+    if (typeof n !== 'number' || !Number.isFinite(n)) throw new TypeError('Invalid embedding value');
+  }
+}
+
 /** 从 Vectra item 还原渲染层期望的文档结构 */
 function itemToSearchResult(item: VectraItem, score: number, fallbackProjectId: string) {
   const meta = (item.metadata ?? {}) as VectorDocumentMetadata & { projectId?: string; knowledgeItemId?: string; content?: string };
@@ -183,6 +237,8 @@ export function registerVectorIpc(): void {
 
   ipcMain.handle(IPC.vector.addDocuments, async (_event, projectId: string, documents: VectorDocumentInput[]): Promise<IpcResult> => {
     try {
+      assertProjectId(projectId);
+      assertDocumentList(documents);
       const index = await service.getIndex(projectId);
       const ids: string[] = [];
       for (const doc of documents) {
@@ -212,9 +268,11 @@ export function registerVectorIpc(): void {
 
   ipcMain.handle(IPC.vector.updateDocument, async (_event, projectId: string, document: VectorDocumentInput): Promise<IpcResult> => {
     try {
+      assertProjectId(projectId);
+      assertDocument(document);
       const index = await service.getIndex(projectId);
       // Vectra 无原地更新：先删后插
-      await index.deleteItem(document.id).catch(() => undefined);
+      await index.deleteItem(document.id).catch((e: unknown) => logger.warn('vector', `Failed to delete before update ${document.id}: ${errorMessage(e)}`));
       await index.insertItem({
         id: document.id,
         vector: document.embedding,
@@ -239,6 +297,8 @@ export function registerVectorIpc(): void {
 
   ipcMain.handle(IPC.vector.deleteDocuments, async (_event, projectId: string, documentIds: string[]): Promise<IpcResult> => {
     try {
+      assertProjectId(projectId);
+      assertStringList(documentIds);
       const index = await service.getIndex(projectId);
       for (const id of documentIds) {
         await index.deleteItem(id).catch((e: unknown) => logger.warn('vector', `Failed to delete document ${id}: ${errorMessage(e)}`));
@@ -254,8 +314,11 @@ export function registerVectorIpc(): void {
     IPC.vector.semanticSearch,
     async (_event, projectId: string, queryEmbedding: number[], options: { limit?: number } = {}): Promise<IpcResult> => {
       try {
+        assertProjectId(projectId);
+        assertEmbedding(queryEmbedding);
+        const limit = Math.min(Math.max(1, Math.floor(options.limit ?? 10)), MAX_SEARCH_LIMIT);
         const index = await service.getIndex(projectId);
-        const results = await index.queryItems(queryEmbedding, '', options.limit ?? 10);
+        const results = await index.queryItems(queryEmbedding, '', limit);
         return {
           success: true,
           results: results.map((r) => itemToSearchResult(r.item as VectraItem, r.score, projectId)),
@@ -269,6 +332,7 @@ export function registerVectorIpc(): void {
 
   ipcMain.handle(IPC.vector.getStats, async (_event, projectId: string): Promise<IpcResult> => {
     try {
+      assertProjectId(projectId);
       const index = await service.getIndex(projectId);
       const items = await index.listItems();
       const categories: Record<string, number> = {};
@@ -292,6 +356,7 @@ export function registerVectorIpc(): void {
 
   ipcMain.handle(IPC.vector.cleanup, async (_event, projectId: string): Promise<IpcResult> => {
     try {
+      assertProjectId(projectId);
       const index = await service.getIndex(projectId);
       const items = await index.listItems();
       for (const item of items) {
@@ -307,6 +372,7 @@ export function registerVectorIpc(): void {
 
   ipcMain.handle(IPC.vector.checkConsistency, async (_event, projectId: string): Promise<IpcResult> => {
     try {
+      assertProjectId(projectId);
       const index = await service.getIndex(projectId);
       const items = await index.listItems();
       const conflicts: Array<{ type: string; description: string; severity: 'low' | 'medium' | 'high'; suggestion: string }> = [];

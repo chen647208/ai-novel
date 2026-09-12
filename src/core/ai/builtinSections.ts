@@ -37,7 +37,7 @@ export const aiPolicySection: PromptSection = {
   order: 15,
   render(ctx: PromptContext): string | undefined {
     const policies = (ctx.extra?.aiPolicies as string[] | undefined) ?? [];
-    return policies.length ? policies.map((text) => `- ${text}`).join('\\n') : undefined;
+    return policies.length ? policies.map((text) => `- ${text}`).join('\n') : undefined;
   },
 };
 

@@ -51,7 +51,13 @@
     "saveRecovered": "Saving recovered."
   },
   "storage": {
-    "corrupt": "Database integrity check failed ({{result}}). Restore from a backup in Settings → Storage before continuing, to avoid overwriting data."
+    "corrupt": "Database integrity check failed ({{result}}). Restore from a backup in Settings → Storage before continuing, to avoid overwriting data.",
+    "loadFailed": "Failed to load app data ({{message}}). Check the data directory in Settings → Storage, or restore from a backup.",
+    "exportAllTitle": "Export Project Data",
+    "importAllTitle": "Import Project Data",
+    "exportAllSuccess": "Data exported successfully!",
+    "jsonFilter": "JSON Files",
+    "allFilesFilter": "All Files"
   },
   "commandPalette": {
     "title": "Command palette",
@@ -134,19 +140,13 @@
     "trashEmpty": "Trash is empty",
     "exportTitle": "Export Current Book",
     "exportSuccess": "Book \"{{title}}\" exported successfully!",
-    "invalidFile": "The imported file is not valid book data"
+    "invalidFile": "The imported file is not valid book data",
+    "exportFailed": "Failed to export book: {{message}}"
   },
   "importAll": {
     "success": "All data imported successfully!",
     "failed": "Import failed or was cancelled.",
     "tooNew": "This data is from a newer version and cannot be read. Please upgrade the app first."
-  },
-  "storage": {
-    "exportAllTitle": "Export Project Data",
-    "importAllTitle": "Import Project Data",
-    "exportAllSuccess": "Data exported successfully!",
-    "jsonFilter": "JSON Files",
-    "allFilesFilter": "All Files"
   },
   "sync": {
     "title": "Sync",

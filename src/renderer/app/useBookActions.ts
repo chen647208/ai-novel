@@ -13,6 +13,7 @@
 import { useCallback } from 'react';
 
 import { dialogService } from '@/shared/services/dialogService';
+import { isFileDialogCanceled } from '@/shared/services/fileDialogError';
 import { logger } from '@/shared/utils/logger';
 
 import { type Project } from '../../shared/types';
@@ -120,7 +121,10 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
   }, [enterWorkspace]);
 
   const exportBook = useCallback((book: Project) => {
-    void repository.exportBook(book);
+    void repository.exportBook(book).catch((error: unknown) => {
+      logger.error('Failed to export book:', error);
+      dialogService.alert(i18n.t('app:book.exportFailed', { message: error instanceof Error ? error.message : String(error) }));
+    });
   }, []);
 
   const importBook = useCallback(async () => {
@@ -140,8 +144,8 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
       dialogService.alert(i18n.t('app:book.importSuccess', { title: imported.title }));
     } catch (error) {
       logger.error('Failed to import book:', error);
-      if (error instanceof Error && error.message !== '未选择文件') {
-        dialogService.alert(i18n.t('app:book.importFailed', { message: error.message }));
+      if (!isFileDialogCanceled(error)) {
+        dialogService.alert(i18n.t('app:book.importFailed', { message: error instanceof Error ? error.message : String(error) }));
       }
     }
   }, []);

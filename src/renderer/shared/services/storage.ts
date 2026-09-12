@@ -14,6 +14,7 @@ import { localStore } from '@/shared/services/localStore';
 import { type AppState, type ConsistencyCheckConfig, type ConsistencyCheckPromptTemplate,type Project, type StorageConfig } from "../../../shared/types";
 import { logger } from '../utils/logger';
 import { AutoBackupService } from "./autoBackupService";
+import { FileDialogCanceledError } from './fileDialogError';
 import { migrateKnowledgeCategories, migrateVirtualChapters } from './storageMigrations';
 
 // 使用Electron API进行文件系统存储
@@ -252,7 +253,7 @@ export const storage = {
           });
           return migratedState;
         }
-        throw new Error('未选择文件');
+        throw new FileDialogCanceledError();
       } catch (error) {
         logger.error('Failed to import data:', error);
         throw error;
@@ -267,7 +268,7 @@ export const storage = {
         input.onchange = (e) => {
           const file = (e.target as HTMLInputElement).files?.[0];
           if (!file) {
-            reject(new Error('未选择文件'));
+            reject(new FileDialogCanceledError());
             return;
           }
           
@@ -459,7 +460,7 @@ export const storage = {
           
           return project;
         }
-        throw new Error('未选择文件');
+        throw new FileDialogCanceledError();
       } catch (error) {
         logger.error('Failed to import book:', error);
         throw error;
@@ -474,7 +475,7 @@ export const storage = {
         input.onchange = (e) => {
           const file = (e.target as HTMLInputElement).files?.[0];
           if (!file) {
-            reject(new Error('未选择文件'));
+            reject(new FileDialogCanceledError());
             return;
           }
           

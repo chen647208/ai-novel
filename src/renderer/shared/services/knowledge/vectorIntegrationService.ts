@@ -29,15 +29,23 @@ import { vectorService } from './vectorService';
  */
 export class VectorIntegrationService {
   private isInitialized: boolean = false;
-
-  constructor() {
-    void this.initialize();
-  }
+  private initPromise: Promise<boolean> | null = null;
 
   /**
-   * 初始化集成服务
+   * 初始化集成服务（幂等）：并发调用复用同一次初始化，成功后短路。
    */
   async initialize(): Promise<boolean> {
+    if (this.isInitialized) return true;
+    if (this.initPromise) return this.initPromise;
+    this.initPromise = this.doInitialize();
+    try {
+      return await this.initPromise;
+    } finally {
+      this.initPromise = null;
+    }
+  }
+
+  private async doInitialize(): Promise<boolean> {
     try {
       // 初始化向量服务
       const vectorInitialized = await vectorService.initialize();

@@ -148,6 +148,17 @@ export async function gatewayStream(
           isStreaming: true,
         });
       } else if (event.t === 'done') {
+        if (!event.response.error && event.response.tokens) {
+          recordUsage({
+            modelId: model.id,
+            modelName: model.name,
+            prompt: event.response.tokens.prompt ?? 0,
+            completion: event.response.tokens.completion ?? 0,
+            cacheRead: event.response.tokens.cacheRead,
+            cacheWrite: event.response.tokens.cacheWrite,
+            at: Date.now(),
+          });
+        }
         onChunk(event.response);
         finish();
       } else {

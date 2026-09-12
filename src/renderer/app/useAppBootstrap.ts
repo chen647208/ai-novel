@@ -101,6 +101,7 @@ export function useAppBootstrap(): void {
           .catch((error) => logger.warn('用户技能装载失败:', error));
       } catch (error) {
         logger.error('Failed to load initial state:', error);
+        dialogService.alert(dt('app:storage.loadFailed', { message: error instanceof Error ? error.message : String(error) }));
       }
     })();
   }, []);
