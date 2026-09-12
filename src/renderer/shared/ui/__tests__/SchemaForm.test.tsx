@@ -42,4 +42,16 @@ describe('SchemaForm（§13.2 schema 驱动设置表单）', () => {
       }),
     ).toEqual({ a: '', b: false, c: 0, d: 5 });
   });
+
+  it('enum 取首项、嵌套对象递归、显式 default 优先', () => {
+    expect(
+      defaultFromSchema({
+        properties: {
+          mode: { enum: ['a', 'b'] },
+          nested: { type: 'object', properties: { x: { type: 'number' }, y: { type: 'string' } } },
+          flag: { type: 'boolean', default: true },
+        },
+      }),
+    ).toEqual({ mode: 'a', nested: { x: 0, y: '' }, flag: true });
+  });
 });
