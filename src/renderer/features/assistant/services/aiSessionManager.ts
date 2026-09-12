@@ -50,7 +50,7 @@ function electron(): NonNullable<Window['electronAPI']> {
   return window.electronAPI;
 }
 
-/** jsonl 落盘：整文件重写（单会话单文件，量级 <100KB，安全简单）。 */
+/** jsonl 落盘：每条事件追加一行（O(1) 追加，避免整文件重写）。 */
 class FileSessionSink implements SessionSink {
   private lines: string[] = [];
   private readonly path: Promise<string>;
@@ -65,7 +65,7 @@ class FileSessionSink implements SessionSink {
   async append(_sessionId: string, line: string): Promise<void> {
     this.lines.push(line);
     try {
-      await electron().writeFile(await this.path, `${this.lines.join('\n')}\n`);
+      await electron().appendFile(await this.path, `${line}\n`);
     } catch {
       // 落盘失败不阻断会话：事件仍在内存，UI 可读（end 时会再尝试）
     }

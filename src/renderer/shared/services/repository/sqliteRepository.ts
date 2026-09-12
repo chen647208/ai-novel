@@ -31,7 +31,7 @@ import type {
 } from '../../../../shared/types';
 import { logger } from '../../utils/logger';
 import { jsonRepository } from './jsonRepository';
-import { META_KEYS,migrate, SETTING_KEYS } from './schema';
+import { META_KEYS,migrate, SCHEMA_VERSION,SETTING_KEYS } from './schema';
 import type { CommitOptions,DbEncryptionStatus, SearchHit, SearchOptions, SqlDriver, StorageRepository } from './types';
 
 const DEFAULT_SEARCH_LIMIT = 50;
@@ -71,7 +71,24 @@ export class SqliteRepository implements StorageRepository {
 
   constructor(driver: SqlDriver) {
     this.driver = driver;
-    this.ready = migrate(driver);
+    this.ready = (async () => {
+      await this.snapshotBeforeMigration();
+      await migrate(driver);
+    })();
+  }
+
+  /** 迁移前快照：已有旧版本库即将升级时先热备份一份（失败不阻断启动）。 */
+  private async snapshotBeforeMigration(): Promise<void> {
+    if (!this.driver.hotBackup) return;
+    let current = 0;
+    try {
+      const row = await this.driver.get<{ value: string }>('schema.versionSelect');
+      current = row ? Number(row.value) : 0;
+    } catch {
+      return; // 新库（meta 表不存在）
+    }
+    if (current <= 0 || current >= SCHEMA_VERSION) return;
+    await this.driver.hotBackup().catch((error) => logger.warn('[repository] 迁移前快照失败', error));
   }
 
   /**

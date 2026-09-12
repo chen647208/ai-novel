@@ -209,8 +209,3 @@ export const SQL = {
 
 /** 语句标识：调用方只能引用目录内的 id。 */
 export type SqlId = keyof typeof SQL;
-
-/** 取语句文本；未知 id 返回 undefined（主进程侧据此拒绝）。 */
-export function sqlText(id: SqlId): string {
-  return SQL[id];
-}

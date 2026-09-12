@@ -22,6 +22,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   allowPath: (dirPath: string) => ipcRenderer.invoke(IPC.allowPath, dirPath),
   readFile: (filePath: string) => ipcRenderer.invoke(IPC.readFile, filePath),
   writeFile: (filePath: string, data: string) => ipcRenderer.invoke(IPC.writeFile, filePath, data),
+  appendFile: (filePath: string, data: string) => ipcRenderer.invoke(IPC.appendFile, filePath, data),
   writeBinaryFile: (filePath: string, base64: string) => ipcRenderer.invoke(IPC.writeBinaryFile, filePath, base64),
   extractPdfText: (base64: string) => ipcRenderer.invoke(IPC.extractPdfText, base64),
   onFlushRequest: (listener: () => void) => {

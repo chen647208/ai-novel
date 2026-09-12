@@ -10,16 +10,31 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-import { afterEach,beforeEach, describe, expect, it } from 'vitest';
+import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   backupName,
   DB_FILE_NAME,
   LEGACY_DB_FILE_NAME,
+  legacyDataDir,
   migrateLegacyDataDir,
   shouldMigrate,
   shouldRunMigration,
 } from '../dataDir.js';
+
+describe('legacyDataDir 平台解析', () => {
+  it('darwin / linux 分支', () => {
+    const spy = vi.spyOn(process, 'platform', 'get');
+    try {
+      spy.mockReturnValue('darwin');
+      expect(legacyDataDir()).toContain('Library');
+      spy.mockReturnValue('linux');
+      expect(legacyDataDir()).toContain('.config');
+    } finally {
+      spy.mockRestore();
+    }
+  });
+});
 
 describe('shouldRunMigration', () => {
   it('仅标准路径跑，隔离目录跳过', () => {
@@ -82,5 +97,18 @@ describe('migrateLegacyDataDir（真实临时目录）', () => {
     await fs.mkdir(oldDir, { recursive: true });
     await fs.mkdir(`${oldDir}.legacy`, { recursive: true });
     expect(backupName(oldDir)).toBe(`${oldDir}.legacy.2`);
+  });
+
+  it('复制失败时清理暂存、旧目录原样保留（可重试）', async () => {
+    const oldDir = path.join(root, 'old');
+    const newDir = path.join(root, 'new');
+    await fs.mkdir(oldDir, { recursive: true });
+    await fs.writeFile(path.join(oldDir, 'x.txt'), 'keep');
+    // 用文件堵住暂存目录名，令整目录复制失败
+    await fs.writeFile(`${newDir}.migrating-${process.pid}`, 'block');
+
+    await expect(migrateLegacyDataDir(oldDir, newDir)).rejects.toThrow();
+    expect(await fs.readFile(path.join(oldDir, 'x.txt'), 'utf-8')).toBe('keep');
+    await expect(fs.stat(newDir)).rejects.toThrow();
   });
 });

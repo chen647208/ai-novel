@@ -7,6 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import { logger } from '../../utils/logger';
 import { IpcSqlDriver } from './ipcDriver';
 import { jsonRepository } from './jsonRepository';
 import { SqliteRepository } from './sqliteRepository';
@@ -34,6 +35,8 @@ function selectRepository(): StorageRepository {
   const db = typeof window !== 'undefined' ? window.electronAPI?.db : undefined;
   if (db) return new SqliteRepository(new IpcSqlDriver(db));
   if (opfsAvailable()) return new SqliteRepository(new WasmSqliteDriver());
+  // 非安全上下文/无 OPFS：退回 localStorage，已有 SQLite/OPFS 数据不会自动迁移
+  logger.warn('[repository] 无 OPFS，退回 localStorage（不自动迁移既有 SQLite 数据）');
   return jsonRepository;
 }
 

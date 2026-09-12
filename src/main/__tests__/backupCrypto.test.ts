@@ -36,4 +36,9 @@ describe('backupCrypto（AES-256-GCM）', () => {
     buf[buf.length - 1] = (buf[buf.length - 1] ?? 0) ^ 0xff;
     expect(() => decryptWithKey(buf.toString('base64'), KEY)).toThrow();
   });
+
+  it('密钥长度非法时抛错', () => {
+    expect(() => encryptWithKey('x', 'abcd')).toThrow();
+    expect(() => decryptWithKey('AAAA', 'abcd')).toThrow();
+  });
 });

@@ -99,6 +99,17 @@ export const fileProvider: Provider = {
       return true;
     });
 
+    ipcMain.handle(IPC.appendFile, async (_event, filePath: string, data: string) => {
+      assertString(filePath, 'filePath');
+      assertPathAllowed(filePath);
+      if (typeof data !== 'string') {
+        throw new TypeError('Invalid data: expected string');
+      }
+      await fs.mkdir(path.dirname(filePath), { recursive: true });
+      await fs.appendFile(filePath, data, 'utf-8');
+      return true;
+    });
+
     ipcMain.handle(IPC.writeBinaryFile, async (_event, filePath: string, base64: string) => {
       assertString(filePath, 'filePath');
       assertString(base64, 'base64');

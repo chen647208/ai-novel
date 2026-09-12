@@ -16,6 +16,7 @@ export const IPC = {
   allowPath: 'fs:allow-path',
   readFile: 'read-file',
   writeFile: 'write-file',
+  appendFile: 'append-file',
   writeBinaryFile: 'write-binary-file',
   extractPdfText: 'extract-pdf-text',
   flushRequest: 'app:flush-request',

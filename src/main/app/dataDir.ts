@@ -98,11 +98,24 @@ export function backupName(oldDir: string): string {
  */
 export function migrateLegacyDataDirSync(oldDir: string, newDir: string): 'migrated' | 'skipped' {
   if (!shouldMigrate(exists(oldDir), exists(newDir))) return 'skipped';
-  fsSync.cpSync(oldDir, newDir, { recursive: true });
-  const oldDb = path.join(newDir, LEGACY_DB_FILE_NAME);
-  const newDb = path.join(newDir, DB_FILE_NAME);
-  if (exists(oldDb) && !exists(newDb)) {
-    fsSync.renameSync(oldDb, newDb);
+  // 先整体复制到暂存目录，改名 DB 后再原子改名为新目录；
+  // 中途失败只清理暂存、旧目录原样保留，下次启动可重试（避免"新目录半份数据"被误判已迁移）。
+  const staging = `${newDir}.migrating-${process.pid}`;
+  try {
+    fsSync.cpSync(oldDir, staging, { recursive: true });
+    const oldDb = path.join(staging, LEGACY_DB_FILE_NAME);
+    const newDb = path.join(staging, DB_FILE_NAME);
+    if (exists(oldDb) && !exists(newDb)) {
+      fsSync.renameSync(oldDb, newDb);
+    }
+    fsSync.renameSync(staging, newDir);
+  } catch (error) {
+    try {
+      fsSync.rmSync(staging, { recursive: true, force: true });
+    } catch {
+      /* 清理失败不影响重试 */
+    }
+    throw error;
   }
   fsSync.renameSync(oldDir, backupName(oldDir));
   logger.info('datadir', `数据目录已迁移，旧目录保留：${oldDir} → ${newDir}`);
