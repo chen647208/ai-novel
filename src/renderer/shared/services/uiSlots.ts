@@ -8,10 +8,12 @@
  */
 
 /**
- * UI 槽位注册表：应用壳在固定位置渲染 `<Slot id>`，功能/插件注册节点即可插入。
- * 注册返回解绑函数（可逆）；getSnapshot 按槽缓存，保证 useSyncExternalStore 引用稳定。
+ * UI 槽位注册表（docs/design/04 §13）：应用壳在固定位置渲染 `<Slot id>`，功能/插件注册节点即可插入。
+ * 存储与订阅复用统一贡献注册表引擎；本类只加"按槽过滤 + 每槽快照缓存"。
  */
 import type React from 'react';
+
+import { ContributionRegistry } from './contributionRegistry';
 
 export type SlotId =
   | 'topbar.actions'
@@ -29,42 +31,34 @@ export interface SlotContribution {
   render: () => React.ReactNode;
 }
 
-type Listener = () => void;
+export class UiSlotRegistry extends ContributionRegistry<SlotContribution> {
+  private readonly slotCache = new Map<SlotId, SlotContribution[]>();
 
-export class UiSlotRegistry {
-  private readonly contributions = new Map<string, SlotContribution>();
-  private readonly cache = new Map<SlotId, SlotContribution[]>();
-  private readonly listeners = new Set<Listener>();
+  constructor() {
+    super('uiSlots');
+  }
 
-  register(contribution: SlotContribution): () => void {
-    this.contributions.set(contribution.id, contribution);
-    this.bump();
+  override register(contribution: SlotContribution): () => void {
+    const dispose = super.register(contribution);
+    this.slotCache.clear();
     return () => {
-      this.contributions.delete(contribution.id);
-      this.bump();
+      dispose();
+      this.slotCache.clear();
     };
   }
 
+  override unregister(id: string): void {
+    super.unregister(id);
+    this.slotCache.clear();
+  }
+
+  /** 按槽返回排序后的贡献；缓存保证 useSyncExternalStore 引用稳定。 */
   getSnapshot(slot: SlotId): SlotContribution[] {
-    const cached = this.cache.get(slot);
+    const cached = this.slotCache.get(slot);
     if (cached) return cached;
-    const ordered = [...this.contributions.values()]
-      .filter((c) => c.slot === slot)
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-    this.cache.set(slot, ordered);
+    const ordered = this.list().filter((c) => c.slot === slot);
+    this.slotCache.set(slot, ordered);
     return ordered;
-  }
-
-  subscribe(listener: Listener): () => void {
-    this.listeners.add(listener);
-    return () => {
-      this.listeners.delete(listener);
-    };
-  }
-
-  private bump(): void {
-    this.cache.clear();
-    for (const listener of this.listeners) listener();
   }
 }
 

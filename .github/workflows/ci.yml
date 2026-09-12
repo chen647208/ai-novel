@@ -99,3 +99,14 @@ jobs:
         run: xvfb-run -a npm run test:e2e:visual
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+
+      - name: 打包 Linux 目录产物（供打包冒烟）
+        run: npx electron-builder --linux dir --publish never
+
+      - name: 打包冒烟（asar 下启动 + 沙箱执行）
+        run: |
+          EXE=$(find build/release/linux-unpacked -maxdepth 1 -type f -executable | head -n1)
+          echo "HONGYUE_PACKAGED_EXE=$EXE"
+          HONGYUE_PACKAGED_EXE="$EXE" xvfb-run -a npm run test:e2e:packaged
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
