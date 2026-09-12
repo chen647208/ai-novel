@@ -9,6 +9,7 @@
 
 /** 会话事件流浏览器：AI 历史（jsonl 归档）的回放视图。 */
 import type { AiEvent } from '@core/ai';
+import type { TFunction } from 'i18next';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -19,36 +20,41 @@ import { LoadingState } from '@/shared/ui/LoadingState';
 
 import { listSessionArchives, type SessionArchiveEntry,summarizeSessionUsage } from '../services/sessionArchive';
 
-function eventLine(e: AiEvent): { label: string; tone: 'ok' | 'err' | 'muted' } {
+function eventLine(e: AiEvent, t: TFunction<'assistant'>): { label: string; tone: 'ok' | 'err' | 'muted' } {
   switch (e.t) {
     case 'session.start':
-      return { label: `▶ ${e.task}`, tone: 'ok' };
+      return { label: t('events.sessionStart', { task: e.task }), tone: 'ok' };
     case 'turn.start':
-      return { label: `— 轮次 ${e.turn} —`, tone: 'muted' };
+      return { label: t('events.turnStart', { turn: e.turn }), tone: 'muted' };
     case 'llm.request':
-      return { label: `LLM 请求（${e.model}，${e.promptChars} 字）`, tone: 'muted' };
+      return { label: t('events.llmRequest', { model: e.model, chars: e.promptChars }), tone: 'muted' };
     case 'llm.done': {
       const tokens = e.tokens as
         | { prompt?: number; completion?: number; cacheRead?: number }
         | undefined;
-      const parts = [`输入 ${tokens?.prompt ?? 0}`, `输出 ${tokens?.completion ?? 0}`];
-      if ((tokens?.cacheRead ?? 0) > 0) parts.push(`缓存命中 ${tokens?.cacheRead ?? 0}`);
-      return { label: `LLM 完成（${parts.join(' · ')}）`, tone: 'ok' };
+      const parts = [
+        t('events.input', { n: tokens?.prompt ?? 0 }),
+        t('events.output', { n: tokens?.completion ?? 0 }),
+      ];
+      if ((tokens?.cacheRead ?? 0) > 0) parts.push(t('events.cacheRead', { n: tokens?.cacheRead ?? 0 }));
+      return { label: t('events.llmDone', { parts: parts.join(' · ') }), tone: 'ok' };
     }
     case 'llm.error':
-      return { label: `LLM 失败：${e.error}`, tone: 'err' };
+      return { label: t('events.llmError', { error: e.error }), tone: 'err' };
     case 'tool.call':
-      return { label: `工具调用 ${e.toolId}（${JSON.stringify(e.args).slice(0, 120)}）`, tone: 'muted' };
+      return { label: t('events.toolCall', { toolId: e.toolId, args: JSON.stringify(e.args).slice(0, 120) }), tone: 'muted' };
     case 'tool.approval':
-      return { label: `审批：${e.verdict}（${e.by}）`, tone: e.verdict === 'approved' ? 'ok' : 'err' };
+      return { label: t('events.toolApproval', { verdict: e.verdict, by: e.by }), tone: e.verdict === 'approved' ? 'ok' : 'err' };
     case 'tool.result':
-      return { label: e.ok ? '工具执行成功' : `工具失败：${e.error ?? ''}`, tone: e.ok ? 'ok' : 'err' };
+      return { label: e.ok ? t('events.toolResultOk') : t('events.toolResultFail', { error: e.error ?? '' }), tone: e.ok ? 'ok' : 'err' };
+    case 'write.direct':
+      return { label: t('events.writeDirect', { toolId: e.toolId }), tone: 'muted' };
     case 'turn.end':
-      return { label: `轮次结束（共 ${e.turns} 轮）`, tone: 'muted' };
+      return { label: t('events.turnEnd', { turns: e.turns }), tone: 'muted' };
     case 'session.end':
-      return { label: e.ok ? '■ 会话完成' : `■ 会话失败：${e.error ?? ''}`, tone: e.ok ? 'ok' : 'err' };
+      return { label: e.ok ? t('events.sessionEndOk') : t('events.sessionEndFail', { error: e.error ?? '' }), tone: e.ok ? 'ok' : 'err' };
     case 'mcp.sync':
-      return { label: e.ok ? 'MCP 同步成功' : `MCP 同步失败：${e.error ?? ''}`, tone: e.ok ? 'ok' : 'err' };
+      return { label: e.ok ? t('events.mcpSyncOk') : t('events.mcpSyncFail', { error: e.error ?? '' }), tone: e.ok ? 'ok' : 'err' };
     default:
       return { label: e.t, tone: 'muted' };
   }
@@ -109,7 +115,7 @@ const SessionEventBrowser: React.FC<{ bookId: string }> = ({ bookId }) => {
     const lines = [
       `# ${selected.task ?? selected.sessionId}`,
       '',
-      ...selected.events.map((e) => `- ${eventLine(e).label}`),
+      ...selected.events.map((e) => `- ${eventLine(e, t).label}`),
     ];
     const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -157,7 +163,7 @@ const SessionEventBrowser: React.FC<{ bookId: string }> = ({ bookId }) => {
           <SessionUsageBar events={selected.events} />
           <div className="max-h-80 space-y-1 overflow-auto font-mono text-xs">
             {selected.events.map((e, i) => {
-              const { label, tone } = eventLine(e);
+              const { label, tone } = eventLine(e, t);
               return (
                 <div
                   key={i}

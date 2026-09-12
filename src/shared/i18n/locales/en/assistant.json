@@ -240,5 +240,25 @@
     "eventDone": "Done",
     "tabRecords": "Records",
     "tabSessions": "Session Events"
+  },
+  "events": {
+    "sessionStart": "▶ {{task}}",
+    "turnStart": "— Turn {{turn}} —",
+    "llmRequest": "LLM request ({{model}}, {{chars}} chars)",
+    "llmDone": "LLM done ({{parts}})",
+    "llmError": "LLM failed: {{error}}",
+    "toolCall": "Tool call {{toolId}} ({{args}})",
+    "toolApproval": "Approval: {{verdict}} ({{by}})",
+    "toolResultOk": "Tool succeeded",
+    "toolResultFail": "Tool failed: {{error}}",
+    "turnEnd": "Turn ended ({{turns}} turns)",
+    "sessionEndOk": "■ Session complete",
+    "sessionEndFail": "■ Session failed: {{error}}",
+    "mcpSyncOk": "MCP sync succeeded",
+    "mcpSyncFail": "MCP sync failed: {{error}}",
+    "writeDirect": "Direct write ({{toolId}})",
+    "input": "in {{n}}",
+    "output": "out {{n}}",
+    "cacheRead": "cache {{n}}"
   }
 }

@@ -240,5 +240,25 @@
     "eventDone": "完成",
     "tabRecords": "生成记录",
     "tabSessions": "会话事件流"
+  },
+  "events": {
+    "sessionStart": "▶ {{task}}",
+    "turnStart": "— 轮次 {{turn}} —",
+    "llmRequest": "LLM 请求（{{model}}，{{chars}} 字）",
+    "llmDone": "LLM 完成（{{parts}}）",
+    "llmError": "LLM 失败：{{error}}",
+    "toolCall": "工具调用 {{toolId}}（{{args}}）",
+    "toolApproval": "审批：{{verdict}}（{{by}}）",
+    "toolResultOk": "工具执行成功",
+    "toolResultFail": "工具失败：{{error}}",
+    "turnEnd": "轮次结束（共 {{turns}} 轮）",
+    "sessionEndOk": "■ 会话完成",
+    "sessionEndFail": "■ 会话失败：{{error}}",
+    "mcpSyncOk": "MCP 同步成功",
+    "mcpSyncFail": "MCP 同步失败：{{error}}",
+    "writeDirect": "直写（{{toolId}}）",
+    "input": "输入 {{n}}",
+    "output": "输出 {{n}}",
+    "cacheRead": "缓存命中 {{n}}"
   }
 }

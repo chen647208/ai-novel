@@ -16,6 +16,7 @@
   },
   "permissions": {
     "read": ["manuscript", "cards"],
+    "write": ["ai"],
     "ai": { "quotaPerHour": 10 }
   },
   "activation": "onDemand",

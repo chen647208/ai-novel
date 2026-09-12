@@ -24,6 +24,7 @@ export type AiEvent =
   | { t: 'llm.error'; turn: number; error: string; at: number }
   | { t: 'tool.call'; turn: number; callId: string; toolId: string; args: unknown; at: number }
   | { t: 'tool.approval'; turn: number; callId: string; verdict: 'approved' | 'rejected' | 'timeout' | 'skipped'; by: string; at: number }
+  | { t: 'write.direct'; callId: string; toolId: string; at: number }
   | { t: 'tool.result'; turn: number; callId: string; ok: boolean; error?: string; at: number }
   | { t: 'turn.end'; turn: number; turns: number; at: number }
   | { t: 'session.end'; ok: boolean; error?: string; at: number }

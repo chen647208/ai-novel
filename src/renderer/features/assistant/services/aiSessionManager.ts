@@ -124,7 +124,10 @@ export class AiSessionManager {
     this.catalog = deps.catalog;
     this.broker = deps.broker;
     this.events = deps.events;
-    this.router = new ApprovalRouter(deps.broker);
+    this.router = new ApprovalRouter(deps.broker, (callId, toolId) => {
+      // write:direct 直接生效：留审计事件（Revision 由写工具经单一事务管线落库）
+      void this.lastSession?.emit({ t: 'write.direct', callId, toolId, at: Date.now() });
+    });
     registerBuiltinSections(this.assembler);
   }
 

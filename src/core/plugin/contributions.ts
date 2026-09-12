@@ -16,7 +16,7 @@
 import type { BuildProfile } from '../build/profile.js';
 import type { TypeRegistry,TypeTemplate } from '../types-registry';
 import type { SeamPolicy } from './events.js';
-import type { Disposable } from './manifest.js';
+import { assertPermission, type Disposable, type PluginManifest } from './manifest.js';
 
 /** 构建档注册表 key：id 优先，缺省回落 name（与 core/build 单源类型）。 */
 export function buildProfileKey(profile: BuildProfile): string {
@@ -54,18 +54,28 @@ export interface HookDeclaration {
   fn?: string;
 }
 
-/** 解析 hooks 声明为总线操作（v0：inject/filter/logic 落 ai 接缝，observe 落事件观察）。 */
-export function installHooks(hooks: HookDeclaration[], bus: { decorate(seam: 'fs' | 'ai' | 'index', policy: SeamPolicy, pluginId?: string): Disposable }, pluginId?: string): Disposable[] {
+/** 解析 hooks 声明为总线操作（v0：inject/filter/logic 落 ai 接缝，observe 落事件观察）。
+ *  声明 hooks 即视为写入对应接缝域，须在 manifest.permissions.write 声明，否则拒绝（默认拒绝）。 */
+export function installHooks(
+  hooks: HookDeclaration[],
+  bus: { decorate(seam: 'fs' | 'ai' | 'index', policy: SeamPolicy, pluginId?: string): Disposable },
+  pluginId?: string,
+  manifest?: PluginManifest,
+): Disposable[] {
   const disposables: Disposable[] = [];
   for (const hook of hooks) {
     if (hook.do === 'inject' || hook.do === 'filter') {
+      const seam = hook.seam ?? 'ai';
+      if (manifest) assertPermission(manifest, 'write', seam);
       const policy: SeamPolicy =
         hook.do === 'inject'
           ? { do: 'inject', where: hook.where ?? 'system', text: hook.text ?? '' }
           : { do: 'filter', pattern: hook.pattern ?? '', replacement: hook.replacement };
-      disposables.push(bus.decorate(hook.seam ?? 'ai', policy, pluginId));
+      disposables.push(bus.decorate(seam, policy, pluginId));
     } else if (hook.do === 'logic' && pluginId && hook.fn) {
-      disposables.push(bus.decorate(hook.seam ?? 'ai', { do: 'logic', pluginId, fn: hook.fn }, pluginId));
+      const seam = hook.seam ?? 'ai';
+      if (manifest) assertPermission(manifest, 'write', seam);
+      disposables.push(bus.decorate(seam, { do: 'logic', pluginId, fn: hook.fn }, pluginId));
     }
   }
   return disposables;

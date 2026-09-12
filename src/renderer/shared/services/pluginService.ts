@@ -308,7 +308,7 @@ export function createContributionInstaller(deps: PluginDeps): ContributionInsta
         try {
           const parsed = JSON.parse(raw) as { hooks?: unknown } | unknown[];
           const list = Array.isArray(parsed) ? parsed : ((parsed.hooks ?? []) as unknown[]);
-          for (const d of installHooks(list as never[], deps.events, manifest.id)) sink.add(d);
+          for (const d of installHooks(list as never[], deps.events, manifest.id, manifest)) sink.add(d);
         } catch {
           // hooks 声明损坏跳过
         }
