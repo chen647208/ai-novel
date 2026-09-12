@@ -164,6 +164,7 @@ const TOOLS = [
     name: 'list_books',
     description: '列出全部书籍（bookId、节点数、最近更新时间）',
     inputSchema: { type: 'object', properties: {} },
+    annotations: { readOnlyHint: true },
   },
   {
     name: 'list_nodes',
@@ -173,11 +174,13 @@ const TOOLS = [
       properties: { bookId: { type: 'string', description: '书籍 id' } },
       required: ['bookId'],
     },
+    annotations: { readOnlyHint: true },
   },
   {
     name: 'get_node',
     description: '读取节点全文与属性（正文/设定）',
     inputSchema: { type: 'object', properties: { nodeId: { type: 'string' } }, required: ['nodeId'] },
+    annotations: { readOnlyHint: true },
   },
   {
     name: 'search_nodes',
@@ -187,6 +190,7 @@ const TOOLS = [
       properties: { bookId: { type: 'string' }, keyword: { type: 'string' } },
       required: ['bookId', 'keyword'],
     },
+    annotations: { readOnlyHint: true },
   },
   {
     name: 'propose_card_write',

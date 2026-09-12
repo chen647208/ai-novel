@@ -1135,7 +1135,7 @@ export interface ElectronAPI {
   /** MCP 客户端：外部 server 的连接/工具/调用（主进程持 stdio）。 */
   mcpClient: {
     connect: (id: string, command: string, args?: string[]) => Promise<{ connected: boolean }>;
-    tools: (id: string) => Promise<{ tools: Array<{ name: string; description?: string; inputSchema?: unknown }> }>;
+    tools: (id: string) => Promise<{ tools: Array<{ name: string; description?: string; inputSchema?: unknown; annotations?: { readOnlyHint?: boolean } }> }>;
     call: (id: string, tool: string, args?: unknown) => Promise<unknown>;
     disconnect: (id: string) => Promise<{ connected: boolean }>;
   };

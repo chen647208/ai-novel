@@ -20,6 +20,8 @@ export interface McpRemoteTool {
   toolId: string;
   name: string;
   description: string;
+  /** 服务端声明只读：注册为 read 权限，直通不走审批。 */
+  readOnly: boolean;
 }
 
 function api() {
@@ -49,6 +51,7 @@ export async function fetchServerTools(server: McpServerConfig): Promise<McpRemo
     toolId: mcpToolId(server.id, t.name),
     name: t.name,
     description: t.description ?? '',
+    readOnly: t.annotations?.readOnlyHint === true,
   }));
 }
 
@@ -85,9 +88,8 @@ export async function syncMcpTools(
           id: tool.toolId,
           description: tool.description || tool.name,
           parameters: { type: 'object', properties: {} },
-          // 远端工具默认走审批提案；服务端自声明只读提示的不在此区分
-          // （MCP annotations 为可选元数据，缺席按可写处理最安全）
-          permission: 'write:proposal',
+          // 服务端声明只读（annotations.readOnlyHint）→ 直通；否则按可写走审批提案
+          permission: tool.readOnly ? 'read' : 'write:proposal',
           execute: async (req) => {
             try {
               const data = await api().call(tool.serverId, tool.name, req.args ?? {});

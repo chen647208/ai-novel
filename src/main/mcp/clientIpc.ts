@@ -17,18 +17,48 @@ import { ipcMain } from 'electron';
 import { IPC } from '../channels.js';
 import { logger } from '../logger.js';
 import { type McpToolDef,MinimalMcpClient } from './client.js';
+import { dispatch } from './server.js';
 
 const MAX_CLIENTS = 8;
-const clients = new Map<string, MinimalMcpClient>();
+/** 内置 MCP server 的 id：进程内直连 server.ts 的 dispatch（自举：助手吃自己的 MCP）。 */
+const BUILTIN_ID = 'builtin';
 
-async function getClient(id: string): Promise<MinimalMcpClient> {
+interface McpClientHandle {
+  start(): Promise<void>;
+  listTools(): Promise<McpToolDef[]>;
+  callTool(tool: string, args: unknown): Promise<unknown>;
+  close(): Promise<void>;
+}
+
+class InProcessMcpClient implements McpClientHandle {
+  async start(): Promise<void> {
+    // 进程内无需握手
+  }
+
+  async listTools(): Promise<McpToolDef[]> {
+    const res = dispatch('tools/list', {}) as { tools?: McpToolDef[] };
+    return res.tools ?? [];
+  }
+
+  async callTool(tool: string, args: unknown): Promise<unknown> {
+    return dispatch('tools/call', { name: tool, arguments: (args ?? {}) as Record<string, unknown> });
+  }
+
+  async close(): Promise<void> {
+    // 进程内无需释放
+  }
+}
+
+const clients = new Map<string, McpClientHandle>();
+
+async function getClient(id: string): Promise<McpClientHandle> {
   const client = clients.get(id);
   if (!client) throw new Error(`MCP server 未连接：${id}`);
   return client;
 }
 
 export function registerMcpClientIpc(): void {
-  // 连接（幂等：已连则复用）
+  // 连接（幂等：已连则复用）；builtin 用进程内直连，不 spawn 子进程
   ipcMain.handle(IPC.mcp.clientConnect, async (_event, id: string, command: string, args?: string[]) => {
     if (typeof id !== 'string' || typeof command !== 'string' || !id || !command) {
       throw new TypeError('Invalid mcp:client-connect arguments');
@@ -38,6 +68,10 @@ export function registerMcpClientIpc(): void {
     }
     const existing = clients.get(id);
     if (existing) return { connected: true as const };
+    if (id === BUILTIN_ID) {
+      clients.set(id, new InProcessMcpClient());
+      return { connected: true as const };
+    }
     if (clients.size >= MAX_CLIENTS) {
       throw new Error(`MCP 连接数上限 ${MAX_CLIENTS}`);
     }

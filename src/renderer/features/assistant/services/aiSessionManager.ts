@@ -30,7 +30,7 @@ import {
 } from '@core/ai';
 import { uuidv7 } from '@core/entities';
 import type { EventBus, SeamPolicy } from '@core/plugin';
-import type { AIMessageImage, CardPromptTemplate, ConsistencyCheckPromptTemplate, ModelConfig, Project } from '@shared/types';
+import type { AIMessageImage, CardPromptTemplate, ConsistencyCheckPromptTemplate, McpServerConfig, ModelConfig, Project } from '@shared/types';
 
 import { useSettingsStore } from '@/app/stores/settingsStore';
 import { aiGatewayClient } from '@/shared/services/ai/gatewayClient.js';
@@ -38,6 +38,9 @@ import { syncMcpTools } from '@/shared/services/mcpClient';
 
 import { buildHistoryText } from './chatHistory.js';
 import { runSkillHandler } from './skillHandlerService';
+
+/** 自举：内置 MCP server 走进程内直连（主进程 clientIpc 特判 `builtin`，不 spawn 子进程）。 */
+const BUILTIN_MCP_SERVER: McpServerConfig = { id: 'builtin', name: '内置 MCP', command: 'builtin', args: [], enabled: true };
 
 function electron(): NonNullable<Window['electronAPI']> {
   if (!window.electronAPI) {
@@ -161,17 +164,17 @@ export class AiSessionManager {
     });
     this.lastSession = session;
 
-    // MCP 外部工具：每轮按设置同步（无配置时零成本；失败记事件不进聊天）
-    try {
-      const servers = useSettingsStore.getState().mcpServers ?? [];
-      if (servers.some((s) => s.enabled)) {
-        const { errors } = await syncMcpTools(this.registry, servers);
+    // MCP：自举内置 server（进程内直连）+ 本轮启用的外部 server（失败记事件不进聊天）
+    if (typeof window !== 'undefined' && window.electronAPI?.mcpClient) {
+      try {
+        const userServers = (useSettingsStore.getState().mcpServers ?? []).filter((s) => s.enabled);
+        const { errors } = await syncMcpTools(this.registry, [BUILTIN_MCP_SERVER, ...userServers]);
         for (const message of errors) {
           await session.emit({ t: 'mcp.sync', ok: false, error: message, at: Date.now() });
         }
+      } catch (err) {
+        await session.emit({ t: 'mcp.sync', ok: false, error: err instanceof Error ? err.message : String(err), at: Date.now() });
       }
-    } catch (err) {
-      await session.emit({ t: 'mcp.sync', ok: false, error: err instanceof Error ? err.message : String(err), at: Date.now() });
     }
 
     try {
