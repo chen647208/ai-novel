@@ -18,7 +18,7 @@ import { useTranslation } from '@/i18n';
 import { assistantRuntime } from '@/shared/services/assistantRuntime';
 import { localStore } from '@/shared/services/localStore';
 import { connectServer, disconnectServer, fetchServerTools } from '@/shared/services/mcpClient';
-import { saveTrustedPluginKeys } from '@/shared/services/pluginService';
+import { saveAllowedPluginSources, saveTrustedPluginKeys } from '@/shared/services/pluginService';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
@@ -108,6 +108,43 @@ const TrustedKeysSection: React.FC = () => {
   );
 };
 
+/** 插件来源白名单（manifest.source，每行一个）；空清单表示不限制来源。 */
+const AllowedSourcesSection: React.FC = () => {
+  const { t } = useTranslation(['settings']);
+  const [text, setText] = useState('');
+  const [saved, setSaved] = useState(false);
+  const save = (): void => {
+    const sources = text
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+    saveAllowedPluginSources(sources);
+    setSaved(true);
+  };
+  return (
+    <div className="rounded-lg border border-border p-3">
+      <div className="mb-1 text-sm font-medium">{t('plugins.sources.title')}</div>
+      <p className="mb-2 text-xs text-muted-foreground">{t('plugins.sources.hint')}</p>
+      <Textarea
+        value={text}
+        onChange={(event) => {
+          setText(event.target.value);
+          setSaved(false);
+        }}
+        rows={3}
+        className="font-mono text-xs"
+        placeholder="https://github.com/owner/plugin"
+      />
+      <div className="mt-2 flex items-center gap-2">
+        <Button size="sm" onClick={save}>
+          {t('plugins.sources.save')}
+        </Button>
+        {saved && <span className="text-xs text-muted-foreground">{t('plugins.sources.saved')}</span>}
+      </div>
+    </div>
+  );
+};
+
 const PluginSettingsPanel: React.FC = () => {
   const { t } = useTranslation(['settings', 'common']);
   const [statuses, setStatuses] = useState<PluginStatus[] | null>(null);
@@ -175,6 +212,8 @@ const PluginSettingsPanel: React.FC = () => {
       <UserSkillsCard />
 
       <TrustedKeysSection />
+
+      <AllowedSourcesSection />
 
       <div className="rounded-lg border border-border p-3">
         <div className="mb-2 text-sm font-medium">{t('plugins.panel.title')}</div>

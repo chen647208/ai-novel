@@ -1125,6 +1125,10 @@ export interface ElectronAPI {
   pluginFetch: (url: string) => Promise<{ ok: boolean; status?: number; text?: string; error?: string }>;
   /** 校验插件包签名（Ed25519，主进程持私钥无关的公开校验）。 */
   pluginVerifySignature: (contentBase64: string, signatureBase64: string, publicKeyPem: string) => Promise<boolean>;
+  /** 校验 sha256 摘要信封（完整性，不认证来源）。 */
+  pluginDigestMatches: (contentBase64: string, digestBase64: string) => Promise<boolean>;
+  /** 用外部 cosign 校验 blob 签名+证书；cosign 不可用返回 false。 */
+  pluginCosignVerify: (contentBase64: string, signatureBase64: string, certificateBase64: string) => Promise<boolean>;
   /** 崩溃上报配置（默认只本地留存；开启且宿主配置地址后上传，重启生效）。 */
   crashReporting: {
     getConfig: () => Promise<{ enabled: boolean; configured: boolean }>;

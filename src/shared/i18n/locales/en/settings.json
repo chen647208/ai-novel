@@ -466,6 +466,12 @@
       "save": "Save trusted keys",
       "saved": "Saved"
     },
+    "sources": {
+      "title": "Plugin source allowlist",
+      "hint": "One manifest.source identifier per line. When non-empty, plugins from other sources are rejected; an empty list allows any source but still checks signatures.",
+      "save": "Save allowlist",
+      "saved": "Saved"
+    },
     "panel": {
       "title": "Plugin UI"
     },

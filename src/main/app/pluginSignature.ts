@@ -15,13 +15,22 @@
  */
 
 import { Buffer } from 'node:buffer';
+import { spawnSync } from 'node:child_process';
 import { createHash, createPublicKey, verify } from 'node:crypto';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 export { parseSignatureEnvelope,type PluginSignatureEnvelope } from '../../shared/pluginSignature.js';
 
 /** 内容 sha256（base64）：完整性快照。 */
 export function sha256Base64(content: Uint8Array | string): string {
   return createHash('sha256').update(content).digest('base64');
+}
+
+/** 内容摘要是否与信封一致（sha256 信封的完整性校验）。 */
+export function sha256Matches(content: Uint8Array | string, digestBase64: string): boolean {
+  return sha256Base64(content) === digestBase64;
 }
 
 /** 校验 detached Ed25519 签名。 */
@@ -36,5 +45,44 @@ export function verifyEd25519(
     return verify(null, data, key, Buffer.from(signatureBase64, 'base64'));
   } catch {
     return false;
+  }
+}
+
+/** cosign 是否可用（外部工具链，缺失时 cosign 信封一律拒绝）。 */
+export function cosignAvailable(): boolean {
+  try {
+    return spawnSync('cosign', ['version'], { stdio: 'ignore' }).status === 0;
+  } catch {
+    return false;
+  }
+}
+
+/** cosign verify-blob 参数（证书/签名/内容各为临时文件路径）。 */
+export function buildCosignVerifyArgs(paths: { blob: string; signature: string; certificate: string }): string[] {
+  return ['verify-blob', '--signature', paths.signature, '--certificate', paths.certificate, paths.blob];
+}
+
+/** 用 cosign 校验 blob 签名；cosign 不存在或校验失败均返回 false。 */
+export function verifyCosignBlob(
+  content: Uint8Array | string,
+  signatureBase64: string,
+  certificateBase64: string,
+): boolean {
+  if (!cosignAvailable()) return false;
+  let dir: string | undefined;
+  try {
+    dir = mkdtempSync(join(tmpdir(), 'hy-cosign-'));
+    const blob = join(dir, 'plugin.json');
+    const signature = join(dir, 'plugin.sig');
+    const certificate = join(dir, 'plugin.crt');
+    writeFileSync(blob, typeof content === 'string' ? Buffer.from(content, 'utf-8') : content);
+    writeFileSync(signature, Buffer.from(signatureBase64, 'base64'));
+    writeFileSync(certificate, Buffer.from(certificateBase64, 'base64'));
+    const result = spawnSync('cosign', buildCosignVerifyArgs({ blob, signature, certificate }), { stdio: 'ignore' });
+    return result.status === 0;
+  } catch {
+    return false;
+  } finally {
+    if (dir) rmSync(dir, { recursive: true, force: true });
   }
 }

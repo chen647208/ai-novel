@@ -22,5 +22,8 @@
     "tailwindcss",
     "@emnapi/core",
     "@emnapi/runtime"
+  ],
+  "ignoreBinaries": [
+    "cosign"
   ]
 }

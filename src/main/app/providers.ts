@@ -26,7 +26,7 @@ import { extractPdfText } from './documents.js';
 import { allowPath, allowRoot, assertPathAllowed } from './fsAccess.js';
 import { registerPluginFsIpc } from './pluginFs.js';
 import { sandboxHost } from './pluginSandbox/host.js';
-import { verifyEd25519 } from './pluginSignature.js';
+import { sha256Matches, verifyCosignBlob,verifyEd25519 } from './pluginSignature.js';
 import { destroyTray, registerShellIpc } from './tray.js';
 import { getMainWindow } from './window.js';
 import { createWindow } from './window.js';
@@ -180,6 +180,14 @@ export const fileProvider: Provider = {
       IPC.pluginVerifySignature,
       (_event, contentBase64: string, signatureBase64: string, publicKeyPem: string) =>
         verifyEd25519(Buffer.from(contentBase64, 'base64'), signatureBase64, publicKeyPem),
+    );
+    ipcMain.handle(IPC.pluginDigestMatches, (_event, contentBase64: string, digestBase64: string) =>
+      sha256Matches(Buffer.from(contentBase64, 'base64'), digestBase64),
+    );
+    ipcMain.handle(
+      IPC.pluginCosignVerify,
+      (_event, contentBase64: string, signatureBase64: string, certificateBase64: string) =>
+        verifyCosignBlob(Buffer.from(contentBase64, 'base64'), signatureBase64, certificateBase64),
     );
     ipcMain.handle(IPC.crashGetConfig, () => ({
       enabled: readCrashReportingConfig().enabled,

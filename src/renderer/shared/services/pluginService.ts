@@ -53,6 +53,8 @@ function toBase64(text: string): string {
 }
 
 let trustedPluginKeys: readonly string[] = [];
+/** 允许的插件来源标识（manifest.source）；空清单 = 不限制来源，仅校验签名。 */
+let allowedPluginSources: readonly string[] = [];
 
 /** 逻辑贡献源码：`<pluginId>:<file>` → 代码（调用时才进沙箱）。 */
 const logicHandlers = new Map<string, string>();
@@ -89,7 +91,32 @@ export function setTrustedPluginKeys(keys: readonly string[]): void {
 }
 
 function readTrustedPluginKeys(): string[] | undefined {
-  const raw = localStore.getItem(STORAGE_KEYS.trustedPluginKeys);
+  return readStringArraySetting(STORAGE_KEYS.trustedPluginKeys);
+}
+
+/** 保存信任公钥并立即生效（设置面板调用）。 */
+export function saveTrustedPluginKeys(keys: readonly string[]): void {
+  localStore.setItem(STORAGE_KEYS.trustedPluginKeys, JSON.stringify(keys));
+  setTrustedPluginKeys(keys);
+}
+
+/** 配置允许的插件来源白名单；空清单表示不限制来源。 */
+export function setAllowedPluginSources(sources: readonly string[]): void {
+  allowedPluginSources = sources;
+}
+
+function readAllowedPluginSources(): string[] | undefined {
+  return readStringArraySetting(STORAGE_KEYS.allowedPluginSources);
+}
+
+/** 保存来源白名单并立即生效（设置面板调用）。 */
+export function saveAllowedPluginSources(sources: readonly string[]): void {
+  localStore.setItem(STORAGE_KEYS.allowedPluginSources, JSON.stringify(sources));
+  setAllowedPluginSources(sources);
+}
+
+function readStringArraySetting(key: string): string[] | undefined {
+  const raw = localStore.getItem(key);
   if (!raw) return undefined;
   try {
     const parsed = JSON.parse(raw) as unknown;
@@ -97,12 +124,6 @@ function readTrustedPluginKeys(): string[] | undefined {
   } catch {
     return undefined;
   }
-}
-
-/** 保存信任公钥并立即生效（设置面板调用）。 */
-export function saveTrustedPluginKeys(keys: readonly string[]): void {
-  localStore.setItem(STORAGE_KEYS.trustedPluginKeys, JSON.stringify(keys));
-  setTrustedPluginKeys(keys);
 }
 
 /** 从 userData/plugins/ 发现插件并装载进宿主。读取/校验失败按 failed 登记，面板可见。 */
@@ -117,25 +138,49 @@ export async function discoverAndLoad(host: PluginHost): Promise<void> {
       const pluginRoot = `${root}/${pluginId}`;
       const manifestText = await api.pluginReadFile(pluginRoot, 'plugin.json');
       const manifestJson = JSON.parse(manifestText) as unknown;
-      // 签名（S4）：可执行贡献（logic/editor）必须带有效签名；未签名一律不放行（fail-closed）
+
+      // 来源白名单（design/21 §4）：配置非空时，manifest.source 必须在清单内
+      const source = typeof (manifestJson as { source?: unknown }).source === 'string' ? (manifestJson as { source: string }).source : undefined;
+      if (allowedPluginSources.length > 0 && (!source || !allowedPluginSources.includes(source))) {
+        host.markFailed(pluginId, 'discover', new Error(`插件来源不在白名单：${source ?? '未声明 source'}`));
+        continue;
+      }
+
+      // 签名（S4/S5）：可执行贡献（logic/editor）必须带来源认证签名；未签名一律不放行（fail-closed）
+      // - ed25519：信任键白名单内公钥的 detached 签名
+      // - cosign：外部 cosign 校验证书签名（工具链缺失即拒绝）
+      // - sha256：仅完整性，通过后仍不放开可执行贡献
       let signed = false;
       const sigText = await api.pluginReadFile(pluginRoot, 'plugin.sig').catch(() => undefined);
       if (sigText !== undefined) {
         const envelope = parseSignatureEnvelope(sigText);
-        const trusted = !!envelope && trustedPluginKeys.includes(envelope.publicKey);
-        const verified =
-          envelope && trusted && typeof api.pluginVerifySignature === 'function'
-            ? await api.pluginVerifySignature(toBase64(manifestText), envelope.signature, envelope.publicKey)
-            : false;
-        if (!envelope || !verified) {
-          host.markFailed(
-            pluginId,
-            'discover',
-            new Error(!envelope ? '插件签名格式非法' : trusted ? '插件签名校验失败' : '插件签名公钥不在信任清单'),
-          );
-          continue;
+        const fail = (reason: string): never => {
+          throw new Error(reason);
+        };
+        if (!envelope) fail('插件签名格式非法');
+        else if (envelope.algorithm === 'ed25519') {
+          const trusted = trustedPluginKeys.includes(envelope.publicKey);
+          const verified =
+            trusted && typeof api.pluginVerifySignature === 'function'
+              ? await api.pluginVerifySignature(toBase64(manifestText), envelope.signature, envelope.publicKey)
+              : false;
+          if (!verified) fail(trusted ? '插件签名校验失败' : '插件签名公钥不在信任清单');
+          else signed = true;
+        } else if (envelope.algorithm === 'cosign') {
+          const verified =
+            typeof api.pluginCosignVerify === 'function'
+              ? await api.pluginCosignVerify(toBase64(manifestText), envelope.signature, envelope.certificate)
+              : false;
+          if (!verified) fail('cosign 校验失败（需安装 cosign 且证书有效）');
+          else signed = true;
+        } else {
+          const ok =
+            typeof api.pluginDigestMatches === 'function'
+              ? await api.pluginDigestMatches(toBase64(manifestText), envelope.digest)
+              : false;
+          if (!ok) fail('插件摘要不匹配');
+          // 摘要通过仅代表未被篡改，不放行可执行贡献
         }
-        signed = true;
       }
       const files: Record<string, string> = {};
       // 浅层收集贡献点文件（skills/types/buildProfiles 目录下的文件）
@@ -323,6 +368,8 @@ export async function bootstrapPlugins(deps: PluginDeps, hostVersion: string, di
   try {
     const storedKeys = readTrustedPluginKeys();
     if (storedKeys) setTrustedPluginKeys(storedKeys);
+    const storedSources = readAllowedPluginSources();
+    if (storedSources) setAllowedPluginSources(storedSources);
     await discoverAndLoad(host);
     // 发现后立即激活全部（含依赖拓扑）：否则插件停在 discovered，贡献点永不生效
     host.activateAll();
