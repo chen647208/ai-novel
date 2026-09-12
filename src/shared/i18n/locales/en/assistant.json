@@ -15,6 +15,12 @@
       "aborted": "Stopped"
     }
   },
+  "attachments": {
+    "open": "Saved attachments",
+    "title": "Saved document attachments",
+    "empty": "No saved attachments yet. Reference files are saved to this book after sending.",
+    "remove": "Remove attachment"
+  },
   "category": {
     "inspiration": "Inspiration",
     "knowledge": "Knowledge Base",

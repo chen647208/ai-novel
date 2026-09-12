@@ -22,6 +22,7 @@ import { cn } from '@/shared/utils/cn';
 import type { CardPromptTemplate, KnowledgeItem } from '../../../../shared/types';
 import { speechLocale } from '../services/speechService';
 import type { ChatMessage } from '../types';
+import SavedAttachmentsButton from './SavedAttachmentsButton';
 import SpeakButton from './SpeakButton';
 import SpeechInputButton from './SpeechInputButton';
 
@@ -48,6 +49,10 @@ interface AssistantChatWorkspaceProps {
   cardPromptTemplates: CardPromptTemplate[];
   selectedCardTemplateId: string | null;
   setSelectedCardTemplateId: React.Dispatch<React.SetStateAction<string | null>>;
+  /** 当前书 id（文档附件按书存储）；无书时不显示附件库。 */
+  bookId: string | null;
+  /** 保存新附件后递增，触发附件库刷新。 */
+  attachmentsRefreshKey?: number;
 }
 
 // cmd 前缀是数据（aiCardCommandService 对中英别名都接受），故按语言在渲染期取用；
@@ -99,6 +104,8 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
   cardPromptTemplates,
   selectedCardTemplateId,
   setSelectedCardTemplateId,
+  bookId,
+  attachmentsRefreshKey,
 }) => {
   const { t, i18n } = useTranslation('assistant');
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
@@ -359,6 +366,11 @@ const AssistantChatWorkspace: React.FC<AssistantChatWorkspaceProps> = ({
               <Paperclip className="size-5" />
               <input type="file" multiple className="hidden" onChange={handleFileUpload} accept=".txt,.md,.json,.js,.ts,.csv,.pdf,.png,.jpg,.jpeg,.webp" />
             </label>
+            <SavedAttachmentsButton
+              bookId={bookId}
+              refreshKey={attachmentsRefreshKey}
+              onAttach={(item) => setPendingFiles((prev) => [...prev, item])}
+            />
             <SpeechInputButton
               onTranscript={(text) => setInput((prev) => (prev ? `${prev} ${text}` : text))}
               lang={speechLocale(i18n.language)}

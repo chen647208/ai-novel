@@ -470,5 +470,24 @@ for (const fixture of [nodeSqliteFixture, wasmFixture]) {
       await repo.saveProject(project('rev3', { chapters: [chapter('c1', '第一章', '')] }));
       expect((await repo.loadRevisions('c1'))).toHaveLength(0);
     });
+
+    it('文档附件：保存 → 列出 → 读回字节 → 删除（元数据与二进制分表）', async () => {
+      const bytes = new Uint8Array([1, 2, 3, 4, 5]);
+      const saved = await repo.saveAttachment({ nodeId: 'book-1', role: 'document', mime: 'text/plain', name: 'note.txt', bytes });
+      expect(saved.size).toBe(5);
+      expect(saved.name).toBe('note.txt');
+
+      const list = await repo.listAttachments('book-1');
+      expect(list.map((item) => item.name)).toEqual(['note.txt']);
+      expect(list.map((item) => item.nodeId)).toEqual(['book-1']);
+
+      const back = await repo.loadAttachmentBytes(saved.id);
+      expect(back).not.toBeNull();
+      expect(Array.from(back!)).toEqual([1, 2, 3, 4, 5]);
+
+      await repo.deleteAttachment(saved.id);
+      expect(await repo.listAttachments('book-1')).toHaveLength(0);
+      expect(await repo.loadAttachmentBytes(saved.id)).toBeNull();
+    });
   });
 }

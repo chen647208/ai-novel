@@ -103,6 +103,17 @@ export interface SearchOptions {
   limit?: number;
 }
 
+/** 文档附件元数据（二进制存 blobs，附件行存元信息；node 为书本实体 id）。 */
+export interface AttachmentMeta {
+  id: string;
+  nodeId: string;
+  role: string;
+  mime: string;
+  name: string;
+  size: number;
+  createdAt: number;
+}
+
 /**
  * 应用数据的唯一入口。UI/App 只依赖此接口，
  * 具体后端（JSON 文件 / SQLite）由 index.ts 按运行环境选择。
@@ -163,6 +174,15 @@ export interface StorageRepository {
 
   /** 全文检索（SQLite 走 FTS5；JSON 后端走内存过滤） */
   search(query: string, options?: SearchOptions): Promise<SearchHit[]>;
+
+  /** 列出某节点未删除的文档附件（仅 SQLite 后端；JSON 后端不提供）。 */
+  listAttachments?(nodeId: string): Promise<AttachmentMeta[]>;
+  /** 保存文档附件：元数据与二进制分别落 attachments/blobs。 */
+  saveAttachment?(input: { nodeId: string; role: string; mime: string; name: string; bytes: Uint8Array }): Promise<AttachmentMeta>;
+  /** 读取附件二进制；不存在返回 null。 */
+  loadAttachmentBytes?(id: string): Promise<Uint8Array | null>;
+  /** 删除附件：标记 erased 并移除 blob。 */
+  deleteAttachment?(id: string): Promise<void>;
 
   /** 导出全量数据（触发保存对话框 / 浏览器下载） */
   exportAll(state: AppState): Promise<void>;

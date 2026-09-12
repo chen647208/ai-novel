@@ -33,7 +33,7 @@ import type {
 import { logger } from '../../utils/logger';
 import { jsonRepository } from './jsonRepository';
 import { META_KEYS,migrate, SCHEMA_VERSION,SETTING_KEYS } from './schema';
-import type { CommitOptions,DbEncryptionStatus, SearchHit, SearchOptions, SqlDriver, StorageRepository } from './types';
+import type { AttachmentMeta,CommitOptions,DbEncryptionStatus, SearchHit, SearchOptions, SqlDriver, StorageRepository } from './types';
 
 const DEFAULT_SEARCH_LIMIT = 50;
 
@@ -52,6 +52,17 @@ function scopeOf(type: string): 'chapter' | 'knowledge' | null {
 interface EntityRow {
   id: string;
   hash: string;
+}
+
+interface AttachmentRow {
+  id: string;
+  node_id: string;
+  role: string;
+  mime: string;
+  blob_id: string;
+  name: string | null;
+  size: number | null;
+  created_at: number | null;
 }
 
 /**
@@ -228,6 +239,53 @@ export class SqliteRepository implements StorageRepository {
       cause: r.cause ?? undefined,
       createdAt: Number(r.created_at),
     }));
+  }
+
+  // ========== 文档附件（attachments + blobs）==========
+
+  async listAttachments(nodeId: string): Promise<AttachmentMeta[]> {
+    await this.ready;
+    const rows = await this.driver.all<AttachmentRow>('attachments.selectByNode', [nodeId]);
+    return rows.map((row) => this.toAttachmentMeta(row));
+  }
+
+  async saveAttachment(input: { nodeId: string; role: string; mime: string; name: string; bytes: Uint8Array }): Promise<AttachmentMeta> {
+    await this.ready;
+    const id = uuidv7();
+    const createdAt = Date.now();
+    const size = input.bytes.byteLength;
+    await this.driver.transaction(async (tx) => {
+      await tx.run('blobs.insert', [id, input.bytes]);
+      await tx.run('attachments.insert', [id, input.nodeId, input.role, input.mime, id, input.name, size, createdAt]);
+    });
+    return { id, nodeId: input.nodeId, role: input.role, mime: input.mime, name: input.name, size, createdAt };
+  }
+
+  async loadAttachmentBytes(id: string): Promise<Uint8Array | null> {
+    await this.ready;
+    const row = await this.driver.get<{ bytes: Uint8Array | null }>('blobs.selectById', [id]);
+    if (!row || row.bytes == null) return null;
+    return row.bytes instanceof Uint8Array ? row.bytes : new Uint8Array(row.bytes);
+  }
+
+  async deleteAttachment(id: string): Promise<void> {
+    await this.ready;
+    await this.driver.transaction(async (tx) => {
+      await tx.run('attachments.markErased', [id]);
+      await tx.run('blobs.delete', [id]);
+    });
+  }
+
+  private toAttachmentMeta(row: AttachmentRow): AttachmentMeta {
+    return {
+      id: row.id,
+      nodeId: row.node_id,
+      role: row.role,
+      mime: row.mime,
+      name: row.name ?? row.id,
+      size: Number(row.size ?? 0),
+      createdAt: Number(row.created_at ?? 0),
+    };
   }
 
   // ========== 写入 ==========

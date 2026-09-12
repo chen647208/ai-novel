@@ -15,6 +15,12 @@
       "aborted": "已中止"
     }
   },
+  "attachments": {
+    "open": "文档附件库",
+    "title": "已存文档附件",
+    "empty": "暂无已存附件。发送参考文件后会自动保存到本书。",
+    "remove": "删除附件"
+  },
   "category": {
     "inspiration": "灵感",
     "knowledge": "知识库",

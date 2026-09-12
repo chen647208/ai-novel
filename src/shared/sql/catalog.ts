@@ -87,6 +87,10 @@ export const SQL = {
          bytes BLOB NOT NULL,
          enc   TEXT
        )`,
+  // ── 迁移 v4（附件元数据列）──
+  'migration.v4.attachmentsName': `ALTER TABLE attachments ADD COLUMN name TEXT`,
+  'migration.v4.attachmentsSize': `ALTER TABLE attachments ADD COLUMN size INTEGER`,
+  'migration.v4.attachmentsCreatedAt': `ALTER TABLE attachments ADD COLUMN created_at INTEGER`,
   'migration.v2.entityChanges': `CREATE TABLE IF NOT EXISTS entity_changes (
          id               INTEGER PRIMARY KEY AUTOINCREMENT,
          entity_name      TEXT NOT NULL,
@@ -185,7 +189,14 @@ export const SQL = {
 
   // ── 附件 / 二进制 ──
   'attachments.deleteAll': `DELETE FROM attachments`,
+  'attachments.selectByNode': `SELECT id, node_id, role, mime, blob_id, name, size, created_at FROM attachments WHERE node_id = ? AND erased = 0 ORDER BY created_at DESC`,
+  'attachments.selectById': `SELECT id, node_id, role, mime, blob_id, name, size, created_at, erased FROM attachments WHERE id = ?`,
+  'attachments.insert': `INSERT INTO attachments (id, node_id, role, mime, blob_id, erased, name, size, created_at) VALUES (?,?,?,?,?,0,?,?,?)`,
+  'attachments.markErased': `UPDATE attachments SET erased = 1 WHERE id = ?`,
   'blobs.deleteAll': `DELETE FROM blobs`,
+  'blobs.insert': `INSERT OR REPLACE INTO blobs (id, bytes, enc) VALUES (?,?,NULL)`,
+  'blobs.selectById': `SELECT bytes FROM blobs WHERE id = ?`,
+  'blobs.delete': `DELETE FROM blobs WHERE id = ?`,
 
   // ── 全文检索 ──
   'fts.deleteByNode': `DELETE FROM nodes_fts WHERE node_id = ?`,

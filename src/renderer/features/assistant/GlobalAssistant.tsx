@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/app/stores/projectStore';
 import { AIService } from '@/shared/services/ai/aiService';
 import { dialogService } from '@/shared/services/dialogService';
+import { saveAttachmentFile } from '@/shared/services/documentAttachmentService';
 import { Button } from '@/shared/ui/Button';
 import { Select } from '@/shared/ui/Select';
 import { normalizeGenderId, normalizeRoleId } from '@/shared/utils/characterKinds';
@@ -62,6 +63,8 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
   } = chat;
 
   const [outputMode, setOutputMode] = useState<OutputMode>('streaming');
+  // 文档附件库刷新信号：保存新附件后递增，触发出现在附件下拉中
+  const [attachmentsRefreshKey, setAttachmentsRefreshKey] = useState(0);
 
   const [contextPanelOpen, setContextPanelOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<AssistantCategory>('inspiration');
@@ -142,8 +145,9 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
+    const picked = Array.from(e.target.files);
     const electronApi = window.electronAPI;
-    const { images, items } = await collectChatAttachments(Array.from(e.target.files), {
+    const { images, items } = await collectChatAttachments(picked, {
       visionAvailable: usableModel?.supportsVision !== false,
       readDataUrl: (file) =>
         new Promise<string>((resolve, reject) => {
@@ -163,6 +167,15 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
     });
     if (images.length > 0) setPendingImages((prev) => [...prev, ...images]);
     if (items.length > 0) setPendingFiles((prev) => [...prev, ...items]);
+    // 文档（非图片）按书持久化为附件，之后可在附件库直接重新引用
+    if (project) {
+      const docs = picked.filter((file) => !file.type.startsWith('image/'));
+      if (docs.length > 0) {
+        void Promise.all(docs.map((file) => saveAttachmentFile(project.id, file))).then((saved) => {
+          if (saved.some((entry) => entry !== null)) setAttachmentsRefreshKey((key) => key + 1);
+        });
+      }
+    }
     e.target.value = '';
   };
 
@@ -616,6 +629,8 @@ const GlobalAssistant: React.FC<GlobalAssistantProps> = ({ models, activeModelId
             cardPromptTemplates={cardPromptTemplates}
             selectedCardTemplateId={selectedCardTemplateId}
             setSelectedCardTemplateId={setSelectedCardTemplateId}
+            bookId={project?.id ?? null}
+            attachmentsRefreshKey={attachmentsRefreshKey}
           />
         </>
     </div>
