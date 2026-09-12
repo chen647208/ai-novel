@@ -253,7 +253,7 @@ Rust host core、stdio JSON-RPC sidecar、面向编码的文件/diff/Bash 工具
 
 1. `TaskScheduler`（已落地）：`renderer/shared/services/taskScheduler.ts`；自动备份兜底（60s）经它驱动，任务抛错隔离、错峰不叠峰。
 2. `healthCheck`（已落地）：`main/app/diagnosticsCore.ts` 的 `collectHealth`，随诊断包导出为 `health.json`。
-3. `contributionRegistry`（待落地）：统一扩展点，随第 4/5 类贡献点（命令/UI 槽位）。
+3. `contributionRegistry`（待落地）：统一扩展点，随第 4/5 类贡献点（命令/UI 槽位）。设计见 §13。
 
 ### 12.3 不迁移
 
@@ -263,3 +263,37 @@ GPL-3.0 代码、.NET/AspNetCore/SignalR 栈、PVR 领域模型、Web 服务 + �
 
 - 调度器：单任务抛错不影响其余；周期任务错峰不叠峰；`stop()` 后计时器全部清除。
 - 健康检查：数据目录可写、存储配置可解析、日志目录存在三项随诊断包导出，失败项带可执行说明。
+
+## 13. Sonarr Provider 抽象落地设计（contributionRegistry）
+
+来源：https://github.com/Sonarr/Sonarr（GPL-3.0，只借设计）；见 `20-external-benchmark.md` §2.2。
+
+### 13.1 Sonarr 的做法
+
+- **定义行 `ProviderDefinition`**（存 DB）：`Id / Name / Implementation / ConfigContract / Settings(JSON) / Enable / Priority / Tags`。
+- **能力接口**：`IProvider` 基类 + 领域接口（`IIndexer`/`IDownloadClient`…）；实现暴露 `ConfigContract => typeof(TSettings)` 与 `IProviderConfig.Validate()`。
+- **工厂 `ProviderFactory<TProvider, TProviderDefinition>`**：`All()`/`Active()`（按 Enable+Priority 过滤）/`GetAvailableProviders()`/`GetDefaultDefinitions()`/`SetProviderCharacteristics()`；所有实现经依赖注入集合 `IEnumerable<IProvider>` 汇入，工厂不 new 具体类型。
+- **设置多态**：配置以 JSON 存一行，按 `ConfigContract` 类型名反序列化为对应 settings 类型；`NullConfig` 兜底。
+- **设置 UI 生成**：服务端下发 `fields[]`（`name/type/label/order/helpText/advanced/unit`），前端按 schema 渲染表单，无每种 provider 的手写表单。
+- **状态与退避**：`ProviderStatusServiceBase` 失败升 `EscalationLevel` 并设 `DisabledTill`，成功后逐级回退。
+
+### 13.2 对位到本项目
+
+| Sonarr | 本项目落点 |
+|---|---|
+| `IProvider` + `ConfigContract` | `ContributionProvider`：`{ kind, id, install(sink), settingsSchema, defaultSettings?, status? }` |
+| `ProviderDefinition`（DB 行） | 每插件的贡献配置行（`plugin.<id>.<kind>`，存设置域，已有命名空间规则 §3） |
+| `ProviderFactory.All()/Active()` | `contributionRegistry`：按 `kind` 索引，统一 install/uninstall + 排序 + 启用过滤 |
+| 设置 JSON 多态 | 设置以 `settingsSchema`（JSON Schema，复用工具参数体系）持久化，键即声明 |
+| `fields[]` 驱动 UI | 设置表单由 JSON Schema 生成，替代每种贡献的手写面板 |
+| `ProviderStatusServiceBase` | 接入 `PluginHost` 状态 + 退避（`EscalationLevel`→禁用至时间戳） |
+
+原则：**一个贡献 = 一份声明（schema）+ 一个装配函数（install）+ 一条状态**；宿主按 kind 统一渲染设置与调度，加贡献不改应用壳。现有散落注册表（`uiSlots`/`commandRegistry`/`settingsTabRegistry`/`SkillCatalog`/`BuildProfileRegistry`）逐步收敛到 `contributionRegistry` 的对应 kind，收敛一个删一个。
+
+### 13.3 落地顺序与验收
+
+1. `core/plugin/providers.ts`：`ContributionProvider` 接口 + `ContributionRegistry`（注册返回 Disposable、按 kind 查询、启用/排序）。
+2. 先收 `settingsTabRegistry` 与 `commandRegistry`（这两个已有注册表，改造面小）。
+3. 设置表单由 schema 渲染，逐步替换手写面板。
+
+验收：加一个贡献只写声明 + install，不改应用壳；禁用后贡献与设置项一并消失；状态退避可见。
