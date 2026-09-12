@@ -115,8 +115,7 @@ test('命令面板：Ctrl+K 打开、过滤并在执行后关闭', async () => {
   }
 });
 
-test('模态键盘契约：打开后焦点进入，Esc 关闭', async () => {
-  const userDataDir = mkdtempSync(join(tmpdir(), 'hongyue-e2e-dialog-'));
+test('模态键盘契约：打开后焦点进入，Esc 关闭', async () => {  const userDataDir = mkdtempSync(join(tmpdir(), 'hongyue-e2e-dialog-'));
   const { app, page } = await launchApp(userDataDir);
   try {
     await createBook(page);
@@ -135,6 +134,32 @@ test('模态键盘契约：打开后焦点进入，Esc 关闭', async () => {
     // Esc 关闭
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden({ timeout: 10_000 });
+  } finally {
+    await app.close();
+    cleanupUserDataDir(userDataDir);
+  }
+});
+
+test('查找替换：Ctrl+F 打开并全部替换', async () => {
+  const userDataDir = mkdtempSync(join(tmpdir(), 'hongyue-e2e-find-'));
+  const { app, page } = await launchApp(userDataDir);
+  try {
+    await createBook(page);
+    await page.keyboard.press('Control+5');
+    await page.getByRole('button', { name: /新建第一章|Create first chapter/ }).click();
+    const editor = page.locator('.ProseMirror').first();
+    await editor.waitFor({ state: 'attached', timeout: 30_000 });
+    await editor.focus();
+    await page.waitForTimeout(300);
+    await page.keyboard.type('aaa bbb aaa');
+
+    await page.keyboard.press('Control+f');
+    const query = page.getByPlaceholder(/查找|Search|Find/);
+    await expect(query).toBeVisible({ timeout: 10_000 });
+    await query.fill('aaa');
+    await page.getByPlaceholder(/替换为|Replace/).fill('ccc');
+    await page.locator('[title="全部替换"]').click();
+    await expect(editor).toContainText('ccc bbb ccc', { timeout: 10_000 });
   } finally {
     await app.close();
     cleanupUserDataDir(userDataDir);
