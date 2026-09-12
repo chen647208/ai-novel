@@ -12,6 +12,7 @@ import path from 'node:path';
 
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron';
 
+import type { SandboxRunRequest } from '../../shared/sandbox.js';
 import { IPC } from '../channels.js';
 import { closeMcpClients,registerMcpClientIpc } from '../mcp/clientIpc.js';
 import { registerProxyIpc } from '../net/proxyIpc.js';
@@ -22,6 +23,7 @@ import type { Provider, ProviderContext } from './container.js';
 import { registerDiagnosticsIpc } from './diagnostics.js';
 import { extractPdfText } from './documents.js';
 import { registerPluginFsIpc } from './pluginFs.js';
+import { sandboxHost } from './pluginSandbox/host.js';
 import { destroyTray, registerShellIpc } from './tray.js';
 import { getMainWindow } from './window.js';
 import { createWindow } from './window.js';
@@ -121,6 +123,7 @@ export const fileProvider: Provider = {
     });
 
     registerPluginFsIpc();
+    ipcMain.handle(IPC.pluginSandboxRun, (_event, request: SandboxRunRequest) => sandboxHost.run(request));
 
     // 系统文件管理器打开路径（日志/数据目录入口；只允许 userData 内路径）
     ipcMain.handle(IPC.openPath, async (_event, targetPath: string) => {

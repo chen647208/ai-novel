@@ -7,6 +7,8 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
+import type { SandboxRunRequest, SandboxRunResult } from './sandbox.js';
+
 
 export type ModelProvider = 'openai-chat' | 'openai-responses' | 'anthropic' | 'gemini' | 'ollama';
 
@@ -1111,6 +1113,8 @@ export interface ElectronAPI {
   pluginReadFile: (rootDir: string, rel: string) => Promise<string>;
   /** 插件资源列目录（同上，经门）。 */
   pluginListDirectory: (rootDir: string, rel: string) => Promise<Array<{ name: string; type: 'file' | 'directory' }>>;
+  /** 在隔离沙箱里执行插件逻辑（utilityProcess + QuickJS）；主进程做资源限额与兜底超时。 */
+  pluginSandboxRun: (request: SandboxRunRequest) => Promise<SandboxRunResult>;
   /** 系统文件管理器打开路径（日志目录/数据目录入口）。 */
   openPath: (targetPath: string) => Promise<boolean>;
   /** 外部浏览器打开链接（仅 https；应用内无浏览器）。 */

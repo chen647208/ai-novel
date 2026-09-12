@@ -92,3 +92,13 @@ export {
   type PluginState,
   type PluginStatus,
 } from './runtime.js';
+export { adjudicateHandlerResult } from './sandbox/capabilities.js';
+export {
+  DEFAULT_SANDBOX_LIMITS,
+  type SandboxError,
+  type SandboxErrorKind,
+  type SandboxLimits,
+  type SandboxRunRequest,
+  type SandboxRunResult,
+  type SandboxToolCall,
+} from './sandbox/types.js';

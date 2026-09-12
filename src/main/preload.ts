@@ -39,6 +39,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   listDirectory: (dirPath: string) => ipcRenderer.invoke(IPC.listDirectory, dirPath),
   pluginReadFile: (rootDir: string, rel: string) => ipcRenderer.invoke(IPC.pluginReadFile, rootDir, rel),
   pluginListDirectory: (rootDir: string, rel: string) => ipcRenderer.invoke(IPC.pluginListDirectory, rootDir, rel),
+  pluginSandboxRun: (request: unknown) => ipcRenderer.invoke(IPC.pluginSandboxRun, request),
   openPath: (targetPath: string) => ipcRenderer.invoke(IPC.openPath, targetPath),
   openExternal: (url: string) => ipcRenderer.invoke(IPC.openExternal, url),
   exportPackage: (files: Record<string, string>, defaultPath: string) => ipcRenderer.invoke(IPC.exportPackage, files, defaultPath),

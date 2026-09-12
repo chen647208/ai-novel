@@ -134,11 +134,13 @@
 
 | 阶段 | 内容 | 验收 |
 |---|---|---|
-| S0（现状） | 仅资源型，不执行插件代码 | 禁用全部插件纯写作可用 |
-| S1 | utilityProcess 逻辑沙箱骨架 + 能力 Broker + 资源限额 | 死循环/内存炸弹被限额终止且不拖垮主进程；越权能力调用被拒 |
-| S2 | 按形态接 WASM（Wasmtime/Extism）或 QuickJS-WASM | 示例插件端到端；宿主函数入参校验用例齐全 |
+| S0 | 仅资源型，不执行插件代码 | 禁用全部插件纯写作可用 |
+| S1（已落地） | utilityProcess 逻辑沙箱 + QuickJS 引擎隔离 + 资源限额 + IPC | 死循环被中断、内存炸弹被内存上限拦截、输出超限拒绝；子进程无响应由主进程兜底 kill；宿主对象不可达 |
+| S2 | 按形态接 WASM（Wasmtime/Extism）作为重逻辑轨 | 示例 WASM 插件端到端；宿主函数入参校验用例齐全 |
 | S3 | UI 沙箱 iframe + postMessage 协议 | 插件 UI 无法触达宿主对象；CSP 下无 `eval` |
 | S4 | 签名与来源白名单（cosign） | 篡改包拒载；来源离线白名单可配 |
+
+S1 实现落点：`core/plugin/sandbox/*`（契约与能力裁决）、`main/app/pluginSandbox/*`（QuickJS 运行时 + utilityProcess 宿主）、`shared/sandbox.ts`（跨层类型）、IPC `plugin-sandbox-run`。
 
 每阶段独立 `npm run verify`；S1 起涉及进程与 IPC，跑打包冒烟与 E2E。
 

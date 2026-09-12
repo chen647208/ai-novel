@@ -28,6 +28,7 @@ export const IPC = {
   listDirectory: 'list-directory',
   pluginReadFile: 'plugin-read-file',
   pluginListDirectory: 'plugin-list-directory',
+  pluginSandboxRun: 'plugin-sandbox-run',
   openPath: 'open-path',
   openExternal: 'open-external',
   exportPackage: 'export-package',

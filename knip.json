@@ -2,6 +2,7 @@
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "entry": [
     "src/main/main.ts",
+    "src/main/app/pluginSandbox/sandboxChild.ts",
     "sdk/src/index.ts",
     "scripts/**/*.mjs",
     "e2e/**/*.spec.ts",
