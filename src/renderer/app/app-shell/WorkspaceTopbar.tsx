@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { useFeatureEnabled } from '@/app/useFeatureToggles';
 import AssistantTasksIndicator from '@/features/assistant/components/AssistantTasksIndicator';
 import { useTranslation } from '@/i18n';
 import { resolveTheme } from '@/shared/services/themeService';
@@ -73,6 +74,7 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
 }) => {
   const { t } = useTranslation(['app', 'nav']);
   const isDark = resolveTheme(theme) === 'dark';
+  const assistantEnabled = useFeatureEnabled('panel.assistant');
   const [editingTitle, setEditingTitle] = useState(false);
   const [draftTitle, setDraftTitle] = useState('');
   const [hintDismissed, setHintDismissed] = useState(false);
@@ -185,7 +187,7 @@ const WorkspaceTopbar: React.FC<WorkspaceTopbarProps> = ({
 
       {/* 右侧工具区 */}
       <div className="flex shrink-0 items-center gap-2">
-        {onToggleAssistant && (
+        {assistantEnabled && onToggleAssistant && (
           <IconButton
             tone="muted"
             active={assistantOpen}

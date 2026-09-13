@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useFeatureEnabled } from '@/app/useFeatureToggles';
 import { collectAllTags, filterBooksByTags, normalizeTagInput } from '@/features/books/bookTags';
 import NewBookModal from '@/features/books/NewBookModal';
 import { useTranslation } from '@/i18n';
@@ -120,6 +121,7 @@ const Bookshelf: React.FC<BookshelfProps> = ({
   onOpenSearch,
 }) => {
   const { t, i18n } = useTranslation(['app', 'books', 'common']);
+  const searchEnabled = useFeatureEnabled('panel.globalSearch');
   const [query, setQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isNewBookOpen, setIsNewBookOpen] = useState(false);
@@ -230,10 +232,12 @@ const Bookshelf: React.FC<BookshelfProps> = ({
           description={t('app:bookshelf.subtitle')}
           actions={
             <>
-              <Button variant="outline" size="sm" onClick={onOpenSearch}>
-                <Search className="size-4" />
-                {t('app:search.open')}
-              </Button>
+              {searchEnabled && (
+                <Button variant="outline" size="sm" onClick={onOpenSearch}>
+                  <Search className="size-4" />
+                  {t('app:search.open')}
+                </Button>
+              )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">

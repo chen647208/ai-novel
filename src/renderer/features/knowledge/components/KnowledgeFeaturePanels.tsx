@@ -11,6 +11,7 @@ import type { LucideIcon } from 'lucide-react';
 import { ChevronDown, ChevronUp, Clock, Flag, LayoutList, MapPinned, Network, ScrollText, Shield, WandSparkles } from 'lucide-react';
 import React from 'react';
 
+import { useFeatureEnabled } from '@/app/useFeatureToggles';
 import { useTranslation } from '@/i18n';
 import { cn } from '@/shared/utils/cn';
 
@@ -99,6 +100,11 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
 }) => {
   const { t } = useTranslation('knowledge');
 
+  const graphEnabled = useFeatureEnabled('panel.worldGraph');
+  const consistencyEnabled = useFeatureEnabled('panel.consistency');
+  const recommenderEnabled = useFeatureEnabled('panel.smartRecommender');
+  const enhancedTimelineEnabled = useFeatureEnabled('panel.enhancedTimeline');
+
   const closeAllEditors = () => {
     setShowLocationEditor(false);
     setShowFactionEditor(false);
@@ -156,44 +162,52 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
       </div>
 
       <div className="grid grid-cols-3 gap-3">
-        <PanelToggle
-          icon={Network}
-          title={t('panel.graphTitle')}
-          hint={t('panel.graphHint')}
-          active={false}
-          hasData={!!(project.characters?.length || project.factions?.length || project.locations?.length)}
-          expandable={false}
-          onClick={() => {
-            setGraphInitialType('mixed');
-            setShowWorldViewGraph(true);
-          }}
-        />
-        <PanelToggle
-          icon={LayoutList}
-          title={t('panel.enhancedTimelineTitle')}
-          hint={t('panel.enhancedTimelineHint')}
-          active={showEnhancedTimeline}
-          hasData={showEnhancedTimeline}
-          onClick={() => setShowEnhancedTimeline(!showEnhancedTimeline)}
-        />
-        <PanelToggle
-          icon={Shield}
-          title={t('panel.consistencyTitle')}
-          hint={t('panel.consistencyHint')}
-          active={showConsistencyChecker}
-          hasData={showConsistencyChecker}
-          onClick={() => setShowConsistencyChecker(!showConsistencyChecker)}
-        />
+        {graphEnabled && (
+          <PanelToggle
+            icon={Network}
+            title={t('panel.graphTitle')}
+            hint={t('panel.graphHint')}
+            active={false}
+            hasData={!!(project.characters?.length || project.factions?.length || project.locations?.length)}
+            expandable={false}
+            onClick={() => {
+              setGraphInitialType('mixed');
+              setShowWorldViewGraph(true);
+            }}
+          />
+        )}
+        {enhancedTimelineEnabled && (
+          <PanelToggle
+            icon={LayoutList}
+            title={t('panel.enhancedTimelineTitle')}
+            hint={t('panel.enhancedTimelineHint')}
+            active={showEnhancedTimeline}
+            hasData={showEnhancedTimeline}
+            onClick={() => setShowEnhancedTimeline(!showEnhancedTimeline)}
+          />
+        )}
+        {consistencyEnabled && (
+          <PanelToggle
+            icon={Shield}
+            title={t('panel.consistencyTitle')}
+            hint={t('panel.consistencyHint')}
+            active={showConsistencyChecker}
+            hasData={showConsistencyChecker}
+            onClick={() => setShowConsistencyChecker(!showConsistencyChecker)}
+          />
+        )}
       </div>
 
-      <PanelToggle
-        icon={WandSparkles}
-        title={t('panel.recommenderTitle')}
-        hint={t('panel.recommenderHint')}
-        active={showSmartRecommender}
-        hasData={showSmartRecommender}
-        onClick={() => setShowSmartRecommender(!showSmartRecommender)}
-      />
+      {recommenderEnabled && (
+        <PanelToggle
+          icon={WandSparkles}
+          title={t('panel.recommenderTitle')}
+          hint={t('panel.recommenderHint')}
+          active={showSmartRecommender}
+          hasData={showSmartRecommender}
+          onClick={() => setShowSmartRecommender(!showSmartRecommender)}
+        />
+      )}
     </>
   );
 };

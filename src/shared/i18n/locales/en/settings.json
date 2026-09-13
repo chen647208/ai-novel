@@ -1,6 +1,16 @@
 {
   "title": "Console Settings",
   "subtitle": "System Core Settings",
+  "features": {
+    "title": "Interface features",
+    "subtitle": "Toggle optional interface entries; disabling removes them from the UI without touching data.",
+    "assistant": "AI assistant panel",
+    "globalSearch": "Full-library search",
+    "worldGraph": "World graph",
+    "consistency": "Consistency check",
+    "smartRecommender": "Smart recommender",
+    "enhancedTimeline": "Enhanced timeline"
+  },
   "tabGroup": {
     "ai": "AI Models",
     "prompts": "Prompts",

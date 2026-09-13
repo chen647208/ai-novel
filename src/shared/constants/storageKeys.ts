@@ -26,6 +26,7 @@ export const STORAGE_KEYS = {
   errorLogs: 'novelocal_error_logs',
   aiUsage: 'ai.usage',
   aiHourlyLimit: 'ai.hourlyLimit',
+  appFeaturesDisabled: 'features.disabled',
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

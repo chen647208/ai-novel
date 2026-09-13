@@ -1,6 +1,16 @@
 {
   "title": "控制台配置",
   "subtitle": "系统核心配置",
+  "features": {
+    "title": "界面功能开关",
+    "subtitle": "逐项开合可选界面入口；关闭即从界面移除，数据不受影响。",
+    "assistant": "AI 助手面板",
+    "globalSearch": "全库检索",
+    "worldGraph": "世界关系图",
+    "consistency": "一致性检查",
+    "smartRecommender": "智能推荐",
+    "enhancedTimeline": "增强时间线"
+  },
   "tabGroup": {
     "ai": "AI 模型",
     "prompts": "提示词",
