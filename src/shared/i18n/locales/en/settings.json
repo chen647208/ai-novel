@@ -11,6 +11,20 @@
     "smartRecommender": "Smart recommender",
     "enhancedTimeline": "Enhanced timeline"
   },
+  "entities": {
+    "title": "Entity types & fields",
+    "subtitle": "Built-in types are read-only; add custom types and fields for the current work (outline, worldbuilding, timeline).",
+    "builtin": "Built-in types",
+    "custom": "Custom types",
+    "empty": "No custom types yet.",
+    "noWork": "Create or open a book first to manage custom types.",
+    "addType": "Add type",
+    "typePlaceholder": "Type name, e.g. Spell",
+    "addField": "Add field",
+    "fieldPlaceholder": "Field name",
+    "removeType": "Remove type",
+    "removeField": "Remove field"
+  },
   "tabGroup": {
     "ai": "AI Models",
     "prompts": "Prompts",

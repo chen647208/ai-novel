@@ -11,6 +11,20 @@
     "smartRecommender": "智能推荐",
     "enhancedTimeline": "增强时间线"
   },
+  "entities": {
+    "title": "实体类型与字段",
+    "subtitle": "内置类型只读；当前作品可自定义类型与字段，用于大纲、设定与时间线。",
+    "builtin": "内置类型",
+    "custom": "自定义类型",
+    "empty": "暂无自定义类型。",
+    "noWork": "先创建或打开一本书，再管理自定义类型。",
+    "addType": "添加类型",
+    "typePlaceholder": "类型名称，如 法术",
+    "addField": "添加字段",
+    "fieldPlaceholder": "字段名称",
+    "removeType": "删除类型",
+    "removeField": "删除字段"
+  },
   "tabGroup": {
     "ai": "AI 模型",
     "prompts": "提示词",

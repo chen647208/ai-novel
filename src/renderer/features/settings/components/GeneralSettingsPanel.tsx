@@ -22,6 +22,7 @@ import { cn } from '@/shared/utils/cn';
 import { DEFAULT_EDITOR_FONT, DEFAULT_UI_FONT, fontPresets, resolveFontStack } from '../../../constants/fonts';
 import { importCustomFont, removeCustomFont } from '../services/customFontService';
 import type { GeneralSettingsPanelProps } from '../types';
+import EntityTypesPanel from './EntityTypesPanel';
 import FeatureTogglesPanel from './FeatureTogglesPanel';
 import ProxyPanel from './ProxyPanel';
 import ShortcutRecorder from './ShortcutRecorder';
@@ -272,6 +273,8 @@ const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({
       <SystemPanel />
 
       <FeatureTogglesPanel />
+
+      <EntityTypesPanel />
 
       <ProxyPanel />
     </div>
