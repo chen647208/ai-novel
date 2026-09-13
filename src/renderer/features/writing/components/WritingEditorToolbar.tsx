@@ -7,7 +7,7 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-import { AlignCenterVertical, ArrowLeft, Camera, ChevronsRight, Eraser, Expand, FileOutput, FileText, History, Lock, Maximize2, Merge, Minimize2, Redo2, RotateCcw, Scissors, Search, SpellCheck, Sprout, Undo2, Unlock } from 'lucide-react';
+import { AlignCenterVertical, ArrowLeft, Camera, ChevronsRight, Eraser, Expand, FileOutput, FileText, History, Lock, Maximize2, Merge, Minimize2, Redo2, RotateCcw, Scissors, Search, SpellCheck, Sprout, Undo2, Unlock, Wrench } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -66,6 +66,7 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
   onMergeChapter,
   chapterFinal,
   onToggleFinal,
+  onOpenTools,
 }) => {
   const { t, i18n } = useTranslation('writing');
   const progress = targetWordCount > 0 ? Math.min(1, chapterStats.charCount / targetWordCount) : 0;
@@ -167,6 +168,9 @@ const WritingEditorToolbar: React.FC<WritingEditorToolbarProps> = ({
                 title={chapterFinal ? t('toolbar.unfinalTitle') : t('toolbar.finalTitle')}
               >
                 {chapterFinal ? <Lock className="size-4" /> : <Unlock className="size-4" />}
+              </Button>
+              <Button variant="ghost" size="icon" className={iconBtn} onClick={onOpenTools} title={t('toolbar.toolsTitle')}>
+                <Wrench className="size-4" />
               </Button>
               <Button variant="ghost" size="icon" className={iconBtn} onClick={onSplitChapter} disabled={!canSplitChapter} title={t('toolbar.splitChapterTitle')}>
                 <Scissors className="size-4" />

@@ -101,6 +101,8 @@ export interface NovelEditorHandle {
   findAll(query: string, caseSensitive: boolean): Array<{ from: number; to: number }>;
   /** 查找替换支撑：区间替换为纯文本，返回是否成功。 */
   replaceRange(from: number, to: number, text: string): boolean;
+  /** 快捷词：在当前光标处插入纯文本，返回是否成功。 */
+  insertText(text: string): boolean;
   /** 章节拆分：按当前光标把正文切成两段 DSL（光标在文首/文尾或空章返回 null）。 */
   splitAtCursor(): { before: string; after: string } | null;
 }
@@ -206,6 +208,8 @@ export interface WritingEditorToolbarProps {
   /** 定稿锁定：定稿后章节正文只读，取消后恢复编辑。 */
   chapterFinal: boolean;
   onToggleFinal: () => void;
+  /** 打开写作工具（排版/纠错/快捷词/预览）。 */
+  onOpenTools: () => void;
 }
 
 export interface WritingSelectionMenuProps {

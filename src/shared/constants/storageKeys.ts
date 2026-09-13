@@ -20,6 +20,7 @@ export const STORAGE_KEYS = {
   versionAutoCheck: 'version.autoCheck',
   versionSkipped: 'version.skipped',
   editorTypewriter: 'editor.typewriter',
+  editorSnippets: 'editor.snippets',
   pluginsDisabled: 'plugins.disabled',
   trustedPluginKeys: 'plugins.trustedKeys',
   allowedPluginSources: 'plugins.allowedSources',

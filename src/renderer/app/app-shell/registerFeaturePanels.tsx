@@ -26,6 +26,7 @@ import LocationEditor from '@/features/world/LocationEditor';
 import RuleSystemEditor from '@/features/world/RuleSystemEditor';
 import WorldViewEditor from '@/features/world/WorldViewEditor';
 import WorldViewGraph from '@/features/world/WorldViewGraph';
+import WritingToolsPanel from '@/features/writing/components/WritingToolsPanel';
 import { registerFeaturePanel } from '@/shared/services/featurePanels';
 
 export function registerFeaturePanels(): void {
@@ -44,4 +45,5 @@ export function registerFeaturePanels(): void {
   registerFeaturePanel('foreshadowing.panel', ForeshadowPanel);
   registerFeaturePanel('view.entities', MultiViewPanel);
   registerFeaturePanel('screenplay.panel', ScreenplayPanel);
+  registerFeaturePanel('writing.tools', WritingToolsPanel);
 }

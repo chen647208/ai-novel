@@ -12,6 +12,39 @@
     "newScene": "新场次",
     "untitledScene": "未命名场次"
   },
+  "tools": {
+    "tabs": {
+      "format": "一键排版",
+      "proofread": "自动纠错",
+      "snippets": "快捷词",
+      "preview": "多平台预览"
+    },
+    "format": {
+      "indent": "段落首行缩进两个全角空格",
+      "current": "排版当前章",
+      "all": "排版全书"
+    },
+    "proofread": {
+      "empty": "未发现常见错别字或重复标点。",
+      "count": "发现 {{count}} 处可修正项",
+      "applyAll": "全部修正"
+    },
+    "snippets": {
+      "labelPlaceholder": "名称",
+      "textPlaceholder": "插入文本",
+      "add": "添加",
+      "insert": "插入",
+      "delete": "删除",
+      "empty": "暂无快捷词。"
+    },
+    "preview": {
+      "title": "章节预览",
+      "desktop": "桌面",
+      "tablet": "平板",
+      "phone": "手机",
+      "empty": "请选择章节。"
+    }
+  },
   "genModal": {
     "title": "AI 智能正文生成",
     "targetChapter": "目标章节",
@@ -249,6 +282,7 @@
     "findTitle": "查找替换（Ctrl+F）",
     "finalTitle": "定稿锁定（正文只读）",
     "unfinalTitle": "取消定稿（恢复编辑）",
+    "toolsTitle": "写作工具（排版/纠错/快捷词/预览）",
     "splitChapterTitle": "从光标处拆分为新章",
     "mergeChapterTitle": "与下一章合并",
     "exitFocus": "退出专注",

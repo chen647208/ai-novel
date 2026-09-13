@@ -47,6 +47,7 @@ import { useGenerationSelections } from './hooks/useGenerationSelections';
 import { useSelectionMenu } from './hooks/useSelectionMenu';
 import { extractChapterSummary } from './services/summaryExtractionService';
 import { computeBookStats, computeChapterStats } from './services/writingStatsService';
+import { applyProofreadFixes, autoFormatContent, type ProofreadIssue } from './services/writingToolsService';
 import type {
   GenerationModalState,
   NovelEditorHandle,
@@ -195,11 +196,27 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
 
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [isForeshadowOpen, setIsForeshadowOpen] = useState(false);
+  const [isToolsOpen, setIsToolsOpen] = useState(false);
 
   // 章节字段写回统一见 useChapterMutations
   const { handleUpdateChapter, updateChapterContent, updateChapterSummary, updateChapterContentSummary, updateActiveChapterTitle } = useChapterMutations({
     project, activeChapterId, onUpdate, setSaveDirty,
   });
+
+  const handleFormatChapter = (chapterId: string, indent: boolean) => {
+    onUpdate({ chapters: project.chapters.map((c) => (c.id === chapterId ? { ...c, content: autoFormatContent(c.content, { indentParagraphs: indent }) } : c)) });
+    setSaveDirty(true);
+  };
+
+  const handleFormatAll = (indent: boolean) => {
+    onUpdate({ chapters: project.chapters.map((c) => ({ ...c, content: autoFormatContent(c.content, { indentParagraphs: indent }) })) });
+    setSaveDirty(true);
+  };
+
+  const handleApplyProofread = (chapterId: string, issues: ProofreadIssue[]) => {
+    onUpdate({ chapters: project.chapters.map((c) => (c.id === chapterId ? { ...c, content: applyProofreadFixes(c.content, issues) } : c)) });
+    setSaveDirty(true);
+  };
 
   // 章节导出：选择/格式/预设/落盘统一见 useChapterExport
   const exporter = useChapterExport({ project, t });
@@ -531,6 +548,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
             if (!activeChapter) return;
             handleUpdateChapter({ ...activeChapter, status: activeChapter.status === 'final' ? 'draft' : 'final' });
           }}
+          onOpenTools={() => setIsToolsOpen(true)}
         />
 
         <Slot id="plugin.editor" />
@@ -591,6 +609,20 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
         activeChapter={activeChapter ? { id: activeChapter.id, title: activeChapter.title, order: activeChapter.order, content: activeChapter.content } : null}
         onUpdate={onUpdate}
         onClose={() => setIsForeshadowOpen(false)}
+      />
+
+      <FeaturePanel
+        id="writing.tools"
+        isOpen={isToolsOpen}
+        project={project}
+        chapter={activeChapter ?? null}
+        onFormatChapter={handleFormatChapter}
+        onFormatAll={handleFormatAll}
+        onApplyProofread={handleApplyProofread}
+        onInsertSnippet={(text: string) => {
+          editorRef.current?.insertText(text);
+        }}
+        onClose={() => setIsToolsOpen(false)}
       />
     </div>
   );

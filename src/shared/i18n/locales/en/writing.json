@@ -12,6 +12,39 @@
     "newScene": "New scene",
     "untitledScene": "Untitled scene"
   },
+  "tools": {
+    "tabs": {
+      "format": "Auto-format",
+      "proofread": "Proofread",
+      "snippets": "Snippets",
+      "preview": "Platform preview"
+    },
+    "format": {
+      "indent": "Indent paragraphs with two em spaces",
+      "current": "Format current chapter",
+      "all": "Format whole book"
+    },
+    "proofread": {
+      "empty": "No common typos or repeated punctuation found.",
+      "count": "{{count}} fixable issues found",
+      "applyAll": "Fix all"
+    },
+    "snippets": {
+      "labelPlaceholder": "Label",
+      "textPlaceholder": "Insert text",
+      "add": "Add",
+      "insert": "Insert",
+      "delete": "Delete",
+      "empty": "No snippets yet."
+    },
+    "preview": {
+      "title": "Chapter preview",
+      "desktop": "Desktop",
+      "tablet": "Tablet",
+      "phone": "Phone",
+      "empty": "Select a chapter."
+    }
+  },
   "genModal": {
     "title": "AI Smart Content Generation",
     "targetChapter": "Target Chapter",
@@ -249,6 +282,7 @@
     "findTitle": "Find & replace (Ctrl+F)",
     "finalTitle": "Finalize and lock (read-only body)",
     "unfinalTitle": "Unfinalize (editable again)",
+    "toolsTitle": "Writing tools (format / proofread / snippets / preview)",
     "splitChapterTitle": "Split into a new chapter at cursor",
     "mergeChapterTitle": "Merge with next chapter",
     "exitFocus": "Exit focus",

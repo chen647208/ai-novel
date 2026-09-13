@@ -101,7 +101,12 @@ const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function T
       try {
         const { from } = editor.state.selection;
         const coords = editor.view.coordsAtPos(from);
-        const container = editor.view.dom.closest('.') as HTMLElement | null;
+        let container: HTMLElement | null = editor.view.dom.parentElement;
+        while (container) {
+          const style = window.getComputedStyle(container);
+          if (/(auto|scroll)/.test(style.overflowY) && container.scrollHeight > container.clientHeight) break;
+          container = container.parentElement;
+        }
         if (!container) return;
         const rect = container.getBoundingClientRect();
         const delta = coords.top - rect.top - container.clientHeight * 0.4;
@@ -192,6 +197,14 @@ const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function T
         try {
           editor.commands.focus();
           return editor.commands.insertContentAt({ from, to }, text);
+        } catch {
+          return false;
+        }
+      },
+      insertText(text: string) {
+        if (!editor) return false;
+        try {
+          return editor.commands.insertContent(text);
         } catch {
           return false;
         }
