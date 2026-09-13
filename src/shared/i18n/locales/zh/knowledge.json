@@ -111,7 +111,9 @@
     "consistencyTitle": "一致性检查",
     "consistencyHint": "检测剧情与设定冲突",
     "recommenderTitle": "智能推荐",
-    "recommenderHint": "基于当前内容推荐相关设定和建议"
+    "recommenderHint": "基于当前内容推荐相关设定和建议",
+    "dataViewsTitle": "数据视图",
+    "dataViewsHint": "同一份设定用表格、卡片或关系图查看"
   },
   "embedding": {
     "serviceNotReady": "API Embedding服务未就绪，请检查配置",

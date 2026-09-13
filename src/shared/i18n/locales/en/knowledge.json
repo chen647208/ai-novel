@@ -111,7 +111,9 @@
     "consistencyTitle": "Consistency Check",
     "consistencyHint": "Detect conflicts between plot and settings",
     "recommenderTitle": "Smart Recommender",
-    "recommenderHint": "Recommends relevant settings and advice based on current content"
+    "recommenderHint": "Recommends relevant settings and advice based on current content",
+    "dataViewsTitle": "Data views",
+    "dataViewsHint": "View the same settings as a table, cards or a relationship graph"
   },
   "embedding": {
     "serviceNotReady": "API embedding service is not ready. Check the configuration",

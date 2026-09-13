@@ -74,6 +74,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
   const [showConsistencyChecker, setShowConsistencyChecker] = useState(false);
   const [showSmartRecommender, setShowSmartRecommender] = useState(false);
   const [showEnhancedTimeline, setShowEnhancedTimeline] = useState(false);
+  const [showDataViews, setShowDataViews] = useState(false);
   const [consistencyPrompts, setConsistencyPrompts] = useState<ConsistencyCheckPromptTemplate[]>([]);
   const [consistencyConfig, setConsistencyConfig] = useState<ConsistencyCheckConfig | null>(null);
   
@@ -380,6 +381,8 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
         setShowConsistencyChecker={setShowConsistencyChecker}
         showSmartRecommender={showSmartRecommender}
         setShowSmartRecommender={setShowSmartRecommender}
+        showDataViews={showDataViews}
+        setShowDataViews={setShowDataViews}
         setShowWorldViewGraph={setShowWorldViewGraph}
         setGraphInitialType={setGraphInitialType}
       />
@@ -401,6 +404,7 @@ const StepKnowledgeEnhanced: React.FC<StepKnowledgeEnhancedProps> = ({
         showConsistencyChecker={showConsistencyChecker}
         showSmartRecommender={showSmartRecommender}
         showWorldViewGraph={showWorldViewGraph}
+        showDataViews={showDataViews}
         onCloseWorldViewGraph={() => setShowWorldViewGraph(false)}
         onNavigateToChapter={onNavigateToChapter}
         onNavigateToItem={handleNavigateToItem}

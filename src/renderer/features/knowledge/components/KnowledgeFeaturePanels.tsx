@@ -8,7 +8,7 @@
  */
 
 import type { LucideIcon } from 'lucide-react';
-import { ChevronDown, ChevronUp, Clock, Flag, LayoutList, MapPinned, Network, ScrollText, Shield, WandSparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, Flag, LayoutList, MapPinned, Network, ScrollText, Shield, Table2, WandSparkles } from 'lucide-react';
 import React from 'react';
 
 import { useFeatureEnabled } from '@/app/useFeatureToggles';
@@ -33,6 +33,8 @@ interface KnowledgeFeaturePanelsProps {
   setShowConsistencyChecker: React.Dispatch<React.SetStateAction<boolean>>;
   showSmartRecommender: boolean;
   setShowSmartRecommender: React.Dispatch<React.SetStateAction<boolean>>;
+  showDataViews: boolean;
+  setShowDataViews: React.Dispatch<React.SetStateAction<boolean>>;
   setShowWorldViewGraph: React.Dispatch<React.SetStateAction<boolean>>;
   setGraphInitialType: React.Dispatch<React.SetStateAction<DiagramType>>;
 }
@@ -95,6 +97,8 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
   setShowConsistencyChecker,
   showSmartRecommender,
   setShowSmartRecommender,
+  showDataViews,
+  setShowDataViews,
   setShowWorldViewGraph,
   setGraphInitialType,
 }) => {
@@ -104,6 +108,7 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
   const consistencyEnabled = useFeatureEnabled('panel.consistency');
   const recommenderEnabled = useFeatureEnabled('panel.smartRecommender');
   const enhancedTimelineEnabled = useFeatureEnabled('panel.enhancedTimeline');
+  const dataViewsEnabled = useFeatureEnabled('panel.dataViews');
 
   const closeAllEditors = () => {
     setShowLocationEditor(false);
@@ -194,6 +199,16 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
             active={showConsistencyChecker}
             hasData={showConsistencyChecker}
             onClick={() => setShowConsistencyChecker(!showConsistencyChecker)}
+          />
+        )}
+        {dataViewsEnabled && (
+          <PanelToggle
+            icon={Table2}
+            title={t('panel.dataViewsTitle')}
+            hint={t('panel.dataViewsHint')}
+            active={showDataViews}
+            hasData={!!(project.characters?.length || project.locations?.length || project.factions?.length || project.timeline?.events?.length)}
+            onClick={() => setShowDataViews(!showDataViews)}
           />
         )}
       </div>

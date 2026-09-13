@@ -84,6 +84,8 @@
     "@lezer/highlight": "^1.2.3",
     "@radix-ui/react-select": "^2.2.6",
     "@sqlite.org/sqlite-wasm": "^3.53.0-build1",
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.14.12",
     "@tiptap/core": "^3.31.3",
     "@tiptap/pm": "^3.31.3",
     "@tiptap/react": "^3.31.3",

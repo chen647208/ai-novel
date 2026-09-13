@@ -9,7 +9,8 @@
     "worldGraph": "World graph",
     "consistency": "Consistency check",
     "smartRecommender": "Smart recommender",
-    "enhancedTimeline": "Enhanced timeline"
+    "enhancedTimeline": "Enhanced timeline",
+    "dataViews": "Data views"
   },
   "entities": {
     "title": "Entity types & fields",

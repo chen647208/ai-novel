@@ -1,5 +1,28 @@
 {
   "unknown": "Unknown",
+  "views": {
+    "title": "Data views",
+    "empty": "No data yet. Create characters, locations, factions or events to see them here.",
+    "save": "Save view",
+    "remove": "Remove view",
+    "columns": "Columns",
+    "defaultName": "View",
+    "kind": {
+      "table": "Table",
+      "card": "Cards",
+      "graph": "Graph",
+      "character": "Character",
+      "location": "Location",
+      "faction": "Faction",
+      "event": "Event"
+    },
+    "col": {
+      "kind": "Type",
+      "title": "Name",
+      "summary": "Summary",
+      "detail": "Detail"
+    }
+  },
   "faction": {
     "searchPlaceholder": "Search factions...",
     "add": "Add Faction",

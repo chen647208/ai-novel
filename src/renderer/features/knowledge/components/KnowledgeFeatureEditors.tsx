@@ -34,6 +34,7 @@ interface KnowledgeFeatureEditorsProps {
   showConsistencyChecker: boolean;
   showSmartRecommender: boolean;
   showWorldViewGraph: boolean;
+  showDataViews: boolean;
   onCloseWorldViewGraph: () => void;
   onNavigateToChapter?: (id: string) => void;
   onNavigateToItem: (type: string, id: string) => void;
@@ -56,6 +57,7 @@ export const KnowledgeFeatureEditors: React.FC<KnowledgeFeatureEditorsProps> = (
   showConsistencyChecker,
   showSmartRecommender,
   showWorldViewGraph,
+  showDataViews,
   onCloseWorldViewGraph,
   onNavigateToChapter,
   onNavigateToItem,
@@ -187,6 +189,10 @@ export const KnowledgeFeatureEditors: React.FC<KnowledgeFeatureEditorsProps> = (
           onClose={onCloseWorldViewGraph}
           onSelectNode={() => undefined}
         />
+      )}
+
+      {showDataViews && (
+        <FeaturePanel id="view.entities" project={project} onSelectItem={onNavigateToItem} />
       )}
     </>
   );

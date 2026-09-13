@@ -1,5 +1,28 @@
 {
   "unknown": "未知",
+  "views": {
+    "title": "数据视图",
+    "empty": "暂无数据。创建角色、地点、势力或事件后在此查看。",
+    "save": "保存视图",
+    "remove": "删除视图",
+    "columns": "列",
+    "defaultName": "视图",
+    "kind": {
+      "table": "表格",
+      "card": "卡片",
+      "graph": "关系图",
+      "character": "角色",
+      "location": "地点",
+      "faction": "势力",
+      "event": "事件"
+    },
+    "col": {
+      "kind": "类型",
+      "title": "名称",
+      "summary": "摘要",
+      "detail": "详情"
+    }
+  },
   "faction": {
     "searchPlaceholder": "搜索势力...",
     "add": "添加势力",

@@ -18,6 +18,7 @@ import ConsistencyPromptManager from '@/features/consistency/ConsistencyPromptMa
 import ForeshadowPanel from '@/features/foreshadowing/components/ForeshadowPanel';
 import EnhancedTimeline from '@/features/timeline/EnhancedTimeline';
 import TimelineEditor from '@/features/timeline/TimelineEditor';
+import MultiViewPanel from '@/features/views/MultiViewPanel';
 import FactionEditor from '@/features/world/FactionEditor';
 import LocationEditor from '@/features/world/LocationEditor';
 import RuleSystemEditor from '@/features/world/RuleSystemEditor';
@@ -38,4 +39,5 @@ export function registerFeaturePanels(): void {
   registerFeaturePanel('consistency.checker', ConsistencyChecker);
   registerFeaturePanel('consistency.promptManager', ConsistencyPromptManager);
   registerFeaturePanel('foreshadowing.panel', ForeshadowPanel);
+  registerFeaturePanel('view.entities', MultiViewPanel);
 }
