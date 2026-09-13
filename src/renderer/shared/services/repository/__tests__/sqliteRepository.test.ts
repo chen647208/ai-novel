@@ -15,6 +15,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { APP_STATE_VERSION } from '../../../../../shared/constants/versions';
 import { SQL,type SqlId } from '../../../../../shared/sql/catalog';
 import type { AppState, Chapter,KnowledgeItem, Project } from '../../../../../shared/types';
+import { BUILTIN_ITEM_TYPES,ensureBuiltinItemTypes } from '../builtinTypes';
 import { jsonRepository } from '../jsonRepository';
 import { migrate,SCHEMA_VERSION } from '../schema';
 import { SqliteRepository } from '../sqliteRepository';
@@ -168,6 +169,7 @@ for (const fixture of [nodeSqliteFixture, wasmFixture]) {
       const names = tables.map(t => t.name);
       expect(names).toEqual(expect.arrayContaining([
         'nodes', 'edges', 'attrs', 'revisions', 'attachments', 'blobs', 'entity_changes', 'nodes_fts', 'settings', 'meta',
+        'item_types', 'fields', 'sequence_items', 'views',
       ]));
       // v1 文档行模型已彻底移除
       expect(names).not.toContain('projects');
@@ -488,6 +490,64 @@ for (const fixture of [nodeSqliteFixture, wasmFixture]) {
       await repo.deleteAttachment(saved.id);
       expect(await repo.listAttachments('book-1')).toHaveLength(0);
       expect(await repo.loadAttachmentBytes(saved.id)).toBeNull();
+    });
+
+    it('通用模型：内置实体类型与字段幂等写入', async () => {
+      await ensureBuiltinItemTypes(repo);
+      await ensureBuiltinItemTypes(repo);
+      const types = await repo.listItemTypes();
+      expect(types.length).toBe(BUILTIN_ITEM_TYPES.length);
+      expect(types.every((item) => item.builtin)).toBe(true);
+      expect(types.some((item) => item.id === 'builtin:novel.character')).toBe(true);
+
+      const fields = await repo.listFields('builtin:novel.event');
+      expect(fields.map((f) => f.key)).toEqual(['storyTime', 'importance', 'duration']);
+      const importance = fields.find((f) => f.key === 'importance')!;
+      expect(importance.options).toEqual(['major', 'minor']);
+      expect(importance.dataType).toBe('option');
+    });
+
+    it('通用模型：自定义类型/字段/视图/顺序往返', async () => {
+      await repo.saveItemType({ id: 'user:spell', workId: 'w1', label: '法术', builtin: false, color: '#ff0000' });
+      await repo.saveField({
+        id: 'user:spell.level', itemTypeId: 'user:spell', key: 'level', label: '阶位', dataType: 'number', required: true, orderIndex: 0,
+      });
+      const types = await repo.listItemTypes('w1');
+      expect(types.some((item) => item.id === 'user:spell')).toBe(true);
+      const fields = await repo.listFields('user:spell');
+      expect(fields).toHaveLength(1);
+      expect(fields[0]).toMatchObject({ key: 'level', required: true });
+
+      await repo.saveView({ id: 'v1', workId: 'w1', name: '时间线', viewType: 'timeline', config: { sort: 'storyTime', reversed: false }, orderIndex: 0 });
+      const views = await repo.listViews('w1');
+      expect(views).toHaveLength(1);
+      expect(views[0]!.viewType).toBe('timeline');
+      expect(views[0]!.config).toEqual({ sort: 'storyTime', reversed: false });
+
+      await repo.saveSequence('w1', [
+        { id: 's1', workId: 'w1', nodeId: 'c1', parentId: null, orderIndex: 99 },
+        { id: 's2', workId: 'w1', nodeId: 'c2', parentId: 'c1', orderIndex: 99 },
+      ]);
+      const seq = await repo.listSequence('w1');
+      expect(seq.map((item) => item.nodeId)).toEqual(['c1', 'c2']);
+      expect(seq.map((item) => item.orderIndex)).toEqual([0, 1]);
+
+      // 覆盖写入：先删后插
+      await repo.saveSequence('w1', [{ id: 's3', workId: 'w1', nodeId: 'c3', parentId: null, orderIndex: 0 }]);
+      expect((await repo.listSequence('w1')).map((item) => item.nodeId)).toEqual(['c3']);
+
+      await repo.deleteView('v1');
+      expect(await repo.listViews('w1')).toHaveLength(0);
+    });
+
+    it('通用模型：clear 清空类型/字段/顺序/视图', async () => {
+      await ensureBuiltinItemTypes(repo);
+      await repo.saveView({ id: 'v1', workId: 'w1', name: 'x', viewType: 'table', config: {}, orderIndex: 0 });
+      await repo.saveSequence('w1', [{ id: 's1', workId: 'w1', nodeId: 'c1', parentId: null, orderIndex: 0 }]);
+      await repo.clear();
+      expect(await repo.listItemTypes()).toHaveLength(0);
+      expect(await repo.listViews('w1')).toHaveLength(0);
+      expect(await repo.listSequence('w1')).toHaveLength(0);
     });
   });
 }

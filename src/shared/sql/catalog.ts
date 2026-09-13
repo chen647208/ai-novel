@@ -91,6 +91,53 @@ export const SQL = {
   'migration.v4.attachmentsName': `ALTER TABLE attachments ADD COLUMN name TEXT`,
   'migration.v4.attachmentsSize': `ALTER TABLE attachments ADD COLUMN size INTEGER`,
   'migration.v4.attachmentsCreatedAt': `ALTER TABLE attachments ADD COLUMN created_at INTEGER`,
+  // ── 迁移 v5（通用创作模型：实体类型/字段/顺序/视图）──
+  'migration.v5.itemTypes': `CREATE TABLE IF NOT EXISTS item_types (
+         id          TEXT PRIMARY KEY,
+         work_id     TEXT,
+         label       TEXT NOT NULL,
+         icon        TEXT,
+         color       TEXT,
+         parent_type TEXT,
+         builtin     INTEGER NOT NULL DEFAULT 0,
+         erased      INTEGER NOT NULL DEFAULT 0,
+         hash        TEXT NOT NULL
+       )`,
+  'migration.v5.fields': `CREATE TABLE IF NOT EXISTS fields (
+         id            TEXT PRIMARY KEY,
+         item_type_id  TEXT NOT NULL,
+         key           TEXT NOT NULL,
+         label         TEXT NOT NULL,
+         data_type     TEXT NOT NULL,
+         options       TEXT,
+         required      INTEGER NOT NULL DEFAULT 0,
+         default_value TEXT,
+         order_index   INTEGER NOT NULL,
+         erased        INTEGER NOT NULL DEFAULT 0,
+         hash          TEXT NOT NULL
+       )`,
+  'migration.v5.sequenceItems': `CREATE TABLE IF NOT EXISTS sequence_items (
+         id          TEXT PRIMARY KEY,
+         work_id     TEXT NOT NULL,
+         node_id     TEXT NOT NULL,
+         parent_id   TEXT,
+         order_index INTEGER NOT NULL,
+         erased      INTEGER NOT NULL DEFAULT 0,
+         hash        TEXT NOT NULL
+       )`,
+  'migration.v5.views': `CREATE TABLE IF NOT EXISTS views (
+         id          TEXT PRIMARY KEY,
+         work_id     TEXT NOT NULL,
+         name        TEXT NOT NULL,
+         view_type   TEXT NOT NULL,
+         config      TEXT NOT NULL,
+         order_index INTEGER NOT NULL,
+         erased      INTEGER NOT NULL DEFAULT 0,
+         hash        TEXT NOT NULL
+       )`,
+  'migration.v5.idxFieldsType': `CREATE INDEX IF NOT EXISTS idx_fields_item_type ON fields(item_type_id)`,
+  'migration.v5.idxSequenceWork': `CREATE INDEX IF NOT EXISTS idx_sequence_work ON sequence_items(work_id)`,
+  'migration.v5.idxViewsWork': `CREATE INDEX IF NOT EXISTS idx_views_work ON views(work_id)`,
   'migration.v2.entityChanges': `CREATE TABLE IF NOT EXISTS entity_changes (
          id               INTEGER PRIMARY KEY AUTOINCREMENT,
          entity_name      TEXT NOT NULL,
@@ -197,6 +244,28 @@ export const SQL = {
   'blobs.insert': `INSERT OR REPLACE INTO blobs (id, bytes, enc) VALUES (?,?,NULL)`,
   'blobs.selectById': `SELECT bytes FROM blobs WHERE id = ?`,
   'blobs.delete': `DELETE FROM blobs WHERE id = ?`,
+
+  // ── 通用创作模型：实体类型 / 字段 / 顺序 / 视图 ──
+  'itemTypes.selectAll': `SELECT id, work_id, label, icon, color, parent_type, builtin FROM item_types WHERE erased = 0 ORDER BY builtin DESC, label ASC`,
+  'itemTypes.selectByWork': `SELECT id, work_id, label, icon, color, parent_type, builtin FROM item_types WHERE erased = 0 AND (work_id IS NULL OR work_id = ?) ORDER BY builtin DESC, label ASC`,
+  'itemTypes.upsert': `INSERT INTO item_types (id, work_id, label, icon, color, parent_type, builtin, erased, hash) VALUES (?,?,?,?,?,?,?,0,?)
+         ON CONFLICT(id) DO UPDATE SET work_id=excluded.work_id, label=excluded.label, icon=excluded.icon, color=excluded.color, parent_type=excluded.parent_type, builtin=excluded.builtin, erased=0, hash=excluded.hash`,
+  'itemTypes.markErased': `UPDATE item_types SET erased = 1 WHERE id = ?`,
+  'itemTypes.deleteAll': `DELETE FROM item_types`,
+  'fields.selectByType': `SELECT id, item_type_id, key, label, data_type, options, required, default_value, order_index FROM fields WHERE item_type_id = ? AND erased = 0 ORDER BY order_index ASC`,
+  'fields.upsert': `INSERT INTO fields (id, item_type_id, key, label, data_type, options, required, default_value, order_index, erased, hash) VALUES (?,?,?,?,?,?,?,?,?,0,?)
+         ON CONFLICT(id) DO UPDATE SET item_type_id=excluded.item_type_id, key=excluded.key, label=excluded.label, data_type=excluded.data_type, options=excluded.options, required=excluded.required, default_value=excluded.default_value, order_index=excluded.order_index, erased=0, hash=excluded.hash`,
+  'fields.markErased': `UPDATE fields SET erased = 1 WHERE id = ?`,
+  'fields.deleteAll': `DELETE FROM fields`,
+  'sequence.selectByWork': `SELECT id, work_id, node_id, parent_id, order_index FROM sequence_items WHERE work_id = ? AND erased = 0 ORDER BY order_index ASC`,
+  'sequence.insert': `INSERT INTO sequence_items (id, work_id, node_id, parent_id, order_index, erased, hash) VALUES (?,?,?,?,?,0,?)`,
+  'sequence.deleteByWork': `DELETE FROM sequence_items WHERE work_id = ?`,
+  'sequence.deleteAll': `DELETE FROM sequence_items`,
+  'views.selectByWork': `SELECT id, work_id, name, view_type, config, order_index FROM views WHERE work_id = ? AND erased = 0 ORDER BY order_index ASC`,
+  'views.upsert': `INSERT INTO views (id, work_id, name, view_type, config, order_index, erased, hash) VALUES (?,?,?,?,?,?,0,?)
+         ON CONFLICT(id) DO UPDATE SET work_id=excluded.work_id, name=excluded.name, view_type=excluded.view_type, config=excluded.config, order_index=excluded.order_index, erased=0, hash=excluded.hash`,
+  'views.markErased': `UPDATE views SET erased = 1 WHERE id = ?`,
+  'views.deleteAll': `DELETE FROM views`,
 
   // ── 全文检索 ──
   'fts.deleteByNode': `DELETE FROM nodes_fts WHERE node_id = ?`,

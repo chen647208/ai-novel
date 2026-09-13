@@ -114,6 +114,52 @@ export interface AttachmentMeta {
   createdAt: number;
 }
 
+/** 自定义字段的数据类型。 */
+export type FieldDataType = 'text' | 'number' | 'date' | 'option' | 'checkbox' | 'relation' | 'image' | 'link' | 'tag';
+
+/** 实体类型定义（内置类型 workId 为 null，用户类型属于某作品）。 */
+export interface ItemTypeDefinition {
+  id: string;
+  workId: string | null;
+  label: string;
+  icon?: string;
+  color?: string;
+  parentType?: string;
+  builtin: boolean;
+}
+
+/** 挂在实体类型上的字段定义。 */
+export interface FieldDefinition {
+  id: string;
+  itemTypeId: string;
+  key: string;
+  label: string;
+  dataType: FieldDataType;
+  options?: string[];
+  required: boolean;
+  defaultValue?: unknown;
+  orderIndex: number;
+}
+
+/** 叙事顺序项：node 在作品内的呈现顺序，可嵌套分组（卷/幕）。 */
+export interface SequenceItem {
+  id: string;
+  workId: string;
+  nodeId: string;
+  parentId: string | null;
+  orderIndex: number;
+}
+
+/** 视图配置（同一数据多视图；config 由视图类型自行解释）。 */
+export interface ViewDefinition {
+  id: string;
+  workId: string;
+  name: string;
+  viewType: string;
+  config: Record<string, unknown>;
+  orderIndex: number;
+}
+
 /**
  * 应用数据的唯一入口。UI/App 只依赖此接口，
  * 具体后端（JSON 文件 / SQLite）由 index.ts 按运行环境选择。
@@ -183,6 +229,29 @@ export interface StorageRepository {
   loadAttachmentBytes?(id: string): Promise<Uint8Array | null>;
   /** 删除附件：标记 erased 并移除 blob。 */
   deleteAttachment?(id: string): Promise<void>;
+
+  /** 列出实体类型：传 workId 时返回内置类型与该作者类型；不传返回全部内置。 */
+  listItemTypes?(workId?: string): Promise<ItemTypeDefinition[]>;
+  /** 写入实体类型（按 id upsert）。 */
+  saveItemType?(itemType: ItemTypeDefinition): Promise<void>;
+  /** 删除实体类型（标记 erased）。 */
+  deleteItemType?(id: string): Promise<void>;
+  /** 列出某实体类型的字段。 */
+  listFields?(itemTypeId: string): Promise<FieldDefinition[]>;
+  /** 写入字段（按 id upsert）。 */
+  saveField?(field: FieldDefinition): Promise<void>;
+  /** 删除字段（标记 erased）。 */
+  deleteField?(id: string): Promise<void>;
+  /** 列出作品的叙事顺序项。 */
+  listSequence?(workId: string): Promise<SequenceItem[]>;
+  /** 覆盖写入作品的叙事顺序（先删后插，单事务）。 */
+  saveSequence?(workId: string, items: SequenceItem[]): Promise<void>;
+  /** 列出作品的视图配置。 */
+  listViews?(workId: string): Promise<ViewDefinition[]>;
+  /** 写入视图配置（按 id upsert）。 */
+  saveView?(view: ViewDefinition): Promise<void>;
+  /** 删除视图配置（标记 erased）。 */
+  deleteView?(id: string): Promise<void>;
 
   /** 导出全量数据（触发保存对话框 / 浏览器下载） */
   exportAll(state: AppState): Promise<void>;

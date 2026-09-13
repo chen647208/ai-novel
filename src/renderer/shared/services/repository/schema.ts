@@ -17,7 +17,7 @@ import type { SqlDriver } from './types';
  * 每个实体表带 hash 列：变更检测缓存，saveProject 时与旧行比对，仅真实变化才写 entity_changes。
  */
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 /** settings 表里以 JSON 存储的非项目配置切片键 */
 export const SETTING_KEYS = [
@@ -67,6 +67,18 @@ export const MIGRATIONS: ReadonlyArray<{ version: number; up: readonly SqlId[] }
   {
     version: 4,
     up: ['migration.v4.attachmentsName', 'migration.v4.attachmentsSize', 'migration.v4.attachmentsCreatedAt'],
+  },
+  {
+    version: 5,
+    up: [
+      'migration.v5.itemTypes',
+      'migration.v5.fields',
+      'migration.v5.sequenceItems',
+      'migration.v5.views',
+      'migration.v5.idxFieldsType',
+      'migration.v5.idxSequenceWork',
+      'migration.v5.idxViewsWork',
+    ],
   },
 ];
 

@@ -31,9 +31,10 @@ import type {
   StorageConfig,
 } from '../../../../shared/types';
 import { logger } from '../../utils/logger';
+import { ensureBuiltinItemTypes } from './builtinTypes';
 import { jsonRepository } from './jsonRepository';
 import { META_KEYS,migrate, SCHEMA_VERSION,SETTING_KEYS } from './schema';
-import type { AttachmentMeta,CommitOptions,DbEncryptionStatus, SearchHit, SearchOptions, SqlDriver, StorageRepository } from './types';
+import type { AttachmentMeta,CommitOptions,DbEncryptionStatus, FieldDefinition, ItemTypeDefinition, SearchHit, SearchOptions, SequenceItem, SqlDriver, StorageRepository, ViewDefinition } from './types';
 
 const DEFAULT_SEARCH_LIMIT = 50;
 
@@ -47,6 +48,17 @@ function scopeOf(type: string): 'chapter' | 'knowledge' | null {
   if (type === 'novel.chapter') return 'chapter';
   if (type === 'meta.knowledge') return 'knowledge';
   return null;
+}
+
+/** 定义行（类型/字段/顺序/视图）的稳定内容指纹，供 hash 列留档与差分。 */
+function definitionHash(value: unknown): string {
+  const text = JSON.stringify(value);
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16).padStart(8, '0');
 }
 
 interface EntityRow {
@@ -63,6 +75,45 @@ interface AttachmentRow {
   name: string | null;
   size: number | null;
   created_at: number | null;
+}
+
+interface ItemTypeRow {
+  id: string;
+  work_id: string | null;
+  label: string;
+  icon: string | null;
+  color: string | null;
+  parent_type: string | null;
+  builtin: number;
+}
+
+interface FieldRow {
+  id: string;
+  item_type_id: string;
+  key: string;
+  label: string;
+  data_type: string;
+  options: string | null;
+  required: number;
+  default_value: string | null;
+  order_index: number;
+}
+
+interface SequenceRow {
+  id: string;
+  work_id: string;
+  node_id: string;
+  parent_id: string | null;
+  order_index: number;
+}
+
+interface ViewRow {
+  id: string;
+  work_id: string;
+  name: string;
+  view_type: string;
+  config: string;
+  order_index: number;
 }
 
 /**
@@ -109,6 +160,7 @@ export class SqliteRepository implements StorageRepository {
     await this.ready;
     if (this.migrated) return;
     this.migrated = true;
+    await ensureBuiltinItemTypes(this);
     const sentinel = await this.driver.get<{ value: string }>(
       'meta.selectMigratedSentinel'
     );
@@ -288,6 +340,160 @@ export class SqliteRepository implements StorageRepository {
     };
   }
 
+  // ========== 通用创作模型（实体类型 / 字段 / 顺序 / 视图）==========
+
+  async listItemTypes(workId?: string): Promise<ItemTypeDefinition[]> {
+    await this.ready;
+    const rows =
+      workId === undefined
+        ? await this.driver.all<ItemTypeRow>('itemTypes.selectAll')
+        : await this.driver.all<ItemTypeRow>('itemTypes.selectByWork', [workId]);
+    return rows.map((row) => this.toItemType(row));
+  }
+
+  async saveItemType(itemType: ItemTypeDefinition): Promise<void> {
+    await this.ready;
+    await this.driver.run('itemTypes.upsert', [
+      itemType.id,
+      itemType.workId,
+      itemType.label,
+      itemType.icon ?? null,
+      itemType.color ?? null,
+      itemType.parentType ?? null,
+      itemType.builtin ? 1 : 0,
+      definitionHash(itemType),
+    ]);
+  }
+
+  async deleteItemType(id: string): Promise<void> {
+    await this.ready;
+    await this.driver.run('itemTypes.markErased', [id]);
+  }
+
+  async listFields(itemTypeId: string): Promise<FieldDefinition[]> {
+    await this.ready;
+    const rows = await this.driver.all<FieldRow>('fields.selectByType', [itemTypeId]);
+    return rows.map((row) => this.toField(row));
+  }
+
+  async saveField(field: FieldDefinition): Promise<void> {
+    await this.ready;
+    await this.driver.run('fields.upsert', [
+      field.id,
+      field.itemTypeId,
+      field.key,
+      field.label,
+      field.dataType,
+      field.options ? JSON.stringify(field.options) : null,
+      field.required ? 1 : 0,
+      field.defaultValue === undefined ? null : JSON.stringify(field.defaultValue),
+      field.orderIndex,
+      definitionHash(field),
+    ]);
+  }
+
+  async deleteField(id: string): Promise<void> {
+    await this.ready;
+    await this.driver.run('fields.markErased', [id]);
+  }
+
+  async listSequence(workId: string): Promise<SequenceItem[]> {
+    await this.ready;
+    const rows = await this.driver.all<SequenceRow>('sequence.selectByWork', [workId]);
+    return rows.map((row) => ({
+      id: row.id,
+      workId: row.work_id,
+      nodeId: row.node_id,
+      parentId: row.parent_id,
+      orderIndex: Number(row.order_index),
+    }));
+  }
+
+  async saveSequence(workId: string, items: SequenceItem[]): Promise<void> {
+    await this.ready;
+    await this.driver.transaction(async (tx) => {
+      await tx.run('sequence.deleteByWork', [workId]);
+      for (let index = 0; index < items.length; index++) {
+        const item = items[index];
+        if (!item) continue;
+        await tx.run('sequence.insert', [
+          item.id,
+          workId,
+          item.nodeId,
+          item.parentId,
+          index,
+          definitionHash({ ...item, orderIndex: index }),
+        ]);
+      }
+    });
+  }
+
+  async listViews(workId: string): Promise<ViewDefinition[]> {
+    await this.ready;
+    const rows = await this.driver.all<ViewRow>('views.selectByWork', [workId]);
+    return rows.map((row) => ({
+      id: row.id,
+      workId: row.work_id,
+      name: row.name,
+      viewType: row.view_type,
+      config: this.parseConfig(row.config),
+      orderIndex: Number(row.order_index),
+    }));
+  }
+
+  async saveView(view: ViewDefinition): Promise<void> {
+    await this.ready;
+    await this.driver.run('views.upsert', [
+      view.id,
+      view.workId,
+      view.name,
+      view.viewType,
+      JSON.stringify(view.config),
+      view.orderIndex,
+      definitionHash(view),
+    ]);
+  }
+
+  async deleteView(id: string): Promise<void> {
+    await this.ready;
+    await this.driver.run('views.markErased', [id]);
+  }
+
+  private toItemType(row: ItemTypeRow): ItemTypeDefinition {
+    return {
+      id: row.id,
+      workId: row.work_id,
+      label: row.label,
+      icon: row.icon ?? undefined,
+      color: row.color ?? undefined,
+      parentType: row.parent_type ?? undefined,
+      builtin: Number(row.builtin) === 1,
+    };
+  }
+
+  private toField(row: FieldRow): FieldDefinition {
+    return {
+      id: row.id,
+      itemTypeId: row.item_type_id,
+      key: row.key,
+      label: row.label,
+      dataType: row.data_type as FieldDefinition['dataType'],
+      options: row.options ? (JSON.parse(row.options) as string[]) : undefined,
+      required: Number(row.required) === 1,
+      defaultValue: row.default_value === null ? undefined : JSON.parse(row.default_value),
+      orderIndex: Number(row.order_index),
+    };
+  }
+
+  private parseConfig(raw: string): Record<string, unknown> {
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      return parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : {};
+    } catch {
+      return {};
+    }
+  }
+
   // ========== 写入 ==========
 
   async saveAll(state: AppState): Promise<void> {
@@ -352,6 +558,10 @@ export class SqliteRepository implements StorageRepository {
       await tx.run('revisions.deleteAll', []);
       await tx.run('attachments.deleteAll', []);
       await tx.run('blobs.deleteAll', []);
+      await tx.run('itemTypes.deleteAll', []);
+      await tx.run('fields.deleteAll', []);
+      await tx.run('sequence.deleteAll', []);
+      await tx.run('views.deleteAll', []);
       await tx.run('changes.deleteAll', []);
       await tx.run('fts.deleteAll', []);
       await tx.run('settings.deleteAll', []);
