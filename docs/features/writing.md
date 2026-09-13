@@ -68,6 +68,20 @@
 - AI 调用经网关客户端（`src/renderer/shared/services/ai/gatewayClient`）走主进程网关
 - 历史记录（含会话事件流浏览器）与正文内容经双 store + `persistenceBridge` 差分落盘持久化
 
+## 写作工具
+
+- 入口：编辑器工具栏「写作工具」按钮，面板为 `src/renderer/features/writing/components/WritingToolsPanel.tsx`，四个页签。
+- 一键排版：`services/writingToolsService.ts` 的 `autoFormatContent` 规范省略号与破折号、合并空行、去行尾空格，可选段落首行缩进；作用于当前章或全书。
+- 自动纠错：`findProofreadIssues` 按规则检出常见错别字与重复标点，`applyProofreadFixes` 从后向前一次替换。
+- 快捷词：`services/snippetStore.ts` 用 `localStore` 持久化片段，面板可增删与插入到光标处（`NovelEditorHandle.insertText`）。
+- 多平台预览：`components/ReaderPreview.tsx` 用编译产出的 HTML 在桌面/平板/手机宽度下渲染当前章节。
+- 自动滚屏：打字机模式按最近的滚动祖先容器把光标定位到视口约 40% 高度。
+
+## 定稿锁定
+
+- 章节 `status` 取值 `draft | writing | done | final`。
+- 工具栏锁按钮在 `final` 与 `draft` 间切换；`status` 为 `final` 时正文只读，AI 生成同样不改写。
+
 ## 维护建议
 
 - 新增弹窗、局部面板或历史展示能力时优先放入 `components`

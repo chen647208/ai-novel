@@ -44,6 +44,29 @@
 - 存储安全：启动执行快速 `quick_check`；存储面板完整性检查执行深度 `integrity_check`；自动备份在 JSON 快照之外生成数据库热备份（`VACUUM INTO`，滚动保留），且库级加密开启时 JSON 快照落密文；库级 AES-256 加密默认关闭，可在存储面板启停并导出/应用恢复码（密钥走系统钥匙串），细节见 `docs/design/25-data-safety.md`
 - 保存语义：语言/主题/字体直写即时生效；模型与密钥类暂存按保存落盘（防半配置生效），关闭直接丢弃
 
+## 界面功能开关
+
+- 位置：设置 → 通用 → 界面功能开关，组件为 `src/renderer/features/settings/components/FeatureTogglesPanel.tsx`。
+- 开关项：助手面板、全库检索、世界关系图、一致性检查、智能推荐、增强时间线、数据视图、双轴时间线、剧本。
+- 语义：默认开启，关闭即从界面移除入口，数据不受影响；状态存 `localStore` 的 `features.disabled`。
+
+## 实体类型与字段
+
+- 位置：设置 → 通用 → 实体类型与字段，组件为 `src/renderer/features/settings/components/EntityTypesPanel.tsx`。
+- 内置类型只读；当前作品可自定义类型与字段（9 种字段类型），经 `genericModelStore` 写入 `item_types` 与 `fields`。
+
+## 操作日志
+
+- 位置：设置 → 存储 → 操作日志，组件为 `src/renderer/features/settings/components/OperationLogPanel.tsx`。
+- 内容：当前作品按时间倒序的正文修订，展示时间、作者（`user` 或 `ai:<工具>`）、触发原因与正文预览；数据来自 `revisions` 表，经 `loadOperationLog` 读取（JSON 后端返回空）。
+
+## 外部文件夹镜像
+
+- 位置：设置 → 存储 → 外部文件夹镜像，组件为 `src/renderer/features/settings/components/MirrorPanel.tsx`，逻辑在 `src/renderer/shared/services/mirrorService.ts`。
+- 导出：把作品写成 `project.json`、`meta.json` 与 `chapters/<序号>-<标题>.md` 到所选文件夹，供云盘同步。
+- 导入：读取所选文件夹的 `project.json` 并以新 ID 加入书库。
+- 边界：镜像为非活动副本；活动数据库不同步到外部文件夹。
+
 ## 维护建议
 
 - 新增设置项优先落到对应 `Panel` 组件，不要直接堆到 `SettingsModal.tsx`

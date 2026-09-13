@@ -36,6 +36,28 @@
 - 这些能力大多从知识库中心入口打开
 - 一致性检查和推荐能力会复用知识条目、人物、地点与时间线数据
 
+## 数据视图
+
+- 入口：世界分区「数据视图」开关卡，组件为 `src/renderer/features/views/MultiViewPanel.tsx`。
+- 数据来源：`buildEntityView.ts` 把角色、地点、势力、事件拍平为行与关系边，列固定为类型/名称/摘要/详情。
+- 视图种类：表格（`ViewTable.tsx`，`@tanstack/react-table` 排序与列显隐）、卡片（`ViewCards.tsx`，`@tanstack/react-virtual` 按行虚拟化）、关系图（`ViewGraph.tsx`，按类型着色，边来自角色↔势力↔地点↔事件关联）。
+- 布局持久化：视图类型、列、隐藏列、排序写入 `views` 表的 `ViewDefinition.config`，经 `genericModelStore` 读写；同一作品可保存多个具名视图。
+
+## 双轴时间线
+
+- 入口：世界分区「双轴时间线」开关卡，组件为 `src/renderer/features/timeline/DualAxisTimeline.tsx`。
+- 两轴：叙事顺序轴按章节 `order`；故事时间轴按事件日期（`HistoryDate` 折算为月刻度），同一刻度的多个事件分层显示。
+- 交互：章节片段可拖拽重排（松手写回章节 `order`）、刻度吸附、缩放、播放头、重大/次要过滤；章节与事件的关联经 `chapter.timelineEventId` 画连接虚线。
+- 合并：选中多个章节后写 `sequence_items`，以分组节点（`groupId`）记录包含关系；取消合并移除分组并清空 `parentId`。
+- 确定性一致性检查：`timelineConsistency.ts` 检出同一角色同刻异地、出生后登场、伏笔回收早于埋设、章节指向不存在事件，全部为本地规则，不调用模型。
+
+## 剧本
+
+- 入口：世界分区「剧本」开关卡，组件为 `src/renderer/features/screenplay/ScreenplayPanel.tsx`。
+- 结构：每个场次为一个章节，标题即场次标题。
+- Fountain 互操作：`screenplayModel.ts` 用 `fountain-js` 解析 Fountain，序列化回 Fountain；导入把场次追加为章节，导出把章节写成 Fountain 文件。
+- 类型模板：核心类型注册表含 `script.screenplay`、`script.scene`、`storyboard.shot`、`bible.entry`。
+
 ## 维护建议
 
 - 检查规则与语义相似逻辑继续沉到 `services`
