@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { type BookTemplate } from '@/app/bookFactory';
 import { useFeatureEnabled } from '@/app/useFeatureToggles';
 import { collectAllTags, filterBooksByTags, normalizeTagInput } from '@/features/books/bookTags';
 import NewBookModal from '@/features/books/NewBookModal';
@@ -61,7 +62,7 @@ interface BookshelfProps {
   books: Project[];
   activeBookId: string | null;
   onOpenBook: (bookId: string) => void;
-  onCreateBook: (title: string, description?: string, templateType?: 'blank' | 'duplicate' | 'example', sourceBookId?: string) => void;
+  onCreateBook: (title: string, description?: string, templateType?: BookTemplate, sourceBookId?: string) => void;
   /** 先建后改：一键建空白书直接进工作区（默认路径，不开模态）。 */
   onCreateQuickBook: () => void;
   onRenameBook: (bookId: string, newTitle: string) => void;

@@ -8,7 +8,7 @@
  */
 
 import type { LucideIcon } from 'lucide-react';
-import { ChevronDown, ChevronUp, Clock, Film, Flag, LayoutList, MapPinned, Network, ScrollText, Shield, Table2, WandSparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clapperboard, Clock, Film, Flag, LayoutList, MapPinned, Network, ScrollText, Shield, Table2, WandSparkles } from 'lucide-react';
 import React from 'react';
 
 import { useFeatureEnabled } from '@/app/useFeatureToggles';
@@ -37,6 +37,8 @@ interface KnowledgeFeaturePanelsProps {
   setShowDataViews: React.Dispatch<React.SetStateAction<boolean>>;
   showDualTimeline: boolean;
   setShowDualTimeline: React.Dispatch<React.SetStateAction<boolean>>;
+  showScreenplay: boolean;
+  setShowScreenplay: React.Dispatch<React.SetStateAction<boolean>>;
   setShowWorldViewGraph: React.Dispatch<React.SetStateAction<boolean>>;
   setGraphInitialType: React.Dispatch<React.SetStateAction<DiagramType>>;
 }
@@ -103,6 +105,8 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
   setShowDataViews,
   showDualTimeline,
   setShowDualTimeline,
+  showScreenplay,
+  setShowScreenplay,
   setShowWorldViewGraph,
   setGraphInitialType,
 }) => {
@@ -114,6 +118,7 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
   const enhancedTimelineEnabled = useFeatureEnabled('panel.enhancedTimeline');
   const dataViewsEnabled = useFeatureEnabled('panel.dataViews');
   const dualTimelineEnabled = useFeatureEnabled('panel.dualTimeline');
+  const screenplayEnabled = useFeatureEnabled('panel.screenplay');
 
   const closeAllEditors = () => {
     setShowLocationEditor(false);
@@ -224,6 +229,16 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
             active={showDualTimeline}
             hasData={!!(project.chapters?.length || project.timeline?.events?.length)}
             onClick={() => setShowDualTimeline(!showDualTimeline)}
+          />
+        )}
+        {screenplayEnabled && (
+          <PanelToggle
+            icon={Clapperboard}
+            title={t('panel.screenplayTitle')}
+            hint={t('panel.screenplayHint')}
+            active={showScreenplay}
+            hasData={!!project.chapters?.length}
+            onClick={() => setShowScreenplay(!showScreenplay)}
           />
         )}
       </div>

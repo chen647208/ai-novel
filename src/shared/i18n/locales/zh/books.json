@@ -36,7 +36,31 @@
     "selectToDuplicate": "选择要复制的书籍",
     "example": "示例模板",
     "exampleDesc": "使用预设的故事结构和示例",
+    "screenplay": "剧本模板",
+    "screenplayDesc": "分场结构，含场次标题与对白（Fountain 兼容）",
+    "bible": "设定集模板",
+    "bibleDesc": "世界观、角色、地点的设定条目骨架",
+    "storyboard": "分镜模板",
+    "storyboardDesc": "镜头卡片，含画面、景别、镜头运动与时长",
     "create": "新建书籍"
+  },
+  "templates": {
+    "screenplay": {
+      "sceneTitle": "场景 {{n}}",
+      "sceneHeading": "内景 / 外景 - 地点 - 日",
+      "action": "在此描写动作与画面。",
+      "character": "角色",
+      "parenthetical": "（提示）",
+      "dialogue": "对白。"
+    },
+    "storyboard": {
+      "shotTitle": "镜头 {{n}}"
+    },
+    "bible": {
+      "world": "世界观",
+      "character": "角色",
+      "location": "地点"
+    }
   },
   "example": {
     "intro": "雾港是一座被潮水与旧神低语包围的城市。年轻的测绘师林砚在绘制城郊海图时，发现了一座只在特定潮位出现的“不存在”的岛。",

@@ -14,6 +14,9 @@
 import { type Character, type CharacterGenderId, type CharacterRoleId, type Project } from '../../shared/types';
 import { i18n } from '../i18n';
 
+/** 新建方式：空白 / 复制 / 示例，或体裁模板（剧本/设定集/分镜）。 */
+export type BookTemplate = 'blank' | 'duplicate' | 'example' | 'screenplay' | 'bible' | 'storyboard';
+
 /** 新建空白书（可带简介）。 */
 export const emptyBook = (title: string, intro = ''): Project => ({
   id: Date.now().toString(),
@@ -117,4 +120,52 @@ export function buildExampleProject(title: string, intro: string): Project {
     },
     lastModified: now,
   };
+}
+
+/** 体裁模板：剧本分场、设定集条目、分镜镜头。 */
+export function buildTemplatedProject(title: string, intro: string, template: 'screenplay' | 'bible' | 'storyboard'): Project {
+  const book = emptyBook(title, intro);
+  if (template === 'screenplay') {
+    book.chapters = [1, 2, 3].map((n) => ({
+      id: `${book.id}-sc${n}`,
+      title: i18n.t('books:templates.screenplay.sceneTitle', { n }),
+      summary: '',
+      content: [
+        i18n.t('books:templates.screenplay.sceneHeading'),
+        '',
+        i18n.t('books:templates.screenplay.action'),
+        '',
+        i18n.t('books:templates.screenplay.character'),
+        i18n.t('books:templates.screenplay.parenthetical'),
+        i18n.t('books:templates.screenplay.dialogue'),
+      ].join('\n'),
+      order: n - 1,
+      status: 'draft' as const,
+    }));
+  } else if (template === 'storyboard') {
+    book.chapters = [1, 2, 3].map((n) => ({
+      id: `${book.id}-shot${n}`,
+      title: i18n.t('books:templates.storyboard.shotTitle', { n }),
+      summary: '',
+      content: ['# @画面: ', '# @景别: ', '# @镜头运动: ', '# @时长: '].join('\n'),
+      order: n - 1,
+      status: 'draft' as const,
+    }));
+  } else {
+    const names = [
+      i18n.t('books:templates.bible.world'),
+      i18n.t('books:templates.bible.character'),
+      i18n.t('books:templates.bible.location'),
+    ];
+    book.knowledge = names.map((name, index) => ({
+      id: `${book.id}-kb${index}`,
+      name,
+      content: '',
+      type: 'text',
+      size: 0,
+      addedAt: book.lastModified,
+      category: 'writing' as const,
+    }));
+  }
+  return book;
 }

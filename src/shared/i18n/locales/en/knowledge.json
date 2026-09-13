@@ -115,7 +115,9 @@
     "dataViewsTitle": "Data views",
     "dataViewsHint": "View the same settings as a table, cards or a relationship graph",
     "dualTimelineTitle": "Dual-axis timeline",
-    "dualTimelineHint": "Align narrative order with story time; merge and check"
+    "dualTimelineHint": "Align narrative order with story time; merge and check",
+    "screenplayTitle": "Screenplay",
+    "screenplayHint": "Manage by scene; import and export Fountain"
   },
   "embedding": {
     "serviceNotReady": "API embedding service is not ready. Check the configuration",

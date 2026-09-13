@@ -1,4 +1,17 @@
 {
+  "screenplay": {
+    "title": "剧本（Fountain）",
+    "addScene": "新增场次",
+    "import": "导入 Fountain",
+    "export": "导出 Fountain",
+    "importTitle": "导入 Fountain 剧本",
+    "exportTitle": "导出 Fountain 剧本",
+    "imported": "已导入 {{count}} 个场次",
+    "desktopOnly": "该功能仅在桌面端可用。",
+    "empty": "暂无场次。新增场次或导入 Fountain 文件。",
+    "newScene": "新场次",
+    "untitledScene": "未命名场次"
+  },
   "genModal": {
     "title": "AI 智能正文生成",
     "targetChapter": "目标章节",

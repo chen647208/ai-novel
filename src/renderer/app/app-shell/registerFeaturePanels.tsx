@@ -16,6 +16,7 @@ import SmartRecommender from '@/features/assistant/SmartRecommender';
 import ConsistencyChecker from '@/features/consistency/ConsistencyChecker';
 import ConsistencyPromptManager from '@/features/consistency/ConsistencyPromptManager';
 import ForeshadowPanel from '@/features/foreshadowing/components/ForeshadowPanel';
+import ScreenplayPanel from '@/features/screenplay/ScreenplayPanel';
 import DualAxisTimeline from '@/features/timeline/DualAxisTimeline';
 import EnhancedTimeline from '@/features/timeline/EnhancedTimeline';
 import TimelineEditor from '@/features/timeline/TimelineEditor';
@@ -42,4 +43,5 @@ export function registerFeaturePanels(): void {
   registerFeaturePanel('consistency.promptManager', ConsistencyPromptManager);
   registerFeaturePanel('foreshadowing.panel', ForeshadowPanel);
   registerFeaturePanel('view.entities', MultiViewPanel);
+  registerFeaturePanel('screenplay.panel', ScreenplayPanel);
 }

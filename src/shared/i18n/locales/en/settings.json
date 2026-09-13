@@ -11,7 +11,8 @@
     "smartRecommender": "Smart recommender",
     "enhancedTimeline": "Enhanced timeline",
     "dataViews": "Data views",
-    "dualTimeline": "Dual-axis timeline"
+    "dualTimeline": "Dual-axis timeline",
+    "screenplay": "Screenplay"
   },
   "entities": {
     "title": "Entity types & fields",

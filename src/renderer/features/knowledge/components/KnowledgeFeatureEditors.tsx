@@ -36,6 +36,7 @@ interface KnowledgeFeatureEditorsProps {
   showWorldViewGraph: boolean;
   showDataViews: boolean;
   showDualTimeline: boolean;
+  showScreenplay: boolean;
   onCloseWorldViewGraph: () => void;
   onNavigateToChapter?: (id: string) => void;
   onNavigateToItem: (type: string, id: string) => void;
@@ -60,6 +61,7 @@ export const KnowledgeFeatureEditors: React.FC<KnowledgeFeatureEditorsProps> = (
   showWorldViewGraph,
   showDataViews,
   showDualTimeline,
+  showScreenplay,
   onCloseWorldViewGraph,
   onNavigateToChapter,
   onNavigateToItem,
@@ -204,6 +206,14 @@ export const KnowledgeFeatureEditors: React.FC<KnowledgeFeatureEditorsProps> = (
           onUpdate={(updates: Partial<Project>) => onUpdate(updates)}
           onNavigateToChapter={onNavigateToChapter}
           onSelectEvent={(id: string) => onNavigateToItem('timeline', id)}
+        />
+      )}
+
+      {showScreenplay && (
+        <FeaturePanel
+          id="screenplay.panel"
+          project={project}
+          onUpdate={(updates: Partial<Project>) => onUpdate(updates)}
         />
       )}
     </>

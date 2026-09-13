@@ -365,9 +365,77 @@ const META_TEMPLATES: TypeTemplate[] = [
   },
 ];
 
+const SCRIPT_TEMPLATES: TypeTemplate[] = [
+  {
+    id: 'script.screenplay',
+    label: '剧本',
+    labelEn: 'Screenplay',
+    icon: 'clapperboard',
+    category: 'novel',
+    fields: [
+      { key: 'logline', label: '一句话梗概', type: 'text' },
+      { key: 'genre', label: '类型', type: 'text' },
+      { key: 'draftDate', label: '稿次/日期', type: 'text' },
+      { key: 'status', label: '状态', type: 'enum', enum: ['draft', 'done'] },
+    ],
+    views: ['outline', 'table'],
+    statusLabels: 'status',
+  },
+  {
+    id: 'script.scene',
+    label: '场次',
+    labelEn: 'Scene',
+    icon: 'clapperboard',
+    category: 'novel',
+    fields: [
+      { key: 'sceneNumber', label: '场次号', type: 'number' },
+      { key: 'location', label: '地点', type: 'ref', refType: 'card.location' },
+      { key: 'timeOfDay', label: '时间', type: 'enum', enum: ['day', 'night', 'dawn', 'dusk'] },
+      { key: 'cast', label: '出场角色', type: 'list' },
+      { key: 'synopsis', label: '场次梗概', type: 'richtext' },
+      { key: 'status', label: '状态', type: 'enum', enum: ['draft', 'done'] },
+    ],
+    views: ['corkboard', 'table'],
+    statusLabels: 'status',
+    dslHint: { headingLevel: 3 },
+  },
+  {
+    id: 'storyboard.shot',
+    label: '分镜',
+    labelEn: 'Shot',
+    icon: 'film',
+    category: 'card',
+    fields: [
+      { key: 'shotNumber', label: '镜号', type: 'number' },
+      { key: 'framing', label: '景别', type: 'enum', enum: ['wide', 'full', 'medium', 'close', 'extreme-close'] },
+      { key: 'cameraMove', label: '镜头运动', type: 'text' },
+      { key: 'duration', label: '时长（秒）', type: 'number' },
+      { key: 'image', label: '画面', type: 'image' },
+      { key: 'description', label: '画面描述', type: 'richtext' },
+      { key: 'scene', label: '所属场次', type: 'ref', refType: 'script.scene' },
+    ],
+    views: ['corkboard', 'table'],
+  },
+  {
+    id: 'bible.entry',
+    label: '设定条目',
+    labelEn: 'Series entry',
+    icon: 'book-open',
+    category: 'card',
+    fields: [
+      { key: 'category', label: '分类', type: 'text' },
+      { key: 'summary', label: '摘要', type: 'text' },
+      { key: 'details', label: '详情', type: 'richtext' },
+      { key: 'tags', label: '标签', type: 'list' },
+    ],
+    views: ['table', 'corkboard'],
+  },
+];
+
 export const BUILTIN_TEMPLATES: readonly TypeTemplate[] = [
   ...NOVEL_TEMPLATES,
   ...CARD_TEMPLATES,
   ...WORLD_TEMPLATES,
   ...META_TEMPLATES,
+  ...SCRIPT_TEMPLATES,
 ];

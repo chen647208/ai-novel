@@ -10,6 +10,7 @@
 import { BookHeart } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { type BookTemplate } from '@/app/bookFactory';
 import { useTranslation } from '@/i18n';
 import { dialogService } from '@/shared/services/dialogService';
 import { Button } from '@/shared/ui/Button';
@@ -23,7 +24,7 @@ import { cn } from '@/shared/utils/cn';
 interface NewBookModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (title: string, description?: string, templateType?: 'blank' | 'duplicate' | 'example', sourceBookId?: string) => void;
+  onCreate: (title: string, description?: string, templateType?: BookTemplate, sourceBookId?: string) => void;
   existingBooks?: Array<{ id: string; title: string }>;
 }
 
@@ -36,7 +37,7 @@ const NewBookModal: React.FC<NewBookModalProps> = ({
   const { t } = useTranslation(['books', 'common']);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [templateType, setTemplateType] = useState<'blank' | 'duplicate' | 'example'>('blank');
+  const [templateType, setTemplateType] = useState<BookTemplate>('blank');
   const [selectedBookToDuplicate, setSelectedBookToDuplicate] = useState<string>('');
 
   const resetForm = () => {
@@ -72,6 +73,9 @@ const NewBookModal: React.FC<NewBookModalProps> = ({
       ? [{ value: 'duplicate' as const, label: t('books:newBook.duplicate'), desc: t('books:newBook.duplicateDesc') }]
       : []),
     { value: 'example' as const, label: t('books:newBook.example'), desc: t('books:newBook.exampleDesc') },
+    { value: 'screenplay' as const, label: t('books:newBook.screenplay'), desc: t('books:newBook.screenplayDesc') },
+    { value: 'bible' as const, label: t('books:newBook.bible'), desc: t('books:newBook.bibleDesc') },
+    { value: 'storyboard' as const, label: t('books:newBook.storyboard'), desc: t('books:newBook.storyboardDesc') },
   ];
 
   return (

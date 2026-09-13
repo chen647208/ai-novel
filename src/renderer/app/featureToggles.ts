@@ -23,7 +23,8 @@ export type ToggleableFeatureId =
   | 'panel.smartRecommender'
   | 'panel.enhancedTimeline'
   | 'panel.dataViews'
-  | 'panel.dualTimeline';
+  | 'panel.dualTimeline'
+  | 'panel.screenplay';
 
 export type FeatureLabelKey =
   | 'features.assistant'
@@ -33,7 +34,8 @@ export type FeatureLabelKey =
   | 'features.smartRecommender'
   | 'features.enhancedTimeline'
   | 'features.dataViews'
-  | 'features.dualTimeline';
+  | 'features.dualTimeline'
+  | 'features.screenplay';
 
 export interface ToggleableFeature {
   id: ToggleableFeatureId;
@@ -50,6 +52,7 @@ export const TOGGLEABLE_FEATURES: readonly ToggleableFeature[] = [
   { id: 'panel.enhancedTimeline', labelKey: 'features.enhancedTimeline' },
   { id: 'panel.dataViews', labelKey: 'features.dataViews' },
   { id: 'panel.dualTimeline', labelKey: 'features.dualTimeline' },
+  { id: 'panel.screenplay', labelKey: 'features.screenplay' },
 ];
 
 const listeners = new Set<() => void>();

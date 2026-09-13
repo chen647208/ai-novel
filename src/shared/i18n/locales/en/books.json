@@ -36,7 +36,31 @@
     "selectToDuplicate": "Select a book to duplicate",
     "example": "Example Template",
     "exampleDesc": "Use a preset story structure and samples",
+    "screenplay": "Screenplay Template",
+    "screenplayDesc": "Scene structure with scene headings and dialogue (Fountain compatible)",
+    "bible": "Series Bible Template",
+    "bibleDesc": "Skeleton entries for worldbuilding, characters and locations",
+    "storyboard": "Storyboard Template",
+    "storyboardDesc": "Shot cards with image, shot size, camera movement and duration",
     "create": "New Book"
+  },
+  "templates": {
+    "screenplay": {
+      "sceneTitle": "Scene {{n}}",
+      "sceneHeading": "INT. / EXT. - Location - Day",
+      "action": "Describe the action and visuals here.",
+      "character": "CHARACTER",
+      "parenthetical": "(beat)",
+      "dialogue": "Dialogue."
+    },
+    "storyboard": {
+      "shotTitle": "Shot {{n}}"
+    },
+    "bible": {
+      "world": "Worldbuilding",
+      "character": "Character",
+      "location": "Location"
+    }
   },
   "example": {
     "intro": "Mistport is a city ringed by tides and the whispers of old gods. While charting the coastal waters, a young surveyor, Lin Yan, finds an island that should not exist—one that appears only at a certain tide.",

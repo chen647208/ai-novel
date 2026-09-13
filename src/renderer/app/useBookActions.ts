@@ -20,7 +20,7 @@ import { type Project } from '../../shared/types';
 import { i18n } from '../i18n';
 import { repository } from '../shared/services/repository';
 import { deleteTrash, moveToTrash, readTrash } from '../shared/services/trashService';
-import { blankContents, buildExampleProject, cloneProject, emptyBook } from './bookFactory';
+import { blankContents, type BookTemplate,buildExampleProject, buildTemplatedProject, cloneProject, emptyBook } from './bookFactory';
 import { normalizeImportedState } from './initialState';
 import { checkImportVersion } from './initialState';
 import { composeAppState, seedPersistBaseline } from './stores/persistenceBridge';
@@ -29,7 +29,7 @@ import { hydrateStoresFromState } from './useAppBootstrap';
 
 export interface BookActions {
   openBook: (bookId: string) => void;
-  createBook: (title: string, description?: string, templateType?: 'blank' | 'duplicate' | 'example', sourceBookId?: string) => void;
+  createBook: (title: string, description?: string, templateType?: BookTemplate, sourceBookId?: string) => void;
   /** 先建后改：一键建空白书（默认名，不开模态），直接进工作区。 */
   createQuickBook: () => void;
   renameBook: (bookId: string, newTitle: string) => void;
@@ -59,7 +59,7 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
     enterWorkspace();
   }, [enterWorkspace]);
 
-  const createBook = useCallback((title: string, description?: string, templateType?: 'blank' | 'duplicate' | 'example', sourceBookId?: string) => {
+  const createBook = useCallback((title: string, description?: string, templateType?: BookTemplate, sourceBookId?: string) => {
     const intro = description?.trim() || undefined;
     let newBook: Project;
     if (templateType === 'duplicate' && sourceBookId) {
@@ -69,6 +69,8 @@ export function useBookActions(enterWorkspace: () => void): BookActions {
         : emptyBook(title, intro);
     } else if (templateType === 'example') {
       newBook = buildExampleProject(title, intro ?? i18n.t('books:example.intro'));
+    } else if (templateType === 'screenplay' || templateType === 'bible' || templateType === 'storyboard') {
+      newBook = buildTemplatedProject(title, intro ?? '', templateType);
     } else {
       newBook = emptyBook(title, intro);
     }

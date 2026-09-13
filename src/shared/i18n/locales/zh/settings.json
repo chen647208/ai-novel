@@ -11,7 +11,8 @@
     "smartRecommender": "智能推荐",
     "enhancedTimeline": "增强时间线",
     "dataViews": "数据视图",
-    "dualTimeline": "双轴时间线"
+    "dualTimeline": "双轴时间线",
+    "screenplay": "剧本"
   },
   "entities": {
     "title": "实体类型与字段",

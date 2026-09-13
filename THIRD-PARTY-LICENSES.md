@@ -4,7 +4,7 @@
 收录运行期依赖（package-lock.json 中排除 dev/link）的许可证声明；
 各依赖的完整许可证文本随发行包内 `node_modules` 一并分发。
 
-共 395 个运行期依赖。
+共 396 个运行期依赖。
 
 | 依赖 | 版本 | 许可证 |
 | --- | --- | --- |
@@ -189,6 +189,7 @@
 | fetch-blob | 3.2.0 | MIT |
 | foreground-child | 3.3.1 | ISC |
 | formdata-polyfill | 4.0.10 | MIT |
+| fountain-js | 1.2.4 | MIT |
 | fs-extra | 10.1.0 | MIT |
 | gaxios | 7.1.3 | Apache-2.0 |
 | gcp-metadata | 8.1.2 | Apache-2.0 |

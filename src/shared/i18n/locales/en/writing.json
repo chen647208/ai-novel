@@ -1,4 +1,17 @@
 {
+  "screenplay": {
+    "title": "Screenplay (Fountain)",
+    "addScene": "Add scene",
+    "import": "Import Fountain",
+    "export": "Export Fountain",
+    "importTitle": "Import Fountain screenplay",
+    "exportTitle": "Export Fountain screenplay",
+    "imported": "Imported {{count}} scenes",
+    "desktopOnly": "This feature is available on desktop only.",
+    "empty": "No scenes yet. Add a scene or import a Fountain file.",
+    "newScene": "New scene",
+    "untitledScene": "Untitled scene"
+  },
   "genModal": {
     "title": "AI Smart Content Generation",
     "targetChapter": "Target Chapter",
