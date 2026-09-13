@@ -1,4 +1,27 @@
 {
+  "dual": {
+    "title": "Dual-axis timeline",
+    "axis": {
+      "narrative": "Narrative order",
+      "story": "Story time"
+    },
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "snap": "Snap",
+    "majorOnly": "Major only",
+    "check": "Consistency check",
+    "merge": "Merge",
+    "unmerge": "Unmerge",
+    "empty": "No chapters or events yet. Add chapters and timeline events to align them here.",
+    "grouped": "Grouped",
+    "noIssues": "No timeline conflicts found",
+    "issue": {
+      "characterLocationConflict": "Character \"{{character}}\" is in different places at the same time: {{places}}",
+      "bornAfterAppearance": "Character \"{{character}}\" (born {{year}}) appears in the earlier event \"{{event}}\" ({{year}})",
+      "foreshadowOrder": "Foreshadow \"{{title}}\" is paid off before it is planted",
+      "missingEventLink": "Chapter \"{{chapter}}\" links to a timeline event that does not exist"
+    }
+  },
   "type": {
     "plot": "Plot",
     "character": "Character",

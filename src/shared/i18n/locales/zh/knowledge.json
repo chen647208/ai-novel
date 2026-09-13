@@ -113,7 +113,9 @@
     "recommenderTitle": "智能推荐",
     "recommenderHint": "基于当前内容推荐相关设定和建议",
     "dataViewsTitle": "数据视图",
-    "dataViewsHint": "同一份设定用表格、卡片或关系图查看"
+    "dataViewsHint": "同一份设定用表格、卡片或关系图查看",
+    "dualTimelineTitle": "双轴时间线",
+    "dualTimelineHint": "叙事顺序与故事时间对齐，可合并与检查"
   },
   "embedding": {
     "serviceNotReady": "API Embedding服务未就绪，请检查配置",

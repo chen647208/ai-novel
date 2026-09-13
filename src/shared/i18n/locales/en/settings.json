@@ -10,7 +10,8 @@
     "consistency": "Consistency check",
     "smartRecommender": "Smart recommender",
     "enhancedTimeline": "Enhanced timeline",
-    "dataViews": "Data views"
+    "dataViews": "Data views",
+    "dualTimeline": "Dual-axis timeline"
   },
   "entities": {
     "title": "Entity types & fields",

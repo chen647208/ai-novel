@@ -35,6 +35,7 @@ interface KnowledgeFeatureEditorsProps {
   showSmartRecommender: boolean;
   showWorldViewGraph: boolean;
   showDataViews: boolean;
+  showDualTimeline: boolean;
   onCloseWorldViewGraph: () => void;
   onNavigateToChapter?: (id: string) => void;
   onNavigateToItem: (type: string, id: string) => void;
@@ -58,6 +59,7 @@ export const KnowledgeFeatureEditors: React.FC<KnowledgeFeatureEditorsProps> = (
   showSmartRecommender,
   showWorldViewGraph,
   showDataViews,
+  showDualTimeline,
   onCloseWorldViewGraph,
   onNavigateToChapter,
   onNavigateToItem,
@@ -193,6 +195,16 @@ export const KnowledgeFeatureEditors: React.FC<KnowledgeFeatureEditorsProps> = (
 
       {showDataViews && (
         <FeaturePanel id="view.entities" project={project} onSelectItem={onNavigateToItem} />
+      )}
+
+      {showDualTimeline && (
+        <FeaturePanel
+          id="timeline.dual"
+          project={project}
+          onUpdate={(updates: Partial<Project>) => onUpdate(updates)}
+          onNavigateToChapter={onNavigateToChapter}
+          onSelectEvent={(id: string) => onNavigateToItem('timeline', id)}
+        />
       )}
     </>
   );

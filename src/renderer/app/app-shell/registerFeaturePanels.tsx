@@ -16,6 +16,7 @@ import SmartRecommender from '@/features/assistant/SmartRecommender';
 import ConsistencyChecker from '@/features/consistency/ConsistencyChecker';
 import ConsistencyPromptManager from '@/features/consistency/ConsistencyPromptManager';
 import ForeshadowPanel from '@/features/foreshadowing/components/ForeshadowPanel';
+import DualAxisTimeline from '@/features/timeline/DualAxisTimeline';
 import EnhancedTimeline from '@/features/timeline/EnhancedTimeline';
 import TimelineEditor from '@/features/timeline/TimelineEditor';
 import MultiViewPanel from '@/features/views/MultiViewPanel';
@@ -34,6 +35,7 @@ export function registerFeaturePanels(): void {
   registerFeaturePanel('world.worldViewEditor', WorldViewEditor);
   registerFeaturePanel('timeline.enhanced', EnhancedTimeline);
   registerFeaturePanel('timeline.editor', TimelineEditor);
+  registerFeaturePanel('timeline.dual', DualAxisTimeline);
   registerFeaturePanel('assistant.smartRecommender', SmartRecommender);
   registerFeaturePanel('assistant.sessionEventBrowser', SessionEventBrowser);
   registerFeaturePanel('consistency.checker', ConsistencyChecker);

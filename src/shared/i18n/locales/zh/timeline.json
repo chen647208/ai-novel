@@ -1,4 +1,27 @@
 {
+  "dual": {
+    "title": "双轴时间线",
+    "axis": {
+      "narrative": "叙事顺序",
+      "story": "故事时间"
+    },
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "snap": "吸附",
+    "majorOnly": "仅重大事件",
+    "check": "一致性检查",
+    "merge": "合并",
+    "unmerge": "取消合并",
+    "empty": "暂无章节或事件；添加章节与时间线事件后在此对齐。",
+    "grouped": "已分组",
+    "noIssues": "未发现时间线冲突",
+    "issue": {
+      "characterLocationConflict": "角色「{{character}}」在同一时间出现在不同地点：{{places}}",
+      "bornAfterAppearance": "角色「{{character}}」（生于 {{year}} 年）出现在更早的事件「{{event}}」（{{year}} 年）中",
+      "foreshadowOrder": "伏笔「{{title}}」的回收章节早于埋设章节",
+      "missingEventLink": "章节「{{chapter}}」指向的时间线事件不存在"
+    }
+  },
   "type": {
     "plot": "剧情",
     "character": "角色",

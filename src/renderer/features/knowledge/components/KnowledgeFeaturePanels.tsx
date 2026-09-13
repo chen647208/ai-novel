@@ -8,7 +8,7 @@
  */
 
 import type { LucideIcon } from 'lucide-react';
-import { ChevronDown, ChevronUp, Clock, Flag, LayoutList, MapPinned, Network, ScrollText, Shield, Table2, WandSparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, Film, Flag, LayoutList, MapPinned, Network, ScrollText, Shield, Table2, WandSparkles } from 'lucide-react';
 import React from 'react';
 
 import { useFeatureEnabled } from '@/app/useFeatureToggles';
@@ -35,6 +35,8 @@ interface KnowledgeFeaturePanelsProps {
   setShowSmartRecommender: React.Dispatch<React.SetStateAction<boolean>>;
   showDataViews: boolean;
   setShowDataViews: React.Dispatch<React.SetStateAction<boolean>>;
+  showDualTimeline: boolean;
+  setShowDualTimeline: React.Dispatch<React.SetStateAction<boolean>>;
   setShowWorldViewGraph: React.Dispatch<React.SetStateAction<boolean>>;
   setGraphInitialType: React.Dispatch<React.SetStateAction<DiagramType>>;
 }
@@ -99,6 +101,8 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
   setShowSmartRecommender,
   showDataViews,
   setShowDataViews,
+  showDualTimeline,
+  setShowDualTimeline,
   setShowWorldViewGraph,
   setGraphInitialType,
 }) => {
@@ -109,6 +113,7 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
   const recommenderEnabled = useFeatureEnabled('panel.smartRecommender');
   const enhancedTimelineEnabled = useFeatureEnabled('panel.enhancedTimeline');
   const dataViewsEnabled = useFeatureEnabled('panel.dataViews');
+  const dualTimelineEnabled = useFeatureEnabled('panel.dualTimeline');
 
   const closeAllEditors = () => {
     setShowLocationEditor(false);
@@ -209,6 +214,16 @@ const KnowledgeFeaturePanels: React.FC<KnowledgeFeaturePanelsProps> = ({
             active={showDataViews}
             hasData={!!(project.characters?.length || project.locations?.length || project.factions?.length || project.timeline?.events?.length)}
             onClick={() => setShowDataViews(!showDataViews)}
+          />
+        )}
+        {dualTimelineEnabled && (
+          <PanelToggle
+            icon={Film}
+            title={t('panel.dualTimelineTitle')}
+            hint={t('panel.dualTimelineHint')}
+            active={showDualTimeline}
+            hasData={!!(project.chapters?.length || project.timeline?.events?.length)}
+            onClick={() => setShowDualTimeline(!showDualTimeline)}
           />
         )}
       </div>

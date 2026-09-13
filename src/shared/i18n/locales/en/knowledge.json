@@ -113,7 +113,9 @@
     "recommenderTitle": "Smart Recommender",
     "recommenderHint": "Recommends relevant settings and advice based on current content",
     "dataViewsTitle": "Data views",
-    "dataViewsHint": "View the same settings as a table, cards or a relationship graph"
+    "dataViewsHint": "View the same settings as a table, cards or a relationship graph",
+    "dualTimelineTitle": "Dual-axis timeline",
+    "dualTimelineHint": "Align narrative order with story time; merge and check"
   },
   "embedding": {
     "serviceNotReady": "API embedding service is not ready. Check the configuration",
