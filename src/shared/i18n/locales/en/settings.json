@@ -540,5 +540,13 @@
     "imported": "Imported \"{{title}}\"",
     "failed": "Operation failed. Check folder permissions and contents.",
     "desktopOnly": "This feature is available on desktop only."
+  },
+  "collab": {
+    "title": "Real-time collaboration",
+    "subtitle": "When on, multiple windows on this machine sync the current work's chapters via BroadcastChannel. The collaborative copy adds no second store beyond the live database; cross-device transport is a separate add-on.",
+    "enable": "Enable real-time collaboration",
+    "active": "Joined room {{room}}",
+    "waiting": "Waiting for a work to open",
+    "inactive": "Off"
   }
 }

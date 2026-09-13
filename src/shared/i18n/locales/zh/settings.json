@@ -540,5 +540,13 @@
     "imported": "已导入《{{title}}》",
     "failed": "操作失败，请检查文件夹权限与内容。",
     "desktopOnly": "该功能仅在桌面端可用。"
+  },
+  "collab": {
+    "title": "实时协作",
+    "subtitle": "开启后，同一台电脑的多个窗口经 BroadcastChannel 实时同步当前作品的章节。协作副本不写入活动数据库之外的第二份存储；跨设备传输另行接入。",
+    "enable": "开启实时协作",
+    "active": "已加入房间 {{room}}",
+    "waiting": "等待打开作品",
+    "inactive": "未开启"
   }
 }

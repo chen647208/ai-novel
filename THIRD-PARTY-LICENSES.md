@@ -4,7 +4,7 @@
 收录运行期依赖（package-lock.json 中排除 dev/link）的许可证声明；
 各依赖的完整许可证文本随发行包内 `node_modules` 一并分发。
 
-共 396 个运行期依赖。
+共 399 个运行期依赖。
 
 | 依赖 | 版本 | 许可证 |
 | --- | --- | --- |
@@ -220,6 +220,7 @@
 | is-hexadecimal | 2.0.1 | MIT |
 | is-plain-obj | 4.1.0 | MIT |
 | isexe | 2.0.0 | ISC |
+| isomorphic.js | 0.2.5 | MIT |
 | jackspeak | 3.4.3 | BlueOak-1.0.0 |
 | js-yaml | 4.3.2 | MIT |
 | json-bigint | 1.0.0 | MIT |
@@ -228,6 +229,7 @@
 | jwa | 2.0.1 | MIT |
 | jws | 4.0.1 | MIT |
 | lazy-val | 1.0.5 | MIT |
+| lib0 | 0.2.117 | MIT |
 | linkifyjs | 4.3.3 | MIT |
 | lodash.camelcase | 4.3.0 | MIT |
 | lodash.escaperegexp | 4.1.2 | MIT |
@@ -401,6 +403,7 @@
 | yargs | 18.1.0 | MIT |
 | yargs-parser | 21.1.1 | ISC |
 | yargs-parser | 22.0.0 | ISC |
+| yjs | 13.6.32 | MIT |
 | zod | 4.6.2 | MIT |
 | zustand | 5.0.15 | MIT |
 | zwitch | 2.0.4 | MIT |

@@ -67,6 +67,15 @@
 - 导入：读取所选文件夹的 `project.json` 并以新 ID 加入书库。
 - 边界：镜像为非活动副本；活动数据库不同步到外部文件夹。
 
+## 实时协作
+
+- 位置：设置 → 通用 → 实时协作，组件为 `src/renderer/features/settings/components/CollaborationPanel.tsx`；会话逻辑在 `src/renderer/app/collaboration/collaborationService.ts`。
+- 依赖：仅 `yjs`（MIT）。不用 `y-indexeddb`（避免与 sqlite 形成第二份真源），不用 `y-websocket`/`y-webrtc`（避免绕过主进程网络门）。
+- 传输：同机多窗口经原生 `BroadcastChannel` 交换 Yjs 增量（`features/collaboration/broadcastTransport.ts`），无网络面。
+- 模型：作品章节映射为 `Y.Array<Y.Map>`，正文为 `Y.Text`（`features/collaboration/projectDoc.ts`）。
+- 持久化：协作副本不单独落盘；会话以当前 `Project` 播种，远程更新回写 `projectStore`，仍走既有差分落盘。
+- 边界：跨设备协作需主进程通道（后续接入）；同一段落的并发编辑按 CRDT 规则收敛，不做字符级同文档绑定（`y-prosemirror` 属后续）。
+
 ## 维护建议
 
 - 新增设置项优先落到对应 `Panel` 组件，不要直接堆到 `SettingsModal.tsx`

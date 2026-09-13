@@ -43,6 +43,7 @@ import { registerFeaturePanels } from './app-shell/registerFeaturePanels';
 import ResetAlertDialog from './app-shell/ResetAlertDialog';
 import ToastHost from './app-shell/ToastHost';
 import WorkspaceView from './app-shell/WorkspaceView';
+import { useCollaborationSync } from './collaboration/collaborationService';
 import { isSectionVisible } from './sectionFeatures';
 import type { SectionId } from './sections';
 import { WORKSPACE_SECTIONS } from './sections';
@@ -68,6 +69,7 @@ const VersionCheckModal = lazy(() => import('../features/version/VersionCheckMod
 
 const App: React.FC = () => {
   useAppBootstrap();
+  useCollaborationSync();
   const { t, i18n } = useTranslation('app');
 
   // 纯 UI 态（不落盘）
