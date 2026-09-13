@@ -548,6 +548,8 @@
     "active": "Joined room {{room}}",
     "waiting": "Waiting for a work to open",
     "inactive": "Off",
-    "online": "{{count}} online"
+    "online": "{{count}} online",
+    "serverLabel": "Relay URL (cross-device, optional)",
+    "serverHint": "Leave empty for same-machine windows; set ws:// or wss:// when all peers connect to the same relay for cross-device sync."
   }
 }

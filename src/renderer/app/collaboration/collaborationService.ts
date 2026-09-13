@@ -8,7 +8,8 @@
  */
 
 /**
- * 协作会话：以作品为房间，Y.Doc 为协作副本，同机多窗口经 BroadcastChannel 交换增量。
+ * 协作会话：以作品为房间，Y.Doc 为协作副本。
+ * 同机多窗口走 BroadcastChannel；填了中转地址则经主进程 WebSocket 跨设备同步。
  * 持久化仍走既有 projectStore → sqlite 链路，Y.Doc 不落第二个存储。
  */
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
@@ -17,6 +18,7 @@ import * as Y from 'yjs';
 import { create } from 'zustand';
 
 import { type CollaborationPeer, type CollaborationTransport,createBroadcastTransport } from '@/features/collaboration/broadcastTransport';
+import { createIpcTransport } from '@/features/collaboration/ipcTransport';
 import { applyProjectToDoc, docToProjectPatch } from '@/features/collaboration/projectDoc';
 import { localStore } from '@/shared/services/localStore';
 
@@ -33,7 +35,9 @@ interface CollaborationSession {
 interface CollaborationState {
   enabled: boolean;
   peers: CollaborationPeer[];
+  serverUrl: string;
   setEnabled: (enabled: boolean) => void;
+  setServerUrl: (url: string) => void;
 }
 
 let session: CollaborationSession | null = null;
@@ -50,12 +54,25 @@ function readEnabled(): boolean {
   }
 }
 
+function readServerUrl(): string {
+  try {
+    return localStore.getItem(STORAGE_KEYS.collabServerUrl) ?? '';
+  } catch {
+    return '';
+  }
+}
+
 export const useCollaborationStore = create<CollaborationState>()((set) => ({
   enabled: readEnabled(),
   peers: [],
+  serverUrl: readServerUrl(),
   setEnabled: (enabled) => {
     set({ enabled });
     localStore.setItem(STORAGE_KEYS.collabEnabled, enabled ? '1' : '0');
+  },
+  setServerUrl: (url) => {
+    set({ serverUrl: url });
+    localStore.setItem(STORAGE_KEYS.collabServerUrl, url);
   },
 }));
 
@@ -76,12 +93,16 @@ export function startCollaboration(projectId: string): void {
   const room = `book:${projectId}`;
   const doc = new Y.Doc();
   let receivedRemote = false;
-  const transport = createBroadcastTransport(doc, room, {
-    onPresence: (peers) => useCollaborationStore.setState({ peers }),
+  const serverUrl = useCollaborationStore.getState().serverUrl.trim();
+  const transportOptions = {
+    onPresence: (peers: CollaborationPeer[]) => useCollaborationStore.setState({ peers }),
     onRemoteUpdate: () => {
       receivedRemote = true;
     },
-  });
+  };
+  const transport = serverUrl
+    ? createIpcTransport(doc, room, { ...transportOptions, url: serverUrl })
+    : createBroadcastTransport(doc, room, transportOptions);
 
   const onDocUpdate = (_update: Uint8Array, origin: unknown): void => {
     if (origin === 'local-project' || origin === 'seed') return;

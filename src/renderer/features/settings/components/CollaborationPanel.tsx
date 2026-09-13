@@ -15,12 +15,15 @@ import { getCollaborationSession, useCollaborationStore } from '@/app/collaborat
 import { useProjectStore } from '@/app/stores/projectStore';
 import { useTranslation } from '@/i18n';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/Card';
+import { Input } from '@/shared/ui/Input';
 import { Switch } from '@/shared/ui/Switch';
 
 const CollaborationPanel: React.FC = () => {
   const { t } = useTranslation('settings');
   const enabled = useCollaborationStore((state) => state.enabled);
   const peers = useCollaborationStore((state) => state.peers);
+  const serverUrl = useCollaborationStore((state) => state.serverUrl);
+  const setServerUrl = useCollaborationStore((state) => state.setServerUrl);
   const setEnabled = useCollaborationStore((state) => state.setEnabled);
   const activeProjectId = useProjectStore((state) => state.activeProjectId);
   const session = getCollaborationSession();
@@ -43,6 +46,13 @@ const CollaborationPanel: React.FC = () => {
           <Switch aria-label={t('collab.enable')} checked={enabled} disabled={!activeProjectId} onCheckedChange={setEnabled} />
         </div>
         <p className="text-xs text-muted-foreground">{status}</p>
+        {typeof window !== 'undefined' && window.electronAPI?.collab && (
+          <div className="space-y-1">
+            <span className="text-xs text-muted-foreground">{t('collab.serverLabel')}</span>
+            <Input value={serverUrl} onChange={(event) => setServerUrl(event.target.value)} placeholder="ws://host:1234" className="h-8 text-xs" />
+            <p className="text-2xs text-muted-foreground">{t('collab.serverHint')}</p>
+          </div>
+        )}
         {enabled && peers.length > 0 && (
           <div className="space-y-1">
             <span className="text-2xs text-muted-foreground">{t('collab.online', { count: peers.length })}</span>

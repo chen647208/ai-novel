@@ -71,7 +71,8 @@
 
 - 位置：设置 → 通用 → 实时协作，组件为 `src/renderer/features/settings/components/CollaborationPanel.tsx`；会话逻辑在 `src/renderer/app/collaboration/collaborationService.ts`。
 - 依赖：仅 `yjs`（MIT）。不用 `y-indexeddb`（避免与 sqlite 形成第二份真源），不用 `y-websocket`/`y-webrtc`（避免绕过主进程网络门）。
-- 传输：同机多窗口经原生 `BroadcastChannel` 交换 Yjs 增量与在线状态（`features/collaboration/broadcastTransport.ts`），无网络面。
+- 传输：同机多窗口经原生 `BroadcastChannel` 交换 Yjs 增量与在线状态（`features/collaboration/broadcastTransport.ts`）；填了中转地址则经主进程 WebSocket 跨设备同步（`features/collaboration/ipcTransport.ts` + `main/app/collab.ts`）。
+- 网络面：渲染层不直接建连，WebSocket 由主进程持有并经 IPC 收发，仅接受 `ws://` 与 `wss://`；中转服务见 `scripts/collab-server.mjs`（按房间广播，不持久化）。
 - 模型：作品章节映射为 `Y.Array<Y.Map>`，正文为 `Y.Text`；本地改动按最小增量写入（`applyTextDiff`），保留字符级并发合并。
 - 播种握手：加入者先请求对端状态，收到远端状态即采用；等待窗口内无对端才用本地作品播种，避免两端各自播种产生重复章节。
 - 在线状态：对端心跳每 4 秒一次，超过 12 秒未心跳即剔除；面板显示在线成员。

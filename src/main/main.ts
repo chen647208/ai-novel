@@ -10,6 +10,7 @@
 import { app, crashReporter } from 'electron';
 
 import { aiGatewayProvider } from './ai/gateway.js';
+import { collabProvider } from './app/collab.js';
 import { AppContainer, type ProviderContext } from './app/container.js';
 import { crashSubmitUrl, readCrashReportingConfig } from './app/crashReportConfig.js';
 import { legacyDataDir, migrateLegacyDataDir, shouldRunMigration, standardDataDir } from './app/dataDir.js';
@@ -44,6 +45,7 @@ const container = new AppContainer()
   .register(aiGatewayProvider)
   .register(mcpClientProvider)
   .register(netProvider)
+  .register(collabProvider)
   .register(shellProvider)
   .register(updaterProvider)
   .register(windowProvider);

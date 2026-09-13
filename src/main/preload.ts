@@ -67,6 +67,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   printPdf: (html: string, defaultPath: string) => ipcRenderer.invoke(IPC.printPdf, html, defaultPath),
 
+  // 协作传输（主进程持有 WebSocket，渲染层经 IPC 收发）
+  collab: {
+    open: (url: string) => ipcRenderer.invoke(IPC.collab.open, url),
+    send: (id: string, message: unknown) => ipcRenderer.invoke(IPC.collab.send, id, message),
+    close: (id: string) => ipcRenderer.invoke(IPC.collab.close, id),
+    onMessage: (listener: (id: string, message: unknown) => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, id: string, message: unknown): void => listener(id, message);
+      ipcRenderer.on(IPC.collab.message, handler);
+      return () => ipcRenderer.removeListener(IPC.collab.message, handler);
+    },
+  },
+
   // 向量存储操作（主进程托管 Vectra 索引）
   vector: {
     initialize: () => ipcRenderer.invoke(IPC.vector.initialize),

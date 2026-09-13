@@ -1145,6 +1145,13 @@ export interface ElectronAPI {
   exportPackage: (files: Record<string, string>, defaultPath: string) => Promise<{ canceled: boolean }>;
   /** 导出诊断包（日志 + 窗口几何 + 存储配置 + 环境信息，zip）。 */
   exportDiagnostics: () => Promise<{ canceled: boolean; path?: string }>;
+  /** 协作传输：主进程持有 WebSocket，渲染层经 IPC 收发。 */
+  collab?: {
+    open: (url: string) => Promise<{ ok: boolean; id?: string; error?: string }>;
+    send: (id: string, message: unknown) => Promise<{ ok: boolean }>;
+    close: (id: string) => Promise<{ ok: boolean }>;
+    onMessage: (listener: (id: string, message: unknown) => void) => () => void;
+  };
   /** MCP 客户端：外部 server 的连接/工具/调用（主进程持 stdio）。 */
   mcpClient: {
     connect: (id: string, command: string, args?: string[]) => Promise<{ connected: boolean }>;

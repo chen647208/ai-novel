@@ -115,4 +115,12 @@ export const IPC = {
     install: 'updater:install',
     event: 'updater:event',
   },
+
+  // 协作传输（主进程持有 WebSocket，渲染层经 IPC 收发；跨设备协作）
+  collab: {
+    open: 'collab:open',
+    send: 'collab:send',
+    close: 'collab:close',
+    message: 'collab:message',
+  },
 } as const;
