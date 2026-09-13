@@ -522,5 +522,23 @@
     "hourlyLimitLabel": "每小时上限",
     "hourlyLimitHint": "次（0 为不限）",
     "unlimited": "不限"
+  },
+  "operationLog": {
+    "title": "操作日志",
+    "subtitle": "当前作品的正文修订记录，标注作者（user / ai:<工具>）与触发原因。",
+    "refresh": "刷新",
+    "noWork": "先打开一本书。",
+    "empty": "暂无修订记录。"
+  },
+  "mirror": {
+    "title": "外部文件夹镜像",
+    "subtitle": "把作品导出为 Markdown 与 project.json 到所选文件夹，供云盘同步或再次导入；不与活动数据库混用。",
+    "export": "导出到文件夹",
+    "import": "从文件夹导入",
+    "pickTitle": "选择镜像文件夹",
+    "exported": "已写入 {{count}} 个文件",
+    "imported": "已导入《{{title}}》",
+    "failed": "操作失败，请检查文件夹权限与内容。",
+    "desktopOnly": "该功能仅在桌面端可用。"
   }
 }

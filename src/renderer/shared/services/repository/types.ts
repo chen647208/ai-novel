@@ -114,6 +114,16 @@ export interface AttachmentMeta {
   createdAt: number;
 }
 
+/** 操作日志条目：一次正文修订，含作者（user / ai:<tool>）与触发原因。 */
+export interface OperationLogEntry {
+  id: string;
+  nodeId: string;
+  actor: string;
+  cause?: string;
+  preview: string;
+  createdAt: number;
+}
+
 /** 自定义字段的数据类型。 */
 export type FieldDataType = 'text' | 'number' | 'date' | 'option' | 'checkbox' | 'relation' | 'image' | 'link' | 'tag';
 
@@ -217,6 +227,12 @@ export interface StorageRepository {
    * JSON 后端无修订概念，返回空数组。
    */
   loadRevisions?(nodeId: string): Promise<RevisionEntity[]>;
+
+  /**
+   * 读取某本书最近的操作日志（正文修订，按时间倒序）。仅 SQLite 后端提供；
+   * 无修订概念的后端返回空数组。
+   */
+  loadOperationLog?(bookId: string, limit?: number): Promise<OperationLogEntry[]>;
 
   /** 全文检索（SQLite 走 FTS5；JSON 后端走内存过滤） */
   search(query: string, options?: SearchOptions): Promise<SearchHit[]>;

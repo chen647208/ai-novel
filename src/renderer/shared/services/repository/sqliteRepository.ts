@@ -34,7 +34,7 @@ import { logger } from '../../utils/logger';
 import { ensureBuiltinItemTypes } from './builtinTypes';
 import { jsonRepository } from './jsonRepository';
 import { META_KEYS,migrate, SCHEMA_VERSION,SETTING_KEYS } from './schema';
-import type { AttachmentMeta,CommitOptions,DbEncryptionStatus, FieldDefinition, ItemTypeDefinition, SearchHit, SearchOptions, SequenceItem, SqlDriver, StorageRepository, ViewDefinition } from './types';
+import type { AttachmentMeta,CommitOptions,DbEncryptionStatus, FieldDefinition, ItemTypeDefinition, OperationLogEntry, SearchHit, SearchOptions, SequenceItem, SqlDriver, StorageRepository, ViewDefinition } from './types';
 
 const DEFAULT_SEARCH_LIMIT = 50;
 
@@ -293,8 +293,28 @@ export class SqliteRepository implements StorageRepository {
     }));
   }
 
-  // ========== 文档附件（attachments + blobs）==========
+  /** 读取某本书最近的操作日志（正文修订，按时间倒序） */
+  async loadOperationLog(bookId: string, limit = 100): Promise<OperationLogEntry[]> {
+    await this.ready;
+    const rows = await this.driver.all<{
+      id: string;
+      node_id: string;
+      author: string;
+      cause: string | null;
+      created_at: number;
+      preview: string;
+    }>('revisions.selectRecentByBook', [bookId, limit]);
+    return rows.map((row) => ({
+      id: row.id,
+      nodeId: row.node_id,
+      actor: row.author,
+      cause: row.cause ?? undefined,
+      preview: row.preview,
+      createdAt: Number(row.created_at),
+    }));
+  }
 
+  // ========== 文档附件（attachments + blobs）==========
   async listAttachments(nodeId: string): Promise<AttachmentMeta[]> {
     await this.ready;
     const rows = await this.driver.all<AttachmentRow>('attachments.selectByNode', [nodeId]);

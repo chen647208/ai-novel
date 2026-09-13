@@ -526,6 +526,11 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           canMergeChapter={project.chapters.findIndex(c => c.id === activeChapterId) >= 0 && project.chapters.findIndex(c => c.id === activeChapterId) < project.chapters.length - 1}
           onSplitChapter={handleSplitChapter}
           onMergeChapter={() => void handleMergeNextChapter()}
+          chapterFinal={activeChapter?.status === 'final'}
+          onToggleFinal={() => {
+            if (!activeChapter) return;
+            handleUpdateChapter({ ...activeChapter, status: activeChapter.status === 'final' ? 'draft' : 'final' });
+          }}
         />
 
         <Slot id="plugin.editor" />
@@ -552,6 +557,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           editorRef={editorRef}
           activeChapterId={activeChapterId}
           content={gen.isStreaming ? gen.streamingContent : (activeChapter?.content || "")}
+          locked={activeChapter?.status === 'final'}
           isFocusMode={isFocusMode}
           typewriter={typewriter}
           isGenerating={gen.isGenerating}

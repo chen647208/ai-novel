@@ -247,6 +247,8 @@
     "retryTitle": "Regenerate with the last settings",
     "spellTitle": "Spellcheck toggle (built-in)",
     "findTitle": "Find & replace (Ctrl+F)",
+    "finalTitle": "Finalize and lock (read-only body)",
+    "unfinalTitle": "Unfinalize (editable again)",
     "splitChapterTitle": "Split into a new chapter at cursor",
     "mergeChapterTitle": "Merge with next chapter",
     "exitFocus": "Exit focus",
@@ -362,7 +364,8 @@
     "status": {
       "draft": "Draft",
       "writing": "Writing",
-      "done": "Done"
+      "done": "Done",
+      "final": "Final"
     }
   },
   "canvas": {

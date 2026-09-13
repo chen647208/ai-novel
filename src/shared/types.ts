@@ -197,8 +197,8 @@ export interface Chapter {
   content: string;
   contentSummary?: string; // 章节正文摘要（从正文中提取）
   order: number;
-  /** 写作状态（缺席=draft，免迁移）：草稿/写作中/完稿 */
-  status?: 'draft' | 'writing' | 'done';
+  /** 写作状态（缺席=draft，免迁移）：草稿/写作中/完稿/定稿 */
+  status?: 'draft' | 'writing' | 'done' | 'final';
   history?: AIHistoryRecord[]; // AI生成历史记录
   snapshots?: ChapterSnapshot[]; // 手动编辑快照（用于误删/回退恢复）
   

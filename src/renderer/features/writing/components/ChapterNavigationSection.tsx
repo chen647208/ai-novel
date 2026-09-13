@@ -27,12 +27,14 @@ const statusTone: Record<NonNullable<Chapter['status']>, string> = {
   draft: 'bg-muted-foreground/40',
   writing: 'bg-primary',
   done: 'bg-success',
+  final: 'bg-foreground',
 };
 
 const statusLabelKey = {
   draft: 'navigation.status.draft',
   writing: 'navigation.status.writing',
   done: 'navigation.status.done',
+  final: 'navigation.status.final',
 } as const;
 
 const ChapterNavigationSection: React.FC<ChapterNavigationSectionProps> = ({

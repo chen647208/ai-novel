@@ -522,5 +522,23 @@
     "hourlyLimitLabel": "Hourly limit",
     "hourlyLimitHint": "requests (0 = unlimited)",
     "unlimited": "Unlimited"
+  },
+  "operationLog": {
+    "title": "Operation log",
+    "subtitle": "Body revisions of the current work, with author (user / ai:<tool>) and trigger cause.",
+    "refresh": "Refresh",
+    "noWork": "Open a book first.",
+    "empty": "No revisions yet."
+  },
+  "mirror": {
+    "title": "External folder mirror",
+    "subtitle": "Export the work as Markdown and project.json into a chosen folder for cloud sync or re-import; never mixed with the live database.",
+    "export": "Export to folder",
+    "import": "Import from folder",
+    "pickTitle": "Choose mirror folder",
+    "exported": "Wrote {{count}} files",
+    "imported": "Imported \"{{title}}\"",
+    "failed": "Operation failed. Check folder permissions and contents.",
+    "desktopOnly": "This feature is available on desktop only."
   }
 }

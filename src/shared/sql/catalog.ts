@@ -228,11 +228,16 @@ export const SQL = {
         WHERE r.node_id IN (SELECT id FROM nodes WHERE book_id = ?) GROUP BY r.node_id`,
   'revisions.insert': `INSERT INTO revisions(id, node_id, seq, body, author, cause, created_at) VALUES(?,?,?,?,?,?,?)`,
   'revisions.deleteAll': `DELETE FROM revisions`,
+  'revisions.selectRecentByBook': `SELECT r.id, r.node_id, r.author, r.cause, r.created_at, substr(r.body, 1, 120) AS preview
+         FROM revisions r JOIN nodes n ON n.id = r.node_id
+         WHERE n.book_id = ? ORDER BY r.created_at DESC, r.seq DESC LIMIT ?`,
 
   // ── entity_changes ──
   'changes.insert': `INSERT INTO entity_changes(entity_name, entity_id, hash, is_erased, instance_id, agent_id, utc_date_changed)
          VALUES(?,?,?,?,?,?,?)`,
   'changes.deleteAll': `DELETE FROM entity_changes`,
+  'changes.selectRecent': `SELECT id, entity_name, entity_id, is_erased, agent_id, utc_date_changed
+         FROM entity_changes ORDER BY id DESC LIMIT ?`,
 
   // ── 附件 / 二进制 ──
   'attachments.deleteAll': `DELETE FROM attachments`,

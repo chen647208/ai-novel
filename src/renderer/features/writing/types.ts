@@ -203,6 +203,9 @@ export interface WritingEditorToolbarProps {
   canMergeChapter: boolean;
   onSplitChapter: () => void;
   onMergeChapter: () => void;
+  /** 定稿锁定：定稿后章节正文只读，取消后恢复编辑。 */
+  chapterFinal: boolean;
+  onToggleFinal: () => void;
 }
 
 export interface WritingSelectionMenuProps {
@@ -275,6 +278,8 @@ export interface WritingEditorCanvasProps {
   editorRef: React.RefObject<NovelEditorHandle | null>;
   activeChapterId: string | null;
   content: string;
+  /** 定稿锁定：正文只读。 */
+  locked?: boolean;
   isFocusMode: boolean;
   typewriter: boolean;
   isGenerating: boolean;

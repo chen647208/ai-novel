@@ -28,6 +28,8 @@ import { logger } from '@/shared/utils/logger';
 import type { AppState } from '../../../../shared/types';
 import type { StorageSettingsPanelProps } from '../types';
 import { BackupRestoreDialog } from './BackupRestoreDialog';
+import MirrorPanel from './MirrorPanel';
+import OperationLogPanel from './OperationLogPanel';
 
 /** 状态徽章 */
 const StatusBadge: React.FC<{ tone: 'primary' | 'success' | 'muted'; children: React.ReactNode }> = ({ tone, children }) => (
@@ -543,6 +545,10 @@ const StorageSettingsPanel: React.FC<StorageSettingsPanelProps> = ({
             </Button>
           </div>
       </div>
+
+      <OperationLogPanel />
+
+      <MirrorPanel />
 
       <BackupRestoreDialog
         open={restoreTarget !== null}

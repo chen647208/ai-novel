@@ -22,6 +22,8 @@ import type { NovelEditorHandle } from '../types';
 interface TipTapCanvasProps {
   content: string;
   activeChapterId: string | null;
+  /** 定稿锁定：正文只读。 */
+  locked?: boolean;
   isFocusMode: boolean;
   /** 生成中且非流式时锁定编辑；流式期间以只读方式回显增量。 */
   isGenerating: boolean;
@@ -41,7 +43,7 @@ interface TipTapCanvasProps {
  * 并通过 NovelEditorHandle 向编排层暴露 PM 语义的选区与坐标。
  */
 const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function TipTapCanvas(
-  { content, activeChapterId, isFocusMode, isGenerating, isStreaming, typewriter, onNewChapter, onContentChange, onMouseUp, onKeyUp, onMouseMove },
+  { content, activeChapterId, locked, isFocusMode, isGenerating, isStreaming, typewriter, onNewChapter, onContentChange, onMouseUp, onKeyUp, onMouseMove },
   ref,
 ) {
   const { t } = useTranslation('writing');
@@ -63,7 +65,7 @@ const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function T
   const editor = useEditor({
     extensions,
     content: dslToPmDoc(content),
-    editable: !!activeChapterId && !(isGenerating && !isStreaming),
+    editable: !!activeChapterId && !locked && !(isGenerating && !isStreaming),
     onUpdate: ({ editor: e }) => {
       const dsl = pmDocToDsl(e.getJSON() as PmNode);
       lastEmitted.current = dsl;
@@ -85,9 +87,9 @@ const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function T
   // 可编辑态：无章节或生成中（非流式）时锁定。
   useEffect(() => {
     if (!editor) return;
-    const editable = !!activeChapterId && !(isGenerating && !isStreaming);
+    const editable = !!activeChapterId && !locked && !(isGenerating && !isStreaming);
     if (editor.isEditable !== editable) editor.setEditable(editable);
-  }, [editor, activeChapterId, isGenerating, isStreaming]);
+  }, [editor, activeChapterId, locked, isGenerating, isStreaming]);
 
   // 打字机模式：选区变化时把光标收到视口约 40% 高度处，长文连写不沉底。
   const typewriterRef = useRef(typewriter);
