@@ -14,14 +14,14 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui/Button';
 import Slot from '@/shared/ui/Slot';
 import { Textarea } from '@/shared/ui/Textarea';
-import { roleLabel } from '@/shared/utils/displayLabels';
 
 import type { WritingSidebarProps } from '../types';
 import ChapterNavigationSection from './ChapterNavigationSection';
 import ChapterSummarySection from './ChapterSummarySection';
+import WritingEntityPanel from './WritingEntityPanel';
 
 const WritingSidebar: React.FC<WritingSidebarProps> = ({
-  characters,
+  project,
   activeChapter,
   activeChapterId,
   chapters,
@@ -39,6 +39,7 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
   onDeleteChapter,
   onChaptersChange,
   onBatchDeleteChapter,
+  onInsertEntity,
 }) => {
   const { t } = useTranslation('writing');
   return (
@@ -53,33 +54,13 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
         </div>
       </div>
       <div className=" flex-1 space-y-6 overflow-y-auto p-4">
-        <section>
-          <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('sidebar.charactersTitle')}</h4>
-          {characters.length === 0 ? (
-            <div className="space-y-2">
-              <p className="text-xs italic text-muted-foreground">{t('sidebar.noCharacters')}</p>
-              {onNavigateToCharacters && (
-                <Button variant="outline" size="sm" className="w-full" onClick={onNavigateToCharacters}>
-                  {t('sidebar.goCharacters')}
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {characters.map((character) => (
-                <div key={character.id} className="rounded-lg border border-border bg-muted/30 p-3 text-sm">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="truncate font-serif font-medium">{character.name}</span>
-                    <span className="shrink-0 rounded border border-border bg-background px-1.5 py-0.5 text-2xs uppercase text-muted-foreground">{roleLabel(character.role)}</span>
-                  </div>
-                  <div className="mt-1.5 line-clamp-3 text-xs leading-relaxed text-muted-foreground">
-                    {character.personality || character.background}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+        <WritingEntityPanel project={project} activeChapter={activeChapter} onInsertEntity={onInsertEntity} />
+
+        {project.characters.length === 0 && onNavigateToCharacters && (
+          <Button variant="outline" size="sm" className="w-full" onClick={onNavigateToCharacters}>
+            {t('sidebar.goCharacters')}
+          </Button>
+        )}
 
         <section>
           <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('sidebar.outlineTitle')}</h4>

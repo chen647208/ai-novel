@@ -11,7 +11,7 @@ import type { Project } from '@shared/types';
 import { describe, expect, it } from 'vitest';
 import * as Y from 'yjs';
 
-import { applyProjectToDoc, createProjectDoc, docToChapters } from '../projectDoc';
+import { applyProjectToDoc, createProjectDoc, docToChapters, getChapterText } from '../projectDoc';
 
 function makeProject(): Project {
   return {
@@ -31,12 +31,6 @@ function makeProject(): Project {
   };
 }
 
-function chapterText(doc: Y.Doc, id: string): Y.Text | undefined {
-  const map = doc.getArray<Y.Map<unknown>>('chapters').toArray().find((item) => item.get('id') === id);
-  const text = map?.get('content');
-  return text instanceof Y.Text ? text : undefined;
-}
-
 describe('projectDoc', () => {
   it('作品与 Y.Doc 往返一致', () => {
     const chapters = docToChapters(createProjectDoc(makeProject()));
@@ -49,12 +43,15 @@ describe('projectDoc', () => {
   it('两个副本交换增量后收敛', () => {
     const project = makeProject();
     const a = createProjectDoc(project);
-    const b = createProjectDoc(project);
+    const b = new Y.Doc();
+    Y.applyUpdate(b, Y.encodeStateAsUpdate(a));
 
-    chapterText(a, 'c1')?.insert(chapterText(a, 'c1')?.length ?? 0, '（甲）');
+    const textA = getChapterText(a, 'c1');
+    textA?.insert(textA.length, '（甲）');
     Y.applyUpdate(b, Y.encodeStateAsUpdate(a), 'remote');
 
-    chapterText(b, 'c2')?.insert(chapterText(b, 'c2')?.length ?? 0, '（乙）');
+    const textB = getChapterText(b, 'c2');
+    textB?.insert(textB.length, '（乙）');
     Y.applyUpdate(a, Y.encodeStateAsUpdate(b), 'remote');
 
     const chaptersA = docToChapters(a);
@@ -75,5 +72,18 @@ describe('projectDoc', () => {
     const chapters = docToChapters(doc);
     expect(chapters.map((chapter) => chapter.id)).toEqual(['c1', 'c3']);
     expect(chapters[0]?.title).toBe('第一章（改）');
+  });
+
+  it('字符级增量：不同位置的并发插入都保留', () => {
+    const base: Project = { ...makeProject(), chapters: [{ id: 'c1', title: 'x', summary: '', content: 'ABCDE', order: 0 }] };
+    const a = createProjectDoc(base);
+    const b = new Y.Doc();
+    Y.applyUpdate(b, Y.encodeStateAsUpdate(a));
+    applyProjectToDoc(a, { ...base, chapters: [{ id: 'c1', title: 'x', summary: '', content: 'A1BCDE', order: 0 }] });
+    applyProjectToDoc(b, { ...base, chapters: [{ id: 'c1', title: 'x', summary: '', content: 'ABC2DE', order: 0 }] });
+    Y.applyUpdate(a, Y.encodeStateAsUpdate(b), 'remote');
+    Y.applyUpdate(b, Y.encodeStateAsUpdate(a), 'remote');
+    expect(docToChapters(a).find((chapter) => chapter.id === 'c1')?.content).toBe('A1BC2DE');
+    expect(docToChapters(b).find((chapter) => chapter.id === 'c1')?.content).toBe('A1BC2DE');
   });
 });

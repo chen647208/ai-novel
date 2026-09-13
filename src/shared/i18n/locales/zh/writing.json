@@ -1,4 +1,20 @@
 {
+  "entities": {
+    "title": "写作实体",
+    "searchPlaceholder": "搜索实体",
+    "count": "共 {{count}} 个",
+    "insertHint": "点击把名称插入正文",
+    "mentioned": "本章出现",
+    "empty": "无匹配实体。",
+    "kind": {
+      "all": "全部",
+      "character": "角色",
+      "location": "地点",
+      "faction": "势力",
+      "knowledge": "知识",
+      "event": "事件"
+    }
+  },
   "screenplay": {
     "title": "剧本（Fountain）",
     "addScene": "新增场次",

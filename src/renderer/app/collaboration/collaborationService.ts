@@ -13,11 +13,11 @@
  */
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import { useEffect } from 'react';
-import type * as Y from 'yjs';
+import * as Y from 'yjs';
 import { create } from 'zustand';
 
-import { type CollaborationTransport,createBroadcastTransport } from '@/features/collaboration/broadcastTransport';
-import { applyProjectToDoc, createProjectDoc, docToProjectPatch } from '@/features/collaboration/projectDoc';
+import { type CollaborationPeer, type CollaborationTransport,createBroadcastTransport } from '@/features/collaboration/broadcastTransport';
+import { applyProjectToDoc, docToProjectPatch } from '@/features/collaboration/projectDoc';
 import { localStore } from '@/shared/services/localStore';
 
 import { useProjectStore } from '../stores/projectStore';
@@ -32,11 +32,15 @@ interface CollaborationSession {
 
 interface CollaborationState {
   enabled: boolean;
+  peers: CollaborationPeer[];
   setEnabled: (enabled: boolean) => void;
 }
 
 let session: CollaborationSession | null = null;
 let applyingRemote = false;
+
+/** 播种前的等待时间：给对端一个回包窗口，避免各自播种。 */
+const SEED_GRACE_MS = 400;
 
 function readEnabled(): boolean {
   try {
@@ -48,6 +52,7 @@ function readEnabled(): boolean {
 
 export const useCollaborationStore = create<CollaborationState>()((set) => ({
   enabled: readEnabled(),
+  peers: [],
   setEnabled: (enabled) => {
     set({ enabled });
     localStore.setItem(STORAGE_KEYS.collabEnabled, enabled ? '1' : '0');
@@ -69,8 +74,14 @@ export function startCollaboration(projectId: string): void {
   if (!project) return;
 
   const room = `book:${projectId}`;
-  const doc = createProjectDoc(project);
-  const transport = createBroadcastTransport(doc, room);
+  const doc = new Y.Doc();
+  let receivedRemote = false;
+  const transport = createBroadcastTransport(doc, room, {
+    onPresence: (peers) => useCollaborationStore.setState({ peers }),
+    onRemoteUpdate: () => {
+      receivedRemote = true;
+    },
+  });
 
   const onDocUpdate = (_update: Uint8Array, origin: unknown): void => {
     if (origin === 'local-project' || origin === 'seed') return;
@@ -90,7 +101,14 @@ export function startCollaboration(projectId: string): void {
     applyProjectToDoc(doc, local, 'local-project');
   });
 
-  session = { projectId, room, doc, transport, unsubscribe };
+  const current: CollaborationSession = { projectId, room, doc, transport, unsubscribe };
+  session = current;
+
+  // 播种握手：等待片刻确认没有对端后再用本地作品初始化，避免两端各自播种产生重复章节。
+  setTimeout(() => {
+    if (session !== current || receivedRemote) return;
+    applyProjectToDoc(doc, project, 'seed');
+  }, SEED_GRACE_MS);
 }
 
 export function stopCollaboration(): void {
@@ -99,6 +117,7 @@ export function stopCollaboration(): void {
   session.transport.destroy();
   session.doc.destroy();
   session = null;
+  useCollaborationStore.setState({ peers: [] });
 }
 
 /** App 层接线：开关与当前作品变化时启停协作会话。 */

@@ -547,6 +547,7 @@
     "enable": "开启实时协作",
     "active": "已加入房间 {{room}}",
     "waiting": "等待打开作品",
-    "inactive": "未开启"
+    "inactive": "未开启",
+    "online": "在线 {{count}} 人"
   }
 }

@@ -62,8 +62,36 @@ export function docToChapters(doc: Y.Doc): Chapter[] {
   return getChapters(doc).toArray().map((map) => toChapter(map));
 }
 
+/** 读取某章节的正文 Y.Text（绑定与测试用）。 */
+export function getChapterText(doc: Y.Doc, chapterId: string): Y.Text | undefined {
+  const map = getChapters(doc).toArray().find((item) => item.get('id') === chapterId);
+  const text = map?.get('content');
+  return text instanceof Y.Text ? text : undefined;
+}
+
 export function docToProjectPatch(doc: Y.Doc): Partial<Project> {
   return { chapters: docToChapters(doc) };
+}
+
+/** 只改动变化区间，保留 Y.Text 的字符级并发合并能力。 */
+export function applyTextDiff(text: Y.Text, next: string): void {
+  const current = text.toString();
+  if (current === next) return;
+  let prefix = 0;
+  const maxPrefix = Math.min(current.length, next.length);
+  while (prefix < maxPrefix && current[prefix] === next[prefix]) prefix += 1;
+  let suffix = 0;
+  while (
+    suffix < current.length - prefix &&
+    suffix < next.length - prefix &&
+    current[current.length - 1 - suffix] === next[next.length - 1 - suffix]
+  ) {
+    suffix += 1;
+  }
+  const deleteCount = current.length - prefix - suffix;
+  const insert = next.slice(prefix, next.length - suffix);
+  if (deleteCount > 0) text.delete(prefix, deleteCount);
+  if (insert.length > 0) text.insert(prefix, insert);
 }
 
 /** 把本地作品的章节增删改同步进 Y.Doc；事务来源标记为 local-project，便于区分远程更新。 */
@@ -89,10 +117,7 @@ export function applyProjectToDoc(doc: Y.Doc, project: Project, origin: unknown 
       if (map.get('order') !== chapter.order) map.set('order', chapter.order);
       if (map.get('status') !== (chapter.status ?? 'draft')) map.set('status', chapter.status ?? 'draft');
       const text = map.get('content');
-      if (text instanceof Y.Text && text.toString() !== chapter.content) {
-        text.delete(0, text.length);
-        text.insert(0, chapter.content);
-      }
+      if (text instanceof Y.Text) applyTextDiff(text, chapter.content);
     }
   }, origin);
 }

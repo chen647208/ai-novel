@@ -547,6 +547,7 @@
     "enable": "Enable real-time collaboration",
     "active": "Joined room {{room}}",
     "waiting": "Waiting for a work to open",
-    "inactive": "Off"
+    "inactive": "Off",
+    "online": "{{count}} online"
   }
 }

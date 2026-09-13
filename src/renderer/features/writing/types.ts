@@ -258,7 +258,7 @@ export interface ChapterNavigationSectionProps {
 }
 
 export interface WritingSidebarProps {
-  characters: Project['characters'];
+  project: Project;
   activeChapter: Chapter | undefined;
   activeChapterId: string | null;
   chapters: Chapter[];
@@ -276,6 +276,8 @@ export interface WritingSidebarProps {
   onDeleteChapter: (chapterId: string) => void;
   onChaptersChange: (chapters: Chapter[]) => void;
   onBatchDeleteChapter: (chapterIds: string[]) => void;
+  /** 点击实体把名称插入正文光标处。 */
+  onInsertEntity: (name: string) => void;
 }
 
 export interface WritingEditorCanvasProps {

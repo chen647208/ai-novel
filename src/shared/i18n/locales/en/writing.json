@@ -1,4 +1,20 @@
 {
+  "entities": {
+    "title": "Writing entities",
+    "searchPlaceholder": "Search entities",
+    "count": "{{count}} total",
+    "insertHint": "Click to insert the name into the text",
+    "mentioned": "In this chapter",
+    "empty": "No matching entities.",
+    "kind": {
+      "all": "All",
+      "character": "Character",
+      "location": "Location",
+      "faction": "Faction",
+      "knowledge": "Knowledge",
+      "event": "Event"
+    }
+  },
   "screenplay": {
     "title": "Screenplay (Fountain)",
     "addScene": "Add scene",

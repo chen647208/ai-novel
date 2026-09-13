@@ -68,6 +68,13 @@
 - AI 调用经网关客户端（`src/renderer/shared/services/ai/gatewayClient`）走主进程网关
 - 历史记录（含会话事件流浏览器）与正文内容经双 store + `persistenceBridge` 差分落盘持久化
 
+## 写作实体面板
+
+- 位置：写作区左侧栏顶部，组件为 `src/renderer/features/writing/components/WritingEntityPanel.tsx`，逻辑在 `services/writingEntityService.ts`。
+- 汇总：角色、地点、势力、知识、事件五类实体，带类型图标、搜索与类型筛选。
+- 本章出现：命中当前章节正文的实体显示标记（`findMentionedEntities` 按名字匹配）。
+- 插入：点击实体把名称插入正文光标处（`NovelEditorHandle.insertText`）。
+
 ## 写作工具
 
 - 入口：编辑器工具栏「写作工具」按钮，面板为 `src/renderer/features/writing/components/WritingToolsPanel.tsx`，四个页签。

@@ -463,7 +463,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
       {/* Sidebar & Editor Areas */}
       {isSidebarOpen && !isFocusMode && (
         <WritingSidebar
-          characters={project.characters}
+          project={project}
           activeChapter={activeChapter}
           activeChapterId={activeChapterId}
           chapters={project.chapters}
@@ -481,6 +481,9 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           onDeleteChapter={handleDeleteChapter}
           onChaptersChange={handleChaptersChange}
           onBatchDeleteChapter={handleBatchDeleteChapter}
+          onInsertEntity={(name: string) => {
+            editorRef.current?.insertText(name);
+          }}
         />
       )}
 

@@ -20,6 +20,7 @@ import { Switch } from '@/shared/ui/Switch';
 const CollaborationPanel: React.FC = () => {
   const { t } = useTranslation('settings');
   const enabled = useCollaborationStore((state) => state.enabled);
+  const peers = useCollaborationStore((state) => state.peers);
   const setEnabled = useCollaborationStore((state) => state.setEnabled);
   const activeProjectId = useProjectStore((state) => state.activeProjectId);
   const session = getCollaborationSession();
@@ -42,6 +43,18 @@ const CollaborationPanel: React.FC = () => {
           <Switch aria-label={t('collab.enable')} checked={enabled} disabled={!activeProjectId} onCheckedChange={setEnabled} />
         </div>
         <p className="text-xs text-muted-foreground">{status}</p>
+        {enabled && peers.length > 0 && (
+          <div className="space-y-1">
+            <span className="text-2xs text-muted-foreground">{t('collab.online', { count: peers.length })}</span>
+            <div className="flex flex-wrap gap-1">
+              {peers.map((peer) => (
+                <span key={peer.id} className="rounded-full border border-border px-2 py-0.5 text-2xs text-muted-foreground">
+                  {peer.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

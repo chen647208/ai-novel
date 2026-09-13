@@ -71,9 +71,11 @@
 
 - 位置：设置 → 通用 → 实时协作，组件为 `src/renderer/features/settings/components/CollaborationPanel.tsx`；会话逻辑在 `src/renderer/app/collaboration/collaborationService.ts`。
 - 依赖：仅 `yjs`（MIT）。不用 `y-indexeddb`（避免与 sqlite 形成第二份真源），不用 `y-websocket`/`y-webrtc`（避免绕过主进程网络门）。
-- 传输：同机多窗口经原生 `BroadcastChannel` 交换 Yjs 增量（`features/collaboration/broadcastTransport.ts`），无网络面。
-- 模型：作品章节映射为 `Y.Array<Y.Map>`，正文为 `Y.Text`（`features/collaboration/projectDoc.ts`）。
-- 持久化：协作副本不单独落盘；会话以当前 `Project` 播种，远程更新回写 `projectStore`，仍走既有差分落盘。
+- 传输：同机多窗口经原生 `BroadcastChannel` 交换 Yjs 增量与在线状态（`features/collaboration/broadcastTransport.ts`），无网络面。
+- 模型：作品章节映射为 `Y.Array<Y.Map>`，正文为 `Y.Text`；本地改动按最小增量写入（`applyTextDiff`），保留字符级并发合并。
+- 播种握手：加入者先请求对端状态，收到远端状态即采用；等待窗口内无对端才用本地作品播种，避免两端各自播种产生重复章节。
+- 在线状态：对端心跳每 4 秒一次，超过 12 秒未心跳即剔除；面板显示在线成员。
+- 持久化：协作副本不单独落盘；远程更新回写 `projectStore`，仍走既有差分落盘。
 - 边界：跨设备协作需主进程通道（后续接入）；同一段落的并发编辑按 CRDT 规则收敛，不做字符级同文档绑定（`y-prosemirror` 属后续）。
 
 ## 维护建议
