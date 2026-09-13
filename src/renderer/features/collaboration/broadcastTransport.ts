@@ -11,6 +11,7 @@
  * 同机多窗口传输：用原生 BroadcastChannel 交换 Yjs 增量与在线状态。
  * 不引入网络依赖，不走 WebSocket；跨机器传输由主进程通道另行接入。
  */
+import { applyAwarenessUpdate, type Awareness,encodeAwarenessUpdate } from 'y-protocols/awareness';
 import * as Y from 'yjs';
 
 export interface CollaborationPeer {
@@ -27,8 +28,9 @@ export interface CollaborationTransport {
 }
 
 interface TransportMessage {
-  type: 'update' | 'sync-request' | 'presence';
+  type: 'update' | 'sync-request' | 'presence' | 'awareness';
   update?: number[];
+  awareness?: number[];
   peer?: { id: string; name: string; at: number };
 }
 
@@ -42,6 +44,7 @@ export function prunePeers(peers: CollaborationPeer[], now: number, ttl = PEER_T
 
 export interface BroadcastTransportOptions {
   name?: string;
+  awareness?: Awareness;
   onPresence?: (peers: CollaborationPeer[]) => void;
   /** 收到并应用远端增量时回调（用于判定是否已有对端，决定是否本端播种）。 */
   onRemoteUpdate?: () => void;
@@ -74,13 +77,24 @@ export function createBroadcastTransport(doc: Y.Doc, room: string, options: Broa
     channel.postMessage({ type: 'update', update: Array.from(update) } satisfies TransportMessage);
   };
 
+  const onAwarenessUpdate = (changes: { added: number[]; updated: number[]; removed: number[] }, origin: unknown): void => {
+    if (!options.awareness || origin === remoteOrigin) return;
+    const changed = [...changes.added, ...changes.updated, ...changes.removed];
+    channel.postMessage({ type: 'awareness', awareness: Array.from(encodeAwarenessUpdate(options.awareness, changed)) } satisfies TransportMessage);
+  };
+
   channel.onmessage = (event: MessageEvent<TransportMessage>) => {
     const data = event.data;
     if (data?.type === 'update' && data.update) {
       Y.applyUpdate(doc, new Uint8Array(data.update), remoteOrigin);
       options.onRemoteUpdate?.();
+    } else if (data?.type === 'awareness' && data.awareness && options.awareness) {
+      applyAwarenessUpdate(options.awareness, new Uint8Array(data.awareness), remoteOrigin);
     } else if (data?.type === 'sync-request') {
       channel.postMessage({ type: 'update', update: Array.from(Y.encodeStateAsUpdate(doc)) } satisfies TransportMessage);
+      if (options.awareness) {
+        channel.postMessage({ type: 'awareness', awareness: Array.from(encodeAwarenessUpdate(options.awareness, [...options.awareness.getStates().keys()])) } satisfies TransportMessage);
+      }
       heartbeat();
     } else if (data?.type === 'presence' && data.peer) {
       const incoming = data.peer;
@@ -90,6 +104,7 @@ export function createBroadcastTransport(doc: Y.Doc, room: string, options: Broa
   };
 
   doc.on('update', onLocalUpdate);
+  options.awareness?.on('update', onAwarenessUpdate);
   channel.postMessage({ type: 'sync-request' } satisfies TransportMessage);
   heartbeat();
   const timer = setInterval(heartbeat, HEARTBEAT_MS);
@@ -100,6 +115,7 @@ export function createBroadcastTransport(doc: Y.Doc, room: string, options: Broa
     destroy: () => {
       clearInterval(timer);
       doc.off('update', onLocalUpdate);
+      options.awareness?.off('update', onAwarenessUpdate);
       channel.close();
     },
   };

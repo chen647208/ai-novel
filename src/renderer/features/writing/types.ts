@@ -8,8 +8,16 @@
  */
 
 import type React from 'react';
+import type { Awareness } from 'y-protocols/awareness';
+import type * as Y from 'yjs';
 
 import type { AIHistoryRecord, Chapter, ModelConfig, OutputMode, Project, PromptTemplate } from '../../../shared/types';
+
+/** 协作绑定：当前章节的 Y.XmlFragment 与在线状态。 */
+export interface EditorCollaboration {
+  fragment: Y.XmlFragment;
+  awareness: Awareness;
+}
 
 /** 导出格式（单源，避免 types↔utils 循环）。 */
 export type ExportFormat = 'txt' | 'md' | 'html' | 'rtf' | 'pdf' | 'epub' | 'docx';
@@ -286,6 +294,8 @@ export interface WritingEditorCanvasProps {
   content: string;
   /** 定稿锁定：正文只读。 */
   locked?: boolean;
+  /** 协作绑定：当前章节片段与在线状态。 */
+  collaboration?: EditorCollaboration | null;
   isFocusMode: boolean;
   typewriter: boolean;
   isGenerating: boolean;

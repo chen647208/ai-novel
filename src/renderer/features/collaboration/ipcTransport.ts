@@ -8,6 +8,7 @@
  */
 
 /** 跨设备传输：消息经主进程 WebSocket 中转；协议与同机传输一致（增量 + 在线状态）。 */
+import { applyAwarenessUpdate, type Awareness,encodeAwarenessUpdate } from 'y-protocols/awareness';
 import * as Y from 'yjs';
 
 import { type CollaborationPeer, type CollaborationTransport,prunePeers } from './broadcastTransport';
@@ -17,14 +18,16 @@ const PEER_TTL_MS = 12000;
 
 interface WireMessage {
   room?: string;
-  type?: 'update' | 'sync-request' | 'presence';
+  type?: 'update' | 'sync-request' | 'presence' | 'awareness';
   update?: number[];
+  awareness?: number[];
   peer?: CollaborationPeer;
 }
 
 export interface IpcTransportOptions {
   url: string;
   name?: string;
+  awareness?: Awareness;
   onPresence?: (peers: CollaborationPeer[]) => void;
   onRemoteUpdate?: () => void;
 }
@@ -58,12 +61,23 @@ export function createIpcTransport(doc: Y.Doc, room: string, options: IpcTranspo
     post({ type: 'update', update: Array.from(update) });
   };
 
+  const onAwarenessUpdate = (changes: { added: number[]; updated: number[]; removed: number[] }, origin: unknown): void => {
+    if (!options.awareness || origin === remoteOrigin) return;
+    const changed = [...changes.added, ...changes.updated, ...changes.removed];
+    post({ type: 'awareness', awareness: Array.from(encodeAwarenessUpdate(options.awareness, changed)) });
+  };
+
   const handle = (message: WireMessage): void => {
     if (message.type === 'update' && message.update) {
       Y.applyUpdate(doc, new Uint8Array(message.update), remoteOrigin);
       options.onRemoteUpdate?.();
+    } else if (message.type === 'awareness' && message.awareness && options.awareness) {
+      applyAwarenessUpdate(options.awareness, new Uint8Array(message.awareness), remoteOrigin);
     } else if (message.type === 'sync-request') {
       post({ type: 'update', update: Array.from(Y.encodeStateAsUpdate(doc)) });
+      if (options.awareness) {
+        post({ type: 'awareness', awareness: Array.from(encodeAwarenessUpdate(options.awareness, [...options.awareness.getStates().keys()])) });
+      }
       heartbeat();
     } else if (message.type === 'presence' && message.peer) {
       const incoming = message.peer;
@@ -81,6 +95,7 @@ export function createIpcTransport(doc: Y.Doc, room: string, options: IpcTranspo
     if (!result.ok || !result.id) return;
     connectionId = result.id;
     doc.on('update', onLocalUpdate);
+    options.awareness?.on('update', onAwarenessUpdate);
     post({ type: 'sync-request' });
     heartbeat();
     timer = setInterval(heartbeat, HEARTBEAT_MS);
@@ -92,6 +107,7 @@ export function createIpcTransport(doc: Y.Doc, room: string, options: IpcTranspo
     destroy: () => {
       if (timer) clearInterval(timer);
       doc.off('update', onLocalUpdate);
+      options.awareness?.off('update', onAwarenessUpdate);
       unsubscribe();
       if (connectionId) void api.close(connectionId);
       connectionId = null;

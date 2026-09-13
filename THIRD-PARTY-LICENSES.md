@@ -4,7 +4,7 @@
 收录运行期依赖（package-lock.json 中排除 dev/link）的许可证声明；
 各依赖的完整许可证文本随发行包内 `node_modules` 一并分发。
 
-共 399 个运行期依赖。
+共 401 个运行期依赖。
 
 | 依赖 | 版本 | 许可证 |
 | --- | --- | --- |
@@ -398,6 +398,8 @@
 | wrap-ansi | 8.1.0 | MIT |
 | wrap-ansi | 9.0.2 | MIT |
 | ws | 8.21.3 | MIT |
+| y-prosemirror | 1.3.7 | MIT |
+| y-protocols | 1.0.7 | MIT |
 | y18n | 5.0.8 | ISC |
 | yargs | 17.7.2 | MIT |
 | yargs | 18.1.0 | MIT |

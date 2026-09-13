@@ -11,7 +11,15 @@ import type { Project } from '@shared/types';
 import { describe, expect, it } from 'vitest';
 import * as Y from 'yjs';
 
-import { applyProjectToDoc, createProjectDoc, docToChapters, getChapterText } from '../projectDoc';
+import { applyProjectToDoc, type ChapterContentCodec,createProjectDoc, docToChapters } from '../projectDoc';
+
+/** 测试用编解码器：正文以单个 XmlText 存放，避免依赖编辑器 schema。 */
+const codec: ChapterContentCodec = {
+  toFragment: (dsl, fragment) => {
+    if (dsl) fragment.insert(0, [new Y.XmlText(dsl)]);
+  },
+  toDsl: (fragment) => fragment.toArray().map((node) => (node instanceof Y.XmlText ? node.toString() : '')).join(''),
+};
 
 function makeProject(): Project {
   return {
@@ -33,7 +41,7 @@ function makeProject(): Project {
 
 describe('projectDoc', () => {
   it('作品与 Y.Doc 往返一致', () => {
-    const chapters = docToChapters(createProjectDoc(makeProject()));
+    const chapters = docToChapters(createProjectDoc(makeProject(), codec), codec);
     expect(chapters.map((chapter) => chapter.id)).toEqual(['c1', 'c2']);
     expect(chapters[0]?.content).toBe('正文一');
     expect(chapters[0]?.status).toBe('writing');
@@ -42,48 +50,39 @@ describe('projectDoc', () => {
 
   it('两个副本交换增量后收敛', () => {
     const project = makeProject();
-    const a = createProjectDoc(project);
+    const a = createProjectDoc(project, codec);
     const b = new Y.Doc();
     Y.applyUpdate(b, Y.encodeStateAsUpdate(a));
 
-    const textA = getChapterText(a, 'c1');
-    textA?.insert(textA.length, '（甲）');
+    applyProjectToDoc(a, { ...project, chapters: [
+      { id: 'c1', title: '第一章', summary: '摘要一', content: '正文一（甲）', order: 0, status: 'writing' },
+      { id: 'c2', title: '第二章', summary: '', content: '正文二', order: 1 },
+    ] }, codec);
     Y.applyUpdate(b, Y.encodeStateAsUpdate(a), 'remote');
 
-    const textB = getChapterText(b, 'c2');
-    textB?.insert(textB.length, '（乙）');
+    applyProjectToDoc(b, { ...project, chapters: [
+      { id: 'c1', title: '第一章', summary: '摘要一', content: '正文一（甲）', order: 0, status: 'writing' },
+      { id: 'c2', title: '第二章', summary: '', content: '正文二（乙）', order: 1 },
+    ] }, codec);
     Y.applyUpdate(a, Y.encodeStateAsUpdate(b), 'remote');
 
-    const chaptersA = docToChapters(a);
-    const chaptersB = docToChapters(b);
+    const chaptersA = docToChapters(a, codec);
+    const chaptersB = docToChapters(b, codec);
     expect(chaptersA.find((chapter) => chapter.id === 'c1')?.content).toBe('正文一（甲）');
     expect(chaptersB.find((chapter) => chapter.id === 'c2')?.content).toBe('正文二（乙）');
     expect(chaptersA).toEqual(chaptersB);
   });
 
   it('本地增删改同步进 Y.Doc', () => {
-    const doc = createProjectDoc(makeProject());
+    const doc = createProjectDoc(makeProject(), codec);
     const project = makeProject();
     project.chapters = [
       { id: 'c1', title: '第一章（改）', summary: '摘要一', content: '正文一', order: 0, status: 'writing' },
       { id: 'c3', title: '第三章', summary: '', content: '正文三', order: 2 },
     ];
-    applyProjectToDoc(doc, project);
-    const chapters = docToChapters(doc);
+    applyProjectToDoc(doc, project, codec);
+    const chapters = docToChapters(doc, codec);
     expect(chapters.map((chapter) => chapter.id)).toEqual(['c1', 'c3']);
     expect(chapters[0]?.title).toBe('第一章（改）');
-  });
-
-  it('字符级增量：不同位置的并发插入都保留', () => {
-    const base: Project = { ...makeProject(), chapters: [{ id: 'c1', title: 'x', summary: '', content: 'ABCDE', order: 0 }] };
-    const a = createProjectDoc(base);
-    const b = new Y.Doc();
-    Y.applyUpdate(b, Y.encodeStateAsUpdate(a));
-    applyProjectToDoc(a, { ...base, chapters: [{ id: 'c1', title: 'x', summary: '', content: 'A1BCDE', order: 0 }] });
-    applyProjectToDoc(b, { ...base, chapters: [{ id: 'c1', title: 'x', summary: '', content: 'ABC2DE', order: 0 }] });
-    Y.applyUpdate(a, Y.encodeStateAsUpdate(b), 'remote');
-    Y.applyUpdate(b, Y.encodeStateAsUpdate(a), 'remote');
-    expect(docToChapters(a).find((chapter) => chapter.id === 'c1')?.content).toBe('A1BC2DE');
-    expect(docToChapters(b).find((chapter) => chapter.id === 'c1')?.content).toBe('A1BC2DE');
   });
 });

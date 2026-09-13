@@ -10,20 +10,24 @@
 import { EditorContent, useEditor } from '@tiptap/react';
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { redoCommand, undoCommand, yCursorPlugin, ySyncPlugin, yUndoPlugin } from 'y-prosemirror';
 
 import { cn } from '@/shared/utils/cn';
 
+import { createCollaborativeExtensions } from '../../../editor/collaborative';
 import { findMatches } from '../../../editor/findReplace';
 import { createWritingPrimitives } from '../../../editor/primitives';
 import { createNovelExtensions } from '../../../editor/schema';
 import { dslToPmDoc, pmDocToDsl, type PmNode } from '../../../editor/serialization';
-import type { NovelEditorHandle } from '../types';
+import type { EditorCollaboration, NovelEditorHandle } from '../types';
 
 interface TipTapCanvasProps {
   content: string;
   activeChapterId: string | null;
   /** 定稿锁定：正文只读。 */
   locked?: boolean;
+  /** 协作模式：文档绑到 Y.XmlFragment，远端改动实时合并，撤销走 yUndoPlugin。 */
+  collaboration?: EditorCollaboration | null;
   isFocusMode: boolean;
   /** 生成中且非流式时锁定编辑；流式期间以只读方式回显增量。 */
   isGenerating: boolean;
@@ -41,12 +45,14 @@ interface TipTapCanvasProps {
 /**
  * 小说 DSL 富文本画布：把受控的 DSL 字符串与 ProseMirror 文档双向同步，
  * 并通过 NovelEditorHandle 向编排层暴露 PM 语义的选区与坐标。
+ * 传入 collaboration 时改为 y-prosemirror 节点级绑定。
  */
 const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function TipTapCanvas(
-  { content, activeChapterId, locked, isFocusMode, isGenerating, isStreaming, typewriter, onNewChapter, onContentChange, onMouseUp, onKeyUp, onMouseMove },
+  { content, activeChapterId, locked, collaboration, isFocusMode, isGenerating, isStreaming, typewriter, onNewChapter, onContentChange, onMouseUp, onKeyUp, onMouseMove },
   ref,
 ) {
   const { t } = useTranslation('writing');
+  const collaborative = Boolean(collaboration);
   // 回调经 ref 传递，避免每次渲染重建编辑器实例。
   const onChangeRef = useRef(onContentChange);
   onChangeRef.current = onContentChange;
@@ -57,32 +63,42 @@ const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function T
   const [isEmpty, setIsEmpty] = useState(() => content.trim().length === 0);
 
   // schema 节点 + 8 写作原语（enterFlow 的新章回调经 ref 转发，保持扩展集稳定不重建）。
+  // 协作模式另加 y-prosemirror 同步/光标/撤销插件，并关闭 StarterKit 的 History。
+  const fragment = collaboration?.fragment;
+  const awareness = collaboration?.awareness;
   const extensions = useMemo(
-    () => [...createNovelExtensions(), ...createWritingPrimitives({ onNewChapter: () => onNewChapterRef.current?.() })],
-    [],
+    () => [
+      ...(collaborative ? createCollaborativeExtensions() : createNovelExtensions()),
+      ...createWritingPrimitives({ onNewChapter: () => onNewChapterRef.current?.() }),
+      ...(fragment && awareness ? [ySyncPlugin(fragment), yCursorPlugin(awareness), yUndoPlugin()] : []),
+    ],
+    [collaborative, fragment, awareness],
   );
 
-  const editor = useEditor({
-    extensions,
-    content: dslToPmDoc(content),
-    editable: !!activeChapterId && !locked && !(isGenerating && !isStreaming),
-    onUpdate: ({ editor: e }) => {
-      const dsl = pmDocToDsl(e.getJSON() as PmNode);
-      lastEmitted.current = dsl;
-      setIsEmpty(dsl.trim().length === 0);
-      onChangeRef.current(dsl);
+  const editor = useEditor(
+    {
+      extensions,
+      content: collaborative ? undefined : dslToPmDoc(content),
+      editable: !!activeChapterId && !locked && !(isGenerating && !isStreaming),
+      onUpdate: ({ editor: e }) => {
+        const dsl = pmDocToDsl(e.getJSON() as PmNode);
+        lastEmitted.current = dsl;
+        setIsEmpty(dsl.trim().length === 0);
+        onChangeRef.current(dsl);
+      },
     },
-  });
+    [fragment, collaborative],
+  );
 
   // 受控同步：外部 content 变化（切章、流式增量、AI 回写）时刷新文档，
-  // 但跳过自身 onUpdate 刚吐出的值，防止光标跳动与回环。
+  // 但跳过自身 onUpdate 刚吐出的值，防止光标跳动与回环。协作模式由 y-prosemirror 接管。
   useEffect(() => {
-    if (!editor) return;
+    if (!editor || collaborative) return;
     if (content === lastEmitted.current) return;
     lastEmitted.current = content;
     setIsEmpty(content.trim().length === 0);
     editor.commands.setContent(dslToPmDoc(content), { emitUpdate: false });
-  }, [content, editor]);
+  }, [content, editor, collaborative]);
 
   // 可编辑态：无章节或生成中（非流式）时锁定。
   useEffect(() => {
@@ -147,17 +163,21 @@ const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function T
       undo() {
         if (!editor) return false;
         editor.commands.focus();
+        if (collaborative) return undoCommand(editor.view.state, editor.view.dispatch, editor.view);
         return editor.commands.undo();
       },
       redo() {
         if (!editor) return false;
         editor.commands.focus();
+        if (collaborative) return redoCommand(editor.view.state, editor.view.dispatch, editor.view);
         return editor.commands.redo();
       },
       canUndo() {
+        if (collaborative) return editor ? undoCommand(editor.view.state) : false;
         return editor?.can().undo() ?? false;
       },
       canRedo() {
+        if (collaborative) return editor ? redoCommand(editor.view.state) : false;
         return editor?.can().redo() ?? false;
       },
       harvestDarling() {
@@ -228,7 +248,7 @@ const TipTapCanvas = forwardRef<NovelEditorHandle, TipTapCanvasProps>(function T
         }
       },
     }),
-    [editor],
+    [editor, collaborative],
   );
 
   if (!editor) return null;

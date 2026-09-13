@@ -12,6 +12,7 @@ import { STORAGE_KEYS } from '@shared/constants/storageKeys';
 import React, { useCallback,useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useChapterCollab } from '@/app/collaboration/collaborationService';
 import { type CommitOptions,useProjectStore } from '@/app/stores/projectStore';
 import { useSettingsStore, useUsableModel } from '@/app/stores/settingsStore';
 import { dialogService } from '@/shared/services/dialogService';
@@ -134,6 +135,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
   const summaryPrompts = useMemo(() => prompts.filter(p => p.category === 'summary'), [prompts]);
 
   const activeChapter = project.chapters.find(c => c.id === activeChapterId);
+  const collaboration = useChapterCollab(project.id, activeChapterId);
   const chapterStats = useMemo(() => computeChapterStats(activeChapter?.content || ''), [activeChapter?.content]);
   // 全书统计含 runBuild 全稿管线，逐键重算代价高：降为低优先级，打字不卡顿。
   const deferredProject = useDeferredValue(project);
@@ -579,6 +581,7 @@ const WritingEditor: React.FC<WritingEditorProps> = ({ project, initialChapterId
           activeChapterId={activeChapterId}
           content={gen.isStreaming ? gen.streamingContent : (activeChapter?.content || "")}
           locked={activeChapter?.status === 'final'}
+          collaboration={collaboration}
           isFocusMode={isFocusMode}
           typewriter={typewriter}
           isGenerating={gen.isGenerating}

@@ -7,15 +7,25 @@
  * 商业闭源使用需另行获取授权，详见 docs/guides/licensing.md。
  */
 
-/** 作品与 Y.Doc 的映射：章节列表为 Y.Array，章节正文为 Y.Text，其余字段为 Y.Map。 */
+/**
+ * 作品与 Y.Doc 的映射：章节列表为 Y.Array，章节正文为 Y.XmlFragment。
+ * 正文与 DSL 的互转由注入的编解码器完成（编辑器侧用 ProseMirror 编解码器）。
+ */
 import type { Chapter, Project } from '@shared/types';
 import * as Y from 'yjs';
 
 const CHAPTERS_KEY = 'chapters';
 
-export function createProjectDoc(project: Project): Y.Doc {
+/** 正文编解码器：把 DSL 写进 Y.XmlFragment，或从 Y.XmlFragment 读出 DSL。 */
+export interface ChapterContentCodec {
+  /** 写入前片段已清空，实现只需追加内容。 */
+  toFragment(dsl: string, fragment: Y.XmlFragment): void;
+  toDsl(fragment: Y.XmlFragment): string;
+}
+
+export function createProjectDoc(project: Project, codec: ChapterContentCodec): Y.Doc {
   const doc = new Y.Doc();
-  seedChapters(doc, project.chapters ?? []);
+  seedChapters(doc, project.chapters ?? [], codec);
   return doc;
 }
 
@@ -28,17 +38,28 @@ function makeChapterMap(chapter: Chapter): Y.Map<unknown> {
   map.set('id', chapter.id);
   map.set('title', chapter.title);
   map.set('summary', chapter.summary);
-  map.set('content', new Y.Text(chapter.content));
   map.set('order', chapter.order);
   map.set('status', chapter.status ?? 'draft');
+  map.set('content', new Y.XmlFragment());
   return map;
 }
 
-function seedChapters(doc: Y.Doc, chapters: Chapter[]): void {
+function fillFragment(map: Y.Map<unknown>, content: string, codec: ChapterContentCodec): void {
+  const fragment = map.get('content');
+  if (fragment instanceof Y.XmlFragment) codec.toFragment(content, fragment);
+}
+
+function seedChapters(doc: Y.Doc, chapters: Chapter[], codec: ChapterContentCodec): void {
   doc.transact(() => {
     const array = getChapters(doc);
     array.delete(0, array.length);
-    array.push(chapters.map((chapter) => makeChapterMap(chapter)));
+    const maps = chapters.map((chapter) => makeChapterMap(chapter));
+    array.push(maps);
+    // 片段先并入文档，再写入内容，避免对未挂载的共享类型读写。
+    chapters.forEach((chapter, index) => {
+      const map = maps[index];
+      if (map) fillFragment(map, chapter.content, codec);
+    });
   }, 'seed');
 }
 
@@ -46,56 +67,35 @@ function readStatus(value: unknown): NonNullable<Chapter['status']> {
   return value === 'writing' || value === 'done' || value === 'final' ? value : 'draft';
 }
 
-function toChapter(map: Y.Map<unknown>): Chapter {
+function toChapter(map: Y.Map<unknown>, codec: ChapterContentCodec): Chapter {
   const content = map.get('content');
   return {
     id: String(map.get('id') ?? ''),
     title: String(map.get('title') ?? ''),
     summary: String(map.get('summary') ?? ''),
-    content: content instanceof Y.Text ? content.toString() : '',
+    content: content instanceof Y.XmlFragment ? codec.toDsl(content) : '',
     order: Number(map.get('order') ?? 0),
     status: readStatus(map.get('status')),
   };
 }
 
-export function docToChapters(doc: Y.Doc): Chapter[] {
-  return getChapters(doc).toArray().map((map) => toChapter(map));
+export function docToChapters(doc: Y.Doc, codec: ChapterContentCodec): Chapter[] {
+  return getChapters(doc).toArray().map((map) => toChapter(map, codec));
 }
 
-/** 读取某章节的正文 Y.Text（绑定与测试用）。 */
-export function getChapterText(doc: Y.Doc, chapterId: string): Y.Text | undefined {
+export function docToProjectPatch(doc: Y.Doc, codec: ChapterContentCodec): Partial<Project> {
+  return { chapters: docToChapters(doc, codec) };
+}
+
+/** 取某章节的正文片段（编辑器绑定与测试用）。 */
+export function getChapterFragment(doc: Y.Doc, chapterId: string): Y.XmlFragment | undefined {
   const map = getChapters(doc).toArray().find((item) => item.get('id') === chapterId);
-  const text = map?.get('content');
-  return text instanceof Y.Text ? text : undefined;
+  const content = map?.get('content');
+  return content instanceof Y.XmlFragment ? content : undefined;
 }
 
-export function docToProjectPatch(doc: Y.Doc): Partial<Project> {
-  return { chapters: docToChapters(doc) };
-}
-
-/** 只改动变化区间，保留 Y.Text 的字符级并发合并能力。 */
-export function applyTextDiff(text: Y.Text, next: string): void {
-  const current = text.toString();
-  if (current === next) return;
-  let prefix = 0;
-  const maxPrefix = Math.min(current.length, next.length);
-  while (prefix < maxPrefix && current[prefix] === next[prefix]) prefix += 1;
-  let suffix = 0;
-  while (
-    suffix < current.length - prefix &&
-    suffix < next.length - prefix &&
-    current[current.length - 1 - suffix] === next[next.length - 1 - suffix]
-  ) {
-    suffix += 1;
-  }
-  const deleteCount = current.length - prefix - suffix;
-  const insert = next.slice(prefix, next.length - suffix);
-  if (deleteCount > 0) text.delete(prefix, deleteCount);
-  if (insert.length > 0) text.insert(prefix, insert);
-}
-
-/** 把本地作品的章节增删改同步进 Y.Doc；事务来源标记为 local-project，便于区分远程更新。 */
-export function applyProjectToDoc(doc: Y.Doc, project: Project, origin: unknown = 'local-project'): void {
+/** 把本地作品的章节增删改同步进 Y.Doc；事务来源标记为 origin，便于区分远程更新。 */
+export function applyProjectToDoc(doc: Y.Doc, project: Project, codec: ChapterContentCodec, origin: unknown = 'local-project'): void {
   const chapters = project.chapters ?? [];
   const byId = new Map(chapters.map((chapter) => [chapter.id, chapter]));
   doc.transact(() => {
@@ -109,15 +109,20 @@ export function applyProjectToDoc(doc: Y.Doc, project: Project, origin: unknown 
     for (const chapter of chapters) {
       const map = existing.get(chapter.id);
       if (!map) {
-        array.push([makeChapterMap(chapter)]);
+        const created = makeChapterMap(chapter);
+        array.push([created]);
+        fillFragment(created, chapter.content, codec);
         continue;
       }
       if (map.get('title') !== chapter.title) map.set('title', chapter.title);
       if (map.get('summary') !== chapter.summary) map.set('summary', chapter.summary);
       if (map.get('order') !== chapter.order) map.set('order', chapter.order);
       if (map.get('status') !== (chapter.status ?? 'draft')) map.set('status', chapter.status ?? 'draft');
-      const text = map.get('content');
-      if (text instanceof Y.Text) applyTextDiff(text, chapter.content);
+      const fragment = map.get('content');
+      if (fragment instanceof Y.XmlFragment && codec.toDsl(fragment) !== chapter.content) {
+        fragment.delete(0, fragment.length);
+        codec.toFragment(chapter.content, fragment);
+      }
     }
   }, origin);
 }

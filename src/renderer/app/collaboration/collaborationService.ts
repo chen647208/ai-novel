@@ -13,13 +13,15 @@
  * 持久化仍走既有 projectStore → sqlite 链路，Y.Doc 不落第二个存储。
  */
 import { STORAGE_KEYS } from '@shared/constants/storageKeys';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
 import { create } from 'zustand';
 
 import { type CollaborationPeer, type CollaborationTransport,createBroadcastTransport } from '@/features/collaboration/broadcastTransport';
+import { editorContentCodec } from '@/features/collaboration/editorBinding';
 import { createIpcTransport } from '@/features/collaboration/ipcTransport';
-import { applyProjectToDoc, docToProjectPatch } from '@/features/collaboration/projectDoc';
+import { applyProjectToDoc, docToProjectPatch, getChapterFragment } from '@/features/collaboration/projectDoc';
 import { localStore } from '@/shared/services/localStore';
 
 import { useProjectStore } from '../stores/projectStore';
@@ -28,6 +30,7 @@ interface CollaborationSession {
   projectId: string;
   room: string;
   doc: Y.Doc;
+  awareness: Awareness;
   transport: CollaborationTransport;
   unsubscribe: () => void;
 }
@@ -36,12 +39,16 @@ interface CollaborationState {
   enabled: boolean;
   peers: CollaborationPeer[];
   serverUrl: string;
+  sessionProjectId: string | null;
   setEnabled: (enabled: boolean) => void;
   setServerUrl: (url: string) => void;
 }
 
 let session: CollaborationSession | null = null;
 let applyingRemote = false;
+
+/** 协作光标颜色池。 */
+const PEER_COLORS = ['#e5484d', '#0091ff', '#30a46c', '#f76b15', '#8e4ec6', '#e93d82'];
 
 /** 播种前的等待时间：给对端一个回包窗口，避免各自播种。 */
 const SEED_GRACE_MS = 400;
@@ -66,6 +73,7 @@ export const useCollaborationStore = create<CollaborationState>()((set) => ({
   enabled: readEnabled(),
   peers: [],
   serverUrl: readServerUrl(),
+  sessionProjectId: null,
   setEnabled: (enabled) => {
     set({ enabled });
     localStore.setItem(STORAGE_KEYS.collabEnabled, enabled ? '1' : '0');
@@ -94,7 +102,11 @@ export function startCollaboration(projectId: string): void {
   const doc = new Y.Doc();
   let receivedRemote = false;
   const serverUrl = useCollaborationStore.getState().serverUrl.trim();
+  const awareness = new Awareness(doc);
+  const localName = `用户-${crypto.randomUUID().slice(0, 4)}`;
+  awareness.setLocalStateField('user', { name: localName, color: PEER_COLORS[awareness.clientID % PEER_COLORS.length] });
   const transportOptions = {
+    awareness,
     onPresence: (peers: CollaborationPeer[]) => useCollaborationStore.setState({ peers }),
     onRemoteUpdate: () => {
       receivedRemote = true;
@@ -108,7 +120,7 @@ export function startCollaboration(projectId: string): void {
     if (origin === 'local-project' || origin === 'seed') return;
     applyingRemote = true;
     try {
-      useProjectStore.getState().updateProject(projectId, docToProjectPatch(doc));
+      useProjectStore.getState().updateProject(projectId, docToProjectPatch(doc, editorContentCodec));
     } finally {
       applyingRemote = false;
     }
@@ -119,16 +131,17 @@ export function startCollaboration(projectId: string): void {
     if (applyingRemote || state.activeProjectId !== projectId) return;
     const local = state.projects.find((item) => item.id === projectId);
     if (!local) return;
-    applyProjectToDoc(doc, local, 'local-project');
+    applyProjectToDoc(doc, local, editorContentCodec, 'local-project');
   });
 
-  const current: CollaborationSession = { projectId, room, doc, transport, unsubscribe };
+  const current: CollaborationSession = { projectId, room, doc, awareness, transport, unsubscribe };
   session = current;
+  useCollaborationStore.setState({ sessionProjectId: projectId });
 
   // 播种握手：等待片刻确认没有对端后再用本地作品初始化，避免两端各自播种产生重复章节。
   setTimeout(() => {
     if (session !== current || receivedRemote) return;
-    applyProjectToDoc(doc, project, 'seed');
+    applyProjectToDoc(doc, project, editorContentCodec, 'seed');
   }, SEED_GRACE_MS);
 }
 
@@ -136,9 +149,28 @@ export function stopCollaboration(): void {
   if (!session) return;
   session.unsubscribe();
   session.transport.destroy();
+  session.awareness.destroy();
   session.doc.destroy();
   session = null;
-  useCollaborationStore.setState({ peers: [] });
+  useCollaborationStore.setState({ peers: [], sessionProjectId: null });
+}
+
+/** 取某章节的协作绑定（片段 + 在线状态），未加入或不是当前作品时返回 null。 */
+export function getChapterCollab(projectId: string, chapterId: string | null): { fragment: Y.XmlFragment; awareness: Awareness } | null {
+  if (!session || session.projectId !== projectId || !chapterId) return null;
+  const fragment = getChapterFragment(session.doc, chapterId);
+  if (!fragment) return null;
+  return { fragment, awareness: session.awareness };
+}
+
+/** 编辑器接线：会话与章节变化时返回当前章节的协作绑定。 */
+export function useChapterCollab(projectId: string | undefined, chapterId: string | null): { fragment: Y.XmlFragment; awareness: Awareness } | null {
+  const enabled = useCollaborationStore((state) => state.enabled);
+  const sessionProjectId = useCollaborationStore((state) => state.sessionProjectId);
+  return useMemo(
+    () => (enabled && projectId && sessionProjectId === projectId ? getChapterCollab(projectId, chapterId) : null),
+    [enabled, projectId, sessionProjectId, chapterId],
+  );
 }
 
 /** App 层接线：开关与当前作品变化时启停协作会话。 */

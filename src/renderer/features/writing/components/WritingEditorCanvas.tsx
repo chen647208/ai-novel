@@ -20,6 +20,7 @@ const WritingEditorCanvas: React.FC<WritingEditorCanvasProps> = ({
   activeChapterId,
   content,
   locked,
+  collaboration,
   isFocusMode,
   typewriter,
   isGenerating,
@@ -49,6 +50,7 @@ const WritingEditorCanvas: React.FC<WritingEditorCanvasProps> = ({
         activeChapterId={activeChapterId}
         content={content}
         locked={locked}
+        collaboration={collaboration}
         isFocusMode={isFocusMode}
         isGenerating={isGenerating}
         isStreaming={isStreaming}

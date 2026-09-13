@@ -184,10 +184,11 @@ export const TagRef = Mark.create({
  * 装配小说编辑器扩展集。StarterKit 关闭历史/撤销以外的默认多余项由上层按需覆盖；
  * 此处保留 StarterKit 默认（含 History），单一事务管线在其上叠加。
  */
-export function createNovelExtensions(): Extensions {
+export function createNovelExtensions(options: { undoRedo?: boolean } = {}): Extensions {
   return [
     StarterKit.configure({
       heading: { levels: [1, 2, 3] },
+      undoRedo: options.undoRedo === false ? false : undefined,
     }),
     SceneBreak,
     KeywordLine,
